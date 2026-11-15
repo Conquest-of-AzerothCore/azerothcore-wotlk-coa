@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Tank stance crit reduction aura lowers melee crit taken and prevents daze",
+  "contract": "Spell 991293 is the tank-stance passive: SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE -6 (6% less chance to be critically hit by melee). The aura also makes the tank immune to daze: Unit::GetMeleeDazeChance returns 0 for its holder whatever the defense skill, so at defense skill 1, where the formula alone gives a positive chance, it stays 0. The level 60 attacker carries QA aura 25848 (Test Enemy Crit Bonus - 10%, aura 52 +10) so its crit chance sits above 6 and the 0 clamp in GetUnitCriticalChance cannot hide the reduction. Without 991293 the crit chance taken is at least 7% and the daze chance at least 1%; with it the crit chance taken is exactly 6 points lower and the daze chance is 0, also at defense skill 1.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tank", "race": 1, "class": 18, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tank",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "tank", "target": "dummy", "spell": 25848, "stacks": 1 },
+    { "action": "snapshot", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "save_as": "plain" },
+    { "action": "assert", "label": "SETUP: the attacker can crit the tank by more than 6%", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "min": 7 },
+    { "action": "assert", "label": "SETUP: the attacker can daze the tank without the aura", "actor": "tank", "metric": "daze_taken_chance", "target": "dummy", "min": 1 },
+    { "action": "set_aura", "actor": "tank", "spell": 991293, "stacks": 1 },
+    { "action": "assert", "label": "991293 lowers the melee crit chance taken by 6 points", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "relative_to": "plain", "min": -6.01, "max": -5.99 },
+    { "action": "assert", "label": "991293 makes the tank immune to daze from a same-level attacker", "actor": "tank", "metric": "daze_taken_chance", "target": "dummy", "equals": 0 },
+    { "action": "set_skill", "actor": "tank", "skill": 95, "value": 1, "maximum": 300 },
+    { "action": "assert", "label": "SETUP: the tank's defense skill is lowered to 1", "actor": "tank", "metric": "skill_value", "skill": 95, "equals": 1 },
+    { "action": "assert", "label": "991293 keeps the tank immune to daze at defense skill 1", "actor": "tank", "metric": "daze_taken_chance", "target": "dummy", "equals": 0 },
+    { "action": "set_aura", "actor": "tank", "spell": 991293, "stacks": 0 },
+    { "action": "assert", "label": "SETUP: at defense skill 1 the daze formula alone lets the attacker daze", "actor": "tank", "metric": "daze_taken_chance", "target": "dummy", "min": 1 }
+  ]
+}

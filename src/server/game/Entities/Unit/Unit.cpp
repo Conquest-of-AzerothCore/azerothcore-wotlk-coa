@@ -21,6 +21,7 @@
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
 #include "AscensionResilientConstitution.h"
+#include "AscensionTankStances.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -2317,32 +2318,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                                !IsPlayer() && !ToCreature()->IsControlledByPlayer() && !victim->HasInArc(M_PI, this)
                                && (victim->IsPlayer() || !victim->ToCreature()->isWorldBoss()) && !victim->IsVehicle()))
     {
-        // -probability is between 0% and 40%
-        // 20% base chance
-        float Probability = 20.0f;
-
-        // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
-        if (victim->GetLevel() < 30)
-            Probability = 0.65f * victim->GetLevel() + 0.5f;
-
-        uint32 VictimDefense = victim->GetDefenseSkillValue();
-        uint32 VictimAuraDefense = -victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE) * 25;
-        uint32 AttackerMeleeSkill = GetUnitMeleeSkill();
-        if (Player const* viewer = victim->GetCharmerOrOwnerPlayerOrPlayerItself())
-            if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, ToCreature()))
-                AttackerMeleeSkill = view * 5;
-
-        // xinef: fix daze mechanics
-        float const chancePerSkillPoint = IsClassicPlusCombat(this, victim) ?
-            ClassicPlusCombat::DazeChancePerSkillPoint : 0.1428f;
-        Probability -= ((float)VictimDefense + (float)VictimAuraDefense - AttackerMeleeSkill) * chancePerSkillPoint;
-
-        if (Probability > 40.0f)
-            Probability = 40.0f;
-
         // Daze application
         if (sWorld->getBoolConfig(CONFIG_ENABLE_DAZE))
-            if (roll_chance_f(std::max(0.0f, Probability)))
+            if (roll_chance_f(GetMeleeDazeChance(victim)))
                 CastSpell(victim, 1604, true);
     }
 
@@ -4504,6 +4482,38 @@ int32 Unit::GetAscensionConditionalCombatModifier(Unit const* victim, SpellInfo 
         return creature ? condition > 0 && (victim->GetCreatureTypeMask() & uint32(condition)) :
             victim->HasAscensionConditionalCombatState(condition);
     });
+}
+
+float Unit::GetMeleeDazeChance(Unit const* victim) const
+{
+    if (victim->HasAura(Ascension::TANK_STANCE_CRIT_REDUCTION_AURA))
+        return 0.0f;
+
+    // -probability is between 0% and 40%
+    // 20% base chance
+    float Probability = 20.0f;
+
+    // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
+    if (victim->GetLevel() < 30)
+        Probability = 0.65f * victim->GetLevel() + 0.5f;
+
+    uint32 VictimDefense = victim->GetDefenseSkillValue();
+    uint32 VictimAuraDefense = -victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE) * 25;
+    uint32 AttackerMeleeSkill = GetUnitMeleeSkill();
+    if (Creature const* attacker = ToCreature())
+        if (Player const* viewer = victim->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, attacker))
+                AttackerMeleeSkill = view * 5;
+
+    // xinef: fix daze mechanics
+    float const chancePerSkillPoint = IsClassicPlusCombat(this, victim) ?
+        ClassicPlusCombat::DazeChancePerSkillPoint : 0.1428f;
+    Probability -= ((float)VictimDefense + (float)VictimAuraDefense - AttackerMeleeSkill) * chancePerSkillPoint;
+
+    if (Probability > 40.0f)
+        Probability = 40.0f;
+
+    return std::max(0.0f, Probability);
 }
 
 float Unit::GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victim) const
