@@ -12,15 +12,18 @@
     "one clear per cooling spear rank. SMSG_CLEAR_COOLDOWN's first field is the spell id, so packet rows count clears per spell:",
     "the owned spear rank 804137 gets at least one clear (a proc happened) and at most one per proc, and 40222, a category 133",
     "spell outside family 18, gets none. Each cycle recasts the spear, throws while it cools down (6 s cooldown, throw ends",
-    "4.1 s after the spear) and waits until the cooldown has run out, so every throw is a fresh 30% trial."
+    "4.1 s after the spear) and waits until the cooldown has run out, so every throw is a fresh 30% trial. Right after",
+    "each throw the spear is cast again, 1.9 s before its cooldown ends: that cast completes only when a proc reset the",
+    "server cooldown, so more than 25 completed spear casts prove the reset itself and not only its packets. Player and",
+    "target are level 60, the realm cap."
   ],
-  "timeout_ms": 240000,
+  "timeout_ms": 400000,
   "players": [
     {
       "id": "barbarian",
       "race": 1,
       "class": 12,
-      "level": 30,
+      "level": 60,
       "ranged_hit_rating": 10000,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
@@ -31,7 +34,7 @@
       "id": "enemy",
       "owner": "barbarian",
       "entry": 36,
-      "level": 30,
+      "level": 60,
       "health": 1000000,
       "distance": 10
     }
@@ -113,8 +116,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 1: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -143,8 +158,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 2: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -173,8 +200,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 3: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -203,8 +242,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 4: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -233,8 +284,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 5: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -263,8 +326,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 6: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -293,8 +368,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 7: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -323,8 +410,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 8: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -353,8 +452,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 9: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -383,8 +494,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 10: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -413,8 +536,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 11: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -443,8 +578,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 12: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -473,8 +620,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 13: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -503,8 +662,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 14: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -533,8 +704,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 15: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -563,8 +746,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 16: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -593,8 +788,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 17: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -623,8 +830,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 18: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -653,8 +872,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 19: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -683,8 +914,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 20: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -713,8 +956,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 21: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -743,8 +998,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 22: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -773,8 +1040,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 23: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -803,8 +1082,20 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 24: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "set_power",
@@ -833,12 +1124,40 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2.5 s cast finish and the spear cooldown run out",
-      "ms": 5000
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 25: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
     },
     {
       "action": "assert",
-      "label": "A Spear Thrower proc cleared the spear's cooldown (no proc in 25 throws at 30%: 0.7^25, about 0.013%)",
+      "label": "SETUP: every cycle's first spear cast completed",
+      "actor": "barbarian",
+      "metric": "spell_cast_count",
+      "spell": 804137,
+      "min": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a proc reset the server cooldown, so an early recast completed (no proc in 25 throws at 30%: 0.7^25, about 0.013%)",
+      "actor": "barbarian",
+      "metric": "spell_cast_count",
+      "spell": 804137,
+      "min": 26
+    },
+    {
+      "action": "assert",
+      "label": "The proc also cleared the client's spear cooldown",
       "actor": "barbarian",
       "metric": "server_packets",
       "opcode": 478,
