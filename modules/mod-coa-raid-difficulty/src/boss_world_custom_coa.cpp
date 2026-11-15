@@ -866,6 +866,7 @@ namespace
                     _drops.clear();
                     break;
                 case TW_ICICLE:
+                    me->RemoveDynObject(SPELL_WATER_SPIKE);
                     for (Position const& pos : _icicles)
                     {
                         CastAt(pos, SPELL_WATER_SPIKE);
