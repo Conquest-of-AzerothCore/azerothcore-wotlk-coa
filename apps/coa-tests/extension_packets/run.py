@@ -96,7 +96,7 @@ def main():
         ('WITHHELD_VANITY', '\n'.join([
             (re.search(r'static constexpr std::array<uint32, \d+> MysticAltarVanityItems = [^;]+;', compat) or [''])[0],
             'bool IsBrokenCosmeticPetToken(uint32) const { return false; }',
-            method_or(compat, 'bool IsWithheldVanityItem(uint32 itemId) const',
+            method_or(compat, 'bool IsWithheldVanityItem(uint32 itemId)',
                       'bool IsWithheldVanityItem(uint32) const { return false; }'),
         ])),
         ('BANK_VANITY', '\n'.join([re.search(r'static constexpr std::array<uint32, \d+> BankVanityItems = [^;]+;',
