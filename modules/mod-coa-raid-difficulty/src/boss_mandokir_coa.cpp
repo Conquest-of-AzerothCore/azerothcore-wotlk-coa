@@ -515,7 +515,7 @@ namespace
     private:
         float const _baseScale;
         float const _growthPerKill;
-        uint8 _kills = 0;
+        uint32 _kills = 0;
         bool _useExecute = false;
         bool _whirlwindOnLanding = false;
         ObjectGuid _gazed;
