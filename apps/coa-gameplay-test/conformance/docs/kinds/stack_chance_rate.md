@@ -31,14 +31,19 @@ The judge (`stack_chance_judgement`):
 - The worst arm sets the status and the verdict's measured, expected and interval values; every arm's total, band
   and interval are in `detail.arms`. `contrast: learned` is stamped when both controls held.
 
-Sizing: an arm needs the casts that put the 99% half-width at half the band of its total
-(`procs.band_trials_needed`; from 10 parts the t quantile with parts - 1 degrees of freedom replaces z). An entry
-with fewer casts over its `parts` is refused, unless `pilot` is true (300 casts per arm, G-20 step 1, at best
-`measured`). An arm whose total reaches 100% is refused. `parts` pool identical scenarios through `POOLED_JUDGE`.
-Each part uses the accelerated cap (one hour of game time, ADR 0139) and at most 10,000 steps. G-20 step 3 applies
-per claim: when one counted pair of the sized entry would take more than 90 minutes of wall time on the simulated
-clock, the claim keeps the pilot's `measured` interval and the cast count the band needs (status 5). The class ADR
-states the game time, the acceleration it assumes and the wall time.
+Sizing (flip-proof, mentor M-14 and M-14a, ADR 0662): an arm of total chance p needs
+n >= p(1 - p) x ((z_99 + z_flip) / b)^2 casts over its `parts` (`arm_trials_needed`), where b is `procs.rate_band(p)`
+itself, the half-width the judge accepts (`compare.banded_rate`: expected plus or minus `rate_band`), z_99 = 2.576
+and z_flip = 3.719 (`Z_FLIP`, one-sided 1e-4); from 10 parts the Student t quantile with parts - 1 degrees of freedom
+replaces z_99. At the stated chance the arm's 99% interval then crosses each band edge with probability at most 1e-4
+(2e-4 for both edges), so a correct claim does not flip between `ok` and `measured` across runs (the Loa Spirits flip
+of the Witch Doctor proof `prove-c2r`). Below 10 parts 75% needs 5,284 casts, 60% 10,568 and 5% 4,706; at 13 parts
+(t 3.055, 12 degrees of freedom) 5% needs 5,449. An entry with fewer casts over its `parts` is refused, unless
+`pilot` is true (300 casts per arm, G-20 step 1, at best `measured`). An arm whose total reaches 100% is refused.
+`parts` pool identical scenarios through `POOLED_JUDGE`. Each part uses the accelerated cap (one hour of game time,
+ADR 0139) and at most 10,000 steps. G-20 step 3 applies per claim: when one counted pair of the sized entry would take
+more than 90 minutes of wall time on the simulated clock, the claim keeps the pilot's `measured` interval and the cast
+count the band needs (status 5). The class ADR states the game time, the acceleration it assumes and the wall time.
 
 Two arms of different stacks separate a per-stack chance from a flat one: a flat 75% at 4 Spirits reads 75% against
 60% plus or minus 3 points. `cast_power` sets the trigger's power before each cast (required for a costed trigger);

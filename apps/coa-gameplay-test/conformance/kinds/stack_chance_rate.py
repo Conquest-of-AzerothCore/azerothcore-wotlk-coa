@@ -1,13 +1,14 @@
 from dataclasses import dataclass, replace
 import math
 from pathlib import Path
+from statistics import NormalDist
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, LEARNED_CONTRAST, METRIC_DELTA_MAX_DUMMY_DISTANCE, behaviour_entry,
                         prose_rule, waited_ms)
 from compare import (CONTRAST, MINIMUM_BETWEEN_PARTS, Run, Verdict, banded_rate, between_part_judgement,
                      missing_measurement)
 from hits import MAX_ACCELERATED_SCENARIO_MS, creature_fixture, timed
-from procs import band_trials_needed, rate_band, wilson_interval
+from procs import Z_99, rate_band, wilson_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from stack import TWO_SIDED_99, student_t_quantile
 from tooltip import Records
@@ -26,6 +27,8 @@ CONTROL = 'control'
 UNLEARNED = 'unlearned'
 STATUS_ORDER = ('alert', 'unmeasured', 'insufficient_trials', 'measured', 'ok')
 EDGES = ('start trials', 'start events', 'end trials', 'end events')
+FLIP_ONE_SIDED = 1e-4
+Z_FLIP = NormalDist().inv_cdf(1 - FLIP_ONE_SIDED)
 
 
 @dataclass(frozen=True)
@@ -62,12 +65,13 @@ def arm_total_chance(chance: float, stacks: int) -> float:
     return chance * stacks
 
 
+def flip_proof_trials(total: float, quantile: float) -> int:
+    return math.ceil(total * (1 - total) * ((quantile + Z_FLIP) / rate_band(total)) ** 2)
+
+
 def arm_trials_needed(chance: float, stacks: int, parts: int = 1) -> int:
-    total = arm_total_chance(chance, stacks)
-    if parts < MINIMUM_BETWEEN_PARTS:
-        return band_trials_needed(total)
-    quantile = student_t_quantile(TWO_SIDED_99, parts - 1)
-    return math.ceil(quantile ** 2 * total * (1 - total) / (rate_band(total) / 2) ** 2)
+    quantile = Z_99 if parts < MINIMUM_BETWEEN_PARTS else student_t_quantile(TWO_SIDED_99, parts - 1)
+    return flip_proof_trials(arm_total_chance(chance, stacks), quantile)
 
 
 def interval_name(parts: int) -> str:
@@ -109,7 +113,7 @@ def stack_chance_spec(entry: dict) -> StackChanceSpec:
         needed = PILOT_TRIALS if spec.pilot else arm_trials_needed(chance, arm.stacks, spec.parts)
         if arm.trials * spec.parts < needed:
             raise ValueError(f'{spec.spell} {KIND} arm of {arm.stacks} stacks casts {arm.trials * spec.parts} times, '
-                             f'fewer than the {needed} trials the band of its total chance needs')
+                             f'fewer than the {needed} flip-proof trials the band of its total chance needs')
     for role, trials in ((CONTROL, spec.control_trials), (UNLEARNED, spec.unlearned_trials)):
         if trials * spec.parts < CONTROL_MINIMUM_TRIALS:
             raise ValueError(f'{spec.spell} {KIND} {role} arm casts {trials * spec.parts} times, fewer than '
