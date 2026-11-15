@@ -41,11 +41,31 @@ heal. `fixed_count` with `metric: "aura"` expresses the Hex threshold.
   hit), so the 5% leech is 3; rank 1's 15 would round the leech to 0 (`Copy` casts nothing for 0) and start the gate
   unseen. Spirits 561136 are set by harness `set_aura` before every Eclipse: a precondition fixture for the trigger, as
   Witch Doctor ADR 0001 rules for Spirits, never the subject. Four windows inside the Potion's 15 s.
+  Cycle 4 revision: no schedule closes this gate by design: the band is 25 ms, one simulated wait step; five Spirits
+  (StackAmount 5) give 1250 ms of hits, under the 1500 ms global cooldown, so only one 250 ms stream runs at a time,
+  hit 3 of a window lands 475 to 525 ms after hit 1 and its lateness decides whether it is answered, and a Hex of
+  Malice tick near the edge would be decided the same way. In final01 that split made the pair flip (`ok` in one run,
+  `unmeasured` in the other). The entry now sets three Spirits, so each window has three hits: hit 3 answered gives a
+  bracket of 250 to about 500 ms, hit 3 refused gives one output, and neither can close, so the expected verdict is
+  `unmeasured` in every run (data conformant, G-19). A gate of 250 ms or less still alerts (outputs 250 ms apart).
+  Seven windows of one Eclipse each, read 1700 ms after the cast, inside the Potion's 15 s less 1000 ms. Closing it
+  needs a harness read of each event stamp or of the proc cooldown left on 802975 (tool note).
 - 807450 (`proc_gate_interval`): four dummies take Hex of Malice 801693 2250 ms apart, so the 3000 ms ticks fall
   750 ms apart; the control is those ticks before 807450 is learned; one window of 12.5 s ends before the first Hex
   (24 s). The 30% roll is forced (ADR 0482): the subject is the gate, not the chance. Ward spawns are read on the
   encounter timeline. The same dummy's tick lands on the 3000 ms edge: `ok` needs spawns both 3000 and 3750 ms
   apart; all 3000 or all 3750 reads `unmeasured`; a gate of 1800 or 4200 ms alerts.
+  Cycle 4 revision (ADR 0663 revision): four dummies hexed 2020 ms apart (2029 ms with the three 3 ms steps before
+  each cast), so three spacings make 6087 ms and `dummy` ticks 87 ms before `dummy4`, the dummy of the latest cast;
+  `dummy3` and `dummy2` tick about 975 and 1950 ms after `dummy4`. 807450 is learned 935 ms after the round's last
+  wait, 2964 ms after the `dummy4` cast: after the `dummy` tick (2913 ms, stamped at most 25 ms late) and before the
+  first `dummy4` tick (3000 ms) and the window's start reads. The window of 6150 ms holds three spawns on `dummy4`
+  ticks, 3000 ms apart; the `dummy` tick about 2900 ms after the first spawn is refused. `lead_targets` (`dummy`,
+  `dummy2`, `dummy3`) and the timeline reads of the first spawn and the `dummy4` cast measure that offset with one
+  extrapolated interval: under the documented step model it reads 2900 ms (2875 ms or more with 3 ms database steps);
+  the worst stamp lateness (24 ms) and a full 25 ms interval spread leave 2913 - 24 - 25 = 2864 ms, so the bracket
+  lies inside 2850 to 3150 ms. A gate of 2700 ms answers that tick (spawns about 2900 ms apart, a lead bound of about
+  1925 ms); one of 3300 ms leaves one spawn interval; neither reads `ok`.
 - 802219 (`heal_cooldown_cut`): one entry per gated spell (Potion Toss 801661, Splash Potion 802710), Mojo Beam
   500950 at the caster for 3000 ms (about six heals) then cancelled, caster health at 1% of the 10000 fixture maximum
   so every heal is effective. Expected recast near 9000 ms after the priming cast; attempts every 100 ms from 6500 to
@@ -66,7 +86,11 @@ heal. `fixed_count` with `metric: "aura"` expresses the Hex threshold.
   (`rev_20260909_00_witch_doctor_completion.sql:232-233, 312-323`), whose Tick casts one hit per Spirit
   (`AscensionWitchDoctorAuras.cpp:285-295`); a ranged spell hit can miss (not be dodged), which the
   `ranged_hit_rating` fixture removes, and a missed hit would widen a trigger gap (then `unmeasured`, never a false
-  `ok`); the gates read `ok` only when the server's edge timing splits the windows, else `unmeasured`; `cancel_aura`
+  `ok`); 801664 reads `unmeasured` in every run by design; 807450 closes by its lead bound while the `dummy4` tick
+  on the 3000 ms edge is answered, which needs its stamp lateness not to drop between spawns (final01 read every
+  spawn interval as 3000 ms); a dropped edge moves the next spawn to `dummy3`, about 975 ms later, and reads
+  `unmeasured`;
+  `cancel_aura`
   must stop the Beam channel, else the recast comes early and reads `unmeasured`.
 - Observation (not a claim, not fixed): the leech heal 803287 targets the caster (`TARGET_UNIT_CASTER`,
   `AscensionWitchDoctorCompletion.cpp:365-371`) with the Witch Doctor as caster, so a Potion tossed on another ally

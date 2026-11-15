@@ -51,8 +51,43 @@ The contributor-owned kind `proc_gate_interval` (`CONF/kinds/proc_gate_interval.
 - Resolution, two-sided: on a regular trigger grid of gap g, windows that all answer alike leave a bracket g wide, so
   a gate shorter or longer than stated by less than one gap is not separated and reads `unmeasured`. The bracket
   closes on the stated gate only when it sits on the grid and edge timing splits the windows (a trigger on the edge
-  refused in one window, accepted in another), or when triggers fall at most 2b apart. A gate off by more than one
+  refused in one window, accepted in another), or when triggers land at most b apart. A gate off by more than one
   gap alerts.
+
+### Revision (cycle 4): a lead bound from per-dummy reads
+
+In the Witch Doctor count of record final01, 801664 read `ok` in one run and `unmeasured` in the other (brackets 484 to
+500 and 250 to 500 ms), and 807450 read `unmeasured` in both (2222 to 3000 ms). Both relied on edge timing. An event
+is stamped at the first world update at or after it is due, up to one simulated step late (25 ms in a wait), and the
+gate is compared in the same game time, so lateness decides the edge trigger's side.
+
+Options: (1) a uniform grid with triggers at most b apart: 807450 would need 20 Hex dummies (b 150 ms of a 3000 ms
+period), more than the 11 dummies and the 24 s Hex allow at a 1.5 s global cooldown; (2) a harness read of each event
+stamp or of the proc cooldown left (owner-owned C++, a tool note); (3) a source dummy identified by counts and the
+other dummies' ticks placed over every cycle of the window, widened by the interval spreads (the first cycle 4 draft:
+a 25 ms spread over the 5 cycles of a 14300 ms span took the lead tick below the band); (4) a lower bound anchored on
+the first output, chosen.
+
+Decision: the optional `lead_targets` reads, at the window end and with existing harness metrics, each lead dummy's
+first event and its shortest and longest interval since the latest `since_spell` cast, and on the encounter timeline
+the first output and that cast (`timeline_first_ms`; the same game clock stamps the event streams). With O the first
+output's offset after the cast and f, low, high the reads of a lead dummy, the dummy's first event refused at f - O
+after O when it falls between O and O plus the shortest output interval, or its second event refused at least
+f + low - O after O when f <= O < f + low and f + high < O + shortest. Either trigger lies after the first output and
+before the next one, so it was refused; at most one interval is extrapolated. The largest such offset is the lead
+bound, a window with one skips the longest-trigger-gap requirement, and a dummy that meets neither condition adds
+nothing. The dummy of the latest cast is not a lead target (its first event since that cast is the cast's own hit).
+The bound is deterministic under the documented step model (verification.md: 3 ms non-wait steps, wait steps of at
+most 25 ms) when a lead dummy ticks d before the source of the first output, the cause is learned in that gap, the
+latest cast lies less than one period before it, and the period less d less two steps (the lateness of the first
+output and of the lead tick, and the lead dummy's interval spread across the wait boundary) stays at or above
+`gate - b`.
+
+Limit: with b no wider than one simulated step (801664: b 25 ms), triggers would have to land at most b apart on both
+sides of the gate after every output. Spirit Eclipse gives one 250 ms stream at a time, and a second phased stream
+(Hex of Malice ticks on dummies, which Bloodthistle's check also takes as owner damage) only adds a trigger whose side
+of the edge its own lateness decides; option (2) would close it. Such an entry is scheduled so that it cannot read
+`ok` by chance either, since an `ok` in one run and `unmeasured` in the other is a flip.
 
 ## Consequences
 
@@ -60,7 +95,11 @@ The contributor-owned kind `proc_gate_interval` (`CONF/kinds/proc_gate_interval.
 - The judge separates the stated gate from one shorter or longer by less than one trigger gap only when the edge
   splits as above; otherwise the entry reads `unmeasured` with its bracket and the clause stays data conformant
   (G-19, ADR 0135). An `ok` always means a bracket inside the band.
-- A run whose server timing never splits the edge (ticks exactly on the gate end every time) stays `unmeasured`.
+- A run whose server timing never splits the edge (ticks exactly on the gate end every time) stays `unmeasured`,
+  unless `lead_targets` gives a lead bound.
+- The lead bound adds 3 reads per lead dummy and 2 timeline reads; it rests only on the first output, the measured
+  stamps of one or two events per dummy and the shortest output interval, so it gives no bound, never a false one,
+  when the schedule drifts (a refused edge, a cause learned outside its gap).
 - `docs/behaviour-scenarios.md` (owner-owned) does not yet list the kind in its index of module kinds; a tool note asks
   for the line.
 

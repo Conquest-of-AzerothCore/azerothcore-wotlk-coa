@@ -42,7 +42,10 @@
   {
     "spell": 92085,
     "clause": "You may now prepare Ingredients into a Cauldron, crafting a brew.",
-    "labels": [],
+    "labels": [
+      "92085 behaviour_metric_delta brew",
+      "92085 behaviour_metric_delta brew_marker"
+    ],
     "kind": "claim"
   },
   {
@@ -55,13 +58,42 @@
     "spell": 92085,
     "clause": "Only 1 of each Ingredient can be active at a time.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Only 1 of each Ingredient",
+        "labels": [
+          "92085 behaviour_metric_delta one_each",
+          "92085 behaviour_metric_delta one_each_casts"
+        ]
+      },
+      {
+        "claim": "can be active at a time",
+        "labels": [
+          "92085 behaviour_metric_delta swap"
+        ]
+      }
+    ]
   },
   {
     "spell": 92085,
     "clause": "$?s561069[ Maximum of 2 Ingredients can be active.][]",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Maximum of 2 Ingredients can be active, two together",
+        "labels": [
+          "92085 behaviour_metric_delta two_ingredients"
+        ]
+      },
+      {
+        "claim": "Maximum of 2 Ingredients can be active, no third",
+        "labels": [
+          "92085 behaviour_metric_delta max_two"
+        ]
+      }
+    ]
   },
   {
     "spell": 92086,
@@ -104,7 +136,23 @@
     "labels": [
       "300662 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration of your Jinxes by $s1%",
+        "labels": [
+          "300662 effect_value e0 #0",
+          "300662 behaviour_metric_delta jinx_longer",
+          "300662 behaviour_metric_delta jinx_ends"
+        ]
+      },
+      {
+        "claim": "and effectiveness of your Jinxes by $s1%",
+        "labels": [
+          "300662 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 300663,
@@ -148,7 +196,7 @@
     "spell": 301175,
     "clause": "Regenerates ${$m2+$ppl2} health",
     "labels": [
-      "301175 effect_value 561136e1 #0"
+      "301175 behaviour_metric_delta spirit_heal"
     ],
     "kind": "claim"
   },
@@ -159,13 +207,43 @@
       "301175 aura_amplitude_ms #1",
       "301175 spell_duration 561136 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and mana",
+        "labels": [
+          "301175 behaviour_metric_delta spirit_mana"
+        ]
+      },
+      {
+        "claim": "repeating every $T2 sec",
+        "labels": [
+          "301175 behaviour_metric_delta spirit_mana",
+          "301175 behaviour_metric_delta spirit_heal"
+        ]
+      },
+      {
+        "claim": "and increases your movement speed by $561071s1%",
+        "labels": [
+          "301175 behaviour_metric_delta spirit_speed"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "301175 spell_duration 561136 #2",
+          "301175 behaviour_metric_delta spirit_lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 301175,
     "clause": "stacking $u times.",
     "labels": [
-      "301175 max_stacks 561136 #3"
+      "301175 max_stacks 561136 #3",
+      "301175 behaviour_metric_delta spirit_stacks",
+      "301175 behaviour_metric_delta spirit_casts"
     ],
     "kind": "claim"
   },
@@ -505,7 +583,28 @@
       "ruling": null,
       "spell": 503608,
       "dbc_differs": "Description differs from Spell.dbc"
-    }
+    },
+    "claims": [
+      {
+        "claim": "Increases your Agility by $s1%",
+        "labels": [
+          "503608 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "Increases your Intellect by $s1%",
+        "labels": [
+          "503608 effect_value e0 #0",
+          "503608 behaviour_metric_delta intellect"
+        ]
+      },
+      {
+        "claim": "Increases your Spirit by $s1%",
+        "labels": [
+          "503608 behaviour_metric_delta spirit"
+        ]
+      }
+    ]
   },
   {
     "spell": 503609,
@@ -530,7 +629,9 @@
     "spell": 503696,
     "clause": "Increases your Spirit and maximum mana by $s1%.",
     "labels": [
-      "503696 effect_value e0 #0"
+      "503696 effect_value e0 #0",
+      "503696 behaviour_metric_delta spirit",
+      "503696 behaviour_metric_delta max_mana"
     ],
     "kind": "claim"
   },
@@ -538,14 +639,17 @@
     "spell": 503707,
     "clause": "Emanate a powerful aura, granting $s1% increased melee and ranged haste to party and raid members.",
     "labels": [
-      "503707 effect_value e0 #0"
+      "503707 effect_value e0 #0",
+      "503707 behaviour_party_stat_ratio"
     ],
     "kind": "claim"
   },
   {
     "spell": 503707,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "503707 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -560,7 +664,7 @@
     "spell": 503707,
     "clause": "Regenerates ${$m2+$ppl2} health",
     "labels": [
-      "503707 effect_value 561136e1 #2"
+      "503707 behaviour_metric_delta spirit_heal"
     ],
     "kind": "claim"
   },
@@ -571,13 +675,43 @@
       "503707 aura_amplitude_ms #3",
       "503707 spell_duration 561136 #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and mana",
+        "labels": [
+          "503707 behaviour_metric_delta spirit_mana"
+        ]
+      },
+      {
+        "claim": "repeating every $T2 sec",
+        "labels": [
+          "503707 behaviour_metric_delta spirit_mana",
+          "503707 behaviour_metric_delta spirit_heal"
+        ]
+      },
+      {
+        "claim": "and increases your movement speed by $561071s1%",
+        "labels": [
+          "503707 behaviour_metric_delta spirit_speed"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "503707 spell_duration 561136 #4",
+          "503707 behaviour_metric_delta spirit_lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 503707,
     "clause": "stacking $u times.",
     "labels": [
-      "503707 max_stacks 561136 #5"
+      "503707 max_stacks 561136 #5",
+      "503707 behaviour_metric_delta spirit_stacks",
+      "503707 behaviour_metric_delta spirit_casts"
     ],
     "kind": "claim"
   },
@@ -605,7 +739,33 @@
       "503712 effect_value #3",
       "503712 effect_radius 504582e0 #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Launch a spirit volley at your enemy, dealing ${$m1+0+$RAP*.285} Shadow damage to them",
+        "labels": [
+          "503712 effect_value 504582e0 #2"
+        ]
+      },
+      {
+        "claim": "and up to $i enemies",
+        "labels": [
+          "503712 effect_value #3"
+        ]
+      },
+      {
+        "claim": "within $a1 yds",
+        "labels": [
+          "503712 effect_radius 504582e0 #4"
+        ]
+      },
+      {
+        "claim": "and collects a Spirit",
+        "labels": [
+          "503712 behaviour_metric_delta volley_collect"
+        ]
+      }
+    ]
   },
   {
     "spell": 503712,
@@ -1424,7 +1584,26 @@
     "labels": [
       "705840 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Bad Juju, Malefic Wrath and Hexfire by $s1%",
+        "labels": [
+          "705840 effect_value e0 #0",
+          "705840 behaviour_hit_ratio wrath",
+          "705840 behaviour_hit_ratio hexfire",
+          "705840 behaviour_hit_ratio badjuju"
+        ]
+      },
+      {
+        "claim": "against enemies affected by Hex of Malice",
+        "labels": [
+          "705840 behaviour_hit_ratio wrath_unhexed",
+          "705840 behaviour_hit_ratio hexfire_unhexed",
+          "705840 behaviour_hit_ratio badjuju_unhexed"
+        ]
+      }
+    ]
   },
   {
     "spell": 705841,
@@ -1596,7 +1775,8 @@
     "spell": 705864,
     "clause": "For $d,",
     "labels": [
-      "705864 aura_duration_ms #0"
+      "705864 aura_duration_ms #0",
+      "705864 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
@@ -1838,7 +2018,8 @@
     "spell": 705916,
     "clause": "Voice of Bwonsamdi now increases your Spirit by $s1%.",
     "labels": [
-      "705916 effect_value e0 #0"
+      "705916 effect_value e0 #0",
+      "705916 behaviour_metric_delta voice_spirit"
     ],
     "kind": "claim"
   },
@@ -2057,7 +2238,8 @@
     "spell": 706488,
     "clause": "and its duration is increased by $/1000;s2 sec.",
     "labels": [
-      "706488 effect_value e1 #0"
+      "706488 effect_value e1 #0",
+      "706488 behaviour_metric_delta mimic_lasts"
     ],
     "kind": "claim"
   },
@@ -2780,7 +2962,9 @@
     "spell": 802268,
     "clause": "stacking $681233u times.",
     "labels": [
-      "802268 max_stacks 681233 #2"
+      "802268 max_stacks 681233 #2",
+      "802268 behaviour_metric_delta true_stacks",
+      "802268 behaviour_metric_delta true_casts"
     ],
     "kind": "claim"
   },
@@ -2828,6 +3012,7 @@
     "spell": 802756,
     "clause": "Your direct damage now heals you for $s1% of the damage done.",
     "labels": [
+      "802756 trigger_magnitude_ratio",
       "802756 effect_value e0 #0"
     ],
     "kind": "claim"
@@ -3022,13 +3207,33 @@
       "572383 effect_value e1 #0",
       "572383 effect_value e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Shoot a quick voodoo arrow at an enemy dealing $s2% Ranged Weapon Damage",
+        "labels": [
+          "572383 effect_value e1 #0"
+        ]
+      },
+      {
+        "claim": "plus ${$m1+0} as Nature damage",
+        "labels": [
+          "572383 effect_value e0 #1"
+        ]
+      },
+      {
+        "claim": "and collecting a Spirit",
+        "labels": [
+          "572383 behaviour_metric_delta collect"
+        ]
+      }
+    ]
   },
   {
     "spell": 572383,
     "clause": "Regenerates ${$m2+$ppl2} health",
     "labels": [
-      "572383 effect_value 561136e1 #2"
+      "572383 behaviour_metric_delta spirit_heal"
     ],
     "kind": "claim"
   },
@@ -3039,13 +3244,43 @@
       "572383 aura_amplitude_ms #3",
       "572383 spell_duration 561136 #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and mana",
+        "labels": [
+          "572383 behaviour_metric_delta spirit_mana"
+        ]
+      },
+      {
+        "claim": "repeating every $T2 sec",
+        "labels": [
+          "572383 behaviour_metric_delta spirit_mana",
+          "572383 behaviour_metric_delta spirit_heal"
+        ]
+      },
+      {
+        "claim": "and increases your movement speed by $561071s1%",
+        "labels": [
+          "572383 behaviour_metric_delta spirit_speed"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "572383 spell_duration 561136 #4",
+          "572383 behaviour_metric_delta spirit_lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 572383,
     "clause": "stacking $u times.",
     "labels": [
-      "572383 max_stacks 561136 #5"
+      "572383 max_stacks 561136 #5",
+      "572383 behaviour_metric_delta spirit_stacks",
+      "572383 behaviour_metric_delta spirit_casts"
     ],
     "kind": "claim"
   },
@@ -3070,7 +3305,21 @@
       "562719 effect_value #1",
       "562719 aura_duration_ms #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reducing their Shadow Resistance by ${1*$PL+1}",
+        "labels": [
+          "562719 behaviour_metric_delta resist"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "562719 behaviour_metric_delta resist_lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 562719,

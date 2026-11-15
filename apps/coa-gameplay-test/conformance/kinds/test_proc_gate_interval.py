@@ -1,3 +1,6 @@
+from bisect import bisect_left
+import math
+import random
 import unittest
 
 from behaviours import behaviour_scenario
@@ -32,6 +35,21 @@ WARDS = {'spell': 807450, 'name': 'Hexfire Mass (Serpent Ward once every 3 sec)'
          'output': {'event': 'spawn', 'source_entry': 50587}, 'dummies': 4}
 FAIR = (5, 3, 250.0, 500.0, 500.0)
 EDGE = (5, 2, 250.0, 750.0, 750.0)
+LEECH_GATE = {**ENTRY, 'windows': 7, 'window_ms': 100, 'cast_auras': [[561136, 3]]}
+WARD_TALENT = 807450
+LEAD_WARDS = {**WARDS, 'cast_wait_ms': 2020, 'control_ms': 935, 'window_ms': 6150,
+              'lead_targets': ['dummy', 'dummy2', 'dummy3']}
+LATE_MS = 25
+STEP_MS = 3
+SEEDS = range(200)
+HEX_PERIOD = 3000
+HEX_DURATION = 24000
+ECLIPSE_PERIOD = 250
+ECLIPSE_HIT_AMOUNT = 75.0
+INGREDIENT_WAIT_MS = 1600
+POTION_WAIT_MS = 1600
+DB_WORK = 0.2
+STEP_MODELS = ({}, {'db_work': DB_WORK}, {'lanes': True}, {'lanes': True, 'db_work': DB_WORK})
 
 
 def gate_values(expectation, windows, control=(5, 0), amount=75.0, released=None) -> dict:
@@ -54,6 +72,125 @@ def gate_values(expectation, windows, control=(5, 0), amount=75.0, released=None
         values[labels['output gap min']], values[labels['output gap max']] = shortest, longest
     if model['released']:
         values[model['released']] = 0.0 if released is None else released
+    return values
+
+
+def counted(stamps, moment) -> float:
+    return float(sum(1 for stamp in stamps if stamp <= moment))
+
+
+def interval_reads(stamps, since=None) -> tuple[float, float, float]:
+    kept = sorted(stamp for stamp in stamps if since is None or stamp >= since)
+    gaps = [after - before for before, after in zip(kept, kept[1:])]
+    first = float(kept[0] - since) if kept and since is not None else math.nan
+    return first, float(min(gaps)) if gaps else math.nan, float(max(gaps)) if gaps else math.nan
+
+
+def gated(triggers, gate, opened) -> list[int]:
+    outputs = []
+    for stamp in sorted(triggers):
+        if stamp > opened and (not outputs or stamp - outputs[-1] >= gate):
+            outputs.append(stamp)
+    return outputs
+
+
+def step_times(steps, rng=None, db_work=0.0, lanes=False) -> tuple[list[int], list[int]]:
+    now, updates, times = 0, [0], []
+    for step in steps:
+        times.append(now)
+        if step['action'] != 'wait':
+            now += STEP_MS * (2 if rng is not None and rng.random() < db_work else 1)
+            updates.append(now)
+            continue
+        left = step['ms']
+        while left > 0:
+            size = min(left, rng.randint(STEP_MS, LATE_MS) if lanes else LATE_MS)
+            now, left = now + size, left - size
+            updates.append(now)
+    return times, updates
+
+
+def stamped(updates, due) -> int | None:
+    index = bisect_left(updates, due)
+    return updates[index] if index < len(updates) else None
+
+
+def ward_run(scenario, gate, seed=0, **model) -> dict:
+    steps = scenario['steps']
+    times, updates = step_times(steps, random.Random(seed) if model else None, **model)
+    casts = [(times[index], step['target']) for index, step in enumerate(steps) if step['action'] == 'cast']
+    learned = next(times[index] for index, step in enumerate(steps)
+                   if step['action'] == 'learn' and step['spell'] == WARD_TALENT)
+    hits = {target: [cast] + [stamp for stamp in (stamped(updates, cast + tick * HEX_PERIOD)
+                                                  for tick in range(1, HEX_DURATION // HEX_PERIOD + 1)) if stamp]
+            for cast, target in casts}
+    spawns = gated([stamp for stamps in hits.values() for stamp in stamps[1:]], gate, learned)
+    reads = {step['label']: times[index] for index, step in enumerate(steps) if step['action'] == 'assert'}
+    return {'casts': casts, 'learned': learned, 'hits': hits, 'spawns': spawns, 'reads': reads, 'updates': updates}
+
+
+def ward_values(expectation, scenario, gate, seed=0, **model) -> dict:
+    simulated = ward_run(scenario, gate, seed, **model)
+    hits, spawns, latest = simulated['hits'], simulated['spawns'], simulated['casts'][-1][0]
+    union = sorted(stamp for stamps in hits.values() for stamp in stamps)
+    values = {expectation.model['released']: 0.0}
+    for labels in [expectation.model['control']] + expectation.model['windows']:
+        for read, label in labels.items():
+            moment = simulated['reads'][label]
+            seen_spawns = [stamp for stamp in spawns if stamp <= moment]
+            if read.endswith('triggers'):
+                values[label] = counted(union, moment)
+            elif read.endswith('outputs'):
+                values[label] = float(len(seen_spawns))
+            elif read == 'trigger gap max':
+                values[label] = interval_reads([stamp for stamp in union if stamp <= moment], latest)[2]
+            elif read in ('output gap min', 'output gap max'):
+                values[label] = interval_reads(seen_spawns)[1 if read.endswith('min') else 2]
+            elif read == 'lead output first':
+                values[label] = float(seen_spawns[0]) if seen_spawns else math.nan
+            elif read == 'lead cast first':
+                values[label] = float(latest)
+            else:
+                target, gap = read.removeprefix('lead ').split(' ', 1)
+                stamps = [stamp for stamp in hits[target] if stamp <= moment]
+                values[label] = interval_reads(stamps, latest)[('first gap', 'min gap', 'max gap').index(gap)]
+    return values
+
+
+def leech_values(expectation, seed, gate, per_hit=False) -> dict:
+    rng = random.Random(seed)
+    constant = rng.randrange(LATE_MS)
+    model = expectation.model
+    spirits = LEECH_GATE['cast_auras'][0][1]
+
+    def eclipse(cast: int) -> list[int]:
+        return [cast + hit * ECLIPSE_PERIOD + (rng.randrange(LATE_MS) if per_hit else constant)
+                for hit in range(1, spirits + 1)]
+
+    control_hits = eclipse(0)
+    opened = LEECH_GATE['cast_wait_ms'] + LEECH_GATE['control_ms'] + INGREDIENT_WAIT_MS
+    cast = opened + POTION_WAIT_MS
+    windows = []
+    for _ in model['windows']:
+        cast += rng.randint(3, 15)
+        windows.append((cast, eclipse(cast), cast + LEECH_GATE['cast_wait_ms'] + LEECH_GATE['window_ms']))
+        cast = windows[-1][2]
+    hits = control_hits + [stamp for _, stamps, _ in windows for stamp in stamps]
+    heals = gated(hits, gate, opened)
+    control = model['control']
+    values = {control['start triggers']: 0.0, control['start outputs']: 0.0, control['start amount']: 0.0,
+              control['end triggers']: counted(hits, opened), control['end outputs']: counted(heals, opened),
+              control['end amount']: counted(hits, opened) * ECLIPSE_HIT_AMOUNT}
+    start = opened
+    for labels, (cast, stamps, end) in zip(model['windows'], windows):
+        for side, moment in (('start', start), ('end', end)):
+            values[labels[f'{side} triggers']] = counted(hits, moment)
+            values[labels[f'{side} outputs']] = counted(heals, moment)
+            values[labels[f'{side} amount']] = counted(hits, moment) * ECLIPSE_HIT_AMOUNT
+        values[labels['trigger gap max']] = interval_reads(stamps, cast)[2]
+        _, values[labels['output gap min']], values[labels['output gap max']] = interval_reads(
+            [stamp for stamp in heals if stamp <= end], cast)
+        start = end
     return values
 
 
@@ -173,3 +310,90 @@ class ProcGateIntervalTests(unittest.TestCase):
     def test_a_window_past_the_hex_duration_is_refused(self):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, {**WARDS, 'window_ms': 20000})
+
+    def ward_verdicts(self, gate, entry=LEAD_WARDS, **model) -> list:
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        return [judge_behaviour(base_verdict(expectation),
+                                FakeRun(ward_values(expectation, scenario, gate, seed, **model)), expectation)
+                for seed in (SEEDS if model else [0])]
+
+    def leech_verdicts(self, gate, **jitter) -> list:
+        _, [expectation] = behaviour_scenario(CLASS_FILE, LEECH_GATE)
+        return [judge_behaviour(base_verdict(expectation), FakeRun(leech_values(expectation, seed, gate, **jitter)),
+                                expectation) for seed in SEEDS]
+
+    def test_the_lead_ward_schedule_learns_the_talent_between_the_lead_tick_and_the_first_spawn(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, LEAD_WARDS)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertEqual(expectation.model['lead']['since_target'], 'dummy4')
+        reads = {step['label'] for step in scenario['steps'] if step['action'] == 'assert'}
+        self.assertTrue(set(expectation.model['windows'][0].values()) <= reads)
+        simulated = ward_run(scenario, 3000)
+        casts = {target: cast for cast, target in simulated['casts']}
+        latest = casts['dummy4']
+        window_start = simulated['reads'][expectation.model['windows'][0]['start outputs']]
+        self.assertEqual([cast - latest for cast in casts.values()], [-6087, -4058, -2029, 0])
+        self.assertGreaterEqual(simulated['learned'] - (casts['dummy'] + 3 * HEX_PERIOD + LATE_MS), 20)
+        self.assertGreaterEqual(latest + HEX_PERIOD - window_start, 20)
+        self.assertEqual(simulated['spawns'][:3], simulated['hits']['dummy4'][1:4])
+
+    def test_the_lead_ward_schedule_closes_inside_the_band_under_the_documented_step_model(self):
+        for model in ({}, {'db_work': DB_WORK}):
+            for verdict in self.ward_verdicts(3000, **model):
+                self.assertEqual(verdict.status, 'ok', (model, verdict.explanation))
+                self.assertEqual(verdict.measured, 3000.0)
+                self.assertGreaterEqual(verdict.detail['reopened_by_ms'], 2850.0)
+                self.assertIn('a lead tick', verdict.explanation)
+
+    def test_a_full_step_of_spread_and_lateness_on_the_lead_dummy_keeps_the_bound_in_the_band(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, LEAD_WARDS)
+        values = ward_values(expectation, scenario, 3000)
+        window = expectation.model['windows'][0]
+        values[window['lead dummy first gap']] -= LATE_MS - 1
+        values[window['lead dummy min gap']] -= LATE_MS
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertGreaterEqual(verdict.detail['reopened_by_ms'], 2850.0)
+
+    def test_a_lead_tick_needs_the_first_output_and_must_fall_before_the_shortest_output_interval(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, LEAD_WARDS)
+        window = expectation.model['windows'][0]
+        for label, shift in ((window['lead output first'], math.nan), (window['lead dummy max gap'], 100.0)):
+            values = ward_values(expectation, scenario, 3000)
+            values[label] += shift
+            verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+            self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+            self.assertNotIn('a lead tick 2900', verdict.explanation)
+
+    def test_seeded_ward_gates_ten_percent_off_never_read_ok(self):
+        for gate in (2700, 3300):
+            for model in STEP_MODELS:
+                for verdict in self.ward_verdicts(gate, **model):
+                    self.assertNotEqual(verdict.status, 'ok', (gate, model, verdict.explanation))
+
+    def test_jittered_steps_never_make_the_stated_ward_gate_alert(self):
+        for model in STEP_MODELS[2:]:
+            statuses = {verdict.status for verdict in self.ward_verdicts(3000, **model)}
+            self.assertLessEqual(statuses, {'ok', 'unmeasured'}, model)
+
+    def test_lead_targets_need_a_timeline_output_and_the_latest_cast_outside_them(self):
+        for targets in (['dummy', 'dummy4'], ['dummy', 'dummy5'], ['dummy', 'dummy']):
+            with self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, {**LEAD_WARDS, 'lead_targets': targets})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**LEAD_WARDS, 'window_casts': True})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**LEAD_WARDS, 'trigger_casts': LEAD_WARDS['trigger_casts'][:3]
+                                            + [[HEX, 'dummy']]})
+
+    def test_three_spirit_eclipse_windows_never_close_or_alert_for_the_stated_leech_gate(self):
+        for per_hit in (False, True):
+            for verdict in self.leech_verdicts(500, per_hit=per_hit):
+                self.assertEqual(verdict.status, 'unmeasured', (per_hit, verdict.explanation))
+
+    def test_seeded_leech_gates_ten_percent_off_never_read_ok_and_a_missing_gate_alerts(self):
+        for gate in (450, 550):
+            for per_hit in (False, True):
+                for verdict in self.leech_verdicts(gate, per_hit=per_hit):
+                    self.assertNotEqual(verdict.status, 'ok', (gate, per_hit, verdict.explanation))
+        self.assertEqual({verdict.status for verdict in self.leech_verdicts(1)}, {'alert'})

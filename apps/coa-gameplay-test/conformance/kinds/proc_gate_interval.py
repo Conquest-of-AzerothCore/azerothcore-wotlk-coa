@@ -28,6 +28,9 @@ CONTROL = 'control'
 WINDOW_READS = ('start triggers', 'start outputs', 'end triggers', 'end outputs', 'trigger gap max',
                 'output gap min', 'output gap max')
 AMOUNT_READS = ('start amount', 'end amount')
+LEAD_GAPS = {'first gap': 'event_first_ms', 'min gap': 'event_interval_min_ms', 'max gap': 'event_interval_max_ms'}
+LEAD_OUTPUT_FIRST = 'lead output first'
+LEAD_CAST_FIRST = 'lead cast first'
 
 
 @dataclass(frozen=True)
@@ -70,6 +73,7 @@ class ProcGateSpec:
     amount_pct: float | None
     fixture: tuple[tuple[str, int], ...]
     label_suffix: str
+    lead_targets: tuple[str, ...]
 
 
 def stream_of(raw: dict, role: str, spell: int) -> Stream:
@@ -107,7 +111,7 @@ def proc_gate_spec(entry: dict) -> ProcGateSpec:
         int(entry['forced_talent']) if entry.get('forced_talent') is not None else None,
         float(entry['amount_pct']) if entry.get('amount_pct') is not None else None,
         tuple((str(stat), int(value)) for stat, value in entry.get('fixture', {}).items()),
-        entry.get('label_suffix', 'gate'))
+        entry.get('label_suffix', 'gate'), tuple(str(target) for target in entry.get('lead_targets', ())))
     names = {CASTER} | {dummy_name(index) for index in range(spec.dummies)}
     if spec.gate_ms <= 0 or spec.windows < 1 or spec.control_ms < 0 or spec.window_ms <= 0:
         raise ValueError(f'{spell} {KIND} needs a positive gate, at least one window and positive waits')
@@ -135,7 +139,22 @@ def proc_gate_spec(entry: dict) -> ProcGateSpec:
         raise ValueError(f'{spell} {KIND} learns {spec.talent} only between the control and the windows')
     if spec.amount_pct is not None and (spec.amount_pct <= 0 or spec.trigger.stream not in AMOUNT_METRICS):
         raise ValueError(f'{spell} {KIND} amount_pct needs a positive share of a damage or heal trigger stream')
+    if spec.lead_targets:
+        since_casts = [target for cast, target in spec.trigger_casts + spec.setup_casts if cast == spec.since_spell]
+        distinct = len(set(spec.lead_targets)) == len(spec.lead_targets)
+        if spec.trigger.target is not None or not distinct or not set(spec.lead_targets) <= names - {CASTER}:
+            raise ValueError(f'{spell} {KIND} lead_targets name distinct dummies of a trigger stream without a '
+                             f'target')
+        if not spec.output.timeline or spec.window_casts:
+            raise ValueError(f'{spell} {KIND} lead_targets need a timeline output and a window without casts')
+        if since_casts.count(since_casts[-1]) != 1 or since_casts[-1] in spec.lead_targets:
+            raise ValueError(f'{spell} {KIND} lead_targets need the latest {spec.since_spell} cast on a dummy cast '
+                             f'once and outside lead_targets')
     return spec
+
+
+def since_target(spec: ProcGateSpec) -> str:
+    return [target for cast, target in spec.trigger_casts + spec.setup_casts if cast == spec.since_spell][-1]
 
 
 def gate_mark(spec: ProcGateSpec, mark: str) -> str:
@@ -160,6 +179,11 @@ def gap_read(label: str, stream: Stream, edge: str, since_spell: int) -> dict:
     fields = {'stream': stream.stream, 'spell': stream.spell, 'since_spell': since_spell,
               **({'target': stream.target} if stream.target else {})}
     return measurement(label, CASTER, EVENT_GAP[edge], **fields)
+
+
+def lead_gap_read(label: str, stream: Stream, target: str, metric: str, since_spell: int) -> dict:
+    return measurement(label, CASTER, metric, stream=stream.stream, spell=stream.spell, since_spell=since_spell,
+                       target=target)
 
 
 def amount_read(label: str, stream: Stream) -> dict:
@@ -213,6 +237,18 @@ def proc_gate_scenario(class_file: dict, spec: ProcGateSpec) -> tuple[dict, list
                 gap_read(gate_mark(spec, f'{prefix} output gap min'), spec.output, 'min', spec.since_spell),
                 gap_read(gate_mark(spec, f'{prefix} output gap max'), spec.output, 'max', spec.since_spell)]
 
+    def lead_reads(prefix: str) -> list[dict]:
+        if not spec.lead_targets:
+            return []
+        reads = [lead_gap_read(gate_mark(spec, f'{prefix} lead {target} {read}'), spec.trigger, target, metric,
+                               spec.since_spell)
+                 for target in spec.lead_targets for read, metric in LEAD_GAPS.items()]
+        return reads + [
+            measurement(gate_mark(spec, f'{prefix} {LEAD_OUTPUT_FIRST}'), CASTER, 'timeline_first_ms',
+                        event=spec.output.event, source_entry=spec.output.source_entry),
+            measurement(gate_mark(spec, f'{prefix} {LEAD_CAST_FIRST}'), CASTER, 'timeline_first_ms', event='cast',
+                        spell=spec.since_spell, target_actors=[since_target(spec)])]
+
     learned = (*spec.learn, *(cast for cast, _ in spec.trigger_casts + spec.setup_casts))
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
                                       for spell in dict.fromkeys(learned)]
@@ -230,13 +266,15 @@ def proc_gate_scenario(class_file: dict, spec: ProcGateSpec) -> tuple[dict, list
         cast_starts[cast] = len(steps)
         steps += hit_ratio_cast(records, cast, CASTER, target, spec.cast_power)
     windows = []
+    lead_names = tuple(f'lead {target} {read}' for target in spec.lead_targets for read in LEAD_GAPS)
+    lead_names += (LEAD_OUTPUT_FIRST, LEAD_CAST_FIRST) if spec.lead_targets else ()
     for index in range(1, spec.windows + 1):
         prefix = f'w{index}'
         steps += edge_reads(prefix, 'start') + (trigger_round() if spec.window_casts else [])
         steps += [{'action': 'wait', 'label': 'gate window', 'ms': spec.window_ms}]
-        steps += edge_reads(prefix, 'end') + gap_reads(prefix)
+        steps += edge_reads(prefix, 'end') + gap_reads(prefix) + lead_reads(prefix)
         windows.append({read: gate_mark(spec, f'{prefix} {read}')
-                        for read in WINDOW_READS + (AMOUNT_READS if spec.amount_pct is not None else ())})
+                        for read in WINDOW_READS + (AMOUNT_READS if spec.amount_pct is not None else ()) + lead_names})
     for aura, cast in spec.cause_auras:
         try:
             lasting = int(records.duration_ms(aura))
@@ -276,7 +314,12 @@ def proc_gate_scenario(class_file: dict, spec: ProcGateSpec) -> tuple[dict, list
                        f'every gate window. The gate lies above the longest output interval less the longest trigger '
                        f'gap (a trigger that late was refused) and at most the shortest output interval; ok needs '
                        f'that whole bracket inside the stated {spec.gate_ms} ms +- the G-19 band ({band:g} ms), a '
-                       f'bound beyond the band alerts, a wider bracket is unmeasured.'),
+                       f'bound beyond the band alerts, a wider bracket is unmeasured.'
+                     + (f' Each of {", ".join(spec.lead_targets)} is also read alone (first event and intervals '
+                        f'since the latest {spec.since_spell} cast), with the first output and that cast on the '
+                        f'timeline: a tick of one of them that falls after the first output and before the shortest '
+                        f'output interval has passed was refused, and its offset is a lower bound.'
+                        if spec.lead_targets else '')),
         'players': [player],
         'creatures': creatures,
         'steps': steps}
@@ -285,6 +328,8 @@ def proc_gate_scenario(class_file: dict, spec: ProcGateSpec) -> tuple[dict, list
              'control': {read: gate_mark(spec, f'{CONTROL} {read}')
                          for read in WINDOW_READS[:4] + (AMOUNT_READS if spec.amount_pct is not None else ())},
              'windows': windows, 'released': released, 'amount_pct': spec.amount_pct,
+             'lead': ({'targets': list(spec.lead_targets), 'since_target': since_target(spec)}
+                      if spec.lead_targets else None),
              'contrast': LEARNED_CONTRAST if spec.talent is not None else OWN_CAST_CONTRAST}
     expectation = Expectation(gate_mark(spec, ''), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger.spell, None,
                               f'{spec.gate_ms} ms', prose_rule(entry.quote, spec.spell), model)
@@ -295,6 +340,27 @@ def finite(value: float | None) -> bool:
     return value is not None and not math.isnan(value)
 
 
+def lead_tick(first: float, low: float, high: float, opened: float, shortest: float) -> float | None:
+    if opened < first < opened + shortest:
+        return first - opened
+    if finite(low) and finite(high) and first <= opened < first + low and first + high < opened + shortest:
+        return first + low - opened
+    return None
+
+
+def lead_bound(values: dict, lead: dict, shortest: float) -> float | None:
+    output, cast = values.get(LEAD_OUTPUT_FIRST), values.get(LEAD_CAST_FIRST)
+    if not finite(output) or not finite(cast) or output <= cast:
+        return None
+    ticks = []
+    for target in lead['targets']:
+        first, low, high = (values.get(f'lead {target} {read}') for read in LEAD_GAPS)
+        tick = lead_tick(first, low, high, output - cast, shortest) if finite(first) else None
+        if tick is not None:
+            ticks.append(tick)
+    return max(ticks) if ticks else None
+
+
 def window_reading(values: dict, model: dict) -> dict:
     triggers = values['end triggers'] - values['start triggers']
     outputs = values['end outputs'] - values['start outputs']
@@ -303,6 +369,10 @@ def window_reading(values: dict, model: dict) -> dict:
     if outputs >= 2 and all(finite(gap) for gap in gaps):
         reading.update({'trigger_gap': gaps[0], 'shortest': gaps[1], 'longest': gaps[2],
                         'bound': gaps[2] - gaps[0]})
+        if model.get('lead'):
+            lead = lead_bound(values, model['lead'], gaps[1])
+            if lead is not None:
+                reading['lead_bound'] = lead
     if model.get('amount_pct') is not None and triggers > 0:
         reading['leech'] = (values['end amount'] - values['start amount']) / triggers * model['amount_pct'] / 100
     return reading
@@ -312,7 +382,7 @@ def proc_gate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     counted = [model['control']] + model['windows']
     for group in counted:
         for read, label in group.items():
-            if 'gap' not in read and not finite(run.values.get(label)):
+            if 'gap' not in read and not read.startswith('lead ') and not finite(run.values.get(label)):
                 return replace(base, explanation=missing_measurement(run, label))
     if model.get('released') and not finite(run.values.get(model['released'])):
         return replace(base, explanation=missing_measurement(run, model['released']))
@@ -334,6 +404,8 @@ def proc_gate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     summary = '; '.join(f'w{index} {reading["triggers"]:g} triggers, {reading["outputs"]:g} outputs'
                         + (f', outputs {reading["shortest"]:g} to {reading["longest"]:g} ms apart, triggers at most '
                            f'{reading["trigger_gap"]:g} ms apart' if 'shortest' in reading else '')
+                        + (f', a lead tick {reading["lead_bound"]:g} ms after an output refused'
+                           if 'lead_bound' in reading else '')
                         for index, reading in enumerate(readings, start=1))
     detail = {'windows': readings, CONTRAST: model.get('contrast', LEARNED_CONTRAST)}
     if any(reading['outputs'] > reading['triggers'] for reading in readings):
@@ -348,7 +420,7 @@ def proc_gate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         return replace(base, status='unmeasured', detail=detail,
                        explanation=f'no window read two outputs: {summary}')
     shortest = min(reading['shortest'] for reading in judged)
-    bound = max(reading['bound'] for reading in judged)
+    bound = max(max(reading['bound'], reading.get('lead_bound', -math.inf)) for reading in judged)
     edges = dict(measured=shortest, expected=gate, low=gate - band, high=gate + band)
     detail.update({'shortest_ms': shortest, 'reopened_by_ms': bound})
     if shortest < gate - band - 1e-9:
@@ -360,7 +432,8 @@ def proc_gate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                        explanation=f'a trigger {bound:g} ms after an output was refused, past the stated {gate:g} '
                                    f'ms window plus the {band:g} ms band: {summary}')
     intervals = sum(reading['outputs'] - 1 for reading in judged)
-    coarse = [reading['trigger_gap'] for reading in judged if reading['trigger_gap'] >= gate - band]
+    coarse = [reading['trigger_gap'] for reading in judged
+              if 'lead_bound' not in reading and reading['trigger_gap'] >= gate - band]
     if coarse or intervals < MINIMUM_INTERVALS or sum(reading['blocked'] for reading in judged) <= 0:
         why = (f'triggers {max(coarse):g} ms apart leave a window without a trigger' if coarse else
                f'{intervals:g} output intervals, fewer than {MINIMUM_INTERVALS}' if intervals < MINIMUM_INTERVALS
