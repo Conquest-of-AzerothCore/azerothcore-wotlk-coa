@@ -627,7 +627,7 @@ namespace
     constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_SINK   = 4.0f;
-    constexpr Milliseconds ICICLE_DROP = 2400ms;
+    constexpr Milliseconds ICICLE_DROP = 1600ms;
     constexpr uint32 NPC_FALLING_ICICLE = 978100;
     constexpr float CAVE_FLOOR_STEP   = 10.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
@@ -737,6 +737,16 @@ namespace
                 if (GameObject* hanging = me->GetMap()->GetGameObject(stalactite.hanging))
                     hanging->DespawnOrUnsummon();
             _stalactites.clear();
+            _drops.clear();
+            DespawnFalling();
+        }
+
+        void DespawnFalling()
+        {
+            for (ObjectGuid const& guid : _falling)
+                if (Creature* falling = ObjectAccessor::GetCreature(*me, guid))
+                    falling->DespawnOrUnsummon();
+            _falling.clear();
         }
 
         void Schedule() override
@@ -861,11 +871,15 @@ namespace
                     for (Stalactite const& drop : _drops)
                         if (Creature* falling = me->SummonCreature(NPC_FALLING_ICICLE, drop.ground.GetPositionX(),
                                 drop.ground.GetPositionY(), drop.ceiling, frand(0.0f, 2 * float(M_PI)),
-                                TEMPSUMMON_TIMED_DESPAWN, 1600))
+                                TEMPSUMMON_TIMED_DESPAWN, 4000))
+                        {
                             falling->GetMotionMaster()->MoveFall();
+                            _falling.push_back(falling->GetGUID());
+                        }
                     _drops.clear();
                     break;
                 case TW_ICICLE:
+                    DespawnFalling();
                     me->RemoveDynObject(SPELL_WATER_SPIKE);
                     for (Position const& pos : _icicles)
                     {
@@ -991,6 +1005,7 @@ namespace
         };
         std::vector<Stalactite> _stalactites;
         std::vector<Stalactite> _drops;
+        std::vector<ObjectGuid> _falling;
         bool _hung = false;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
