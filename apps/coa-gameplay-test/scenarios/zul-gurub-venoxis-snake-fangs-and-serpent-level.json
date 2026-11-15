@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Venoxis's snakes stack his Virulent Poison, and his Parasitic Serpents are level 60",
+  "contract": [
+    "On live the Razzashi Cobras' Poisonous Fangs (2118075) proc on their melee hits and add stacks of Virulent",
+    "Poison (2118026) owned by High Priest Venoxis (14507) while he fights, so they stack with his own (tester",
+    "and Pigeon's spell review, 2026-11-03: the aura had no proc data). In troll form Venoxis has no poison, so",
+    "a stack owned by him on a hero he never fights can only come from a cobra. Parasitic Serpents (14884) are",
+    "level 60 on live. Venoxis and the cobra are summoned at the entrance on Normal."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "snaketank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the heroes so both enter the same instance",
+      "actor": "tank",
+      "target": "snaketank"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the tank create the instance first",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "snaketank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "snaketank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14507,
+      "as": "venoxis",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Venoxis",
+      "actor": "tank",
+      "target": "venoxis"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis fights",
+      "actor": "venoxis",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "summon",
+      "actor": "snaketank",
+      "entry": 11373,
+      "as": "cobra",
+      "distance": 8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cobra carries Poisonous Fangs",
+      "actor": "cobra",
+      "metric": "aura",
+      "spell": 2118075,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Pull the cobra",
+      "actor": "snaketank",
+      "target": "cobra"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cobra fights",
+      "actor": "cobra",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "snaketank"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cobra's hits stack Venoxis's Virulent Poison",
+      "actor": "snaketank",
+      "metric": "aura_stacks",
+      "spell": 2118026,
+      "caster": "venoxis",
+      "min": 2,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no separate poison of the cobra's own",
+      "actor": "snaketank",
+      "metric": "aura",
+      "spell": 2118026,
+      "caster": "cobra",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis is still in troll form",
+      "actor": "venoxis",
+      "metric": "aura",
+      "spell": 2118025,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14884,
+      "as": "serpent",
+      "distance": 6
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Parasitic Serpent is level 60",
+      "actor": "serpent",
+      "metric": "level",
+      "equals": 60
+    }
+  ]
+}

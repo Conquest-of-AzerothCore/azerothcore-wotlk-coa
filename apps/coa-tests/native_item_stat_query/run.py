@@ -28,6 +28,14 @@ def check_wiring(source):
         'player updates must answer deferred stat queries'
     assert 'DiscardPendingStatQueries(player)' in method(acquisition, 'void OnPlayerLogout('), \
         'logout must discard deferred stat queries'
+    assert 'PLAYERHOOK_ON_MAP_CHANGED' in acquisition, \
+        'the acquisition script must subscribe to map changes, which recreate the player and items at the client'
+    for hook in ('void OnPlayerLogin(', 'void OnPlayerMapChanged('):
+        assert 'SendClientState(player)' in method(acquisition, hook), \
+            f'{hook} must resend the loot preview flag and the carried item levels'
+    state = method(source, 'void SendClientState(')
+    assert 'SendPreviewFlag(player)' in state and 'SendAllLevels(player)' in state, \
+        'the client state is the loot preview flag and every carried item level'
 
 
 def main():

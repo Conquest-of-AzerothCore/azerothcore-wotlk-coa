@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Chromie's Experience Items: Potion of Experience costs 300 and Aura of Experience 1000 Bazaar Tokens",
+  "contract": "Chromie (178081) opens her Experience Items list, vendor entry 990782, from her third gossip option 'GOSSIP_ACTION_EXPERIENCE_ITEMS'. It matches Tiraxis' Convenience Items (900008): Potion of Experience 818046 costs 300 Bazaar Tokens (ItemExtendedCost 3014, 975001 x 300) and Aura of Experience 818059 costs 1000 (ItemExtendedCost 10339, 975001 x 1000), the same ids Tiraxis sells them for. Before this change they were 100 (2983) and 350 (3015). The scenario reads the ExtendedCost ids from the vendor list the session is sent, not a rendered window.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "buyer",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "assert",
+      "label": "The third option is the Experience Items shop",
+      "actor": "buyer",
+      "metric": "gossip_option_text",
+      "index": 2,
+      "text": "GOSSIP_ACTION_EXPERIENCE_ITEMS",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 2,
+      "label": "Open the Experience Items shop"
+    },
+    {
+      "action": "assert",
+      "label": "Chromie sends one vendor list",
+      "actor": "buyer",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Potion of Experience costs 300 Bazaar Tokens (ExtendedCost 3014)",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 818046,
+      "equals": 3014
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Aura of Experience costs 1000 Bazaar Tokens (ExtendedCost 10339)",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 818059,
+      "equals": 10339
+    }
+  ]
+}

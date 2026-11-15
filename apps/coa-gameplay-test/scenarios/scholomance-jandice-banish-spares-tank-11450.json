@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Scholomance: Jandice Barov's Banish spares her top threat",
+  "contract": [
+    "Issue #11450: Jandice Barov (10503) banished the tank. Her vanilla script casts Banish 8994 on a random enemy",
+    "other than her top threat, and her Ascension kit timer (first 10-12 s, then every 25-27 s) keeps that rule. The",
+    "tank engages her first and holds top threat; a second player hits her once so she knows about them, then stops.",
+    "Over two casts Banish lands on the second player and never on the tank."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "bystander", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "tank", "target": "bystander" },
+    { "action": "teleport", "actor": "tank", "map": 289, "x": 175.3, "y": -91.0, "z": 70.86, "o": 0 },
+    { "action": "assert", "label": "CONTROL: tank is in Scholomance", "actor": "tank", "metric": "map_id",
+      "equals": 289, "within_ms": 10000 },
+    { "action": "teleport", "actor": "bystander", "map": 289, "x": 175.3, "y": -91.0, "z": 70.86, "o": 0 },
+    { "action": "assert", "label": "CONTROL: bystander is in Scholomance", "actor": "bystander", "metric": "map_id",
+      "equals": 289, "within_ms": 10000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_health", "actor": "tank", "value": 100000000, "maximum": 100000000 },
+    { "action": "set_health", "actor": "bystander", "value": 100000000, "maximum": 100000000 },
+    { "action": "summon", "actor": "tank", "as": "jandice", "entry": 10503, "distance": 4 },
+    { "action": "encounter_start", "actor": "tank", "boss_entry": 10503, "radius": 30 },
+    { "action": "attack", "actor": "tank", "target": "jandice" },
+    { "action": "assert", "label": "CONTROL: Jandice is in combat", "actor": "jandice", "metric": "combat",
+      "equals": 1, "within_ms": 10000 },
+    { "action": "wait", "label": "The tank builds a threat lead", "ms": 3000 },
+    { "action": "attack", "label": "The bystander joins her threat list", "actor": "bystander", "target": "jandice" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "stop_attack", "actor": "bystander" },
+    { "action": "assert", "label": "CONTROL: the tank holds her attention", "actor": "jandice", "metric": "victim",
+      "target": "tank", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "CONTROL: Jandice casts Banish twice", "actor": "tank", "metric": "timeline_count",
+      "event": "cast", "spell": 8994, "source_entry": 10503, "min": 2, "within_ms": 45000 },
+    { "action": "assert", "label": "Banish lands on the bystander", "actor": "tank", "metric": "timeline_count",
+      "event": "aura_applied", "spell": 8994, "source_entry": 10503, "target_actors": ["bystander"], "min": 2,
+      "within_ms": 5000 },
+    { "action": "assert", "label": "Banish never lands on the tank", "actor": "tank", "metric": "timeline_count",
+      "event": "aura_applied", "spell": 8994, "source_entry": 10503, "target_actors": ["tank"], "equals": 0 }
+  ]
+}

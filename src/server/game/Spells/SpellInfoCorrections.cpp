@@ -386,6 +386,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
     });
 
+    // Revive (Chained Spirit, Zul'Gurub): the dead player can accept it while the corpse reclaim delay runs
+    ApplySpellFix({ 24341 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_RES_TIMER;
+    });
+
     // Ascendance (Talisman of Ascendance trinket)
     ApplySpellFix({ 28200 }, [](SpellInfo* spellInfo)
     {
@@ -425,6 +431,16 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 48422 }, [](SpellInfo* spellInfo)
     {
         spellInfo->Stances = 1 << (FORM_TREE - 1);
+    });
+
+    // Murder Rush's damage aura: the client's effect 1 names the aura and its 10% but no effect type, so the
+    // aura that Murder Rush keeps up while Sprint is active was never applied.
+    ApplySpellFix({ 1180881 }, [](SpellInfo* spellInfo)
+    {
+        if (spellInfo->Effects[EFFECT_1].Effect != 0 ||
+            spellInfo->Effects[EFFECT_1].ApplyAuraName != SPELL_AURA_ADD_PCT_MODIFIER)
+            return;
+        spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
     });
 
     // Elemental Oath
@@ -1261,10 +1277,18 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].TriggerSpell = 58374;
     });
 
-    // Sweeping Strikes stance change
-    ApplySpellFix({ 12328 }, [](SpellInfo* spellInfo)
+    // CoA tooltips read "This ability is usable while shapeshifted" (#11978): Sweeping Strikes, Bloodthirst,
+    // Hunger For Blood, Strength of Earth Totem, Titanic Bloodthirst, Fel Strike
+    ApplySpellFix({ 12328, 23881, 63848, 65991, 823881, 1568346 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFTED;
+        spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFTED;
+    });
+
+    // Mycelial Ring (#11933): its triggered ring spells share spell category 38 with the 45 sec Mycelial Ring 681056
+    // and carry a 2 min category cooldown, which they put on Mycelial Ring itself.
+    ApplySpellFix({ 681291, 681552, 681553, 681554, 681555, 681556 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->CategoryRecoveryTime = 0;
     });
 
     // Damage Shield
@@ -2912,6 +2936,19 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 69055, 70814 }, [](SpellInfo* spellInfo)
     {
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS); // 5yd
+    });
+
+    // Summon Robot (quest 9433 A Dip in the Moonwell): the 50 yd random spot can be up the hill behind the control panel
+    ApplySpellFix({ 30009 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+    });
+
+    // Woodworking upgrade kits ship without the interrupt flags every other recipe has, so moving does not stop a Create All queue
+    ApplySpellFix({ 1015015, 1015016, 1015017, 1015018, 1015019 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_MOVEMENT | SPELL_INTERRUPT_FLAG_PUSH_BACK
+            | SPELL_INTERRUPT_FLAG_UNK3 | SPELL_INTERRUPT_FLAG_INTERRUPT;
     });
 
     // Impaled (Lord Marrowgar)
@@ -5470,6 +5507,13 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 975011 }, [](SpellInfo* spellInfo)
     {
         spellInfo->Attributes |= SPELL_ATTR0_ON_NEXT_SWING;
+    });
+
+    // CoA: Sacrifice (Zevrim Thornhoof): the 2100215 tooltip drains 17% maximum health per second, but the
+    // periodic effect of 2100216 ticked every 2 seconds.
+    ApplySpellFix({ 2100216 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_1].Amplitude = 1000;
     });
 
     // CoA: Summon Eye of Immol'thar puts the eyes anywhere up to 30 yards away; keep them close around him.

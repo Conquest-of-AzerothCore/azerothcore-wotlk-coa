@@ -27,6 +27,7 @@
 #include "RBAC.h"
 #include "Realm.h"
 #include "ScriptMgr.h"
+#include "StaffChatTag.h"
 #include "Tokenize.h"
 #include "World.h"
 #include "WorldPacket.h"
@@ -359,6 +360,7 @@ std::size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, La
     bool gmMessage = false;
     ObjectGuid receiverGUID;
     std::string receiverName = "";
+    std::string taggedMessage;
     if (sender)
     {
         senderGUID = sender->GetGUID();
@@ -367,6 +369,51 @@ std::size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, La
         {
             chatTag = playerSender->GetChatTag();
             gmMessage = playerSender->GetSession()->HasPermission(rbac::RBAC_PERM_COMMAND_GM_CHAT);
+
+            if (language != LANG_ADDON)
+            {
+                switch (chatType)
+                {
+                    case CHAT_MSG_SAY:
+                    case CHAT_MSG_YELL:
+                    case CHAT_MSG_WHISPER:
+                    case CHAT_MSG_PARTY:
+                    case CHAT_MSG_PARTY_LEADER:
+                    case CHAT_MSG_RAID:
+                    case CHAT_MSG_RAID_LEADER:
+                    case CHAT_MSG_RAID_WARNING:
+                    case CHAT_MSG_BATTLEGROUND:
+                    case CHAT_MSG_BATTLEGROUND_LEADER:
+                    case CHAT_MSG_GUILD:
+                    case CHAT_MSG_OFFICER:
+                    case CHAT_MSG_CHANNEL:
+                    {
+                        for (bool stripped = true; stripped;)
+                        {
+                            stripped = false;
+                            for (std::string_view const prefix : STAFF_CHAT_PREFIXES)
+                            {
+                                if (message.starts_with(prefix))
+                                {
+                                    message.remove_prefix(prefix.size());
+                                    stripped = true;
+                                }
+                            }
+                        }
+
+                        StaffChatTagData const* staffTag = playerSender->CustomData.Get<StaffChatTagData>(STAFF_CHAT_TAG_KEY);
+                        if (!message.empty() && staffTag && staffTag->Tag != StaffChatTag::None)
+                        {
+                            taggedMessage = GetStaffChatPrefix(staffTag->Tag);
+                            taggedMessage += message;
+                            message = taggedMessage;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         }
     }
 

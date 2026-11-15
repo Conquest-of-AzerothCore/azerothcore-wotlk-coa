@@ -21,9 +21,10 @@ struct TalentReplacement
     std::uint32_t OriginalSpellId;
     std::array<ReplacementRank, 9> Ranks;
     bool RequiresAura = false;
+    std::uint8_t MinAuraStacks = 0;
 };
 
-inline constexpr std::array<TalentReplacement, 28> TalentReplacements =
+inline constexpr std::array<TalentReplacement, 29> TalentReplacements =
 {{
     { 14, 9, 520853, 500028, {{ { 500610, 0 } }} },
     { 17, 18, 570727, 801059, {{
@@ -71,6 +72,7 @@ inline constexpr std::array<TalentReplacement, 28> TalentReplacements =
     { 32, 0, 718040, 800732, {{ { 713002, 0 } }}, true },
     { 32, 0, 721085, 800732, {{ { 712404, 0 } }}, true },
     { 32, 0, 805742, 800732, {{ { 805794, 0 } }}, true },
+    { 32, 0, 572358, 707141, {{ { 803736, 0 } }}, true, 3 },
     { 15, 0, 802272, 680238, {{ { 680376, 0 } }}, true },
     { 15, 0, 802272, 681445, {{ { 681562, 0 } }}, true },
     { 15, 0, 802272, 681450, {{ { 681563, 0 } }}, true },

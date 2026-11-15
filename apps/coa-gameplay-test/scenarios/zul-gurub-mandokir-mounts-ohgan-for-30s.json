@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Bloodlord Mandokir mounts Ohgan for 30 s when he comes close and mounts him again",
+  "contract": [
+    "Round-9 tester (2026-11-15, Bronzebeard video of 2025-11-13, 28:07-28:40): when Ohgan (14988) gets",
+    "close, Mandokir (11382) mounts up, both stay active and attackable, and he dismounts about 30 s later.",
+    "User decision 2026-11-15: within 10 yards of Ohgan (estimated) Mandokir rides Ohgan's display 215271 with",
+    "Mounted 2118412 while Ohgan carries Mounted 2118411 and keeps fighting his rider's target; after 30 s he",
+    "dismounts, and mounts again 30 s later (estimated) when Ohgan is in reach. Neither Mounted aura is in any",
+    "live log. Before round 9 Mandokir never cast Mounted. Ohgan runs in from the arena entrance, so the first",
+    "mount comes once he arrives. Mandokir's timers wait while he casts, so a Whirlwind (3 s cast, 6 s spin) can",
+    "hold the dismount or the next mount back by up to 9 s; 25 s waits plus 16 s windows allow 41 s.",
+    "The tank is the only player, so every melee swing of Ohgan's the tank sees during the ride is at Mandokir's",
+    "target; at least 3 in 25 s shows he keeps fighting (threshold estimated, his attack speed is not asserted)."
+  ],
+  "timeout_ms": 170000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "label": "Into Mandokir's arena, 30 yards in from the entrance",
+      "actor": "tank",
+      "map": 309,
+      "x": -12246.7,
+      "y": -1924.7,
+      "z": 131.5,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage Mandokir",
+      "actor": "tank",
+      "target": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir fights",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: he starts the fight on foot",
+      "actor": "mandokir",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: once Ohgan arrives, Mandokir is Mounted (2118412)",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and rides Ohgan's display",
+      "actor": "mandokir",
+      "metric": "mount_display_id",
+      "equals": 215271
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ohgan carries his Mounted (2118411)",
+      "actor": "tank",
+      "metric": "nearby_creature_aura_count",
+      "entry": 14988,
+      "spell": 2118411,
+      "equals": 1
+    },
+    {
+      "action": "select_nearby",
+      "label": "Ohgan can still be selected",
+      "actor": "tank",
+      "entry": 14988,
+      "radius": 60
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and attacked",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14988,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: so can the mounted Mandokir",
+      "actor": "tank",
+      "metric": "can_attack",
+      "target": "mandokir",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Ohgan's melee swings seen by the tank when the ride starts",
+      "actor": "tank",
+      "metric": "owned_creature_attack_count",
+      "entry": 14988,
+      "save_as": "ohgan_swings"
+    },
+    {
+      "action": "wait",
+      "label": "Most of the 30 s ride",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the mounted Ohgan keeps attacking his rider's target (idle: 0 swings)",
+      "actor": "tank",
+      "metric": "owned_creature_attack_count",
+      "entry": 14988,
+      "relative_to": "ohgan_swings",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: still mounted 25 s later",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he dismounts about 30 s after mounting",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0,
+      "within_ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: back on foot",
+      "actor": "mandokir",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and Ohgan's Mounted is gone",
+      "actor": "tank",
+      "metric": "nearby_creature_aura_count",
+      "entry": 14988,
+      "spell": 2118411,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ohgan keeps fighting",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 14988,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Most of the 30 s before he mounts again",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: still on foot 25 s later",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he mounts Ohgan again",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1,
+      "within_ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir is still fighting",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

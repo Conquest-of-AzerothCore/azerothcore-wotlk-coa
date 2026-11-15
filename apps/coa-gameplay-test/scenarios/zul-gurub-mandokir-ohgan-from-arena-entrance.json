@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Mandokir waits unmounted and Ohgan runs in from the arena entrance at double size when he is pulled",
+  "contract": [
+    "The tester of 2026-11-04 (live): when Bloodlord Mandokir (11382) comes down, Ohgan (14988) comes running in",
+    "from the arena entrance instead of appearing at his side, and he is twice the size of the stock raptor. The",
+    "entrance is estimated as the gap in the chained spirits' ring on the north-west side (-12274.7, -1913.96).",
+    "The tank stands about 30 yards inside the arena from there, so the old spawn 3 yards beside Mandokir never",
+    "leaves its home by 15 yards, while Ohgan from the entrance must run to the fight. Double size is display",
+    "215271, the same model and textures as 15271 at a client scale of 2, kept at a model scale of 1 on every",
+    "tier.",
+    "Before the pull Mandokir stands unmounted (tester and user decision, 2026-11-13): he rode Ohgan's display",
+    "215271 from his template addon and his Reset, and carried Mounted 2118412; now neither mount nor aura.",
+    "In all four live logs Ohgan casts Dash (2106617) early in the fight and about every 20 seconds; the stock",
+    "npc_ohgan casts it on engage and repeats it every 20 seconds."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "label": "Into Mandokir's arena, 30 yards in from the entrance",
+      "actor": "tank",
+      "map": 309,
+      "x": -12246.7,
+      "y": -1924.7,
+      "z": 131.5,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Ohgan before the pull",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 14988,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mandokir does not ride Ohgan before the pull",
+      "actor": "mandokir",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and carries no Mounted aura",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage Mandokir",
+      "actor": "tank",
+      "target": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir fights",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ohgan runs more than 15 yards from where he appeared, to the fight",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 14988,
+      "min_home_distance": 15,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ohgan fights at double size",
+      "actor": "tank",
+      "metric": "nearby_creature_display",
+      "entry": 14988,
+      "equals": 215271
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ohgan casts Dash in the fight",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "spell": 2106617,
+      "entry": 14988,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and casts it again about 20 seconds later",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "spell": 2106617,
+      "entry": 14988,
+      "min": 2,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir is still fighting",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Normal Ohgan uses the double-size display",
+      "actor": "tank",
+      "metric": "creature_model_display",
+      "entry": 14988,
+      "equals": 215271
+    },
+    {
+      "action": "assert",
+      "label": "at a model scale of 1, since the display carries the size",
+      "actor": "tank",
+      "metric": "creature_model_scale",
+      "entry": 14988,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Heroic Ohgan too",
+      "actor": "tank",
+      "metric": "creature_model_display",
+      "entry": 114988,
+      "equals": 215271
+    },
+    {
+      "action": "assert",
+      "label": "Mythic Ohgan too",
+      "actor": "tank",
+      "metric": "creature_model_display",
+      "entry": 214988,
+      "equals": 215271
+    },
+    {
+      "action": "assert",
+      "label": "Ascended Ohgan too",
+      "actor": "tank",
+      "metric": "creature_model_display",
+      "entry": 314988,
+      "equals": 215271
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Effect 167 rejects the DBC zero-movie control",
+  "contract": "Spell.dbc78951 uses effect167 MiscA0; zero is not a movie. Casting this control must not emit SMSG_TRIGGER_MOVIE.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Settle native login"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 78951
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1124,
+      "save_as": "before_zero"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 78951
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "label": "zero_control_cast_executed",
+      "spell": 78951,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000,
+      "label": "Observe the full invalid-movie emission window"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "label": "zero_movie_no_packet",
+      "opcode": 1124,
+      "relative_to": "before_zero",
+      "equals": 0
+    }
+  ]
+}

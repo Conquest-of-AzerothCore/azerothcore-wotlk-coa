@@ -1424,7 +1424,8 @@ public:
 
     static bool HandleSegmentTestCommand(
         ChatHandler* handler,
-        uint32 segmentId)
+        uint32 segmentId,
+        Optional<uint32> requestedDepth)
     {
         Player* player =
             handler->GetSession()
@@ -1454,7 +1455,9 @@ public:
         }
 
         uint32 const depth =
-            std::max<uint32>(
+            requestedDepth
+            ? *requestedDepth
+            : std::max<uint32>(
                 1,
                 segment->MinDepth);
 

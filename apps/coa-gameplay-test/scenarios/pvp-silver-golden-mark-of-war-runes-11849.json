@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Silver and Golden Mark of War pay Runes of Ascension (#11849)",
+  "contract": [
+    "Silver Mark of War 1201002 casts dummy spell 413116 ('Awards 250 Runes of Ascension.') and Golden Mark of War",
+    "1201003 casts dummy spell 413117 ('Awards 1000 Runes of Ascension.'). Both dropped from High-Risk rares and",
+    "Crow's Cache but had no script, so using them did nothing (#11849). Expected: using one Silver Mark from a stack",
+    "of two spends that mark and adds 250 Rune of Ascension (item 375250); using the Golden Mark spends it and brings",
+    "the total to 1250. The '4 Silver Marks upgrade into 1 Golden' line of the tooltip has no source and is not tested."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "add_item", "actor": "hero", "item": 1201002, "count": 2},
+    {"action": "add_item", "actor": "hero", "item": 1201003, "count": 1},
+    {"action": "assert", "actor": "hero", "metric": "token_count", "item": 375250, "equals": 0},
+    {"action": "use_item", "actor": "hero", "item": 1201002, "spell": 413116},
+    {"action": "assert", "label": "DISCRIMINATING: one Silver Mark is spent", "actor": "hero", "metric": "item_count",
+     "item": 1201002, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: 250 runes reach the Currency tab", "actor": "hero",
+     "metric": "token_count", "item": 375250, "equals": 250, "within_ms": 2000},
+    {"action": "use_item", "actor": "hero", "item": 1201003, "spell": 413117},
+    {"action": "assert", "label": "DISCRIMINATING: the Golden Mark is spent", "actor": "hero", "metric": "item_count",
+     "item": 1201003, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "the Golden Mark adds 1000 runes", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 1250, "within_ms": 2000}
+  ]
+}

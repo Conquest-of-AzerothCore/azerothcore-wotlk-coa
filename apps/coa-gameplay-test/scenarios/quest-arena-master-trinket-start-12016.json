@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Stranglethorn arena: the Arena Master trinket starts Arena Master (#12016)",
+  "contract": [
+    "Quest 7810 'Arena Master' names item 18706 'Arena Master' as its StartItem and has no other starter; 7838 'Arena Grandmaster' requires 7810 (PrevQuestID).",
+    "Stock 3.3.5 data and Wowhead classic list item 18706 as 'This Item Begins a Quest' for 7810. With item_template.startquest 0 the trinket offers nothing, so 7810 and the 7838 chain cannot be started.",
+    "Accepting 7810 from the carried trinket (CMSG_QUESTGIVER_ACCEPT_QUEST, 393, with the item as quest giver) must put 7810 in the log. It has no objectives, so its status is complete (1)."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -13184.5,
+    "y": 330.0,
+    "z": 40.4,
+    "o": 1.3
+  },
+  "players": [
+    {
+      "id": "fighter",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "add_item",
+      "actor": "fighter",
+      "item": 18706,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the trinket is carried and 7810 is not in the log",
+      "actor": "fighter",
+      "metric": "quest_status",
+      "quest": 7810,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Accept Arena Master from the trinket",
+      "actor": "fighter",
+      "opcode": 393,
+      "fields": [{"item_guid": 18706}, {"u32": 7810}, {"u32": 0}],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "Arena Master is in the log and complete",
+      "actor": "fighter",
+      "metric": "quest_status",
+      "quest": 7810,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

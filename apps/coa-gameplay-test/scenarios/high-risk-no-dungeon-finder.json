@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "High-Risk characters cannot use the Dungeon Finder",
+  "contract": [
+    "Issue #9598: as on Ascension, a High-Risk character (aura 1004019) is locked out of the Dungeon Finder, also in a",
+    "city where #9217 used to let them queue, and so is a group with a High-Risk member. A character without",
+    "High-Risk queues normally from the same spot in Orgrimmar."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1583.18,
+    "y": -4417.3,
+    "z": 8.35,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "risky",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "leader",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "lfg_join",
+      "label": "CONTROL: a character without High-Risk queues",
+      "actor": "normal",
+      "dungeons": [
+        258
+      ],
+      "roles": 8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the character is queued",
+      "actor": "normal",
+      "metric": "lfg_state",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "risky",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The character is in High-Risk",
+      "actor": "risky",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk character rests in Orgrimmar, where #9217 let them queue",
+      "actor": "risky",
+      "metric": "resting",
+      "equals": 1
+    },
+    {
+      "action": "lfg_join",
+      "actor": "risky",
+      "dungeons": [
+        258
+      ],
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A High-Risk character is not queued",
+      "actor": "risky",
+      "metric": "lfg_state",
+      "equals": 0
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "risky"
+    },
+    {
+      "action": "lfg_join",
+      "actor": "leader",
+      "dungeons": [
+        258
+      ],
+      "roles": 9
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A group with a High-Risk member does not start a role check",
+      "actor": "leader",
+      "metric": "lfg_state",
+      "equals": 0
+    }
+  ]
+}

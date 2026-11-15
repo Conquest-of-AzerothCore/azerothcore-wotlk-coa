@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Fiery Demeanor raises the pushback resistance of Ascension of Thaurissan (#11281)",
+  "contract": "Ascension of Thaurissan 1119751 reduces pushback by 35 percent (effect 2, base 34). Fiery Demeanor 525059 adds 15 to that effect through its SpellAffect row, so the aura reads 50 once the passive is known. Issue #11281.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 40
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "p", "spell": 1119751 },
+    { "action": "cast", "actor": "p", "spell": 1119751 },
+    {
+      "action": "assert", "label": "SETUP: Ascension of Thaurissan is active",
+      "metric": "aura", "spell": 1119751, "equals": 1, "within_ms": 3000, "actor": "p"
+    },
+    {
+      "action": "assert", "label": "CONTROL: 35 percent without Fiery Demeanor",
+      "metric": "aura_amount", "spell": 1119751, "effect": 2, "equals": 35, "actor": "p"
+    },
+    { "action": "learn", "actor": "p", "spell": 525059 },
+    { "action": "cast", "actor": "p", "spell": 1119751 },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 50 percent with Fiery Demeanor",
+      "metric": "aura_amount", "spell": 1119751, "effect": 2, "equals": 50, "within_ms": 3000, "actor": "p"
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 #include <string>
 
 class Player;
+class ManastormRun;
 
 namespace ManastormClientUIFixes
 {
@@ -22,6 +23,7 @@ namespace ManastormClientUIFixes
     void ScheduleLoginPush(Player* player);
     void SendObjectiveHighlight(Player* player);
     void ResetObjectiveHighlight(Player* player);
+    void SendCoALootState(Player* player, ManastormRun const* run);
 }
 
 #endif

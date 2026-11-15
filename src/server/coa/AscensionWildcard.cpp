@@ -685,23 +685,44 @@ void RememberTrainedRank(Player* player, uint32 spellId)
     player->UpdatePlayerSetting(TRAINED_RANKS_SETTING, free, spellId);
 }
 
+uint32 RankLevel(SpellInfo const* info)
+{
+    SpellEntry const* entry = sSpellStore.LookupEntry(info->Id);
+    uint32 const baseLevel = entry ? entry->BaseLevel : info->BaseLevel;
+    uint32 const spellLevel = entry ? entry->SpellLevel : info->SpellLevel;
+    return std::clamp<uint32>(baseLevel ? baseLevel : spellLevel, 1, 255);
+}
+
 void RestoreTrainedRanks(Player* player, uint32 firstSpellId)
 {
     PlayerSettingVector const* stored = player->FindPlayerSettings(TRAINED_RANKS_SETTING);
-    if (!stored)
+    if (!stored || !player->HasSpell(firstSpellId))
         return;
-    std::vector<uint32> remembered;
+    std::unordered_map<uint32, uint32> remembered;
     for (uint32 index = 0; index < stored->size(); ++index)
         if (uint32 const spellId = (*stored)[index].value)
             if (auto const root = Loaded.RankRoots.find(spellId); root != Loaded.RankRoots.end() && root->second == firstSpellId)
-            {
-                remembered.push_back(spellId);
-                player->UpdatePlayerSetting(TRAINED_RANKS_SETTING, index, 0);
-            }
+                remembered.emplace(spellId, index);
+    if (remembered.empty())
+        return;
     for (uint32 rankSpellId : Loaded.RankLadders.at(firstSpellId))
-        if (rankSpellId && std::find(remembered.begin(), remembered.end(), rankSpellId) != remembered.end() &&
-            !player->HasSpell(rankSpellId) && sSpellMgr->GetSpellInfo(rankSpellId))
+    {
+        SpellInfo const* info = rankSpellId && rankSpellId != firstSpellId ? sSpellMgr->GetSpellInfo(rankSpellId) : nullptr;
+        if (!info)
+            continue;
+        auto const slot = remembered.find(rankSpellId);
+        if (slot == remembered.end())
+        {
+            if (!player->HasSpell(rankSpellId))
+                return;
+            continue;
+        }
+        if (RankLevel(info) > player->GetLevel())
+            return;
+        player->UpdatePlayerSetting(TRAINED_RANKS_SETTING, slot->second, 0);
+        if (!player->HasSpell(rankSpellId))
             player->learnSpell(rankSpellId);
+    }
 }
 
 void AppendUInt32(std::vector<std::uint8_t>& out, std::uint32_t value)
@@ -2000,10 +2021,7 @@ std::vector<Trainer::Spell> RankTrainerRows(Player const* player)
                 Trainer::Spell row;
                 row.SpellId = info->Id;
                 row.ReqAbility[0] = previous;
-                SpellEntry const* entry = sSpellStore.LookupEntry(info->Id);
-                uint32 const baseLevel = entry ? entry->BaseLevel : info->BaseLevel;
-                uint32 const spellLevel = entry ? entry->SpellLevel : info->SpellLevel;
-                row.ReqLevel = uint8(std::clamp<uint32>(baseLevel ? baseLevel : spellLevel, 1, 255));
+                row.ReqLevel = uint8(RankLevel(info));
                 row.MoneyCost = TrainerPrice(info->Id, row.ReqLevel);
                 rows.push_back(row);
             }
@@ -2216,7 +2234,7 @@ public:
             PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_CREATURE_KILL,
             PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL,
             PLAYERHOOK_ON_PLAYER_HAS_ACTIVE_POWER_TYPE, PLAYERHOOK_ON_PLAYER_IS_CLASS,
-            PLAYERHOOK_ON_BEFORE_GUARDIAN_INIT_STATS_FOR_LEVEL })
+            PLAYERHOOK_ON_BEFORE_GUARDIAN_INIT_STATS_FOR_LEVEL, PLAYERHOOK_ON_LEVEL_CHANGED })
     {
     }
 
@@ -2262,6 +2280,14 @@ public:
             GrantEntrySpells(player);
         if ((IsRealmHero(player) || IsWildcardHero(player)) && Loaded.RankLadders.contains(spellId))
             RestoreTrainedRanks(player, spellId);
+    }
+
+    void OnPlayerLevelChanged(Player* player, uint8) override
+    {
+        if (!IsRealmHero(player) && !IsWildcardHero(player))
+            return;
+        for (auto const& [firstSpellId, ladder] : Loaded.RankLadders)
+            RestoreTrainedRanks(player, firstSpellId);
     }
 
     void OnPlayerForgotSpell(Player* player, uint32 spellId) override

@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Aura365: resource, school and existing-script controls",
+  "contract": "An energy ability is outside masks1/3; physical-only973841 must not change Frost cost. Clearcasting16246 is already remapped to the stock school-cost aura and must retain40% reduction.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "save_as": "frost",
+      "spell": 116
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "save_as": "energy",
+      "spell": 1752
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 1752,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 34471,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 1752,
+      "relative_to": "energy",
+      "equals": 0,
+      "label": "Energy is outside the declared resource mask"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 34471,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 973841,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "relative_to": "frost",
+      "equals": 0,
+      "label": "Physical school selector excludes Frost"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 973841,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 16246,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "ratio_to": "frost",
+      "min": 0.58,
+      "max": 0.61,
+      "label": "Existing Clearcasting remap is preserved and not doubled"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 16246,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "relative_to": "frost",
+      "equals": 0
+    }
+  ]
+}

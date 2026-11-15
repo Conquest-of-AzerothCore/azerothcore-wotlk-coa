@@ -16,6 +16,8 @@ void ApplyContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != 31)
         return;
     uint32 id = info->Id;
+    if (id == 807815)
+        info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
     auto dummy = [info](uint8 slot)
     {
         info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
@@ -125,7 +127,10 @@ void ApplyContracts(SpellInfo* info)
     }
     for (uint32 infusion : CultistInfusions)
         if (id == infusion)
+        {
             info->AuraInterruptFlags = 0;
+            info->SpellLevel = 0;
+        }
     if (Named(info, 500714))
         info->Effects[1].Effect = SPELL_EFFECT_DUMMY;
     if (id == BlackBlood)

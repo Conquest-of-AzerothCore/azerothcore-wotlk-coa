@@ -228,6 +228,7 @@ private:
     std::unordered_map<ObjectGuid, ThreatReference*> _threatenedByMe;
     std::array<float, MAX_SPELL_SCHOOL> _singleSchoolModifiers;
     mutable std::unordered_map<std::underlying_type<SpellSchoolMask>::type, float> _multiSchoolModifiers;
+    bool _inTankStance = false;
 
     void UpdateRedirectInfo();
     std::vector<std::pair<ObjectGuid, uint32>> _redirectInfo;

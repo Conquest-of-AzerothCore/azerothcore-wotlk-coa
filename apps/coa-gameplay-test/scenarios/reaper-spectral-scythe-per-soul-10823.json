@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Spectral Scythe summons one scythe per Reaped Soul and the scythes attack with Scythe Sweep (#10823, #11114)",
+  "contract": [
+    "Spectral Scythe 500484: 'Summons 1 Spectral Scythe for each Reaped Soul active'. Its summon effect value is 1",
+    "(SummonProperties 61), so the core summoned one scythe for any soul count; a live Domination Reaper's log",
+    "(2026-08-04) shows 3, 1, 1, 3, 3 ... summons per cast, one per Reaped Soul 500363 stack.",
+    "Scythe Sweep 500489 is the scythe's next-swing attack (SPELL_ATTR0_ON_NEXT_SWING_NO_DAMAGE): live scythes cast",
+    "it 385 times against 10 plain swings. Creature 250305 had no AI that queues it, so no Scythe Sweep landed.",
+    "Expected: three souls give three scythes, one soul gives one, and the scythes hit the Reaper's target with",
+    "Scythe Sweep."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "single",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 500484 },
+    { "action": "learn", "actor": "single", "spell": 500484 },
+    { "action": "grant_resource", "actor": "reaper", "spell": 500363, "amount": 3 },
+    { "action": "grant_resource", "actor": "single", "spell": 500363, "amount": 1 },
+    { "action": "assert", "label": "SETUP: the Reaper holds three Reaped Souls", "actor": "reaper", "metric": "aura_stacks", "spell": 500363, "equals": 3, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the control Reaper holds one Reaped Soul", "actor": "single", "metric": "aura_stacks", "spell": 500363, "equals": 1, "within_ms": 2000 },
+    { "action": "cast", "label": "Spectral Scythe with three souls", "actor": "reaper", "spell": 500484 },
+    { "action": "cast", "label": "Spectral Scythe with one soul", "actor": "single", "spell": 500484 },
+    { "action": "assert", "label": "SETUP: the souls are consumed", "actor": "reaper", "metric": "aura_stacks", "spell": 500363, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: three Reaped Souls summon three Spectral Scythes", "actor": "reaper", "metric": "owned_creature_count", "entry": 250305, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "One Reaped Soul summons one Spectral Scythe", "actor": "single", "metric": "owned_creature_count", "entry": 250305, "equals": 1, "within_ms": 3000 },
+    { "action": "attack", "label": "The Reaper engages the enemy", "actor": "reaper", "target": "enemy" },
+    { "action": "assert", "label": "DISCRIMINATING: the scythes hit the Reaper's target with Scythe Sweep", "actor": "reaper", "metric": "spell_damage_count", "entry": 250305, "spell": 500489, "target": "enemy", "min": 1, "within_ms": 10000 },
+    { "action": "stop_attack", "actor": "reaper" }
+  ]
+}

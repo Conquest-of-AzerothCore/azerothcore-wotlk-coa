@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Wildcard Guardian of Ancient Kings shows the Guardian model instead of a pig (#10606)",
+  "contract": [
+    "Guardian of Ancient Kings 277875 is APPLY_AURA TRANSFORM into creature 80220 (effect 0) plus MOD_DAMAGE_PERCENT_DONE 15% Holy (effect 1). Creature 80220 had no creature_template, so the transform fell back to the pink pig display 16358.",
+    "The live creature cache records creature 80220 'Guardian of Ancient Kings' with display 35107; the transformed character must show it while the aura lasts and the native model after it ends.",
+    "Effect 1 must still apply: Holy damage done rises by 15% while the Guardian is up."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Wildgoak", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildgoak" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "wild", "metric": "game_mode_mask", "min": 64 },
+    { "action": "snapshot", "actor": "wild", "metric": "display_id", "save_as": "native_display" },
+    { "action": "learn", "actor": "wild", "spell": 277875 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "label": "Guardian of Ancient Kings", "actor": "wild", "spell": 277875 },
+    { "action": "assert", "label": "SETUP: Guardian of Ancient Kings is accepted", "actor": "wild", "metric": "cast_failure", "spell": 277875, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Guardian aura is up", "actor": "wild", "metric": "aura", "spell": 277875, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the character shows the Guardian display 35107, not the pig 16358", "actor": "wild", "metric": "display_id", "equals": 35107, "within_ms": 1000 },
+    { "action": "assert", "label": "The Holy damage bonus is the DBC 15%", "actor": "wild", "metric": "aura_amount", "spell": 277875, "effect": 1, "equals": 15 },
+    { "action": "cancel_aura", "label": "End the Guardian", "actor": "wild", "spell": 277875 },
+    { "action": "assert", "label": "The aura is gone", "actor": "wild", "metric": "aura", "spell": 277875, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "The native model returns", "actor": "wild", "metric": "display_id", "relative_to": "native_display", "equals": 0, "within_ms": 1000 }
+  ]
+}

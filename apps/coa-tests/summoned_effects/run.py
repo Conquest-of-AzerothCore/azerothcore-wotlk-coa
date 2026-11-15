@@ -25,7 +25,9 @@ from client_data import dbc_dir  # noqa: E402
 HEADER = ROOT / "src/server/coa/AscensionSummonedEffects.h"
 SOURCE = ROOT / "src/server/coa/AscensionSummonedEffects.cpp"
 LOADER = ROOT / "src/server/coa/CoAScriptLoader.cpp"
-SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261004_20_coa_hero_summoned_effects.sql"
+SQL_DIR = ROOT / "data/sql/updates/pending_db_world"
+SQL_FILES = ("rev_20261004_20_coa_hero_summoned_effects.sql", "rev_20261104_63_wildcard_firestorm_tornado_11061.sql",
+             "rev_20261104_75_wildcard_nether_portal_9806.sql")
 
 MAIN = r"""
 #include "AscensionSummonedEffects.h"
@@ -83,6 +85,13 @@ int main(int, char** argv)
         return value;
     };
     auto const known = [&](std::uint32_t spell) { return !spell || rows.count(spell); };
+    auto const ticksInto = [](std::uint32_t helper, std::uint32_t trigger)
+    {
+        for (Summon const& row : SUMMONS)
+            if (row.Kind == Behaviour::Tick && row.Helper == helper && row.Payload == trigger)
+                return true;
+        return false;
+    };
 
     bool summons = true, helpers = true, payloads = true, unique = true;
     std::map<std::pair<std::uint32_t, std::uint32_t>, int> seen;
@@ -102,7 +111,10 @@ int main(int, char** argv)
 
         bool helper = !UsesHelper(row.Kind) || (row.Helper && rows.count(row.Helper) &&
             field(row.Helper, EFFECT) == APPLY_AURA);
-        if (helper && (row.Kind == Behaviour::Tick || row.Kind == Behaviour::Freeze))
+        if (helper && row.Kind == Behaviour::Tick)
+            helper = field(row.Helper, AURA) == PERIODIC_TRIGGER_SPELL &&
+                (!field(row.Helper, TRIGGER) || ticksInto(row.Helper, std::uint32_t(field(row.Helper, TRIGGER))));
+        if (helper && row.Kind == Behaviour::Freeze)
             helper = field(row.Helper, AURA) == PERIODIC_TRIGGER_SPELL && !field(row.Helper, TRIGGER);
         if (helper && row.Kind == Behaviour::Expire)
             helper = field(row.Helper, AURA) == DUMMY;
@@ -187,7 +199,7 @@ def main():
             print(line)
     ok = result.returncode == 0
 
-    sql = SQL.read_text(encoding="utf-8") if SQL.exists() else ""
+    sql = "\n".join((SQL_DIR / name).read_text(encoding="utf-8") for name in SQL_FILES)
     created = {int(m[1]): m[2] for m in
                re.finditer(r"^\((\d+), '.*?', .*?'(\w*)'\)(?:,| ON DUPLICATE KEY UPDATE .*;)$", sql, re.M)}
     engine = {row[0] for row in table}

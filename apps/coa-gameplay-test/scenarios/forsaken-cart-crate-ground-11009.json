@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Forsaken Cart Crate in The Grizzled Den rests on the ground (#11009)",
+  "contract": "The Forsaken Cart Crate (spawn 6940804, entry 517352) in The Grizzled Den, Dun Morogh, stood at 355.986, above the cave floor it sits on. Issue #11009.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the crate rests on the cave floor",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6940804, "spawn_type": "gameobject", "min": -0.3, "max": 0.3
+    }
+  ]
+}

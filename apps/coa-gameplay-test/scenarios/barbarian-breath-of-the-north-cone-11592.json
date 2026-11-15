@@ -1,0 +1,419 @@
+{
+  "schema": 1,
+  "name": "Breath of the North hits an enemy 38 degrees off the Barbarian's facing (#11592)",
+  "contract": [
+    "Every Breath of the North rank (800838, 802386-802392) targets TARGET_UNIT_CONE_ENEMY_24 with a 12 yd radius.",
+    "Without a spell_cone row the core read the enum suffix as 24 degrees (+/-12), so an enemy a few yards off the facing",
+    "line escaped the breath, as #11592 reports. The first-rank spell_cone row restores 90 degrees (+/-45) for the chain,",
+    "as for Flames of Xoroth, Dreadwake, Dawnbreak and Spirit Glaive. The harness places the target only along +x, so the",
+    "Barbarian turns in place. Expected: the target straight ahead and 38 degrees off the facing (outside 24, inside 90)",
+    "receives the 30 percent slow; at 60 and 120 degrees off it does not."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 43,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "b",
+      "entry": 36,
+      "level": 43,
+      "health": 500000,
+      "distance": 8,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "actor": "b",
+      "id": 3
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800838
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 805808
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 806804
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 92083,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 92083
+    },
+    {
+      "action": "teleport",
+      "label": "Face the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "Fill Level holds at least three stacks",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "within_ms": 6500,
+      "min": 3
+    },
+    {
+      "action": "cast",
+      "label": "Spend Fill Level to open the Empty Tankard window",
+      "actor": "b",
+      "spell": 806804,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Keep facing the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Breath of the North facing the target",
+      "actor": "b",
+      "spell": 800838
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a target straight ahead is slowed",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800838,
+      "caster": "b",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The slow expires",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800838,
+      "caster": "b",
+      "equals": 0,
+      "within_ms": 7000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Empty Tankard window close",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Face the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "Fill Level holds at least three stacks",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "within_ms": 6500,
+      "min": 3
+    },
+    {
+      "action": "cast",
+      "label": "Spend Fill Level to open the Empty Tankard window",
+      "actor": "b",
+      "spell": 806804,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Turn 38 degrees away from the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0.6632
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "DISCRIMINATING: Breath of the North with the target 38 degrees off facing",
+      "actor": "b",
+      "spell": 800838
+    },
+    {
+      "action": "assert",
+      "label": "#11592: the 90 degree cone hits a target the 24 degree cone missed",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800838,
+      "caster": "b",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The slow expires",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800838,
+      "caster": "b",
+      "equals": 0,
+      "within_ms": 7000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Empty Tankard window close",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Face the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "Fill Level holds at least three stacks",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "within_ms": 6500,
+      "min": 3
+    },
+    {
+      "action": "cast",
+      "label": "Spend Fill Level to open the Empty Tankard window",
+      "actor": "b",
+      "spell": 806804,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Turn 60 degrees away from the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 1.0472
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Breath of the North with the target 60 degrees off facing",
+      "actor": "b",
+      "spell": 800838
+    },
+    {
+      "action": "wait",
+      "label": "Let the cast finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a target 60 degrees off facing is outside the 45 degree half-angle",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800838,
+      "caster": "b",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the Empty Tankard window close",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Face the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "Fill Level holds at least three stacks",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "within_ms": 6500,
+      "min": 3
+    },
+    {
+      "action": "cast",
+      "label": "Spend Fill Level to open the Empty Tankard window",
+      "actor": "b",
+      "spell": 806804,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Turn 120 degrees away from the target",
+      "actor": "b",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 2.0944
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Breath of the North with the target 120 degrees off facing",
+      "actor": "b",
+      "spell": 800838
+    },
+    {
+      "action": "wait",
+      "label": "Let the cast finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a target behind the caster is not hit",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800838,
+      "caster": "b",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the Empty Tankard window close",
+      "ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Tinker Duobombers bombs spawn apart (#10457)",
+  "contract": "Issue #10457: Duobombers (707258) 'doesnt spawn extra spider bomb'. The second Spider Bomb must be visibly distinct: the Factory (#7079) spreads its bombs, so the two Duobombers bombs must start at least a yard apart.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 25
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 500535
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707258
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500535,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Two Spider Bombs",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the two bombs start at least a yard apart",
+      "actor": "t",
+      "metric": "owned_creature_spacing",
+      "entry": 226012,
+      "min": 1
+    }
+  ]
+}

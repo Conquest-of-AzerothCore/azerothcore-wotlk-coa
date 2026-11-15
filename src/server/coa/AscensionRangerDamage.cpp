@@ -228,12 +228,16 @@ void ApplyAscensionRangerDamageContracts(SpellInfo* spellInfo)
     if (spellInfo->Effects[EFFECT_0].IsAura(SPELL_AURA_DUMMY) &&
         spellInfo->Effects[EFFECT_0].TriggerSpell == SPELL_RANGER_RUSTY_SHIV_DAMAGE &&
         effect.IsAura(SPELL_AURA_SCHOOL_ABSORB) && effect.BasePoints == 0 &&
-        effect.DieSides == 1 && effect.MiscValue == SPELL_SCHOOL_MASK_ALL && effect.MiscValueB == 10)
+        effect.DieSides == 1 && effect.MiscValue == SPELL_SCHOOL_MASK_ALL &&
+        (effect.MiscValueB == 10 || effect.MiscValueB == 20))
     {
         effect.ApplyAuraName = SPELL_AURA_DUMMY;
         effect.BasePoints = -1;
         effect.MiscValueB = 20;
     }
+
+    if (effect.IsAura(SPELL_AURA_DUMMY) && effect.MiscValueB == 20)
+        spellInfo->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
 
     if (IsRustyShivContract(spellInfo))
         spellInfo->AttributesEx &= ~SPELL_ATTR1_ALLOW_WHILE_STEALTHED;

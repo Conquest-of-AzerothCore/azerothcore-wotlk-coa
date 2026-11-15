@@ -1,0 +1,366 @@
+{
+  "schema": 1,
+  "name": "Mok'rash's Circlet procs a Frost wave when the wearer is struck by melee (#11662)",
+  "contract": "Mok'rash's Circlet equips proc dummy 304007 (worldforged tiers 312980/316980/320980), an aura 42 (proc trigger spell) on the Water Wave records 304008/312981/316981/320981. Every dummy carries Spell.dbc ProcFlags 0 and the world had no spell_proc row, so Aura::GetProcEffectMask found no proc entry and 'When struck in combat by melee attacks you have a chance to inflict ... Frost damage to all enemies within ... yards' never happened (#11662). The records' ProcChance is 100; the three tier tooltips add '(3sec. internal cooldown)' while the base tooltip and DBC name none, so the base dummy keeps Cooldown 0 and the tiers carry 3000. The repair grants the taken melee auto attack and taken melee damage-class masks (ProcFlags 40) for damage at the hit phase and defers Chance to the record. spell_proc_chance reads 100 on every dummy, and aura_proc_rate replays each aura's native incoming proc decision on a synthetic melee strike (always proc) while ranged, spell and outgoing events never do. Real swings by three hostile Horde players then make the wearer cast Water Wave and damage the strikers, and over ten further seconds the tier with its 3 second cooldown casts fewer waves than the uncapped base dummy. Before the repair the chance lookups fail with 'Spell has no proc entry' and every rate and count reads 0, so the discriminating assertions fail rather than flake.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wearer",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "striker",
+      "race": 2,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "striker2",
+      "race": 2,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "striker3",
+      "race": 2,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Base item proc dummy",
+      "actor": "wearer",
+      "spell": 304007,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Top worldforged tier proc dummy",
+      "actor": "wearer",
+      "spell": 320980,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: base proc dummy aura is applied",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 304007,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: top tier proc dummy aura is applied",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 320980,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 304007 loads the record's 100% chance",
+      "actor": "wearer",
+      "metric": "spell_proc_chance",
+      "spell": 304007,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 312980 loads the record's 100% chance",
+      "actor": "wearer",
+      "metric": "spell_proc_chance",
+      "spell": 312980,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 316980 loads the record's 100% chance",
+      "actor": "wearer",
+      "metric": "spell_proc_chance",
+      "spell": 316980,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 320980 loads the record's 100% chance",
+      "actor": "wearer",
+      "metric": "spell_proc_chance",
+      "spell": 320980,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck by a melee auto attack procs 304007",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 304007,
+      "target": "striker",
+      "incoming": true,
+      "type_mask": 8,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck by a melee ability procs 304007",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 304007,
+      "target": "striker",
+      "incoming": true,
+      "type_mask": 32,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck by a melee auto attack procs 320980",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 320980,
+      "target": "striker",
+      "incoming": true,
+      "type_mask": 8,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck by a melee ability procs 320980",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 320980,
+      "target": "striker",
+      "incoming": true,
+      "type_mask": 32,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed ranged auto attack on the wearer is not a melee strike",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 304007,
+      "target": "striker",
+      "incoming": true,
+      "type_mask": 128,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: incoming magic damage is not a melee strike",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 304007,
+      "target": "striker",
+      "incoming": true,
+      "type_mask": 131072,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: melee damage the wearer deals is not a strike on the wearer",
+      "actor": "wearer",
+      "metric": "aura_proc_rate",
+      "spell": 304007,
+      "target": "striker",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "wearer",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "striker",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "striker2",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "striker3",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the wearer alive through the swings",
+      "actor": "wearer",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "striker",
+      "value": 1000000,
+      "maximum": 1000000,
+      "label": "Keep the striker alive through the waves"
+    },
+    {
+      "action": "set_health",
+      "actor": "striker2",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "striker3",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "snapshot",
+      "actor": "striker",
+      "metric": "health",
+      "save_as": "striker_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "wearer",
+      "metric": "health",
+      "save_as": "wearer_health"
+    },
+    {
+      "action": "attack",
+      "label": "A hostile player swings at the wearer",
+      "actor": "striker",
+      "target": "wearer"
+    },
+    {
+      "action": "attack",
+      "actor": "striker2",
+      "target": "wearer"
+    },
+    {
+      "action": "attack",
+      "actor": "striker3",
+      "target": "wearer"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the wearer takes melee damage",
+      "actor": "wearer",
+      "metric": "health",
+      "relative_to": "wearer_health",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the base dummy casts Water Wave when struck",
+      "actor": "wearer",
+      "metric": "spell_cast_count",
+      "spell": 304008,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the top tier casts its Water Wave when struck",
+      "actor": "wearer",
+      "metric": "spell_cast_count",
+      "spell": 320981,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Water Wave damages the enemy that struck",
+      "actor": "striker",
+      "metric": "health",
+      "relative_to": "striker_health",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let several more swings land",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "striker"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "striker2"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "striker3"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the uncapped base dummy cast at least six waves",
+      "actor": "wearer",
+      "metric": "spell_cast_count",
+      "spell": 304008,
+      "min": 6
+    },
+    {
+      "action": "snapshot",
+      "actor": "wearer",
+      "metric": "spell_cast_count",
+      "spell": 304008,
+      "save_as": "base_waves"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the 3 sec internal cooldown makes the tier cast fewer waves than the uncapped base",
+      "actor": "wearer",
+      "metric": "spell_cast_count",
+      "spell": 320981,
+      "relative_to": "base_waves",
+      "max": -2
+    }
+  ]
+}

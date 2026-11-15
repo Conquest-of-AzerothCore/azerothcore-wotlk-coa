@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Wand of Time always crits Undead and Demons (#10851)",
+  "contract": "Wand of Time's tooltip says \"This spell is guaranteed to critically strike against Undead and Demons\". Its ranks (520165, 520175, 520702-520707, 524960) are DmgClass 3 (ranged) Chronomancer spells (SpellFamilyName 28, SpellFamilyFlags word1 0x100000, unique to Wand of Time) and nothing forced the crit, so they crit at the normal ranged chance. Expected: against an undead and a demon target the taken crit chance is 100, against a beast it stays at the normal chance, and other ranged-class spells are unaffected. An undead target that cannot be critically hit (SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE at -100 or lower, here Blessed Resilience 33143) is not crit, as for Lava Burst and the Ascension guaranteed-crit auras.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "zombie",
+      "owner": "chrono",
+      "entry": 1501,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "felguard",
+      "owner": "chrono",
+      "entry": 6115,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "wolf",
+      "owner": "chrono",
+      "entry": 299,
+      "level": 60,
+      "health": 1000000,
+      "distance": 6,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 520175 always crits the undead Mindless Zombie",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520175,
+      "target": "zombie",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 520175 always crits the demon Roaming Felguard",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520175,
+      "target": "felguard",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Wand of Time 520175 keeps its normal crit chance on the beast Young Wolf",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520175,
+      "target": "wolf",
+      "max": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 520707 always crits the undead Mindless Zombie",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520707,
+      "target": "zombie",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 520707 always crits the demon Roaming Felguard",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520707,
+      "target": "felguard",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Wand of Time 520707 keeps its normal crit chance on the beast Young Wolf",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520707,
+      "target": "wolf",
+      "max": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 524960 always crits the undead Mindless Zombie",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 524960,
+      "target": "zombie",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 524960 always crits the demon Roaming Felguard",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 524960,
+      "target": "felguard",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Wand of Time 524960 keeps its normal crit chance on the beast Young Wolf",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 524960,
+      "target": "wolf",
+      "max": 50
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: another ranged-class spell (Auto Shot 75) is not guaranteed to crit undead",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 75,
+      "target": "zombie",
+      "max": 50
+    },
+    {
+      "action": "cast",
+      "label": "The undead Mindless Zombie gains Blessed Resilience 33143 (attacker crit chance -1000)",
+      "actor": "zombie",
+      "spell": 33143
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 520175 does not crit an undead that cannot be critically hit",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520175,
+      "target": "zombie",
+      "max": 0
+    }
+  ]
+}

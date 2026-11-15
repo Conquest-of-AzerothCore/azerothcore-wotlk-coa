@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Starcaller (Moon Guard) threat-related abilities generate the threat their tooltips promise",
+  "contract": [
+    "Chosen of the Moon 680755/680756 (Moon Guard talent): 'Become the chosen of the moon, reducing all Physical damage taken by -60% and taunting all enemies within 8 yds for 10 seconds.' DBC: 680755 Effect[1] is SPELL_EFFECT_TRIGGER_SPELL -> 680756, which applies SPELL_AURA_MOD_TAUNT (effect0) in an 8 yd radius around the caster (TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14). The AoE taunt mechanism matches the tooltip. Like every other pure-MOD_TAUNT ability in this batch (Blood Howl 800782, Absolution 800424), ThreatManager::TauntUpdate (src/server/game/Combat/ThreatManager.cpp) only reorders taunt priority among ThreatReferences already on the target's threat list ('Only the last taunt effect applied by something still on our threat list is considered'); it cannot switch a victim the caster never had any threat against, so this scenario (whose caster never damaged moon_target before taunting) only asserts that the taunt aura lands, not a victim switch.",
+    "Command 804386 (ClassSpells level 12): 'Taunt an enemy to attack you for $d.' DBC Effect[0] is SPELL_EFFECT_ATTACK_ME targeting the enemy; no threat-amount claim beyond the taunt itself."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "starcaller",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "decoy",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "moon_target",
+      "owner": "starcaller",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3,
+      "reaction": 1
+    },
+    {
+      "id": "command_target",
+      "owner": "starcaller",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3,
+      "reaction": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "decoy",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "decoy",
+      "spell": 116,
+      "target": "moon_target"
+    },
+    {
+      "action": "assert",
+      "label": "moon_target is attacking the decoy before the taunt",
+      "actor": "moon_target",
+      "metric": "victim",
+      "target": "decoy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 680755
+    },
+    {
+      "action": "cast",
+      "actor": "starcaller",
+      "spell": 680755
+    },
+    {
+      "action": "assert",
+      "label": "Chosen of the Moon is cast",
+      "actor": "starcaller",
+      "metric": "cast_failure",
+      "spell": 680755,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Chosen of the Moon: the triggered AoE taunt (680756) lands on the engaged target",
+      "actor": "moon_target",
+      "metric": "aura",
+      "spell": 680756,
+      "caster": "starcaller",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "decoy",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "decoy",
+      "spell": 116,
+      "target": "command_target"
+    },
+    {
+      "action": "assert",
+      "label": "command_target is attacking the decoy before the taunt",
+      "actor": "command_target",
+      "metric": "victim",
+      "target": "decoy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 804386
+    },
+    {
+      "action": "cast",
+      "actor": "starcaller",
+      "spell": 804386,
+      "target": "command_target"
+    },
+    {
+      "action": "assert",
+      "label": "Command: the single-target taunt switches the creature's victim to the caster",
+      "actor": "command_target",
+      "metric": "victim",
+      "target": "starcaller",
+      "equals": 1,
+      "within_ms": 1500
+    }
+  ]
+}

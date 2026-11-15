@@ -729,6 +729,9 @@ void World::SetInitialWorldSettings()
     // Loot tables
     LoadLootTables();
 
+    LOG_INFO("server.loading", "Loading Quest Target Respawn Classes...");
+    sObjectMgr->LoadQuestTargetRespawns();                       // must be after LoadQuests(), pools and loot
+
     LOG_INFO("server.loading", "Loading Skill Discovery Table...");
     LoadSkillDiscoveryTable();
 

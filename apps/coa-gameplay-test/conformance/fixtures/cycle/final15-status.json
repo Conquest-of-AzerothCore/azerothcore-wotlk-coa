@@ -1,0 +1,323 @@
+[
+ {
+  "key": "0.0",
+  "index": 0,
+  "part": 0,
+  "spell": 92121,
+  "claim": "Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague",
+  "labels": [
+   "92121 behaviour_metric_delta crypt_swarm"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip"
+ },
+ {
+  "key": "14.0",
+  "index": 1,
+  "part": 0,
+  "spell": 300748,
+  "claim": "Increases your maximum health ... by $s1%",
+  "labels": [
+   "300748 behaviour_metric_delta own_health"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip"
+ },
+ {
+  "key": "14.1",
+  "index": 1,
+  "part": 1,
+  "spell": 300748,
+  "claim": "and the maximum health of your summons by $s1%",
+  "labels": [
+   "300748 behaviour_metric_delta summon_health"
+  ],
+  "evidence": "unproven",
+  "run1": "unproven",
+  "run2": "unproven",
+  "record_status": "2",
+  "record_evidence": "unproven",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "2",
+  "basis": "kept",
+  "detail": "mentor ruling (c3 brief): status 2 exact, engine rounding (ADR 0528)"
+ },
+ {
+  "key": "26.0",
+  "index": 2,
+  "part": 0,
+  "spell": 301207,
+  "claim": "Abomination or Decaying Colossus active now increases your total Armor",
+  "labels": [
+   "301207 behaviour_metric_delta armor",
+   "301207 behaviour_metric_delta armor_colossus",
+   "301207 behaviour_metric_delta armor_none"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip"
+ },
+ {
+  "key": "26.1",
+  "index": 2,
+  "part": 1,
+  "spell": 301207,
+  "claim": "Each",
+  "labels": [
+   "301207 behaviour_metric_delta armor_each",
+   "301207 behaviour_metric_delta capacity_fixture"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip; mentor 16:42: A accepted as candidates (T10, ADR 0585)"
+ },
+ {
+  "key": "26.2",
+  "index": 2,
+  "part": 2,
+  "spell": 301207,
+  "claim": "and magic resistance by $805017s2%",
+  "labels": [
+   "301207 behaviour_metric_delta resistance"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "2",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "2",
+  "basis": "kept",
+  "detail": "Frost resistance 90 -> 116, 90.0f x 1.30 = 116.99999f truncated"
+ },
+ {
+  "key": "29.0",
+  "index": 3,
+  "part": 0,
+  "spell": 301303,
+  "claim": "Increases your critical damage with Frost spells by $s1%.",
+  "labels": [
+   "301303 effect_value e0 #0"
+  ],
+  "evidence": "data",
+  "run1": "data",
+  "run2": "data",
+  "record_status": "2",
+  "record_evidence": "data",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "2",
+  "basis": "kept",
+  "detail": "mentor 14:50 O-1 (a): status 2 by precedent Q-rb-1"
+ },
+ {
+  "key": "81.0",
+  "index": 4,
+  "part": 0,
+  "spell": 504316,
+  "claim": "Command your Abominations to hook an enemy to their location",
+  "labels": [
+   "504316 spell_duration 800043 #0",
+   "504316 behaviour_metric_delta hook_pull",
+   "504316 behaviour_metric_delta hook_to_abomination"
+  ],
+  "evidence": "unproven",
+  "run1": "unproven",
+  "run2": "unproven",
+  "record_status": "3",
+  "record_evidence": "unproven",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "3",
+  "basis": "ruled",
+  "detail": "mentor ruling on X 18:39, confirmed (c8 brief): status 3; alerting labels kept as evidence: ['504316 behaviour_metric_delta hook_to_abomination']"
+ },
+ {
+  "key": "81.1",
+  "index": 4,
+  "part": 1,
+  "spell": 504316,
+  "claim": "slowing their movement speed to a halt",
+  "labels": [
+   "504316 behaviour_metric_delta halt",
+   "504316 behaviour_metric_delta chase_halt"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "c8: chase_halt travel ratio is an event read (ADR 0615); behaviour both runs, every label conformant, no flip"
+ },
+ {
+  "key": "81.2",
+  "index": 4,
+  "part": 2,
+  "spell": 504316,
+  "claim": "for $800043d",
+  "labels": [
+   "504316 behaviour_metric_delta duration"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip"
+ },
+ {
+  "key": "125.0",
+  "index": 5,
+  "part": 0,
+  "spell": 560800,
+  "claim": "Upon fully channeling Crypt Swarm, you summon a Rotling",
+  "labels": [
+   "560800 behaviour_metric_delta rotling"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip"
+ },
+ {
+  "key": "125.1",
+  "index": 5,
+  "part": 1,
+  "spell": 560800,
+  "claim": "that will run towards the enemy and explode after $807640t2 sec",
+  "labels": [
+   "560800 behaviour_metric_delta explode_before",
+   "560800 behaviour_metric_delta explode_after"
+  ],
+  "evidence": "behaviour",
+  "run1": "behaviour",
+  "run2": "behaviour",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "1",
+  "basis": "kept",
+  "detail": "behaviour in both runs, no flip"
+ },
+ {
+  "key": "125.2",
+  "index": 5,
+  "part": 2,
+  "spell": 560800,
+  "claim": "for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
+  "labels": [
+   "560800 effect_value 500585e0 #1"
+  ],
+  "evidence": "data",
+  "run1": "data",
+  "run2": "data",
+  "record_status": "2",
+  "record_evidence": "data",
+  "flips_in_pair": [],
+  "flips_vs_record": [],
+  "status": "2",
+  "basis": "kept",
+  "detail": "mentor 14:50 125.2 (a): status 2 by precedent Q-b1-1"
+ },
+ {
+  "key": "389.0",
+  "index": 6,
+  "part": 0,
+  "spell": 503740,
+  "claim": "Immune to movement slowing effects.",
+  "labels": [
+   "503740 behaviour_metric_delta frenzied_snare_immune",
+   "503740 behaviour_metric_delta snare_control"
+  ],
+  "evidence": "flip",
+  "run1": "behaviour",
+  "run2": "unproven",
+  "record_status": "1",
+  "record_evidence": "behaviour",
+  "flips_in_pair": [
+   {
+    "label": "503740 behaviour_metric_delta frenzied_snare_immune",
+    "check": "behaviour_metric_delta",
+    "scenario": "conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune",
+    "statuses": [
+     "ok",
+     "unmeasured"
+    ]
+   },
+   {
+    "label": "503740 behaviour_metric_delta snare_control",
+    "check": "behaviour_metric_delta",
+    "scenario": "conformance-necromancer-behaviour-503740-metric-delta-snare-control",
+    "statuses": [
+     "ok",
+     "unmeasured"
+    ]
+   }
+  ],
+  "flips_vs_record": [
+   {
+    "label": "503740 behaviour_metric_delta snare_control",
+    "check": "behaviour_metric_delta",
+    "scenario": "conformance-necromancer-behaviour-503740-metric-delta-snare-control",
+    "record": [
+     "ok",
+     "ok"
+    ],
+    "pair": [
+     "ok",
+     "unmeasured"
+    ]
+   }
+  ],
+  "status": "not final",
+  "basis": "flip",
+  "detail": "503740 behaviour_metric_delta frenzied_snare_immune ['ok', 'unmeasured']; 503740 behaviour_metric_delta snare_control ['ok', 'unmeasured']503740 behaviour_metric_delta snare_control record ['ok', 'ok'] pair ['ok', 'unmeasured']"
+ }
+]

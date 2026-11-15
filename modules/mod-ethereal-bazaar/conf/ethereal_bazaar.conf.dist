@@ -64,7 +64,9 @@ EtherealBazaar.Tokens.RaidBoss.Max = 40
 EtherealBazaar.Tokens.BonusLevel = 60
 EtherealBazaar.Tokens.BonusPercent = 100
 
-# A number of levels, or grey
+# A number of levels, or grey. A creature counts at the level the character is
+# shown: with level scaling on, an open-world creature lifted to the character's
+# band pays like a creature of that level.
 EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling = grey
 EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel = 5
 EtherealBazaar.Tokens.MaxLevel = 60

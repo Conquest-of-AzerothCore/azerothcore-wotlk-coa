@@ -164,6 +164,14 @@ namespace PathToAscension
             return true;
         }
 
+        void RefuseTrackedQuest(Player* player, std::vector<uint32> const& variants)
+        {
+            bool const claimed = std::any_of(variants.begin(), variants.end(),
+                [player](uint32 id) { return Claimed(player, id); });
+            SendResult(player, claimed ? "This tutorial reward has already been collected."
+                : "This tutorial is not available for your character.");
+        }
+
         void SendRewardedList(Player* player)
         {
             std::vector<uint32> claimed;
@@ -221,6 +229,28 @@ namespace PathToAscension
         return false;
     }
 
+    bool TrackingQuestCollected(Player const* player, uint32 questId)
+    {
+        bool claimed = false;
+        for (uint32 id : trackingQuests.at(questId))
+            if (Tutorial const* tutorial = GetCatalog().Find(id))
+            {
+                if (Claimed(player, id))
+                    claimed = true;
+                else if (Eligible(player, *tutorial))
+                    return false;
+            }
+
+        return claimed;
+    }
+
+    void RecordCollectedTrackingQuest(Player* player, uint32 questId)
+    {
+        if (IsTrackingQuest(questId) && !player->IsActiveQuest(questId) && !player->IsQuestRewarded(questId)
+            && TrackingQuestCollected(player, questId))
+            player->SetRewardedQuest(questId);
+    }
+
     void SyncTracking(Player* player, uint32 tutorialId)
     {
         if (!GetSettings().tracking || !player || !player->IsInWorld() || player->IsGameMaster()
@@ -274,12 +304,7 @@ namespace PathToAscension
             return;
 
         if (!IsQuestAvailable(player, questId))
-        {
-            bool const claimed = std::any_of(found->second.begin(), found->second.end(),
-                [player](uint32 id) { return Claimed(player, id); });
-            return SendResult(player, claimed ? "This tutorial reward has already been collected."
-                : "This tutorial is not available for your character.");
-        }
+            return RefuseTrackedQuest(player, found->second);
 
         if (player->GetQuestStatus(questId) == QUEST_STATUS_NONE)
         {
@@ -293,6 +318,22 @@ namespace PathToAscension
 
         ActivateTracking(player, questId);
         player->SaveToDB(false, false);
+    }
+
+    void ShowTrackedQuest(Player* player, uint32 questId)
+    {
+        auto const found = trackingQuests.find(questId);
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        QuestStatus const status = player->GetQuestStatus(questId);
+        if (found == trackingQuests.end() || !quest
+            || (status != QUEST_STATUS_NONE && status != QUEST_STATUS_REWARDED))
+            return;
+
+        if (!IsQuestAvailable(player, questId))
+            return RefuseTrackedQuest(player, found->second);
+
+        if (player->CanTakeQuest(quest, true))
+            player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, ObjectGuid::Empty, true);
     }
 
     uint32 NpcRewardTutorial(Player const* player, uint32 questId)
@@ -399,6 +440,7 @@ namespace PathToAscension
             player->RemoveActiveQuest(tutorial->QuestId());
             for (uint32 variant : trackingQuests.at(tutorial->QuestId()))
                 player->UpdatePlayerSetting(TrackingSetting, variant, 0);
+            RecordCollectedTrackingQuest(player, tutorial->QuestId());
         }
 
         // One character save carries the items, the achievement progress and the claim marker.
@@ -445,6 +487,9 @@ namespace PathToAscension
 
         for (auto const& [id, tutorial] : GetCatalog().Tutorials())
             SyncTracking(player, id);
+
+        for (auto const& [questId, variants] : trackingQuests)
+            RecordCollectedTrackingQuest(player, questId);
     }
 
     void PrestigeRewards(Player* player)
@@ -565,6 +610,27 @@ public:
     }
 };
 
+class PathToAscensionQuestOffer final : public ServerScript
+{
+public:
+    PathToAscensionQuestOffer() : ServerScript("PathToAscensionQuestOffer", { SERVERHOOK_CAN_PACKET_RECEIVE }) { }
+
+    bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
+    {
+        if (packet.GetOpcode() != CMSG_QUESTGIVER_QUERY_QUEST || packet.size() != 13 || packet.read<uint64>(0) != 0
+            || !session || !IsLoaded())
+            return true;
+
+        Player* player = session->GetPlayer();
+        uint32 const questId = packet.read<uint32>(8);
+        if (!player || !player->IsInWorld() || !IsTrackingQuest(questId))
+            return true;
+
+        ShowTrackedQuest(player, questId);
+        return false;
+    }
+};
+
 class PathToAscensionNetwork final : public ServerScript
 {
 public:
@@ -580,5 +646,6 @@ void AddPathToAscensionRewardScripts()
 {
     new PathToAscensionQuests();
     new PathToAscensionRewardPlayers();
+    new PathToAscensionQuestOffer();
     new PathToAscensionNetwork();
 }

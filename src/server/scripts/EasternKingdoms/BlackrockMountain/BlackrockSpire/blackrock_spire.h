@@ -91,7 +91,8 @@ enum CreaturesIds
     NPC_UROK_MAGUS                  = 10602,
     NPC_UROK_ENFORCER               = 10601,
     NPC_FINKLE_EINHORN              = 10776,
-    NPC_CHROMATIC_ELITE_GUARD       = 10814
+    NPC_CHROMATIC_ELITE_GUARD       = 10814,
+    NPC_BURNING_FELGUARD            = 10263
 };
 
 enum AdditionalData

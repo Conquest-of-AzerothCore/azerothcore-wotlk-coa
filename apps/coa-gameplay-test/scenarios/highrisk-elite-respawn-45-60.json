@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "High-Risk elites respawn after 45 to 60 minutes",
+  "contract": "Requires Bloodforged.Enable = 1 with the default Bloodforged.HighRiskEliteEntries and Bloodforged.HighRiskEliteRespawnMinutes = \"45 60\". A High-Risk elite (Construct Surgeon 918530, spawn 9185300, own respawn 10 minutes) killed by a player who is not High-Risk respawns 45 to 60 minutes later.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "p", "value": 5000000, "maximum": 5000000 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 3185.0, "y": -3622.89, "z": 164.38 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_phase", "label": "Join world phase 1, where the elite is spawned", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 2500 },
+    { "action": "assert", "label": "CONTROL: the elite is alive", "actor": "p", "metric": "spawn_respawn_remaining", "spawn": 9185300, "equals": 0 },
+    { "action": "attack_nearby", "actor": "p", "entry": 918530, "kill": true },
+    { "action": "assert", "label": "Respawn is 45 to 60 minutes, not its own 10", "actor": "p", "metric": "spawn_respawn_remaining", "spawn": 9185300, "min": 2690, "max": 3600, "within_ms": 1500 }
+  ]
+}

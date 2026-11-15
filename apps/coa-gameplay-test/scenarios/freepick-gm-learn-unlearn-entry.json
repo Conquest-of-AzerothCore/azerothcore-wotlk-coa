@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "The Character Advancement (GM) Learn and (GM) Unlearn menu entries teach and remove an entry at no cost",
+  "contract": [
+    "Run on a free-pick realm (CoA.ClassModel = hero). Ascension's CharacterAdvancement.lua gives a GM two spell menu entries: (GM) Learn sends \".ca2 player addentry <name> <entry>\" and (GM) Unlearn sends \".ca2 player removeentry <name> <entry>\". The server had no ca2 command, so both did nothing.",
+    "addentry teaches the entry at its highest rank, past its level, essence and tab requirements, without charging anything. Improved Heroic Strike (entry 40351, ranks 12282/12663/12664) and the level-30 Mortal Strike (entry 40362, spell 12294) are taught to a level 10 Hero. removeentry takes the entry and all its rank spells away, again free. The client is sent its known entries after each change.",
+    "Players below Game Master security cannot use either command, and removing an entry the character does not know is refused.",
+    "An entry the build grants automatically at no cost, such as Judgement of Light (entry 18443, spell 1120271), cannot be removed: the next build check would grant it again, so removeentry refuses it and the spell stays. The scenario teaches it with addentry first, since a level 10 Hero does not yet qualify for it."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "gm", "name": "Gmlearner", "race": 1, "class": 10, "level": 10, "security": 2},
+    {"id": "player", "name": "Plainhero", "race": 1, "class": 10, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "set_money", "actor": "gm", "value": 1000},
+    {"action": "assert", "label": "SETUP: Improved Heroic Strike is not known", "actor": "gm", "metric": "knows_spell", "spell": 12664, "equals": 0},
+    {"action": "assert", "label": "SETUP: Mortal Strike is not known", "actor": "gm", "metric": "knows_spell", "spell": 12294, "equals": 0},
+    {"action": "snapshot", "label": "Known-entries packets before", "actor": "gm", "metric": "server_packets", "opcode": 1830, "save_as": "known_before"},
+
+    {"action": "command", "label": "(GM) Learn Improved Heroic Strike", "actor": "gm", "command": ".ca2 player addentry Gmlearner 40351"},
+    {"action": "assert", "label": "THE FIX: Improved Heroic Strike is learned at rank 3", "actor": "gm", "metric": "knows_spell", "spell": 12664, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Lower ranks are not kept alongside it", "actor": "gm", "metric": "knows_spell", "spell": 12282, "equals": 0},
+    {"action": "command", "label": "(GM) Learn the level-30 Mortal Strike at level 10", "actor": "gm", "command": ".ca2 player addentry Gmlearner 40362"},
+    {"action": "assert", "label": "THE FIX: Mortal Strike is learned past its level", "actor": "gm", "metric": "knows_spell", "spell": 12294, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The client is sent its known entries", "actor": "gm", "metric": "server_packets", "opcode": 1830, "relative_to": "known_before", "min": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Nothing was charged", "actor": "gm", "metric": "carried_money", "equals": 1000},
+
+    {"action": "command", "label": "(GM) Unlearn Improved Heroic Strike", "actor": "gm", "command": ".ca2 player removeentry Gmlearner 40351"},
+    {"action": "assert", "label": "THE FIX: Improved Heroic Strike is gone", "actor": "gm", "metric": "knows_spell", "spell": 12664, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Mortal Strike is kept", "actor": "gm", "metric": "knows_spell", "spell": 12294, "equals": 1},
+    {"action": "assert", "label": "Unlearning was free", "actor": "gm", "metric": "carried_money", "equals": 1000},
+    {"action": "command", "label": "Removing an entry the character does not know is refused", "actor": "gm", "command": ".ca2 player removeentry Gmlearner 40351", "rejected": true},
+    {"action": "command", "label": "(GM) Learn Judgement of Light, an automatic entry", "actor": "gm", "command": ".ca2 player addentry Gmlearner 18443"},
+    {"action": "assert", "label": "SETUP: Judgement of Light is known", "actor": "gm", "metric": "knows_spell", "spell": 1120271, "equals": 1, "within_ms": 2000},
+    {"action": "command", "label": "THE FIX: removing an automatically granted entry is refused", "actor": "gm", "command": ".ca2 player removeentry Gmlearner 18443", "rejected": true},
+    {"action": "assert", "label": "Judgement of Light is still known", "actor": "gm", "metric": "knows_spell", "spell": 1120271, "equals": 1, "within_ms": 1000},
+
+    {"action": "command", "label": "A player without GM security cannot use it", "actor": "player", "command": ".ca2 player addentry Plainhero 40362", "rejected": true},
+    {"action": "assert", "label": "The player did not learn Mortal Strike", "actor": "player", "metric": "knows_spell", "spell": 12294, "equals": 0, "within_ms": 1000}
+  ]
+}

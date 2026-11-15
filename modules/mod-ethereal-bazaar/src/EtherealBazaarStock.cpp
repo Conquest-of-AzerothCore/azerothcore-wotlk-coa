@@ -4,6 +4,7 @@
 
 #include "EtherealBazaar.h"
 
+#include "AscensionCosmeticPetTokens.h"
 #include "Configuration/Config.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
@@ -104,6 +105,10 @@ void BazaarStock::Load()
             continue;
         }
 
+        // A cosmetic pet token no class on this realm can use would only waste a rotation slot
+        if (!AscensionCosmeticPetTokens::AvailableOnRealm(e.item))
+            continue;
+
         _pool[static_cast<std::size_t>(e.band)].push_back(e);
     } while (result->NextRow());
 
@@ -129,7 +134,8 @@ void BazaarStock::Load()
             e.item = f[0].Get<uint32>();
             e.extendedCost = f[1].Get<uint32>();
             e.band = static_cast<BazaarBand>(std::min<uint8>(f[2].Get<uint8>(), BAZAAR_BAND_COUNT - 1));
-            _stock.push_back(e);
+            if (AscensionCosmeticPetTokens::AvailableOnRealm(e.item))
+                _stock.push_back(e);
         } while (saved->NextRow());
 
         ApplyToVendor();

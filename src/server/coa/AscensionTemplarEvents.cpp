@@ -71,9 +71,11 @@ class aura_ascension_templar_event : public AuraScript
         case 560648:
             return damage && melee && !periodic;
         case 680397:
-            return heal && !State(player).cooldowns.HasTimeUntilEvent(id);
+            return heal && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) &&
+                   !State(player).cooldowns.HasTimeUntilEvent(id);
         case 705298:
-            return heal && event.GetActionTarget() == player && !State(player).cooldowns.HasTimeUntilEvent(id);
+            return heal && event.GetActionTarget() == player && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) &&
+                   !State(player).cooldowns.HasTimeUntilEvent(id);
         case 801457:
             return heal && event.GetActionTarget() != player && player->IsInRaidWith(event.GetActionTarget());
         case 803158:
@@ -206,12 +208,9 @@ class aura_ascension_templar_event : public AuraScript
                 Cast(player, player, 807648);
             break;
         case 806516:
-            if (!player->HasAura(806517))
-            {
-                if (Aura* aura = player->GetAura(805390))
-                    aura->SetScriptValue(805390, std::max(0, aura->GetDuration()));
-                Cast(player, player, 805390);
-            }
+            if (Aura* aura = player->GetAura(805390))
+                aura->SetScriptValue(805390, std::max(0, aura->GetDuration()));
+            Cast(player, player, 805390);
             break;
         default:
             break;

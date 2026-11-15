@@ -1,0 +1,294 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Weapons stays active through a disarm (#10973)",
+  "contract": "Disarm (6713, cast by 51 creature smart scripts) disarms the main hand and the ranged slot. Bestial Might (801242) and Primal Might (704098) are non-passive weapon-dependent auras. The core kept them through a disarm only while no other equipped weapon was disarmed, so with a bow equipped the ranged-slot disarm removed the form once the main-hand weapon was disarmed and no off-hand weapon remained. Both forms now stay active while disarmed and after the disarm ends.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -1513.56,
+    "y": -3082.66,
+    "z": 91.67,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 31,
+      "level": 22
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 537218
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 197
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 264
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 37
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 12282
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 537218
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bestial Might is active with a one-handed weapon and a bow",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6713,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the weapon is disarmed",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 6713,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bestial Might survives the disarm",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6713,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Bestial Might is still active after the disarm ends",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a two-handed weapon replaces Bestial Might",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 537218
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Primal Might is active with a two-handed weapon and a bow",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 704098,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6713,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the weapon is disarmed",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 6713,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Primal Might survives the disarm",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 704098,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6713,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Primal Might is still active after the disarm ends",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 704098,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the one-handed weapon replaces Primal Might",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 704098,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 537218
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bestial Might is active with a lone one-handed weapon and a bow",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6713,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the weapon is disarmed",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 6713,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bestial Might survives the disarm",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6713,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Bestial Might is still active after the disarm ends",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    }
+  ]
+}

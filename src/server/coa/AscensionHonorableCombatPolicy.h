@@ -8,7 +8,8 @@ namespace HonorableCombat
 {
 constexpr unsigned WesternPlaguelands = 28;
 constexpr unsigned Winterspring = 618;
-constexpr std::array<std::uint32_t, 2> Zones = {WesternPlaguelands, Winterspring};
+constexpr unsigned UngoroCrater = 490;
+constexpr std::array<std::uint32_t, 3> Zones = {WesternPlaguelands, Winterspring, UngoroCrater};
 constexpr std::array<std::uint32_t, 4> WinCriteria = {15691, 15695, 21691, 21695};
 constexpr unsigned HonorableAura = 9930870;
 constexpr unsigned CombatAura = 9930871;

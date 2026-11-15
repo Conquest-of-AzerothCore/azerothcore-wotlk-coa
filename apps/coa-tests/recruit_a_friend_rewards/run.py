@@ -1,3 +1,4 @@
+import ipaddress
 from pathlib import Path
 import re
 import sqlite3
@@ -143,7 +144,84 @@ def main():
     check(db.execute(cycle_sql, (3, 6)).fetchone()[0] == 0, 'Unrelated root may join an existing chain')
     db.execute('UPDATE account SET recruiter=3 WHERE id=1')
     check(db.execute(cycle_sql, (3, 1)).fetchone()[0] == 1, 'Preexisting cycles terminate safely via UNION DISTINCT')
-    recovery = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::RecoverRecruitAFriendRewards(')
+    migration = (ROOT / 'data/sql/updates/pending_db_auth/zz_rev_20261106_01_raf_unlink_same_ip.sql').read_text()
+    selector = 'SELECT `recruit`.' + migration.split('SELECT `recruit`.', 1)[1].split(';', 1)[0]
+
+    def inet6_aton(value):
+        try:
+            return ipaddress.ip_address(value).packed
+        except ValueError:
+            return None
+
+    db.create_function('INET6_ATON', 1, inet6_aton)
+    db.create_function('CONCAT', 2, lambda left, right: left + right)
+    db.executescript("""
+        ALTER TABLE account ADD COLUMN last_ip TEXT;
+        ALTER TABLE account ADD COLUMN last_login INTEGER;
+        UPDATE account SET last_login=1, last_ip='192.0.2.1' WHERE id=1;
+        UPDATE account SET last_login=1, last_ip='::ffff:192.0.2.1' WHERE id=2;
+        UPDATE account SET last_login=1, last_ip='192.0.2.2' WHERE id=3;
+        UPDATE account SET last_ip='192.0.2.1' WHERE id=5;
+        INSERT INTO account VALUES
+            (7,'G',0,'0.0.0.0',1),(8,'H',7,'::ffff:0.0.0.0',1),
+            (9,'I',0,'2001:db8::1',1),(10,'J',9,'2001:0db8:0:0::1',1);
+    """)
+    blocked = sorted(db.execute(selector).fetchall())
+    check(blocked == [(2,), (10,)], 'Only authenticated links with matching concrete IPv4 or IPv6 addresses are selected')
+    check('DELETE `progress` FROM' in migration and 'DELETE `registration` FROM' in migration and
+          'SET `recruit`.`recruiter` = 0' in migration and '`raf_claims`' not in migration,
+          'Cleanup drops qualification and unlinks the recruit while preserving award receipts')
+    invite = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'bool WorldSession::InviteRecruitAFriend(')
+    accept = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'bool WorldSession::HandleRecruitAFriendInviteResponse(')
+    check(invite.index('LinkRecruitmentAddresses') < invite.index('SharedAddressHasFreeLink') <
+          invite.index('SendDynamicGossipMenu'),
+          'A full shared IP address is refused before prompting the recipient')
+    check(accept.index('LinkRecruitmentAddresses') < accept.index('LOGIN_UPD_RAF_RECRUITER'),
+          'Address policy is rechecked before persisting the link')
+    check(accept.index('LOGIN_UPD_RAF_RECRUITER') < accept.index('LOGIN_INS_RAF_LINKED_ACCOUNT') <
+          accept.index('AsyncCommitTransaction') and 'LOGIN_INS_RAF_ACCOUNT' not in accept and
+          'UPDATE raf_accounts' not in sql['LOGIN_INS_RAF_LINKED_ACCOUNT'],
+          'The shared address is written only with the registration row the link transaction creates')
+    links = sql['LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS']
+    check(links.split('SELECT COUNT(*)', 1)[1] in sql['LOGIN_UPD_RAF_RECRUITER'] and
+          'AND (? IS NULL OR shared.used < ?)' in sql['LOGIN_UPD_RAF_RECRUITER'],
+          'The link update counts shared-address links with the same predicate as the invitation check')
+    db.executescript("""
+        ALTER TABLE raf_accounts ADD COLUMN shared_address TEXT;
+        UPDATE account SET recruiter=0 WHERE id=6;
+        INSERT OR IGNORE INTO raf_accounts(account_id, started_at) VALUES (2, 1), (3, 1), (5, 1), (6, 1);
+        UPDATE raf_accounts SET shared_address='::ffff:198.51.100.7' WHERE account_id IN (2, 3, 6);
+        UPDATE raf_accounts SET shared_address='::ffff:203.0.113.9' WHERE account_id=5;
+    """)
+    check(run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', ('::ffff:198.51.100.7',)).fetchone()[0] == 2,
+          'Only linked accounts count toward their shared IP address')
+    check(run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', ('::ffff:203.0.113.9',)).fetchone()[0] == 1,
+          'Each shared IP address has its own link count')
+    check(run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', (None,)).fetchone()[0] == 0,
+          'Links between different IP addresses never count')
+
+    def shared_address(account):
+        row = db.execute('SELECT shared_address FROM raf_accounts WHERE account_id=?', (account,)).fetchone()
+        return row[0] if row else 'missing'
+
+    run('LOGIN_INS_RAF_LINKED_ACCOUNT', (None, 2, 1))
+    check(shared_address(2) == '::ffff:198.51.100.7' and
+          run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', ('::ffff:198.51.100.7',)).fetchone()[0] == 2,
+          'A stale different-address acceptance keeps the existing link counted against its shared address')
+    run('LOGIN_INS_RAF_LINKED_ACCOUNT', ('::ffff:203.0.113.9', 4, 2))
+    check(shared_address(4) == '::ffff:203.0.113.9' and
+          run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', ('::ffff:203.0.113.9',)).fetchone()[0] == 2,
+          'A new shared-address link registers its address')
+    run('LOGIN_INS_RAF_LINKED_ACCOUNT', ('::ffff:198.51.100.7', 8, 1))
+    check(shared_address(8) == 'missing', 'No registration is written for an account linked to another recruiter')
+    update = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::UpdateRecruitAFriendRewards(')
+    check('bool const linked = recruiterId || isRecruiter;' in update and
+          '(!force || !linked) && now < _rafRewardsNextUpdate' in update and
+          '(linked ? LinkedRewardInterval : UnlinkedRecoveryInterval)' in update,
+          'Unlinked account saves respect recovery backoff while linked accounts can checkpoint progress')
+    check(update.rstrip().endswith('RecoverRecruitAFriendRewards();\n    RecoverRecruitAFriendRewards(true);\n}'),
+          'Both reward classes still get recovery after the last link is removed')
+    recovery = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::DeliverRecruitAFriendRewards(')
     mail_rows = method('src/server/game/Mails/Mail.cpp', 'StagedMail MailDraft::AppendMailRows(')
     new_item = method('src/server/game/Entities/Item/Item.cpp', 'void Item::SaveToDB(')
     check('CharacterDatabase.DirectCommitTransaction(trans)' in recovery and 'StageMailTo(trans' in recovery,

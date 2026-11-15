@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Stay a While: Aliscar Lend lifts the listener to the gatehouse tower and back (#8800)",
+  "contract": "Quest 1660060 Stay a While needs one credit of 162921. Aliscar Lend 162806 (SmartAI, gossip menu 85190) offers option 0 \"I have a moment. Tell me about Goldshire.\" only while the quest is taken (conditions 15/85190/0, type 9). Selecting it runs the linked chain 162806 id 0-4: close gossip, hide the option, cast 267032, teleport the invoker to map 0 (-9408.46, -7.11, 78.219), the gatehouse tower top, and start actionlist 16280600. That actionlist talks for about 60 s, gives the invoker kill credit 162921 (id 7) and teleports the invoker back to (-9399.9, -12.9, 62.243) (id 8). Expected: within seconds of the choice the listener stands on the tower top (z 76-80, x near -9408) on map 0; after the talk the quest objective is complete and the listener is back near z 62. Client rendering and the talk lines are not tested.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9397.41, "y": -12.37, "z": 62.13, "o": 0 },
+  "players": [
+    { "id": "listener", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "aliscar", "owner": "listener", "entry": 162806, "distance": 2, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Stay a While", "actor": "listener", "quest": 1660060, "complete": false },
+    { "action": "gossip_hello", "label": "Talk to Aliscar Lend", "actor": "listener", "target": "aliscar" },
+    { "action": "gossip_select", "label": "Ask about Goldshire", "actor": "listener", "option": 0 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "The listener stays on map 0", "actor": "listener", "metric": "map_id", "equals": 0 },
+    {
+      "action": "assert", "label": "The listener stands on the gatehouse tower top", "actor": "listener",
+      "metric": "position_z", "min": 76, "max": 80
+    },
+    {
+      "action": "assert", "label": "The listener is at the tower's x", "actor": "listener",
+      "metric": "position_x", "min": -9412, "max": -9404
+    },
+    { "action": "wait", "label": "Let Aliscar finish his story", "ms": 65000 },
+    {
+      "action": "assert", "label": "The story credits the quest objective", "actor": "listener",
+      "metric": "quest_objective_count", "quest": 1660060, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The listener is back beside Aliscar", "actor": "listener",
+      "metric": "position_z", "min": 60, "max": 65
+    }
+  ]
+}

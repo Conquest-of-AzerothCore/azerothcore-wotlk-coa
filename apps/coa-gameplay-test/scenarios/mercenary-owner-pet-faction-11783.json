@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "A Mercenary receives its own pet with its race faction (#11783)",
+  "contract": "Issue #11783. The client colours and offers interaction from UNIT_FIELD_FACTIONTEMPLATE. Mercenary for Hire! sets the player and its controlled units to the Outlaw faction 1163, which is hostile to every race faction, and the patch sent to the Mercenary replaced the faction only for the player itself, so the Mercenary saw its own pets as enemies. An Orc Primalist under a PvP ruleset casts Mercenary for Hire! and then Spirits of Life: the Mercenary must receive the spirit with its Orc faction 2, while a High-Risk Orc viewer still receives the Outlaw faction 1163.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "merc",
+      "race": 2,
+      "class": 31,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "foe",
+      "race": 2,
+      "class": 31,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "merc",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "merc",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "merc",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "merc",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "foe",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "foe",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "foe",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "foe",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mercenary for Hire! is active",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "merc",
+      "spell": 572853
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 572853
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Spirits of Life summons a Spirit of Life",
+      "actor": "merc",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Mercenary receives its own spirit with its Orc race faction",
+      "actor": "merc",
+      "metric": "owned_creature_sent_faction",
+      "entry": 840002,
+      "target": "merc",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a High-Risk viewer still receives the spirit with the Outlaw faction",
+      "actor": "merc",
+      "metric": "owned_creature_sent_faction",
+      "entry": 840002,
+      "target": "foe",
+      "equals": 1163,
+      "within_ms": 3000
+    }
+  ]
+}

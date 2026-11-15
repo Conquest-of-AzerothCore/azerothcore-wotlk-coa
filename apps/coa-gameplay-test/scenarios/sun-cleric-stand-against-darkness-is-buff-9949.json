@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Stand Against Darkness is shown as a buff, not a debuff (#9949)",
+  "contract": "Talent 707078 keeps the self-applied helper 707768 alive during the day. The helper boosts the Sun Cleric's own damage, so the server applies it as a positive aura and the client lists it among the buffs.",
+  "timeout_ms": 60000,
+  "hour": 12,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 707078 },
+    {
+      "action": "assert", "label": "SETUP: the helper is applied", "actor": "cleric",
+      "metric": "aura", "spell": 707768, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The helper is applied as a buff", "actor": "cleric",
+      "metric": "aura_positive", "spell": 707768, "equals": 1
+    }
+  ]
+}

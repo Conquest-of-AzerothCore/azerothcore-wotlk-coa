@@ -14,7 +14,23 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 using Guid = uint32;
 struct ObjectGuid { using LowType = uint32; uint32 value; uint32 GetCounter() const { return value; } operator uint32() const { return value; } };
-namespace ManastormModuleConfig { bool enabled = true; uint32 cap = 5; bool WeeklyCacheLockoutEnabled() { return enabled; } uint32 WeeklyCacheLockoutLimit() { return cap; } }
+namespace ManastormModuleConfig
+{
+    bool enabled = true;
+    uint32 cap = 5;
+    bool WeeklyCacheLockoutEnabled() { return enabled; }
+    uint32 WeeklyCacheLockoutLimit() { return cap; }
+    uint32 CoATokenCap() { return 1000; }
+}
+namespace ManastormCoALoot
+{
+    constexpr uint32 TokenItem = 975001;
+    uint32 Remaining(uint32 earned, uint32 cap) { return earned < cap ? cap - earned : 0; }
+}
+struct ManastormCoATokenState
+{
+    struct { uint32 Start = 0, End = 0, Earned = 0; } Window;
+};
 namespace ManastormLimits { constexpr uint32 MaxMembers = 5; }
 constexpr uint32 CONFIG_MAX_PLAYER_LEVEL = 0;
 using Seconds = std::chrono::seconds;
@@ -113,6 +129,8 @@ struct ManastormRewards {
     struct PotentialReward { uint32 ItemEntry; bool Enabled = true; };
     std::vector<PotentialReward> _potentialRewards = {{97884,true},{1478052,true}};
     uint32 GetActiveGameModeMask(uint32) const { return 0; }
+    bool IsCoALootMode(uint32) const { return false; }
+    bool LoadCoATokenState(uint32, ManastormCoATokenState&) const { return false; }
     std::vector<ManastormRewardVisibilityRecord> BuildVisibilityRecords(ObjectGuid::LowType,bool,uint32 = 0) const;
     bool LoadWeeklyCacheAllowance(ObjectGuid::LowType, ManastormWeeklyCacheAllowance&) const;
     bool PrepareNormalCacheReward(ObjectGuid::LowType,bool, ManastormRewardStateSnapshot const&,

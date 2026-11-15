@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: every Cache of the Blood God opens into one of Hakkar's own items, never the Heart",
+  "contract": [
+    "Hakkar's Cache of the Blood God (Normal 1400023, Heroic 1400039, Mythic 2400039, Ascended 2500039) gives",
+    "everyone one of Hakkar's own items for its tier; it never holds the Heart of Hakkar, a one-per-run world buff",
+    "item (tester, live, 2026-11-04). Before, none of the four had loot, so they could not be opened. Each hero",
+    "opens one cache, two by using it and two through the open packet: the cache is used up and exactly one item",
+    "of its loot is in the bags."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "normal",
+      "item": 1400023,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "heroic",
+      "item": 1400039,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "mythic",
+      "item": 2400039,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ascended",
+      "item": 2500039,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal hero holds the cache",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 1400023,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal hero holds none of its items yet",
+      "actor": "normal",
+      "metric": "carried_pool_item_count",
+      "cache": 1400023,
+      "table": "loot",
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "Use the Normal cache",
+      "actor": "normal",
+      "item": 1400023,
+      "spell": 93461
+    },
+    {
+      "action": "use_item",
+      "label": "Use the Heroic cache",
+      "actor": "heroic",
+      "item": 1400039,
+      "spell": 93461
+    },
+    {
+      "action": "open_item",
+      "label": "Open the Mythic cache",
+      "actor": "mythic",
+      "item": 2400039
+    },
+    {
+      "action": "open_item",
+      "label": "Open the Ascended cache",
+      "actor": "ascended",
+      "item": 2500039
+    },
+    {
+      "action": "assert",
+      "label": "The Normal cache is used up",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 1400023,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It gave one of Hakkar's Normal items",
+      "actor": "normal",
+      "metric": "carried_pool_item_count",
+      "cache": 1400023,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Heroic cache is used up",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 1400039,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It gave one of Hakkar's Heroic items",
+      "actor": "heroic",
+      "metric": "carried_pool_item_count",
+      "cache": 1400039,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Mythic cache is used up",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 2400039,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It gave one of Hakkar's Mythic items",
+      "actor": "mythic",
+      "metric": "carried_pool_item_count",
+      "cache": 2400039,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Ascended cache is used up",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 2500039,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It gave one of Hakkar's Ascended items",
+      "actor": "ascended",
+      "metric": "carried_pool_item_count",
+      "cache": 2500039,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No cache gave a Heart of Hakkar",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 19802,
+      "equals": 0
+    }
+  ]
+}

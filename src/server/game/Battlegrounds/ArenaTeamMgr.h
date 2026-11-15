@@ -38,6 +38,8 @@ public:
     ArenaTeam* GetArenaTeamByCaptain(ObjectGuid guid) const;
     ArenaTeam* GetArenaTeamByName(std::string const& arenaTeamName, const uint32 type) const;
     ArenaTeam* GetArenaTeamByCaptain(ObjectGuid guid, const uint32 type) const;
+    bool IsCaptainOfTeamWithOtherMembers(ObjectGuid guid) const;
+    void DisbandSoloTeamsOfCaptain(ObjectGuid guid);
 
     void LoadArenaTeams();
     void AddArenaTeam(ArenaTeam* arenaTeam);

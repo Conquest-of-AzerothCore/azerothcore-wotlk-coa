@@ -64,6 +64,7 @@
 
 #include "Bag.h"
 #include "CellImpl.h"
+#include "DataMap.h"
 #include "DatabaseEnv.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
@@ -72,6 +73,7 @@
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "Item.h"
+#include "Log.h"
 #include "LootMgr.h"
 #include "Map.h"
 #include "ObjectGuid.h"
@@ -92,6 +94,25 @@ namespace
 // ScriptName on gameobject_template and gameobject rows of every pickup.
 constexpr char const* WorldforgedPickupScript = "worldforged_pickup";
 constexpr char const* WorldforgedLootTable = "character_worldforged_loot";
+std::string const PendingWorldforgedSavesKey = "worldforged_pending_loot_saves";
+
+struct PendingWorldforgedSaves final : DataMap::Base
+{
+    struct Claim
+    {
+        uint32 Entry;
+        ObjectGuid ItemGuid;
+        bool NewItem;
+    };
+
+    std::unordered_map<uint32, Claim> BySpawn;
+};
+
+void AppendWorldforgedClaim(CharacterDatabaseTransaction const& trans, uint32 characterGuid, uint32 spawnId, uint32 entry)
+{
+    trans->Append("INSERT IGNORE INTO `{}` (`guid`, `spawn_id`, `entry`) VALUES ({}, {}, {})",
+        WorldforgedLootTable, characterGuid, spawnId, entry);
+}
 
 [[nodiscard]] bool IsWorldforgedPickup(GameObject const* go)
 {
@@ -155,9 +176,7 @@ public:
     // together: item_instance, character_inventory and the ledger row commit as one. The
     // item is still ITEM_NEW here - nothing has written it yet, because it is only flushed
     // with the next character save - so these are exactly the writes Player::_SaveInventory
-    // would make, moved to the moment of the award. If the transaction fails, the pickup
-    // stays unclaimed and the character can loot it again, which is the survivable outcome;
-    // a ledger row on its own would mark the pickup spent and lose the item instead.
+    // would make, moved to the moment of the award.
     void Claim(Player* player, Item* item, uint32 spawnId, uint32 entry)
     {
         uint32 const characterGuid = player->GetGUID().GetCounter();
@@ -184,13 +203,20 @@ public:
         // SaveToDB marks the item ITEM_UNCHANGED but leaves its pointer in the player's update queue.
         // Any later change (sold, destroyed, stacked) would queue it a second time, and the next
         // character save would then delete it on the first entry and read freed memory on the second.
+        ItemUpdateState const state = item->GetState();
         item->RemoveFromUpdateQueueOf(player);
         item->SaveToDB(trans);                              // item_instance, then ITEM_UNCHANGED
 
-        trans->Append("INSERT IGNORE INTO `{}` (`guid`, `spawn_id`, `entry`) VALUES ({}, {}, {})",
-                      WorldforgedLootTable, characterGuid, spawnId, entry);
+        AppendWorldforgedClaim(trans, characterGuid, spawnId, entry);
+        if (CharacterDatabase.AsyncCommitTransaction(trans).m_future.get())
+            return;
 
-        CharacterDatabase.AsyncCommitTransaction(trans).m_future.get();
+        item->SetState(state == ITEM_NEW ? ITEM_NEW : ITEM_CHANGED, player);
+        player->CustomData.GetDefault<PendingWorldforgedSaves>(PendingWorldforgedSavesKey)
+            ->BySpawn.try_emplace(spawnId, PendingWorldforgedSaves::Claim{entry, item->GetGUID(), state == ITEM_NEW});
+        player->AdditionalSavingAddMask(ADDITIONAL_SAVING_INVENTORY_AND_GOLD);
+        LOG_ERROR("module.worldforged", "Pickup {} for character {} failed to save. Queued with inventory saves.",
+            spawnId, characterGuid);
     }
 
 private:
@@ -345,7 +371,7 @@ public:
     worldforged_pickup_lifecycle() : PlayerScript("worldforged_pickup_lifecycle",
         {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM,
             PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_MASTER_LOOT_ITEM,
-            PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED}) { }
+            PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED, PLAYERHOOK_ON_SAVE_INVENTORY}) { }
 
     // Early enough that no gameobject has been sent to this client yet.
     void OnPlayerLoadFromDB(Player* player) override
@@ -356,6 +382,21 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
+    }
+
+    void OnPlayerSaveInventory(Player* player, CharacterDatabaseTransaction trans) override
+    {
+        auto const* pending = player->CustomData.Get<PendingWorldforgedSaves>(PendingWorldforgedSavesKey);
+        if (!pending)
+            return;
+
+        uint32 const characterGuid = player->GetGUID().GetCounter();
+        for (auto const& [spawnId, claim] : pending->BySpawn)
+        {
+            if (Item* item = player->GetItemByGuid(claim.ItemGuid))
+                item->SetState(claim.NewItem ? ITEM_NEW : ITEM_CHANGED, player);
+            AppendWorldforgedClaim(trans, characterGuid, spawnId, claim.Entry);
+        }
     }
 
     void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans) override
@@ -369,6 +410,7 @@ public:
         if (!player)
             return;
 
+        player->CustomData.Erase(PendingWorldforgedSavesKey);
         WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
         if (!player->IsInWorld())
             return;

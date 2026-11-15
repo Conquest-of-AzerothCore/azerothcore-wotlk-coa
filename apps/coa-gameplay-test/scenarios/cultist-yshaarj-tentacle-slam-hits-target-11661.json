@@ -1,0 +1,438 @@
+{
+  "schema": 1,
+  "name": "Every Tentacle of Y'shaarj slams the target it is summoned beside (#11661)",
+  "contract": "Tentacle of Y'shaarj 802044 summons creature 50096, which slams once with 802046 in a 24 degree frontal cone when summoned and whenever Gaze of C'thun is used. The report says that summoning it repeatedly beside an aggroed mob that has closed in often deals no damage. An aggressive mob walks up and fights the cultist, eight tentacles are summoned in a row, and each one must lower the mob's health; only a tentacle slam can, because the cultist never attacks.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 30,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "cultist",
+      "entry": 36,
+      "level": 30,
+      "health": 1000000,
+      "distance": 8,
+      "reaction": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the cultist alive while the mob swings",
+      "actor": "cultist",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the aggroed mob closes to melee range",
+      "actor": "cultist",
+      "metric": "distance_2d",
+      "target": "mob",
+      "max": 5,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the mob is attacking the cultist",
+      "actor": "cultist",
+      "metric": "melee_attacks_taken",
+      "target": "mob",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 1",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_1"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 1",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 1 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 1 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_1",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 2",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_2"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 2",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 2 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 2 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_2",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 3",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_3"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 3",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 3 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 3 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_3",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 4",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_4"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 4",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 4 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 4 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_4",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 5",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_5"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 5",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 5 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 5 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_5",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 6",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_6"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 6",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 6 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 6 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_6",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 7",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_7"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 7",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 7 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 7 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_7",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Refill mana before summon 8",
+      "actor": "cultist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "health",
+      "save_as": "health_8"
+    },
+    {
+      "action": "cast",
+      "label": "Summon tentacle 8",
+      "actor": "cultist",
+      "spell": 802044
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: summon 8 cast accepted",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 802044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: tentacle 8 slams the mob",
+      "actor": "mob",
+      "metric": "health",
+      "relative_to": "health_8",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the tentacle settle",
+      "ms": 2000
+    }
+  ]
+}

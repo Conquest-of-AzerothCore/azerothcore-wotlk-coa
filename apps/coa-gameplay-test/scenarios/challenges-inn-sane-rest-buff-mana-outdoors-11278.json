@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Inn-Sane: the Rest buff from drinking restores no mana outside a rest area",
+  "contract": "Issue #11278. Drinking applies Rest 818011, whose OBS_MOD_POWER tick restores a percentage of maximum mana. Inn-Sane's NO_MANA_REGENERATION_UNLESS_RESTED rule must hold that tick as it holds the drink itself, so a trial character drinking outdoors keeps its mana. The trial character is level 59 because reaching the level-60 cap completes the trial. A level 60 character without the trial drinking at the same spot regains mana, and the trial character regains mana after entering the Goldshire inn through its real area trigger.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053
+  },
+  "players": [
+    { "id": "trial", "race": 1, "class": 25, "level": 1 },
+    { "id": "control", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "start_challenge", "actor": "trial", "challenge": 76, "level": 1 },
+    { "action": "assert", "actor": "trial", "metric": "challenge_start_code", "label": "Inn-Sane activates", "equals": 0, "within_ms": 3000 },
+    { "action": "set_level", "actor": "trial", "value": 59 },
+    { "action": "assert", "actor": "trial", "metric": "aura", "spell": 93149, "equals": 1, "label": "Inn-Sane stays active at level 59, one below the level-60 cap that completes it" },
+    { "action": "assert", "actor": "trial", "metric": "resting", "label": "trial starts outdoors", "equals": 0 },
+    { "action": "add_item", "actor": "trial", "item": 159, "count": 3 },
+    { "action": "add_item", "actor": "control", "item": 159, "count": 3 },
+    { "action": "set_power", "actor": "trial", "power": 0, "value": 100 },
+    { "action": "set_power", "actor": "control", "power": 0, "value": 100 },
+    { "action": "use_item", "actor": "trial", "item": 159, "spell": 430 },
+    { "action": "use_item", "actor": "control", "item": 159, "spell": 430 },
+    { "action": "assert", "actor": "trial", "metric": "aura", "spell": 818011, "equals": 1, "label": "drinking applies Rest to the trial character", "within_ms": 3000 },
+    { "action": "assert", "actor": "control", "metric": "aura", "spell": 818011, "equals": 1, "label": "drinking applies Rest to the control", "within_ms": 3000 },
+    { "action": "wait", "ms": 6100 },
+    { "action": "assert", "actor": "trial", "metric": "aura", "spell": 818011, "equals": 1, "label": "Rest is still ticking on the trial character" },
+    { "action": "assert", "actor": "trial", "metric": "power", "power": 0, "equals": 100, "label": "Inn-Sane keeps outdoor mana while drinking and resting" },
+    { "action": "assert", "actor": "control", "metric": "power", "power": 0, "min": 101, "label": "control regains mana from the same drink outdoors" },
+    { "action": "cancel_aura", "actor": "trial", "spell": 430 },
+    { "action": "cancel_aura", "actor": "trial", "spell": 818011 },
+    { "action": "teleport", "actor": "trial", "map": 0, "x": -9483.25, "y": -17.9883, "z": 56.9634 },
+    { "action": "area_trigger", "actor": "trial", "id": 562 },
+    { "action": "assert", "actor": "trial", "metric": "resting", "label": "Goldshire inn trigger grants rest", "equals": 1, "within_ms": 3000 },
+    { "action": "set_power", "actor": "trial", "power": 0, "value": 100 },
+    { "action": "use_item", "actor": "trial", "item": 159, "spell": 430 },
+    { "action": "assert", "actor": "trial", "metric": "aura", "spell": 818011, "equals": 1, "label": "drinking in the inn applies Rest", "within_ms": 3000 },
+    { "action": "wait", "ms": 6100 },
+    { "action": "assert", "actor": "trial", "metric": "power", "power": 0, "min": 101, "label": "Inn-Sane allows mana from drinking in a rest area" },
+    { "action": "stop_challenge", "actor": "trial", "challenge": 76 }
+  ]
+}

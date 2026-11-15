@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Spirit Glaive hits an enemy 38 degrees off the Witch Doctor's facing (#8914)",
+  "contract": [
+    "Every Spirit Glaive rank (806289, 680906, 562715-562719) targets TARGET_UNIT_CONE_ENEMY_24 with a 30 yd radius.",
+    "Without a spell_cone row the core read the enum suffix as 24 degrees (+/-12), so enemies inside the client's",
+    "90 degree cone marker (ConeSplat_Static_90d_30yd) were skipped, as #8914 reports. The first-rank spell_cone row",
+    "restores 90 degrees (+/-45) for the chain, as for Flames of Xoroth, Dreadwake and Dawnbreak. The harness places",
+    "the target only along +x, so the doctor turns in place. Expected: the target straight ahead and 38 degrees off",
+    "the facing (outside 24, inside 90) receives the glaive debuff; at 60 degrees off it does not."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "doctor", "race": 1, "class": 13, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "target", "owner": "doctor", "entry": 14023, "faction": 14, "level": 80, "health": 1000000, "distance": 8,
+     "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "doctor", "spell": 806289},
+    {"action": "add_item", "actor": "doctor", "item": 2504},
+    {"action": "equip", "label": "Bow for the glaive's ranged-weapon requirement", "actor": "doctor", "item": 2504,
+     "slot": 17},
+    {"action": "wait", "label": "Let the equipment settle", "ms": 1500},
+
+    {"action": "cast", "label": "CONTROL: Spirit Glaive facing the target", "actor": "doctor", "spell": 806289},
+    {"action": "assert", "label": "CONTROL: a target straight ahead receives the glaive debuff", "actor": "target",
+     "metric": "aura", "spell": 806289, "caster": "doctor", "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "The debuff expires", "actor": "target", "metric": "aura", "spell": 806289,
+     "caster": "doctor", "equals": 0, "within_ms": 7000},
+
+    {"action": "reset_cooldown", "actor": "doctor", "spell": 806289},
+    {"action": "teleport", "label": "Turn 38 degrees away from the target", "actor": "doctor", "map": 0,
+     "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0.6632},
+    {"action": "wait", "ms": 1000},
+    {"action": "cast", "label": "DISCRIMINATING: Spirit Glaive with the target 38 degrees off facing",
+     "actor": "doctor", "spell": 806289},
+    {"action": "assert", "label": "#8914: the 90 degree cone hits a target the 24 degree cone missed",
+     "actor": "target", "metric": "aura", "spell": 806289, "caster": "doctor", "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "The debuff expires", "actor": "target", "metric": "aura", "spell": 806289,
+     "caster": "doctor", "equals": 0, "within_ms": 7000},
+
+    {"action": "reset_cooldown", "actor": "doctor", "spell": 806289},
+    {"action": "teleport", "label": "Turn 60 degrees away from the target", "actor": "doctor", "map": 0,
+     "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 1.0472},
+    {"action": "wait", "ms": 1000},
+    {"action": "cast", "label": "CONTROL: Spirit Glaive with the target 60 degrees off facing", "actor": "doctor",
+     "spell": 806289},
+    {"action": "wait", "label": "Let the cast and the glaive's travel finish", "ms": 4000},
+    {"action": "assert", "label": "CONTROL: a target outside the 90 degree cone is not hit", "actor": "target",
+     "metric": "aura", "spell": 806289, "caster": "doctor", "equals": 0}
+  ]
+}

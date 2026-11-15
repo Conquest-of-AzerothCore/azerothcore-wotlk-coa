@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Templar Rituals pulls enemies within 15 yd to the Templar after Righteous Tempest (#10352)",
+  "contract": [
+    "Templar Rituals 520534 states that Righteous Tempest pulls enemies within 15 yds towards the caster. Pull 520695 carries ExcludeTargetAuraSpell 520694 (the 15 s re-pull limit), so the pull must be cast before the 520694 marker is applied.",
+    "An enemy 7 yd away must end within 3 yd of the Templar and carry 520694."
+  ],
+  "timeout_ms": 90000,
+  "players": [ { "id": "t", "race": 1, "class": 19, "level": 60, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 } ],
+  "creatures": [ { "id": "e", "owner": "t", "entry": 6, "level": 60, "health": 1000000, "distance": 7 } ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "t", "spell": 520534 },
+    { "action": "learn", "actor": "t", "spell": 805410 },
+    { "action": "add_item", "actor": "t", "item": 2495 },
+    { "action": "equip", "actor": "t", "item": 2495, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP Templar Rituals aura", "actor": "t", "metric": "aura", "spell": 520534, "equals": 1 },
+    { "action": "assert", "label": "SETUP enemy is away from the Templar", "actor": "t", "metric": "distance", "target": "e", "min": 6 },
+    { "action": "cast", "actor": "t", "spell": 805410, "target": "e" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP Righteous Tempest hit", "actor": "t", "metric": "spell_damage_count", "spell": 805410, "min": 1 },
+    { "action": "assert", "label": "Enemy carries the re-pull marker", "actor": "e", "metric": "aura", "spell": 520694, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING enemy was pulled to the Templar", "actor": "t", "metric": "distance", "target": "e", "max": 3 }
+  ]
+}

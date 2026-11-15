@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Vendors sell only the cosmetic pet tokens this realm's classes can use",
+  "contract": [
+    "Wardrobe cosmetic pet tokens follow their AppearanceCategories class mask: a Conquest of Azeroth realm, whose classes are 12-32, can use only Tamed Beast whistles (the Primalist), so Elemental Lodestones must not sell there.",
+    "Millhouse Manastorm (179538) sells the Doberman MK III whistle (532578) and the Bound Water Elemental lodestone (532579). The vendor list hides the lodestone on this realm and keeps the whistle; the purchase handler refuses it the same way, so a .reload npc_vendor cannot bring it back.",
+    "A Game Master in GM mode is shown every token, so they can also buy one: the lodestone is listed for them and the purchase goes through for its 500 Bedlam price."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "buyer", "race": 1, "class": 1, "level": 20},
+    {"id": "gm", "race": 1, "class": 1, "level": 20, "security": 2}
+  ],
+  "creatures": [
+    {"id": "millhouse", "owner": "buyer", "entry": 179538, "faction": 35, "level": 30, "distance": 2},
+    {"id": "gm_millhouse", "owner": "gm", "entry": 179538, "faction": 35, "level": 30, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Ask Millhouse for his goods", "actor": "buyer", "opcode": 414, "fields": [{"actor_guid": "millhouse"}], "consumed": false},
+    {"action": "assert", "label": "Millhouse opens his goods", "actor": "buyer", "metric": "vendor_list_packets", "min": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The Doberman MK III whistle is on sale", "actor": "buyer", "metric": "vendor_price", "item": 532578, "min": 0},
+    {"action": "assert", "label": "THE GATE: the Bound Water Elemental lodestone is not listed on a Conquest of Azeroth realm", "actor": "buyer", "metric": "vendor_price", "item": 532579, "equals": -1},
+    {"action": "console", "command": "reload npc_vendor"},
+    {"action": "wait", "ms": 1000},
+    {"action": "client_packet", "label": "Ask again after the vendor lists reload", "actor": "buyer", "opcode": 414, "fields": [{"actor_guid": "millhouse"}], "consumed": false},
+    {"action": "assert", "label": "Millhouse opens his goods again", "actor": "buyer", "metric": "vendor_list_packets", "min": 2, "within_ms": 2000},
+    {"action": "assert", "label": "THE GATE: the lodestone stays hidden after a reload", "actor": "buyer", "metric": "vendor_price", "item": 532579, "equals": -1},
+
+    {"action": "command", "label": "The Game Master turns GM mode on", "actor": "gm", "command": ".gm on"},
+    {"action": "client_packet", "label": "The Game Master asks Millhouse for his goods", "actor": "gm", "opcode": 414, "fields": [{"actor_guid": "gm_millhouse"}], "consumed": false},
+    {"action": "assert", "label": "Millhouse opens his goods for the Game Master", "actor": "gm", "metric": "vendor_list_packets", "min": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The Game Master is shown the lodestone", "actor": "gm", "metric": "vendor_extended_cost", "item": 532579, "equals": 4207},
+    {"action": "add_item", "actor": "gm", "item": 1297307, "count": 500},
+    {"action": "client_packet", "label": "The Game Master buys the lodestone", "actor": "gm", "opcode": 418, "consumed": false, "fields": [{"actor_guid": "gm_millhouse"}, {"u32": 532579}, {"vendor_slot": 532579}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "THE FIX: the Game Master can buy a token they are shown", "actor": "gm", "metric": "item_count", "item": 532579, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The Bedlam price is paid", "actor": "gm", "metric": "item_count", "item": 1297307, "equals": 0}
+  ]
+}

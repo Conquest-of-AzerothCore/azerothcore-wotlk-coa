@@ -1,6 +1,9 @@
 // mod-coa-challenges (review split): CoA.Challenges.Spells.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Pet.h"
 #include "TemporarySummon.h"
 #include "AscensionRulesets.h"
@@ -168,6 +171,18 @@ namespace CoAChallenges
                     summons.push_back(s);
         }
 
+        if (player->IsInWorld())
+        {
+            auto ownedSummon = [player](Creature* creature)
+            {
+                return creature->IsSummon() && GetPlayerOwner(creature) == player;
+            };
+            std::list<Creature*> wildSummons;
+            Acore::CreatureListSearcher<decltype(ownedSummon)> searcher(player, wildSummons, ownedSummon);
+            Cell::VisitObjects(player, searcher, player->GetVisibilityRange());
+            summons.insert(summons.end(), wildSummons.begin(), wildSummons.end());
+        }
+
         std::sort(summons.begin(), summons.end());
         summons.erase(std::unique(summons.begin(), summons.end()), summons.end());
         return summons;
@@ -216,6 +231,11 @@ namespace CoAChallenges
         if (player->IsInWorld() && CoAParse::ListContains(ChallengeRules(challengeID),
             "CHALLENGE_RULES_TYPE_PVE_ONLY") && !AscensionRulesets::Has(player, AscensionRulesets::Ruleset::PvE))
             AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::PvE);
+        if (player->IsInWorld() && IsTrialChallenge(challengeID)
+            && CoAParse::ListContains(ChallengeRules(challengeID), "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY")
+            && !AscensionRulesets::Has(player, AscensionRulesets::Ruleset::HighRisk)
+            && !AscensionRulesets::HighRiskSuspended(player))
+            AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::HighRisk, true);
         std::vector<Creature*> summons = GetPlayerSummons(player);
         for (uint32 spell : GetChallengeSpells(challengeID, level))
         {

@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Glorious Execution returns 5% of its damage as mana credited to Glorious Execution 807552 (#9590)",
+  "contract": [
+    "Glorious Execution 800626 reads 'regenerate mana equal to $807451s1% of the damage dealt'; 807451 effect 0 is bp 4 +",
+    "DieSides 1 = 5. Its mana-return spell 807552 'Glorious Execution' is SPELL_EFFECT_ENERGIZE ('Restores $807451s1% of",
+    "the damage dealt by Glorious Execution as mana'), and live combat logs credit every return to 807552. The server",
+    "granted the right amount from each main-hand (800691) or off-hand (802566) strike, but sent it as 504877 'Vow of",
+    "Grace' through the shared Mana() helper, so the combat log never showed Glorious Execution mana. With one polearm and",
+    "no off-hand weapon only the main-hand strike lands; its 807552 energize must be 5% of the damage (floored per hit)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000, "attack_power": 5000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "add_item", "actor": "cleric", "item": 4901 },
+    { "action": "equip", "label": "Test Polearm in the main hand", "actor": "cleric", "item": 4901, "slot": 15 },
+    { "action": "learn", "actor": "cleric", "spell": 800626 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "actor": "cleric", "spell": 800626, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Glorious Execution is accepted with a main-hand polearm",
+      "actor": "cleric", "metric": "cast_failure", "spell": 800626, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the main-hand strike lands",
+      "actor": "cleric", "metric": "spell_damage_count", "spell": 800691, "target": "dummy", "min": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let any off-hand strike and energize packets arrive", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: without an off-hand weapon no off-hand strike lands",
+      "actor": "cleric", "metric": "spell_damage_count", "spell": 802566, "target": "dummy", "equals": 0
+    },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_damage_total", "spell": 800691, "target": "dummy", "save_as": "strike_damage" },
+    {
+      "action": "assert", "label": "SETUP: the strike is large enough that per-hit flooring stays below 0.005",
+      "actor": "cleric", "metric": "spell_damage_total", "spell": 800691, "target": "dummy", "min": 200
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the mana return is credited to 807552 and equals 5% of the strike",
+      "actor": "cleric", "metric": "spell_energize_total", "spell": 807552, "power": 0,
+      "ratio_to": "strike_damage", "min": 0.045, "max": 0.0501
+    }
+  ]
+}

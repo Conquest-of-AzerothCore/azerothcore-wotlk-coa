@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Dungeon Diving: Heroic and Mythic dailies are on the Call Board and pay their dungeon's Callboard Cache",
-  "contract": "The Hero's Call Board (gameobject 402000, Stormwind) lists Heroic Dungeon Diving (81245) and Mythic Dungeon Diving (81246) in its PvE category for a level-60 Human; the Mythic quest's text sends the player to 'the Callboard in any major city'. Turning in Heroic Dungeon Diving pays 1500 Runes of Ascension (375250) and one Heroic Dungeon Callboard Cache (1615001); turning in Mythic Dungeon Diving pays 1500 runes and one Mythic Dungeon Callboard Cache (1615002). The caches are a CoA choice: no live source for either is known.",
+  "name": "Dungeon Diving: Heroic and Mythic dailies are on the Call Board and pay their dungeon's Callboard Cache and Bazaar Tokens",
+  "contract": "The Hero's Call Board (gameobject 402000, Stormwind) lists Heroic Dungeon Diving (81245) and Mythic Dungeon Diving (81246) in its PvE category for a level-60 Human; the Mythic quest's text sends the player to 'the Callboard in any major city'. Turning in Heroic Dungeon Diving pays 1500 Runes of Ascension (375250), one Heroic Dungeon Callboard Cache (1615001) and 30 Bazaar Tokens (975001); turning in Mythic Dungeon Diving pays 1500 runes, one Mythic Dungeon Callboard Cache (1615002) and 30 tokens. Each turn-in also pays the Ethereal Bazaar's random 0-6 tokens of any quest (EtherealBazaar.Tokens.Quest at default settings). The caches and the tokens are a CoA choice: no live source for either cache is known, and no live quest paid tokens.",
   "timeout_ms": 120000,
   "players": [
     {"id": "hero", "race": 1, "class": 1, "level": 60}
@@ -16,13 +16,17 @@
     {"action": "assert", "label": "and Mythic Dungeon Diving", "actor": "hero", "metric": "quest_menu_has", "quest": 81246, "equals": 1},
     {"action": "prepare_quest", "label": "Heroic Dungeon Diving is complete", "actor": "hero", "quest": 81245},
     {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_heroic"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_heroic"},
     {"action": "reward_quest", "label": "Turn in Heroic Dungeon Diving", "actor": "hero", "quest": 81245},
     {"action": "assert", "label": "It pays 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_heroic", "equals": 1500},
     {"action": "assert", "label": "and a Heroic Dungeon Callboard Cache", "actor": "hero", "metric": "item_count", "item": 1615001, "equals": 1},
+    {"action": "assert", "label": "and 30 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_heroic", "min": 30, "max": 36},
     {"action": "prepare_quest", "label": "Mythic Dungeon Diving is complete", "actor": "hero", "quest": 81246},
     {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_mythic"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_mythic"},
     {"action": "reward_quest", "label": "Turn in Mythic Dungeon Diving", "actor": "hero", "quest": 81246},
     {"action": "assert", "label": "It pays 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_mythic", "equals": 1500},
-    {"action": "assert", "label": "and a Mythic Dungeon Callboard Cache", "actor": "hero", "metric": "item_count", "item": 1615002, "equals": 1}
+    {"action": "assert", "label": "and a Mythic Dungeon Callboard Cache", "actor": "hero", "metric": "item_count", "item": 1615002, "equals": 1},
+    {"action": "assert", "label": "and 30 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_mythic", "min": 30, "max": 36}
   ]
 }

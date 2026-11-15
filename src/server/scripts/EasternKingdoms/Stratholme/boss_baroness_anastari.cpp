@@ -15,11 +15,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BossControlTargeting.h"
 #include "CreatureScript.h"
 #include "InstanceScript.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
+#include "SpellMgr.h"
 #include "TaskScheduler.h"
 #include "stratholme.h"
 
@@ -87,7 +89,7 @@ public:
         void SchedulePossession()
         {
             _scheduler.Schedule(20s, 30s, [this](TaskContext context){
-                if (Unit* possessTarget = SelectTarget(SelectTargetMethod::Random, 1, 0, true, false))
+                if (Unit* possessTarget = SelectTarget(SelectTargetMethod::Random, 1, BossControlTargetSelector(me, sSpellMgr->GetSpellInfo(SPELL_POSSESS), 0.0f, true, false, 0)))
                 {
                     DoCast(possessTarget, SPELL_POSSESS, true);
                     DoCast(possessTarget, SPELL_POSSESSED, true);

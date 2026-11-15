@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "name": "Path of Duality grants attack power from the higher of Strength and Agility and +75% spell power (#7029)",
+  "contract": [
+    "Path of Duality 129243: 'Granting you Attack Power equal to your Strength or Agility whichever is higher and",
+    "increases your Spell Power from items and effects by 75%.' Spell.dbc carries the helpers 820056 'Path of",
+    "Duality: Strength -> AP' (100% Strength to attack power) and 820057 'Path of Duality: Agility -> AP' (100%",
+    "Agility to melee and ranged attack power), 20 s each, driven by 129243's 15 s periodic dummy. Nothing applied",
+    "them, so the pretest saw +30 attack power instead of at least 100.",
+    "A level-60 human Hero has 105 Strength and 65 Agility (player_class_stats), so the Strength helper applies.",
+    "Ring 19147 gives 33 spell power, which Path of Intelligence turns into 66 (wildcard-path-of-intelligence-6690).",
+    "Expected: taking the path applies 820056 (not 820057) and adds at least 100 attack power; the ring then adds",
+    "57-58 spell power; leaving the path removes the helper and both bonuses.",
+    "Not asserted (no rate in any source): Intellect to melee/ranged crit and Agility to spell crit.",
+    "'Spell casts no longer reset your next auto attack': without the path a Shadow Bolt resets the idle swing timer (attack_timer_ms > 0 after the cast); with the path the timer stays at 0.",
+    "not resetting the swing timer.",
+    "The ring is equipped at the start: equipment changes are refused in combat, and the Shadow Bolt checks start combat."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "attack_power",
+      "save_as": "ap_before"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 686
+    },
+    {
+      "action": "learn",
+      "label": "Take Path of Duality (spell power check, out of combat)",
+      "actor": "hero",
+      "spell": 129243
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the path's stat buff is active",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820054,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "sp_path"
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 19147
+    },
+    {
+      "action": "equip",
+      "label": "Equip the ring before any combat",
+      "actor": "hero",
+      "item": 19147,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ring's 33 spell power counts 75% more",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "sp_path",
+      "min": 57,
+      "max": 58
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "sp_ring"
+    },
+    {
+      "action": "unlearn",
+      "label": "Leave the path for the swing-timer control",
+      "actor": "hero",
+      "spell": 129243
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the stat buff leaves with the path",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820054,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the path drops the spell power bonus",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "sp_ring",
+      "max": -24
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the swing timer is idle",
+      "actor": "hero",
+      "metric": "attack_timer_ms",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Shadow Bolt without the path",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shadow Bolt lands",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 686,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the path the cast reset the swing timer",
+      "actor": "hero",
+      "metric": "attack_timer_ms",
+      "min": 300
+    },
+    {
+      "action": "wait",
+      "label": "Let the swing timer run out",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the swing timer is idle again",
+      "actor": "hero",
+      "metric": "attack_timer_ms",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Take Path of Duality",
+      "actor": "hero",
+      "spell": 129243
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the path's stat buff is active",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820054,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Strength helper applies (Strength 105 > Agility 65)",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820056,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Agility helper does not",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820057,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: attack power rises by the higher stat (Strength 105)",
+      "actor": "hero",
+      "metric": "attack_power",
+      "relative_to": "ap_before",
+      "min": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 686
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Bolt with the path",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second Shadow Bolt lands",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 686,
+      "target": "enemy",
+      "min": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with the path the cast does not reset the swing timer",
+      "actor": "hero",
+      "metric": "attack_timer_ms",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Past the 20 s helper duration: the 15 s tick keeps it up",
+      "ms": 21000
+    },
+    {
+      "action": "assert",
+      "label": "The helper is still active after its own duration",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820056,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 129243
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the stat buff leaves with the path",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820054,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The attack power helper leaves with the path",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 820056,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the path drops the attack power",
+      "actor": "hero",
+      "metric": "attack_power",
+      "relative_to": "ap_before",
+      "max": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10,
+      "reaction": 0,
+      "stationary": true
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Nysoni's Blessing gives a Seraphim Seraphim's Light on Dawn (#11431)",
+  "contract": [
+    "Nysoni's Blessing (520639) grants a spec-dependent reward whenever Dawn (804584) activates; for the",
+    "Seraphim specialization (ChrSpecs 48, identity spell 92137 Angelic Presence) its tooltip names Seraphim's",
+    "Light (520641), a stamina/intellect/strength-scaling absorb shield. ActivateDawn gated the shield on the",
+    "obsolete spec passive 800586, which no current Seraphim owns, so Dawn granted nothing. A Seraphim with",
+    "Nysoni's Blessing must gain Seraphim's Light with a positive absorb amount when Dawn activates."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -8914.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and class synchronisation settle", "ms": 3000 },
+    { "action": "specialization", "label": "cleric takes the Seraphim specialization 48", "actor": "cleric", "id": 48 },
+    {
+      "action": "assert", "label": "The Seraphim identity spell Angelic Presence is known",
+      "actor": "cleric", "metric": "knows_spell", "spell": 92137, "equals": 1, "within_ms": 3000
+    },
+    { "action": "learn", "actor": "cleric", "spell": 520639 },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "set_aura", "label": "Fixture: Dawn requires 20 Solar Power (500149) to cast",
+      "actor": "cleric", "spell": 500149, "stacks": 20
+    },
+    {
+      "action": "set_aura", "label": "Fixture: Dawn's own CasterAuraSpell readiness marker",
+      "actor": "cleric", "spell": 704396, "stacks": 1
+    },
+    { "action": "cast", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "assert", "label": "Dawn is active",
+      "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Dawn grants the Seraphim Seraphim's Light",
+      "actor": "cleric", "metric": "aura", "spell": 520641, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Seraphim's Light absorbs at least its level-60 base",
+      "actor": "cleric", "metric": "aura_amount", "spell": 520641, "effect": 0, "min": 1000
+    }
+  ]
+}

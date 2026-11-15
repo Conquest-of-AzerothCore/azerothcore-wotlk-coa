@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "Ruin cast during Sargeras Embrace keeps its Felfury (#11080)",
+  "contract": [
+    "Sargeras Embrace 800355: 'For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.' Ruin 801895 is 'Consumes 2 Felfury' and costs 30 Energy.",
+    "Control: a plain Ruin from 4 Felfury lands and leaves 2, which proves the harness sees the Felfury consumption. During the channel the same Ruin must land and leave all 4 Felfury.",
+    "The Energy refund is not asserted: the channel drains Energy every second, so its net level is not a clean measure."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "channel",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "level": 80
+    },
+    {
+      "id": "dummy_channel",
+      "owner": "channel",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801895
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "learn",
+      "actor": "channel",
+      "spell": 801895
+    },
+    {
+      "action": "set_power",
+      "actor": "channel",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "channel",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "learn",
+      "actor": "channel",
+      "spell": 800355
+    },
+    {
+      "action": "cast",
+      "label": "Control: a plain Ruin",
+      "actor": "control",
+      "spell": 801895,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 801895,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: the plain Ruin hits",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 801895,
+      "target": "dummy_control",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Control: a plain Ruin consumes its two Felfury",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 2
+    },
+    {
+      "action": "cast",
+      "label": "Start Sargeras Embrace",
+      "actor": "channel",
+      "spell": 800355,
+      "target": "dummy_channel"
+    },
+    {
+      "action": "assert",
+      "actor": "channel",
+      "metric": "cast_failure",
+      "spell": 800355,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the channel settle",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "label": "Instant Ruin while channeling",
+      "actor": "channel",
+      "spell": 801895,
+      "target": "dummy_channel"
+    },
+    {
+      "action": "assert",
+      "actor": "channel",
+      "metric": "cast_failure",
+      "spell": 801895,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The channelled Ruin hits",
+      "actor": "channel",
+      "metric": "spell_damage_count",
+      "spell": 801895,
+      "target": "dummy_channel",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ruin cast during Sargeras Embrace refunds its two Felfury",
+      "actor": "channel",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 4
+    }
+  ]
+}

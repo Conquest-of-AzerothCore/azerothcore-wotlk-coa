@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Mar'li's Web Spray webs her victim in her spider form",
+  "contract": [
+    "The tester saw no target webbed by Mar'li's Web Spray. On live (combat logs of 2025-12 to 2026-08) Web Spray",
+    "(2118133) lands on 11 to 17 players at once, followed by its slow (2118134) and web (2118135). Its first",
+    "effect is an aura on an enemy target (implicit target 6) and its other two reach every enemy within 20 yards",
+    "(radius 9), so it is cast at her victim. In her spider form, which she takes below half health, Web Spray",
+    "comes 15 s after the change, so her victim must carry the Web Spray aura."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -12326.5,
+    "y": -1577.11,
+    "z": 133.588,
+    "o": 4.817,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14510,
+      "as": "marli",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage Mar'li",
+      "actor": "hero",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights the hero",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Web Spray in her troll form",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118133,
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Mar'li below half health",
+      "actor": "hero",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights in her spider form",
+      "actor": "marli",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Web Spray lands on her victim 15 s into the spider form",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118133,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survived the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

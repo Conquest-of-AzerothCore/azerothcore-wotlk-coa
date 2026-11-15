@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Wardrobe cosmetic pets summon a pet of every kind, keeping a pet of another kind in the stable",
+  "contract": [
+    "AppearanceCategories 33-37 are APPEARANCE_TYPE_COSMETIC_PET: Tamed Beast, Summoned Demon, Raised Undead, Tamed Elemental and Tamed Dragonkin, tiers 1-5. The client accepts a selection only when the player knows the tier's summon and dismiss spells (Extensions.dll FUN_100c1b40: a Hero needs 884/892 for demons, 885/893 for undead) and its category's class mask admits the class, then labels the button Summon Pet.",
+    "Only Tamed Beast whistles did anything; a Summoner's Stone recoloured a summoned Imp instead (#8201) and the other three kinds were saved and ignored.",
+    "Each kind now summons its token's creature as the pet. The player's pet of that kind is replaced; a pet of another kind goes to the stable."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {"id": "caller", "name": "Petcaller", "race": 1, "class": 10, "level": 20},
+    {"id": "raiser", "name": "Gravecaller", "race": 1, "class": 10, "level": 20},
+    {"id": "warrior", "name": "Stoneless", "race": 1, "class": 1, "level": 20},
+    {"id": "plain", "name": "Nodemon", "race": 1, "class": 10, "level": 20}
+  ],
+  "creatures": [
+    {"id": "stable_master", "owner": "caller", "entry": 6749, "faction": 12, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Petcaller"},
+    {"action": "console", "command": "coa gamemode WildCard on Gravecaller"},
+    {"action": "learn", "label": "Enslave Demon Abilities", "actor": "caller", "spell": 890},
+    {"action": "assert", "label": "SETUP: Summon Demon known", "actor": "caller", "metric": "knows_spell", "spell": 884, "equals": 1},
+    {"action": "assert", "label": "SETUP: Dismiss Demon known", "actor": "caller", "metric": "knows_spell", "spell": 892, "equals": 1},
+    {"action": "apply_appearances", "label": "Use the Subdued Mistress Summoner's Stone", "actor": "caller", "selection": {"34": 753}},
+    {"action": "assert", "label": "The stone is accepted", "actor": "caller", "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE FIX: the Subdued Mistress is the pet", "actor": "caller", "metric": "pet_entry", "equals": 45906, "within_ms": 5000},
+    {"action": "assert", "label": "A client appearance's pet keeps its family's name", "actor": "caller", "metric": "pet_name_is", "text": "Man'ari Eredar (Purple)", "equals": 1},
+    {"action": "assert", "label": "One pet row", "actor": "caller", "metric": "pet_rows", "equals": 1, "within_ms": 5000},
+    {"action": "set_money", "actor": "caller", "value": 100000},
+    {"action": "client_packet", "label": "Buy a stable slot", "actor": "caller", "opcode": 626, "fields": [{"actor_guid": "stable_master"}], "consumed": false},
+    {"action": "assert", "label": "SETUP: the slot is bought", "actor": "caller", "metric": "stable_result", "equals": 10},
+    {"action": "learn", "label": "Tame Beast Abilities", "actor": "caller", "spell": 965200},
+    {"action": "assert", "label": "SETUP: Call Pet known", "actor": "caller", "metric": "knows_spell", "spell": 883, "equals": 1},
+    {"action": "apply_appearances", "label": "Use the Forest Spider whistle with the demon out", "actor": "caller", "selection": {"33": 48864}},
+    {"action": "assert", "label": "THE FIX: the Forest Spider is the pet", "actor": "caller", "metric": "pet_entry", "equals": 30, "within_ms": 5000},
+    {"action": "assert", "label": "THE FIX: the demon went to the stable, not away", "actor": "caller", "metric": "stabled_pet_count", "equals": 1},
+    {"action": "assert", "label": "Two pet rows", "actor": "caller", "metric": "pet_rows", "equals": 2, "within_ms": 5000},
+    {"action": "apply_appearances", "label": "Use the Sneering Doomling Summoner's Stone with the beast out", "actor": "caller", "selection": {"34": 11736}},
+    {"action": "assert", "label": "THE FIX: the Sneering Doomling is the pet", "actor": "caller", "metric": "pet_entry", "equals": 41236, "within_ms": 5000},
+    {"action": "assert", "label": "The stabled demon was replaced and the beast stabled", "actor": "caller", "metric": "stabled_pet_count", "equals": 1},
+    {"action": "assert", "label": "Still two pet rows", "actor": "caller", "metric": "pet_rows", "equals": 2, "within_ms": 5000},
+    {"action": "learn", "label": "Dominate Undead Abilities", "actor": "raiser", "spell": 891},
+    {"action": "assert", "label": "SETUP: Raise Undead known", "actor": "raiser", "metric": "knows_spell", "spell": 885, "equals": 1},
+    {"action": "apply_appearances", "label": "Use a Blood Soaked Vellum whose creature only the client knows", "actor": "raiser", "selection": {"35": 47888}},
+    {"action": "assert", "label": "THE FIX: the undead pet is out", "actor": "raiser", "metric": "pet_entry", "equals": 143416, "within_ms": 5000},
+    {"action": "apply_appearances", "label": "A Warrior uses a Summoner's Stone", "actor": "warrior", "selection": {"34": 753}},
+    {"action": "assert", "label": "Summoned Demon pets are not offered to warriors", "actor": "warrior", "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS", "equals": 1, "within_ms": 2000},
+    {"action": "apply_appearances", "label": "A Hero without Summon Demon uses a Summoner's Stone", "actor": "plain", "selection": {"34": 753}},
+    {"action": "assert", "label": "It is refused", "actor": "plain", "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_PET_SUMMON_SPELL_NOT_LEARNED", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "and gives no pet", "actor": "plain", "metric": "pet_entry", "equals": 0}
+  ]
+}

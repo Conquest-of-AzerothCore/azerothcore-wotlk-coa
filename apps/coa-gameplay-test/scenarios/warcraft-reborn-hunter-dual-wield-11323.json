@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn: hunter trainers sell Dual Wield at level 20 and the off hand swings (#11323)",
+  "contract": [
+    "#11323: on Warcraft Reborn no warrior, hunter or rogue trainer listed Dual Wield. The Reborn trainer lists swapped",
+    "stock Dual Wield 674 for its Reborn copy 1100674, which has no SkillLineAbility row, and the client drops a trainer",
+    "row whose spell has none. The Reborn Hunter tree's own Dual Wield entry (CharacterAdvancement 18820) names 674.",
+    "A trainer spell keeps its stock id when the Reborn copy has no skill line, so the window offers 674 at level 20 for",
+    "22 silver (trainer 7), it can be bought, and the off-hand weapon swings."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8413.0, "y": 545.0, "z": 96.0, "o": 0 },
+  "players": [
+    { "id": "h", "name": "Dualhunter", "race": 3, "class": 3, "level": 20, "melee_hit_rating": 10000,
+      "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "ulfir", "owner": "h", "entry": 5516, "distance": 2, "faction": 35 },
+    { "id": "dummy", "owner": "h", "entry": 28168, "level": 20, "health": 2000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "money", "actor": "h", "copper": 100000 },
+    { "action": "gossip_hello", "actor": "h", "target": "ulfir" },
+    { "action": "gossip_select", "actor": "h", "option": 0 },
+    { "action": "assert", "label": "The trainer window opened", "actor": "h", "metric": "trainer_list_packets", "equals": 1,
+      "within_ms": 2000 },
+    { "action": "assert", "label": "THE FIX: the window offers stock Dual Wield as available at level 20", "actor": "h",
+      "metric": "trainer_window_state", "spell": 674, "equals": 0 },
+    { "action": "assert", "label": "THE FIX: the window holds no Reborn Dual Wield row the client would drop", "actor": "h",
+      "metric": "trainer_window_state", "spell": 1100674, "equals": -1 },
+    { "action": "trainer_buy", "label": "Buy Dual Wield", "actor": "h", "target": "ulfir", "spell": 674 },
+    { "action": "assert", "label": "Dual Wield is learned", "actor": "h", "metric": "knows_spell", "spell": 674, "equals": 1 },
+    { "action": "add_item", "actor": "h", "item": 25 },
+    { "action": "add_item", "actor": "h", "item": 2092 },
+    { "action": "equip", "label": "Worn Shortsword in the main hand", "actor": "h", "item": 25, "slot": 15 },
+    { "action": "equip", "label": "Worn Dagger in the off hand", "actor": "h", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "The dagger sits in the off hand", "actor": "h", "metric": "equipped_item", "slot": 16,
+      "equals": 2092 },
+    { "action": "snapshot", "actor": "h", "metric": "melee_attack_count", "hand": 1, "save_as": "oh" },
+    { "action": "attack", "actor": "h", "target": "dummy" },
+    { "action": "wait", "ms": 8000 },
+    { "action": "stop_attack", "actor": "h" },
+    { "action": "assert", "label": "THE FIX: the off hand swings", "actor": "h", "metric": "melee_attack_count", "hand": 1,
+      "relative_to": "oh", "min": 1 }
+  ]
+}

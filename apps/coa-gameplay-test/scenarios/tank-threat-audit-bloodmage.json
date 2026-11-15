@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Bloodmage Eternal tank threat audit: the health-cost spellmod misses most of the health-cost kit",
+  "contract": "Eternal Curse's Tank Stance Aura 807736 effect 2 (aura 108 ADD_PCT_MODIFIER, MiscValue 2 SPELLMOD_THREAT, +50%) carries SpellClassMask bits matching only Ravenous Strike 500123, Lunge 500126, Rotclaw 503476/804197, Sanguine Rupture 572907/800774 and Taldaram's Torment 800772 (family 26). Every one of those is PowerType Health (-2). Hematoma 803392 is also PowerType Health (-2), family 26, a direct-damage Shadow nuke with no spell_threat row and no classmask bit this aura targets, and -- unlike Blood Blast 500546 -- it carries no CasterAuraSpell/ExcludeCasterAuraSpell restriction, so it stays castable while the stance (which only exists inside Cursed Form 800157) is active: with the stance active, Ravenous Strike (matched) must show a materially higher threat_per_damage than Hematoma (unmatched), even though both 'cost health' per the tooltip. Blood Blast was dropped from this scenario: its ExcludeCasterAuraSpell is 802877, the Cursed Form marker 800157's OnAuraApply also casts, so Spell::CheckCast (src/server/game/Spells/Spell.cpp:5926-5927) always refuses it with SPELL_FAILED_CASTER_AURASTATE while any Cursed Form -- including the tank stance -- is active; it can never be compared against the stance at all, so it was not a valid representative of the classmask gap despite report B listing it. Hemorrhagic Shock 504702 carries the same 802877 exclusion and has the same problem; Bloodmoon Blast/Valanar's Vengeance exclude a different marker (524861, a non-Eternal Cursed Form) and remain castable here. Blood Howl 800782 (aura 11 MOD_TAUNT, implicit target 22 AoE around caster) must still apply its taunt aura to a nearby enemy.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bm",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ravenous_target",
+      "owner": "bm",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "hematoma_target",
+      "owner": "bm",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "howl_target",
+      "owner": "bm",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "bm", "spell": 800157, "stacks": 1 },
+    { "action": "assert", "label": "Tank Stance Aura is active", "actor": "bm",
+      "metric": "aura", "spell": 807736, "equals": 1, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "bm", "spell": 500123 },
+    { "action": "cast", "actor": "bm", "spell": 500123, "target": "ravenous_target" },
+    { "action": "assert", "label": "Ravenous Strike is cast", "actor": "bm",
+      "metric": "cast_failure", "spell": 500123, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "OK: Ravenous Strike (classmask-matched) gets the extra 50% threat on top of the stance",
+      "actor": "ravenous_target", "metric": "threat_per_damage", "target": "bm", "min": 5.0, "within_ms": 3000 },
+
+    { "action": "wait", "label": "Clear the shared GCD (category 133) left by Ravenous Strike before the next cast", "ms": 1600 },
+    { "action": "learn", "actor": "bm", "spell": 803392 },
+    { "action": "cast", "actor": "bm", "spell": 803392, "target": "hematoma_target" },
+    { "action": "assert", "label": "Hematoma is cast", "actor": "bm",
+      "metric": "cast_failure", "spell": 803392, "equals": 0, "within_ms": 2000 },
+    { "action": "assert",
+      "label": "WRONG: Hematoma also costs health but is missed by the same classmask, same gap as Blood Blast",
+      "actor": "hematoma_target", "metric": "threat_per_damage", "target": "bm", "max": 4.5, "within_ms": 3000 },
+
+    { "action": "wait", "label": "Clear the shared GCD left by Hematoma before the next cast", "ms": 1600 },
+    { "action": "learn", "actor": "bm", "spell": 800782 },
+    { "action": "cast", "actor": "bm", "spell": 800782, "target": "bm" },
+    { "action": "assert", "label": "Blood Howl is cast", "actor": "bm",
+      "metric": "cast_failure", "spell": 800782, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "OK: Blood Howl's AoE taunt applies to a nearby enemy",
+      "actor": "howl_target", "metric": "aura", "spell": 800782, "equals": 1, "within_ms": 2000 }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Hero Rock Barrier charges consume when the wearer takes damage (#11713)",
+  "contract": "#11713: Rock Barrier (280295) reads 'Lasts for $n attacks or $d. Expending a charge of Rock Barrier launches a Geode at the enemy.' Its Spell.dbc record has ProcCharges 10, ProcFlags 0 and EFFECT_2 SPELL_AURA_PROC_TRIGGER_SPELL (EffectTriggerSpell 280296, Geode). LoadSpellProcs only builds a default entry from a non-zero DBC ProcFlags, so without a `spell_proc` row the aura's charges could never be consumed, matching the report that the barrier only acts as a 10 second armor buff. rev_20261109_840_hero_rock_barrier_proc_11713.sql adds the row (PROC_FLAG_TAKEN_DAMAGE, as for Rock Barrier 503630). Gnomish Death Ray (13493, the self-damage fixture of primalist-5037-rock-barrier-geode.json) deals four Physical periodic ticks; with the row present at least one tick must consume a charge, dropping the remaining count below the DBC starting value of 10.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "hero", "spell": 280295 },
+    { "action": "cast", "label": "Raise Rock Barrier", "actor": "hero", "spell": 280295, "target": "hero" },
+    { "action": "wait", "ms": 200 },
+    { "action": "assert", "label": "control: Rock Barrier is up", "actor": "hero", "metric": "aura", "spell": 280295, "equals": 1 },
+    { "action": "assert", "label": "control: it starts at its DBC charge count", "actor": "hero", "metric": "aura_charges", "spell": 280295, "equals": 10 },
+    { "action": "set_health", "actor": "hero", "maximum": 1000000, "value": 1000000 },
+    { "action": "snapshot", "label": "charges before taking damage", "actor": "hero", "metric": "aura_charges", "spell": 280295, "save_as": "charges_before" },
+    { "action": "snapshot", "label": "health before taking damage", "actor": "hero", "metric": "health", "save_as": "health_before" },
+    { "action": "set_aura", "label": "Gnomish Death Ray: four Physical periodic ticks", "actor": "hero", "spell": 13493, "stacks": 1 },
+    { "action": "wait", "label": "let all four ticks resolve", "ms": 4600 },
+    { "action": "assert", "label": "control: the fixture actually dealt damage", "actor": "hero", "metric": "health", "relative_to": "health_before", "max": -1 },
+    { "action": "assert", "label": "at least one taken-damage tick consumed a Rock Barrier charge", "actor": "hero", "metric": "aura_charges", "spell": 280295, "relative_to": "charges_before", "max": -1 }
+  ]
+}

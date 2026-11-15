@@ -8,8 +8,8 @@
     "Sages, Grikkin Copperspring and the Halaa quartermasters. rev_20261008_05_remove_hall_quartermasters deletes",
     "the Legacy Armor, Legacy Weapon, Accessories and Jewelcrafting quartermasters of both halls, which Ascension",
     "does not have. Expected: in the world phase none of those entries is within 60 yards of its former spawn,",
-    "while Thorne 48053, Vik 48066, Korgash 49053 and Vik 49066 remain. Arena season event spawns are inactive",
-    "and are not measured."
+    "while Thorne 48053, Vik 48066, Korgash 49053 and Vik 49066 remain once their release-stage event 198 is",
+    "active. Arena season event spawns are inactive and are not measured."
   ],
   "timeout_ms": 240000,
   "location": {"map": 0, "x": -8777.0, "y": 414.1, "z": 104.4, "o": 0.0},
@@ -17,6 +17,7 @@
     {"id": "hero", "race": 1, "class": 1, "level": 60}
   ],
   "steps": [
+    {"action": "game_event", "event": 198, "active": true},
     {"action": "set_phase", "actor": "hero", "value": 1},
     {"action": "teleport", "actor": "hero", "map": 0, "x": -8777.0, "y": 414.1, "z": 104.4, "o": 0.0},
     {"action": "wait", "ms": 2000},

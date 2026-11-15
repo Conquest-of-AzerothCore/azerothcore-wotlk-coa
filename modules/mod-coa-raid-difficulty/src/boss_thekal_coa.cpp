@@ -14,7 +14,8 @@
  * into his tiger kit without being healed. As the other priests, at 50% he
  * drains the Avatar of Shirvallah (see LoaAvatar), taking ~1% damage while it
  * dies; then the Gift of the Blood God and his tiger form (Shredding Claws in
- * the log 0.3 seconds before the avatar's death).
+ * the log 0.3 seconds before the avatar's death). The tank keeps his threat
+ * through the change (the CoA logs of 2026-08-02 and 2026-08-24, 3 of 3 pulls).
  *
  *   Troll form
  *     Mortal Cleave    first 4s,  every 13s   cone in front, -25% healing taken
@@ -22,10 +23,14 @@
  *     Bloodlust        first 16s, every 30s   himself or a zealot
  *
  *   Tiger form (his Aspect of Shirvallah), when the avatar dies
- *     Rending Swipe    first 4s,  every 14s   cone in front, bleeds (Rip)
- *     War Stomp        first 12s, every 40s   50 yards, knocks back
- *     Speed Slash      first 14s, every 40s   runs through the raid for 8s,
- *                                             cutting everyone he passes
+ *     Rending Swipe    first 4s,  every 14s   cone in front
+ *     War Stomp        first 1s,  every 40s   on the tank, 50 yards, knocks back
+ *     Speed Slash      as each War Stomp's    runs through the raid for 17s,
+ *                      2s cast ends           to a new random player every 2s,
+ *                                             no melee meanwhile; each cut adds
+ *                                             a stack of Rip
+ *                      (both casts start 1 and 3s after Shredding Claws in
+ *                      the CoA logs, 3 of 3 pulls)
  *     Shredding Claws  passive, armour down on hit
  *     Summon Tigers, frenzy every 30s and enrage at 20% from stock
  *
@@ -36,18 +41,24 @@
  *   - which spells belong to which form. The video shows all of them in one
  *     stretch below 75%; the split follows the spell names (troll priest,
  *     tiger claws);
- *   - Speed Slash ends after 8 seconds (its aura never runs out by itself);
+ *   - Speed Slash ends after 17 seconds (its aura never runs out by itself;
+ *     tester, live);
  *   - Force Punch and the stock charge are gone, the tiger kit replaces them.
  */
 
 #include "CreatureScript.h"
+#include "GlobalScript.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
+#include "SpellInfo.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+
+#include <algorithm>
+#include <array>
 
 using namespace coa_zg;
 
@@ -77,6 +88,7 @@ namespace
         SPELL_WAR_STOMP            = 2118227,
         SPELL_WAR_STOMP_HIT        = 2118228,
         SPELL_SPEED_SLASH          = 2118232,
+        SPELL_SPEED_SLASH_HIT      = 2118233,
         SPELL_RENDING_SWIPE        = 2118238,
         SPELL_RENDING_SWIPE_HIT    = 2118239,
         SPELL_RIP                  = 2118240,
@@ -93,11 +105,20 @@ namespace
 
     constexpr uint32 GROUP_TROLL = 1;
     constexpr uint32 GROUP_TIGER = 2;
+    constexpr uint32 GROUP_SPEED_SLASH = 3;
+
+    constexpr Milliseconds SPEED_SLASH_RETARGET = 2s;
+    constexpr Milliseconds SPEED_SLASH_DURATION = 17s;
+    constexpr uint32 POINT_SPEED_SLASH = 1;
 
     constexpr float CLEAVE_RANGE = 10.0f;
     constexpr float CLEAVE_ARC   = float(M_PI) / 2;
 
     constexpr uint8 STORM_SHIELD_CHARGES = 20;
+
+    // Rip by difficulty (SpellDifficulty 2351). The DBC lets it stay on a dead
+    // player, so a battle-resurrected player bled to death again (round-7 tester).
+    constexpr std::array<uint32, 4> RIP_BLEEDS = { 2118240, 2118241, 2118242, 2118243 };
 
     struct boss_thekal_coa : public BossAI
     {
@@ -131,6 +152,11 @@ namespace
                 zealot->Kill(zealot, zealot);
             if (Creature* zealot = instance->GetCreature(DATA_ZATH))
                 zealot->Kill(zealot, zealot);
+            me->GetMap()->DoForAllPlayers([](Player* p)
+            {
+                for (uint32 bleed : RIP_BLEEDS)
+                    p->RemoveAurasDueToSpell(bleed);
+            });
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -174,16 +200,12 @@ namespace
             {
                 DoCastVictim(SPELL_RENDING_SWIPE);
                 context.Repeat(14s);
-            }).Schedule(12s, [this](TaskContext context)
+            }).Schedule(1s, [this](TaskContext context)
             {
-                DoCastSelf(SPELL_WAR_STOMP);
-                context.Repeat(40s);
-            }).Schedule(14s, [this](TaskContext context)
-            {
-                DoCastSelf(SPELL_SPEED_SLASH);
-                context.Schedule(10s, [this](TaskContext)
+                DoCastVictim(SPELL_WAR_STOMP);
+                context.Schedule(0ms, [this](TaskContext)
                 {
-                    me->RemoveAurasDueToSpell(SPELL_SPEED_SLASH);
+                    DoCastSelf(SPELL_SPEED_SLASH);
                 });
                 context.Repeat(40s);
             }).Schedule(30s, [this](TaskContext context)
@@ -213,9 +235,43 @@ namespace
             DoCast(target, SPELL_BLOODLUST);
         }
 
+        void StartSpeedSlash()
+        {
+            scheduler.Schedule(0ms, GROUP_SPEED_SLASH, [this](TaskContext slash)
+            {
+                Unit* victim = me->GetVictim();
+                Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [victim](Unit* u)
+                {
+                    return u->IsPlayer() && u != victim;
+                });
+                if (!target)
+                    target = victim;
+                if (target)
+                    me->GetMotionMaster()->MovePoint(POINT_SPEED_SLASH, target->GetPosition());
+                slash.Repeat(SPEED_SLASH_RETARGET);
+            }).Schedule(SPEED_SLASH_DURATION, GROUP_SPEED_SLASH, [this](TaskContext)
+            {
+                EndSpeedSlash();
+            });
+        }
+
+        void EndSpeedSlash()
+        {
+            scheduler.CancelGroup(GROUP_SPEED_SLASH);
+            me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me));
+            if (Unit* victim = me->GetVictim())
+                me->GetMotionMaster()->MoveChase(victim);
+        }
+
         void OnSpellCast(SpellInfo const* spell) override
         {
             BossAI::OnSpellCast(spell);
+
+            if (spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me))
+            {
+                StartSpeedSlash();
+                return;
+            }
 
             switch (spell->Id)
             {
@@ -228,10 +284,7 @@ namespace
                     break;
                 case SPELL_RENDING_SWIPE:
                     for (Player* p : PlayersInFront(me, CLEAVE_RANGE, CLEAVE_ARC))
-                    {
                         me->CastSpell(p, SPELL_RENDING_SWIPE_HIT, true);
-                        me->CastSpell(p, SPELL_RIP, true);
-                    }
                     break;
                 case SPELL_DISRUPTING_SHOUT:
                     me->CastSpell(me, SPELL_DISRUPTING_SHOUT_HIT, true);
@@ -242,6 +295,12 @@ namespace
                 default:
                     break;
             }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        {
+            if (target && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH_HIT, me))
+                me->CastSpell(target, SPELL_RIP, true);
         }
 
         void EnterEvadeMode(EvadeReason why) override
@@ -271,7 +330,6 @@ namespace
             DoCastSelf(SPELL_ASPECT_OF_SHIRVALLAH, true);
             DoCastSelf(SPELL_SHREDDING_CLAWS, true);
             me->LoadEquipment(0, true);
-            DoResetThreatList();
             ScheduleTiger();
         }
 
@@ -285,8 +343,14 @@ namespace
 
             scheduler.Update(diff, [this]
             {
-                DoMeleeAttackIfReady();
+                if (!Slashing())
+                    DoMeleeAttackIfReady();
             });
+        }
+
+        bool Slashing() const
+        {
+            return me->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me));
         }
 
     private:
@@ -359,6 +423,19 @@ namespace
                 SPELL_AURA_DUMMY);
         }
     };
+
+    class ThekalRipEndsOnDeath final : public GlobalScript
+    {
+    public:
+        ThekalRipEndsOnDeath()
+            : GlobalScript("ThekalRipEndsOnDeath", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (std::find(RIP_BLEEDS.begin(), RIP_BLEEDS.end(), info->Id) != RIP_BLEEDS.end())
+                info->AttributesEx3 &= ~SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD;
+        }
+    };
 }
 
 void AddCoaThekalScripts()
@@ -367,4 +444,5 @@ void AddCoaThekalScripts()
     RegisterSpellScript(spell_thekal_coa_zath_strike);
     RegisterSpellScript(spell_thekal_coa_storm_shield);
     RegisterSpellScript(spell_thekal_coa_storm_shield_charge);
+    new ThekalRipEndsOnDeath();
 }

@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "name": "Eyes In The Night gives a grouped damage dealer its own passive, single-bite Shadow Bats that scale on and heal that ally (#3247)",
+  "contract": [
+    "A Bloodmage tank with Eyes In The Night 801959 groups with a damage dealer. 801959 periodically recasts",
+    "Shadow Colony 806723, a raid area aura that gives grouped players within 20 yd a 40% chance (5 s internal",
+    "cooldown) to trigger Call of the Darkwing 801958 when they take direct damage. Only the ally attacks the",
+    "monster, so only the ally takes damage. The engine casts the proc-triggered Call from the aura's carrier",
+    "(AuraEffect::HandleProcTriggerSpellAuraProc: triggerCaster = aurApp->GetTarget()), so the bats belong to",
+    "the ally and the Bloodmage summons none. Each bat casts Bat Bite 802358 once and then stays passive, and",
+    "the bite adds 0.4 x spell power and 0.2 x attack power of the bat's owner to its base damage. Bat Bite's",
+    "unscaled damage at level 80 is 5 + 0.65 x (80 - 24), about 41; the ally carries a 10000 attack power",
+    "fixture bonus and the Bloodmage none, so a bite scaled on the ally deals about 2041 before armor, while a",
+    "bite scaled on the Bloodmage or left unscaled stays far below 500. The monster has enough health, and both",
+    "players enough health, that the fight lasts the whole 60 s window. The Bloodmage is held at 50% health and",
+    "the ally starts at 100%, so the threat redirect (ally below the Bloodmage's percentage) does not pull the",
+    "monster away from the ally during the window.",
+    "Each bite also casts Bat Bite's heal 802399 on the bat's owner for the bite's damage, so the ally receives one heal per bite whose average carries the same attack power bonus."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false,
+      "attack_power": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "monster",
+      "owner": "ally",
+      "entry": 36,
+      "health": 5000000,
+      "distance": 3,
+      "reaction": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "set_health",
+      "label": "Bloodmage at 50% health",
+      "actor": "bloodmage",
+      "value": 500000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "label": "Ally at 100% health",
+      "actor": "ally",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "learn",
+      "label": "The Bloodmage tank learns Eyes In The Night",
+      "actor": "bloodmage",
+      "spell": 801959
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Eyes In The Night puts Shadow Colony on the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806723,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "label": "Only the ally attacks; the aggressive monster fights back on the ally",
+      "actor": "ally",
+      "target": "monster"
+    },
+    {
+      "action": "assert",
+      "label": "The ally owns a Shadow Bat once Shadow Colony procs",
+      "actor": "ally",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "wait",
+      "label": "Keep the fight running for more procs",
+      "ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the monster is still alive",
+      "actor": "monster",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The ally cast Call of the Darkwing from Shadow Colony",
+      "actor": "ally",
+      "metric": "spell_cast_count",
+      "spell": 801958,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Bloodmage, never hit, cast no Call of the Darkwing",
+      "actor": "bloodmage",
+      "metric": "spell_cast_count",
+      "spell": 801958,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Bloodmage owns no Shadow Bat",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ally never owns more than 10 Shadow Bats",
+      "actor": "ally",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "max": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "owned_creature_damage_count",
+      "entry": 50069,
+      "save_as": "bites"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_cast_count",
+      "spell": 801958,
+      "save_as": "calls"
+    },
+    {
+      "action": "assert",
+      "label": "The ally's bats bit",
+      "actor": "ally",
+      "metric": "owned_creature_damage_count",
+      "entry": 50069,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: each bat attacks at most once (a Call summons 1-2 bats)",
+      "actor": "ally",
+      "metric": "owned_creature_attack_count",
+      "entry": 50069,
+      "ratio_to": "calls",
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: an average bite carries the ally's attack power bonus",
+      "actor": "ally",
+      "metric": "owned_creature_damage_total",
+      "entry": 50069,
+      "ratio_to": "bites",
+      "min": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "owned_creature_heal_count",
+      "entry": 50069,
+      "save_as": "heals"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: every bite healed the ally",
+      "actor": "ally",
+      "metric": "owned_creature_heal_count",
+      "entry": 50069,
+      "ratio_to": "bites",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: an average heal carries the ally's attack power bonus",
+      "actor": "ally",
+      "metric": "owned_creature_heal_total",
+      "entry": 50069,
+      "ratio_to": "heals",
+      "min": 500
+    }
+  ]
+}

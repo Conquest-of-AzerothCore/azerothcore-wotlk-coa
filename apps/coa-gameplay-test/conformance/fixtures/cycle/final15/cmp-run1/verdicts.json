@@ -1,0 +1,158 @@
+{
+ "verdicts": [
+  {
+   "label": "301303 effect_value e0 #0",
+   "check": "effect_value",
+   "scenario": "conformance-necromancer-value-301303",
+   "status": "ok",
+   "measured": 50.0
+  },
+  {
+   "label": "504316 spell_duration 800043 #0",
+   "check": "spell_duration",
+   "scenario": "conformance-necromancer-value-504316",
+   "status": "ok",
+   "measured": 2000.0
+  },
+  {
+   "label": "560800 effect_value 500585e0 #1",
+   "check": "effect_value",
+   "scenario": "conformance-necromancer-value-560800",
+   "status": "ok",
+   "measured": 320.0
+  },
+  {
+   "label": "560800 behaviour_metric_delta rotling",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-560800-metric-delta-rotling",
+   "status": "ok",
+   "measured": 1.0
+  },
+  {
+   "label": "560800 behaviour_metric_delta explode_before",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-560800-metric-delta-explode-before",
+   "status": "ok",
+   "measured": 0.0
+  },
+  {
+   "label": "560800 behaviour_metric_delta explode_after",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-560800-metric-delta-explode-after",
+   "status": "ok",
+   "measured": 1.0
+  },
+  {
+   "label": "504316 behaviour_metric_delta halt",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-504316-metric-delta-halt",
+   "status": "ok",
+   "measured": 0.022857189178466797
+  },
+  {
+   "label": "504316 behaviour_metric_delta chase_halt",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-504316-chase-halt",
+   "status": "ok",
+   "measured": 0.019889778606208157
+  },
+  {
+   "label": "504316 behaviour_metric_delta hook_pull",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-504316-metric-delta-hook-pull",
+   "status": "ok",
+   "measured": 3.0953726768493652
+  },
+  {
+   "label": "504316 behaviour_metric_delta hook_to_abomination",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-504316-metric-delta-hook-to-abomination",
+   "status": "alert",
+   "measured": 3.2708816528320312
+  },
+  {
+   "label": "504316 behaviour_metric_delta duration",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-504316-metric-delta-duration",
+   "status": "ok",
+   "measured": 1.0
+  },
+  {
+   "label": "300748 behaviour_metric_delta summon_health",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-300748-metric-delta-summon-health",
+   "status": "alert",
+   "measured": 1450.0
+  },
+  {
+   "label": "300748 behaviour_metric_delta own_health",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-300748-metric-delta-own-health",
+   "status": "ok",
+   "measured": 2053.0
+  },
+  {
+   "label": "92121 behaviour_metric_delta crypt_swarm",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-92121-metric-delta-crypt-swarm",
+   "status": "ok",
+   "measured": 6.0
+  },
+  {
+   "label": "301207 behaviour_metric_delta armor",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-301207-metric-delta-armor",
+   "status": "ok",
+   "measured": 1.297872340425532
+  },
+  {
+   "label": "301207 behaviour_metric_delta resistance",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-301207-metric-delta-resistance",
+   "status": "ok",
+   "measured": 116.0
+  },
+  {
+   "label": "301207 behaviour_metric_delta armor_none",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-301207-metric-delta-armor-none",
+   "status": "ok",
+   "measured": 1.0
+  },
+  {
+   "label": "301207 behaviour_metric_delta armor_colossus",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-301207-metric-delta-armor-colossus",
+   "status": "ok",
+   "measured": 1.297872340425532
+  },
+  {
+   "label": "301207 behaviour_metric_delta capacity_fixture",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-301207-metric-delta-capacity-fixture",
+   "status": "ok",
+   "measured": 6.0
+  },
+  {
+   "label": "301207 behaviour_metric_delta armor_each",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-301207-metric-delta-armor-each",
+   "status": "ok",
+   "measured": 1.5957446808510638
+  },
+  {
+   "label": "503740 behaviour_metric_delta frenzied_snare_immune",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune",
+   "status": "ok",
+   "measured": 1.1428600549697876
+  },
+  {
+   "label": "503740 behaviour_metric_delta snare_control",
+   "check": "behaviour_metric_delta",
+   "scenario": "conformance-necromancer-behaviour-503740-metric-delta-snare-control",
+   "status": "ok",
+   "measured": 0.5714300274848938
+  }
+ ]
+}

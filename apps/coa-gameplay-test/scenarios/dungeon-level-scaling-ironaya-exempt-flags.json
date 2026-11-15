@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Uldaman: Ironaya follows dungeon level scaling like every other boss (#9074, #9076, #9576)",
-  "contract": "Ironaya (creature_template 7228, Uldaman map 70) authored unit_flags 33554434 = UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE. mod-destiny-weaver's ViewableCreature() excludes any creature whose spawn/template unit_flags carry those bits from per-viewer dungeon level scaling, so with the authored flags she stayed at her authored level 40 for every party regardless of their own level. The fix clears both bits in creature_template so she scales inside Uldaman's 15-59 band like Archaedas, Grimlok, Revelosh and the Ancient Stone Keeper, which already spawn with unit_flags 0. GO_IRONAYA_SEAL_DOOR gates physical access to her chamber independently of these bits, so clearing them does not change who can reach her.",
+  "contract": "Ironaya (creature_template 7228, Uldaman map 70) authored unit_flags 33554434 = UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE. mod-destiny-weaver's ViewableCreature() excludes any creature whose spawn/template unit_flags carry those bits from per-viewer dungeon level scaling, so with the authored flags she stayed at her authored level 40 for every Dungeon Finder party regardless of their own level. The fix clears both bits in creature_template so she scales inside Uldaman's 15-59 band like Archaedas, Grimlok, Revelosh and the Ancient Stone Keeper, which already spawn with unit_flags 0. GO_IRONAYA_SEAL_DOOR gates physical access to her chamber independently of these bits, so clearing them does not change who can reach her.",
   "timeout_ms": 90000,
   "location": {
     "map": 70,
@@ -14,6 +14,12 @@
   "players": [
     {
       "id": "p",
+      "race": 1,
+      "class": 15,
+      "level": 30
+    },
+    {
+      "id": "mate",
       "race": 1,
       "class": 15,
       "level": 30
@@ -32,6 +38,17 @@
       "action": "wait",
       "label": "Let the fixture settle",
       "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "p",
+      "target": "mate"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is a Dungeon Finder group assigned Uldaman",
+      "actor": "p",
+      "dungeon": 22
     },
     {
       "action": "level_scaling_packet",

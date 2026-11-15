@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "The last member of a finished Dungeon Finder group is teleported out when the others leave",
+  "contract": [
+    "Issue #10561: every member who leaves a Dungeon Finder group inside its dungeon is teleported to their entry",
+    "point. When the dungeon is finished and only one member remains, the group of one keeps no party frame, so the",
+    "client offers that member no way to teleport out. They now leave the dungeon with the second to last member.",
+    "In a dungeon that is not finished the last member stays, and the group keeps looking for players as before."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "stayer", "race": 1, "class": 1, "level": 20 },
+    { "id": "leaver", "race": 1, "class": 1, "level": 20 },
+    { "id": "runner", "race": 1, "class": 1, "level": 20 },
+    { "id": "quitter", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "stayer", "target": "leaver" },
+    { "action": "group", "actor": "runner", "target": "quitter" },
+    { "action": "lfg_dungeon", "label": "The first group is assigned Deadmines", "actor": "stayer", "dungeon": 6 },
+    { "action": "lfg_dungeon", "label": "The second group is assigned Deadmines", "actor": "runner", "dungeon": 6 },
+    { "action": "lfg_teleport", "actor": "stayer" },
+    { "action": "lfg_teleport", "actor": "leaver" },
+    { "action": "lfg_teleport", "actor": "runner" },
+    { "action": "lfg_teleport", "actor": "quitter" },
+    { "action": "assert", "label": "The stayer enters Deadmines", "actor": "stayer", "metric": "map_id", "equals": 36, "within_ms": 15000 },
+    { "action": "assert", "label": "The leaver enters Deadmines", "actor": "leaver", "metric": "map_id", "equals": 36, "within_ms": 15000 },
+    { "action": "assert", "label": "The runner enters Deadmines", "actor": "runner", "metric": "map_id", "equals": 36, "within_ms": 15000 },
+    { "action": "assert", "label": "The quitter enters Deadmines", "actor": "quitter", "metric": "map_id", "equals": 36, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "lfg_final_credit", "label": "The first group finishes Deadmines", "actor": "stayer" },
+    { "action": "assert", "label": "CONTROL: the first group's dungeon is finished", "actor": "stayer", "metric": "lfg_state", "equals": 6, "within_ms": 5000 },
+    { "action": "leave_group", "actor": "leaver" },
+    { "action": "assert", "label": "CONTROL: the leaver is teleported out", "actor": "leaver", "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "The last member of the finished group is teleported out too", "actor": "stayer", "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    { "action": "leave_group", "actor": "quitter" },
+    { "action": "assert", "label": "CONTROL: the quitter of the unfinished run is teleported out", "actor": "quitter", "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    { "action": "wait", "ms": 5000 },
+    { "action": "assert", "label": "In an unfinished run the last member stays in the dungeon", "actor": "runner", "metric": "map_id", "equals": 36 }
+  ]
+}

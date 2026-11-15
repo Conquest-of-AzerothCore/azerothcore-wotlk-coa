@@ -1,0 +1,540 @@
+{
+  "schema": 1,
+  "name": "Quest log: Quests.LogSize 64 holds 64 quests and refuses a 65th",
+  "contract": [
+    "With Quests.LogSize 64 the server keeps 64 quests: 25 in the client's slots and 39 in server-only overflow slots. The 26th to 64th quests go to overflow slots 25-63 and the client slots stay unchanged; the 65th quest is refused like on a full log."
+  ],
+  "timeout_ms": 120000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "willem",
+      "owner": "hero",
+      "entry": 823,
+      "level": 20,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 318",
+      "actor": "hero",
+      "quest": 318,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 319",
+      "actor": "hero",
+      "quest": 319,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 415",
+      "actor": "hero",
+      "quest": 415,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 419",
+      "actor": "hero",
+      "quest": 419,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 421",
+      "actor": "hero",
+      "quest": 421,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 428",
+      "actor": "hero",
+      "quest": 428,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 432",
+      "actor": "hero",
+      "quest": 432,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 433",
+      "actor": "hero",
+      "quest": 433,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 436",
+      "actor": "hero",
+      "quest": 436,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 438",
+      "actor": "hero",
+      "quest": 438,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 448",
+      "actor": "hero",
+      "quest": 448,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 454",
+      "actor": "hero",
+      "quest": 454,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 456",
+      "actor": "hero",
+      "quest": 456,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 457",
+      "actor": "hero",
+      "quest": 457,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 458",
+      "actor": "hero",
+      "quest": 458,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 475",
+      "actor": "hero",
+      "quest": 475,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 476",
+      "actor": "hero",
+      "quest": 476,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 477",
+      "actor": "hero",
+      "quest": 477,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 482",
+      "actor": "hero",
+      "quest": 482,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 486",
+      "actor": "hero",
+      "quest": 486,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 487",
+      "actor": "hero",
+      "quest": 487,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 729",
+      "actor": "hero",
+      "quest": 729,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 730",
+      "actor": "hero",
+      "quest": 730,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 745",
+      "actor": "hero",
+      "quest": 745,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 749",
+      "actor": "hero",
+      "quest": 749,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 752",
+      "actor": "hero",
+      "quest": 752,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 755",
+      "actor": "hero",
+      "quest": 755,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 764",
+      "actor": "hero",
+      "quest": 764,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 767",
+      "actor": "hero",
+      "quest": 767,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 773",
+      "actor": "hero",
+      "quest": 773,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 775",
+      "actor": "hero",
+      "quest": 775,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 787",
+      "actor": "hero",
+      "quest": 787,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 804",
+      "actor": "hero",
+      "quest": 804,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 833",
+      "actor": "hero",
+      "quest": 833,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 835",
+      "actor": "hero",
+      "quest": 835,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 887",
+      "actor": "hero",
+      "quest": 887,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 920",
+      "actor": "hero",
+      "quest": 920,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 948",
+      "actor": "hero",
+      "quest": 948,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 953",
+      "actor": "hero",
+      "quest": 953,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "The 26th quest is in the first overflow slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 318,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "An overflow quest has no client slot",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 318,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "The 64th quest is in the last overflow slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 953,
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "label": "The 25th quest keeps its client slot",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 302,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "label": "The log is full at 64",
+      "actor": "hero",
+      "metric": "quest_log_has_room",
+      "equals": 0
+    },
+    {
+      "action": "quest_accept",
+      "label": "Ask Deputy Willem for A Threat Within (783)",
+      "actor": "hero",
+      "quest": 783,
+      "entry": 823
+    },
+    {
+      "action": "wait",
+      "label": "Let the accept be handled",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The full log refuses the quest",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 783,
+      "equals": 0
+    }
+  ]
+}

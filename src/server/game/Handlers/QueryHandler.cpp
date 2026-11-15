@@ -420,7 +420,7 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
     uint32 count;
     recvData >> count; // quest count, max=25
 
-    if (count > MAX_QUEST_LOG_SIZE)
+    if (count > NATIVE_QUEST_LOG_SIZE)
     {
         recvData.rfinish();
         return;

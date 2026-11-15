@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Only one Worldforged Crater's Silk Drape stands in Dalaran Crater (#10834)",
+  "contract": "#9146 pinned the Silk Drape pickup (95535) guid 6901050 where it was reported but left the module's copy 6940272 eight yards away, so two drapes were in sight. The extra copy is removed and the pinned one rests on the ground.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 307.66, "y": 174.98, "z": 47.8, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 32 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: one Silk Drape pickup", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95535, "equals": 1 },
+    { "action": "assert", "label": "the pinned copy rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6901050, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 }
+  ]
+}

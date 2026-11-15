@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Sturdy Flora pickup rests on the Darkshore ground (#10197)",
+  "contract": "The Sturdy Flora pickup (guid 6941700) was 4.02 yd under the terrain in the open. It now rests on the terrain at the same XY.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941700,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

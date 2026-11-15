@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Caught! tracks the Wooden Outhouse in Searing Gorge (#11259)",
+  "contract": "Issue #11259: the quest tracker shows QuestCompletionLog, which for Caught! (4449) said 'Return to Wooden Outhouse in Badlands.' while the quest description and the ender (Wooden Outhouse 173265, spawned in Searing Gorge) agree on Searing Gorge. The case sends the native quest query and reads the strings the client receives.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 45
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "label": "Query quest 4449",
+      "actor": "p",
+      "opcode": 92,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 4449
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tracker names Searing Gorge",
+      "actor": "p",
+      "metric": "quest_query_text_contains",
+      "quest": 4449,
+      "text": "Return to Wooden Outhouse in Searing Gorge.",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the tracker no longer sends players to Badlands",
+      "actor": "p",
+      "metric": "quest_query_text_contains",
+      "quest": 4449,
+      "text": "in Badlands",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

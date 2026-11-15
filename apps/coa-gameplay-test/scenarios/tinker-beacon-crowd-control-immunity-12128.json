@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Tinker: beacons are immune to crowd control and knockback (#12128)",
+  "contract": [
+    "Shield, Restorative, Replenishment and Alarm Beacons (50036, 51036, 53036, 54036, 55036, 56036, 50037,",
+    "500360, 500361) had CreatureImmunitiesId 0, so enemies could stun, fear and knock them away (the report).",
+    "The user approved immunity set -410 on 2026-11-14: crowd-control mechanics plus the knockback and pull",
+    "effects 98/124/144/145. Creature::InitEntry loads the template immunities, so a summoned beacon must be",
+    "immune to Hammer of Justice 853 (stun), Fear 5782 and Typhoon's knockback effect 61391/0. A plain",
+    "creature 299 (no template immunities) stays affected by all three, proving the probes discriminate."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "control",
+      "owner": "tinker",
+      "entry": 299,
+      "level": 60,
+      "distance": 10,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the spawn settle", "ms": 3000},
+    {"action": "summon", "label": "Place a Shield Beacon", "actor": "tinker", "as": "shield", "entry": 50036, "distance": 3},
+    {"action": "summon", "label": "Place a Restorative Beacon", "actor": "tinker", "as": "restorative", "entry": 50037, "distance": 4},
+    {"action": "summon", "label": "Place a Replenishment Beacon", "actor": "tinker", "as": "replenishment", "entry": 500360, "distance": 5},
+    {"action": "summon", "label": "Place an Alarm Beacon", "actor": "tinker", "as": "alarm", "entry": 500361, "distance": 6},
+    {"action": "assert", "label": "Control: a plain creature can be stunned", "actor": "control", "metric": "spell_immune", "spell": 853, "target": "tinker", "equals": 0},
+    {"action": "assert", "label": "Control: a plain creature can be feared", "actor": "control", "metric": "spell_immune", "spell": 5782, "target": "tinker", "equals": 0},
+    {"action": "assert", "label": "Control: a plain creature can be knocked back", "actor": "control", "metric": "spell_effect_immune", "spell": 61391, "effect": 0, "target": "tinker", "equals": 0},
+    {"action": "assert", "label": "DISCRIMINATING: the Shield Beacon resists the stun", "actor": "shield", "metric": "spell_immune", "spell": 853, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Shield Beacon resists the fear", "actor": "shield", "metric": "spell_immune", "spell": 5782, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Shield Beacon resists the knockback", "actor": "shield", "metric": "spell_effect_immune", "spell": 61391, "effect": 0, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Restorative Beacon resists the stun", "actor": "restorative", "metric": "spell_immune", "spell": 853, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Restorative Beacon resists the knockback", "actor": "restorative", "metric": "spell_effect_immune", "spell": 61391, "effect": 0, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Replenishment Beacon resists the fear", "actor": "replenishment", "metric": "spell_immune", "spell": 5782, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Replenishment Beacon resists the knockback", "actor": "replenishment", "metric": "spell_effect_immune", "spell": 61391, "effect": 0, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Alarm Beacon resists the stun", "actor": "alarm", "metric": "spell_immune", "spell": 853, "target": "tinker", "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the Alarm Beacon resists the knockback", "actor": "alarm", "metric": "spell_effect_immune", "spell": 61391, "effect": 0, "target": "tinker", "equals": 1}
+  ]
+}

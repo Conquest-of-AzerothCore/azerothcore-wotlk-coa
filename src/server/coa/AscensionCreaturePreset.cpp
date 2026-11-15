@@ -2,6 +2,64 @@
 #include "DatabaseEnv.h"
 #include "QueryResult.h"
 #include "Log.h"
+#include "StringConvert.h"
+#include <string_view>
+
+namespace
+{
+uint32 Mix(uint32 value)
+{
+    value ^= value >> 16;
+    value *= 0x7FEB352Du;
+    value ^= value >> 15;
+    value *= 0x846CA68Bu;
+    value ^= value >> 16;
+    return value;
+}
+
+uint8 Pick(std::vector<uint8> const& values, uint8 fallback, uint32 seed, uint32 salt)
+{
+    return values.empty() ? fallback : values[Mix(seed ^ (salt * 0x9E3779B9u)) % values.size()];
+}
+}
+
+std::vector<uint8> ParsePresetVarietyValues(std::string_view text)
+{
+    std::vector<uint8> values;
+    std::size_t pos = 0;
+    while (pos < text.size())
+    {
+        std::size_t end = text.find_first_of(" ,", pos);
+        if (end == std::string_view::npos)
+            end = text.size();
+        std::string_view token = text.substr(pos, end - pos);
+        pos = end + 1;
+        if (token.empty())
+            continue;
+
+        std::size_t dash = token.find('-');
+        Optional<uint32> low = Acore::StringTo<uint32>(token.substr(0, dash));
+        Optional<uint32> high = dash == std::string_view::npos ? low : Acore::StringTo<uint32>(token.substr(dash + 1));
+        if (!low || !high || *low > *high || *high > 255)
+            continue;
+        for (uint32 value = *low; value <= *high; ++value)
+            values.push_back(uint8(value));
+    }
+    return values;
+}
+
+CreatureDisplayPreset ApplyPresetVariety(CreatureDisplayPreset const& preset,
+    CreatureDisplayPresetVariety const& variety, uint32 spawnSeed)
+{
+    uint32 const seed = Mix(spawnSeed ^ Mix(preset.entry));
+    CreatureDisplayPreset varied = preset;
+    varied.skin = Pick(variety.skins, preset.skin, seed, 1);
+    varied.face = Pick(variety.faces, preset.face, seed, 2);
+    varied.hair = Pick(variety.hairs, preset.hair, seed, 3);
+    varied.haircolor = Pick(variety.hairColors, preset.haircolor, seed, 4);
+    varied.facialhair = Pick(variety.facialHairs, preset.facialhair, seed, 5);
+    return varied;
+}
 
 AscensionCreaturePresetMgr* AscensionCreaturePresetMgr::Instance()
 {
@@ -13,6 +71,7 @@ void AscensionCreaturePresetMgr::LoadFromDB()
 {
     _presets.clear();
     _entryToDisplays.clear();
+    LoadVarietiesFromDB();
 
     QueryResult result = WorldDatabase.Query(
         "SELECT entry, display_id, race, gender, class, skin, face, hair, haircolor, facialhair, guild_id, "
@@ -53,6 +112,41 @@ void AscensionCreaturePresetMgr::LoadFromDB()
 
     LOG_INFO("coa", ">> Loaded {} creature display presets into cache across {} unique creature entries.",
         _presets.size(), _entryToDisplays.size());
+}
+
+void AscensionCreaturePresetMgr::LoadVarietiesFromDB()
+{
+    _varieties.clear();
+
+    if (!WorldDatabase.Query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND "
+        "TABLE_NAME = 'creature_display_preset_variety'"))
+        return;
+
+    QueryResult result = WorldDatabase.Query(
+        "SELECT entry, gender, skins, faces, hair_styles, hair_colors, facial_hairs FROM creature_display_preset_variety");
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        CreatureDisplayPresetVariety variety;
+        variety.skins = ParsePresetVarietyValues(fields[2].Get<std::string_view>());
+        variety.faces = ParsePresetVarietyValues(fields[3].Get<std::string_view>());
+        variety.hairs = ParsePresetVarietyValues(fields[4].Get<std::string_view>());
+        variety.hairColors = ParsePresetVarietyValues(fields[5].Get<std::string_view>());
+        variety.facialHairs = ParsePresetVarietyValues(fields[6].Get<std::string_view>());
+        _varieties[MakeKey(fields[0].Get<uint32>(), fields[1].Get<uint8>())] = std::move(variety);
+    } while (result->NextRow());
+
+    LOG_INFO("coa", ">> Loaded {} creature display preset varieties.", _varieties.size());
+}
+
+CreatureDisplayPreset AscensionCreaturePresetMgr::WithSpawnVariety(CreatureDisplayPreset const& preset,
+    uint32 spawnSeed) const
+{
+    auto itr = _varieties.find(MakeKey(preset.entry, preset.gender));
+    return itr == _varieties.end() ? preset : ApplyPresetVariety(preset, itr->second, spawnSeed);
 }
 
 CreatureDisplayPreset const* AscensionCreaturePresetMgr::GetPreset(uint32 entry, uint32 displayId) const

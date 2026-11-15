@@ -2,12 +2,13 @@
   "schema": 1,
   "name": "Scaled dungeon creatures follow the viewer down to the finder entry's TargetLevelMin",
   "contract": [
-    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds.",
-    "Inside a scaled five-player dungeon a creature stands at the viewer's own level, held inside the dungeon's band.",
-    "The band's floor is LFGDungeons.dbc TargetLevelMin, not the finder's MinLevel: Maraudon (map 349, entries 26,",
-    "272 and 273) has MinLevel 35 and TargetLevelMin 20, so a level-26 character sees a level-45 creature at 26",
-    "instead of 35, and a level-15 character sees it at the floor of 20. The Destiny Weaver's switch is open world",
-    "scaling, so turning it off leaves the dungeon view in place. Black Riding Wolf 5194 is the fixture."
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default",
+    "DestinyWeaver.Scaling.DungeonIds. Inside a scaled five-player dungeon a Dungeon Finder group's creatures stand",
+    "at the viewer's own level, held inside the dungeon's band. The band's floor is LFGDungeons.dbc TargetLevelMin,",
+    "not the finder's MinLevel: Maraudon (map 349, entries 26, 272 and 273) has MinLevel 35 and TargetLevelMin 20, so",
+    "a level-26 character sees a level-45 creature at 26 instead of 35, and a level-15 character sees it at the floor",
+    "of 20. The Destiny Weaver's switch is open world scaling, so turning it off leaves the finder group's dungeon",
+    "view in place. Black Riding Wolf 5194 is the fixture."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -28,6 +29,9 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "group", "actor": "mid", "target": "low" },
+    { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Maraudon", "actor": "mid",
+      "dungeon": 26 },
     { "action": "level_scaling_packet", "actor": "mid", "value": 1 },
     { "action": "level_scaling_packet", "actor": "low", "value": 1 },
     {

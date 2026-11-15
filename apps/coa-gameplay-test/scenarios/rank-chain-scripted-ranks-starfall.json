@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Starfall ranks 2-3 rain stars through their dummy ranks 50417 and 50418",
+  "contract": [
+    "These ranks exist only in the client's SpellRank.dbc. Under the stock spell_ranks chains they had no first rank, so the first-rank script that turns their dummy effect into the real one never ran and the cast did nothing.",
+    "Starfall 48512 and 48513 trigger the dummy ranks 50417 and 50418 (ranks 2-3 of 50286), whose script casts the stars 50393 and 50394 at nearby enemies."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "dr",
+      "name": "Rankdruid",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "dr",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Rankdruid"
+    },
+    {
+      "action": "assert",
+      "label": "50417 is rank 2 of 50286",
+      "actor": "dr",
+      "metric": "spell_rank",
+      "spell": 50417,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "50417 belongs to the 50286 chain",
+      "actor": "dr",
+      "metric": "first_rank_spell",
+      "spell": 50417,
+      "equals": 50286
+    },
+    {
+      "action": "assert",
+      "label": "50418 is rank 3 of 50286",
+      "actor": "dr",
+      "metric": "spell_rank",
+      "spell": 50418,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "50418 belongs to the 50286 chain",
+      "actor": "dr",
+      "metric": "first_rank_spell",
+      "spell": 50418,
+      "equals": 50286
+    },
+    {
+      "action": "learn",
+      "actor": "dr",
+      "spell": 48512
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "dr",
+      "spell": 48512
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_damage_count",
+      "spell": 50393,
+      "target": "enemy",
+      "save_as": "d48512"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Starfall 48512",
+      "actor": "dr",
+      "spell": 48512,
+      "target": "dr"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Starfall 48512 produces 50393",
+      "actor": "dr",
+      "metric": "spell_damage_count",
+      "spell": 50393,
+      "target": "enemy",
+      "relative_to": "d48512",
+      "min": 1
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "dr",
+      "spell": 48512
+    },
+    {
+      "action": "learn",
+      "actor": "dr",
+      "spell": 48513
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "dr",
+      "spell": 48513
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_damage_count",
+      "spell": 50394,
+      "target": "enemy",
+      "save_as": "d48513"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Starfall 48513",
+      "actor": "dr",
+      "spell": 48513,
+      "target": "dr"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Starfall 48513 produces 50394",
+      "actor": "dr",
+      "metric": "spell_damage_count",
+      "spell": 50394,
+      "target": "enemy",
+      "relative_to": "d48513",
+      "min": 1
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "dr",
+      "spell": 48513
+    }
+  ]
+}

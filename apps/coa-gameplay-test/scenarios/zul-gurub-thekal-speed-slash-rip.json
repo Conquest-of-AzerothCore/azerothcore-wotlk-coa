@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priest Thekal's tiger form stomps after 1 s, slashes after 3 s and keeps the tank",
+  "contract": [
+    "On live Thekal's (14509) tiger form applies Rip (2118240) through Speed Slash: each cut of the channel",
+    "(2118232, ticking 2118233 every second) adds a stack, and the channel ends after 17 s (tester, 2026-11-03).",
+    "His passive Shredding Claws (2118225) lowers the target's armour with 2118226 on his melee hits. The tester of",
+    "2026-11-08 and the CoA logs (3 of 3 pulls) start War Stomp's (2118227) 2 s cast 1 s and Speed Slash's 3 s after",
+    "the tiger change, Speed Slash running to another player than the tank, and the tank keeping Thekal through the",
+    "change.",
+    "Thekal is summoned at the entrance, away from his avatar, so he takes tiger form as soon as the tank wounds",
+    "him below half health; the raider then wounds him for 1 % of his health, far less threat than the tank's."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "hero",
+      "target": "raider"
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14509,
+      "as": "thekal",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Thekal",
+      "actor": "hero",
+      "target": "thekal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thekal fights",
+      "actor": "thekal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "The tank wounds Thekal below half health",
+      "actor": "hero",
+      "entry": 14509,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thekal takes tiger form",
+      "actor": "thekal",
+      "metric": "aura",
+      "spell": 2118223,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "The raider wounds him for 1 % of his health",
+      "actor": "raider",
+      "entry": 14509,
+      "pct": 44
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: War Stomp, begun 1 s into tiger form, lands after its 2 s cast",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14509,
+      "spell": 2118227,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Speed Slash, begun as War Stomp lands, runs after its 2 s cast",
+      "actor": "thekal",
+      "metric": "aura",
+      "spell": 2118232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Past a 10-second channel, before the 17-second end",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Speed Slash still runs past ten seconds",
+      "actor": "thekal",
+      "metric": "aura",
+      "spell": 2118232,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Speed Slash stacks Rip on the raider it runs to",
+      "actor": "raider",
+      "metric": "aura_stacks",
+      "spell": 2118240,
+      "min": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tank keeps Thekal through the tiger change",
+      "actor": "thekal",
+      "metric": "victim",
+      "target": "hero",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Past the end of the 17-second channel",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Speed Slash has ended",
+      "actor": "thekal",
+      "metric": "aura",
+      "spell": 2118232,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: back on the tank, his hits shred the tank's armour",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118226,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank still holds Thekal",
+      "actor": "thekal",
+      "metric": "victim",
+      "target": "hero",
+      "equals": 1
+    }
+  ]
+}

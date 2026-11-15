@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Suffuse leaves a single buff and Speed Demon still adds 20% movement speed (#11578)",
+  "contract": "#11578: Suffuse showed two buffs, one with the description and one with only icon and title. Client DBC: Suffuse 801063 has a single effect, TRIGGER_SPELL 64 into 801064, and no aura effect; 801064 carries the heal-over-time (aura 8), the damage-taken reduction (aura 87) and a native speed aura (aura 31, amount 0). The extra buff was 801063 itself, made an aura by a server contract only to carry Speed Demon's speed. Speed Demon 707232 is the native aura 107 SPELLMOD_EFFECT3 (MiscValue 23, BasePoints 19 + DieSides 1) on class mask word1 32768, shared only by 801063 and 801064, so it raises 801064's own speed effect by 20. Expected after Suffuse: aura 801064 present and aura 801063 absent, run speed unchanged without Speed Demon, and with Speed Demon run speed 1.20 times the baseline while aura 801063 stays absent.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "run_speed_rate", "save_as": "speed_before" },
+    { "action": "learn", "actor": "knight", "spell": 801063 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 3, "label": "Three Demonfire stacks so Suffuse is castable" },
+    { "action": "cast", "actor": "knight", "spell": 801063 },
+    {
+      "action": "assert", "label": "SETUP: the Suffuse heal-over-time is up",
+      "actor": "knight", "metric": "aura", "spell": 801064, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Suffuse cast leaves no second buff",
+      "actor": "knight", "metric": "aura", "spell": 801063, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: Suffuse alone does not change movement speed",
+      "actor": "knight", "metric": "run_speed_rate", "ratio_to": "speed_before", "min": 0.99, "max": 1.01
+    },
+    { "action": "learn", "actor": "knight", "spell": 707232 },
+    { "action": "set_aura", "actor": "knight", "spell": 707232, "stacks": 1, "label": "Force the Speed Demon passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    { "action": "set_aura", "actor": "knight", "spell": 801064, "stacks": 0, "label": "Clear the untalented heal-over-time so the recast recomputes its speed effect" },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 3, "label": "Refill Demonfire before recasting Suffuse" },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801063 },
+    { "action": "wait", "label": "Clear the global cooldown from the first Suffuse cast", "ms": 1700 },
+    { "action": "cast", "actor": "knight", "spell": 801063 },
+    {
+      "action": "assert", "label": "SETUP: the Suffuse heal-over-time is up with Speed Demon known",
+      "actor": "knight", "metric": "aura", "spell": 801064, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Speed Demon adds no second buff either",
+      "actor": "knight", "metric": "aura", "spell": 801063, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Speed Demon still raises movement speed by 20%",
+      "actor": "knight", "metric": "run_speed_rate", "ratio_to": "speed_before", "min": 1.19, "max": 1.21
+    }
+  ]
+}

@@ -1,0 +1,880 @@
+{
+  "schema": 1,
+  "name": "Skinning a Searing Hatchling always yields a skin (#10191)",
+  "contract": [
+    "Requires CoALegendaryItems.DropChance=0: only the skinning table is under test.",
+    "Skinning loot 4323 listed five GroupId 0 rows rolled independently and summing to 100 percent, so about 27 percent of skins came back empty. As one GroupId 1 group with the same chances it always yields exactly one item. The scenario kills, loots and skins 8 Searing Hatchling (entry 4323), looting the ordinary corpse loot first because a corpse is skinnable only once that is gone. The harness caps a scenario at eight creatures, so a broken table passes by chance about 8 percent of the time; the fixed table can never fail."
+  ],
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "h0",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h1",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h2",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h3",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h4",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h5",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h6",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "h7",
+      "owner": "ranger",
+      "entry": 4323,
+      "level": 40,
+      "health": 1,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 8613
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h0"
+    },
+    {
+      "action": "assert",
+      "actor": "h0",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h0"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 0 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 0 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h1"
+    },
+    {
+      "action": "assert",
+      "actor": "h1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h1"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h1"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 1 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 1 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h2"
+    },
+    {
+      "action": "assert",
+      "actor": "h2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h2"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h2"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 2 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 2 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h3"
+    },
+    {
+      "action": "assert",
+      "actor": "h3",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h3"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h3"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 3 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 3 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h4"
+    },
+    {
+      "action": "assert",
+      "actor": "h4",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h4"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h4"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 4 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 4 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h5"
+    },
+    {
+      "action": "assert",
+      "actor": "h5",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h5"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h5"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 5 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 5 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h6"
+    },
+    {
+      "action": "assert",
+      "actor": "h6",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h6"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h6"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 6 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 6 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "h7"
+    },
+    {
+      "action": "assert",
+      "actor": "h7",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_creature",
+      "actor": "ranger",
+      "target": "h7"
+    },
+    {
+      "action": "loot_money",
+      "actor": "ranger"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 2
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 3
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 4
+    },
+    {
+      "action": "loot_slot",
+      "actor": "ranger",
+      "slot": 5
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "h7"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hatchling 7 is skinned",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: skin 7 holds an item",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "name": "Emberscale Greatsword procs on landed and received melee hits (#11217)",
+  "contract": [
+    "Emberscale Greatsword (515223) equips proc dummy 202030 and its worldforged tiers 312531/316531/320531 (top tier item 1387216 equips 320531). Every dummy is an aura 42 trigger on the Emberscales buff with Spell.dbc ProcFlags 0, and the world had no spell_proc row, so Aura::GetProcEffectMask found no entry and the sword never procced (#11217).",
+    "The tooltips promise a chance when dealing melee damage or being struck by melee attacks (ProcChance 15). The repair grants the landed and received melee auto attack and melee damage-class ability masks for damage at the hit phase, with Chance deferred to the record.",
+    "spell_proc_chance reads the record's 15 for every dummy and aura_proc_rate replays each equipped aura's native proc decision on a synthetic event, outgoing and incoming. Before the repair the chance lookups fail with no proc entry and every rate reads 0, so the discriminating assertions fail rather than flake. A ranged auto attack is not a melee hit."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "tier",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "m1",
+      "owner": "base",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "m2",
+      "owner": "tier",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "base",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "tier",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "base",
+      "item": 515223
+    },
+    {
+      "action": "equip",
+      "label": "Equip Emberscale Greatsword",
+      "actor": "base",
+      "item": 515223,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "tier",
+      "item": 1387216
+    },
+    {
+      "action": "equip",
+      "label": "Equip the top worldforged Emberscale Greatsword",
+      "actor": "tier",
+      "item": 1387216,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Emberscale Greatsword applies its proc dummy",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 202030,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the top tier applies its proc dummy",
+      "actor": "tier",
+      "metric": "aura",
+      "spell": 320531,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 202030 loads the record's 15% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 202030,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 312531 loads the record's 15% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 312531,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 316531 loads the record's 15% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 316531,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 320531 loads the record's 15% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 320531,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs the Greatsword at about 15%",
+      "actor": "base",
+      "metric": "aura_proc_rate",
+      "spell": 202030,
+      "target": "m1",
+      "type_mask": 4,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck by a melee auto attack procs the Greatsword at about 15%",
+      "actor": "base",
+      "metric": "aura_proc_rate",
+      "spell": 202030,
+      "target": "m1",
+      "incoming": true,
+      "type_mask": 8,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs the top tier at about 15%",
+      "actor": "tier",
+      "metric": "aura_proc_rate",
+      "spell": 320531,
+      "target": "m2",
+      "type_mask": 4,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck by a melee auto attack procs the top tier at about 15%",
+      "actor": "tier",
+      "metric": "aura_proc_rate",
+      "spell": 320531,
+      "target": "m2",
+      "incoming": true,
+      "type_mask": 8,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed ranged auto attack does not proc the Greatsword",
+      "actor": "base",
+      "metric": "aura_proc_rate",
+      "spell": 202030,
+      "target": "m1",
+      "type_mask": 64,
+      "equals": 0
+    }
+  ]
+}

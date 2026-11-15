@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Continual Starfall grants haste for each Astral Flare that lands",
+  "contract": "Continual Starfall 503584 (passive, hidden, SpellFamilyName 32) reads 'Astral Flares called down by Aspect of the Stars now increase your haste by $503585s1% for $503585d, stacking $503585u times.' Its own single effect is a SPELL_AURA_DUMMY, so the grant is script driven. 503585 'Continual Starfall [Proc]' carries the haste: three effects, SPELL_AURA_MOD_CASTING_SPEED (216), SPELL_AURA_MOD_MELEE_RANGED_HASTE (138) and aura 218, each with EffectBasePoints 2 and DieSides 1 resolving to 3%, with StackAmount 3. The script applies it in AscensionStarcallerAbilities.cpp's AllSpellScript::OnSpellHitResult when 800507 'Aspect of the Stars [Damage]' lands on a hostile target, which is the spell every Astral Flare triggers (502318-502324 and 800499 all carry SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE on 800507), and which Aspect of the Stars 800510 also triggers from its own auto attack proc. The branch previously required the hit to have dealt damage, using the scriptDamageResult that Spell::_cast passes to the hook, which is the post mitigation damage from Unit::DealSpellDamage: a flare absorbed to zero, or one landing on a target that takes no damage such as a training dummy, granted nothing even though the talent states the haste outright. A genuinely immune target is still excluded upstream, because Unit::SpellHitResult classifies immunity as SPELL_MISS_IMMUNE and the handler returns on any miss. This scenario casts 800507 directly, which is what a flare does, and asserts the stack count rises per landing and caps at three; the control has no talent. This case also passes against the pre-fix build, because the flare takes 9 health from an ungeared level 80 creature and so satisfied the old damage condition: it characterises the stacking and the cap rather than guarding the change. The regression itself is covered by starcaller-continual-starfall-absorbed-flare, where an absorb makes the flare land for no damage at all.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 4,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 4,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "talent",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: cast the flare's damage directly",
+      "actor": "talent",
+      "spell": 800507
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: the control casts the same flare",
+      "actor": "control",
+      "spell": 800507
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 503584
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talent's passive is applied",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 503584,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no haste stacks beforehand",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503585,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "First flare",
+      "actor": "talent",
+      "spell": 800507,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "One flare grants one stack",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503585,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Second flare",
+      "actor": "talent",
+      "spell": 800507,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Two flares grant two stacks",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503585,
+      "equals": 2
+    },
+    {
+      "action": "cast",
+      "label": "Third flare",
+      "actor": "talent",
+      "spell": 800507,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Three flares grant three stacks",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503585,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "label": "Fourth flare",
+      "actor": "talent",
+      "spell": 800507,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The haste caps at three stacks",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503585,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "label": "The control's flare",
+      "actor": "control",
+      "spell": 800507,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent there is no haste",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 503585,
+      "equals": 0
+    }
+  ]
+}

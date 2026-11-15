@@ -86,9 +86,11 @@ requires an actual successful interrupt by Heartchill itself.
 Other local choices where exact behavior is absent:
 
 * Harvest Plague increases linearly with missing target health, from 1× to 2×.
-* Resilient Constitution uses 10% baseline PvP damage reduction plus its explicit 20% critical reduction.
-  Existing native resilience then applies. Only the existing player-controlled damage path invokes it;
-  ordinary NPC damage does not gain a new reduction.
+* Resilient Constitution reduces damage from players and their pets by `CoA.ResilientConstitution.DamageReductionPct`
+  (default 50%) and critical hits by a further `CriticalReductionPct` (default 20%). A player's pet gets
+  `PetSharePct` (default 85%) of both through its owner's aura, as in Ascension's changelog. Existing native
+  resilience then applies. Only the existing player-controlled damage path invokes it; ordinary NPC damage does
+  not gain a new reduction.
 * Life For Power converts 20% of healing remaining after earlier healing absorbs into a ten-second
   accumulating shield. It does not consume its passive as a finite twenty-point absorb.
 

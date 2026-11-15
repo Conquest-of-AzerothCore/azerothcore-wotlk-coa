@@ -156,7 +156,7 @@ namespace
         // Reuse AzerothCore's normal item-query response serializer to warm
         // the client cache. This changes no client files and no DBCs.
         //
-        static constexpr std::array<uint32, 7>
+        static constexpr std::array<uint32, 8>
             potentialRewardItems =
             {
                 97884,
@@ -165,7 +165,8 @@ namespace
                 1278049,
                 1278048,
                 97886,
-                97885
+                97885,
+                ManastormCoALoot::TokenItem
             };
 
         WorldSession* session =
@@ -174,6 +175,9 @@ namespace
         for (uint32 itemEntry :
             potentialRewardItems)
         {
+            if (itemEntry == ManastormCoALoot::TokenItem &&
+                !ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
+                continue;
             if (!sObjectMgr->GetItemTemplate(
                     itemEntry))
             {
@@ -406,6 +410,13 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
         }
     }
 
+    if (ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
+    {
+        cacheChancePct = 0.0f;
+        if (!guaranteedCaches)
+            cacheItem = 0;
+    }
+
     WorldPacket packet(
         ManastormNativeOpcode::ActiveState,
         48);
@@ -516,6 +527,7 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
 
     player->SendDirectMessage(
         &visibility);
+    ManastormClientUIFixes::SendCoALootState(player, active ? run : nullptr);
 }
 
 void ManastormClientBridge::SendProgression(Player* player) const

@@ -1,0 +1,105 @@
+{
+ "schema": 1,
+ "name": "Primalist (Mountain King) tank ability generates the threat its tooltip promises",
+ "contract": "Gaze of Theradras 805919 (\"Taunts the target to attack you\", SPELL_EFFECT_ATTACK_ME + SPELL_AURA_MOD_TAUNT, no stance prerequisite) must match the creature's highest threat through core EffectTaunt (Spell.cpp ThreatManager::MatchUnitThreatToHighestThreat).",
+ "timeout_ms": 60000,
+ "players": [
+  {
+   "id": "builder",
+   "race": 1,
+   "class": 1,
+   "level": 60,
+   "spell_hit_rating": 10000
+  },
+  {
+   "id": "tank",
+   "race": 1,
+   "class": 31,
+   "level": 60,
+   "spell_hit_rating": 10000,
+   "melee_hit_rating": 10000,
+   "expertise_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "taunt_target",
+   "owner": "tank",
+   "entry": 36,
+   "level": 60,
+   "health": 10000000,
+   "faction": 14,
+   "distance": 5
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "actor": "builder",
+   "spell": 45648
+  },
+  {
+   "action": "cast",
+   "actor": "builder",
+   "spell": 45648,
+   "target": "taunt_target"
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: builder's Holy Nova is cast",
+   "actor": "builder",
+   "metric": "cast_failure",
+   "spell": 45648,
+   "equals": 0,
+   "within_ms": 2000
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: builder's Holy Nova hit lands before snapshotting threat",
+   "actor": "builder",
+   "metric": "spell_damage_total",
+   "spell": 45648,
+   "target": "taunt_target",
+   "min": 1,
+   "within_ms": 2000
+  },
+  {
+   "action": "wait",
+   "label": "Let the threat builder's Holy Nova hit resolve before snapshotting threat",
+   "ms": 1000
+  },
+  {
+   "action": "snapshot",
+   "actor": "taunt_target",
+   "metric": "threat",
+   "target": "builder",
+   "save_as": "builder_threat"
+  },
+  {
+   "action": "learn",
+   "actor": "tank",
+   "spell": 805919
+  },
+  {
+   "action": "cast",
+   "actor": "tank",
+   "spell": 805919,
+   "target": "taunt_target"
+  },
+  {
+   "action": "assert",
+   "label": "Gaze of Theradras 805919: taunt matches the target's highest threat (builder's)",
+   "actor": "taunt_target",
+   "metric": "threat",
+   "target": "tank",
+   "ratio_to": "builder_threat",
+   "min": 0.95,
+   "max": 1.05,
+   "within_ms": 3000
+  }
+ ]
+}

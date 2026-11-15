@@ -1,0 +1,19 @@
+-- Road's statue traps as placed in game: 2 yards lower at the mouths, with the facings set by .road trap.
+UPDATE `creature` SET `position_x` = 417.060, `position_y` = 53.740, `position_z` = 272.150, `orientation` = 5.84690 WHERE `guid` = 9370601 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 430.380, `position_y` = 47.530, `position_z` = 272.150, `orientation` = 2.70530 WHERE `guid` = 9370602 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 413.210, `position_y` = 44.790, `position_z` = 277.580, `orientation` = 5.84700 WHERE `guid` = 9370603 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 426.040, `position_y` = 38.810, `position_z` = 277.580, `orientation` = 2.70540 WHERE `guid` = 9370604 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 408.690, `position_y` = 35.130, `position_z` = 284.910, `orientation` = 5.84670 WHERE `guid` = 9370605 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 421.510, `position_y` = 29.150, `position_z` = 284.910, `orientation` = 2.70510 WHERE `guid` = 9370606 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 368.770, `position_y` = -51.440, `position_z` = 297.650, `orientation` = 5.84640 WHERE `guid` = 9370607 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 380.850, `position_y` = -57.080, `position_z` = 297.650, `orientation` = 2.70480 WHERE `guid` = 9370608 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 365.000, `position_y` = -59.190, `position_z` = 302.310, `orientation` = 5.84710 WHERE `guid` = 9370609 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 377.340, `position_y` = -64.940, `position_z` = 302.310, `orientation` = 2.70550 WHERE `guid` = 9370610 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 360.880, `position_y` = -67.250, `position_z` = 307.220, `orientation` = 5.84620 WHERE `guid` = 9370611 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 373.810, `position_y` = -73.290, `position_z` = 307.220, `orientation` = 2.70460 WHERE `guid` = 9370612 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 319.940, `position_y` = -152.720, `position_z` = 332.326, `orientation` = 5.79076 WHERE `guid` = 9370613 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 334.190, `position_y` = -159.320, `position_z` = 332.470, `orientation` = 2.74970 WHERE `guid` = 9370614 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 315.830, `position_y` = -161.860, `position_z` = 339.240, `orientation` = 5.84700 WHERE `guid` = 9370615 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 330.290, `position_y` = -168.600, `position_z` = 339.240, `orientation` = 2.73399 WHERE `guid` = 9370616 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 310.870, `position_y` = -171.060, `position_z` = 346.220, `orientation` = 5.84690 WHERE `guid` = 9370617 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 326.440, `position_y` = -178.320, `position_z` = 346.220, `orientation` = 2.65152 WHERE `guid` = 9370618 AND `id` = 162975;

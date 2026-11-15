@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "name": "Grovekeeper can spend the final specialization point beside the level-59 Seismic Smash grant (#9970)",
+  "name": "Grovekeeper can spend the final specialization point (#9970)",
   "contract": [
     "CharacterAdvancementEssence gives a Primalist 25 specialization points at level 60. Seismic Smash 300693 is",
-    "a Primalist class spell from level 59 and also the Mountain King talent entry 7498 (spec 60, TE 1). It",
-    "belongs to no Grovekeeper build, so it must not consume a Grovekeeper point. A Grovekeeper (spec 58)",
+    "the Mountain King talent entry 7498 (spec 60, TE 1); it belongs to no Grovekeeper build, so it must not",
+    "consume a Grovekeeper point. A Grovekeeper (spec 58)",
     "uploads 24 Life entries of the 0 and 8 investment tiers, then buys entry 30966 (706138) with the 25th",
     "point, which must be learned. Entry 30967 (805445) as a 26th point must still be refused."
   ],

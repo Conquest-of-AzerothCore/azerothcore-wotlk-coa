@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter (Black Knight) tank threat abilities generate the threat their tooltips promise",
+  "contract": "Shadow Brand 680516/680517 promises '36 High Threat Shadow Damage over 12 seconds'. The DBC sets SPELL_ATTR1_NO_THREAT on its DoT spell 680517 and AscensionWitchHunterCompletion.cpp clears it at load, so ThreatManager::AddThreat reaches the spell_threat pctMod=2 row of rev_20261026_20_coa_tank_ability_threat.sql and each tick adds about 2x its damage in threat. Destroyer of Evil 680528 only extends Shadow Brand's application and is not independently audited. Chains of Darkness 680521 (taunt via helper 680522's SPELL_AURA_MOD_TAUNT effect) is already exhaustively verified by witch-hunter-chains-of-darkness.json (#1216); this file adds one confirmatory assert instead of duplicating that coverage.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000,
+      "spell_hit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "brand_target",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "darkness_target",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 196,
+      "label": "Learn sword proficiency"
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 37,
+      "slot": 15,
+      "label": "Hunter wields a sword"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 802252,
+      "label": "Learn Dawn Blade"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680528,
+      "label": "Learn Destroyer of Evil (applies Shadow Brand)"
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 802252,
+      "target": "brand_target",
+      "label": "Land a Dawn Blade to apply Shadow Brand"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn Blade is cast",
+      "actor": "hunter",
+      "metric": "cast_failure",
+      "spell": 802252,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shadow Brand is applied",
+      "actor": "brand_target",
+      "metric": "aura",
+      "spell": 680517,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let Dawn Blade's direct hit, the full Twilight DoT (680532, 3000ms total) and Shadow Brand's first tick (amplitude 3000ms) resolve",
+      "ms": 3500
+    },
+    {
+      "action": "snapshot",
+      "label": "Snapshot cumulative Shadow Brand damage before its 3 remaining ticks",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 680517,
+      "target": "brand_target",
+      "save_as": "brand_dmg_0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Snapshot cumulative threat before the 3 remaining Shadow Brand ticks (only remaining damage source in this window)",
+      "actor": "brand_target",
+      "metric": "threat",
+      "target": "hunter",
+      "save_as": "threat_0"
+    },
+    {
+      "action": "wait",
+      "label": "Let Shadow Brand's remaining ticks at 6000/9000/12000ms land, no other damage source active",
+      "ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "label": "Snapshot the isolated window's Shadow Brand damage delta",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 680517,
+      "target": "brand_target",
+      "relative_to": "brand_dmg_0",
+      "save_as": "brand_dmg_delta"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shadow Brand dealt real damage in the isolated window",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 680517,
+      "target": "brand_target",
+      "relative_to": "brand_dmg_0",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Brand's tooltip ('High Threat Shadow Damage') implies the same ~2x threat_per_damage as every other spell_threat-pctMod-2 'High Threat' ability in this codebase, and with SPELL_ATTR1_NO_THREAT cleared ThreatManager::AddThreat reads the pctMod=2 row rev_20261026_20_coa_tank_ability_threat.sql added for 680517",
+      "actor": "brand_target",
+      "metric": "threat",
+      "target": "hunter",
+      "relative_to": "threat_0",
+      "ratio_to": "brand_dmg_delta",
+      "min": 1.9,
+      "max": 2.1
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680521,
+      "label": "Learn Chains of Darkness"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680521,
+      "label": "Cast Chains of Darkness"
+    },
+    {
+      "action": "assert",
+      "label": "OK (already exhaustively proven by witch-hunter-chains-of-darkness.json #1216): Chains of Darkness taunts a nearby enemy",
+      "actor": "darkness_target",
+      "metric": "aura",
+      "spell": 680522,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Mythic+ Horde: an enemy gets one Horde buff per nearby ally and none when alone (#11453)",
+  "contract": [
+    "The Mythic+ affix Horde 80046 goes on every enemy of the run and links Horde 80047, a friendly area aura with a",
+    "5 yd radius worth 1% damage. #11453: a lone enemy still carried 80047, because the area aura also applied to its",
+    "own owner, so every enemy started with two Horde buffs. The owner no longer counts itself. A Defias Bandit and a",
+    "Defias Cutpurse stand 2 yd apart and a Defias Thug stands 30 yd away; each gets 80046. The two neighbours each carry the other's",
+    "80047 but not its own, and the lone thug carries no 80047 at all."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": 16222.0, "y": 16252.0, "z": 12.6, "o": 0.0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "creatures": [
+    {"id": "first", "owner": "hero", "entry": 116, "level": 60, "distance": 10},
+    {"id": "second", "owner": "hero", "entry": 94, "level": 60, "distance": 12},
+    {"id": "lone", "owner": "hero", "entry": 38, "level": 60, "distance": 42}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "set_aura", "actor": "hero", "target": "first", "spell": 80046, "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "target": "second", "spell": 80046, "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "target": "lone", "spell": 80046, "stacks": 1},
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "CONTROL: the lone enemy carries the Horde affix", "actor": "lone", "metric": "aura",
+     "spell": 80046, "equals": 1},
+    {"action": "assert", "label": "The lone enemy gets no Horde buff", "actor": "lone", "metric": "aura",
+     "spell": 80047, "equals": 0},
+    {"action": "assert", "label": "The first enemy gets the Horde buff of its neighbour", "actor": "first",
+     "metric": "aura", "spell": 80047, "caster": "second", "equals": 1},
+    {"action": "assert", "label": "The first enemy does not count itself", "actor": "first", "metric": "aura",
+     "spell": 80047, "caster": "first", "equals": 0},
+    {"action": "assert", "label": "The second enemy gets the Horde buff of its neighbour", "actor": "second",
+     "metric": "aura", "spell": 80047, "caster": "first", "equals": 1},
+    {"action": "assert", "label": "The second enemy does not count itself", "actor": "second", "metric": "aura",
+     "spell": 80047, "caster": "second", "equals": 0}
+  ]
+}

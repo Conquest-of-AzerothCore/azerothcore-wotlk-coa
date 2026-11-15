@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Rom'ogg's Skullcracker hits the players who stay within 3 yards of the Chains' spot (#11646)",
+  "contract": [
+    "Rom'ogg Bonecrusher 39665 pulls everyone to the Chains of Woe (40447) and then casts The Skullcracker (12.5 s).",
+    "A player still bound by the Chains (5011010) dies. A freed player still within 3 yards of where the Chains appeared",
+    "loses 75 % of their health, as our tester asked. A freed player who stepped away takes nothing, even next to Rom'ogg,",
+    "and so does a player far away."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "near",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mid",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "near"
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "mid"
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "far"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mid",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "label": "CONTROL: the grouped players are in Blackrock Caverns",
+      "action": "assert",
+      "actor": "near",
+      "metric": "map_id",
+      "equals": 645,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 39665,
+      "as": "romogg",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "romogg"
+    },
+    {
+      "label": "Rom'ogg puts the Chains of Woe down",
+      "action": "assert",
+      "actor": "near",
+      "metric": "nearby_creature_count",
+      "entry": 40447,
+      "equals": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "relocate",
+      "actor": "mid",
+      "dx": 7.0
+    },
+    {
+      "label": "CONTROL: mid stepped away from the Chains",
+      "action": "assert",
+      "actor": "mid",
+      "metric": "nearest_creature_distance",
+      "entry": 40447,
+      "min": 4
+    },
+    {
+      "label": "CONTROL: mid still stands within 12 yards of Rom'ogg",
+      "action": "assert",
+      "actor": "mid",
+      "metric": "distance",
+      "target": "romogg",
+      "max": 12
+    },
+    {
+      "label": "CONTROL: near stands within 3 yards of the Chains",
+      "action": "assert",
+      "actor": "near",
+      "metric": "nearest_creature_distance",
+      "entry": 40447,
+      "max": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "near",
+      "entry": 40447,
+      "kill": true
+    },
+    {
+      "label": "CONTROL: near is free of the Chains",
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura_stacks",
+      "spell": 5011010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "label": "CONTROL: so is mid",
+      "action": "assert",
+      "actor": "mid",
+      "metric": "aura_stacks",
+      "spell": 5011010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 645,
+      "x": 249.3,
+      "y": 949.2,
+      "z": 191.8,
+      "ignore_access": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "near",
+      "spell": 54303,
+      "stacks": 1
+    },
+    {
+      "label": "CONTROL: near wears 60000 extra armor",
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura_stacks",
+      "spell": 54303,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "near",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "mid",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "label": "CONTROL: far stands 20 yards away, at Raz's cage",
+      "action": "assert",
+      "actor": "far",
+      "metric": "point_distance_2d",
+      "x": 229.0,
+      "y": 949.0,
+      "min": 19
+    },
+    {
+      "label": "DISCRIMINATING: the Skullcracker takes 75 % from near",
+      "action": "assert",
+      "actor": "near",
+      "metric": "health_pct",
+      "min": 20,
+      "max": 30,
+      "within_ms": 20000
+    },
+    {
+      "label": "far takes nothing",
+      "action": "assert",
+      "actor": "far",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "label": "DISCRIMINATING: mid, near Rom'ogg but away from the Chains, is spared the Skullcracker (only stray hits from the fight)",
+      "action": "assert",
+      "actor": "mid",
+      "metric": "health_pct",
+      "min": 90
+    }
+  ]
+}

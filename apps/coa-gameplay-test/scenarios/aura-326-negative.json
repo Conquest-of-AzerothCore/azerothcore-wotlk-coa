@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "name": "Aura 326 baseline removal and target-direction controls",
+  "contract": "Without326, saturated native dodge/parry/block inputs must remain effective. Removing326 restores those same outcomes. The aura belongs to the defender; applying it only to the attacker must not disable defender avoidance.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "defender",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Settle native login"
+    },
+    {
+      "action": "teleport",
+      "actor": "defender",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "attacker",
+      "map": 0,
+      "x": -8946.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 3.141592653589793
+    },
+    {
+      "action": "learn",
+      "actor": "attacker",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "attacker",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "attacker",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "attacker",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "attacker",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 107
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 3127
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "defender",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "defender",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "defender",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "actor": "defender",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300,
+      "refresh_stats": true,
+      "label": "Refresh avoidance after fixture skill initialization"
+    },
+    {
+      "action": "assert",
+      "actor": "defender",
+      "metric": "block_chance",
+      "min": 1,
+      "label": "Shield provides an eligible block baseline"
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 5277,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "baseline_probe_0",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "min": 511
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "baseline_probe_1",
+      "target": "defender",
+      "spell": 78,
+      "id": 2,
+      "min": 511
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "baseline_probe_2",
+      "target": "defender",
+      "spell": 78,
+      "id": 3,
+      "min": 511
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "baseline_spell_avoidance",
+      "target": "defender",
+      "spell": 78,
+      "id": 5,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "baseline_spell_block",
+      "target": "defender",
+      "spell": 78,
+      "id": 6,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 986065,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 986065,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "removal_probe_0",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "min": 511
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "removal_probe_1",
+      "target": "defender",
+      "spell": 78,
+      "id": 2,
+      "min": 511
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "removal_probe_2",
+      "target": "defender",
+      "spell": 78,
+      "id": 3,
+      "min": 511
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 5,
+      "min": 1,
+      "label": "removal_restores_melee_spell_avoidance"
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 6,
+      "min": 1,
+      "label": "removal_restores_spell_block"
+    },
+    {
+      "action": "set_aura",
+      "actor": "attacker",
+      "spell": 986065,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "label": "attacker_aura_not_defender",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "min": 511
+    }
+  ]
+}

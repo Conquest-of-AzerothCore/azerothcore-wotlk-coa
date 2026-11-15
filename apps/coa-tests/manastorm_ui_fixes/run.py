@@ -30,8 +30,13 @@ def ui_fixes_source():
     fixes = re.search(r'enum Fix : uint32\s*\{.*?\};', header, re.S).group(0)
     constants = '\n'.join(RAW_LUA.findall(source))
     build = method(source, 'std::string BuildLua(uint32 fixes)')
+    state = re.search(r'struct CoALootClientState final : DataMap::Base\s*\{.*?\};', source, re.S).group(0)
+    key = re.search(r'constexpr char CoALootStateKey\[\] = .*?;', source).group(0)
+    sender = method(source, 'void SendCoALootState(')
     return ('namespace ManastormClientUIFixes\n{\n' + fixes + '\nnamespace\n{\n' + constants
-            + '\n}\n' + build + '\n}\n')
+            + '\nconstexpr uint32 RequirementTypeId = 24;\n' + key + '\n' + state
+            + '\nbool CanPush(Player* player) { return player && player->GetSession(); }\n'
+            + '\n}\n' + build + '\n' + sender + '\n}\n')
 
 
 def compile_and_run(out, compiler, code, args):

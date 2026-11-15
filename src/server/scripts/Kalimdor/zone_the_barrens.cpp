@@ -635,14 +635,8 @@ namespace
             && creature->GetName().find("Kolkar") != std::string::npos
             && creature->GetDistance2d(VEROG_TENT_X, VEROG_TENT_Y) <= 350.0f;
     }
-}
 
-class quest_verog_the_dervish : public PlayerScript
-{
-public:
-    quest_verog_the_dervish() : PlayerScript("quest_verog_the_dervish") { }
-
-    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
+    void CountVerogKill(Player* killer, Creature* killed)
     {
         if (!killer || killer->GetQuestStatus(QUEST_VEROG_THE_DERVISH) != QUEST_STATUS_INCOMPLETE || !IsStagnantOasisCentaur(killed))
             return;
@@ -657,16 +651,43 @@ public:
 
         killer->SummonCreature(NPC_VEROG_THE_DERVISH, VEROG_TENT_X, VEROG_TENT_Y, VEROG_TENT_Z, VEROG_TENT_O, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 300000);
     }
+}
+
+class quest_verog_the_dervish : public PlayerScript
+{
+public:
+    quest_verog_the_dervish() : PlayerScript("quest_verog_the_dervish") { }
+
+    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
+    {
+        CountVerogKill(killer, killed);
+    }
 
     void OnPlayerCreatureKilledByPet(Player* owner, Creature* killed) override
     {
-        OnPlayerCreatureKill(owner, killed);
+        CountVerogKill(owner, killed);
     }
 
     void OnPlayerQuestAbandon(Player* player, uint32 questId) override
     {
         if (questId == QUEST_VEROG_THE_DERVISH)
             verogKills.erase(player->GetGUID());
+    }
+};
+
+class unit_verog_the_dervish_minion_kills : public UnitScript
+{
+public:
+    unit_verog_the_dervish_minion_kills() :
+        UnitScript("unit_verog_the_dervish_minion_kills", true, { UNITHOOK_ON_UNIT_DEATH }) { }
+
+    void OnUnitDeath(Unit* unit, Unit* killer) override
+    {
+        Creature* killed = unit ? unit->ToCreature() : nullptr;
+        if (!killed || !killer || !killer->IsCreature() || killer->IsPet() || killer->IsTotem())
+            return;
+
+        CountVerogKill(killer->GetCharmerOrOwnerPlayerOrPlayerItself(), killed);
     }
 };
 
@@ -677,4 +698,5 @@ void AddSC_the_barrens()
     new npc_twiggy_flathead();
     new npc_wizzlecrank_shredder();
     new quest_verog_the_dervish();
+    new unit_verog_the_dervish_minion_kills();
 }

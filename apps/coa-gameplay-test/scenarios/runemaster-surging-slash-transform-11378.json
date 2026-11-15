@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Issue 11378: the 3rd Runeblade cast transforms the next Runeblade into Surging Slash",
+  "contract": [
+    "Surging Slash 705579 reads 'Every 3rd cast of Runeblade now transforms your next Runeblade within $572358d",
+    "into Surging Slash' (803736), and its buff 572358 (StackAmount 3) reads 'At 3 stacks, Runeblade transforms into",
+    "Surging Slash.' Expected: after 1 and 2 Runeblade casts the Runeblade button still stands for itself; at 3",
+    "stacks it is replaced by 803736, which is known only while the replacement lasts; casting 803736 uses the buff",
+    "up (the transform is for the 'next' Runeblade), so the stacks return to 0, Runeblade stands for itself again",
+    "and 803736 is forgotten."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 707141},
+    {"action": "learn", "actor": "rm", "spell": 705579},
+    {"action": "assert", "label": "SETUP: Surging Slash passive is known", "actor": "rm", "metric": "aura",
+      "spell": 705579, "equals": 1, "within_ms": 2000},
+    {"action": "restore_charges", "actor": "rm", "spell": 707141},
+    {"action": "assert", "label": "CONTROL: Runeblade stands for itself before any cast", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 707141, "equals": 707141},
+    {"action": "assert", "label": "CONTROL: Surging Slash is not known before any cast", "actor": "rm",
+      "metric": "knows_spell", "spell": 803736, "equals": 0},
+    {"action": "cast", "label": "Runeblade 1", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 1st cast the buff has 1 stack", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTROL: 1 stack leaves Runeblade alone", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 707141, "equals": 707141},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Runeblade 2", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 2nd cast the buff has 2 stacks", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "CONTROL: 2 stacks leave Runeblade alone", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 707141, "equals": 707141},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Runeblade 3", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 3rd cast the buff has 3 stacks", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 3, "within_ms": 2000},
+    {"action": "assert", "label": "THE FIX: at 3 stacks Surging Slash replaces Runeblade", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 707141, "equals": 803736, "within_ms": 2000},
+    {"action": "assert", "label": "THE FIX: Surging Slash is known while it replaces Runeblade", "actor": "rm",
+      "metric": "knows_spell", "spell": 803736, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Surging Slash", "actor": "rm", "spell": 803736, "target": "dummy"},
+    {"action": "assert", "label": "Surging Slash was cast once", "actor": "rm", "metric": "spell_cast_count",
+      "spell": 803736, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE FIX: casting Surging Slash uses the buff up", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "THE FIX: Runeblade stands for itself again", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 707141, "equals": 707141, "within_ms": 2000},
+    {"action": "assert", "label": "THE FIX: Surging Slash is forgotten again", "actor": "rm",
+      "metric": "knows_spell", "spell": 803736, "equals": 0, "within_ms": 2000}
+  ]
+}

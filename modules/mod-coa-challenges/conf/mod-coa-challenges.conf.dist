@@ -236,6 +236,12 @@ CoAChallenges.HungerDrinkSpell = 93176
 CoAChallenges.ThirstSecondsPerPoint = 10
 CoAChallenges.HungerSecondsPerPoint = 16
 
+# `.coa trial restore`: levels a character may have gained since its run failed
+# and still be restored. More than this refuses the restore, because those
+# levels were gained outside the challenge's rules. 0 requires the same level.
+# Default: 3
+CoAChallenges.Restore.MaxLevelsGained = 3
+
 # Restore per tick while the matching eat/drink aura is up. Range: 1-100.
 # Defaults: 1 / 1
 CoAChallenges.FoodRestore = 1

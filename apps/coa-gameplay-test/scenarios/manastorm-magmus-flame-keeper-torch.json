@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Manastorm Blackrock Depths Magmus: a Shadowforge Flame Keeper drops a Shadowforge Torch",
+  "contract": [
+    "The Magmus stage (segment 428) needs Shadowforge Torches (11885) to light the braziers that open the Magmus",
+    "doors. The torch comes from Shadowforge Flame Keepers (9956), but Manastorm sets loot mode 0 on every stage",
+    "creature, so the keepers dropped nothing and the stage could not be completed. A player killing a keeper in",
+    "the stage now finds exactly one torch on a lootable corpse. The drop is guaranteed so the stage can always",
+    "be finished; the stage's other loot stays suppressed, and a corpse that already holds a torch gets no second",
+    "one. Pool 1550 spawns two of its four keepers at random and three of them patrol, so the case summons a",
+    "keeper without an owner in the Lyceum: Manastorm sets loot mode 0 on it as on the pooled keepers.",
+    "Manastorm scales the keeper's health below half of its native health, so the scaling also resizes the player",
+    "damage requirement; otherwise no kill was credited to the player and the corpse got no loot owner. The torch",
+    "is a free-for-all item, so it joins the loot while the core fills it: added after the kill, no looter saw it.",
+    "The player takes the torch from their own free-for-all view and must then carry it."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 428"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the keeper is visible to this lane",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 91119
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble clears its safety aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player starts without a Shadowforge Torch",
+      "actor": "n",
+      "metric": "item_count",
+      "item": 11885,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "label": "Add a keeper that, like a pooled one, is not player-created",
+      "actor": "n",
+      "as": "keeper",
+      "entry": 9956,
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "nearby_creature_count",
+      "entry": 9956,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "n",
+      "entry": 9956,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "n",
+      "entry": 9956
+    },
+    {
+      "action": "assert",
+      "label": "The keeper's corpse holds one Shadowforge Torch",
+      "actor": "n",
+      "metric": "loot_count",
+      "item": 11885,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "label": "Take the torch from this player's own view of the free-for-all loot",
+      "actor": "n",
+      "item": 11885
+    },
+    {
+      "action": "assert",
+      "label": "The player now carries the Shadowforge Torch",
+      "actor": "n",
+      "metric": "item_count",
+      "item": 11885,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The stage's ordinary loot stays suppressed",
+      "actor": "n",
+      "metric": "loot_gold",
+      "equals": 0
+    }
+  ]
+}

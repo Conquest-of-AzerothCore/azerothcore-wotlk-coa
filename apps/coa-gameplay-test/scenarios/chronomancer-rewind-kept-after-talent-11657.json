@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Rewind taught by Infinite Clone survives a talent change (#11657)",
+  "contract": "Casting Infinite Clone (804492) casts 801299, whose second effect is SPELL_EFFECT_LEARN_SPELL for Rewind (801294), so the Chronomancer owns Rewind for as long as Infinite Clone is known. Buying Rippling Power (CharacterAdvancement entry 6162, spell 806300) synchronises the class progression; nothing in the data takes Rewind back, so the caster must still know it afterwards. Issue #11657.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "c", "race": 1, "class": 22, "level": 46 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "c", "spell": 804492 },
+    { "action": "cast", "actor": "c", "spell": 804492 },
+    {
+      "action": "assert", "label": "Infinite Clone must leave a living clone owned by the caster",
+      "metric": "owned_creature_count", "entry": 50071, "equals": 1, "within_ms": 5000, "actor": "c"
+    },
+    {
+      "action": "assert", "label": "Casting Infinite Clone must teach Rewind",
+      "metric": "knows_spell", "spell": 801294, "equals": 1, "within_ms": 3000, "actor": "c"
+    },
+    { "action": "advancement_rank", "label": "Buy Rippling Power", "actor": "c", "entry": 6162, "rank": 1 },
+    {
+      "action": "assert", "label": "Rippling Power must be applied",
+      "metric": "knows_spell", "spell": 806300, "equals": 1, "within_ms": 3000, "actor": "c"
+    },
+    {
+      "action": "assert", "label": "Rewind must survive the talent change",
+      "metric": "knows_spell", "spell": 801294, "equals": 1, "actor": "c"
+    }
+  ]
+}

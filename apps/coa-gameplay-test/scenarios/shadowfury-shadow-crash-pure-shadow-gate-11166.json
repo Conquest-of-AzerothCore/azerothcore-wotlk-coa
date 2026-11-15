@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Issue 11166: Shadowfury calls down Shadow Crash only at full Pure Shadow with the Shadow Crash enchant",
+  "contract": "Every Shadowfury rank carries a hidden trigger missile to Shadow Crash 273459, which casts both Shadow Crash 273455 and 977714. The Shadow Crash Mystic Scroll (273458) says that while Pure Shadow is at max stacks Shadowfury calls down Shadow Crash at the target area, with its damage spread between the enemies hit. A Shadowfury without the enchant, or with fewer than five Pure Shadow (273456) stacks, must not cast either Shadow Crash; with the enchant at five stacks it must cast one 273455 that hits each enemy once and no 977714. Shadowfury's own damage is unchanged.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "warlock",
+      "race": 1,
+      "class": 9,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "first",
+      "owner": "warlock",
+      "entry": 36,
+      "level": 58,
+      "distance": 5
+    },
+    {
+      "id": "second",
+      "owner": "warlock",
+      "entry": 36,
+      "level": 58,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "warlock",
+      "spell": 30283
+    },
+    {
+      "action": "cast",
+      "actor": "warlock",
+      "spell": 30283,
+      "destination": {
+        "x": -9453.0,
+        "y": 42.0,
+        "z": 55.5
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 30283,
+      "target": "first",
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Shadowfury still hits"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 273455,
+      "equals": 0,
+      "label": "No Shadow Crash without the enchant"
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 977714,
+      "equals": 0,
+      "label": "No talent Shadow Crash without the talent"
+    },
+    {
+      "action": "set_aura",
+      "actor": "warlock",
+      "spell": 273458,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "warlock",
+      "spell": 273456,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "warlock",
+      "spell": 30283
+    },
+    {
+      "action": "cast",
+      "actor": "warlock",
+      "spell": 30283,
+      "destination": {
+        "x": -9453.0,
+        "y": 42.0,
+        "z": 55.5
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 30283,
+      "target": "first",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 273455,
+      "equals": 0,
+      "label": "No Shadow Crash below five Pure Shadow stacks"
+    },
+    {
+      "action": "set_aura",
+      "actor": "warlock",
+      "spell": 273456,
+      "stacks": 5
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "warlock",
+      "spell": 30283
+    },
+    {
+      "action": "cast",
+      "actor": "warlock",
+      "spell": 30283,
+      "destination": {
+        "x": -9453.0,
+        "y": 42.0,
+        "z": 55.5
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 273455,
+      "target": "first",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "Full Pure Shadow calls down one Shadow Crash on the first enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 273455,
+      "target": "second",
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The same Shadow Crash hits the second enemy once"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 273455,
+      "equals": 2,
+      "label": "Only one Shadow Crash for the cast"
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "spell_damage_count",
+      "spell": 977714,
+      "equals": 0,
+      "label": "The scroll does not also cast the talent Shadow Crash"
+    }
+  ]
+}

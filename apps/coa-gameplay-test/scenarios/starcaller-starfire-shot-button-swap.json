@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Starfire Barrage replaces Starfire Shot, and Drawstring of Elune does not",
+  "contract": "aura_ascension_starcaller_lifecycle::Apply swapped the Starfire Shot button on two different auras. 572319 'Starfire Barrage [Proc]' is the correct one: Starfire Barrage 802682 is a ranged shot (DmgClass 3, RangeIndex 113, EquippedItemSubClassMask 262156) whose tooltip reads 'Scales with modifiers to Starfire Shot'. 803573 'Drawstring of Elune [SLS]' was the wrong one: it swapped in 801975, which is the Drawstring of Elune ability itself, a 120000 ms cooldown self buff (RangeIndex 1, DmgClass 1, effects granting a proc, SPELLMOD_RANGE and a dummy) that the Starcaller already owns as its own spellbook entry (mod-spellbook SpellbookTreeSpellData {26, 801975}), so the shot button became a duplicate of that cooldown. Among every SpellFamilyName 32 spell named Starfire or Drawstring only 802682 is a ranged shot, so no third variant was intended. The swap itself also never applied: Replace calls Player::SetTemporarySpellReplacement, which returns early unless HasActiveSpell holds for both the original and the replacement, and 802682 has no acquisition path at all (absent from AscensionCompatData::ClassSpells, trainer_spell and ascension_custom_class_spell). Apply now learns it with learnSpell(..., true) for PLAYERSPELL_TEMPORARY knowledge before calling Replace, and Remove reverts with removeSpell(802682, SPEC_MASK_ALL, true), mirroring the Blade of the Moon bridge for Moonblade 801125 directly above it. Replace matches by rank chain via sSpellMgr->GetFirstSpellInChain, so all eight Starfire Shot ranks are covered; only rank 1 is asserted here. The three stack gate that hands out 572319 in play is covered by its own scenario; this one applies the auras as fixtures.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "starcaller", "race": 4, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "starcaller", "spell": 801978 },
+    { "action": "assert", "label": "SETUP: Starfire Barrage is not known beforehand",
+      "actor": "starcaller", "metric": "knows_spell", "spell": 802682, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Starfire Shot is not replaced beforehand",
+      "actor": "starcaller", "metric": "temporary_spell_replacement", "spell": 801978, "equals": 801978 },
+    { "action": "set_aura", "label": "Apply the Drawstring of Elune proc on its own",
+      "actor": "starcaller", "spell": 803573, "stacks": 1 },
+    { "action": "assert", "label": "Drawstring of Elune leaves the Starfire Shot button alone",
+      "actor": "starcaller", "metric": "temporary_spell_replacement", "spell": 801978, "equals": 801978 },
+    { "action": "assert", "label": "The Drawstring ability is not learned onto the bar",
+      "actor": "starcaller", "metric": "knows_spell", "spell": 801975, "equals": 0 },
+    { "action": "set_aura", "label": "Clear the Drawstring proc", "actor": "starcaller", "spell": 803573, "stacks": 0 },
+    { "action": "set_aura", "label": "Apply the Starfire Barrage proc",
+      "actor": "starcaller", "spell": 572319, "stacks": 1 },
+    { "action": "assert", "label": "Starfire Barrage is learned temporarily",
+      "actor": "starcaller", "metric": "knows_spell", "spell": 802682, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Starfire Shot is replaced by Starfire Barrage",
+      "actor": "starcaller", "metric": "temporary_spell_replacement", "spell": 801978, "equals": 802682 },
+    { "action": "set_aura", "label": "The proc expires", "actor": "starcaller", "spell": 572319, "stacks": 0 },
+    { "action": "assert", "label": "The replacement reverts",
+      "actor": "starcaller", "metric": "temporary_spell_replacement", "spell": 801978, "equals": 801978, "within_ms": 3000 },
+    { "action": "assert", "label": "Starfire Barrage is forgotten again",
+      "actor": "starcaller", "metric": "knows_spell", "spell": 802682, "equals": 0 }
+  ]
+}

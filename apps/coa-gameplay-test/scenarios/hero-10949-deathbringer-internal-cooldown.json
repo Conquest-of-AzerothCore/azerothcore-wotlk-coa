@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Deathbringer procs Take Life at most once every 3 seconds (#10949)",
+  "contract": "Deathbringer (273088) reads 'This effect can only occur once every 3 sec.': aura 42 triggering Take Life (273089), DBC ProcChance 100, and no spell_proc row gave it a cooldown. Two direct damage spells 1.5 seconds apart can proc it once; a damage spell after the 3 second cooldown procs it again.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 273088
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 2136
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Deathbringer is active",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 273088,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "First damage spell",
+      "actor": "p",
+      "spell": 2136,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 2136
+    },
+    {
+      "action": "cast",
+      "label": "Second damage spell inside the cooldown",
+      "actor": "p",
+      "spell": 2136,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: two casts 1.5 s apart trigger Take Life once",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 273089,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the 3 second cooldown elapse",
+      "ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 2136
+    },
+    {
+      "action": "cast",
+      "label": "Damage spell after the cooldown",
+      "actor": "p",
+      "spell": 2136,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "The effect procs again after the cooldown",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 273089,
+      "equals": 2,
+      "within_ms": 2000
+    }
+  ]
+}

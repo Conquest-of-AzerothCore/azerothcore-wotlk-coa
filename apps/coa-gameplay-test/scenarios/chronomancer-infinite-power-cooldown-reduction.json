@@ -14,16 +14,14 @@
     "so the difference between them isolates the talent's contribution. Only the talented caster then casts",
     "Wand of Time 520175 (a second damaging spell, unrelated to Timerend) to trigger the proc against",
     "Timerend's already-running cooldown, so the trigger and the affected cooldown are cleanly separated in",
-    "time. 92118's own spell_proc row requires SpellPhaseMask PROC_SPELL_PHASE_HIT (2) and SpellTypeMask",
-    "PROC_SPELL_TYPE_DAMAGE (1): Spell::cast's unconditional pre-hit proc always fires PROC_SPELL_PHASE_CAST,",
-    "so only a spell whose Spell::DoAllEffectOnTarget hit phase classifies as an actual damage hit can satisfy",
-    "the row. Reverse Wound 501805 (TARGET_UNIT_TARGET_ALLY, SPELL_EFFECT_HEAL) and Unmake 804418",
-    "(TARGET_UNIT_TARGET_ENEMY, but only SPELL_EFFECT_APPLY_AURA/SPELL_EFFECT_DUMMY, no direct damage) both",
-    "fail SpellTypeMask; Wand of Time carries SPELL_EFFECT_NORMALIZED_WEAPON_DMG + SPELL_EFFECT_SCHOOL_DAMAGE",
-    "(DmgClass 3 = ranged, matching the PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS bit the fix's own SQL comment",
-    "adds for wand attacks) and is the only Chronomancer-accessible direct-damage spell of the three. Fails",
-    "before the fix (near-zero difference, only cast-timing skew); passes after (roughly a",
-    "10%-of-remaining-at-proc-time reduction, well beyond skew)."
+    "time. 92118's own spell_proc row fires in the cast phase (PROC_SPELL_PHASE_CAST) once per cast of a non-triggered hostile",
+    "spell, and the spell_ascension_infinite_power CheckProc keeps only spells that deal damage directly or periodically:",
+    "Wand of Time carries SPELL_EFFECT_NORMALIZED_WEAPON_DMG + SPELL_EFFECT_SCHOOL_DAMAGE (DmgClass 3 = ranged, matching the",
+    "PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS bit in the row's ProcFlags). Reverse Wound 501805 is a heal and does not proc; Unmake",
+    "804418 and Melt Reality, whose damage is a periodic aura, do (see chronomancer-infinite-power-damage-over-time-10806).",
+    "Without the fix the difference is near zero (only cast-timing skew); with it, roughly a 10%-of-remaining-at-proc-time",
+    "reduction, well beyond skew. Timerend is itself a damaging cast, so its own cooldown is cut by about 2 s as it starts, and",
+    "the talented caster ends 2 s lower again than the control; the window covers both."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -31,7 +29,7 @@
       "id": "control",
       "race": 1,
       "class": 22,
-      "level": 80,
+      "level": 60,
       "spell_hit_rating": 10000,
       "ranged_hit_rating": 10000
     },
@@ -39,7 +37,7 @@
       "id": "talent",
       "race": 1,
       "class": 22,
-      "level": 80,
+      "level": 60,
       "spell_hit_rating": 10000,
       "ranged_hit_rating": 10000
     }
@@ -128,7 +126,7 @@
       "actor": "talent",
       "metric": "cooldown_ms",
       "spell": 801291,
-      "min": 18000
+      "min": 15000
     },
     {
       "action": "wait",
@@ -161,7 +159,7 @@
       "metric": "cooldown_ms",
       "spell": 801291,
       "relative_to": "control_cooldown",
-      "min": -3000,
+      "min": -4500,
       "max": -500
     }
   ]

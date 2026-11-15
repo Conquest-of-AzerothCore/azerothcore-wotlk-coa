@@ -100,12 +100,14 @@ void PetAI::_doMeleeAttack()
 bool PetAI::_canMeleeAttack()
 {
     combatRange = 0.f;
-    switch (GetStockPetEntry(me->GetEntry()))
+    uint32 const stockEntry = GetStockPetEntry(me->GetEntry());
+    switch (stockEntry)
     {
         case ENTRY_IMP:
         case ENTRY_WATER_ELEMENTAL:
         case ENTRY_WATER_ELEMENTAL_PERM:
             {
+                bool boltOnAutocast = false;
                 for (uint8 i = 0; i < me->GetPetAutoSpellSize(); ++i)
                 {
                     uint32 spellID = me->GetPetAutoSpellOnPos(i);
@@ -123,6 +125,7 @@ bool PetAI::_canMeleeAttack()
                         case WATER_ELEMENTAL_WATERBOLT_1:
                         case WATER_ELEMENTAL_WATERBOLT_2:
                             {
+                                boltOnAutocast = true;
                                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID);
                                 int32 mana = me->GetPower(POWER_MANA);
 
@@ -136,7 +139,10 @@ bool PetAI::_canMeleeAttack()
                             break;
                     }
                 }
-                return false;
+                // CoA: an Imp whose Firebolt is not on autocast (the default for a newly learned pet spell)
+                // still chases its target into melee and swings, as on TrinityCore; otherwise the pet bar's
+                // Attack command left it standing idle (#10225, #6291)
+                return stockEntry == ENTRY_IMP && !boltOnAutocast;
             }
         default:
             break;

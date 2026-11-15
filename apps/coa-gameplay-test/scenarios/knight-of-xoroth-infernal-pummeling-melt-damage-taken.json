@@ -27,6 +27,7 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Increased Spell Penetration 68 removes the level-60 dummy's 60 monster resistance, so no hit is partially resisted", "actor": "knight", "spell": 56399 },
     { "action": "learn", "actor": "knight", "spell": 801059 },
     { "action": "learn", "actor": "knight", "spell": 803334 },
     { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Melt and Flames of Xoroth are Spender abilities (AscensionXoroth::Spender); grant Demonfire so xoroth_casts::OnSpellCheckCast does not block the cast" },

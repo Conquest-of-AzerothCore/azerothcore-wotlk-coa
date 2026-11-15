@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Issue 11157: Gorged lengthens only Brimstone Bludgeon's cooldown, also on the client",
+  "contract": "Gorged (680199) says Brimstone Bludgeon strikes an additional time after 1 sec but has a 12 sec increased cooldown. The server lengthens 520005's cooldown by 12 s; the client must be told the same through a native SMSG_SPELL_COOLDOWN for 520005 (15 s base + 12 s, about 27 s), not through SMSG_MODIFY_COOLDOWN, whose positive delta locked every Knight of Xoroth ability on the client for 12 s while the bar showed no cooldown on Brimstone Bludgeon. Other abilities keep no cooldown and the extra strike still lands.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 801042
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 680199,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 520005,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 3000,
+      "label": "Gorged adds the second strike"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "cooldown_ms",
+      "spell": 520005,
+      "min": 23000,
+      "max": 27000,
+      "label": "The server lengthens Brimstone Bludgeon by 12 s"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 520005,
+      "min": 23000,
+      "max": 27500,
+      "label": "The client is sent the lengthened cooldown for Brimstone Bludgeon itself"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "cooldown_ms",
+      "spell": 801042,
+      "equals": 0,
+      "label": "Other abilities keep no cooldown"
+    }
+  ]
+}

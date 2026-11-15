@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Infinite Horizon description reads 'Increases all damage' (#11691)",
+  "contract": [
+    "#11691: Infinite Horizon (560528) ships the description 'Increases the all damage dealt by party and raid members by $s1%.' (Spell.dbc Description[enUS]). coa_client_spell_description row 560528 streams the same sentence without the stray 'the', and keeps the rest of the text, the Unmake and Timerend colour codes and the $s1 and $s2 tokens unchanged. Rendered client text is outside the harness."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "chrono", "race": 1, "class": 22, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 7000 },
+    { "action": "assert", "label": "The Infinite Horizon row is emitted", "actor": "chrono", "metric": "server_packets", "opcode": 2346, "row": 560528, "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The description drops the stray article", "actor": "chrono", "metric": "server_packet_contains", "opcode": 2346, "row": 560528, "text": "Increases all damage dealt by party and raid members by $s1%. Does not stack with similar effects.", "equals": 1 },
+    { "action": "assert", "label": "The original wording is gone", "actor": "chrono", "metric": "server_packet_contains", "opcode": 2346, "row": 560528, "text": "Increases the all damage", "equals": 0 },
+    { "action": "assert", "label": "The Unmake and Timerend sentence is unchanged", "actor": "chrono", "metric": "server_packet_contains", "opcode": 2346, "row": 560528, "text": "In addition, your |cFFFFFFFFUnmake|r and |cFFFFFFFFTimerend|r gain an additional $s2% bonus spell scaling.", "equals": 1 }
+  ]
+}

@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Crush damages every stationary enemy inside its cone and applies Horde Breaker (#10298)",
   "contract": [
-    "Crush 501006 selects an uncapped 54-degree, six-yard frontal cone when its two-second cast completes.",
+    "Crush 501006 selects an uncapped 90-degree, 7.5-yard frontal cone when its two-second cast completes.",
     "With stationary targets, capped melee hit and expertise, every in-cone target takes damage on every cast;",
     "there is no random target limit. Horde Breaker 804745 procs 570739 on each victim damaged by Crush.",
     "An enemy fifteen yards away remains an untouched control. Three independent casts distinguish reliable cone",

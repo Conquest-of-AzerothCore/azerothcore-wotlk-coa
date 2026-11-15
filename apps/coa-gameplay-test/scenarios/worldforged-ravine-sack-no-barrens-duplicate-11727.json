@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Ravine Sack pickup stands only in Durotar",
+  "contract": "Issue #11727: the Pillaged Sack (object 95644, loot Ravine Sack 450815) was reported in two places with the same map coordinates, 49, 29: Durotar and the Barrens. The Ascension sidekick snapshot lists one location for the item, Durotar (48.7, 29.04), which is the Durotar spawn 6942068 at (784.45, -4542.41). The Barrens copy 6942067 at (-346.9, -2342.7) is removed, so no object 95644 stands at that spot while the Durotar one still loads.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -346.9, "y": -2342.7, "z": 92.5, "o": 0 },
+  "players": [
+    { "id": "p", "race": 2, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no Ravine Sack pickup at the Barrens spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95644, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": 784.45, "y": -4542.41, "z": 5.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the Durotar Ravine Sack pickup is still there", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95644, "equals": 1 }
+  ]
+}

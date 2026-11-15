@@ -190,16 +190,8 @@ void ApplyContracts(SpellInfo* info)
         info->CasterAuraSpell = 0;
         Ascension::ClientSpellPatches::Instance().Register(id);
     }
-    if (id == 805965)
-    {
-        auto& e = info->Effects[0];
-        e.Effect = SPELL_EFFECT_APPLY_AURA;
-        e.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-        e.MiscValue = SPELLMOD_COST;
-        e.SpellClassMask = flag96(32768, 0, 0);
-        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-        info->DurationEntry = sSpellDurationStore.LookupEntry(21);
-    }
+    if (id == 805916)
+        dummy(2);
     if (id == 800702)
         dummy(0);
     if (id == 801064)
@@ -325,6 +317,19 @@ void ApplyContracts(SpellInfo* info)
         cost.TargetB = SpellImplicitTargetInfo();
         info->Effects[EFFECT_2].Effect = 0;
     }
+    if ((id == 300382 || id == 570100) && !info->Effects[EFFECT_1].Effect &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE)
+    {
+        SpellEffectInfo const& strength = info->Effects[EFFECT_0];
+        SpellEffectInfo& intellect = info->Effects[EFFECT_1];
+        intellect.Effect = SPELL_EFFECT_APPLY_AURA;
+        intellect.ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
+        intellect.BasePoints = strength.BasePoints;
+        intellect.DieSides = strength.DieSides;
+        intellect.MiscValue = STAT_INTELLECT;
+        intellect.TargetA = strength.TargetA;
+        intellect.TargetB = SpellImplicitTargetInfo();
+    }
     if (id == 707388)
     {
         SpellEffectInfo& crit = info->Effects[EFFECT_0];
@@ -445,18 +450,6 @@ void ApplyContracts(SpellInfo* info)
         hit.DieSides = 0;
         hit.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
         hit.TargetB = SpellImplicitTargetInfo();
-    }
-    if (id == 707232)
-        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
-    if (id == 801063)
-    {
-        SpellEffectInfo& e = info->Effects[EFFECT_2];
-        e.Effect = SPELL_EFFECT_APPLY_AURA;
-        e.ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
-        e.BasePoints = 0;
-        e.DieSides = 0;
-        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-        e.TargetB = SpellImplicitTargetInfo();
     }
     if (id == 704954)
     {

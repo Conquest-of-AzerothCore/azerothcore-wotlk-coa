@@ -116,7 +116,7 @@
     },
     {
       "action": "assert",
-      "label": "Eclipse is active and spent the four phase stacks",
+      "label": "Eclipse is active",
       "actor": "star",
       "metric": "aura",
       "spell": 800386,
@@ -125,18 +125,18 @@
     },
     {
       "action": "assert",
-      "label": "Activation consumed the Lunar Phase stacks",
+      "label": "Activation keeps the four Lunar Phase stacks",
       "actor": "star",
-      "metric": "aura",
+      "metric": "aura_stacks",
       "spell": 802985,
-      "equals": 0
+      "equals": 4
     },
     {
       "action": "set_power",
       "label": "Fix mana at a known value so the refund is visible",
       "actor": "star",
       "power": 0,
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -155,7 +155,7 @@
     },
     {
       "action": "assert",
-      "label": "The cast leaves the refunded Lunar Phase stack the line names",
+      "label": "The Eclipsed cast spends the four stacks and leaves the refunded Lunar Phase stack the line names",
       "actor": "star",
       "metric": "aura_stacks",
       "spell": 802985,
@@ -168,7 +168,7 @@
       "actor": "star",
       "metric": "power",
       "power": 0,
-      "min": 5000,
+      "min": 1000,
       "within_ms": 5000
     }
   ]

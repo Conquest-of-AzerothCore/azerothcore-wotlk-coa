@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Call of the Darkwing's Shadow Bat strikes once with Bat Bite and heals its master (#10614)",
+  "contract": [
+    "Before this fix, bloodmage_darkwing_bat set REACT_DEFENSIVE on the Shadow Bat (50069) and gave it weapon",
+    "damage, but no code ever cast Bat Bite 802358: the bat either auto-attacked perpetually or, with no",
+    "victim assist available, never acted at all. Live Ascension combat logs (2026-07-13, coa-log-history)",
+    "show each Shadow Bat landing exactly one Bat Bite hit, healing its master for the same amount (Bat",
+    "Bite's own helper chain 802358 -> 802577 -> 802399, tooltip 'healing you equal to the damage dealt' on",
+    "801958), then staying alive and idle until its normal 15 sec duration (SpellDuration 8) expires.",
+    "The fix: ShadowBatAI (AscensionBloodmageDarkwing.cpp) casts Bat Bite exactly once at the owner's current",
+    "victim when the bat spawns (retrying briefly if no victim is set yet), then sets REACT_PASSIVE and never",
+    "acts again; spell_ascension_bloodmage_bat_bite (SpellScript on 802358) heals the master for the hit's",
+    "final post-mitigation damage via 802399, cast by the bat itself so 802399's native TARGET_UNIT_MASTER",
+    "resolves to the owner (Spell::EffectImplicitTarget), only for bats created by 801958",
+    "(UNIT_CREATED_BY_SPELL), matching 802578's tooltip (BasePoints 5, 6-bat variant) carrying no heal clause.",
+    "Metric limitation: spell_heal_count/spell_heal_total (CoAGameplayTest.cpp) default their caster filter to",
+    "the player or, with pet:true, Player::GetPetGUID(); the Shadow Bat is SummonProperties 61 (Category ALLY,",
+    "not SUMMON_CATEGORY_PET), so Minion::IsGuardianPet() is false and it is never placed in that pet slot, so",
+    "no heal-metric selector can name it as caster. The heal is therefore proven indirectly: the Bloodmage's",
+    "current health (regeneration disabled, fixtured low with max headroom) rises once, exactly when",
+    "spell_damage_count/spell_damage_total for 802358 with entry 50069 as caster (which IS supported) shows",
+    "the bite landed, and never again afterward. spell_damage_count/entry is GetOwnedCreature(player, entry)",
+    "backed and unaffected by the pet-slot gap. pet_melee_swings with entry 50069 stays zero throughout,",
+    "proving no auto-attack ever occurred either."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801958
+    },
+    {
+      "action": "set_health",
+      "label": "Fixture a low current health with headroom so the Bat Bite heal is visible and never overheals away",
+      "actor": "bloodmage",
+      "value": 1000,
+      "maximum": 500000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixtured health took effect",
+      "actor": "bloodmage",
+      "metric": "health",
+      "equals": 1000
+    },
+    {
+      "action": "attack",
+      "label": "Give the Bloodmage a current victim before summoning: the bat bites the owner's victim",
+      "actor": "bloodmage",
+      "target": "dummy"
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call of the Darkwing",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shadow Bat is present",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shadow Bat landed exactly one Bat Bite",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 802358,
+      "entry": 50069,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the master's health rose once the bite landed",
+      "actor": "bloodmage",
+      "metric": "health",
+      "min": 1001
+    },
+    {
+      "action": "snapshot",
+      "label": "Health and Bat Bite damage count right after the single bite",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "health_after_first_bite"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 802358,
+      "entry": 50069,
+      "save_as": "bite_count_after_first_bite"
+    },
+    {
+      "action": "assert",
+      "label": "The bat is still alive right after its strike",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Give the bat several seconds to (incorrectly) re-engage, well inside its 15 sec duration",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The bat is still alive and present, not despawned early",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no further Bat Bite after the first strike",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 802358,
+      "entry": 50069,
+      "relative_to": "bite_count_after_first_bite",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no further heal after the first strike (no regeneration, no other damage source)",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "health_after_first_bite",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shadow Bat never auto-attacked",
+      "actor": "bloodmage",
+      "metric": "pet_melee_swings",
+      "entry": 50069,
+      "equals": 0
+    }
+  ]
+}

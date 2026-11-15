@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "name": "Aura348: PvP exclusion and removal",
+  "contract": "The tooltip excludes player attacks. Removing348 restores the same casting restriction; forced misses remain available.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "defender",
+      "race": 1,
+      "class": 2,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "defender",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "defender",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "attacker",
+      "map": 0,
+      "x": -8946.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 3.141592653589793
+    },
+    {
+      "action": "learn",
+      "actor": "attacker",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "attacker",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "attacker",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "attacker",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "attacker",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "defender",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "defender",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 107
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 3127
+    },
+    {
+      "action": "add_item",
+      "actor": "defender",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "actor": "defender",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300,
+      "refresh_stats": true
+    },
+    {
+      "action": "assert",
+      "actor": "defender",
+      "metric": "block_chance",
+      "min": 1,
+      "label": "Shield provides an eligible block baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "defender",
+      "spell": 116,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "defender",
+      "metric": "casting",
+      "equals": 1,
+      "label": "Real native cast is active"
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 81171,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "equals": 0,
+      "label": "PvP casting defense remains blocked 1"
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 2,
+      "equals": 0,
+      "label": "PvP casting defense remains blocked 2"
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 3,
+      "equals": 0,
+      "label": "PvP casting defense remains blocked 3"
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 5,
+      "equals": 0,
+      "label": "PvP casting defense remains blocked 5"
+    },
+    {
+      "action": "assert",
+      "actor": "attacker",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 6,
+      "equals": 0,
+      "label": "PvP casting defense remains blocked 6"
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 81171,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "equals": 0,
+      "label": "Removal restores native casting restriction 1"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 2,
+      "equals": 0,
+      "label": "Removal restores native casting restriction 2"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 3,
+      "equals": 0,
+      "label": "Removal restores native casting restriction 3"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 5,
+      "equals": 0,
+      "label": "Removal restores native casting restriction 5"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 6,
+      "equals": 0,
+      "label": "Removal restores native casting restriction 6"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 4,
+      "equals": 512
+    }
+  ]
+}

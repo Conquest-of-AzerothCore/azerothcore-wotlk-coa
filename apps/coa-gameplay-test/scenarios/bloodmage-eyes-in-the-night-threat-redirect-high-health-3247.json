@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Eyes In The Night does not redirect threat when the protected ally is higher-health (#3247)",
+  "contract": [
+    "Mirrors bloodmage-eyes-in-the-night-threat-redirect-low-health-3247.json with the health comparison",
+    "reversed: the ally is fixtured at 100% health and the Bloodmage at 10%, so aura_ascension_bloodmage_",
+    "shadow_colony's AfterEffectProc health-percent guard (AscensionBloodmageSecondary.cpp) must never move",
+    "threat, however many times Shadow Colony 806723 procs. This assertion does not depend on the proc chance",
+    "at all (no transfer is correct whether or not a proc happens), but the scenario still drives 90 s of",
+    "continuous aggressive melee from the fixture biter to exercise the actual proc path at least once rather",
+    "than trivially pass from an untested mechanism."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "biter",
+      "owner": "ally",
+      "entry": 36,
+      "health": 2000000,
+      "distance": 3,
+      "reaction": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "set_health",
+      "label": "Bloodmage at 10% health, below the ally",
+      "actor": "bloodmage",
+      "value": 100000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "label": "Ally at 100% health, well above the Bloodmage",
+      "actor": "ally",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806723
+    },
+    {
+      "action": "cast",
+      "label": "Bloodmage applies Shadow Colony to the grouped, nearby ally (infinite duration)",
+      "actor": "bloodmage",
+      "spell": 806723
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the biter has no threat on the Bloodmage yet",
+      "actor": "biter",
+      "metric": "threat",
+      "target": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "The ally engages; the aggressive biter fights back, repeatedly rolling Shadow Colony's taken-damage proc",
+      "actor": "ally",
+      "target": "biter"
+    },
+    {
+      "action": "wait",
+      "label": "Let roughly 45 independent proc rolls happen",
+      "ms": 90000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shadow Colony proc'd at least once",
+      "actor": "ally",
+      "metric": "spell_cast_count",
+      "spell": 801958,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the biter never gained threat against the Bloodmage (the ally is not lower-health)",
+      "actor": "biter",
+      "metric": "threat",
+      "target": "bloodmage",
+      "equals": 0
+    }
+  ]
+}

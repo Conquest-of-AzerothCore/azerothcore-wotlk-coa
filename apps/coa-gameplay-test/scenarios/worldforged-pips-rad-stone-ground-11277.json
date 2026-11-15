@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Worldforged Pip's Rad Stone rests on the ground (#11277, #11171)",
+  "contract": "The Pip's Rad Stone pickup (spawn 6942028) in the Shimmering Flats crater stood 4.68 yd under the mound it sits on. Issues #11277 and #11171.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the pickup rests on the terrain",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6942028, "spawn_type": "gameobject", "min": -0.15, "max": 0.5
+    }
+  ]
+}

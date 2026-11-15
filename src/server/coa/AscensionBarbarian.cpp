@@ -111,16 +111,6 @@ void HandleAscensionBarbarianAura(Player* player, uint32 spellId, bool apply)
         player->RemoveAurasDueToSpell(helper);
 }
 
-void HandleAscensionBarbarianAttackPower(Player* player, float& modifier, bool ranged)
-{
-    if (!player || player->getClass() != CLASS_BARBARIAN || ranged ||
-        player->GetStat(STAT_STRENGTH) < player->GetStat(STAT_AGILITY))
-        return;
-
-    if (AuraEffect const* effect = player->GetAuraEffect(BODY_BUILDER, EFFECT_0))
-        modifier -= CalculatePct(player->GetStat(STAT_STRENGTH), effect->GetAmount());
-}
-
 void HandleAscensionBarbarianCast(Spell* spell)
 {
     if (!spell || spell->IsTriggered())
@@ -161,10 +151,5 @@ void HandleAscensionBarbarianCast(Spell* spell)
             reset.push_back(spellId);
     }
     for (uint32 spellId : reset)
-    {
         player->RemoveSpellCooldown(spellId, true);
-        if (SpellInfo const* spear = sSpellMgr->GetSpellInfo(spellId))
-            if (uint32 category = spear->GetCategory())
-                player->RemoveCategoryCooldown(category);
-    }
 }

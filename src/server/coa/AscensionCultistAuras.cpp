@@ -285,7 +285,8 @@ class aura_ascension_cultist_lifecycle : public AuraScript
             int32 previous = player->GetAuraEffect(681067, EFFECT_0) ? player->GetAuraEffect(681067, EFFECT_0)->GetAmount() : 0;
             Copy(player, player, 681067, std::max(0, previous) + CalculatePct(amount, Amount(681088, 1)));
         }
-        if (Named(GetSpellInfo(), 500715) && GetTarget() != player && player->HasAura(525060) && damage.GetAttacker())
+        if (Named(GetSpellInfo(), 500715) && player->HasAura(525060) && damage.GetAttacker() &&
+            damage.GetAttacker() != player)
             Copy(player, damage.GetAttacker(), 525062, CalculatePct(amount, Amount(525060)));
         State(player).event = old;
     }

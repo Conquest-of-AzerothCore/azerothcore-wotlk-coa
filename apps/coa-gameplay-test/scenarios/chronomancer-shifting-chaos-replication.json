@@ -19,6 +19,8 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Increased Spell Penetration 68 and 38 remove the level-80 targets' 80 monster resistance, so no hit is partially resisted", "actor": "chronomancer", "spell": 56399 },
+    { "action": "learn", "actor": "chronomancer", "spell": 26175 },
     { "action": "learn", "actor": "chronomancer", "spell": 801292 },
     {
       "action": "cast", "label": "Control Chromatic Shard without Shifting Chaos", "actor": "chronomancer",

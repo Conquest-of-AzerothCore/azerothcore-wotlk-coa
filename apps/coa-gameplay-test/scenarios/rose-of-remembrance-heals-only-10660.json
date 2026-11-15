@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Rose of Remembrance procs only from heals, not Mark of Order's ticks (#10660, #10537)",
+  "contract": "Rose of Remembrance (Passive) 23994's tooltip is \"Healing an ally has a chance to increase your spell power by $23995s1 and restore $23995s2 mana every 5 seconds for 15 seconds\". Spell.dbc gives it ProcFlags 0x4000 (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS), ProcChance 35 and SPELL_ATTR3_CAN_PROC_FROM_PROCS, and it had no spell_proc row, so any helpful magic spell rolled it. Chronomancer Mark of Order 806269 casts 806270 \"Add stack\" (positive, DmgClass 1, no heal) on the target every second, so the trinket stayed up permanently. Expected: about 10 seconds of real Mark of Order ticks never apply Rose of Remembrance 23995 (0.65^10 under 1.5% to miss with the bug); a no-heal helpful event procs it 0% of the time and a heal event about 35%.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "chronomancer",
+      "item": 1414520
+    },
+    {
+      "action": "equip",
+      "actor": "chronomancer",
+      "item": 1414520,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rose of Remembrance's passive is on the wearer",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 23994,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Mark of Order, which casts its Add stack spell on the wearer every second",
+      "actor": "chronomancer",
+      "spell": 806269,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mark of Order grows on its periodic Add stack casts",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "min": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mark of Order's Add stack casts never proc Rose of Remembrance",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 23995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a helpful spell event that heals nothing (Mark of Order's Add stack 806270) never procs Rose of Remembrance",
+      "actor": "chronomancer",
+      "metric": "aura_proc_rate",
+      "spell": 23994,
+      "target": "chronomancer",
+      "trigger_spell": 806270,
+      "type_mask": 16384,
+      "phase_mask": 2,
+      "spell_type_mask": 4,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A Fortify Timeline heal event procs Rose of Remembrance at its 35% chance",
+      "actor": "chronomancer",
+      "metric": "aura_proc_rate",
+      "spell": 23994,
+      "target": "chronomancer",
+      "trigger_spell": 804491,
+      "type_mask": 16384,
+      "phase_mask": 2,
+      "heal": true,
+      "hit_mask": 1,
+      "min": 32,
+      "max": 38
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "name": "Quest log: the Extra Quests window lists, promotes and abandons overflow quests",
+  "contract": [
+    "The client cannot show overflow quests, so the server sends them over the COAQLOG addon channel to the Extra Quests window: BEGIN <count> <capacity>, one Q line per quest with its objectives, END.",
+    "The window's Move to Quest Log button sends PROMOTE <quest>, which swaps the quest with the idlest native quest. Abandon sends ABANDON <quest>. The client's own abandon packet reaches only its 25 slots, so it cannot remove an overflow quest; an empty overflow log is announced with EMPTY."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Kobold Camp Cleanup goes to the overflow log",
+      "actor": "hero",
+      "quest": 7,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "The window learns about one overflow quest",
+      "actor": "hero",
+      "metric": "whisper_contains",
+      "text": "COAQLOG\tBEGIN 1 64",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The window's records come from the player's own whisper, the only sender the window accepts",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tBEGIN 1 64",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The window lists Kobold Camp Cleanup",
+      "actor": "hero",
+      "metric": "whisper_contains",
+      "text": "COAQLOG\tQ 7\t",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The window lists its objective",
+      "actor": "hero",
+      "metric": "whisper_contains",
+      "text": "COAQLOG\tO Kobold Vermin slain: 0/8",
+      "equals": 1
+    },
+    {
+      "action": "addon_message",
+      "label": "Move to Quest Log",
+      "actor": "hero",
+      "prefix": "COAQLOG",
+      "text": "PROMOTE 7"
+    },
+    {
+      "action": "assert",
+      "label": "Kobold Camp Cleanup takes the idlest client slot",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 7,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The idlest native quest moves to the overflow log",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 5,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "The window lists the swapped quest",
+      "actor": "hero",
+      "metric": "whisper_contains",
+      "text": "COAQLOG\tQ 5\t",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "quest_abandon",
+      "label": "The client's abandon packet names overflow slot 25",
+      "actor": "hero",
+      "quest": 5,
+      "slot": 25
+    },
+    {
+      "action": "assert",
+      "label": "The client packet cannot remove an overflow quest, so Jitters' Growling Gut stays complete",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 5,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "addon_message",
+      "label": "Abandon from the window",
+      "actor": "hero",
+      "prefix": "COAQLOG",
+      "text": "ABANDON 5"
+    },
+    {
+      "action": "assert",
+      "label": "The window abandons the overflow quest",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 5,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The window learns the overflow log is empty",
+      "actor": "hero",
+      "metric": "whisper_contains",
+      "text": "COAQLOG\tEMPTY",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

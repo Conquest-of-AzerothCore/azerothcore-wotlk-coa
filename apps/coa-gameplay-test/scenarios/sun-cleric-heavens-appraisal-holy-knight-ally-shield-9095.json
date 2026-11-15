@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Heaven's Appraisal gives Holy Knight's healed allies Holy Shield under Holy Form (#9095)",
+  "contract": [
+    "Heaven's Appraisal 300353 empowers Gavel of Light 800611 under Holy Form 805301 to place Holy Shield 805489, an absorb equal to the amount healed. Holy Knight 301011 extends the Gavel heal 707522 to up to five nearby group allies through 301012. Live combat logs (2026-08-22/23/30) show every ally healed by 301012 also receiving 805489 from the Sun Cleric; the server placed 805489 only on the Sun Cleric.",
+    "With Holy Form, Heaven's Appraisal and Holy Knight, an injured group ally must receive both the Holy Knight heal and a non-empty Holy Shield from the Sun Cleric. Without Holy Form the ally is still healed but receives no shield."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000, "allow_regeneration": false, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "ally1", "race": 1, "class": 8, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 800611 },
+    { "action": "learn", "actor": "cleric", "spell": 300353 },
+    { "action": "learn", "actor": "cleric", "spell": 301011 },
+    { "action": "set_aura", "actor": "cleric", "spell": 805301, "stacks": 1, "label": "Holy Form active" },
+    { "action": "group", "actor": "cleric", "target": "ally1" },
+    { "action": "assert", "label": "SETUP: Heaven's Appraisal is known", "actor": "cleric", "metric": "knows_spell", "spell": 300353, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Holy Knight is active", "actor": "cleric", "metric": "aura", "spell": 301011, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Holy Form is active", "actor": "cleric", "metric": "aura", "spell": 805301, "equals": 1 },
+    { "action": "set_health", "actor": "cleric", "maximum": 100000, "value": 100 },
+    { "action": "set_health", "actor": "ally1", "maximum": 100000, "value": 1000 },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "cleric", "spell": 800611, "target": "enemy" },
+    { "action": "assert", "actor": "cleric", "metric": "cast_failure", "spell": 800611, "equals": 0 },
+    { "action": "assert", "actor": "cleric", "metric": "spell_damage_count", "spell": 800611, "target": "enemy", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Gavel of Light heals the Sun Cleric", "actor": "cleric", "metric": "spell_heal_count", "spell": 707522, "target": "cleric", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: Holy Knight heals the ally", "actor": "cleric", "metric": "spell_heal_count", "spell": 301012, "target": "ally1", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTROL: the Sun Cleric gets its own Holy Shield", "actor": "cleric", "metric": "aura", "spell": 805489, "caster": "cleric", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the ally healed by Holy Knight also gets Holy Shield from the Sun Cleric", "actor": "ally1", "metric": "aura", "spell": 805489, "caster": "cleric", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "The ally's Holy Shield absorbs a non-zero amount", "actor": "ally1", "metric": "aura_amount", "spell": 805489, "caster": "cleric", "effect": 0, "min": 1 },
+
+    { "action": "set_aura", "actor": "ally1", "spell": 805489, "stacks": 0 },
+    { "action": "set_aura", "actor": "cleric", "spell": 805489, "stacks": 0 },
+    { "action": "set_aura", "actor": "cleric", "spell": 805301, "stacks": 0, "label": "Leave Holy Form" },
+    { "action": "set_health", "actor": "cleric", "maximum": 100000, "value": 100 },
+    { "action": "set_health", "actor": "ally1", "maximum": 100000, "value": 1000 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "cleric", "spell": 800611, "target": "enemy" },
+    { "action": "assert", "actor": "cleric", "metric": "cast_failure", "spell": 800611, "equals": 0 },
+    { "action": "assert", "actor": "cleric", "metric": "spell_damage_count", "spell": 800611, "target": "enemy", "min": 2, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: without Holy Form Holy Knight still heals the ally", "actor": "cleric", "metric": "spell_heal_count", "spell": 301012, "target": "ally1", "equals": 2, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTROL: without Holy Form the ally gets no Holy Shield", "actor": "ally1", "metric": "aura", "spell": 805489, "caster": "cleric", "equals": 0 }
+  ]
+}

@@ -22,7 +22,8 @@ enum RunemasterElementalTalentSpells : uint32
     SPELL_EARTH_CARVING_HEAL = 712356,
     SPELL_AIR_CARVING = 653253,
     SPELL_WINDSAGE_STRIKE = 706457,
-    SPELL_PRIMORDIAL_BLAST = 800732
+    SPELL_PRIMORDIAL_BLAST = 800732,
+    SPELL_SURGING_SLASH_ARMED = 572358
 };
 
 constexpr uint32 RUNEMASTER_SPELL_FAMILY = 38;
@@ -226,6 +227,43 @@ class spell_ascension_runemaster_primordial_alteration_cast : public SpellScript
     }
 };
 
+class aura_ascension_runemaster_surging_slash_armed : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_runemaster_surging_slash_armed);
+
+    void Synchronize(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Player* player = GetTarget()->ToPlayer();
+        if (IsRunemaster(player) && GetCaster() == player)
+            SynchronizeAscensionTalentReplacements(player);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_runemaster_surging_slash_armed::Synchronize, EFFECT_0,
+            SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_surging_slash_armed::Synchronize, EFFECT_0,
+            SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class spell_ascension_runemaster_surging_slash_cast : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_runemaster_surging_slash_cast);
+
+    bool Load() override { return IsRunemaster(GetCaster()); }
+
+    void Consume()
+    {
+        GetCaster()->RemoveAurasDueToSpell(SPELL_SURGING_SLASH_ARMED, GetCaster()->GetGUID());
+    }
+
+    void Register() override
+    {
+        AfterCast += SpellCastFn(spell_ascension_runemaster_surging_slash_cast::Consume);
+    }
+};
+
 class runemaster_elemental_talent_metadata : public GlobalScript
 {
 public:
@@ -269,4 +307,6 @@ void AddSC_AscensionRunemasterElementalTalents()
     RegisterSpellScript(spell_ascension_runemaster_alteration_trigger);
     RegisterSpellScript(aura_ascension_runemaster_primordial_alteration);
     RegisterSpellScript(spell_ascension_runemaster_primordial_alteration_cast);
+    RegisterSpellScript(aura_ascension_runemaster_surging_slash_armed);
+    RegisterSpellScript(spell_ascension_runemaster_surging_slash_cast);
 }

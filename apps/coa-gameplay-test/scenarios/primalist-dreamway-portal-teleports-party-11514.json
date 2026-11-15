@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Primalist Dreamway: the portal takes group members, and only them, to Seradane, and the teleport takes the Primalist there (#11514)",
+  "contract": [
+    "Report #11514: the Primalist Dreamway portals and teleports do nothing.",
+    "Dreamway: Seradane 809938 is a 10 second cast whose TRANS_DOOR effect places gameobject 376299, which had no gameobject_template row, so nothing was placed.",
+    "The live object 376299 (AscensionDB client captures, 2026-09-04 to 2026-09-07) is a party-only spellcaster that casts Dreamway: Seradane 804741.",
+    "Teleport 804741 is a TELEPORT_UNITS to TARGET_DEST_DB with no spell_target_position row; its destination is the stock game_tele Seradane, 799.721, -3995.68 on map 0.",
+    "After the portal is cast, the object must stand in the world, a group member who uses it must arrive at Seradane, and a player outside the group must not; the Primalist's own teleport must arrive there too."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    { "id": "primalist", "race": 2, "class": 31, "level": 60 },
+    { "id": "member", "race": 2, "class": 1, "level": 60 },
+    { "id": "outsider", "race": 8, "class": 1, "level": 60 }
+  ],
+  "location": { "map": 1, "x": 1629.36, "y": -4373.39, "z": 31.2, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "group", "label": "The Primalist invites the member into a group", "actor": "primalist", "target": "member" },
+    { "action": "assert", "label": "Everyone starts on Kalimdor", "actor": "member", "metric": "map_id", "equals": 1 },
+    { "action": "learn", "label": "The Primalist knows the Seradane portal", "actor": "primalist", "spell": 809938 },
+    { "action": "learn", "label": "And the Seradane teleport", "actor": "primalist", "spell": 804741 },
+    { "action": "add_item", "label": "The portal reagent, Wild Berries", "actor": "primalist", "item": 17021, "count": 1 },
+    { "action": "cast", "label": "The Primalist opens the Dreamway to Seradane", "actor": "primalist", "spell": 809938 },
+    { "action": "wait", "label": "Let the 10 second cast finish and the portal appear", "ms": 11000 },
+    { "action": "assert", "label": "The Dreamway object stands within reach", "actor": "member", "metric": "nearby_gameobject_count", "entry": 376299, "equals": 1 },
+    { "action": "use_nearby_gameobject", "label": "A player outside the group tries the Dreamway", "actor": "outsider", "entry": 376299 },
+    { "action": "wait", "label": "Give a wrongful teleport time to start", "ms": 5000 },
+    { "action": "assert", "label": "The outsider is refused and stays on Kalimdor", "actor": "outsider", "metric": "map_id", "equals": 1 },
+    { "action": "use_nearby_gameobject", "label": "The group member steps through", "actor": "member", "entry": 376299 },
+    { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
+    { "action": "assert", "label": "The member arrives in the Eastern Kingdoms", "actor": "member", "metric": "map_id", "equals": 0, "within_ms": 10000 },
+    { "action": "assert", "label": "At Seradane, x", "actor": "member", "metric": "position_x", "min": 795, "max": 805 },
+    { "action": "assert", "label": "At Seradane, y", "actor": "member", "metric": "position_y", "min": -4000, "max": -3990 },
+    { "action": "assert", "label": "The Primalist is still on Kalimdor", "actor": "primalist", "metric": "map_id", "equals": 1 },
+    { "action": "cast", "label": "The Primalist casts the Seradane teleport", "actor": "primalist", "spell": 804741 },
+    { "action": "wait", "label": "Let the 3 second cast and the transfer finish", "ms": 8000 },
+    { "action": "assert", "label": "The Primalist arrives in the Eastern Kingdoms", "actor": "primalist", "metric": "map_id", "equals": 0, "within_ms": 10000 },
+    { "action": "assert", "label": "At Seradane, x", "actor": "primalist", "metric": "position_x", "min": 795, "max": 805 },
+    { "action": "assert", "label": "At Seradane, y", "actor": "primalist", "metric": "position_y", "min": -4000, "max": -3990 }
+  ]
+}

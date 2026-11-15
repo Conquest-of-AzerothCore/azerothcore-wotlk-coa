@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Infinite Power procs on casting damage-over-time spells, once per cast (#10806)",
+  "contract": [
+    "Infinite Power 92118 reads \"Casting damaging spells now reduces your damaging spell cooldowns by 10% of their",
+    "remaining cooldown\". Its proc waited for the hit phase of a direct damage spell, so Unmake 804418, whose only damage",
+    "is a periodic aura, never counted, while each tick of Melt Reality's triggered damage did: one cast cut a Timerend",
+    "cooldown by about 36%. The proc now fires in the cast phase, once per cast of a non-triggered hostile spell, and",
+    "spell_ascension_infinite_power keeps only spells that deal damage directly or periodically. Three talented",
+    "Chronomancers start the same Timerend 801291 cooldown at the same moment (Timerend is itself a damaging cast, so",
+    "all three get the same cut from it). One of them then casts nothing else and is the baseline; another casts Unmake",
+    "and the third Melt Reality rank 7 572835. Each must end below the baseline by about 10% of a roughly 14 s",
+    "remaining cooldown, more than 1 s, and Melt Reality by one proc only, not one per tick (under 2.2 s)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "only",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "unmake",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "melt",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d_only",
+      "owner": "only",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "d_unmake",
+      "owner": "unmake",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "d_melt",
+      "owner": "melt",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "only",
+      "spell": 801291
+    },
+    {
+      "action": "learn",
+      "actor": "only",
+      "spell": 92118
+    },
+    {
+      "action": "learn",
+      "actor": "unmake",
+      "spell": 801291
+    },
+    {
+      "action": "learn",
+      "actor": "unmake",
+      "spell": 92118
+    },
+    {
+      "action": "learn",
+      "actor": "melt",
+      "spell": 801291
+    },
+    {
+      "action": "learn",
+      "actor": "melt",
+      "spell": 92118
+    },
+    {
+      "action": "learn",
+      "actor": "unmake",
+      "spell": 804418
+    },
+    {
+      "action": "learn",
+      "actor": "melt",
+      "spell": 572835
+    },
+    {
+      "action": "cast",
+      "actor": "only",
+      "spell": 801291,
+      "target": "d_only"
+    },
+    {
+      "action": "cast",
+      "actor": "unmake",
+      "spell": 801291,
+      "target": "d_unmake"
+    },
+    {
+      "action": "cast",
+      "actor": "melt",
+      "spell": 801291,
+      "target": "d_melt"
+    },
+    {
+      "action": "assert",
+      "label": "Timerend is on cooldown for only",
+      "actor": "only",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "min": 10000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Timerend is on cooldown for unmake",
+      "actor": "unmake",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "min": 10000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Timerend is on cooldown for melt",
+      "actor": "melt",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "min": 10000,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "unmake",
+      "spell": 804418,
+      "target": "d_unmake"
+    },
+    {
+      "action": "cast",
+      "actor": "melt",
+      "spell": 572835,
+      "target": "d_melt"
+    },
+    {
+      "action": "wait",
+      "label": "Let both casts finish and the proc land",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "label": "The baseline's remaining Timerend cooldown",
+      "actor": "only",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "save_as": "baseline_timerend"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: casting the periodic damage spell Unmake cut Timerend's cooldown",
+      "actor": "unmake",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "relative_to": "baseline_timerend",
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "label": "Unmake cut it once",
+      "actor": "unmake",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "relative_to": "baseline_timerend",
+      "min": -2200
+    },
+    {
+      "action": "assert",
+      "label": "Casting Melt Reality cut Timerend's cooldown",
+      "actor": "melt",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "relative_to": "baseline_timerend",
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "label": "Melt Reality cut it once per cast, not once per tick",
+      "actor": "melt",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "relative_to": "baseline_timerend",
+      "min": -2200
+    }
+  ]
+}

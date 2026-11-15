@@ -1,0 +1,1464 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Hellborn rolls per AoE enemy hit at the Demon's Blood cap (#12238)",
+  "contract": [
+    "Hellborn 707840 reads 'Generating a stack of Demon's Blood now has a 10% chance to unleash your active Pestilence",
+    "at half of their effectiveness' (installed Spell.dbc ProcChance 10). Bloodied Blade 800997 reads 'Melee Physical",
+    "damage dealt now generates a stack of Demon's Blood' (spell_proc chance 100, no cooldown). #12238 reports that at",
+    "the Demon's Blood cap an AoE physical hit rolls Hellborn once per cast instead of once per enemy hit. Brimstone",
+    "Bludgeon 520005 hits the target and every enemy within 8 yd (SpellRadius 195), so ten enemies packed within",
+    "4.5 yd give ten Bloodied Blade generations per cast. Each generation casts Demon's Blood 800999 on the knight and",
+    "rolls Hellborn, so the 800999 cast count rises by one per enemy hit whether or not the aura is already capped.",
+    "Every Bludgeon also unleashes the active Pestilence of War 802345 once on cast, landing Unleash War 802855 on",
+    "all ten enemies (10 yd, at most 10 targets); each Hellborn proc unleashes it again on the same ten. The control",
+    "cast without Hellborn fixes that base at 10 casts of 802855 per Bludgeon. Thirty capped casts make 300 Hellborn",
+    "rolls: expected 30 procs, and the assertion requires at least 12 (300 + 120 Unleash War casts above the base),",
+    "which per-hit rolling misses with probability below 1e-4 (P[Bin(300,0.1) <= 11]) while one roll per cast",
+    "(Bin(30,0.1)) reaches it with probability below 2e-5."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e0",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 2.0
+    },
+    {
+      "id": "e1",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 2.5
+    },
+    {
+      "id": "e2",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3.0
+    },
+    {
+      "id": "e3",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3.5
+    },
+    {
+      "id": "e4",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 4.0
+    },
+    {
+      "id": "e5",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 4.5
+    },
+    {
+      "id": "e6",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 5.0
+    },
+    {
+      "id": "e7",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 5.5
+    },
+    {
+      "id": "e8",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 6.0
+    },
+    {
+      "id": "e9",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 6.5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 802345
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 800710
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 800997
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 800997,
+      "stacks": 1,
+      "label": "Force the Bloodied Blade passive aura"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Brimstone Bludgeon replaces Sever",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Enter Pestilence of War",
+      "actor": "k",
+      "spell": 802345
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Pestilence of War is active",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 802345,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hellborn is not active for the control cast",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 707840,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "save_as": "blood_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 802855,
+      "save_as": "war_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Control Bludgeon below the cap, without Hellborn",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Bludgeon hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: one Bludgeon below the cap generates Demon's Blood once per enemy hit",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "relative_to": "blood_control",
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Bludgeon's own unleash casts Unleash War once per enemy",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 802855,
+      "relative_to": "war_control",
+      "equals": 10
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 707840
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 707840,
+      "stacks": 1,
+      "label": "Force the Hellborn passive aura"
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 800999,
+      "stacks": 10,
+      "label": "Fill Demon's Blood to its base cap"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Demon's Blood is capped at 10 stacks",
+      "actor": "k",
+      "metric": "aura_stacks",
+      "spell": 800999,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 10 is Demon's Blood's cap",
+      "actor": "k",
+      "metric": "spell_max_stacks",
+      "spell": 800999,
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "save_as": "blood_capped"
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 802855,
+      "save_as": "war_capped"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 1/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 1 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 2/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 2 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 3/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 3 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 4/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 4 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 5/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 5 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 6/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 6 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 7/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 7 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 8/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 8 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 9/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 9 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 10/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 10 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 11,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 11/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 11 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 12,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 12/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 12 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 13,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 13/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 13 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 14,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 14/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 14 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 15,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 15/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 15 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 16/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 16 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 17,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 17/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 17 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 18,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 18/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 18 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 19,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 19/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 19 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 20/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 20 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 21,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 21/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 21 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 22,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 22/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 22 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 23,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 23/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 23 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 24,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 24/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 24 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 25,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 25/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 25 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 26,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 26/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 26 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 27,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 27/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 27 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 28,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 28/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 28 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 29,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 29/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 29 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 30,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Capped Bludgeon 30/30",
+      "actor": "k",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped Bludgeon 30 hits the farthest enemy",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e9",
+      "min": 31,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Demon's Blood stayed at its cap throughout",
+      "actor": "k",
+      "metric": "aura_stacks",
+      "spell": 800999,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at the cap every enemy hit still generates Demon's Blood (300 generations, not 30)",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "relative_to": "blood_capped",
+      "min": 300
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hellborn rolls per enemy hit at the cap (at least 12 procs above the 300 base Unleash War casts)",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 802855,
+      "relative_to": "war_capped",
+      "min": 420
+    }
+  ]
+}

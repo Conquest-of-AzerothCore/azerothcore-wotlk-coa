@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "The kill targets of Oh, the Places You'll Go (611/612) and Duo Delirium (613/614) are spawned",
+  "contract": "Hardcore - Oh, the Places You'll Go (611, Prestige 612) requires killing Blackfathom Ascendant 774803 before level 21, Son of Arugal 772529 before 22, Cahooey the Big 610896 before 29, Myrrkora Wavebind 449327 before 43, Thar'zul 107028 before 57 and Construct Surgeon 918530 before 57; none of them existed, so the trial could not be completed. Nightmare - Duo Delirium (613, 614) requires Yil'da 255146 before 44, who had a template but no spawn. Their names, ranks, displays and cached health modifiers come from the Ascension client creature cache; levels, spawn points, factions, abilities and loot are estimated from the base creature whose entry the id ends in. Each target is asserted from the world phase at its spawn: it is there once at its level with its cached display and can be attacked. Health is asserted within 5% of base health times the cached modifier, which is what remains after the open-world health scaling that trial targets do not receive on Ascension is divided out: tight enough to catch a creature left at the scaled or unscaled value, loose enough for rounding. Like the Trollbane Paragons scenario, the health checks need the live open-world scaling: CoA.CreatureScaling.Enable = 1 as in coa.conf.dist, which a test server without module configs lacks (set AC_CO_A_CREATURE_SCALING_ENABLE=1).",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "p", "value": 10000000, "maximum": 10000000 },
+    { "action": "set_phase", "actor": "p", "value": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 7748030 },
+    { "action": "assert", "label": "Blackfathom Ascendant is on the Twilight Shore at level 21", "actor": "p", "metric": "nearby_creature_count", "entry": 774803, "min_level": 21, "max_level": 21, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Blackfathom Ascendant has 464 x 4.0 = 1856 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 774803, "min": 1763, "max": 1949 },
+    { "action": "assert", "label": "Blackfathom Ascendant uses its cached display", "actor": "p", "metric": "nearby_creature_display", "entry": 774803, "equals": 4976 },
+    { "action": "assert", "label": "Blackfathom Ascendant can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 774803, "equals": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 7725290 },
+    { "action": "assert", "label": "The elite Son of Arugal is in Silverpine Forest at level 20", "actor": "p", "metric": "nearby_creature_count", "entry": 772529, "min_level": 20, "max_level": 20, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "The elite Son of Arugal has 484 x 3.2 = 1549 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 772529, "min": 1471, "max": 1626 },
+    { "action": "assert", "label": "The elite Son of Arugal uses its cached display", "actor": "p", "metric": "nearby_creature_display", "entry": 772529, "equals": 1098 },
+    { "action": "assert", "label": "The elite Son of Arugal can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 772529, "equals": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 6108960 },
+    { "action": "assert", "label": "Cahooey the Big is on Darkcloud Pinnacle at level 29", "actor": "p", "metric": "nearby_creature_count", "entry": 610896, "min_level": 29, "max_level": 29, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Cahooey the Big has 905 x 3.0 = 2715 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 610896, "min": 2579, "max": 2851 },
+    { "action": "assert", "label": "Cahooey the Big uses his cached display", "actor": "p", "metric": "nearby_creature_display", "entry": 610896, "equals": 321657 },
+    { "action": "assert", "label": "Cahooey the Big can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 610896, "equals": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 4493270 },
+    { "action": "assert", "label": "Myrrkora Wavebind is at the Ruins of Solarsal at level 43", "actor": "p", "metric": "nearby_creature_count", "entry": 449327, "min_level": 43, "max_level": 43, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Myrrkora Wavebind has 1373 x 3.5 = 4806 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 449327, "min": 4565, "max": 5046 },
+    { "action": "assert", "label": "Myrrkora Wavebind uses her cached display", "actor": "p", "metric": "nearby_creature_display", "entry": 449327, "equals": 18396 },
+    { "action": "assert", "label": "Myrrkora Wavebind can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 449327, "equals": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 1070280 },
+    { "action": "assert", "label": "Thar'zul is at the Altar of Storms at level 57", "actor": "p", "metric": "nearby_creature_count", "entry": 107028, "min_level": 57, "max_level": 57, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Thar'zul has 1949 x 5.0 = 9745 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 107028, "min": 9258, "max": 10232 },
+    { "action": "assert", "label": "Thar'zul uses his cached display", "actor": "p", "metric": "nearby_creature_display", "entry": 107028, "equals": 17137 },
+    { "action": "assert", "label": "Thar'zul can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 107028, "equals": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 9185300 },
+    { "action": "assert", "label": "The Construct Surgeon is in Plaguewood at level 55", "actor": "p", "metric": "nearby_creature_count", "entry": 918530, "min_level": 55, "max_level": 55, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "The Construct Surgeon has 2614 x 2.5 = 6535 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 918530, "min": 6208, "max": 6862 },
+    { "action": "assert", "label": "The Construct Surgeon uses its cached display", "actor": "p", "metric": "nearby_creature_display", "entry": 918530, "equals": 30881 },
+    { "action": "assert", "label": "The Construct Surgeon can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 918530, "equals": 1 },
+
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 2551460 },
+    { "action": "assert", "label": "Yil'da is in Fallow Sanctuary at level 44", "actor": "p", "metric": "nearby_creature_count", "entry": 255146, "min_level": 44, "max_level": 44, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Yil'da has 1426 x 8.0 = 11408 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 255146, "min": 10838, "max": 11978 },
+    { "action": "assert", "label": "Yil'da uses her stand-in display", "actor": "p", "metric": "nearby_creature_display", "entry": 255146, "equals": 9774 },
+    { "action": "assert", "label": "Yil'da can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 255146, "equals": 1 }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "name": "Verog the Dervish counts Necromancer minion kills (#11155)",
+  "contract": [
+    "Verog 3395 appears after ten Stagnant Oasis Kolkar kills for a player on quest 851 (PR #8308). The count hooks fire for the player's own killing blow and for a pet or totem; a Necromancer's Skeletal Archers 50076 are guardians, which are neither, so their kills never reached the count.",
+    "Nine kills by the archers must leave Verog away and the tenth must summon him within 60 yards of the player, observed by the yell his summon script gives him (the archers kill him at once, so he is not counted alive), whichever of the player or the archers lands the blows. Kolkar Pack Runner 3274 is a Kolkar within 350 yards of the tent. The minion_kill step has the archer deal the killing blow through Unit::DealDamage, so the kill is credited to the guardian."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -1210.6,
+    "y": -2735.0,
+    "z": 106.8,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the Life Force aura synchronize",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 805040
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Verog's quest is in progress",
+      "actor": "n",
+      "quest": 851,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "label": "Verog's item objective is not held, so the quest stays in progress",
+      "actor": "n",
+      "item": 5023
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 851 is incomplete",
+      "actor": "n",
+      "metric": "quest_status",
+      "quest": 851,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nobody has yelled yet",
+      "actor": "n",
+      "metric": "monster_chat_count",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Animate: Skeletal Archer",
+      "actor": "n",
+      "spell": 805040
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: three archers are animated",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 1 wanders in",
+      "actor": "n",
+      "as": "runner1",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 1",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner1"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 2 wanders in",
+      "actor": "n",
+      "as": "runner2",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 2",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner2"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 3 wanders in",
+      "actor": "n",
+      "as": "runner3",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 3",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner3"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 4 wanders in",
+      "actor": "n",
+      "as": "runner4",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 4",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner4"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 5 wanders in",
+      "actor": "n",
+      "as": "runner5",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 5",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner5"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 6 wanders in",
+      "actor": "n",
+      "as": "runner6",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 6",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner6"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 7 wanders in",
+      "actor": "n",
+      "as": "runner7",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 7",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner7"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 8 wanders in",
+      "actor": "n",
+      "as": "runner8",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 8",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner8"
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 9 wanders in",
+      "actor": "n",
+      "as": "runner9",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 9",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner9"
+    },
+    {
+      "action": "assert",
+      "label": "Nine minion kills raise no yell from Verog",
+      "actor": "n",
+      "metric": "monster_chat_count",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "label": "Kolkar Pack Runner 10 wanders in",
+      "actor": "n",
+      "as": "runner10",
+      "entry": 3274,
+      "distance": 6
+    },
+    {
+      "action": "minion_kill",
+      "label": "A Skeletal Archer kills Kolkar 10",
+      "actor": "n",
+      "minion": 50076,
+      "target": "runner10"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tenth minion kill summons Verog, who yells",
+      "actor": "n",
+      "metric": "monster_chat_count",
+      "within_ms": 3000,
+      "min": 1
+    }
+  ]
+}

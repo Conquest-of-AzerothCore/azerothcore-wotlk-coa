@@ -372,7 +372,7 @@ class aura_ascension_tinker_stim : public AuraScript
         HealInfo const* heal = eventInfo.GetHealInfo();
         SpellInfo const* spellInfo = heal ? heal->GetSpellInfo() : nullptr;
         return player && player->getClass() == CLASS_TINKER && eventInfo.GetActor() == player &&
-            heal && heal->GetHealer() == player && heal->GetTarget() && heal->GetEffectiveHeal() &&
+            heal && heal->GetHealer() == player && heal->GetTarget() && heal->GetHeal() &&
             spellInfo && spellInfo->Id != SPELL_STIM_HEAL &&
             !(eventInfo.GetTypeMask() & PROC_FLAG_DONE_PERIODIC);
     }
@@ -384,7 +384,7 @@ class aura_ascension_tinker_stim : public AuraScript
             return;
 
         HealInfo const* heal = eventInfo.GetHealInfo();
-        double amount = double(heal->GetEffectiveHeal()) * effect->GetAmount() / 100.0;
+        double amount = double(heal->GetHeal()) * effect->GetAmount() / 100.0;
         if (amount < 1.0 || amount > std::numeric_limits<int32>::max())
             return;
 

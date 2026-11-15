@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Shadowy Construct and Ichor Globule have AzerothCore's health, not a x1000 modifier (#8392)",
+  "contract": [
+    "#8392: Shadowy Construct (23111) and Ichor Globule (29321) carried HealthModifier 1000, so they had about 7 and",
+    "11 million health. AzerothCore's base data gives 5.95 and 0.181802. On this realm's stats the Construct",
+    "(level 70 Warrior class, expansion 1: 6986 base health) has 6986 x 5.95 = 41567 health, and the Globule (level",
+    "76 Paladin class, expansion 2: 11001 base health) has 11001 x 0.181802 = 2000 health. The Globule is summoned",
+    "inside Violet Hold, because its script reads the Violet Hold instance."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 608,
+    "x": 1808.82,
+    "y": 803.93,
+    "z": 44.364,
+    "o": 6.282
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 23111,
+      "as": "construct",
+      "distance": 6
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 29321,
+      "as": "globule",
+      "distance": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shadowy Construct has 6986 x 5.95 = 41567 health, within 5%",
+      "actor": "hero",
+      "metric": "nearby_creature_max_health",
+      "entry": 23111,
+      "min": 39489,
+      "max": 43645,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ichor Globule has 11001 x 0.181802 = 2000 health, within 5%",
+      "actor": "hero",
+      "metric": "nearby_creature_max_health",
+      "entry": 29321,
+      "min": 1900,
+      "max": 2100,
+      "within_ms": 5000
+    }
+  ]
+}

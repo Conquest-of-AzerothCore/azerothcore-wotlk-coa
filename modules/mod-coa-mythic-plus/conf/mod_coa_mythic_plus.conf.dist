@@ -139,9 +139,10 @@ MythicPlus.Forces.ClearShare = 0.58
 #        Description: Per wing, "lfgId:factor" pairs (space separated) multiplied onto each kill's forces
 #                     after ClearShare, for wings live videos show differently.
 #                     3320 Shadowfang Keep - Halls of the Damned: 18.63 % up to Rethilgore live, 29.75 % here.
-#        Default:     "3320:0.626"
+#                     2038 Dire Maul - North: the usual route reached about 70 %; the wing needs 25 % fewer kills.
+#        Default:     "3320:0.626 2038:1.333"
 
-MythicPlus.Forces.WingFactor = "3320:0.626"
+MythicPlus.Forces.WingFactor = "3320:0.626 2038:1.333"
 
 #    MythicPlus.Health.Basis
 #    MythicPlus.Health.Offset
@@ -164,7 +165,9 @@ MythicPlus.BossCastLog = 1
 #    MythicPlus.DisabledAffixes
 #    MythicPlus.AffixSubstitutes
 #        Description: Affixes left out of every week (MythicAffixes.dbc ids, space or comma separated).
-#                     Each takes the first substitute its row does not have yet. Empty keeps
+#                     Each takes the first substitute of its own tier (an affix the client also
+#                     lists from that keystone level in some week) that its week does not have
+#                     yet, and any substitute the week does not have when none fits. Empty keeps
 #                     Ascension's rotation. The server sends the changed MythicAffixes.dbc rows at
 #                     login, so the client shows the same affixes.
 #        Default:     "80087" (Tiny), "80046 80044 80026 80024 80032" (Horde, Avenger, Life Stealing,

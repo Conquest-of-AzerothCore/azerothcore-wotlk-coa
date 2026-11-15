@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Dire Maul West has Lord Hel'nurath alone at the circle before Immol'thar",
+  "contract": [
+    "On Ascension Lord Hel'nurath (14506) stands alone at the summoning circle before Immol'thar, at 59.2 653.5 -24.6.",
+    "He exists once in a Dire Maul West instance, and no Dread Guard (14483) stands with him."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "actor": "player", "value": 1 },
+    { "action": "teleport", "actor": "player", "map": 429, "x": 54.0, "y": 650.0, "z": -24.6, "o": 0.0 },
+    { "action": "assert", "label": "CONTROL: player is in Dire Maul", "actor": "player", "metric": "map_id", "equals": 429,
+      "within_ms": 15000 },
+    { "action": "assert", "label": "Lord Hel'nurath stands at the circle", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 14506, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "He stands at the Ascension spot", "actor": "player", "metric": "nearest_creature_distance",
+      "entry": 14506, "min": 0, "max": 7 },
+    { "action": "assert", "label": "No Dread Guard stands with him", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 14483, "equals": 0 },
+    { "action": "teleport", "actor": "player", "map": 429, "x": -2.9, "y": 700.0, "z": -24.4, "o": 0.0 },
+    { "action": "assert", "label": "No Dread Guard stands at the old spot from #11411 either", "actor": "player",
+      "metric": "nearby_creature_count", "entry": 14483, "equals": 0, "within_ms": 2000 }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Wildcard Firestorm creates a fiery tornado that damages and knocks back nearby enemies (#11061)",
+  "contract": [
+    "Firestorm280575 summons Fiery Tornado280576 for10s (duration index 1). 280576 had no creature_template, so the",
+    "cast paid its cost and spawned nothing. The tornado carries passive280577 (1000ms period) and each tick casts",
+    "280578 from the tornado for the caster: Fire damage and a knockback to enemies within6yards (radius193).",
+    "The tornado exists after the cast and is gone after its duration; the enemy beside it takes 280578 damage from",
+    "the caster and is pushed away; an enemy 25 yards away is never hit."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 10, "level": 60, "spell_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 3, "reaction": 0 },
+    { "id": "outside", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 25, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "actor": "hero", "spell": 280575 },
+    { "action": "snapshot", "label": "Gap to the enemy before the tornado", "actor": "hero", "metric": "distance_2d", "target": "enemy", "save_as": "gap0" },
+    { "action": "cast", "actor": "hero", "spell": 280575, "destination": { "x": -8949.95, "y": -132.493, "z": 83.5312 } },
+    { "action": "assert", "label": "The Fiery Tornado is summoned", "actor": "hero", "metric": "owned_creature_count", "entry": 280576, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "The tornado carries its passive", "actor": "hero", "metric": "nearby_creature_aura_count", "entry": 280576, "spell": 280577, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "The enemy beside the tornado takes Firestorm damage from the caster", "actor": "hero", "metric": "spell_damage_count", "spell": 280578, "target": "enemy", "min": 1, "within_ms": 2500 },
+    { "action": "assert", "label": "The enemy is knocked back away from the tornado", "actor": "hero", "metric": "distance_2d", "target": "enemy", "relative_to": "gap0", "min": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 9000 },
+    { "action": "assert", "label": "The enemy 25 yards away is never hit", "actor": "hero", "metric": "spell_damage_count", "spell": 280578, "target": "outside", "equals": 0 },
+    { "action": "assert", "label": "The tornado is gone after its 10 s duration", "actor": "hero", "metric": "owned_creature_count", "entry": 280576, "equals": 0, "within_ms": 2000 }
+  ]
+}

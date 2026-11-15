@@ -1,0 +1,318 @@
+{
+  "schema": 1,
+  "name": "A free-pick Hero gets its Wrath ranks back as it levels after Prestige, never above its level (#10709)",
+  "contract": [
+    "Run on a free-pick realm (CoA.ClassModel = hero, CoA.RealmType = seasonal). Wrath is Character Advancement entry 40165 (spell 5176, rank 1); its higher ranks come from a class trainer along SpellRank.dbc: 5177 (level 6), 5178 (14), 5179 (22), 5180 (30), 6780 (38), 8905 (46), 9912 (54).",
+    "Prestige drops every non-retained entry (AscensionFreepick::PrestigeSpecialization), and removing rank 1 removes the trained ranks, which AscensionWildcard remembers in core.wildcard.trainedranks. Re-learning rank 1 used to restore every remembered rank at once, whatever the level: a level 16 Hero held rank 7 (8905, level 46).",
+    "After the fix a remembered rank comes back only when the character's level allows it, in ladder order: at level 16 ranks 2 and 3 are usable and rank 3 is the active one; ranks 4+ are not known; at level 22 rank 4 can be had again. trainer_buy is used for each rank so the scenario holds whether the rank is restored for free or bought again.",
+    "Chromie only prestiges at the realm's level cap (CoAPrestige ResolveRequiredLevel = CONFIG_MAX_PLAYER_LEVEL; the gameplay env has MaxPlayerLevel = 80), so the Hero starts at level 80; below it Activate refuses with Refusal::BelowLevel and the level stays unchanged.",
+    "Wrath ranks are SpellInfo::IsStackableWithRanks (mana power, not passive, not a form or aura), so learning a higher rank leaves the lower ranks known and active (Player::addSpell only deactivates non-stackable ranks); the scenario asserts that stock state rather than a superseded rank 1."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "name": "Prestiger",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "security": 2
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "hero",
+      "entry": 915,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "chromie",
+      "owner": "hero",
+      "entry": 178081,
+      "distance": 3,
+      "faction": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "actor": "hero",
+      "value": 20000000
+    },
+    {
+      "action": "command",
+      "label": "Learn Wrath (entry 40165)",
+      "actor": "hero",
+      "command": ".ca2 player addentry Prestiger 40165"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wrath rank 1 is known",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5176,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 2",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5177
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 3",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5178
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 4",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5179
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 5",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5180
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 6",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 6780
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 7",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 8905
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Wrath rank 8",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 9912
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wrath rank 7 is trained",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 8905,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wrath rank 8 is trained",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 9912,
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Speak to Chromie",
+      "actor": "hero",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I would like to prestige!",
+      "actor": "hero",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Back to level 1",
+      "actor": "hero",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige dropped the Wrath entry",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5176,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and its trained ranks",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 8905,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "hero",
+      "value": 16
+    },
+    {
+      "action": "command",
+      "label": "Learn Wrath again at level 16",
+      "actor": "hero",
+      "command": ".ca2 player addentry Prestiger 40165"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wrath rank 1 is known again",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5176,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: rank 7 (level 46) does not come back at level 16",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 8905,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: neither does rank 4 (level 22)",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5179,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Rank 2 can be had again",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5177
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Rank 3 can be had again",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5178
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 is known",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5177,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 3 is known",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5178,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 3 is the active rank",
+      "actor": "hero",
+      "metric": "spell_active",
+      "spell": 5178,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 stays usable beside it: Wrath is stackable with ranks (mana cost, direct damage), so Player::addSpell keeps lower ranks active, as for any normally trained chain",
+      "actor": "hero",
+      "metric": "spell_active",
+      "spell": 5176,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client spellbook holds rank 3",
+      "actor": "hero",
+      "metric": "client_knows_spell",
+      "spell": 5178,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 4 is still not known at level 16",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5179,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "hero",
+      "value": 22
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Rank 4 can be had again at level 22",
+      "actor": "hero",
+      "target": "trainer",
+      "spell": 5179
+    },
+    {
+      "action": "assert",
+      "label": "Rank 4 is known at level 22",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5179,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "and is the active rank",
+      "actor": "hero",
+      "metric": "spell_active",
+      "spell": 5179,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 5 (level 30) is not known at level 22",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 5180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 7 is still not known",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 8905,
+      "equals": 0
+    }
+  ]
+}

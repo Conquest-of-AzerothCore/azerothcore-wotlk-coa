@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Loot trial objectives gate on their level, not on the item id (Amphibian Angler 609)",
+  "contract": [
+    "LOOT_ITEM_BEFORE_LEVEL objectives are 'count/item/level' (609: 1/6294/15, 1/6310/20, 1/13882/40, 1/13901/60), while kill and quest objectives are 'target/level'.",
+    "The lifecycle read the second value as the gate for every type, so loot trials gated on the item id (6294) and the XP cap and level-up checks never applied to their real gates.",
+    "Expected: the level-gate e2e sees four gates starting at level 15, caps XP at level 14, survives a forced level at the gate, and completes after every item is looted."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "label": "Run the level-gate e2e for Amphibian Angler", "command": "coa e2e Harnessa 609" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: four gates, the first at level 15",
+      "actor": "a", "metric": "system_message_contains", "text": "E2E level-gate 609: 4 gates, first=level 15",
+      "equals": 1, "within_ms": 30000
+    },
+    {
+      "action": "assert", "label": "XP stops one level short of the first gate",
+      "actor": "a", "metric": "system_message_contains", "text": "XP cap -> level 14 (expected 14)", "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert", "label": "A forced level at the gate does not kill",
+      "actor": "a", "metric": "system_message_contains", "text": "alive=true (expected true", "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert", "label": "The full run completes the trial",
+      "actor": "a", "metric": "system_message_contains", "text": "full run -> completed=true", "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert", "label": "No early completion",
+      "actor": "a", "metric": "system_message_contains", "text": "(unexpected)", "equals": 0
+    }
+  ]
+}

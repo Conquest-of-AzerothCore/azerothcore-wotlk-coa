@@ -19,27 +19,27 @@ class aura_ascension_venomancer_event : public AuraScript
     PrepareAuraScript(aura_ascension_venomancer_event);
     Player* Caster()
     {
-        if (GetId() == 300855 || GetId() == 504352 || GetId() == 808082 || GetId() == 808083)
+        if (GetId() == 504352 || GetId() == 808082 || GetId() == 808083)
             return Owner(GetCaster());
         return Owner(GetTarget());
     }
     bool Check(ProcEventInfo& event)
     {
+        auto* info = event.GetSpellInfo();
+        uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
+        if (GetId() == EnvenomedWeapons)
+            return event.GetActor() == GetTarget() && event.GetActionTarget() && damage && !Derived(info) &&
+                (!info || info->Id != EnvenomedJet) && roll_chance_i(GetSpellInfo()->ProcChance);
         Player* player = Caster();
         if (!player || !event.GetActor() || !event.GetActionTarget() || State(player).event)
             return false;
         uint32 id = GetId();
-        auto* info = event.GetSpellInfo();
-        uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
         uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
         bool periodic = event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC);
         bool critical = event.GetHitMask() & PROC_HIT_CRITICAL;
         bool automatic = event.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK);
         bool received = event.GetActionTarget() == GetTarget();
         bool own = event.GetActor() == player;
-        if (id == 300855)
-            return event.GetActor() == GetTarget() && damage && !Derived(info) && (!info || info->Id != 803178) &&
-                roll_chance_i(GetSpellInfo()->ProcChance);
         if (id == 808082)
             return own && received && healing && !Derived(info);
         if (received && damage)
@@ -128,11 +128,16 @@ class aura_ascension_venomancer_event : public AuraScript
     void Proc(ProcEventInfo& event)
     {
         PreventDefaultAction();
+        Unit* target = event.GetActionTarget();
+        if (GetId() == EnvenomedWeapons)
+        {
+            Cast(GetTarget(),target,EnvenomedJet);
+            return;
+        }
         Player* player = Caster();
         if (!player)
             return;
         uint32 id = GetId();
-        Unit* target = event.GetActionTarget();
         Unit* actor = event.GetActor();
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
         uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
@@ -140,7 +145,6 @@ class aura_ascension_venomancer_event : public AuraScript
         State(player).event = true;
         switch (id)
         {
-            case 300855: Cast(player,target,803178); break;
             case 92142:
                 Reduce(player,800946,INT32_MAX);
                 Cast(player,player,706032);

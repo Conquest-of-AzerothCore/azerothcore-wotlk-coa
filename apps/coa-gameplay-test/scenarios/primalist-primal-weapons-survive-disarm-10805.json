@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Primal Weapons survives a Disarm and follows the weapon type (#10805)",
+  "contract": [
+    "Primal Weapons 537218 (\"which when used will grant you a bonus based on whether you use one-handed weapons or",
+    "two-handed weapons\") casts Primal Weapon: Bestial Might 801242 with a one-handed weapon or Primal Might 704098 with a",
+    "two-handed one. Both carried the DBC's equipped-weapon requirement, so a Disarm stripped the buff and nothing",
+    "restored it when the Disarm ended: the Wildwalker had to press the button again after every Disarm. The weapon",
+    "requirement is cleared on those two spells; AscensionPrimalistWeapons keeps the buff matched to the main-hand",
+    "weapon when the slot changes (a swap to another weapon type drops it, and it is not restored by itself). A level 27",
+    "Wildwalker equips a one-handed axe, uses Primal Weapons and is disarmed by Disarm 676: Bestial Might must stay",
+    "through the disarm and after it. Swapping to a two-handed axe must drop Bestial Might."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 31,
+      "level": 27
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "w",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 537218
+    },
+    {
+      "action": "add_item",
+      "actor": "w",
+      "item": 37,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "w",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "label": "Use Primal Weapons with a one-handed axe",
+      "actor": "w",
+      "spell": 537218
+    },
+    {
+      "action": "assert",
+      "label": "Bestial Might is granted",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "w",
+      "spell": 676,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Wildwalker is disarmed",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 676,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bestial Might is still there while disarmed",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Disarm run out",
+      "ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "The Disarm is over",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 676,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bestial Might needs no second press after the Disarm",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "w",
+      "item": 1386,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "w",
+      "item": 1386,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Swapping to a two-handed axe drops Bestial Might",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 801242,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

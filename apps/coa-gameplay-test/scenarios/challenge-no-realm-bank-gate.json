@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "A challenge with NO_REALM_BANK refuses the Realm Bank vault, its deposits and its tab voucher",
+  "contract": [
+    "Hardcore (challenge 54) and 60 other challenges declare CHALLENGE_RULES_TYPE_NO_REALM_BANK, but no code enforced it: a challenger could summon the Realm Bank (item 1180097, spell 92078) and move items between the account's characters.",
+    "Expected: AscensionPersonalBank::CanAccess is asked when a vault opens, for every packet to a vault that is already open, and when the Realm Bank Tab Voucher (1180485) is used. The challenge guard refuses the Realm Bank kind while the rule is active and tells the player why.",
+    "Control: before the challenge starts, the vault opens and takes a deposit, and the voucher is consumed.",
+    "Only deposits are used before the challenge: a Realm Bank withdrawal marks OUTSIDE_REALM_BANK, which would block the Hardcore start."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "add_item", "label": "Acquire the Realm Bank", "actor": "hero", "item": 1180097, "count": 1 },
+    { "action": "add_item", "label": "Carry two Realm Bank Tab Vouchers", "actor": "hero", "item": 1180485,
+      "count": 2 },
+    { "action": "add_item", "label": "Carry a control item", "actor": "hero", "item": 2589, "count": 1 },
+    { "action": "cast", "label": "Summon the Realm Bank vault", "actor": "hero", "spell": 92078 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "personal_bank_open", "label": "Control: open the vault outside any challenge", "actor": "hero",
+      "entry": 80159 },
+    { "action": "personal_bank_swap", "label": "Control: deposit into the open vault", "actor": "hero",
+      "entry": 80159, "direction": "deposit", "item": 2589, "slot": 0 },
+    { "action": "assert", "label": "Control: the vault opened and took the deposit", "actor": "hero",
+      "metric": "item_count", "item": 2589, "equals": 0, "within_ms": 2000 },
+    { "action": "use_item", "label": "Control: use a tab voucher outside any challenge", "actor": "hero",
+      "item": 1180485, "spell": 92079 },
+    { "action": "assert", "label": "Control: the voucher is consumed", "actor": "hero", "metric": "item_count",
+      "item": 1180485, "equals": 1, "within_ms": 2000 },
+    {
+      "action": "assert", "label": "Control: no challenge refusal outside a challenge",
+      "actor": "hero", "metric": "system_message_contains",
+      "text": "Your challenge forbids using the realm bank.", "equals": 0
+    },
+    { "action": "start_challenge", "label": "Start Hardcore (NO_REALM_BANK) with the vault still open",
+      "actor": "hero", "challenge": 54, "level": 1 },
+    { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
+    { "action": "add_item", "label": "Carry a second control item", "actor": "hero", "item": 2589, "count": 1 },
+    { "action": "personal_bank_swap", "label": "DISCRIMINATING: deposit into the vault opened before the challenge",
+      "actor": "hero", "entry": 80159, "direction": "deposit", "item": 2589, "slot": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "The open vault refuses the deposit", "actor": "hero", "metric": "item_count",
+      "item": 2589, "equals": 1 },
+    {
+      "action": "assert", "label": "The challenge says why",
+      "actor": "hero", "metric": "system_message_contains",
+      "text": "Your challenge forbids using the realm bank.", "equals": 1
+    },
+    { "action": "use_item", "label": "DISCRIMINATING: use a tab voucher during Hardcore", "actor": "hero",
+      "item": 1180485, "spell": 92079 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "The voucher is kept and no tab is added", "actor": "hero",
+      "metric": "item_count", "item": 1180485, "equals": 1 },
+    { "action": "personal_bank_open", "label": "DISCRIMINATING: reopen the vault during Hardcore", "actor": "hero",
+      "entry": 80159 },
+    { "action": "personal_bank_swap", "label": "Deposit after the refused reopen", "actor": "hero",
+      "entry": 80159, "direction": "deposit", "item": 2589, "slot": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "The vault stays closed", "actor": "hero", "metric": "item_count",
+      "item": 2589, "equals": 1 }
+  ]
+}

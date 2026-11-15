@@ -19,9 +19,12 @@ constexpr uint32 CharmOfWarding = 705967;
 constexpr uint32 Spider = 800841;
 constexpr uint32 SpiderlingVenomSource = 807702;
 constexpr uint32 Beetle = 803183;
+constexpr uint32 Weaver = 804980;
 constexpr uint32 Skulk = 800843;
 constexpr uint32 SpiderLord = 704264;
 constexpr uint32 SpiderLordDisplay = 142811;
+constexpr uint32 EnvenomedWeapons = 300855;
+constexpr uint32 EnvenomedJet = 803178;
 struct VenomancerState
 {
     EventMap timers;
@@ -67,7 +70,7 @@ void Reduce(Player* player, uint32 root, int32 milliseconds);
 void ReducePercent(Player* player, uint32 root, int32 percent);
 void SetHelper(Player* player, uint32 id, bool enabled);
 void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount);
-void ExtendOwned(Player* player, Unit* target, uint32 root, int32 milliseconds);
+void ExtendOwned(Player* player, Unit* target, uint32 root, int32 milliseconds, bool extendTicks = false);
 void Spread(Player* player, Unit* source, Unit* target, uint32 root);
 void ApplyVenoms(Player* player, Unit* target, bool fromSpiderling = false);
 void Mushroom(Player* player, Position const& position, float coefficient = .25f, bool big = false);

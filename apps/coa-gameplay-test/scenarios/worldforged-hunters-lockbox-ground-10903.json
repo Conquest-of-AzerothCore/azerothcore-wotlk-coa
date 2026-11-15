@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Hunter's Lockbox in Ashenvale rests on the ground (#10903)",
+  "contract": "The Worldforged Hunter's Lockbox (spawn 6941846) in Ashenvale stood at 149.06, above the terrain it sits on. Issue #10903.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the lockbox rests on the terrain",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6941846, "spawn_type": "gameobject", "min": -0.3, "max": 0.3
+    }
+  ]
+}

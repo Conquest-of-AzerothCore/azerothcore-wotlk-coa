@@ -243,11 +243,11 @@
     },
     {
       "action": "assert",
-      "label": "The used key is gone (replaced by the next lower one)",
+      "label": "The used key keeps its level while the run is on",
       "actor": "hero",
       "metric": "item_count",
       "item": 1233407,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",
@@ -286,11 +286,19 @@
     },
     {
       "action": "assert",
-      "label": "Week 39 +10: Avenger (vanilla tier 2191077) takes Tiny's place, Horde is already there",
+      "label": "Week 39 +10: Life Stealing, a +2 affix like Tiny, takes Tiny's place",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 80026,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Week 39 +10: Avenger, a +4 affix, does not take Tiny's place",
       "actor": "mob",
       "metric": "aura",
       "spell": 2191077,
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "assert",

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Wildcard March of the Dead raises a marching line of zombies that explode on an enemy (#10616)",
+  "contract": [
+    "March of the Dead 280510 reads 'Spend rage to summon a line of undead at the target location for $d. Each undead marches forward, exploding when it reaches an enemy and dealing damage to nearby enemies.' Its effect is SCRIPT_EFFECT with 5+1 creatures 280511 and SummonProperties 61, a copy of the Necromancer's 707007.",
+    "Creature 280511 had no template and nothing handled the script effect, so the cast spent rage and did nothing.",
+    "Expected: six zombies appear, march to the enemy 12 yd ahead and explode with 280512 (560 Plague damage in 5 yd, -72% movement speed in 8 yd for 3 s): the enemy is damaged and slowed and the zombies are gone."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Wildmarch", "race": 1, "class": 10, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "wild", "entry": 1601, "level": 60, "health": 500000, "distance": 12, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildmarch" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "wild", "metric": "game_mode_mask", "min": 64 },
+    { "action": "learn", "actor": "wild", "spell": 280510 },
+    { "action": "set_power", "actor": "wild", "power": 1, "value": 1000 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "label": "March of the Dead at the enemy", "actor": "wild", "spell": 280510, "target": "e" },
+    { "action": "assert", "label": "SETUP: March of the Dead is accepted", "actor": "wild", "metric": "cast_failure", "spell": 280510, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: six zombies rise", "actor": "wild", "metric": "owned_creature_count", "entry": 280511, "equals": 6, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the explosion slows the enemy", "actor": "e", "metric": "aura", "spell": 280512, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "The explosion damages the enemy", "actor": "e", "metric": "health", "max": 499999 },
+    { "action": "assert", "label": "The zombies are spent", "actor": "wild", "metric": "owned_creature_count", "entry": 280511, "equals": 0, "within_ms": 5000 }
+  ]
+}

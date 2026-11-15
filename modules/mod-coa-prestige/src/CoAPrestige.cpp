@@ -526,7 +526,7 @@ namespace
         bool const reborn = AscensionWarcraftReborn::IsRebornCharacter(player);
         auto const* realmReset = AscensionPrestigeReset::Area52;
         bool const area52 = realmReset && realmReset->Applies(player);
-        bool const freepick = !area52 && AscensionFreepick::IsFreepickHero(player);
+        bool const freepick = !area52 && AscensionFreepick::HasFreepickBuild(player);
         AscensionPrestigeReset::Plan resetPlan;
         std::string resetError;
         if (area52 && !realmReset->Prepare(player, resetPlan, resetError))
@@ -582,9 +582,11 @@ namespace
         if (!area52 && wildcard)
             talents = AscensionWildcard::PrestigeSpecialization(player);
         else if (!area52 && freepick)
+        {
             talents = AscensionFreepick::PrestigeSpecialization(player);
-        else if (!area52 && reborn)
-            talents = AscensionWarcraftReborn::ResetActiveTalents(player);
+            if (reborn)
+                talents += AscensionWarcraftReborn::ResetActiveTalents(player);
+        }
         else if (!area52 && customClass)
             talents = ForgetAscensionClassTalents(player);
         else if (!area52)
@@ -1040,8 +1042,9 @@ namespace CoAPrestige
     }
 }
 
-// A Warcraft Reborn character's specialization is its talent spec; the lock refuses the other spec's
-// activation spell (SPELL_EFFECT_TALENT_SPEC_SELECT, value 1 or 2).
+// A stock-class character outside Warcraft Reborn uses its talent spec as its specialization; the lock refuses
+// the other spec's activation spell (SPELL_EFFECT_TALENT_SPEC_SELECT, value 1 or 2). Free-pick Heroes and
+// Warcraft Reborn characters switch specialization slots, which the specialization switch guard locks.
 class coa_prestige_talent_spec_lock : public AllSpellScript
 {
 public:
@@ -1052,7 +1055,7 @@ public:
     {
         Player* player = spell->GetCaster() ? spell->GetCaster()->ToPlayer() : nullptr;
         if (!g_enabled || result != SPELL_CAST_OK || !player || IsAscensionCustomClassId(player->getClass()) ||
-            AscensionWildcard::IsWildcardHero(player) || AscensionFreepick::IsFreepickHero(player))
+            AscensionWildcard::IsWildcardHero(player) || AscensionFreepick::HasFreepickBuild(player))
             return;
 
         for (SpellEffectInfo const& effect : spell->GetSpellInfo()->Effects)

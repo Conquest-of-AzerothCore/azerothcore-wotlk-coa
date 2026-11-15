@@ -76,6 +76,11 @@ int32 Amount(uint32 spell, uint8 effect, Unit* caster)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
     return info ? info->Effects[effect].CalcValue(caster) : 0;
 }
+float Radius(uint32 spell, uint8 effect, Unit* caster)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+    return info ? info->Effects[effect].CalcRadius(caster) : 0.0f;
+}
 void Cast(Unit* caster, Unit* target, uint32 spell)
 {
     if (caster && target && target->IsAlive() && caster->IsInWorld())
@@ -165,7 +170,6 @@ void GrantOath(Player* player, uint32 oath)
     Aura* chain = player->GetAura(704576);
     if (chain && chain->GetStackAmount() >= 10)
         return;
-    bool first = !chain;
     int32 duration = chain ? chain->GetDuration() : 15000;
     Cast(player, player, oath);
     if (Aura* aura = player->GetAura(oath))
@@ -174,11 +178,6 @@ void GrantOath(Player* player, uint32 oath)
     if (Aura* aura = player->GetAura(704576))
         aura->SetDuration(aura->GetMaxDuration());
     SyncOaths(player);
-    if (first && State(player).retribution)
-    {
-        State(player).retribution = false;
-        GrantOath(player, 804924);
-    }
 }
 void Delay(Player* player, uint32 amount)
 {
@@ -195,6 +194,7 @@ void Delay(Player* player, uint32 amount)
     {
         aura->GetEffect(EFFECT_0)->ChangeAmount(int32(std::min<uint64>(INT32_MAX, uint64(std::max(0, old)) + amount)));
         aura->SetDuration(aura->GetMaxDuration());
+        aura->GetEffect(EFFECT_0)->ResetTicks();
     }
 }
 void ReduceDebt(Player* player, uint32 percent, bool oneTick)
@@ -208,7 +208,11 @@ void ReduceDebt(Player* player, uint32 percent, bool oneTick)
             if (reduction >= amount)
                 aura->Remove();
             else
+            {
                 effect->ChangeAmount(amount - reduction);
+                if (oneTick)
+                    aura->SetDuration(std::max(0, aura->GetDuration() - 1000));
+            }
         }
 }
 void Zealotry(Player* player, Unit* target, bool repeat)

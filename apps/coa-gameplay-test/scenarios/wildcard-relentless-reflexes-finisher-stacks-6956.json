@@ -1,0 +1,275 @@
+{
+  "schema": 1,
+  "name": "Relentless Reflexes: finishing moves in a tank stance grant stacking dodge without refreshing it (#6956)",
+  "contract": [
+    "Relentless Reflexes 276302 'Your finishing moves grant Relentless Reflexes, increasing dodge chance by",
+    "$276306s1% per stack. Stacks up to $276306u times and lasts $276306d. The duration is not refreshed when gaining",
+    "stacks.' 276306: +4% dodge per stack, 5 stacks, 16 s. 276302 is a passive with Stances 0x8a0400 (forms 11, 18",
+    "Defensive Stance, 20, 24); Bear Form (5/8) is not among them, so the request to add bear forms contradicts the",
+    "client data. 276302 has no proc flags, rule or script, so no stance grants anything today.",
+    "Expected: in Defensive Stance each Eviscerate adds a stack and +4% dodge; the second stack keeps the first",
+    "stack's remaining duration.",
+    "276302 and 276306 carry EquippedItemClass 4 (armor) with subclass mask 64 (shield): Aura::GetProcEffectMask refuses the passive's proc without a usable shield in the off hand, so the Hero carries a buckler.",
+    "PLAYER_DODGE_PERCENTAGE is clamped at 0: a Hero with low Defense skill sits below 0, so the first run saw +1.13 (from -2.87 to 1.13). Defense is set to its level-60 maximum before the base is read.",
+    "A fresh Hero's raw dodge can sit below 0, and the dodge field is clamped at 0, so the +4% per stack is measured between the first and the second stack, both above the clamp."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "label": "Shield proficiency",
+      "actor": "hero",
+      "spell": 9116
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 876
+    },
+    {
+      "action": "equip",
+      "label": "Relentless Reflexes and its buff require a shield (EquippedItemClass 4, subclass mask 64)",
+      "actor": "hero",
+      "item": 876,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "label": "Defensive Stance",
+      "actor": "hero",
+      "spell": 71
+    },
+    {
+      "action": "learn",
+      "label": "Relentless Reflexes",
+      "actor": "hero",
+      "spell": 276302
+    },
+    {
+      "action": "learn",
+      "label": "Sinister Strike",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "label": "Eviscerate",
+      "actor": "hero",
+      "spell": 2098
+    },
+    {
+      "action": "cast",
+      "label": "Enter Defensive Stance",
+      "actor": "hero",
+      "spell": 71
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: in Defensive Stance",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 71,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the stance passive is active",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276302,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Defense at its level-60 maximum, so the base dodge is not clamped at 0",
+      "actor": "hero",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "save_as": "dodge_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Build a combo point",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a combo point",
+      "actor": "hero",
+      "metric": "combo_points",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Finishing move",
+      "actor": "hero",
+      "spell": 2098,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 2098,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the finisher grants a stack",
+      "actor": "hero",
+      "metric": "aura_stacks",
+      "spell": 276306,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Dodge with one stack",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "save_as": "dodge_one"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Build a combo point",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a combo point",
+      "actor": "hero",
+      "metric": "combo_points",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Second finishing move",
+      "actor": "hero",
+      "spell": 2098,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "A second stack",
+      "actor": "hero",
+      "metric": "aura_stacks",
+      "spell": 276306,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second stack adds 4% dodge on top of the first (276306 aura 49, +4% per stack)",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "relative_to": "dodge_one",
+      "min": 3.9,
+      "max": 4.1
+    },
+    {
+      "action": "assert",
+      "label": "The second stack did not refresh the 16 s duration",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 276306,
+      "max": 12000
+    }
+  ]
+}

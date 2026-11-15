@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jin'do's shade detection ends when the Delusions vision ends",
+  "contract": [
+    "Jin'do pairs the Delusions vision (2118511) with the Shade detection of Delusions of Jin'do (24306,",
+    "effect 2) on the cursed player. 24306 lasts longer than the vision, so the cursed player kept seeing",
+    "Shades after the vision ended (round-8 tester, 2026-11-15). spell_jindo_coa_delusions_vision removes",
+    "24306 when 2118511 is removed, by expiry or dispel alike. In a Jin'do fight the harness cannot read",
+    "24306 (see zul-gurub-jindo-delusions-invisibility-detect-9661), so the hero gets both auras out of",
+    "combat, where the leave-combat interrupt of 24306 never fires, and the vision is removed directly."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 309,
+    "x": -11515.8,
+    "y": -1275.48,
+    "z": 79.6621,
+    "o": 3.15905,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "command",
+      "label": "Give the hero the Delusions vision",
+      "actor": "hero",
+      "command": ".aura 2118511"
+    },
+    {
+      "action": "command",
+      "label": "Give the hero the Shade detection",
+      "actor": "hero",
+      "command": ".aura 24306"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero carries the vision",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118511,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero carries the Shade detection",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 24306,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the auras settle",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Shade detection stays while the vision lasts",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 24306,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "End the vision",
+      "actor": "hero",
+      "command": ".unaura 2118511"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the vision is gone",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118511,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shade detection ends with the vision",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 24306,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

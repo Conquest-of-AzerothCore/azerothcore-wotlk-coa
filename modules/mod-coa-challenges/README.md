@@ -88,6 +88,73 @@ keys are appended automatically on deploy.
 .coa reset [all] <player>
 ```
 
+A player with a two-word name is given in quotes, in any letter case: `.coa reset "Firstname Lastname"`.
+
+Support commands for a player's run (administrator, also from the console; the player defaults to the target):
+
+```
+.coa trial objectives [player]
+.coa trial credit <Challenge ID> <Objective ID> [player]
+.coa trial restore <Challenge ID> [player]
+```
+
+- `objectives` lists every active challenge with its level, deaths and tracked objectives, numbered and marked
+  done or pending, and the challenges the player has failed, newest first, each with its Challenge ID, level,
+  when it failed and the character's level at that moment, which is what `restore` needs. It also works for an
+  offline character.
+- `credit` marks one objective done by the Challenge ID and Objective ID shown in that list, whatever the
+  player's level, and runs the normal completion check. The player must be online. `credit` and `restore`
+  typed without their IDs print their syntax and point to `objectives`. `.help coa trial objectives`,
+  `.help coa trial credit` and `.help coa trial restore` print the syntax and a short explanation in game.
+- `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives
+  and run timer it had when it failed, takes the fatal death back when the run was out of lives, and resurrects
+  the character. The meters restart as on a new activation, so a run that failed on one does not die again at
+  once: hunger and thirst at zero on the Survival trials, the fatigue bar full on the Narcolepsy trials. The
+  answer names the meters it restarted. The state comes from `coa_challenge_failure_snapshot`, written at every
+  failure; a failure from before that table restores with a restarted timer. A custom trial the challenge
+  belonged to, High-Risk drops and shared-fate partners are not restored.
+
+`restore` is refused in two cases, both because of levels gained after the failure. Those levels were earned
+outside the challenge's rules: its lives, its bans on the auction house, mail, trade, heirlooms and the dungeon
+finder, and its level cap.
+
+- The character has gained more than `CoAChallenges.Restore.MaxLevelsGained` levels (default 3) since the run
+  failed. This is the only check for a trial with no objectives, such as Hardcore (54), which completes by
+  reaching the maximum level alive.
+- The character has levelled past the gate of an objective that is still pending. An objective only counts
+  below its gate level, so it could never be earned again.
+
+There is no way to bring such a run back. `.coa trial unlock` only removes the failure lock: a challenge that
+must be started at level 1 (the `LEVEL_UP` activation condition, which most trials have) still cannot be started
+by that character, so a fresh attempt means a level 1 character.
+
+A character within the allowance and below every pending gate, for example one who kept playing while waiting
+for a GM, is restored, and the answer states both levels. A failure from before the snapshot table has no
+recorded character level: it is checked against the objective gates only, and refused on a trial that has none.
+
+Examples:
+
+- Hardcore (54): a player dies at level 20 and asks for a restore at level 30. Refused: ten levels gained, three
+  allowed. At level 23 or below the restore succeeds.
+- Hardcore - Boss Blitz (60), whose first gates are Edwin VanCleef before 21, Mutanus the Devourer before 22 and
+  Archmage Arugal before 26: a player dies at level 22 with VanCleef and Mutanus done.
+  - Restored at level 22: both objectives are still done and levelling is capped at 25 again.
+  - Restored at level 24: allowed, Arugal's gate is 26 so nothing was missed.
+  - At level 26 or higher: refused, `past the level 26 gate of pending objective 3 (Kill Archmage Arugal
+    before level 26)`.
+
+Worked example for a kill that did not register:
+
+```
+.coa trial objectives "Firstname Lastname"
+Hardcore - Boss Blitz, Challenge ID 60, level 1, deaths 0 of 1 lives
+  2. [pending] Kill Mutanus the Devourer before level 22, Objective ID 2 (levelling capped at 21)
+.coa trial credit 60 2 "Firstname Lastname"
+```
+
+Crediting the last objective of a trial does not complete it early: a trial completes when every objective is
+done and the character reaches the realm's maximum level.
+
 ## Scope / limitations
 
 - GroupRewards (`ChallengeGroupRewards.dbc`) — semantics not confirmed.

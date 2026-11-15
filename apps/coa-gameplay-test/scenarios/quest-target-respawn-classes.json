@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "name": "Quest target respawn caps apply to real world spawns from their classes",
+  "contract": "With the defaults Respawn.QuestTarget.Named 150, General 0 and LongRespawn 358 and the respawn timer starting at death, a real world spawn respawns at its database delay except a unique named quest target whose delay is at most 358 s, which respawns after 150 s. Hogger 448 (spawn 80531, elite, 180 s) is saved at death with 150 s. Garrick Padfoot 103 (spawn 80247, 270 s) saves 150 s from death when its corpse goes 60 s later. King Mukla 1559 (spawn 823, elite, 360 s) keeps 360 s. Defias Rogue Wizard 474 (spawn 80383, 270 s) is flagged but has 46 spawns, so it is a general target and keeps 270 s.",
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -10107.2,
+      "y": 617.84,
+      "z": 38.08
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 448,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Hogger: elite named target, 180 s capped to 150 s",
+      "actor": "hero",
+      "metric": "spawn_respawn_remaining",
+      "spawn": 80531,
+      "min": 149,
+      "max": 150,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1073741824
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -9056.48,
+      "y": -460.9,
+      "z": 72.83
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 103,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 61000
+    },
+    {
+      "action": "assert",
+      "label": "Garrick Padfoot: named target, 270 s capped to 150 s",
+      "actor": "hero",
+      "metric": "spawn_respawn_remaining",
+      "spawn": 80247,
+      "min": 88,
+      "max": 90,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1073741824
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -14737.8,
+      "y": -392.24,
+      "z": 8.25
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1559,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "King Mukla: elite named target over the 358 s long-respawn limit keeps 360 s",
+      "actor": "hero",
+      "metric": "spawn_respawn_remaining",
+      "spawn": 823,
+      "min": 359,
+      "max": 360,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1073741824
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -9485.0,
+      "y": 486.0,
+      "z": 51.73
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 474,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 61000
+    },
+    {
+      "action": "assert",
+      "label": "Defias Rogue Wizard: flagged wizard with 46 spawns is a general target and keeps 270 s",
+      "actor": "hero",
+      "metric": "spawn_respawn_remaining",
+      "spawn": 80383,
+      "min": 208,
+      "max": 210,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1073741824
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Tickler pickup rests on the cave floor",
+  "contract": "The Tickler pickup stood 1.55 yd under the cave floor, so its model could not be seen or clicked. It now rests on the floor. Issue #10816.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tickler pickup rests on the cave floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6942304,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

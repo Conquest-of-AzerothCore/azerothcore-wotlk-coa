@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: the decorative Twilight Element Warden corpses cannot be attacked (#11373)",
+  "contract": "Twilight Element Warden 40017 spawns 6450150-6450153 outside Beauty's arena carry the Permanent Feign Death addon aura 29266 as decorative corpses, while the same template is the live warden at 6450154-6450167. Feign death does not make a creature unattackable, so the corpse spawns authored with unit_flags 0 could be attacked, leaving the attacker in combat. Each corpse spawn now carries UNIT_FLAG_NON_ATTACKABLE (2), the flag Galaen's Corpse 17508 carries on its template, and the live warden spawn stays attackable.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 645,
+    "x": 137.161,
+    "y": 575.3,
+    "z": 76.464,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 15,
+      "level": 36
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "CONTROL: the player is inside Blackrock Caverns",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 645
+    },
+    {
+      "action": "set_phase",
+      "label": "The player joins world phase 1, where the dungeon spawns live",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "The corpse spawn 6450150 is loaded beside the player",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 40017,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Let the spawn addon auras apply",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player cannot attack the decorative corpse 6450150",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 40017,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "The player walks to the live warden 6450155",
+      "actor": "p",
+      "map": 645,
+      "x": 202.108,
+      "y": 632.3,
+      "z": 83.04
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player can attack the live warden 6450155",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 40017,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

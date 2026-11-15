@@ -1,18 +1,18 @@
 {
   "schema": 1,
-  "name": "Loot in a scaled dungeon scales up and down to the looter, even with a level-60 leader whose open world scaling is off",
+  "name": "Dungeon Finder loot scales up and down to the looter, even with a level-60 leader whose open world scaling is off",
   "contract": [
     "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds,",
     "CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. Loot scales only inside",
-    "a scaled dungeon, whatever the leader's open world switch, up or down to the looter's level, as the corpse and",
-    "roll frame preview it. War Master Voone 9237 drops Flightblade Throwing",
-    "Axe 28972 (blue, item level 57, required level 55, 5 stamina, 8 attack power) at 100%; the client's item key",
-    "for level 30 is 30 + 3 = 33, and its ItemStat.dbc row at 33 requires level 30 and carries 2 stamina and",
-    "2 attack power. The Rake 5807 drops Lionfur Armor 17922",
-    "(green, item level 10, required level 5, 108 armor) at 100%. In Maraudon (map 349) a level-30 member of a group",
-    "led by a level-60 character with the switch off loots the axe at scaling level 33 with that row's stats, and",
-    "Lionfur Armor rises to the same key 33 with required level 30. The leader's own axe rises to the level-60 key",
-    "60 + 5 = 65 and requires level 60. Free-for-all loot keeps a roll out of the way."
+    "a scaled dungeon for a Dungeon Finder group (#11184), whatever the leader's open world switch, up or down to the",
+    "looter's level, as the corpse and roll frame preview it. War Master Voone 9237 drops Flightblade Throwing Axe",
+    "28972 (blue, item level 57, required level 55, 5 stamina, 8 attack power) at 100%; the client's item key for",
+    "level 30 is 30 + 3 = 33, and its ItemStat.dbc row at 33 requires level 30 and carries 2 stamina and 2 attack",
+    "power. The Rake 5807 drops Lionfur Armor 17922 (green, item level 10, required level 5, 108 armor) at 100%. In",
+    "Maraudon (map 349) a level-30 member of a group led by a level-60 character with the switch off loots the axe at",
+    "scaling level 33 with that row's stats, and Lionfur Armor rises to the same key 33 with required level 30. The",
+    "leader's own axe rises to the level-60 key 60 + 5 = 65 and requires level 60. Free-for-all loot keeps a roll out",
+    "of the way."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -37,6 +37,8 @@
     { "action": "level_scaling_packet", "actor": "leader", "value": 0 },
     { "action": "level_scaling_packet", "actor": "member", "value": 1 },
     { "action": "group", "actor": "leader", "target": "member", "loot_method": 0 },
+    { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Maraudon", "actor": "leader",
+      "dungeon": 26, "loot_method": 0 },
     { "action": "wait", "label": "Let the group's switch reach the member", "ms": 1000 },
     {
       "action": "assert",

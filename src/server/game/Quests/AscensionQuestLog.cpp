@@ -44,6 +44,9 @@ WorldPacket BuildLevel(ObjectGuid guid, uint16 slot, uint32 level)
 
 void SendSlot(Player* player, uint16 slot)
 {
+    if (slot >= NATIVE_QUEST_LOG_SIZE)
+        return;
+
     Quest const* quest = sObjectMgr->GetQuestTemplate(player->GetQuestSlotQuestId(slot));
     if (!quest)
         return;
@@ -56,7 +59,7 @@ void SendSlot(Player* player, uint16 slot)
 
 void SendAll(Player* player)
 {
-    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    for (uint16 slot = 0; slot < NATIVE_QUEST_LOG_SIZE; ++slot)
         SendSlot(player, slot);
 }
 }

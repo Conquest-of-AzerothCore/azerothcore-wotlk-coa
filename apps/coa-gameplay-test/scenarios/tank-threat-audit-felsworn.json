@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Felsworn (Tyrant) tank threat abilities generate the threat their tooltips promise",
+  "contract": "Unholy Endurance 300466 promises '+15% damage and threat generated from Carve 800206'. Its two SPELLMOD_DAMAGE/SPELLMOD_THREAT effects (EffectApplyAuraName 108, MiscValue 0 and 2) carry EffectSpellClassMask word0 bit7 (128). Carve's own SpellFamilyFlags are word2 bit21 (2097152, confirmed working for Quick Carving 520254's SPELLMOD_DURATION/ACTIVATION_TIME mods in felsworn-quick-carving.json) and its actual damage sub-spell 578317 carries SpellFamilyFlags {0,0,0}. SpellInfo::IsAffectedBySpellMod (src/server/game/Spells/SpellInfo.cpp) requires (mod->mask & affected->SpellFamilyFlags) != 0 for family 20 with no Carve-specific routing; word0 bit7 never intersects word2 bit21 or an all-zero mask, so Unholy Endurance's modifier cannot ever match Carve or its damage child through the native spellmod path. The native spell_modifier probe (player->ApplySpellMod) against Carve itself must therefore stay at the base value instead of rising to 115. Tyrannical Resolve 804823 promises 'Taunt nearby enemies for 4 seconds'; its own effects (ADD_PCT_MODIFIER, SCHOOL_ABSORB, MOD_DAMAGE_PERCENT_TAKEN) carry no taunt aura, but AscensionFelswornAuras.cpp casts helper 704233 (Tyrant's Command, SPELL_AURA_MOD_TAUNT) on every nearby valid attack target when the aura applies, which must land on a target within 10 yards.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    },
+    {
+      "id": "endurance",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    },
+    {
+      "id": "tyrant",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "taunt_target",
+      "owner": "tyrant",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SANITY: without Unholy Endurance, Carve's SPELLMOD_DAMAGE probe stays at its base value",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800206,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "SANITY: without Unholy Endurance, Carve's SPELLMOD_THREAT probe stays at its base value",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800206,
+      "op": 2,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "endurance",
+      "spell": 300466,
+      "label": "Learn Unholy Endurance"
+    },
+    {
+      "action": "assert",
+      "label": "WRONG CANDIDATE: Unholy Endurance tooltip promises +15% Carve damage (expected 115); classmask word0 bit7 never matches Carve's word2 bit21 family flags",
+      "actor": "endurance",
+      "metric": "spell_modifier",
+      "spell": 800206,
+      "op": 0,
+      "base": 100,
+      "min": 110,
+      "max": 120
+    },
+    {
+      "action": "assert",
+      "label": "WRONG CANDIDATE: Unholy Endurance tooltip promises +15% Carve threat (expected 115); same classmask mismatch",
+      "actor": "endurance",
+      "metric": "spell_modifier",
+      "spell": 800206,
+      "op": 2,
+      "base": 100,
+      "min": 110,
+      "max": 120
+    },
+    {
+      "action": "assert",
+      "label": "WRONG CANDIDATE, confirming on the actual damage sub-spell 578317: SPELLMOD_DAMAGE should also read 115",
+      "actor": "endurance",
+      "metric": "spell_modifier",
+      "spell": 578317,
+      "op": 0,
+      "base": 100,
+      "min": 110,
+      "max": 120
+    },
+    {
+      "action": "assert",
+      "label": "WRONG CANDIDATE, confirming on the actual damage sub-spell 578317: SPELLMOD_THREAT should also read 115",
+      "actor": "endurance",
+      "metric": "spell_modifier",
+      "spell": 578317,
+      "op": 2,
+      "base": 100,
+      "min": 110,
+      "max": 120
+    },
+    {
+      "action": "learn",
+      "actor": "tyrant",
+      "spell": 804823,
+      "label": "Learn Tyrannical Resolve"
+    },
+    {
+      "action": "cast",
+      "actor": "tyrant",
+      "spell": 804823,
+      "label": "Cast Tyrannical Resolve"
+    },
+    {
+      "action": "assert",
+      "label": "OK: Tyrannical Resolve is cast",
+      "actor": "tyrant",
+      "metric": "cast_failure",
+      "spell": 804823,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "OK: a nearby enemy carries Tyrant's Command, the scripted taunt helper",
+      "actor": "taunt_target",
+      "metric": "aura",
+      "spell": 704233,
+      "caster": "tyrant",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

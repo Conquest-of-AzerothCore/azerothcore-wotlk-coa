@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Necromancer: Life For Power shield is capped (#4172)",
- "contract": "Life For Power (705746) converts 20% of healing taken into a shield (707194, 10 s) that cannot grow past the Necromancer's maximum health. Greater Heal (25213) heals 1248-1465 at level 60, so one heal converts 249-293 (439 on a critical heal), 0.1-0.3 of the fixture's 1956 maximum health, and eight heals at the 3.2 s cadence convert at least 1992: the shield reaches exactly maximum health by the eighth heal. The heal that reaches the cap still converts and refreshes the shield, so it is present at that reading. Heals at the cap convert nothing and, as the tooltip says the shield is gained for the amount absorbed, do not refresh it, so after them the shield is either at maximum health or has expired 10 s after the capping heal; it never exceeds maximum health.",
+ "contract": "Life For Power (705746) converts 20% of healing taken into a shield (707194, 10 s) that cannot grow past the Necromancer's maximum health. Greater Heal (25213) heals 1248-1465 at level 60, so one heal converts 249-293 (439 on a critical heal), 0.1-0.3 of the 1956 maximum health the fixture sets (independent of the class stats), and eight heals at the 3.2 s cadence convert at least 1992: the shield reaches exactly maximum health by the eighth heal. The heal that reaches the cap still converts and refreshes the shield, so it is present at that reading. Heals at the cap convert nothing and, as the tooltip says the shield is gained for the amount absorbed, do not refresh it, so after them the shield is either at maximum health or has expired 10 s after the capping heal; it never exceeds maximum health.",
  "timeout_ms": 120000,
  "players": [
   {
@@ -25,6 +25,12 @@
    "action": "set_aura",
    "spell": 705746,
    "stacks": 1,
+   "actor": "n"
+  },
+  {
+   "action": "set_health",
+   "value": 1956,
+   "maximum": 1956,
    "actor": "n"
   },
   {

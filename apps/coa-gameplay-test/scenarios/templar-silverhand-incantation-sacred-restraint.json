@@ -1,0 +1,277 @@
+{
+  "schema": 1,
+  "name": "Silverhand Incantation removes Sacred Restraint from the caster on every cast and from a friendly target only",
+  "contract": "Silverhand Incantation 801465 reads '...charging you to them and removing Sacred Restraint from you and them if they are an ally.' With Sacred Restraint 102208 on the level 60 Templar and on its target: a cast at the ally from 60 yd is refused out of range (97) and both keep it; a cast at the ally from 10 yd lands and clears both; a cast at the hostile dummy lands, clears the caster and keeps the dummy's (owner ruling, status-5 Q4 option (a)). Every application on the two units is removed, whoever applied it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "templar",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "templar",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 801465
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 102208,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 102208,
+      "stacks": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 801465
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801465,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "failed cast is refused out of range",
+      "actor": "templar",
+      "min": 97,
+      "max": 97,
+      "metric": "cast_failure",
+      "spell": 801465
+    },
+    {
+      "action": "assert",
+      "label": "failed cast keeps the caster restraint",
+      "actor": "templar",
+      "min": 1,
+      "max": 1,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "assert",
+      "label": "failed cast keeps the ally restraint",
+      "actor": "ally",
+      "min": 1,
+      "max": 1,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": -20
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": -20
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": -10
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 801465
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801465,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "ally cast lands next to the ally",
+      "actor": "templar",
+      "min": 0,
+      "max": 5,
+      "metric": "distance_2d",
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "ally cast clears the caster restraint",
+      "actor": "templar",
+      "min": 0,
+      "max": 0,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "assert",
+      "label": "ally cast clears the ally restraint",
+      "actor": "ally",
+      "min": 0,
+      "max": 0,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 102208,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 102208,
+      "stacks": 1,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "caster restraint set",
+      "actor": "templar",
+      "min": 1,
+      "max": 1,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "assert",
+      "label": "dummy restraint set",
+      "actor": "dummy",
+      "min": 1,
+      "max": 1,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 801465
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801465,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "hostile cast strikes the dummy",
+      "actor": "templar",
+      "min": 1,
+      "max": 100,
+      "metric": "spell_damage_count",
+      "spell": 801501,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "hostile cast clears the caster restraint",
+      "actor": "templar",
+      "min": 0,
+      "max": 0,
+      "metric": "aura",
+      "spell": 102208
+    },
+    {
+      "action": "assert",
+      "label": "hostile cast keeps the dummy restraint",
+      "actor": "dummy",
+      "min": 1,
+      "max": 1,
+      "metric": "aura",
+      "spell": 102208
+    }
+  ]
+}

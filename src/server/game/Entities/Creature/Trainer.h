@@ -75,7 +75,7 @@ namespace Trainer
             /// next spell learned; it keeps the rest: the steps open to them and the recipes they know.
             void SendSpells(Creature* npc, Player* player, LocaleConstant locale, bool onlyTrainable = false) const;
             bool CanTeachSpell(Player const* player, Spell const* trainerSpell) const;
-            bool RepublishesAfterPurchase() const;
+            bool RepublishesAfterPurchase(Player const* player) const;
             void TeachSpell(Creature* npc, Player* player, uint32 spellId);
 
             [[nodiscard]] uint32 GetTrainerId() const { return _trainerId; }

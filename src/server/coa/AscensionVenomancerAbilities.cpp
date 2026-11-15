@@ -328,7 +328,7 @@ class spell_ascension_venomancer_ability : public SpellScript
                 aura->SetDuration(Amount(704235,2));
         }
         if (Named(GetSpellInfo(),504342))
-            ExtendOwned(player,target,800870,Amount(id,1));
+            ExtendOwned(player,target,800870,Amount(id,1),true);
         if (id == 680767)
             for (Unit* ally : Allies(player,player,Radius(id)))
                 for (uint32 root : {800901,800899})
@@ -355,6 +355,7 @@ class spell_ascension_venomancer_ability : public SpellScript
             for (uint32 n = 0; n < 12; ++n)
                 Mushroom(player,player->GetRandomPoint(*player,Radius(680764)));
             player->CastSpell(player->GetPositionX(),player->GetPositionY(),player->GetPositionZ(),681291,true);
+            player->SendClearCooldown(681291, player);
         }
         if (id == 806217 && GetExplTargetDest())
         {

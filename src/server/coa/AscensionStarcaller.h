@@ -19,7 +19,7 @@ struct StarcallerState
     std::map<ObjectGuid, uint64> counters;
     uint64 clock = 0, sequence = 0;
     double spentPercent = 0;
-    uint32 secondMoon = 0, cascade = 0, barrage = 0;
+    uint32 secondMoon = 0, cascade = 0;
     bool event = false, refreshing = false;
     float chargeDistance = 0, chargeX = 0, chargeY = 0;
     uint32 chargeAura = 0;

@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "name": "Mythical Boon items vanish from the bags when the player leaves the dungeon",
+  "contract": [
+    "Mythical Boon items (2104920-2104935) only work inside a keystone run. Our tester asked for them to leave the bags",
+    "as soon as the player leaves the dungeon. They stay while the player is inside, and go when the player changes to a map",
+    "that is not a dungeon, or logs in outside one. A dead player who ends up outside, for example at a graveyard, keeps",
+    "them for the run back; they go only if that player is brought back to life outside the dungeon."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 389,
+      "x": -243.0,
+      "y": 150.0,
+      "z": -18.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "label": "CONTROL: p is in Ragefire Chasm",
+      "action": "assert",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 389,
+      "within_ms": 10000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2104920,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2104927,
+      "count": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "label": "Inside the dungeon the boons stay in the bags",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 3
+    },
+    {
+      "action": "die",
+      "actor": "p"
+    },
+    {
+      "label": "CONTROL: p is dead",
+      "action": "assert",
+      "actor": "p",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 1177.78,
+      "y": -4464.24,
+      "z": 21.35
+    },
+    {
+      "label": "CONTROL: the dead player is at the Northern Durotar graveyard outside Ragefire Chasm",
+      "action": "assert",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "DISCRIMINATING: a dead player outside keeps the boons for the run back",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 3
+    },
+    {
+      "action": "command",
+      "actor": "p",
+      "command": ".revive"
+    },
+    {
+      "label": "Brought back to life outside the dungeon, the player loses them",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 389,
+      "x": -243.0,
+      "y": 150.0,
+      "z": -18.6
+    },
+    {
+      "label": "CONTROL: p is in Ragefire Chasm again",
+      "action": "assert",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 389,
+      "within_ms": 10000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2104920,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2104927,
+      "count": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "label": "CONTROL: p carries three boons again",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 3
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 1811.0,
+      "y": -4410.0,
+      "z": -18.0
+    },
+    {
+      "label": "CONTROL: p is back in Orgrimmar",
+      "action": "assert",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "label": "DISCRIMINATING: outside the dungeon the boons are gone",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

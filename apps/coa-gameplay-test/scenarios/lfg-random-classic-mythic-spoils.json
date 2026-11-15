@@ -1,7 +1,7 @@
 {
     "schema":  1,
-    "name":  "Random Classic Dungeon Mythic: the completion gives Dungeon Spoils (Mythic) and the final boss a Mark of Triumph",
-    "contract":  "A level 60 group finishes a Random Classic Dungeon Mythic (2258) from the Dungeon Finder. The reward quest gives every member Dungeon Spoils (Mythic) (1027965), and the final boss of a Heroic or Mythic vanilla dungeon one Mark of Triumph (1414502). Using the spoils uses them up and puts one or two epic Mythic dungeon items from them in the bags.",
+    "name":  "Random Classic Dungeon Mythic: the completion gives Dungeon Spoils (Mythic) and the final boss gives no Mark of Triumph",
+    "contract":  "A level 60 group finishes a Random Classic Dungeon Mythic (2258) from the Dungeon Finder. The reward quest gives every member Dungeon Spoils (Mythic) (1027965), while the Mythic final boss gives no Mark of Triumph (1414502, Heroic only since #11384). Using the spoils uses them up and puts one or two epic Mythic dungeon items from them in the bags.",
     "timeout_ms":  180000,
     "location":  {
                      "map":  0,
@@ -610,19 +610,19 @@
                   },
                   {
                       "action":  "assert",
-                      "label":  "p1 holds the final boss Mark of Triumph",
+                      "label":  "p1 gets no Mark of Triumph from the Mythic final boss (#11384)",
                       "actor":  "p1",
                       "metric":  "item_count",
                       "item":  1414502,
-                      "equals":  1
+                      "equals":  0
                   },
                   {
                       "action":  "assert",
-                      "label":  "p5 holds the final boss Mark of Triumph",
+                      "label":  "p5 gets no Mark of Triumph from the Mythic final boss (#11384)",
                       "actor":  "p5",
                       "metric":  "item_count",
                       "item":  1414502,
-                      "equals":  1
+                      "equals":  0
                   },
                   {
                       "action":  "use_item",

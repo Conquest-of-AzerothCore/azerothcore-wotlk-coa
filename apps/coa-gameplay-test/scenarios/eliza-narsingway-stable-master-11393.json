@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Eliza Narsingway, the Mobile Stable Master companion, offers the stable (#11393)",
+  "contract": [
+    "Mobile Stable Master (9931336) says 'Right Click to summon and dismiss Eliza Narsingway the mobile Stable Master.' and summons creature 10960 as a minipet; the core copies the template's npcflag onto the summon. The template carried npcflag 0 and gossip_menu_id 0, so HandleGossipHelloOpcode returned at once and a click did nothing.",
+    "Expected, from the stable masters the world already has (9896 World Stable Master, 24974 Liza Cutlerflix: npcflag 4194305 = gossip | stable master, gossip menu 9821 whose option 0 is 'I'd like to stable my pet here.'): a Primalist (class 31, which the core treats as a hunter for pets once Spirit Beast Master is learned) who clicks the companion is offered that menu (the stable option first, then the lost-companion entry), and the stable requests that need a stable master (CMSG_BUY_STABLE_SLOT) are accepted for it, answered with stable result 10."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 31, "level": 13 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "specialization", "actor": "hunter", "id": 59 },
+    {
+      "action": "assert", "label": "SETUP: Spirit Beast Master is known, so the Primalist counts as a hunter for pets",
+      "actor": "hunter", "metric": "knows_spell", "spell": 92148, "equals": 1
+    },
+    { "action": "learn", "actor": "hunter", "spell": 9931336 },
+    { "action": "cast", "actor": "hunter", "spell": 9931336 },
+    {
+      "action": "assert", "label": "Eliza Narsingway is summoned", "actor": "hunter", "metric": "pet_entry",
+      "equals": 10960, "within_ms": 6000
+    },
+    { "action": "gossip_hello", "actor": "hunter", "label": "Right-click Eliza Narsingway" },
+    {
+      "action": "assert", "label": "She offers the two options of menu 9821", "actor": "hunter", "metric": "gossip_options",
+      "equals": 2, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "and the first is the stable", "actor": "hunter", "metric": "gossip_option_text",
+      "index": 0, "text": "I'd like to stable my pet here.", "equals": 1
+    },
+    { "action": "set_money", "actor": "hunter", "value": 100000 },
+    {
+      "action": "client_packet", "label": "Buy a stable slot from her", "actor": "hunter", "opcode": 626,
+      "fields": [ { "nearest_creature_guid": 10960 } ], "consumed": false
+    },
+    {
+      "action": "assert", "label": "The stable accepts her as its master", "actor": "hunter",
+      "metric": "stable_result", "equals": 10
+    }
+  ]
+}

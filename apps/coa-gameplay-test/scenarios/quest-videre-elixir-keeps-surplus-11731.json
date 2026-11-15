@@ -1,0 +1,91 @@
+{
+ "schema": 1,
+ "name": "Handing in The Videre Elixir takes one elixir and leaves the rest (#11731)",
+ "contract": "The Videre Elixir 3909 asks for 1 Videre Elixir 11243, while the repeatable Videre Elixir 4041 hands out 3 and Meet at the Grave 3912 tells the player to drink one. 11243 is bound as a quest item (Bonding 4) but has an on-use spell, so it does something on its own like Clara's Fresh Apple 8683 in the COA-10637 contract. RewardQuest discarded the whole lot of a Bonding 4 item before it looked at that, so the hand-in destroyed all 3. It takes the 1 asked and leaves 2. Essence of the Elements 11129 has Bonding 4 and no spell, so its surplus is still discarded at the hand-in of The Last Element 7201 (COA-10637).",
+ "timeout_ms": 60000,
+ "location": {
+  "map": 0,
+  "x": -9457.0,
+  "y": 64.0,
+  "z": 56.0,
+  "o": 0.0
+ },
+ "players": [
+  {
+   "id": "a",
+   "race": 2,
+   "class": 12,
+   "level": 60
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "a",
+   "quest": 3909
+  },
+  {
+   "action": "add_item",
+   "actor": "a",
+   "item": 11243,
+   "count": 2
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: a holds the 1 asked and the 2 further Videre Elixirs",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 11243,
+   "equals": 3
+  },
+  {
+   "action": "reward_quest",
+   "actor": "a",
+   "quest": 3909
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: the hand-in takes the 1 asked and leaves 2 Videre Elixirs",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 11243,
+   "equals": 2
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "a",
+   "quest": 7201
+  },
+  {
+   "action": "add_item",
+   "actor": "a",
+   "item": 11129,
+   "count": 3
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: a holds the 10 asked and 3 extra Essences of the Elements",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 11129,
+   "equals": 13
+  },
+  {
+   "action": "reward_quest",
+   "actor": "a",
+   "quest": 7201
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: an item without a spell is still discarded in full",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 11129,
+   "equals": 0
+  }
+ ]
+}

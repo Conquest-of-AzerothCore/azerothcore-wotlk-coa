@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "CoA display patch stream reaches a client that reconnects to its character",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1. The login stream starts with one SMSG_PATCH_LOADING_SCREENS (0x05F8) row.",
+    "A client restarted while its character was still in the world reconnects through",
+    "HandlePlayerLoginToCharInWorld, which runs no login hook. Its new session must receive the stream again when",
+    "the client reports the extension loaded (CMSG 0x561); a second 0x561 on the same session sends nothing.",
+    "Socketless sessions establish the packets, not client rendering."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "players": [
+    {"id": "client", "race": 1, "class": 1, "level": 32}
+  ],
+  "steps": [
+    {"action": "client_packet", "actor": "client", "opcode": 1377},
+    {"action": "assert", "label": "SETUP: the first session is streamed once", "actor": "client",
+     "metric": "server_packets", "opcode": 1528, "equals": 1, "within_ms": 10000},
+    {"action": "reconnect", "actor": "client"},
+    {"action": "client_packet", "actor": "client", "opcode": 1377},
+    {"action": "assert", "label": "The reconnected session is streamed again", "actor": "client",
+     "metric": "server_packets", "opcode": 1528, "equals": 2, "within_ms": 10000},
+    {"action": "client_packet", "actor": "client", "opcode": 1377},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "A repeated 0x561 on the same session is not streamed", "actor": "client",
+     "metric": "server_packets", "opcode": 1528, "equals": 2}
+  ]
+}

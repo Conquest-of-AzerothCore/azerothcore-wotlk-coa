@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "The Bloody Wedding Ring pickup returns to Silithus instead of stacking in the Barrens (#9496)",
+  "contract": "The alignment pass moved the Silithus Bloody Wedding Ring (guid 6941466, template 90305) beside its Barrens twin 6941467, so the Barrens showed the ring twice and Silithus none. The Barrens spot now holds one ring, the spawn is back at its pre-pass Silithus position (-7130.7, 819) resting on the ground.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -1921.54, "y": -2450.08, "z": 95.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no ring left at the stacked Barrens spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90305, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -1782.4, "y": -2373.1, "z": 95.0, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "one ring beside the Barrens twin", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90305, "equals": 1 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -7130.7, "y": 819.0, "z": 15.0, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the ring stands in Silithus", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90305, "equals": 1 },
+    { "action": "assert", "label": "the Silithus ring rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941466, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 }
+  ]
+}

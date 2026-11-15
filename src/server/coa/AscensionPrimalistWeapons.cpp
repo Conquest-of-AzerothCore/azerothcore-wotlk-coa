@@ -25,8 +25,8 @@ uint32 SelectPrimalWeapon(Player* player, bool allowUnconfirmed = false)
 {
     if (!IsAscensionPrimalistWeaponsEligible(player, allowUnconfirmed))
         return 0;
-    Item* weapon = player->GetWeaponForAttack(BASE_ATTACK, true);
-    if (!weapon)
+    Item* weapon = player->GetWeaponForAttack(BASE_ATTACK);
+    if (!weapon || weapon->IsBroken())
         return 0;
     ItemTemplate const* item = weapon->GetTemplate();
     if (item->Class != ITEM_CLASS_WEAPON)
@@ -161,6 +161,13 @@ void ReconcileAscensionPrimalistWeapon(Player* player)
 
 void ApplyAscensionPrimalistWeaponsContract(SpellInfo* info)
 {
+    if ((info->Id == SPELL_BESTIAL_MIGHT || info->Id == SPELL_PRIMAL_MIGHT) && info->SpellFamilyName == 37)
+    {
+        info->EquippedItemClass = -1;
+        info->EquippedItemSubClassMask = 0;
+        info->EquippedItemInventoryTypeMask = 0;
+        return;
+    }
     if (info->Id != SPELL_PRIMAL_WEAPONS || info->SpellFamilyName != 37)
         return;
     info->Attributes = 0;

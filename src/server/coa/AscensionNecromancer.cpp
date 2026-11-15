@@ -235,6 +235,20 @@ bool Chance(Player* player, uint32 talent, float multiplier, uint32 cooldown)
         State(player).cooldowns.ScheduleEvent(talent, Milliseconds(cooldown));
     return true;
 }
+bool MinionChance(Player* player, Unit* holder, uint32 talent, float multiplier, uint32 cooldown)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(talent);
+    if (!info || !holder || !holder->HasAura(talent, player->GetGUID()) ||
+        State(player).cooldowns.HasTimeUntilEvent(talent))
+        return false;
+    float chance = info->ProcChance * multiplier;
+    player->ApplySpellMod(talent, SPELLMOD_CHANCE_OF_SUCCESS, chance);
+    if (!roll_chance_f(std::clamp(chance, 0.0f, 100.0f)))
+        return false;
+    if (cooldown)
+        State(player).cooldowns.ScheduleEvent(talent, Milliseconds(cooldown));
+    return true;
+}
 bool Disease(SpellInfo const* info)
 {
     return info && info->SpellFamilyName == 29 &&
@@ -393,7 +407,7 @@ class necromancer_lifecycle : public UnitScript
             {
                 Sync(player);
                 for (uint32 id : {572638, 706472, 531126, 560012, 500982, 500985, 301207})
-                    if (Aura* aura = player->GetAura(id))
+                    if (Aura* aura = player->GetOwnedAura(id))
                         aura->RecalculateAmountOfEffects();
                 state.events.ScheduleEvent(1, 500ms);
             }

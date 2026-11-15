@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "The grouped e2e completes Hardcore Duo for both members (Pair in the Lair 58)",
+  "contract": [
+    "Pair in the Lair (58) needs a two-player group (GROUP_SIZE 2) and carries a tracked DUO objective.",
+    "The test activation never marked the DUO/TRIO objective, so the grouped e2e could not complete a duo or trio trial even when every kill gate was met.",
+    "Expected: both members pass the XP cap at level 20, survive a forced level at gate 21 and complete the trial at the level cap."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 1 },
+    { "id": "b", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "a", "target": "b" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "console", "label": "Run the grouped e2e for Pair in the Lair", "command": "coa e2e Harnessa 58" },
+    {
+      "action": "assert", "label": "The run sees the first gate at level 21",
+      "actor": "a", "metric": "system_message_contains", "text": "E2E level-gate 58:", "equals": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert", "label": "XP stops one level short of the first gate",
+      "actor": "b", "metric": "system_message_contains", "text": "XP cap -> level 20 (expected 20)", "equals": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the full run completes the trial",
+      "actor": "a", "metric": "system_message_contains", "text": "full run -> completed=true", "equals": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert", "label": "Neither member misses the completion",
+      "actor": "a", "metric": "system_message_contains", "text": "completed=false", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Neither member dies at a gate",
+      "actor": "a", "metric": "system_message_contains", "text": "alive=false", "equals": 0
+    }
+  ]
+}

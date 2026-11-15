@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "Bazaar kill tokens at maximum level follow the open-world level the player is shown",
+  "contract": "At default settings a level-60 character is judged on the level a creature is shown to them. With open-world scaling on, scaling shows Kobold Vermin 6 (level 1-2) in Northshire near level 56, inside the five levels below 60 that pay, so ten solo kills pay 0-2 each and all ten paying zero has a chance of about 1 in 59,000. After the character turns scaling off at the Destiny Weaver, the Vermin keep their authored level 1-2 and three more kills pay nothing.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "capped",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "label": "capped character sees the real Northshire spawns",
+      "actor": "capped",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped character starts with open-world scaling on",
+      "actor": "capped",
+      "metric": "level_scaling_choice",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_scaled"
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79992
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79993
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79994
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79995
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79996
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79998
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 79999
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 80000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 80001
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 80002
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "ten kills shown near level 56 pay tokens at level 60",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_scaled",
+      "min": 1,
+      "max": 20,
+      "within_ms": 2000
+    },
+    {
+      "action": "level_scaling_packet",
+      "label": "capped character turns open-world scaling off",
+      "actor": "capped",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: open-world scaling is off",
+      "actor": "capped",
+      "metric": "level_scaling_choice",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_unscaled"
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 80012
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 80014
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "capped",
+      "guid": 80016
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "authored level 1-2 kills pay nothing at level 60 with scaling off",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_unscaled",
+      "equals": 0
+    }
+  ]
+}

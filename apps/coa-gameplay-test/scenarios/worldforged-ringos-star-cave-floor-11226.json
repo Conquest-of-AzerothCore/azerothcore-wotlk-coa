@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Worldforged Ringo's Star rests on the ground (#11226)",
+  "contract": "The Ringo's Throwing Star pickup (entry 95935, guid 6942091) hovered 2.62 yd above the cave floor under it in Fire Plume Ridge, where the reporter stood on that floor 0.7 yd away. It rests on that floor and opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7201.7,
+    "y": -1394.2,
+    "z": -231.854,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "metric": "spawn_ground_gap",
+      "min": -0.15,
+      "max": 0.5,
+      "actor": "p",
+      "guid": 6942091,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "it is clear of walls",
+      "metric": "spawn_clearance",
+      "min": 0.5,
+      "actor": "p",
+      "guid": 6942091,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95935
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "it is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

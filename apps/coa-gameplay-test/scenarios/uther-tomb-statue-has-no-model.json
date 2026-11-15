@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Uther's Statue in Uther's Tomb is a quest target without a model",
+  "contract": [
+    "The Ascension client crashes in GetCollisionFacets on utherstatue.m2 when gameobject 181653",
+    "(Uther's Statue, spawn 45493) is shown with display 6815. The tomb already draws the statue, so",
+    "rev_20261103_20_coa_uther_statue_crash gives the gameobject display 0. The spawn must stay in the",
+    "world, because quest 9444 (Defiling Uther's Tomb) uses it as the target of spell 30098."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 974.59,
+    "y": -1824.76,
+    "z": 81.388,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Uther's Statue is still spawned for quest 9444",
+      "actor": "p",
+      "metric": "spawn_active",
+      "spawn": 45493,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "and it has no model for the client to build a collision for",
+      "actor": "p",
+      "metric": "spawn_display",
+      "spawn": 45493,
+      "equals": 0
+    }
+  ]
+}

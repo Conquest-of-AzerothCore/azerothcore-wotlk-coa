@@ -36,6 +36,14 @@ enum DataTypes
     ALL_PYLONS_OFF                  = 0x1F
 };
 
+// TYPE_EAST_WING_PROGRESS: 1 frees Ironbark (Zevrim Thornhoof and Hydrospawn dead), 2 opens Alzzin's door; 3 and 4
+// belong to Alzzin's fight, and the Conservatory Door opens on 2, 3 and 4 (SmartAI).
+enum DireMaulEastWingProgress
+{
+    EAST_WING_IRONBARK_FREED        = 1,
+    EAST_WING_DOOR_OPEN             = 2
+};
+
 enum GoIds
 {
     GO_DIRE_MAUL_FORCE_FIELD        = 179503,
@@ -45,7 +53,8 @@ enum GoIds
 enum NpcIds
 {
     NPC_IMMOL_THAR                  = 11496,
-    NPC_HIGHBORNE_SUMMONER          = 11466
+    NPC_HIGHBORNE_SUMMONER          = 11466,
+    NPC_HYDROSPAWN                  = 13280
 };
 
 template <class AI, class T>

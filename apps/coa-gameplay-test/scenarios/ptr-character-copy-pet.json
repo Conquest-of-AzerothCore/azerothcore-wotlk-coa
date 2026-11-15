@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "PTR character copy: a character with a pet copies after a pet was summoned on this realm",
+  "contract": "ObjectMgr::GeneratePetNumber pre-increments, so _hiPetNumber is the last pet number in use. PlayerDumpReader numbered the copy's pets from _hiPetNumber, so once any pet had been summoned since startup the copy's first pet reused that number and .ptr copy failed on a duplicate character_pet key (live PTR: Duplicate entry for key 'character_pet.PRIMARY'). The copy numbers its pets after the last one in use. ptr_character_copy makes this realm both the source and the target of the queued copy.",
+  "timeout_ms": 60000,
+  "ptr_character_copy": true,
+  "players": [
+    { "id": "a", "name": "Impowner", "race": 1, "class": 9, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "a", "spell": 688 },
+    { "action": "cast", "label": "Summon the Imp, which takes the newest pet number", "actor": "a", "spell": 688 },
+    { "action": "wait", "label": "Let the 10-second Imp summon finish", "ms": 11000 },
+    { "action": "assert", "label": "SETUP: the Imp is saved as the character's pet", "actor": "a",
+      "metric": "pet_rows", "equals": 1, "within_ms": 5000 },
+    { "action": "relog", "actor": "a" },
+    { "action": "assert", "label": "The source account starts with one character", "actor": "a",
+      "metric": "account_character_count", "equals": 1 },
+
+    { "action": "command", "label": "Queue the copy of the character with its pet", "actor": "a",
+      "command": ".ptr copy Impowner" },
+    { "action": "assert", "label": "DISCRIMINATING: the copy with its pet loads as a second character", "actor": "a",
+      "metric": "account_character_count", "equals": 2, "within_ms": 15000 },
+    { "action": "assert", "label": "The player is told the copy is ready", "actor": "a",
+      "metric": "system_message_contains", "text": "Impowner was copied to", "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "The source character keeps its own pet", "actor": "a",
+      "metric": "pet_rows", "equals": 1 }
+  ]
+}

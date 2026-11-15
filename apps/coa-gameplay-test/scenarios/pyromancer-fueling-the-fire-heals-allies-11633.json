@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Fueling the Fire heals allies around the Phoenix when Ember Touch hits it (#11633)",
+  "contract": "#11633: Fueling the Fire 806747 reads 'Using Ember Touch on your Roaring Pyre or Phoenix will cause them to erupt in flames, healing $806749i allies within $806749a1 yds'. Spell 806749 is a SPELL_EFFECT_HEAL with MaxAffectedTargets 12, so a grouped ally standing beside the Phoenix must take a native heal log from 806749 after Ember Touch 800818 is cast on the Phoenix. Spell 806747 is an effect 190 (apply aura to summons) passive, so the aura sits on the Phoenix and not on the caster. Ember Touch costs one Ember 807533 (ResourceCostRules, class 24). The Phoenix is wounded to 50 percent so that Ember Touch heals it, since the eruption follows an effective heal. Asserted: before the cast the ally has no 806749 heal, and within 3 s after Ember Touch on the Phoenix with the ally at 1 health it has at least one heal log and effective healing.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "The ally joins the Pyromancer's group",
+      "actor": "p",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800796
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800818
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 806747
+    },
+    {
+      "action": "cast",
+      "label": "Summon the Phoenix",
+      "actor": "p",
+      "spell": 800796,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The Pyromancer owns one Phoenix",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "The Phoenix settles beside its owner",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "label": "Ember Touch costs 653 mana",
+      "actor": "p",
+      "value": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Ember Touch costs one Ember 807533",
+      "actor": "p",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "set_health_pct",
+      "label": "The Phoenix is wounded",
+      "actor": "p",
+      "entry": 50258,
+      "pct": 50
+    },
+    {
+      "action": "set_health",
+      "label": "The ally is wounded",
+      "actor": "ally",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "Before the cast the ally has no Fueling the Fire heal",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 806749,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Ember Touch on the Phoenix",
+      "actor": "p",
+      "spell": 800818,
+      "target_owned_entry": 50258
+    },
+    {
+      "action": "assert",
+      "label": "#11633: the Phoenix erupts and heals the ally",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 806749,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11633: the ally receives effective healing",
+      "actor": "p",
+      "metric": "spell_effective_heal_total",
+      "spell": 806749,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

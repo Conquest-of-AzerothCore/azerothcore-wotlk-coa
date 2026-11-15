@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Crossroads Warchief's Command Board is turned half a circle",
+  "contract": "Issue #11730: the Warchief's Command Board in The Crossroads (object 402001, spawn 7905402) faces the wrong way and the reporter asks for a 180 degree rotation. Its orientation was 0.15995 since the patch-WB1 rebuild; turned by pi it is 3.30154. The board's orientation is read from the loaded object next to the player.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -432.0, "y": -2633.5, "z": 95.7, "o": 0 },
+  "players": [
+    { "id": "p", "race": 2, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the board is turned to 3.30154", "actor": "p", "metric": "nearby_gameobject_orientation", "entry": 402001, "min": 3.3010, "max": 3.3021 }
+  ]
+}

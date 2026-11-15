@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "name": "Quest log: a timed quest takes a client slot and the overflow survives a relog",
+  "contract": [
+    "The client shows quest timers only for its own slots, so a timed quest never stays in the overflow log. A Hunter's Boast (257, 15 minutes) accepted on a full client log swaps with the idlest native quest, Jitters' Growling Gut (5) from slot 0, which moves to the overflow log.",
+    "After a relog every quest is still in the log and the timed quest still has a client slot. Jitters' Growling Gut and Powder to Ironband (302) have no objectives, so both hold QUEST_STATUS_COMPLETE (1) for as long as they stay in the log."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Accept the timed quest A Hunter's Boast",
+      "actor": "hero",
+      "quest": 257,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "The timed quest takes client slot 0",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 257,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The idlest native quest moves to the overflow log",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 5,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "It keeps its completed status",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 5,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "label": "Log out and back in",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "label": "Let the login settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The timed quest keeps a client slot after the relog",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 257,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "The overflow quest is still in the log",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 5,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The last native quest is still in the log",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The log still has room up to 64",
+      "actor": "hero",
+      "metric": "quest_log_has_room",
+      "equals": 1
+    }
+  ]
+}

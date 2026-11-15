@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Worldforged Goblin Cache in Tanaris sits on the ground (#10887)",
+  "contract": "Goblin Cache 6941872 (Inventor's Sand Band) in Tanaris was reported in mid air; the server's ground above it (Map::GetHeight from above) was 1.50 yd below it. Expected: it sits between 0.15 yd below and 0.5 yd above the ground.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -8267.8,
+    "y": -5046.8,
+    "z": 10.152,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -8267.8,
+      "y": -5046.8,
+      "z": 10.152
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Goblin Cache is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515738,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Goblin Cache sits on the ground (#10887)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 515738,
+      "min": -0.15,
+      "max": 0.5
+    }
+  ]
+}

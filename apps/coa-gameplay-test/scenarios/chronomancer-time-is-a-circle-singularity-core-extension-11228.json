@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Time Is A Circle extends Singularity Core when Wand of Time is cast (#11228)",
+  "contract": "Time Is A Circle 806206 applies aura 42 (proc trigger spell) on Wand Master 524962, whose three effect 177 (SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION) slots name Paradox Cannon 806203, Flux Emitter 804435 and Aether Compression 804436, each by 3000 ms. Singularity Core 804438 is a fourth Continuum spell (its Spell.dbc description opens with Continuum Spell) that no slot names, so the tooltip's extension never reached it, as reported in #11228; a spell has only three effect slots, so a script bound to 524962 extends it by the same effect value. Singularity Core carries CasterAuraSpell 804455 (Echo Fragment), fixtured with set_aura; five stacks also give it the per-fragment duration bonus (Echo Fragment's effect 1 is SPELLMOD_DURATION, 5000 ms per stack) so its DurationIndex 28 base of 5000 ms becomes long enough to observe. The assertion is relative to a snapshot taken 1.5 s later: without the repair the remaining duration can only have fallen, so a positive delta discriminates and needs no randomness.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 806206
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804438
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520175
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragments satisfy Singularity Core's CasterAuraSpell",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 804438
+    },
+    {
+      "action": "assert",
+      "label": "Singularity Core is active on the Chronomancer",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804438,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Continuum duration decay measurably",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Singularity Core duration before Wand of Time",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804438,
+      "caster": "chronomancer",
+      "save_as": "core_before"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Casting Wand of Time extends the Continuum spell",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804438,
+      "caster": "chronomancer",
+      "relative_to": "core_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

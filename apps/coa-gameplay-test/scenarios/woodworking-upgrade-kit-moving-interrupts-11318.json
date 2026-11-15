@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Moving interrupts a Woodworking upgrade kit craft (#11318)",
+  "contract": "Issue #11318. The Woodworking upgrade kits 1015015-1015019 had no InterruptFlags, unlike every other recipe, so moving did not cancel a Create All queue. Forestwood Upgrade Kit 1015015 now carries the standard recipe flags: a player standing still makes a kit, and a player who starts moving during the 2 s cast makes none and keeps the reagents.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "still",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mover",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "still",
+      "skill": 757,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "still",
+      "spell": 1015015
+    },
+    {
+      "action": "add_item",
+      "actor": "still",
+      "item": 8210230,
+      "count": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "still",
+      "item": 1006603,
+      "count": 2
+    },
+    {
+      "action": "set_skill",
+      "actor": "mover",
+      "skill": 757,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "mover",
+      "spell": 1015015
+    },
+    {
+      "action": "add_item",
+      "actor": "mover",
+      "item": 8210230,
+      "count": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "mover",
+      "item": 1006603,
+      "count": 2
+    },
+    {
+      "action": "cast",
+      "actor": "still",
+      "spell": 1015015
+    },
+    {
+      "action": "cast",
+      "actor": "mover",
+      "spell": 1015015
+    },
+    {
+      "action": "set_moving",
+      "actor": "mover",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "set_moving",
+      "actor": "mover",
+      "enabled": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: standing still makes the kit",
+      "actor": "still",
+      "metric": "item_count",
+      "item": 150727,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: moving cancels the craft, so no kit is made",
+      "actor": "mover",
+      "metric": "item_count",
+      "item": 150727,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the interrupted craft keeps its planks",
+      "actor": "mover",
+      "metric": "item_count",
+      "item": 8210230,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the interrupted craft keeps its fiber",
+      "actor": "mover",
+      "metric": "item_count",
+      "item": 1006603,
+      "equals": 2
+    }
+  ]
+}

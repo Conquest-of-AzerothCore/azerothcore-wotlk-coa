@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Woodworking crafts and Woodcutting gathers award profession XP (#11316)",
+  "contract": "Issue #11316. The live Ascension CoA config carries Woodworking (1.0) and Woodcutting (0.33) profession XP modifiers, but the core only mapped the other professions, so both awarded nothing. Every profession award shares floor(next-level XP * BaseFraction * Rate.XP.Profession * profession * difficulty * Rate.XP.Global), so the scenario compares each award with a yellow Mining gather (2.11) in the same run, so it holds for both the shipped Rate.XP.Profession 0.2 and the repack's 0.4 (much lower rates round the small awards too coarsely for the ratio): a yellow Forestwood Upgrade Kit craft gives about 1.0/2.11 = 0.474 of it (172/364 at the repack's 0.4, 86/182 at the shipped 0.2) and a yellow Woodcutting gather about 0.33/2.11 = 0.154 (56/364, 28/182). Lockpicking, whose captured modifier is 0, still awards none.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "command",
+      "actor": "p",
+      "command": ".xp 1"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 186,
+      "value": 26,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "xp",
+      "save_as": "mine_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "p",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Reference: a yellow Mining gather at the 2.11 modifier",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "mine_before",
+      "save_as": "mining_xp"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mining reference awards XP",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "mine_before",
+      "min": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 757,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 1015015
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 8210230,
+      "count": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 1006603,
+      "count": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "xp",
+      "save_as": "craft_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 150727,
+      "save_as": "kits_before"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 1015015
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the recipe makes a Forestwood Upgrade Kit",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 150727,
+      "relative_to": "kits_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: a yellow Woodworking craft awards 1.0/2.11 of the Mining reference",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "craft_before",
+      "min": 0.46,
+      "max": 0.49,
+      "ratio_to": "mining_xp"
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 732,
+      "value": 26,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "xp",
+      "save_as": "wood_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "p",
+      "skill": 732,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: a yellow Woodcutting gather awards 0.33/2.11 of the Mining reference",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "wood_before",
+      "min": 0.145,
+      "max": 0.165,
+      "ratio_to": "mining_xp"
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 633,
+      "value": 26,
+      "maximum": 150
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "xp",
+      "save_as": "lock_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "p",
+      "skill": 633,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Lockpicking keeps its captured 0 modifier",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "lock_before",
+      "equals": 0
+    }
+  ]
+}

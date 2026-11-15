@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls the moment his Berserker Charge lands, for 6 seconds",
+  "contract": [
+    "The tester (live video, 2026-11-04) reports Mortal Strike, Mortal Strike, Berserker Charge (2118406) and a",
+    "Whirlwind (2118408) begun as the charge lands; the live CoA combat log of 2026-08-02 starts each Whirlwind",
+    "on the landing too. The old script whirled on its own timer 2 s after the charge began, so the Whirlwind",
+    "came about a second after he landed. The tank holds Mandokir in melee and an archer stands about 18 yards",
+    "away, the only charge target. Within 300 ms of reaching the archer, Mandokir is casting Whirlwind. Its",
+    "spinning aura then lasts its full 6 s (DBC duration), not shorter."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "archer",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "archer"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "archer",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heroes are in Zul'Gurub on Normal",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "relocate",
+      "label": "The archer steps back about 16 yards",
+      "actor": "archer",
+      "dx": -10.15,
+      "dy": -12.955,
+      "dz": -0.665
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages Mandokir",
+      "actor": "tank",
+      "target": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir fights",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the archer stands well out of his reach",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "mandokir",
+      "min": 12
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir charges the archer 10 s into the fight",
+      "actor": "archer",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118406,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the charge lands",
+      "actor": "mandokir",
+      "metric": "moving",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: it lands at the archer",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "mandokir",
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he is casting Whirlwind as he lands, not a second later",
+      "actor": "mandokir",
+      "metric": "cast_remaining_ms",
+      "spell": 2118408,
+      "min": 1,
+      "within_ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Whirlwind spins him",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118408,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "He still spins 5 s later, of a 6 s Whirlwind",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118408,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The spin ends after its 6 s",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118408,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: one Whirlwind for the one charge",
+      "actor": "archer",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "equals": 1
+    }
+  ]
+}

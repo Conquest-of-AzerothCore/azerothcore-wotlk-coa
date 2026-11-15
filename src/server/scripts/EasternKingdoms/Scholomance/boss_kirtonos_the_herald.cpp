@@ -15,11 +15,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BossControlTargeting.h"
 #include "CreatureScript.h"
 #include "GameObjectAI.h"
 #include "MoveSplineInit.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
+#include "SpellMgr.h"
 #include "scholomance.h"
 
 enum Spells
@@ -208,7 +210,7 @@ public:
                     events.ScheduleEvent(EVENT_CURSE_OF_TONGUES, 20s);
                     break;
                 case EVENT_DOMINATE_MIND:
-                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 20.0f, true, false))
+                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, BossControlTargetSelector(me, sSpellMgr->GetSpellInfo(SPELL_DOMINATE_MIND), 20.0f, true, false, 0)))
                     {
                         me->CastSpell(target, SPELL_DOMINATE_MIND, false);
                     }

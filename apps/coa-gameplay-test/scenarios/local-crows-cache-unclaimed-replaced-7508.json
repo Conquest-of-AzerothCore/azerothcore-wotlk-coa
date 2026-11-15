@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Crow's Cache: the next cache removes an unclaimed one (#7508)",
+  "contract": [
+    "An unclaimed Crow's Cache chest stays only until the next cache begins. Starting a second cache at the same",
+    "Barrens spot removes the first, already available chest, so the event list holds only the new warning there",
+    "and exactly one chest stands at the spot instead of two stacked. Event ids are process-global, so the event",
+    "list is read by phase and position rather than by id. Carried and dropped caches keep their own expiry and are",
+    "not covered here. Requires CrowsCache.Enable=1."
+  ],
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "location": {
+    "x": -763.6296,
+    "y": -3191.6892,
+    "z": 91.666626,
+    "o": 2.3004022,
+    "map": 1
+  },
+  "timeout_ms": 60000,
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "owner",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "owner",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "console",
+      "command": "crows barrens 2"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "The first cache appears unclaimed",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "entry": 994311
+    },
+    {
+      "action": "console",
+      "command": "crows barrens 2"
+    },
+    {
+      "action": "assert",
+      "label": "The unclaimed chest is gone before the next one appears",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "equals": 0,
+      "within_ms": 1500,
+      "entry": 994311
+    },
+    {
+      "action": "command",
+      "actor": "owner",
+      "command": ".crows status"
+    },
+    {
+      "action": "assert",
+      "label": "The next cache is listed as a warning at the spot",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "text": "phase=1, carrier=0, map=1, position=(-763.6",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the unclaimed available cache is no longer listed",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "text": "phase=2, carrier=0, map=1, position=(-763.6",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "Only the new chest stands at the spot",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "entry": 994311
+    }
+  ]
+}

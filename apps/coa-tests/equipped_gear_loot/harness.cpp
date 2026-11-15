@@ -25,6 +25,9 @@ constexpr uint32 MAX_NR_LOOT_ITEMS = 16;
 constexpr uint32 MAX_NR_QUEST_ITEMS = 32;
 constexpr uint16 WORLDHOOK_ON_AFTER_CONFIG_LOAD = 1;
 constexpr uint16 WORLDHOOK_ON_STARTUP = 2;
+constexpr uint32 ITEM_SUBCLASS_JEWELCRAFTING_RECIPE = 10;
+constexpr uint32 EXPANSION_THE_BURNING_CRUSADE = 1;
+constexpr uint32 CREATURE_ELITE_WORLDBOSS = 3;
 
 #define LOG_INFO(...) ((void)0)
 #define LOG_ERROR(...) ((void)0)
@@ -56,12 +59,21 @@ struct ObjectMgr
 auto* sObjectMgr = &objectMgr;
 
 struct Creature;
+struct Map;
 struct WorldObject
 {
     virtual ~WorldObject() = default;
     virtual Creature* ToCreature() { return nullptr; }
+    bool IsCreature()
+    {
+        return ToCreature() != nullptr;
+    }
+    Map const* FindMap() const;
 };
-struct CreatureTemplate { uint32 unit_class = 1; };
+struct CreatureTemplate
+{
+    uint32 unit_class = 1, rank = 0;
+};
 struct Creature : WorldObject
 {
     CreatureTemplate data;
@@ -95,7 +107,19 @@ struct Map
         auto found = creatures.find(guid);
         return found == creatures.end() ? nullptr : found->second;
     }
+    uint32 GetId() const
+    {
+        return 0;
+    }
+    uint8 GetSpawnMode() const
+    {
+        return 0;
+    }
 } fixtureMap;
+Map const* WorldObject::FindMap() const
+{
+    return &fixtureMap;
+}
 
 struct CreatureDisplayInfoEntry { uint32 ExtendedDisplayInfoID = 0; };
 template<class T> struct Store
@@ -171,8 +195,20 @@ struct Group
     GroupReference* GetFirstMember() const { return first; }
     uint32 GetLootThreshold() const { return ITEM_QUALITY_UNCOMMON; }
 };
+struct WorldSession
+{
+    uint32 Expansion() const
+    {
+        return EXPANSION_THE_BURNING_CRUSADE;
+    }
+};
 struct Player : WorldObject
 {
+    WorldSession session;
+    WorldSession const* GetSession() const
+    {
+        return &session;
+    }
     uint64 guid = 1;
     Group* group = nullptr;
     bool near = true;
@@ -209,11 +245,12 @@ struct LootItem
     bool AllowedForPlayer(Player const*, uint64) const { return true; }
 };
 struct LootStore;
+struct LootTemplate;
 struct Loot
 {
     std::vector<LootItem> items, quest_items;
-    uint32 unlootedCount = 0;
-    bool sharedQuestLoot = false;
+    uint32 unlootedCount = 0, maxItemCount = MAX_NR_LOOT_ITEMS;
+    bool sharedQuestLoot = false, fixedMoneyLoot = false;
     uint64 lootOwnerGUID = 0, sourceWorldObjectGUID = 1, roundRobinPlayer = 0;
     std::vector<uint64> rights;
     std::map<uint64, uint32> PlayerQuestItems;
@@ -240,7 +277,7 @@ struct LootStore
     LootTemplate const* data = nullptr;
     LootTemplate const* GetLootFor(uint32) const { return data; }
     char const* GetName() const { return "bounded_loot_store"; }
-} LootTemplates_Creature, LootTemplates_Item, LootTemplates_Skinning;
+} LootTemplates_Creature, LootTemplates_Gameobject, LootTemplates_Item, LootTemplates_Skinning;
 struct ScriptMgr
 {
     uint32 calls = 0;

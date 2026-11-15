@@ -32,6 +32,17 @@
       "ms": 3000
     },
     {
+      "action": "learn",
+      "label": "Increased Spell Penetration 68 and 38 remove the level-80 enemy's 80 monster resistance, so no hit is partially resisted",
+      "actor": "rm",
+      "spell": 56399
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 26175
+    },
+    {
       "action": "set_power",
       "actor": "rm",
       "power": 0,

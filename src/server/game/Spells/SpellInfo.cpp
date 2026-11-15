@@ -402,6 +402,11 @@ uint32 SpellEffectInfo::GetItemArmorSubclassMask() const
         return EffectIndex == EFFECT_1 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
             MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 64 ? 64 : 0;
 
+    if (_spellInfo && _spellInfo->SpellFamilyName == 25 &&
+        (_spellInfo->Id == 301311 || _spellInfo->Id == 301360)) // Blessed Padding
+        return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 8 ? 8 : 0;
+
     if (!_spellInfo || _spellInfo->SpellFamilyName != 24 || MiscValue != SPELL_SCHOOL_MASK_NORMAL)
         return 0;
 
@@ -850,7 +855,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 164 SPELL_EFFECT_REMOVE_AURA
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 167 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 167 SPELL_EFFECT_ASCENSION_PLAY_MOVIE
     {EFFECT_IMPLICIT_TARGET_CASTER,   TARGET_OBJECT_TYPE_UNIT}, // 168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
@@ -881,7 +886,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 196 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 197 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 198 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 198 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_DOT_DURATION
 } };
 
 SpellInfo::SpellInfo(SpellEntry const* spellEntry)
@@ -2139,7 +2144,8 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
     if (!caster->IsVehicle() && caster->GetCharmerOrOwner() != target)
     {
-        if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
+        if (TargetAuraState && !(implicit && AscensionTargetAuraStateOnlyPrimary) &&
+            !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
             return SPELL_FAILED_TARGET_AURASTATE;
 
         if (TargetAuraStateNot && unitTarget->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))
@@ -2757,6 +2763,10 @@ void SpellInfo::_LoadImmunityInfo()
                     case 54508: // Demonic Empowerment
                         mechanicImmunityMask |= (1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_ROOT) | (1ULL << MECHANIC_STUN);
                         break;
+                    case 804652: // Vial of Moonwell Water
+                        mechanicImmunityMask |= IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK &
+                            ~((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_DAZE));
+                        break;
                     default:
                         if (miscVal < 1)
                             break;
@@ -3247,6 +3257,12 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
             if (AuraEffect const* talent = caster->GetAuraEffect(582307, EFFECT_0))
                 powerCostMultiplier -= insanity * talent->GetAmount() / 100.0f;
     }
+
+    if (uint32(PowerType) < 32)
+        for (AuraEffect const* effect : caster->GetAuraEffectsByType(SPELL_AURA_ASCENSION_MOD_POWER_COST_PCT))
+            if ((uint32(effect->GetMiscValue()) & (uint32(1) << uint32(PowerType))) &&
+                (uint32(effect->GetMiscValueB()) & uint32(schoolMask)))
+                powerCostMultiplier += float(effect->GetAmount()) / 100.0f;
 
     powerCost = int32(powerCost * (1.0f + powerCostMultiplier));
     if (PowerType == POWER_MANA && caster->IsPlayer() && caster->getClass() == CLASS_SUN_CLERIC &&

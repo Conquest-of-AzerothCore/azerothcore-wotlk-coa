@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Rare mob gives 300 Bazaar Tokens",
+  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.BazaarTokens.RareMob = 300 and CoA.BazaarTokens.HourlyCap.Amount = 1250. A level 60 High-Risk character kills the natural Foreman Marcrid (1844, rank 4 rare, level 58) in Western Plaguelands and receives at least 300 Bazaar Tokens (975001).",
+  "players": [
+    {
+      "id": "h",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 2422.5,
+    "y": -1692.1,
+    "z": 103.6,
+    "o": 0
+  },
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "h",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "h",
+      "maximum": 2000000,
+      "value": 2000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "h",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "nearby_creature_count",
+      "entry": 1844,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "h",
+      "entry": 1844,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Rare kill gives the 300 Bazaar Tokens",
+      "actor": "h",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 300,
+      "within_ms": 3000
+    }
+  ]
+}

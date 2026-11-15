@@ -17,7 +17,7 @@ constexpr unsigned SlotCount = 19;
 constexpr unsigned ShirtSlot = 4;
 constexpr unsigned TabardSlot = 19;
 constexpr double DefaultFeeMultiplier = 1.0;
-constexpr unsigned DefaultMaxSlots = 3;
+constexpr unsigned DefaultMaxSlots = 0;
 constexpr std::uint64_t LevelCapSurcharge = 100000;
 
 struct RateBand
@@ -88,12 +88,6 @@ inline std::uint64_t ClientCost(float averageItemLevel, bool atLevelCap)
     double cost = double(level) * double(CopperPerLevel(std::uint32_t(level)));
     if (atLevelCap)
         cost += double(LevelCapSurcharge);
-    return cost > 0.0 ? std::uint64_t(std::llround(cost)) : 0;
-}
-
-inline std::uint64_t ItemFee(std::uint32_t itemLevel, double feeMultiplier)
-{
-    double const cost = double(itemLevel) * double(CopperPerLevel(itemLevel)) * std::max(0.0, feeMultiplier);
     return cost > 0.0 ? std::uint64_t(std::llround(cost)) : 0;
 }
 

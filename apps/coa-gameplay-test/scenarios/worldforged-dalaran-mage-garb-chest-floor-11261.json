@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Worldforged Dalaran Mage Garb chest rests on the house floor (#11261)",
+  "contract": "The Dalaran Mage Garb chest (entry 515365, guid 6940244) sat 1.9 yd under the floor of the Prisonhq building at its x/y. It rests on the floor and opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -55.26,
+    "y": 268.61,
+    "z": 55.687,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940244,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "it is clear of walls",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6940244,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515365
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "it is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Named quest mobs share credit and loot after a bot takes the first tag",
-  "contract": "Quest 3376 requires Chief Sharptusk Thornmantle's Head 10459, guaranteed by creature loot 8554. Chief Sharptusk has a 375-second world spawn. All nearby contributors and their nearby party members need an independent quest drop, even when a bot without that quest tags first. Master loot cannot reserve quest copies. Nonparticipants and other phases receive none; contributors cannot take the original tagger's gold or ordinary loot. Quest 370 requires Captain Perrine 1662 once and must credit each participating party. Encroachment 837 needs four Razormane Quilboars 3111 and remains exclusively tagged. Summoned fixtures have no persistent spawn id, so their timer includes 60 seconds of corpse decay plus the 30-second cap; the respawn_clock native harness verifies persistent spawns respawn 30 seconds after death with either clock setting.",
+  "contract": "Quest 3376 requires Chief Sharptusk Thornmantle's Head 10459, guaranteed by creature loot 8554. Chief Sharptusk has a 375-second world spawn. All nearby contributors and their nearby party members need an independent quest drop, even when a bot without that quest tags first. Master loot cannot reserve quest copies. Nonparticipants and other phases receive none; contributors cannot take the original tagger's gold or ordinary loot. Quest 370 requires Captain Perrine 1662 once and must credit each participating party. Encroachment 837 needs four Razormane Quilboars 3111 and remains exclusively tagged. Summoned fixtures have no persistent spawn id, so their timer includes 60 seconds of corpse decay plus the 150-second cap; the respawn_clock native harness verifies persistent spawns respawn 150 seconds after death with either clock setting.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -214,8 +214,8 @@
       "action": "assert",
       "actor": "chief",
       "metric": "respawn_remaining",
-      "min": 89,
-      "max": 90
+      "min": 209,
+      "max": 210
     },
     {
       "action": "set_money",

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Wildcard Plaguebringer infects its target with Frost Fever and Blood Plague (#11071)",
+  "contract": [
+    "Plaguebringer288806: 'Infects the target with Frost Fever and Blood Plague.' Its only effect is",
+    "SPELL_EFFECT_DUMMY on the enemy target, so without a link it spent runes and cooldown and applied nothing.",
+    "After the hit the target carries the caster's Frost Fever55095 and Blood Plague55078, and both deal periodic",
+    "damage from the caster. A control enemy that was not targeted carries neither disease."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 10, "level": 60, "allow_regeneration": false, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "p", "entry": 36, "level": 60, "health": 1000000, "distance": 3, "reaction": 0, "stationary": true },
+    { "id": "control", "owner": "p", "entry": 36, "level": 60, "health": 1000000, "distance": 8, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "actor": "p", "spell": 288806 },
+    { "action": "wait", "label": "Let the initial runes recover", "ms": 11000 },
+    { "action": "cast", "actor": "p", "spell": 288806, "target": "enemy" },
+    { "action": "assert", "label": "Plaguebringer goes on cooldown (the cast went through)", "actor": "p", "metric": "cooldown_ms", "spell": 288806, "min": 50000, "within_ms": 1500 },
+    { "action": "assert", "label": "Frost Fever from the caster is on the target", "actor": "enemy", "metric": "aura", "spell": 55095, "caster": "p", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Blood Plague from the caster is on the target", "actor": "enemy", "metric": "aura", "spell": 55078, "caster": "p", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "The untargeted enemy carries no Frost Fever", "actor": "control", "metric": "aura", "spell": 55095, "equals": 0 },
+    { "action": "assert", "label": "The untargeted enemy carries no Blood Plague", "actor": "control", "metric": "aura", "spell": 55078, "equals": 0 },
+    { "action": "wait", "label": "Let at least two 3 s disease ticks land", "ms": 6500 },
+    { "action": "assert", "label": "Frost Fever deals periodic damage", "actor": "p", "metric": "spell_damage_count", "spell": 55095, "target": "enemy", "min": 1 },
+    { "action": "assert", "label": "Blood Plague deals periodic damage", "actor": "p", "metric": "spell_damage_count", "spell": 55078, "target": "enemy", "min": 1 }
+  ]
+}

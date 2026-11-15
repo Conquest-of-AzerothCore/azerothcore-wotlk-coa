@@ -4,6 +4,7 @@
 #include "Common.h"
 #include "ObjectGuid.h"
 #include <array>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -23,6 +24,19 @@ struct CreatureDisplayPreset
     std::array<uint32, 11> items = {0};
 };
 
+struct CreatureDisplayPresetVariety
+{
+    std::vector<uint8> skins;
+    std::vector<uint8> faces;
+    std::vector<uint8> hairs;
+    std::vector<uint8> hairColors;
+    std::vector<uint8> facialHairs;
+};
+
+[[nodiscard]] std::vector<uint8> ParsePresetVarietyValues(std::string_view text);
+[[nodiscard]] CreatureDisplayPreset ApplyPresetVariety(CreatureDisplayPreset const& preset,
+    CreatureDisplayPresetVariety const& variety, uint32 spawnSeed);
+
 class AscensionCreaturePresetMgr
 {
 public:
@@ -34,6 +48,7 @@ public:
     [[nodiscard]] CreatureDisplayPreset const* GetPresetByGender(uint32 entry, uint8 gender) const;
     [[nodiscard]] bool HasPreset(uint32 entry, uint32 displayId = 0) const;
     [[nodiscard]] std::size_t GetPresetCount() const { return _presets.size(); }
+    [[nodiscard]] CreatureDisplayPreset WithSpawnVariety(CreatureDisplayPreset const& preset, uint32 spawnSeed) const;
 
     void SetActivePresetOverride(ObjectGuid guid, uint32 entry, uint32 displayId = 0);
     void ClearActivePresetOverride(ObjectGuid guid);
@@ -46,7 +61,10 @@ private:
     }
 
     std::unordered_map<uint64, CreatureDisplayPreset> _presets;
+    void LoadVarietiesFromDB();
+
     std::unordered_map<uint32, std::vector<uint32>> _entryToDisplays;
+    std::unordered_map<uint64, CreatureDisplayPresetVariety> _varieties;
     std::unordered_map<ObjectGuid, uint64> _activePresetOverrides;
 };
 

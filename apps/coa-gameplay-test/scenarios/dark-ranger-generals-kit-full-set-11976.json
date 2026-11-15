@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Dark Ranger General's Kit hands out the Shoulderguard, Garment and Cheststrap too (#11976)",
+  "contract": "Dark Ranger General's Kit 210740 (item_ethereal_set_cache, spell 60034) gave only the nine pieces of its client VanityCollection row. Its item set 40120 also has the Shoulderguard 210750, the Garment 210751 and the Cheststrap 210752, which the reporter found missing. Expected: opening the kit hands out those three along with the rest of the set and consumes the kit.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 210740
+    },
+    {
+      "action": "add_item",
+      "label": "An 18-slot bag for the twelve pieces",
+      "actor": "p",
+      "item": 14156
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 14156,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: at least twelve slots are free",
+      "actor": "p",
+      "metric": "free_inventory_slots",
+      "min": 12
+    },
+    {
+      "action": "use_item",
+      "label": "Open the kit",
+      "actor": "p",
+      "item": 210740,
+      "spell": 60034
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the kit opens without being refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 60034,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Hood is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210741,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Shoulderguard is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210750,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Garment is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210751,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Cheststrap is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210752,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Spaulder is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210742,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Leggings is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210744,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Breastplate is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210745,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Cloak is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210746,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Gloves is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210747,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Boots is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210748,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Bracers is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210749,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the kit itself is consumed",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 210740,
+      "equals": 0
+    }
+  ]
+}

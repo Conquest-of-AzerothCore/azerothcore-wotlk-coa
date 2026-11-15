@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "The Coldmere Keep kitchen fires count as a Cooking Fire (#11204)",
+  "contract": "The kitchen fires of Coldmere Keep in the Pale Reach are part of the map model and had no Cooking Fire spell focus gameobject, so Roasted Boar Meat 2540 (RequiresSpellFocus 4) failed there with \"Requires Cooking Fire\". Expected: away from any fire cooking still fails, and in the kitchen one Chunk of Boar Meat 769 cooks into a Roasted Boar Meat 2681.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -7223.05,
+    "y": 1234.69,
+    "z": 329.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 185,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 2540
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 769,
+      "count": 2
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cook Roasted Boar Meat away from any fire",
+      "actor": "p",
+      "spell": 2540
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: away from a fire, cooking makes no Roasted Boar Meat",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2681,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -7223.05,
+      "y": 1234.69,
+      "z": 329.5
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cook Roasted Boar Meat in the Coldmere kitchen",
+      "actor": "p",
+      "spell": 2540
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: in the kitchen, Chunk of Boar Meat cooks into Roasted Boar Meat",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2681,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "one Chunk of Boar Meat was used",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 769,
+      "equals": 1
+    }
+  ]
+}

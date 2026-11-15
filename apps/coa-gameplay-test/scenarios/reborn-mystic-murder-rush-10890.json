@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Mystic Enchant Murder Rush gives or refreshes Sprint on a kill and adds 10% damage while Sprint lasts",
+  "contract": [
+    "Murder Rush 1180880 (enchant 1237001): \"Killing an enemy that yields experience or honor gives you Sprint for 5 seconds. If Sprint is already active, its duration is fully refreshed. In addition, while Sprint is active you deal 10% more damage.\" Reported in #10890: the kill made the Sprint sound but gave no buff and no movement speed.",
+    "The kill proc cast only 1180881, whose duration effect lengthens rank 1 Sprint and does nothing without it, and whose 10% damage aura had no effect type. Now a kill without Sprint gives the rogue's Sprint for 5 sec, a kill during Sprint refreshes it to its full duration, and the 10% damage aura (1180881) is up exactly while Sprint is.",
+    "Checked: Sprint (1102983) and its 50% run speed after a kill, its 5 sec duration, 10% more Sinister Strike damage against a same-run baseline, the damage aura ending with Sprint, a cast Sprint lasting its 15 sec (no 30 sec extension), and a kill refreshing a 15 sec Sprint back to full."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "r", "race": 1, "class": 4, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "first", "owner": "r", "entry": 299, "level": 60, "distance": 2 },
+    { "id": "second", "owner": "r", "entry": 299, "level": 60, "distance": 2 },
+    { "id": "dummy", "owner": "r", "entry": 32666, "level": 60, "health": 1000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "r", "item": 2092 },
+    { "action": "equip", "actor": "r", "item": 2092, "slot": 15 },
+    { "action": "learn", "actor": "r", "spell": 1102983 },
+    { "action": "learn", "actor": "r", "spell": 1101752 },
+    { "action": "set_aura", "actor": "r", "spell": 1180880, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Murder Rush is active", "actor": "r", "metric": "aura", "spell": 1180880, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: no Sprint before the kill", "actor": "r", "metric": "aura", "spell": 1102983, "equals": 0 },
+    { "action": "snapshot", "label": "Sinister Strike damage without Sprint", "actor": "r", "metric": "melee_spell_damage_done", "spell": 1101752, "target": "dummy", "save_as": "strike_base" },
+
+    { "action": "set_health", "actor": "first", "value": 1 },
+    { "action": "attack", "actor": "r", "target": "first" },
+    { "action": "assert", "label": "the first enemy dies", "actor": "first", "metric": "alive", "equals": 0, "within_ms": 8000 },
+    { "action": "stop_attack", "actor": "r" },
+    { "action": "assert", "label": "THE FIX (#10890): the kill gives Sprint", "actor": "r", "metric": "aura", "spell": 1102983, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "THE FIX: that Sprint lasts 5 seconds", "actor": "r", "metric": "aura_duration_ms", "spell": 1102983, "min": 3500, "max": 5000 },
+    { "action": "assert", "label": "THE FIX: Sprint's 50% movement speed applies", "actor": "r", "metric": "run_speed_rate", "min": 1.49 },
+    { "action": "assert", "label": "THE FIX: the damage aura is up while Sprint is", "actor": "r", "metric": "aura", "spell": 1180881, "equals": 1 },
+    { "action": "assert", "label": "THE FIX: Sinister Strike deals 10% more damage while Sprint is active", "actor": "r", "metric": "melee_spell_damage_done", "spell": 1101752, "target": "dummy", "ratio_to": "strike_base", "min": 1.099, "max": 1.101 },
+
+    { "action": "wait", "ms": 6000 },
+    { "action": "assert", "label": "the 5 second Sprint has ended", "actor": "r", "metric": "aura", "spell": 1102983, "equals": 0 },
+    { "action": "assert", "label": "THE FIX: the damage aura ends with Sprint", "actor": "r", "metric": "aura", "spell": 1180881, "equals": 0 },
+    { "action": "assert", "label": "damage is back to the baseline", "actor": "r", "metric": "melee_spell_damage_done", "spell": 1101752, "target": "dummy", "ratio_to": "strike_base", "min": 0.999, "max": 1.001 },
+
+    { "action": "cast", "label": "Cast Sprint", "actor": "r", "spell": 1102983 },
+    { "action": "assert", "label": "SETUP: Sprint is active", "actor": "r", "metric": "aura", "spell": 1102983, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "THE FIX: casting Sprint brings the damage aura", "actor": "r", "metric": "aura", "spell": 1180881, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "THE FIX: a cast Sprint keeps its 15 seconds (the aura's duration effect no longer adds 30)", "actor": "r", "metric": "aura_duration_ms", "spell": 1102983, "min": 14000, "max": 15000 },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "SETUP: Sprint has run down", "actor": "r", "metric": "aura_duration_ms", "spell": 1102983, "max": 11500 },
+    { "action": "set_health", "actor": "second", "value": 1 },
+    { "action": "attack", "actor": "r", "target": "second" },
+    { "action": "assert", "label": "the second enemy dies", "actor": "second", "metric": "alive", "equals": 0, "within_ms": 6000 },
+    { "action": "stop_attack", "actor": "r" },
+    { "action": "assert", "label": "THE FIX: a kill during Sprint refreshes it to its full 15 seconds", "actor": "r", "metric": "aura_duration_ms", "spell": 1102983, "min": 14000, "max": 15000, "within_ms": 2000 }
+  ]
+}

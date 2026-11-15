@@ -1,0 +1,518 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jin'do's totems stand at random points of the Bloodfire Pit, not on fixed spots",
+  "contract": [
+    "The round-8 tester asked for Jin'do's (11380) totems to stand at random places of the area they stood in, instead",
+    "of on the ten trash pack spots of the Bloodfire Pit that round 7 used. A third hero visits each of the ten old spots",
+    "once the Brain Wash Totems (15112) and the Powerful Healing Ward (14987) stand, and neither may stand within 0.05",
+    "yards of it; a totem on a fixed spot stands at its exact point. The ten 0.05-yard discs cover 0.079 of the pit's",
+    "4,899 square yards, so with three Brain Wash Totems and one ward a random placement fails this by chance less than",
+    "once in 10,000 runs. The totems still stand at least 13 yards from the tank beside Jin'do: the pit's nearest corner",
+    "is 15 yards away. All heroes carry the Delusions vision aura (2118511), which Delusions of Jin'do skips, so its",
+    "phase aura (2118512, mask 3) cannot move a hero out of the lane's phase and away from the totems."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "probe",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the heroes so all enter the same instance",
+      "actor": "tank",
+      "target": "mate"
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "probe"
+    },
+    {
+      "action": "teleport",
+      "label": "Beside Jin'do's spawn",
+      "actor": "tank",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "label": "Into the arena",
+      "actor": "mate",
+      "map": 309,
+      "x": -11545.0,
+      "y": -1275.5,
+      "z": 79.0,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "label": "Onto the first old totem spot",
+      "actor": "probe",
+      "map": 309,
+      "x": -11550.1,
+      "y": -1223.9,
+      "z": 80.72,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "probe",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_aura",
+      "label": "Delusions passes over the tank",
+      "actor": "tank",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Delusions passes over the mate",
+      "actor": "mate",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Delusions passes over the probe",
+      "actor": "probe",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "summon",
+      "label": "Jin'do two yards in front of the tank",
+      "actor": "tank",
+      "entry": 11380,
+      "as": "jindo",
+      "distance": 2
+    },
+    {
+      "action": "attack",
+      "label": "The tank pulls Jin'do",
+      "actor": "tank",
+      "target": "jindo"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do fights",
+      "actor": "jindo",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Brain Wash Totems come 16 s into the fight",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ward comes at 21 s",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no totem stands on the old ring around Jin'do",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 13
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 1",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 1",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 2",
+      "actor": "probe",
+      "map": 309,
+      "x": -11601.1,
+      "y": -1228.4,
+      "z": 79.61,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 2",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 2",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 3",
+      "actor": "probe",
+      "map": 309,
+      "x": -11549.8,
+      "y": -1243.9,
+      "z": 78.85,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 3",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 3",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 4",
+      "actor": "probe",
+      "map": 309,
+      "x": -11569.4,
+      "y": -1266.4,
+      "z": 78.12,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 4",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 4",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 5",
+      "actor": "probe",
+      "map": 309,
+      "x": -11588.6,
+      "y": -1263.0,
+      "z": 79.17,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 5",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 5",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 6",
+      "actor": "probe",
+      "map": 309,
+      "x": -11532.0,
+      "y": -1270.0,
+      "z": 79.61,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 6",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 6",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 7",
+      "actor": "probe",
+      "map": 309,
+      "x": -11537.6,
+      "y": -1289.9,
+      "z": 79.35,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 7",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 7",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 8",
+      "actor": "probe",
+      "map": 309,
+      "x": -11573.3,
+      "y": -1292.3,
+      "z": 78.11,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 8",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 8",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 9",
+      "actor": "probe",
+      "map": 309,
+      "x": -11571.1,
+      "y": -1308.7,
+      "z": 79.67,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 9",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 9",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "teleport",
+      "label": "Onto old totem spot 10",
+      "actor": "probe",
+      "map": 309,
+      "x": -11613.4,
+      "y": -1278.9,
+      "z": 80.34,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on old spot 10",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward does not stand on old spot 10",
+      "actor": "probe",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0.05
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do is still fighting",
+      "actor": "jindo",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

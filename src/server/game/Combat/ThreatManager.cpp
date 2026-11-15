@@ -24,6 +24,7 @@
  */
 
 #include "ThreatManager.h"
+#include "AscensionTankStances.h"
 #include "CombatManager.h"
 #include "Containers.h"
 #include "Creature.h"
@@ -39,6 +40,7 @@
 #include "TemporarySummon.h"
 #include "Unit.h"
 #include "UnitAI.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include <algorithm>
 #include <boost/heap/fibonacci_heap.hpp>
@@ -751,6 +753,10 @@ void ThreatManager::ProcessAIUpdates()
             break;
         }
     }
+
+    if (victimMgr._inTankStance)
+        threat *= sWorld->getRate(RATE_THREAT_TANK_STANCE);
+
     return threat;
 }
 
@@ -828,6 +834,10 @@ void ThreatManager::UpdateMySpellSchoolModifiers()
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
         _singleSchoolModifiers[i] = _owner->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT, 1 << i);
     _multiSchoolModifiers.clear();
+
+    Unit::AuraEffectList const& threatAuras = _owner->GetAuraEffectsByType(SPELL_AURA_MOD_THREAT);
+    _inTankStance = _owner->IsPlayer() && std::any_of(threatAuras.begin(), threatAuras.end(),
+        [](AuraEffect const* effect) { return Ascension::IsTankStanceAura(effect->GetId()); });
 }
 
 void ThreatManager::RegisterRedirectThreat(uint32 spellId, ObjectGuid const& victim, uint32 pct)

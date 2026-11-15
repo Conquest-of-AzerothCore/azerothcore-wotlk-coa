@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "A Militia Recruit regains full health after losing a spar (#11306)",
+  "contract": "Issue #11306. Talking to a Militia Recruit (255339) starts a spar; at 1% health it gives Militia Training credit, evades and offers the spar again. It used to evade at 1% health, so the same recruit could be beaten in one hit for every credit. It now returns to full health when it evades.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10731.5,
+    "y": 975.0,
+    "z": 36.84,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 18
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "r",
+      "entry": 255339,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "r"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "p",
+      "pct": 1,
+      "target": "r"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the beaten recruit stops at 1% health",
+      "actor": "r",
+      "metric": "health_pct",
+      "max": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: after the spar the recruit is back at full health",
+      "actor": "r",
+      "metric": "health_pct",
+      "min": 99,
+      "within_ms": 10000
+    }
+  ]
+}

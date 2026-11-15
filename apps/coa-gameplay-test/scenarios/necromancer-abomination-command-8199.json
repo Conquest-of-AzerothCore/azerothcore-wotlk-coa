@@ -24,7 +24,7 @@
       "action": "assert", "label": "SETUP: two Life Force passives raise the capacity to 4", "actor": "n",
       "metric": "aura_stacks", "spell": 805011, "equals": 4, "within_ms": 3000
     },
-    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 3000 },
     { "action": "cast", "label": "Raise the Abomination", "actor": "n", "spell": 500335 },
     {
       "action": "assert", "label": "SETUP: one Abomination", "actor": "n",

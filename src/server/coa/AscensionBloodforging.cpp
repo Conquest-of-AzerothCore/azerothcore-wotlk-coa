@@ -3,9 +3,7 @@
 #include "AscensionBloodforging.h"
 #include "AscensionClientSpellPatches.h"
 #include "Chat.h"
-#include "DatabaseEnv.h"
 #include "DataMap.h"
-#include "Errors.h"
 #include "GameTime.h"
 #include "Item.h"
 #include "ObjectMgr.h"
@@ -135,11 +133,7 @@ bool ConvertOwned(Player* player, Item* jar, Item* target)
     player->ApplyItemObtainSpells(target, true);
     target->SetState(ITEM_CHANGED, player);
     target->SendUpdateToPlayer(player);
-    auto transaction = CharacterDatabase.BeginTransaction();
-    player->SaveInventoryAndGoldToDB(transaction);
-    auto committed = CharacterDatabase.AsyncCommitTransaction(transaction);
-    if (!committed.m_future.get())
-        ABORT("Bloodforging inventory transaction failed; refusing to continue");
+    player->AdditionalSavingAddMask(ADDITIONAL_SAVING_INVENTORY_AND_GOLD);
     ChatHandler(player->GetSession()).SendSysMessage("Your item has been Bloodforged.");
     return true;
 }

@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "name": "Vanguard physical threat in Tower Formation and Spiked Reinforcement threat (#10901)",
+  "contract": [
+    "#10901 asks for more Vanguard threat. Footman's Calling 92105 reads 'your threat generated from Physical Damage dealt is increased significantly while Tower Formation or Line Formation is active': casting Tower Formation 800317 with it applies 807728, whose effect 1 is SPELL_AURA_MOD_THREAT +180% to the physical school (2.8x). tank-aura-threat-audit-1 only measured Holy damage (1x) under 807728.",
+    "Spiked Reinforcement damage 803131 ('High Threat Physical damage', fired at the attacker on every block by the shield enchant's equip aura 653386) carries spell_threat pctMod 1.25 plus a +25 flat THREAT effect, so its threat per damage is above 1.25 and is also multiplied by 807728. An aggressive fixture swings at the guardian, who blocks every swing (QA Test 100% Block 10021) and never attacks it, so the only damage it takes is 803131.",
+    "Expected: melee auto attacks put 1x threat per damage before the formation and 2.8x in Tower Formation with Footman's Calling; 803131 puts more than 1.25x before and more than 3.5x in formation."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "melee_control",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "melee_tower",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "brute",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "reaction": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Block",
+      "actor": "guardian",
+      "spell": 107
+    },
+    {
+      "action": "learn",
+      "label": "Shield proficiency",
+      "actor": "guardian",
+      "spell": 9116
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "label": "Tower Formation and blocks need a shield",
+      "actor": "guardian",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 800317
+    },
+    {
+      "action": "set_health",
+      "actor": "guardian",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_aura",
+      "label": "Every frontal swing is blocked",
+      "actor": "guardian",
+      "spell": 10021,
+      "stacks": 1
+    },
+    {
+      "action": "attack",
+      "label": "Control: melee swings without the formation",
+      "actor": "guardian",
+      "target": "melee_control"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: melee threat equals its damage",
+      "actor": "melee_control",
+      "metric": "threat_per_damage",
+      "target": "guardian",
+      "min": 0.95,
+      "max": 1.05
+    },
+    {
+      "action": "set_aura",
+      "label": "The shield enchant's equip aura",
+      "actor": "guardian",
+      "spell": 653386,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "The brute's blocked swings fire Spiked Reinforcement",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Spiked Reinforcement hit the brute",
+      "actor": "guardian",
+      "metric": "spell_cast_count",
+      "spell": 803131,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Spiked Reinforcement damage is high threat (above 1.25x)",
+      "actor": "brute",
+      "metric": "threat_per_damage",
+      "target": "guardian",
+      "min": 1.25
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 92105
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 800317
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 800317,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Tower Formation with Footman's Calling applies 807728",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 807728,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "brute",
+      "metric": "threat",
+      "target": "guardian",
+      "save_as": "brute_threat_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "brute",
+      "metric": "health",
+      "save_as": "brute_health_start"
+    },
+    {
+      "action": "attack",
+      "label": "Melee swings in Tower Formation",
+      "actor": "guardian",
+      "target": "melee_tower"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: melee threat is at least 2.8x its damage in Tower Formation",
+      "actor": "melee_tower",
+      "metric": "threat_per_damage",
+      "target": "guardian",
+      "min": 2.75
+    },
+    {
+      "action": "snapshot",
+      "actor": "brute",
+      "metric": "health",
+      "relative_to": "brute_health_start",
+      "save_as": "brute_health_lost"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Spiked Reinforcement threat per damage in Tower Formation is above 3.5x (health delta is negative)",
+      "actor": "brute",
+      "metric": "threat",
+      "target": "guardian",
+      "relative_to": "brute_threat_start",
+      "ratio_to": "brute_health_lost",
+      "max": -3.5
+    }
+  ]
+}

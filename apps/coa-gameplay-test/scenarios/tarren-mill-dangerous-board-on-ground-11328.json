@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Tarren Mill's Dangerous! board stands on the ground (#11328)",
+  "contract": "Issue #11328. The Dangerous! wanted board (gameobject 2008, guid 17154) used a later retail sniff height and hovered 1.36 yd over this client's Tarren Mill terrain. It now stands on the ground at the spot picked in game.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -15.4,
+    "y": -921.6,
+    "z": 56.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the board rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 17154,
+      "spawn_type": "gameobject",
+      "min": 0.0,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the board is grounded, not floating",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 17154,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    }
+  ]
+}

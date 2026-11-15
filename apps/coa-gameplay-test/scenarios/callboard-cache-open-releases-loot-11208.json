@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Opening a Callboard Cache tells the client to leave the looting state",
+  "contract": [
+    "Opening an item sends CMSG_OPEN_ITEM, and the client enters its looting state until the server sends",
+    "SMSG_LOOT_RELEASE_RESPONSE for that item. A Callboard Cache opens without a loot window, so without that packet",
+    "the client stays in the looting state and refuses the next loot action with 'You are busy looting' (#11208).",
+    "A Heroic Dungeon Callboard Cache (1615001) is opened through the open packet: the cache is used up and the",
+    "hero is sent exactly one item loot release, as opening an Adventurer Cache already does."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1615001,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero holds the cache",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no item loot release has been sent yet",
+      "actor": "hero",
+      "metric": "item_loot_releases",
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "label": "Open the Callboard Cache",
+      "actor": "hero",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "label": "The cache is used up",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The client was told to leave the looting state",
+      "actor": "hero",
+      "metric": "item_loot_releases",
+      "equals": 1
+    }
+  ]
+}

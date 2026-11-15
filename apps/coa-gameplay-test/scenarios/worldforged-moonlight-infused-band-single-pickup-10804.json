@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Only one Moonlight Infused Band pickup lies in Feralas (#10804)",
+  "contract": "Report #10804: two Accumulated Moonlight pickups (518135) gave the Moonlight Infused Band 24 yd apart. LootCollector's Ascension pins hold one location, where guid 6941966 stands; guid 6941381 was a second import of the same pickup. Expected: one pickup within 20 yd of the midpoint, the one at the pin, on the ground.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -4168.0,
+    "y": -731.3,
+    "z": -29.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "one Accumulated Moonlight pickup remains",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 518135,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the remaining pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941966,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

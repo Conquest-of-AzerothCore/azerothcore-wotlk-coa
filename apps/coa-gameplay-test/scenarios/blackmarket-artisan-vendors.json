@@ -1,0 +1,883 @@
+{
+  "schema": 1,
+  "name": "Black Market Artisan Supplies vendors stand on the ground and sell their recipes",
+  "contract": [
+    "Each pooled Black Market vendor spawn (guids 9700000-9700042) stands on the ground, except Crewman Sevly 9700032, whose position no source records.",
+    "Each of them shows a display the client carries.",
+    "Krenic 970040 opens a shop with his one recipe, Fused Clear-Cut Chops 967336, at 10 gold."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -2118.68,
+    "y": -2026.28,
+    "z": 6.5,
+    "o": 3.14159
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "krenic",
+      "owner": "p",
+      "entry": 970040,
+      "faction": 35,
+      "level": 60,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Krenic for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "krenic"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "His shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he sells one recipe",
+      "actor": "p",
+      "metric": "vendor_items",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Recipe: Fused Clear-Cut Chops for 10 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 967336,
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Vastrasz (spawn 9700000) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700000,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Vuye Pathfinder (spawn 9700001) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700001,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Zelegosa (spawn 9700002) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700002,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Ariyya Scorpidsting (spawn 9700003) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700003,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Abydion (spawn 9700004) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700004,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Simwenthi Boldaxe (spawn 9700005) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700005,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Thanelam Fullstone (spawn 9700006) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700006,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice Frieda (spawn 9700007) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700007,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Bloodmage Kalilis (spawn 9700008) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700008,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Volkmar Velor (spawn 9700009) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700009,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Sankle Greasebolt (spawn 9700010) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700010,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Makovei (spawn 9700011) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700011,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Solidan (spawn 9700012) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700012,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Nahiossi (spawn 9700013) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700013,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Jevaxle (spawn 9700014) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700014,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Seterin the Slothful (spawn 9700015) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700015,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Lionus the Sly (spawn 9700016) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700016,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Grovewarden Wetheas (spawn 9700017) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700017,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Dazi (spawn 9700018) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700018,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Cilkeck Gadgetspring (spawn 9700019) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700019,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Rraj'esh (spawn 9700020) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700020,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Kuixa (spawn 9700021) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700021,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Zidormi (spawn 9700022) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700022,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Lydries Frostwind (spawn 9700023) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700023,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Xaarmu (spawn 9700024) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700024,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Nishkix (spawn 9700025) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700025,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Fylaesia (spawn 9700026) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700026,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Oumorn Marbletale (spawn 9700027) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700027,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Squire Leilani (spawn 9700028) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700028,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Flette (spawn 9700029) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700029,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Rixka (spawn 9700030) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700030,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Chumani Earthtalon (spawn 9700031) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700031,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Mytaliath (spawn 9700033) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700033,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Cowardly Minion of Weavil (spawn 9700034) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700034,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Nildat Sharpmine (spawn 9700035) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700035,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Assistant Lulitte (spawn 9700036) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700036,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Kargam Shindigger (spawn 9700037) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700037,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Shola (spawn 9700038) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700038,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Aelsendra (spawn 9700039) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700039,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Krenic (spawn 9700040) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700040,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Kalyn (spawn 9700041) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700041,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Mevezius (spawn 9700042) stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9700042,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Vastrasz (spawn 9700000) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700000,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Vuye Pathfinder (spawn 9700001) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700001,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Zelegosa (spawn 9700002) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700002,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Ariyya Scorpidsting (spawn 9700003) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700003,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Abydion (spawn 9700004) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700004,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Simwenthi Boldaxe (spawn 9700005) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700005,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Thanelam Fullstone (spawn 9700006) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700006,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice Frieda (spawn 9700007) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700007,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Bloodmage Kalilis (spawn 9700008) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700008,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Volkmar Velor (spawn 9700009) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700009,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Sankle Greasebolt (spawn 9700010) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700010,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Makovei (spawn 9700011) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700011,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Solidan (spawn 9700012) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700012,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Nahiossi (spawn 9700013) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700013,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Jevaxle (spawn 9700014) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700014,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Seterin the Slothful (spawn 9700015) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700015,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Lionus the Sly (spawn 9700016) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700016,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Grovewarden Wetheas (spawn 9700017) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700017,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Dazi (spawn 9700018) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700018,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Cilkeck Gadgetspring (spawn 9700019) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700019,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Rraj'esh (spawn 9700020) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700020,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Kuixa (spawn 9700021) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700021,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Zidormi (spawn 9700022) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700022,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Lydries Frostwind (spawn 9700023) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700023,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Xaarmu (spawn 9700024) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700024,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Nishkix (spawn 9700025) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700025,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Fylaesia (spawn 9700026) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700026,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Oumorn Marbletale (spawn 9700027) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700027,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Squire Leilani (spawn 9700028) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700028,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Flette (spawn 9700029) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700029,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Rixka (spawn 9700030) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700030,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Chumani Earthtalon (spawn 9700031) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700031,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Crewman Sevly (spawn 9700032) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700032,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Mytaliath (spawn 9700033) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700033,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Cowardly Minion of Weavil (spawn 9700034) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700034,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Nildat Sharpmine (spawn 9700035) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700035,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Assistant Lulitte (spawn 9700036) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700036,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Kargam Shindigger (spawn 9700037) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700037,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Shola (spawn 9700038) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700038,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Aelsendra (spawn 9700039) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700039,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Krenic (spawn 9700040) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700040,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Kalyn (spawn 9700041) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700041,
+      "spawn_type": "creature",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Mevezius (spawn 9700042) shows a display the client has",
+      "actor": "p",
+      "metric": "spawn_display_state",
+      "guid": 9700042,
+      "spawn_type": "creature",
+      "equals": 2
+    }
+  ]
+}

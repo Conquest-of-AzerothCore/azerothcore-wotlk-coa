@@ -13,39 +13,59 @@
  *                                             for it. A player with poisoned
  *                                             blood hurts him instead. While he
  *                                             drains, his Heart is exposed:
- *                                             damage to it goes to him, and 10%
- *                                             of his health dealt through it ends
- *                                             the siphon early.
+ *                                             damage to it goes to him as well,
+ *                                             and breaking it ends the siphon
+ *                                             early (live logs: the heart's last
+ *                                             hit ends the siphon).
  *   Corrupted Blood    first 25s, every 30s   everyone: stacking Plague damage
  *                                             that heals him; when it ends, a
- *                                             Pool of Corrupted Blood stays
+ *                                             Pool of Corrupted Blood stays;
+ *                                             it ends on everyone when he dies
+ *                                             or evades (live logs)
  *   Will of Hakkar     first 45s, every 45s   a player feels it for 5s, then is
- *                                             his for 15s
+ *                                             his for 15s; Mythic and Ascended
+ *                                             only (tester, live)
  *   Blood Scythe       first 10s, every 15s   cone in front, -10% armour, stacks 10
- *   Sons of Hakkar     first 45s, every 60s   two join; where one dies its blood
+ *   Sons of Hakkar     first 45s, every 60s   one joins; where it dies its blood
  *                                             pools and poisons those inside
  *   Aspects            one for each High Priest still alive, +25% damage and
- *                      -10% damage taken each: at the pull he drains the Avatar
- *                      of each living priest's loa (Drain Power, -99% damage
- *                      taken while any of them lives) and gains its Aspect when
- *                      it dies
- *   Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
- *   Berserk            at 10 minutes
+ *                      -10% damage taken each: the Avatars of the living
+ *                      priests' loas stand around him from the pull; he drains
+ *                      one at a time, the nearest first (Drain Power, -99%
+ *                      damage taken while it lasts), each time he loses
+ *                      another 15% of his health (85%, 70%, ...), and gains
+ *                      its Aspect when it dies (live logs of 2025-12-21,
+ *                      2026-08-02 and 2026-08-09: in seven pulls each avatar
+ *                      died once the damage he took, Heart included, reached
+ *                      the same share of his health, 46-149s into the pull;
+ *                      the one kill puts the step at 15.0%);
+ *                      Bethekk's also brings Arlokk's Razor Claws (live logs:
+ *                      his swings bleed the tank)
+ *   Fierce Blow       tank, first 6.7-17.3s, then every 6-10s
+ *   Berserk            at 10 minutes (26662); Ascended at 15 minutes (2100213)
+ *
+ * Straight to the Heart: killing him while all five High Priests live credits
+ * the achievement of the difficulty (its criterion is "be the target of"
+ * 2107157-2107160, one spell per difficulty).
  *
  * Decided here, not in the data:
- *   - the siphon's length, the heart's 10% and where the heart appears;
+ *   - the siphon's length and where the heart appears;
  *   - the DBM bar "Pet Wind Serpent" (every 60s) is read as the wave of Sons of
  *     Hakkar: the siphon mechanic needs poisoned blood, and the data says it
- *     comes from a Son of Hakkar. Two per wave;
+ *     comes from a Son of Hakkar. One per wave (tester, live);
  *   - the Aspects are Ascension's buffs instead of the stock aspect spells;
  *   - the avatars stand in a ring 10 yards around him (nothing in the data says
  *     where; his Drain Power has no range limit);
  *   - Animate Blood and Rain of Blood are left out (the
  *     Orb of Corrupted Blood exists nowhere in the data).
  * The Heart is creature 92005, as in the log: the stock one (15069) despawns itself.
+ * It appears inside his chest, 8 yards above him (tester, live), higher if anything grows him.
+ * Hakkar's Power keeps its damage and health but not its +20% size per living High Priest: his size
+ * does not change while they live (round-7 tester, 2026-11-14).
  */
 
 #include "CreatureScript.h"
+#include "GlobalScript.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
@@ -57,6 +77,7 @@
 #include <algorithm>
 #include <array>
 #include <list>
+#include <vector>
 
 using namespace coa_zg;
 
@@ -85,6 +106,7 @@ namespace
         SPELL_BLOOD_SCYTHE        = 2118630,
         SPELL_BLOOD_SCYTHE_HIT    = 2118631,
         SPELL_BLOOD_SCYTHE_ARMOR  = 2118632,
+        SPELL_RAZOR_CLAWS         = 2118325,
         SPELL_WILL_SLIPPING       = 2118633,
         SPELL_WILL_CONTROL        = 2118634,
         SPELL_WILL_SHIELD         = 2118635,
@@ -102,6 +124,8 @@ namespace
     enum Npcs
     {
         NPC_SON_OF_HAKKAR   = 11357,
+        NPC_BLOODSEEKER_BAT = 11368,
+        NPC_ZULIAN_PROWLER  = 15101,
         NPC_WORLD_TRIGGER   = 12999,
         NPC_HEART_OF_HAKKAR = 92005,
         NPC_AVATAR_OF_BETHEKK    = 666988,
@@ -124,20 +148,30 @@ namespace
         EVENT_SONS,
         EVENT_BERSERK,
         EVENT_FIERCE_BLOW,
+        EVENT_BLOODSEEKER_BATS,
+        EVENT_ZULIAN_PROWLERS,
     };
 
     enum Actions
     {
-        ACTION_HEART_DAMAGE = 1
+        ACTION_HEART_BROKEN = 1
     };
 
     constexpr Milliseconds SIPHON_LENGTH = 20s;
-    constexpr uint32 HEART_BREAK_PCT     = 10;
+    constexpr Milliseconds BERSERK_TIMER = 10min;
     constexpr float SCYTHE_RANGE         = 20.0f;
     constexpr float SCYTHE_ARC           = float(M_PI) / 2;
     constexpr float POOL_RADIUS          = 5.0f;
     constexpr uint8 SCYTHE_STACKS        = 10;
     constexpr float AVATAR_RING          = 10.0f;
+    constexpr float HEART_HEIGHT         = 8.0f;
+    constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
+    constexpr int32 DRAIN_HEALTH_STEP    = 15;
+    constexpr uint8 BAT_WAVE             = 6;
+    constexpr uint8 PROWLER_WAVE         = 4;
+    constexpr Milliseconds ADD_WAVE_INTERVAL = 45s;
+    constexpr std::array<uint32, 4> CORRUPTED_BLOOD_VARIANTS = { 2118601, 2118602, 2118603, 2118604 };
+    constexpr std::array<uint32, 4> STRAIGHT_TO_THE_HEART = { 2107157, 2107158, 2107159, 2107160 };
 
     // The launch-day Normal kill (youtube c7iqfz04PmI) gives each player 2500 Runes of Ascension in one loot slot,
     // more than a loot row's 8-bit count holds, so they are handed out at his death instead.
@@ -159,7 +193,7 @@ namespace
         {
             if (me->GetPositionZ() < 52.f || me->GetPositionZ() > 57.28f)
             {
-                BossAI::EnterEvadeMode(EVADE_REASON_BOUNDARY);
+                EnterEvadeMode(EVADE_REASON_BOUNDARY);
                 return false;
             }
             return true;
@@ -177,14 +211,17 @@ namespace
         void Reset() override
         {
             _Reset();
+            me->RemoveAllDynObjects();
             ApplyHakkarPowerStacks();
             for (PriestLoa& loa : _loas)
             {
                 loa.avatar.Despawn(me);
                 me->RemoveAurasDueToSpell(loa.aspect);
             }
+            me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
+            _undrained.clear();
+            _drainsBegun = 0;
             _siphoning = false;
-            _heartDamage = 0;
             _pools.clear();
             _clock.Reset();
         }
@@ -194,20 +231,23 @@ namespace
             _JustEngagedWith();
             Talk(SAY_AGGRO);
 
-            DrainLivingPriestsLoas();
+            SummonLivingPriestsLoas();
 
             events.ScheduleEvent(EVENT_BLOOD_SCYTHE, 10s);
             events.ScheduleEvent(EVENT_CORRUPTED_BLOOD, 25s);
-            events.ScheduleEvent(EVENT_WILL_OF_HAKKAR, 45s);
+            if (me->GetMap()->GetSpawnMode() >= WILL_OF_HAKKAR_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_WILL_OF_HAKKAR, 45s);
             events.ScheduleEvent(EVENT_SONS, 45s);
             events.ScheduleEvent(EVENT_BLOOD_SIPHON, 59500ms);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
-            events.ScheduleEvent(EVENT_BERSERK, 10min);
+            events.ScheduleEvent(EVENT_BERSERK, IsAscended(me) ? ASCENDED_BERSERK_TIMER : BERSERK_TIMER);
         }
 
         // Ascension's aspects: one for each priest still standing, taken from its avatar.
-        void DrainLivingPriestsLoas()
+        void SummonLivingPriestsLoas()
         {
+            _undrained.clear();
+            _drainsBegun = 0;
             float angle = 0.0f;
             for (PriestLoa& loa : _loas)
             {
@@ -215,23 +255,77 @@ namespace
                     continue;
                 loa.avatar.Summon(me, me->GetNearPosition(AVATAR_RING, angle));
                 angle += 2 * float(M_PI) / _loas.size();
-                if (!loa.avatar.Drain(me))
-                    DoCastSelf(loa.aspect, true);
+                _undrained.push_back(&loa);
+            }
+        }
+
+        float AvatarDistance(PriestLoa const* loa) const
+        {
+            Creature* avatar = loa->avatar.Get(me);
+            return avatar ? me->GetDistance(avatar) : 0.0f;
+        }
+
+        bool AnyLoaDraining() const
+        {
+            return std::any_of(_loas.begin(), _loas.end(), [](PriestLoa const& loa) { return loa.avatar.Draining(); });
+        }
+
+        void DrainAtHealthSteps()
+        {
+            if (_undrained.empty() || AnyLoaDraining())
+                return;
+            if (!me->HealthBelowPct(100 - DRAIN_HEALTH_STEP * (_drainsBegun + 1)))
+                return;
+            ++_drainsBegun;
+            DrainNearestLoa();
+        }
+
+        void DrainNearestLoa()
+        {
+            while (!_undrained.empty())
+            {
+                auto nearest = std::min_element(_undrained.begin(), _undrained.end(),
+                    [this](PriestLoa const* a, PriestLoa const* b) { return AvatarDistance(a) < AvatarDistance(b); });
+                PriestLoa* loa = *nearest;
+                _undrained.erase(nearest);
+                if (loa->avatar.Drain(me))
+                    return;
+                TakeAspect(*loa);
+            }
+        }
+
+        void TakeAspect(PriestLoa const& loa)
+        {
+            DoCastSelf(loa.aspect, true);
+            if (loa.priest == DATA_ARLOKK)
+            {
+                DoCastSelf(SPELL_RAZOR_CLAWS, true);
+                _clock.ScheduleEvent(EVENT_ZULIAN_PROWLERS, 0ms);
+            }
+            else if (loa.priest == DATA_JEKLIK)
+                _clock.ScheduleEvent(EVENT_BLOODSEEKER_BATS, 0ms);
+        }
+
+        void SummonWave(uint32 entry, uint8 count)
+        {
+            for (uint8 i = 0; i < count; ++i)
+            {
+                Creature* add = me->SummonCreature(entry, me->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                if (!add)
+                    continue;
+                if (Unit* target = SelectTarget(SelectTargetMethod::Random))
+                    add->AI()->AttackStart(target);
             }
         }
 
         void TakeConsumedAspects()
         {
-            bool consumed = false;
             for (PriestLoa& loa : _loas)
             {
-                if (!loa.avatar.Consumed(me, false))
+                if (!loa.avatar.Consumed(me))
                     continue;
-                consumed = true;
-                DoCastSelf(loa.aspect, true);
+                TakeAspect(loa);
             }
-            if (consumed && std::none_of(_loas.begin(), _loas.end(), [](PriestLoa const& loa) { return loa.avatar.Draining(); }))
-                me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_DRAIN_POWER, me));
         }
 
         void EnterEvadeMode(EvadeReason why) override
@@ -239,7 +333,9 @@ namespace
             for (PriestLoa& loa : _loas)
                 loa.avatar.Despawn(me);
             ClearWill();
+            me->RemoveAllDynObjects();
             BossAI::EnterEvadeMode(why);
+            CleanseCorruptedBlood();
             Talk(SAY_EVADE);
         }
 
@@ -248,8 +344,28 @@ namespace
             for (PriestLoa& loa : _loas)
                 loa.avatar.Despawn(me);
             ClearWill();
+            me->RemoveAllDynObjects();
             BossAI::JustDied(killer);
+            CleanseCorruptedBlood();
             GrantRunes();
+            CreditStraightToTheHeart();
+        }
+
+        void CreditStraightToTheHeart()
+        {
+            for (uint32 priest = DATA_JEKLIK; priest < DATA_HAKKAR; ++priest)
+                if (instance->GetBossState(priest) == DONE)
+                    return;
+            uint8 const spawnMode = me->GetMap()->GetSpawnMode();
+            if (spawnMode < STRAIGHT_TO_THE_HEART.size())
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,
+                    STRAIGHT_TO_THE_HEART[spawnMode], 0, me);
+        }
+
+        void CleanseCorruptedBlood()
+        {
+            for (uint32 spell : CORRUPTED_BLOOD_VARIANTS)
+                instance->DoRemoveAurasDueToSpellOnPlayers(spell);
         }
 
         void GrantRunes()
@@ -275,17 +391,12 @@ namespace
             }
         }
 
-        // The heart reports what it took.
-        void SetData(uint32 type, uint32 value) override
+        void SetData(uint32 type, uint32 /*value*/) override
         {
-            if (type != ACTION_HEART_DAMAGE || !_siphoning)
+            if (type != ACTION_HEART_BROKEN || !_siphoning)
                 return;
-            _heartDamage += value;
-            if (_heartDamage >= me->CountPctFromMaxHealth(HEART_BREAK_PCT))
-            {
-                _clock.CancelEvent(EVENT_SIPHON_END);
-                _clock.ScheduleEvent(EVENT_SIPHON_END, 0ms);
-            }
+            _clock.CancelEvent(EVENT_SIPHON_END);
+            _clock.ScheduleEvent(EVENT_SIPHON_END, 0ms);
         }
 
         bool PoisonedBlood(Player* p)
@@ -308,8 +419,8 @@ namespace
                 case SPELL_BLOOD_SIPHON:
                 {
                     _siphoning = true;
-                    _heartDamage = 0;
-                    Position pos = me->GetNearPosition(12.0f, 0.0f);
+                    Position pos = me->GetPosition();
+                    pos.m_positionZ += HEART_HEIGHT * me->GetObjectScale();
                     if (Creature* heart = me->SummonCreature(NPC_HEART_OF_HAKKAR, pos, TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         heart->AddAura(SPELL_HEART_EXPOSED, heart);
@@ -355,7 +466,10 @@ namespace
         {
             _siphoning = false;
             _clock.CancelEvent(EVENT_SIPHON_TICK);
-            me->InterruptSpell(CURRENT_CHANNELED_SPELL);
+            // A drain begun during the siphon replaced its channel; ending the siphon must not cut that drain off.
+            if (Spell const* channel = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                if (channel->GetSpellInfo()->Id == SPELL_BLOOD_SIPHON)
+                    me->InterruptSpell(CURRENT_CHANNELED_SPELL);
             if (Creature* heart = ObjectAccessor::GetCreature(*me, _heart))
                 heart->DespawnOrUnsummon();
             _heart.Clear();
@@ -378,6 +492,7 @@ namespace
                 return;
 
             TakeConsumedAspects();
+            DrainAtHealthSteps();
 
             events.Update(diff);
             _clock.Update(diff);
@@ -392,6 +507,14 @@ namespace
                         break;
                     case EVENT_SIPHON_END:
                         EndSiphon();
+                        break;
+                    case EVENT_BLOODSEEKER_BATS:
+                        SummonWave(NPC_BLOODSEEKER_BAT, BAT_WAVE);
+                        _clock.ScheduleEvent(EVENT_BLOODSEEKER_BATS, ADD_WAVE_INTERVAL);
+                        break;
+                    case EVENT_ZULIAN_PROWLERS:
+                        SummonWave(NPC_ZULIAN_PROWLER, PROWLER_WAVE);
+                        _clock.ScheduleEvent(EVENT_ZULIAN_PROWLERS, ADD_WAVE_INTERVAL);
                         break;
                     default:
                         break;
@@ -446,16 +569,13 @@ namespace
                         events.ScheduleEvent(EVENT_BLOOD_SCYTHE, 15s);
                         break;
                     case EVENT_SONS:
-                        for (uint8 i = 0; i < 2; ++i)
-                        {
-                            Position pos = me->GetRandomNearPosition(25.0f);
-                            if (Creature* son = me->SummonCreature(NPC_SON_OF_HAKKAR, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
-                                son->SetInCombatWithZone();
-                        }
+                        if (Creature* son = me->SummonCreature(NPC_SON_OF_HAKKAR, me->GetRandomNearPosition(25.0f),
+                            TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                            son->SetInCombatWithZone();
                         events.ScheduleEvent(EVENT_SONS, 60s);
                         break;
                     case EVENT_BERSERK:
-                        DoCastSelf(SPELL_BERSERK, true);
+                        DoCastSelf(IsAscended(me) ? SPELL_ASCENDED_BERSERK : SPELL_BERSERK, true);
                         break;
                     case EVENT_FIERCE_BLOW:
                         DoCastVictim(SPELL_FIERCE_BLOW);
@@ -481,38 +601,54 @@ namespace
             { DATA_THEKAL, SPELL_ASPECT_OF_SHIRVALLAH, { NPC_AVATAR_OF_SHIRVALLAH, SPELL_DRAIN_POWER } },
             { DATA_ARLOKK, SPELL_ASPECT_OF_BETHEKK, { NPC_AVATAR_OF_BETHEKK, SPELL_DRAIN_POWER } }
         }};
+        std::vector<PriestLoa*> _undrained;
+        uint8 _drainsBegun = 0;
         EventMap _clock;
         bool _siphoning = false;
-        uint32 _heartDamage = 0;
         ObjectGuid _heart;
         ObjectGuid _willTarget;
         GuidVector _pools;
     };
 
-    // The Heart of Hakkar: whatever hits it hits Hakkar.
+    // The Heart of Hakkar: whatever hits it hits Hakkar too, and breaking it ends the siphon.
     struct npc_heart_of_hakkar_coa : public ScriptedAI
     {
         npc_heart_of_hakkar_coa(Creature* creature) : ScriptedAI(creature)
         {
             me->SetReactState(REACT_PASSIVE);
             me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetDisableGravity(true);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask /*school*/) override
         {
+            if (_broken)
+            {
+                damage = 0;
+                return;
+            }
             uint32 const dealt = damage;
-            damage = 0;
+            bool const broken = damage >= me->GetHealth();
+            if (broken)
+                damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
             if (!dealt || !attacker)
                 return;
-            InstanceScript* instance = me->GetInstanceScript();
-            Creature* hakkar = instance ? instance->GetCreature(DATA_HAKKAR) : nullptr;
+            TempSummon* summon = me->ToTempSummon();
+            Creature* hakkar = summon ? summon->GetSummonerCreatureBase() : nullptr;
             if (!hakkar || !hakkar->IsAlive())
                 return;
             Unit::DealDamage(attacker, hakkar, dealt, nullptr, type, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-            hakkar->AI()->SetData(ACTION_HEART_DAMAGE, dealt);
+            if (broken && !_broken)
+            {
+                _broken = true;
+                hakkar->AI()->SetData(ACTION_HEART_BROKEN, 0);
+            }
         }
 
         void UpdateAI(uint32 /*diff*/) override { }
+
+    private:
+        bool _broken = false;
     };
 
     // Corrupted Blood heals Hakkar for what it deals, and leaves a pool when it ends.
@@ -550,6 +686,23 @@ namespace
             AfterEffectRemove += AuraEffectRemoveFn(spell_hakkar_coa_corrupted_blood::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }
     };
+
+    // Hakkar's Power without its third effect, the +20% size per stack.
+    class HakkarPowerKeepsHisSize final : public GlobalScript
+    {
+    public:
+        HakkarPowerKeepsHisSize()
+            : GlobalScript("HakkarPowerKeepsHisSize", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (info->Id == SPELL_HAKKAR_POWER && info->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOD_SCALE)
+            {
+                info->Effects[EFFECT_2].Effect = 0;
+                info->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+            }
+        }
+    };
 }
 
 void AddCoaHakkarScripts()
@@ -557,4 +710,5 @@ void AddCoaHakkarScripts()
     RegisterZulGurubCreatureAI(boss_hakkar_coa);
     RegisterZulGurubCreatureAI(npc_heart_of_hakkar_coa);
     RegisterSpellScript(spell_hakkar_coa_corrupted_blood);
+    new HakkarPowerKeepsHisSize();
 }

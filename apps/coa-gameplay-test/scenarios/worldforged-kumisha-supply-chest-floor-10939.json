@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged Kum'isha's Supply Chest is not buried in the Blasted Lands model (#10939)",
+  "contract": "Kum'isha's Supply Chest (entry 96199, guid 6940265) sat 1.9 yd under the ground reported at its x/y with 0.05 yd of clearance to a model. It rests on the ground at the point where the reporter stood.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -11367.28, "y": -2981.92, "z": 2, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: it is not under the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940265, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is clear of walls", "actor": "p", "metric": "spawn_clearance", "guid": 6940265, "spawn_type": "gameobject", "min": 0.5 },
+    { "action": "assert", "label": "it has headroom", "actor": "p", "metric": "spawn_headroom", "guid": 6940265, "spawn_type": "gameobject", "min": 3 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 96199 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

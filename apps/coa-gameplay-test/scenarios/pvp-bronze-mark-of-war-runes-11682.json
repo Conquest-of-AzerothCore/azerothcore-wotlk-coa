@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Bronze Mark of War pays 50 Runes of Ascension",
+  "contract": [
+    "Bronze Mark of War 1303551 reads \"Awards 50 Runes of Ascension.\" Its own spell 413114 is a dummy that pays",
+    "nothing, so a right click did nothing. Expected: using one mark from a stack of two spends exactly that mark and",
+    "adds 50 Rune of Ascension (item 375250) to the Currency tab; using the second brings the total to 100 and",
+    "leaves no mark."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 25, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "add_item", "actor": "hero", "item": 1303551, "count": 2},
+    {"action": "assert", "actor": "hero", "metric": "item_count", "item": 1303551, "equals": 2},
+    {"action": "assert", "actor": "hero", "metric": "token_count", "item": 375250, "equals": 0},
+    {"action": "use_item", "actor": "hero", "item": 1303551, "spell": 413114},
+    {"action": "assert", "label": "one mark is spent", "actor": "hero", "metric": "item_count", "item": 1303551,
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "50 runes reach the Currency tab", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 50, "within_ms": 2000},
+    {"action": "use_item", "actor": "hero", "item": 1303551, "spell": 413114},
+    {"action": "assert", "label": "the second mark is spent", "actor": "hero", "metric": "item_count",
+     "item": 1303551, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "the runes add up to 100", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 100, "within_ms": 2000}
+  ]
+}

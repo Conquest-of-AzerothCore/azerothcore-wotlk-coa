@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Gri'lek has the health of the tester's live video, about 318k per player",
+  "contract": [
+    "The tester's live video of 2026-11-04 shows Gri'lek (15082) with 3.5 million health against 11 players, about",
+    "318,182 per player; ours gave 108,341 per player (about 1.19 million at 11). Raid flex counts at least 10",
+    "players, so one hero on Normal faces 10 x 318,182 = 3,181,820 health once the fight starts, where the old",
+    "value gave 1,083,410."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 309,
+    "x": -12326.5,
+    "y": -1577.11,
+    "z": 133.588,
+    "o": 4.817,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 15082,
+      "as": "grilek",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage Gri'lek",
+      "actor": "hero",
+      "target": "grilek"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek fights the hero",
+      "actor": "grilek",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Gri'lek has 10 x 318,182 health, not 10 x 108,341",
+      "actor": "grilek",
+      "metric": "max_health",
+      "min": 3100000,
+      "max": 3300000,
+      "within_ms": 3000
+    }
+  ]
+}

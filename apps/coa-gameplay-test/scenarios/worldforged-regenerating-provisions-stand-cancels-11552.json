@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Standing up ends Eat Provisions, which must remain seated (#11552)",
+  "contract": [
+    "Eat Provisions (spell 901543, used by the Sack of Regenerating Provisions, item 450586) reads \"Eat your",
+    "provisions, restoring health and mana every 3 sec for 25 sec while out of combat. Must remain seated while",
+    "eating.\". A spell that must remain seated ends when its caster stands up, as the stock Food spells do. A",
+    "level 30 Chronomancer eats the provisions out of combat, then asks the server to stand with",
+    "CMSG_STANDSTATECHANGE, which the client sends when the player moves or presses the stand key. The eating aura",
+    "must be gone afterwards. The scenario measures the aura, not the animation: no stand state metric reads a player."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "eater", "race": 1, "class": 22, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "eater", "item": 450586, "label": "fixture: a Sack of Regenerating Provisions" },
+    { "action": "equip", "actor": "eater", "item": 450586, "slot": 12 },
+    { "action": "use_item", "actor": "eater", "item": 450586, "spell": 901543, "label": "eat the provisions" },
+    { "action": "assert", "label": "The provisions are being eaten", "actor": "eater", "metric": "aura",
+      "spell": 901543, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Eat for a moment while seated", "ms": 2000 },
+    { "action": "assert", "label": "The aura is still active while seated", "actor": "eater", "metric": "aura",
+      "spell": 901543, "equals": 1 },
+    { "action": "client_packet", "label": "Stand up", "actor": "eater", "opcode": 257, "consumed": false, "fields": [ { "u32": 0 } ] },
+    { "action": "assert", "label": "Standing up ends the provisions", "actor": "eater", "metric": "aura",
+      "spell": 901543, "equals": 0, "within_ms": 2000 }
+  ]
+}

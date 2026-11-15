@@ -1,0 +1,534 @@
+{
+  "schema": 1,
+  "name": "Nether Portal opens a portal and its Shadow Bolts call three demons, then a greater one (#9806, #7326)",
+  "contract": [
+    "Nether Portal 290441: 'Tear open a portal to the Twisting Nether for $290443d. Casting Shadow Bolt, Incinerate or",
+    "Soul Fire summons a demon to fight for you. Summoning 3 demons causes a stronger one to be summoned which sends",
+    "the previous ones back to the nether.' The cast summons portal 840095 and applies the 20 s buff 290443.",
+    "Each Shadow Bolt under the buff summons a guardian: casts 1-3 from Darkhound/Satyr/Void Terror/Wrathguard, each with",
+    "tier 1 (290447: +100% attack power, +100% damage); cast 4 unsummons them and summons a Dreadlord or Shivarra with",
+    "tier 2 (290448: +100% attack power, +250% damage); later casts summon nothing. Every demon leaves 0.5 s after the",
+    "buff ends, and the portal with it. Picks are random, so demons are counted by their tier aura among the Hero's",
+    "controlled units.",
+    "Demons are scaled to the owner's level from creature_classlevelstats (unit_class 1, expansion 0) as",
+    "Demons are scaled to the owner's level from creature_classlevelstats (unit_class 1, expansion 0) as",
+    "Creature::SelectLevel does: weapon damage_base to 1.5x, attack power attackpower, attack time 2000. The tier auras'",
+    "aura 99 is SPELL_AURA_MOD_ATTACK_POWER, a flat +100 attack power, and aura 79 (+100% / +250% damage done) sits in",
+    "the main-hand TOTAL_PCT, so the damage fields already include it: (weapon + (AP + 100) / 14) * 2.0 * (1 + pct).",
+    "Level 60 (33.9625, AP 252): tier 1 236.42-304.35, tier 2 413.74-532.61. Level 35 (15.8617, AP 118): tier 1 125.73-157.46, tier 2 220.03-275.55."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 4000000,
+      "distance": 10,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 290441
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 686
+    },
+    {
+      "action": "cast",
+      "label": "Open the Nether Portal",
+      "actor": "hero",
+      "spell": 290441
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 290441,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The portal stands",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840095,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The portal buff is on the caster",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 290443,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Level 60 Shadow Bolt 1",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Demon 1 carries tier 1 (DISCRIMINATING)",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level 60 Shadow Bolt 2",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Demon 2 carries tier 1",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level 60 Shadow Bolt 3",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Demon 3 carries tier 1",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No greater demon yet",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 tier-1 demon: minimum swing 236.42",
+      "actor": "hero",
+      "metric": "controlled_aura_min_damage",
+      "spell": 290447,
+      "min": 235.42,
+      "max": 237.42
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 tier-1 demon: maximum swing 304.35",
+      "actor": "hero",
+      "metric": "controlled_aura_max_damage",
+      "spell": 290447,
+      "min": 303.35,
+      "max": 305.35
+    },
+    {
+      "action": "cast",
+      "label": "Level 60 Shadow Bolt 4",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a greater demon with tier 2",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The three lesser demons were sent back",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 tier-2 demon: minimum swing 413.74",
+      "actor": "hero",
+      "metric": "controlled_aura_min_damage",
+      "spell": 290448,
+      "min": 412.74,
+      "max": 414.74
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 tier-2 demon: maximum swing 532.61",
+      "actor": "hero",
+      "metric": "controlled_aura_max_damage",
+      "spell": 290448,
+      "min": 531.61,
+      "max": 533.61
+    },
+    {
+      "action": "assert",
+      "label": "No lesser demon remains: Darkhound",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840099,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No lesser demon remains: Satyr",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840096,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No lesser demon remains: Void Terror",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840097,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No lesser demon remains: Wrathguard",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840098,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Bolt 5",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the fifth cast adds nothing",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Still exactly one greater demon",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The portal buff runs out",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 290443,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The greater demon is still out as the buff ends",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the greater demon leaves about 0.5 s later",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The portal is gone",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840095,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "set_level",
+      "label": "Same check at level 35",
+      "actor": "hero",
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 290441
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 686
+    },
+    {
+      "action": "cast",
+      "label": "Open a second Nether Portal at level 35",
+      "actor": "hero",
+      "spell": 290441
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff is back",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 290443,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Level 35 Shadow Bolt 1",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Demon 1 carries tier 1",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level 35 Shadow Bolt 2",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Demon 2 carries tier 1",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level 35 Shadow Bolt 3",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Demon 3 carries tier 1",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No greater demon yet",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 35 tier-1 demon: minimum swing 125.73",
+      "actor": "hero",
+      "metric": "controlled_aura_min_damage",
+      "spell": 290447,
+      "min": 124.73,
+      "max": 126.73
+    },
+    {
+      "action": "assert",
+      "label": "Level 35 tier-1 demon: maximum swing 157.46",
+      "actor": "hero",
+      "metric": "controlled_aura_max_damage",
+      "spell": 290447,
+      "min": 156.46,
+      "max": 158.46
+    },
+    {
+      "action": "cast",
+      "label": "Level 35 Shadow Bolt 4",
+      "actor": "hero",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 686,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a greater demon with tier 2",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290448,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The three lesser demons were sent back",
+      "actor": "hero",
+      "metric": "controlled_aura_count",
+      "spell": 290447,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Level 35 tier-2 demon: minimum swing 220.03",
+      "actor": "hero",
+      "metric": "controlled_aura_min_damage",
+      "spell": 290448,
+      "min": 219.03,
+      "max": 221.03
+    },
+    {
+      "action": "assert",
+      "label": "Level 35 tier-2 demon: maximum swing 275.55",
+      "actor": "hero",
+      "metric": "controlled_aura_max_damage",
+      "spell": 290448,
+      "min": 274.55,
+      "max": 276.55
+    }
+  ]
+}

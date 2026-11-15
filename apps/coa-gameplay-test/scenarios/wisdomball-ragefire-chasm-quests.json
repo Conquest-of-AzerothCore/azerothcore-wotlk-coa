@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball offers each Ragefire Chasm quest once and never hands in Searching for the Lost Satchel in place of Maur Grimtotem",
+  "contract": "Ragefire Chasm (map 389) has seven quest_template rows with QuestSortID 2437. 5723 Testing an Enemy's Strength, 5728 Hidden Enemies, 5761 Slaying the Beast and 14356 The Power to Destroy... are the Horde quests a player can obtain, from Rahauro 11833, Thrall 4949, Neeru Fireblade 3216 and Bragor Bloodfist 36273. 5725 is an older The Power to Destroy... with the same objectives, flagged QUEST_FLAGS_UNAVAILABLE (0x4000); its only giver, Varimathras 2425, is not spawned. The ball listed both copies, so a player saw the same quest twice and could carry both. The ball withholds quests flagged QUEST_FLAGS_UNAVAILABLE. 5722 Searching for the Lost Satchel, from Rahauro in Thunder Bluff, has no objective: the player completes it by finding Maur Grimtotem 11834, whose corpse lies inside Ragefire Chasm. The ball never offers it, but it listed the carried quest as ready to hand in wherever the ball was summoned, so the reward was paid without entering the dungeon. A carried quest without a player objective whose ender stands in a dungeon is not listed or handed in at the ball. A carried quest with an objective, 5723 here, is still listed and handed in.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "seeker", "race": 10, "class": 13, "level": 80 }
+  ],
+  "location": {
+    "map": 389,
+    "x": -45.0298,
+    "y": -27.7645,
+    "z": -21.2917,
+    "o": 1.70311,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Ragefire Chasm settle", "ms": 8000 },
+    { "action": "add_item", "label": "Obtain the companion, as a purchase would", "actor": "seeker", "item": 101169, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "seeker", "item": 101169, "spell": 55884 },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "seeker", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Summon the ball in Ragefire Chasm", "actor": "seeker", "spell": 83050 },
+    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this character owns",
+      "actor": "seeker", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Testing an Enemy's Strength is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 5723, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Hidden Enemies is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 5728, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Slaying the Beast is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 5761, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bragor Bloodfist's The Power to Destroy... is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 14356, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The unavailable The Power to Destroy... copy is not offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 5725, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try to take the unavailable copy anyway, as a hostile client would", "actor": "seeker", "quest": 5725, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The ball refuses it",
+      "actor": "seeker", "metric": "quest_status", "quest": 5725, "equals": 0
+    },
+    { "action": "prepare_quest", "label": "Carry Searching for the Lost Satchel, as Rahauro gives it in Thunder Bluff", "actor": "seeker", "quest": 5722 },
+    {
+      "action": "assert",
+      "label": "It is in the log, already complete",
+      "actor": "seeker", "metric": "quest_status", "quest": 5722, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ball does not list it as carried",
+      "actor": "seeker", "metric": "ball_carried_quest", "quest": 5722, "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Nor as ready to hand in",
+      "actor": "seeker", "metric": "ball_turn_in_quest", "quest": 5722, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Take Testing an Enemy's Strength at the ball", "actor": "seeker", "quest": 5723, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The quest with an objective is listed as carried",
+      "actor": "seeker", "metric": "ball_carried_quest", "quest": 5723, "equals": 1, "within_ms": 3000
+    },
+    { "action": "quest_complete", "label": "Finish its objectives, as a dungeon run would", "actor": "seeker", "quest": 5723 },
+    {
+      "action": "assert",
+      "label": "It is now ready to hand in at the ball",
+      "actor": "seeker", "metric": "ball_turn_in_quest", "quest": 5723, "equals": 1, "within_ms": 3000
+    },
+    { "action": "quest_turn_in", "label": "Hand it in at the ball", "actor": "seeker", "quest": 5723, "entry": 79025, "reward": 0 },
+    {
+      "action": "assert",
+      "label": "The ball paid it out",
+      "actor": "seeker", "metric": "quest_status", "quest": 5723, "equals": 6, "within_ms": 3000
+    }
+  ]
+}

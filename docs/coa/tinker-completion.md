@@ -94,8 +94,9 @@ an all-rank scaling fix from this inconsistency.
   speed from one to three times the base. Each explosion selects its target set once.
 - Firepot starts five yards above the origin, follows its target while flying, drops one intermediate
   payload/oil patch and explodes on contact. Real map collision and flight appearance remain untested.
-- Battle Turrets use native vehicle 116 with action slots 706689 and 706694, share health across owned
-  turrets and supply the owned damage field. Vehicle choice and controllability require live acceptance.
+- Battle Turrets use native vehicle 116 with action slots Z-9001 Round 503600, Frozen Core Round 503604,
+  Blowin' off Steam 503606 and Battery Round 503602, close the gossip window on entry, share health across
+  owned turrets and supply the owned damage field. Vehicle choice and controllability require live acceptance.
 - Heavy Spider Bomb uses free creature identity 840028, copied Spider display 408331 and local scale
   1.5. Portable Sawmill uses native woodpile display 1248 with the actual required focus 1653.
   Other new creature identities use their copied-client displays. Upgrade keeps the base appearance;

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Voodoo Bonemaker pickup 6941309 rests on the ground measured under it (#10926)",
+  "contract": "Voodoo Bonemaker pickup (guid 6941309) floated 1.4 yd above the ground (#10926). The target z is the vmap ground height measured under the spawn's x, y on the worldserver data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Voodoo Bonemaker pickup 6941309 rests on the ground measured under it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6941309,
+      "spawn_type": "gameobject",
+      "x": -12991.7,
+      "y": 197.5,
+      "z": 17.285,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941309,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

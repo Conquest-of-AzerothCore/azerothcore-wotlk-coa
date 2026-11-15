@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Shadow Pennant rank 2 is in the Heretic tab, not General",
+  "contract": [
+    "Issue #11505. Shadow Pennant rank 2 (525307) had no SkillLineAbility row, so the client filed it under General.",
+    "The talent (CharacterAdvancement 30522) shares Tab 66 with Blade of Yogg-Saron, in SkillLine 90 (Heretic)",
+    "through row 24171; rank 1 (706926) is never displayed. Row 843, a duplicate of row 12781 (spell 1499) that",
+    "differs only in MinSkillLineRank, is repurposed for 525307 at SkillLine 90, and the client patch streams that",
+    "row after the spell is learned."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 60}
+  ],
+  "steps": [
+    {"action": "assert", "actor": "cultist", "metric": "skill_line_for_spell", "spell": 524887, "equals": 90,
+     "label": "CONTROL: Blade of Yogg-Saron rank 1 shares Tab 66 in the Heretic line"},
+    {"action": "assert", "actor": "cultist", "metric": "skill_line_for_spell", "spell": 1499, "equals": 50,
+     "label": "CONTROL: row 843's old spell keeps its line through the twin row"},
+    {"action": "assert", "actor": "cultist", "metric": "skill_line_for_spell", "spell": 525307, "equals": 90,
+     "label": "rank 2 carries the Heretic line"},
+    {"action": "learn", "actor": "cultist", "spell": 525307, "label": "learn Shadow Pennant rank 2"},
+    {"action": "assert", "actor": "cultist", "metric": "skill_line_after_learned", "spell": 525307, "equals": 1,
+     "within_ms": 5000, "label": "the row follows the learn announcement"},
+    {"action": "assert", "actor": "cultist", "metric": "skill_line_ability", "spell": 525307, "equals": 90,
+     "within_ms": 5000, "label": "the client patch carries SkillLine 90 for rank 2"}
+  ]
+}

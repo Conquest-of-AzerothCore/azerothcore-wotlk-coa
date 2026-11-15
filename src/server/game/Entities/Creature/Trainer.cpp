@@ -54,26 +54,13 @@ namespace
         return RankTrainerHeroOf ? RankTrainerHeroOf(player) : IsWildcardHero(player);
     }
 
-    uint8 ProfessionExpansion(uint32 skill)
-    {
-        switch (skill)
-        {
-            case SKILL_JEWELCRAFTING:
-                return EXPANSION_THE_BURNING_CRUSADE;
-            case SKILL_INSCRIPTION:
-                return EXPANSION_WRATH_OF_THE_LICH_KING;
-            default:
-                return EXPANSION_CLASSIC;
-        }
-    }
-
     bool TeachesProfessionBeyondExpansion(SpellInfo const* spellInfo, uint8 expansion)
     {
         for (SpellEffectInfo const& spellEffectInfo : spellInfo->GetEffects())
             if ((spellEffectInfo.IsEffect(SPELL_EFFECT_SKILL_STEP) || spellEffectInfo.IsEffect(SPELL_EFFECT_SKILL))
                 && IsProfessionSkill(spellEffectInfo.MiscValue)
                 && (spellEffectInfo.CalcValue() > GetMaxProfessionSkillStep(expansion)
-                    || ProfessionExpansion(spellEffectInfo.MiscValue) > expansion))
+                    || GetProfessionExpansion(spellEffectInfo.MiscValue) > expansion))
                 return true;
 
         return false;
@@ -265,9 +252,17 @@ namespace Trainer
     }
 
     // A rank trainer's next rank turns trainable once the rank below it is bought, so its list is sent again.
-    bool Trainer::RepublishesAfterPurchase() const
+    // So is a list holding a spell the client knows only as its temporary replacement: on the next spell
+    // learned the client redraws rows from its own spellbook and would offer that held spell again.
+    bool Trainer::RepublishesAfterPurchase(Player const* player) const
     {
-        return _trainerId == WILDCARD_RANK_TRAINER_ID;
+        if (_trainerId == WILDCARD_RANK_TRAINER_ID)
+            return true;
+
+        return std::any_of(_spells.begin(), _spells.end(), [player](Spell const& trainerSpell)
+        {
+            return player->GetTemporarySpellReplacement(trainerSpell.SpellId) != trainerSpell.SpellId;
+        });
     }
 
     bool Trainer::CanTeachSpell(Player const* player, Spell const* trainerSpell) const
@@ -302,7 +297,7 @@ namespace Trainer
 
         // check expansion requirement of professions, their ranks and their recipes
         uint8 const expansion = player->GetSession()->Expansion();
-        if (ProfessionExpansion(trainerSpell->ReqSkillLine) > expansion
+        if (GetProfessionExpansion(trainerSpell->ReqSkillLine) > expansion
             || RecipeExpansion(trainerSpell->SpellId) > expansion)
             return SpellState::Unavailable;
 

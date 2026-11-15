@@ -1,0 +1,372 @@
+{
+ "schema": 1,
+ "name": "Necromancer: Harrowing Winds frost damage can unleash Soulfreeze (#10421)",
+ "contract": "Soulfreeze 572023 reads 'All Frost damage you deal to Frozen targets now has a chance to unleash Soulfreeze on them' (25% proc chance). Harrowing Winds 707575 is Frost (SchoolMask 16) damage dealt by the Necromancer to up to 8 enemies around the Glacial Impact target, and Permafrost 801747 makes them count as frozen. Ten Glacial Impact casts roll Soulfreeze 10 times from the Glacial Impact hits alone (mean 2.5 casts, 9 or more has probability 0.00003) and 80 times with the splash (mean 20 casts, fewer than 9 has probability about 0.0006).",
+ "timeout_ms": 180000,
+ "players": [
+  {
+   "id": "n",
+   "race": 5,
+   "class": 23,
+   "level": 60,
+   "spell_hit_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "d",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 12,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s0",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 12.5,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s1",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 13.0,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s2",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 13.5,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s3",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 14.0,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s4",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 14.5,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s5",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 15.0,
+   "stationary": true,
+   "health": 5000000
+  },
+  {
+   "id": "s6",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 15.5,
+   "stationary": true,
+   "health": 5000000
+  }
+ ],
+ "location": {
+  "map": 0,
+  "x": -8917.41,
+  "y": -115.853,
+  "z": 82.3711,
+  "o": 0
+ },
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "spell": 704355,
+   "actor": "n"
+  },
+  {
+   "action": "learn",
+   "spell": 705745,
+   "actor": "n"
+  },
+  {
+   "action": "learn",
+   "spell": 572023,
+   "actor": "n"
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: Harrowing Winds is active",
+   "actor": "n",
+   "metric": "aura",
+   "spell": 705745,
+   "equals": 1,
+   "within_ms": 5000
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: Soulfreeze is active",
+   "actor": "n",
+   "metric": "aura",
+   "spell": 572023,
+   "equals": 1,
+   "within_ms": 5000
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 1",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 2",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 3",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 4",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 5",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 6",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 7",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 8",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 9",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "n",
+   "spell": 704355
+  },
+  {
+   "action": "cast",
+   "label": "Glacial Impact 10",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 2200
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: Harrowing Winds splashed the farthest enemy",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707575,
+   "target": "s6",
+   "min": 1
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: Soulfreeze was unleashed by the Glacial Impact hits and the Harrowing Winds splashes (8 rolls per cast at 25%, 20 expected; Glacial Impact alone rolls once per cast, 2.5 expected)",
+   "actor": "n",
+   "metric": "spell_cast_count",
+   "spell": 801724,
+   "min": 9
+  }
+ ]
+}

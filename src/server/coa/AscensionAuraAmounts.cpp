@@ -24,7 +24,8 @@ void AppendAuraAmounts(WorldPacket& data, AuraApplication const& application, bo
     {
         uint8 sourceIndex = aura->GetId() == SPELL_BARBARIAN_DRUNKEN_FRENZY && index == 1 ? 0 : index;
         AuraEffect const* effect = aura->GetEffect(sourceIndex);
-        int32 amount = effect && application.HasEffect(sourceIndex) && application.IsActive(sourceIndex)
+        bool enemyArea = effect && aura->GetSpellInfo()->Effects[sourceIndex].IsEffect(SPELL_EFFECT_APPLY_AREA_AURA_ENEMY);
+        int32 amount = effect && (enemyArea || (application.HasEffect(sourceIndex) && application.IsActive(sourceIndex)))
             ? effect->GetAmount() : 0;
         if (aura->GetId() == SPELL_BARBARIAN_TANKARD && index == 0 && amount && aura->GetSpellInfo()->StackAmount)
             amount = 100 * aura->GetStackAmount() / aura->GetSpellInfo()->StackAmount;

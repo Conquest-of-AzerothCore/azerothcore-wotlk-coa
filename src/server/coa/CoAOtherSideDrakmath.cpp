@@ -2,8 +2,10 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "AscensionDungeonRelease.h"
 #include "CoAOtherSideDamage.h"
 #include "Creature.h"
+#include "GameObject.h"
 #include "Map.h"
 #include "MotionMaster.h"
 #include "MoveSplineInit.h"
@@ -11,6 +13,7 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
@@ -31,6 +34,8 @@ enum DrakmathData : uint32
     NPC_PILLAR = 162727,
     NPC_ORB = 162728,
     NPC_VOLZEEN = 162988,
+    GO_WEB_DOOR_WEST = 2300575,
+    GO_WEB_DOOR_EAST = 2300583,
 
     SPELL_ENCHANTED = 256839,
     SPELL_PARASITISM = 256867,
@@ -71,13 +76,14 @@ enum DrakmathData : uint32
     EVENT_BEAM_PILLAR,
     EVENT_BEAM_END,
     EVENT_DEATH_MISSILE,
+    EVENT_CLOSE_DOORS,
 };
 
 constexpr float SidePillarDistance = 10.0f;
 constexpr float OrbSpeed = 2.0f;
 constexpr float OrbTravel = 25.0f;
 constexpr float OrbTouch = 2.0f;
-constexpr float BeamLength = 45.0f;
+constexpr float BeamLength = 23.0f;
 constexpr float BeamConeHalfAngle = 15.0f * float(M_PI) / 180.0f;
 constexpr float BeamMinHalfWidth = 2.0f;
 constexpr uint32 BeamPillars = 10;
@@ -87,6 +93,7 @@ constexpr float LevitateHeight = 3.0f;
 
 constexpr float OrbHover = 1.2f;
 constexpr int32 OrbExplosionRadiusMod = 17500;
+constexpr int32 MissileImpactRadiusMod = 21250;
 constexpr uint32 PointCenter = 1;
 constexpr uint32 DisplayInvisible = 11686;
 
@@ -103,6 +110,8 @@ constexpr Damage3 NecroticEmerge = { 260, 660 };
 constexpr Damage3 NecroticExplosion = { 340, 954 };
 constexpr Damage3 DeathMissile = { 250, 750 };
 constexpr uint32 MissileMarkMs = 2500;
+constexpr Seconds DoorCloseDelay = 3s;
+constexpr float DoorSearch = 80.0f;
 constexpr float MissileSpeed = 15.0f;
 
 uint32 ByDifficulty(WorldObject const* source, uint32 normal, uint32 heroic, uint32 mythic)
@@ -156,6 +165,7 @@ struct boss_coa_drakmath : public ScriptedAI
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         DoCastSelf(SPELL_ENCHANTED, true);
+        SetDoors(GO_STATE_ACTIVE);
     }
 
     void JustEngagedWith(Unit* ) override
@@ -168,6 +178,7 @@ struct boss_coa_drakmath : public ScriptedAI
         _events.ScheduleEvent(EVENT_FIERCE_BLOW, 9s);
         _events.ScheduleEvent(EVENT_SINK, 15s);
         _pillarsSaid = false;
+        _events.ScheduleEvent(EVENT_CLOSE_DOORS, DoorCloseDelay);
         Talk(SAY_AGGRO);
     }
 
@@ -186,6 +197,8 @@ struct boss_coa_drakmath : public ScriptedAI
     {
         Talk(SAY_DEATH);
         _summons.DespawnAll();
+        CoASetDungeonReleaseStart(me->GetMap(), ArenaCenter);
+        SetDoors(GO_STATE_ACTIVE);
         _beaming = false;
         me->RemoveAurasDueToSpell(SPELL_SUBMERGED);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -221,6 +234,9 @@ struct boss_coa_drakmath : public ScriptedAI
         {
             switch (eventId)
             {
+                case EVENT_CLOSE_DOORS:
+                    SetDoors(GO_STATE_READY);
+                    break;
                 case EVENT_PARASITISM:
                     if (Busy())
                     {
@@ -367,6 +383,17 @@ private:
             pillar->CastSpell(pillar, SPELL_PILLAR_VISUAL, true);
         }
         return pillar;
+    }
+
+    void SetDoors(GOState state)
+    {
+        for (uint32 entry : { GO_WEB_DOOR_WEST, GO_WEB_DOOR_EAST })
+        {
+            std::list<GameObject*> doors;
+            me->GetGameObjectListWithEntryInGrid(doors, entry, DoorSearch);
+            for (GameObject* door : doors)
+                door->SetGoState(state);
+        }
     }
 
     void BurstPillar(Creature* pillar)
@@ -533,8 +560,16 @@ private:
                 ++itr;
                 continue;
             }
-            mark->CastSpell(mark->GetPositionX(), mark->GetPositionY(), mark->GetPositionZ(),
-                ByDifficulty(me, SPELL_DEATH_MISSILE_HIT, SPELL_DEATH_MISSILE_HIT_HC, SPELL_DEATH_MISSILE_HIT_MYTHIC), true, nullptr, nullptr, me->GetGUID());
+            if (SpellInfo const* hit = sSpellMgr->GetSpellInfo(ByDifficulty(me, SPELL_DEATH_MISSILE_HIT,
+                SPELL_DEATH_MISSILE_HIT_HC, SPELL_DEATH_MISSILE_HIT_MYTHIC)))
+            {
+                SpellCastTargets targets;
+                targets.SetDst(mark->GetPositionX(), mark->GetPositionY(), mark->GetPositionZ(),
+                    mark->GetOrientation());
+                CustomSpellValues values;
+                values.AddSpellMod(SPELLVALUE_RADIUS_MOD, MissileImpactRadiusMod);
+                mark->CastSpell(targets, hit, &values, TRIGGERED_FULL_MASK, nullptr, nullptr, me->GetGUID());
+            }
             mark->RemoveAurasDueToSpell(SPELL_IMPACT_ZONE);
             mark->DespawnOrUnsummon(500ms);
             itr = _missiles.erase(itr);
@@ -730,7 +765,8 @@ class spell_coa_volzeen_colossal_smash : public SpellScript
         Unit* target = GetHitUnit();
         Unit* caster = GetCaster();
         if (target && caster && caster->GetEntry() == NPC_VOLZEEN)
-            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(12.0f)), GetSpellInfo())));
+            SetHitDamage(int32(Unscaled(caster, target,
+                float(target->CountPctFromMaxHealth(float(ByDifficulty(caster, 30, 35, 45)))), GetSpellInfo())));
     }
 
     void Register() override

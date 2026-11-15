@@ -35,6 +35,16 @@ void CharacterDatabaseConnection::DoPrepareStatements()
             "PRIMARY KEY (account, challengeId, level)) "
             "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    PrepareStatement(CHAR_SEL_COA_DAILY_LOGIN,
+        "SELECT CAST(COALESCE(MAX(next_claim_at), 0) AS UNSIGNED), "
+        "CAST(COALESCE(MAX(claim_number), 0) AS UNSIGNED), CAST(UNIX_TIMESTAMP() AS UNSIGNED) "
+        "FROM account_coa_daily_login WHERE account_id = ?", CONNECTION_BOTH);
+    PrepareStatement(CHAR_CLAIM_COA_DAILY_LOGIN,
+        "INSERT INTO account_coa_daily_login (account_id, last_claim_at, next_claim_at, claim_number) "
+        "VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE "
+        "claim_number = IF(next_claim_at <= ? AND claim_number = ?, claim_number + 1, 0), "
+        "last_claim_at = VALUES(last_claim_at), next_claim_at = VALUES(next_claim_at)", CONNECTION_ASYNC);
+
     PrepareStatement(CHAR_SEL_RAF_DELIVERY, "SELECT mail_id FROM raf_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_RAF_DELIVERY, "INSERT INTO raf_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_RAF_RECRUIT_DELIVERY,
@@ -57,6 +67,32 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "UPDATE coa_character_challenge SET level = ? WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
         "DELETE FROM coa_account_challenge_completion WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_CHALLENGE_FAILURE,
+        "SELECT level, deaths FROM coa_challenge_failure WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_CHALLENGE_FAILURES,
+        "SELECT f.challengeId, f.level, f.failTime, s.characterLevel FROM coa_challenge_failure f "
+        "LEFT JOIN coa_challenge_failure_snapshot s ON s.guid = f.guid AND s.challengeId = f.challengeId "
+        "WHERE f.guid = ? ORDER BY f.failTime DESC, f.challengeId", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHALLENGE_FAILURE,
+        "DELETE FROM coa_challenge_failure WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_COA_CHALLENGE_FAILURE_SNAPSHOT,
+        "REPLACE INTO coa_challenge_failure_snapshot (guid, challengeId, level, deaths, startTime, characterLevel) "
+        "SELECT guid, challengeId, level, deaths, startTime, ? FROM coa_character_challenge "
+        "WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_CHALLENGE_FAILURE_SNAPSHOT,
+        "SELECT level, deaths, startTime, characterLevel FROM coa_challenge_failure_snapshot "
+        "WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOT,
+        "DELETE FROM coa_challenge_failure_snapshot WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOTS,
+        "DELETE FROM coa_challenge_failure_snapshot WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_COA_CHARACTER_CHALLENGE,
+        "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
+        "VALUES (?, ?, ?, ?, 0, 0, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHARACTER_FATIGUE,
+        "DELETE FROM coa_character_fatigue WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_COA_CHARACTER_SURVIVAL_RESET,
+        "UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = ?", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION,
         "INSERT IGNORE INTO account_vanity_collection (account_id, item_id) VALUES (?, ?)", CONNECTION_ASYNC);
@@ -219,6 +255,16 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE,
         "DELETE FROM coa_build_creator_active WHERE guid = ? AND spec = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL, "DELETE FROM coa_build_creator_active WHERE guid = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_COA_CALLBOARD_CONTRACTS,
+        "SELECT contract_type, completions, purchases FROM character_callboard_contract "
+        "WHERE guid = ? AND week_start = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_COA_CALLBOARD_CONTRACT,
+        "REPLACE INTO character_callboard_contract (guid, contract_type, week_start, completions, purchases) "
+        "VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACT_OLD_WEEKS,
+        "DELETE FROM character_callboard_contract WHERE guid = ? AND week_start <> ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACTS, "DELETE FROM character_callboard_contract WHERE guid = ?",
         CONNECTION_ASYNC);
 
     // Read-only safety gate for the unregistered, never-saved Create probe.
@@ -934,6 +980,30 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT COUNT(*) FROM character_manastorm_completed_depth WHERE guid = ? AND mode = ? AND track = ? AND depth = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_MANASTORM_COMPLETION_REWARD, "SELECT remainder_bp, earned FROM character_manastorm_completion_reward_state WHERE guid = ? AND mode = ? AND track = ? AND reward_key = ? LIMIT 1", CONNECTION_SYNCH);
     PrepareStatement(CHAR_REP_MANASTORM_COMPLETION_REWARD, "INSERT INTO character_manastorm_completion_reward_state (guid, mode, track, reward_key, remainder_bp, earned) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE remainder_bp = VALUES(remainder_bp), earned = VALUES(earned)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_MANASTORM_COA_ENCOUNTER,
+        "INSERT INTO character_manastorm_coa_encounter (receipt, guid) VALUES (?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_MANASTORM_COA_TOKEN_WINDOW,
+        "SELECT CAST(COALESCE(MAX(window_start), 0) AS UNSIGNED), "
+        "CAST(COALESCE(MAX(window_end), 0) AS UNSIGNED), "
+        "CAST(COALESCE(MAX(tokens_earned), 0) AS UNSIGNED), "
+        "CAST(COALESCE(MAX(revision), 0) AS UNSIGNED) "
+        "FROM character_manastorm_coa_token_window WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_MANASTORM_COA_TOKEN_CLEARS,
+        "SELECT mode, track, depth, window_start FROM character_manastorm_coa_token_clear WHERE guid = ? "
+        "UNION ALL SELECT 0, 0, 0, 0", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SAVE_MANASTORM_COA_TOKEN_WINDOW,
+        "INSERT INTO character_manastorm_coa_token_window "
+        "(guid, window_start, window_end, tokens_earned, revision) VALUES (?, ?, ?, ?, 1) "
+        "ON DUPLICATE KEY UPDATE revision = IF(revision = ?, revision + 1, 0), "
+        "window_start = VALUES(window_start), window_end = VALUES(window_end), "
+        "tokens_earned = VALUES(tokens_earned)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SAVE_MANASTORM_COA_TOKEN_CLEAR,
+        "INSERT INTO character_manastorm_coa_token_clear (guid, mode, track, depth, window_start) "
+        "VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE window_start = VALUES(window_start)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_MANASTORM_COA_TOKEN_WINDOW,
+        "DELETE FROM character_manastorm_coa_token_window WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_MANASTORM_COA_TOKEN_CLEARS,
+        "DELETE FROM character_manastorm_coa_token_clear WHERE guid = ?", CONNECTION_ASYNC);
 #endif
     PrepareStatement(CHAR_REP_APPEARANCE_OUTFIT,
         "REPLACE INTO character_appearance_outfit (guid, name, appearances) VALUES (?, ?, ?)", CONNECTION_ASYNC);
@@ -958,6 +1028,15 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
         "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP,
+        "SELECT CAST(COALESCE(MAX(window_start), 0) AS UNSIGNED), CAST(COALESCE(MAX(earned), 0) AS UNSIGNED) "
+        "FROM account_bazaar_token_hourly_cap WHERE account = ?", CONNECTION_BOTH);
+    PrepareStatement(CHAR_INS_BAZAAR_TOKEN_HOURLY_CAP_IF_NEWER,
+        "INSERT INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?) AS claimed "
+        "ON DUPLICATE KEY UPDATE earned = IF(claimed.window_start > account_bazaar_token_hourly_cap.window_start OR "
+        "(claimed.window_start = account_bazaar_token_hourly_cap.window_start AND claimed.earned > account_bazaar_token_hourly_cap.earned), "
+        "claimed.earned, account_bazaar_token_hourly_cap.earned), window_start = GREATEST(account_bazaar_token_hourly_cap.window_start, claimed.window_start)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_BAZAAR_TOKEN_HOURLY_CAP, "REPLACE INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_LEGACY,
         "SELECT t.account, t.guid AS original_guid, t.name, s.note, s.guid AS owner_guid, s.flags "
         "FROM character_social s JOIN characters o ON o.guid=s.guid JOIN characters t ON t.guid=s.friend "

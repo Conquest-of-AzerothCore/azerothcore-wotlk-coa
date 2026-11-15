@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Serpent Ward is tracked on the Witch Doctor's totem bar and can be dismissed there (#10802)",
+  "contract": [
+    "Serpent Ward 500960 is Effect0 SPELL_EFFECT_SUMMON of creature 50105 with EffectMiscValueB 63 in Spell.dbc, a",
+    "SummonProperties row with Type SUMMON_TYPE_TOTEM and Slot 1 (Fire); the other wards (63), effigies (81), idols (82)",
+    "and the Spirit Link Idol (83) use the other totem slots. The Witch Doctor spell corrections rewrite every summon",
+    "effect to properties 64 and the class summon script spawns a plain timed TempSummon, so no SMSG_TOTEM_CREATED",
+    "(opcode 1043) reached the owner: #10802 reports no totem-bar bubble and no way to dismiss a ward there. Expected:",
+    "the cast sends SMSG_TOTEM_CREATED for bar slot 0 carrying spell 500960, a recast announces the replacement ward",
+    "while only one ward stays out, and CMSG_TOTEM_DESTROYED (opcode 1044) for slot 0 dismisses it. The ward stays a",
+    "plain summon, so it keeps its model, scale and ability to receive buffs. Whether the client draws the bar for",
+    "class 13 is not observed."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "doctor", "race": 2, "class": 13, "level": 21, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000},
+    {"action": "learn", "actor": "doctor", "spell": 500960},
+    {"action": "assert", "label": "SETUP: no SMSG_TOTEM_CREATED has been sent yet", "actor": "doctor",
+     "metric": "server_packets", "opcode": 1043, "equals": 0},
+    {"action": "assert", "label": "SETUP: no Serpent Ward is out", "actor": "doctor", "metric": "owned_creature_count",
+     "entry": 50105, "equals": 0},
+
+    {"action": "cast", "actor": "doctor", "spell": 500960},
+    {"action": "assert", "label": "One Serpent Ward is out", "actor": "doctor", "metric": "owned_creature_count",
+     "entry": 50105, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "#10802: casting the ward sends SMSG_TOTEM_CREATED to its owner", "actor": "doctor",
+     "metric": "server_packets", "opcode": 1043, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The totem bar slot is Fire (Slot 1, zero-based byte 0), matching SummonProperties 63",
+     "actor": "doctor", "metric": "server_packet_u8", "opcode": 1043, "index": 0, "equals": 0},
+    {"action": "assert", "label": "The bar entry names Serpent Ward 500960", "actor": "doctor",
+     "metric": "server_packet_u32", "opcode": 1043, "offset": 13, "equals": 500960},
+
+    {"action": "wait", "label": "Let the global cooldown expire", "ms": 1600},
+    {"action": "reset_cooldown", "actor": "doctor", "spell": 500960},
+    {"action": "cast", "label": "Recast the ward", "actor": "doctor", "spell": 500960},
+    {"action": "assert", "label": "The recast sends a second SMSG_TOTEM_CREATED", "actor": "doctor",
+     "metric": "server_packets", "opcode": 1043, "equals": 2, "within_ms": 2000},
+    {"action": "wait", "label": "Let the replaced ward leave the world", "ms": 1000},
+    {"action": "assert", "label": "The new ward replaces the old one", "actor": "doctor",
+     "metric": "owned_creature_count", "entry": 50105, "equals": 1},
+
+    {"action": "client_packet", "label": "#10802: right-click the Fire totem bar bubble", "actor": "doctor",
+     "opcode": 1044, "fields": [{"u8": 0}], "early": false, "consumed": true},
+    {"action": "assert", "label": "#10802: dismissing the bar slot removes the ward", "actor": "doctor",
+     "metric": "owned_creature_count", "entry": 50105, "equals": 0, "within_ms": 2000}
+  ]
+}

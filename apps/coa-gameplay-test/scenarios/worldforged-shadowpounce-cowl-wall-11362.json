@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Worldforged Shadowpounce Cowl stands on the Shaul'watha floor (#11362)",
+  "contract": "#11362 reported the Shadowpounce Cowl pickup (gameobject entry 95792, guid 6941058) half inside a wall. It stood 8.66 yd above the terrain at its position and 0.12 yd from a wall model. It now stands on the floor the reporter stood on at (74.623, -4380.05), so the pickup is outside the wall and the chest opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 74.623,
+    "y": -4380.05,
+    "z": 131.07,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95792,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "clearance after the fix",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6941058,
+      "spawn_type": "gameobject",
+      "save_as": "clearance"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup stands on the floor instead of 8.66 yd above the terrain",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941058,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6941058,
+      "spawn_type": "gameobject",
+      "tolerance": 0.8,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95792
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

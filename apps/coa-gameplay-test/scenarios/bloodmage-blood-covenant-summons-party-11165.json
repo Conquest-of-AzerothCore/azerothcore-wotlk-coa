@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Issue 11165: Blood Covenant carves a summoning rune that party members can use to summon allies",
+  "contract": "Blood Covenant (1200012) is channeled and creates the ritual gameobject 194111 (SUMMONING_RITUAL, three participants, grouped casters). Once two party members click it while the Bloodmage channels, the ritual casts Blood Covenant Completion (1200014), which creates the rune 194114 (MEETINGSTONE). A party member who uses the rune with another party member selected casts Meeting Stone Summon (23598), whose 59782 channel opens the Meeting Stone Summoning Portal (179944, two participants). Once another party member clicks that portal, Ritual of Summoning Effect (7720) must leave the selected member with a pending summon.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 48
+    },
+    {
+      "id": "first",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    },
+    {
+      "id": "faraway",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "first"
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "second"
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "faraway"
+    },
+    {
+      "action": "teleport",
+      "actor": "faraway",
+      "map": 0,
+      "x": -9100.0,
+      "y": 400.0,
+      "z": 93.0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 1200012
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 1200012
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "owned_gameobject_count",
+      "entry": 194111,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "Blood Covenant creates the ritual"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "first",
+      "entry": 194111,
+      "owner": "bloodmage"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "second",
+      "entry": 194111,
+      "owner": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "owned_gameobject_count",
+      "entry": 194114,
+      "equals": 1,
+      "within_ms": 10000,
+      "label": "Two party members complete the ritual and it carves the rune"
+    },
+    {
+      "action": "select",
+      "actor": "first",
+      "target": "faraway"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "first",
+      "entry": 194114,
+      "owner": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "owned_gameobject_count",
+      "entry": 179944,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "Using the rune opens the meeting stone summoning portal"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "second",
+      "entry": 179944,
+      "owner": "first"
+    },
+    {
+      "action": "assert",
+      "actor": "faraway",
+      "metric": "summon_pending",
+      "equals": 1,
+      "within_ms": 10000,
+      "label": "Using the rune with a party member selected summons them"
+    }
+  ]
+}

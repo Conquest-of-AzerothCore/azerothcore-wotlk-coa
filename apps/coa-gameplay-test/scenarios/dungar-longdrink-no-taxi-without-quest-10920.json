@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Dungar Longdrink does not fly players who are not on Path to Ascension: Westfall (#10920)",
+  "contract": [
+    "Issue #10920 (also #10876, #10882, #10889, #10921). The Westfall taxi activation on Dungar Longdrink 352's gossip hello",
+    "must only fire for a player on quest 100466; any other player must get the normal flight master window instead of a flight."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8838.9677734375,
+    "y": 490.73483276367,
+    "z": 109.6120300293,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 17,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dungar",
+      "owner": "p",
+      "entry": 352,
+      "distance": 3,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2500
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the Stormwind -> Westfall flight cost",
+      "actor": "p",
+      "value": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: not in flight yet",
+      "actor": "p",
+      "metric": "in_flight",
+      "equals": 0
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Speak to Dungar Longdrink",
+      "actor": "p",
+      "target": "dungar"
+    },
+    {
+      "action": "assert",
+      "label": "the player is still not in flight after speaking to Dungar",
+      "actor": "p",
+      "metric": "in_flight",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Allow a late taxi start to show",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "still not in flight",
+      "actor": "p",
+      "metric": "in_flight",
+      "equals": 0
+    }
+  ]
+}

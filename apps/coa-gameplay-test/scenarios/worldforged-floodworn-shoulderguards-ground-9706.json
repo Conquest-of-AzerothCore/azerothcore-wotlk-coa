@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Floodworn Shoulderguards pickup 6940491 rests on the ground measured under it (#9706)",
+  "contract": "Floodworn Shoulderguards pickup (guid 6940491, Hinterlands) was 1.31 yd under the ground (#9706). The target z is the vmap ground height measured under the spawn's x, y on the worldserver data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Floodworn Shoulderguards pickup 6940491 rests on the ground measured under it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940491,
+      "spawn_type": "gameobject",
+      "x": -52.6,
+      "y": -3179.7,
+      "z": 100.943,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940491,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionTaming.h"
 #include "AscensionTamingData.h"
 #include "AscensionWildcard.h"
 #include "Creature.h"
@@ -224,19 +225,13 @@ void Swap(Player* player, PetStable& stable, Pet* out, Plan const& plan)
     stable.CurrentPet = std::move(wanted);
 }
 
-bool GrantStarter(Player* player, FamilyCall const& call)
+Pet* CreateCurrentPet(Player* player, uint32 entry, uint32 spellId, bool creatureName = false)
 {
-    if (player->GetPetGUID())
-        return false;
-    Pet* pet = player->CreateTamedPetFrom(call.Starter, call.SpellId);
+    Pet* pet = player->CreateTamedPetFrom(entry, spellId);
     if (!pet)
-    {
-        PetStable const* stable = player->GetPetStable();
-        LOG_ERROR("coa", "Starter pet {} for {} of {} could not be created: current {} unslotted {}", call.Starter,
-            call.SpellId, player->GetName(), stable && stable->CurrentPet ? stable->CurrentPet->CreatureId : 0,
-            stable ? stable->UnslottedPets.size() : 0);
-        return false;
-    }
+        return nullptr;
+    if (creatureName)
+        pet->SetName(pet->GetCreatureTemplate()->Name);
 
     uint8 const level = player->GetLevel();
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level > 1 ? level - 1 : level);
@@ -246,9 +241,105 @@ bool GrantStarter(Player* player, FamilyCall const& call)
     pet->InitTalentForLevel();
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     player->PetSpellInitialize();
+    return pet;
+}
+
+bool GrantStarter(Player* player, FamilyCall const& call)
+{
+    if (player->GetPetGUID())
+        return false;
+    if (!CreateCurrentPet(player, call.Starter, call.SpellId))
+    {
+        PetStable const* stable = player->GetPetStable();
+        LOG_ERROR("coa", "Starter pet {} for {} of {} could not be created: current {} unslotted {}", call.Starter,
+            call.SpellId, player->GetName(), stable && stable->CurrentPet ? stable->CurrentPet->CreatureId : 0,
+            stable ? stable->UnslottedPets.size() : 0);
+        return false;
+    }
     LOG_INFO("coa", "Granted {} the starter pet {} for spell {}", player->GetName(), call.Starter, call.SpellId);
     return true;
 }
+
+std::size_t FreeStableSlots(PetStable const& stable)
+{
+    std::size_t free = 0;
+    for (std::size_t slot = 0; slot < stable.MaxStabledPets && slot < stable.StabledPets.size(); ++slot)
+        free += !stable.StabledPets[slot];
+    return free;
+}
+}
+
+char const* SummonCosmeticPet(Player* player, std::uint32_t tier, std::uint32_t entry, bool creatureName)
+{
+    std::uint32_t const kind = CosmeticPetKind(tier);
+    if (!kind)
+        return "APPLY_APPEARANCES_PET_TYPE_NOT_FOUND";
+    CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(entry);
+    if (!creature)
+        return "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
+    if (!creature->IsTameable(true))
+        return "APPLY_APPEARANCES_BAD_CREATURE_TEMPLATE";
+    if (!creature->IsTameable(player->CanTameExoticPets()))
+        return "APPLY_APPEARANCES_CANNOT_TAME_EXOTIC";
+    if (player->IsInCombat())
+        return "APPLY_APPEARANCES_COSMETIC_PET_IN_COMBAT";
+    PetSpells const spells = CosmeticPetSpells(player->getClass(), tier);
+    if (!player->HasSpell(spells.Summon))
+        return "APPLY_APPEARANCES_PET_SUMMON_SPELL_NOT_LEARNED";
+    if (!player->HasSpell(spells.Dismiss))
+        return "APPLY_APPEARANCES_PET_DISMISS_SPELL_NOT_LEARNED";
+
+    PetStable& stable = player->GetOrInitPetStable();
+    Pet* out = player->GetPet();
+    if (out && out->getPetType() != HUNTER_PET)
+        return "APPLY_APPEARANCES_PET_TYPE_NOT_FOUND";
+    bool const hasCurrent = out || stable.CurrentPet;
+    bool const currentAlive = out ? out->IsAlive() : stable.CurrentPet && stable.CurrentPet->Health;
+    if (hasCurrent && !currentAlive && !player->HasPlayerFlag(PLAYER_FLAGS_RESTING))
+        return "APPLY_APPEARANCES_PET_DEAD_NON_SAFE_ZONE";
+
+    bool const sorted = AscensionWildcard::IsClasslessHero(player);
+    auto const ofKind = [sorted, kind](uint32 creatureId) { return !sorted || IsKind(creatureId, kind); };
+    bool const replaceCurrent = hasCurrent && (out ? ofKind(out->GetEntry()) :
+        stable.CurrentPet->Type != HUNTER_PET || ofKind(stable.CurrentPet->CreatureId));
+    std::optional<std::size_t> slot, unslotted;
+    for (std::size_t index = 0; !replaceCurrent && !slot && index < stable.StabledPets.size(); ++index)
+        if (stable.StabledPets[index] && stable.StabledPets[index]->Type == HUNTER_PET &&
+            ofKind(stable.StabledPets[index]->CreatureId))
+            slot = index;
+    for (std::size_t index = 0; !replaceCurrent && !slot && !unslotted && index < stable.UnslottedPets.size(); ++index)
+        if (stable.UnslottedPets[index].Type == HUNTER_PET && ofKind(stable.UnslottedPets[index].CreatureId))
+            unslotted = index;
+
+    std::size_t waiting = (hasCurrent && !replaceCurrent) ? 1 : 0;
+    for (std::size_t index = 0; index < stable.UnslottedPets.size(); ++index)
+        waiting += stable.UnslottedPets[index].Type == HUNTER_PET && index != unslotted;
+    if (waiting > FreeStableSlots(stable) + (slot ? 1 : 0))
+        return "APPLY_APPEARANCES_UNKNOWN";
+
+    if (replaceCurrent && out)
+        player->RemovePet(out, PET_SAVE_AS_DELETED);
+    else if (replaceCurrent)
+    {
+        Pet::DeleteFromDB(stable.CurrentPet->PetNumber);
+        stable.CurrentPet.reset();
+    }
+    else if (slot)
+    {
+        Pet::DeleteFromDB(stable.StabledPets[*slot]->PetNumber);
+        stable.StabledPets[*slot].reset();
+    }
+    else if (unslotted)
+    {
+        Pet::DeleteFromDB(stable.UnslottedPets[*unslotted].PetNumber);
+        stable.UnslottedPets.erase(stable.UnslottedPets.begin() + *unslotted);
+    }
+    StableUnslottedHunterPets(player, stable);
+    if (hasCurrent && !replaceCurrent)
+        ParkCurrent(player, stable, out, FreeStableSlot(stable));
+
+    return CreateCurrentPet(player, entry, spells.Summon, creatureName) ? nullptr :
+        "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
 }
 
 class spell_ascension_family_call : public SpellScript

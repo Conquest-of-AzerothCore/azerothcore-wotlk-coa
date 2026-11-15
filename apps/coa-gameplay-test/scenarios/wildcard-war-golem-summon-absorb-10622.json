@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Wildcard War Golem summons a passive golem that shields its owner (#10622)",
+  "contract": [
+    "War Golem 280445 reads 'Summon a War Golem for $d, absorbing damage dealt to you and redirecting harmful spells cast on nearby allies to itself. The golem is passive and has no offensive abilities.' Its only effect is SUMMON creature 280450 (SummonProperties 61) for 10 s; creature 280450 had no template, so nothing appeared.",
+    "The golem wears 280446 War Golem Protection Aura (APPLY_AREA_AURA_OWNER school absorb 2999+1 = 3000, 'Will fade if the War Golem is destroyed', and a 1.5 s periodic trigger of 280449 War Golem Grounding Ward, a 20 yd ally SPELL_MAGNET), 280447 War Golem Scaling and 280448 Avoidance.",
+    "Expected: the golem appears wearing its scaling, the owner gains a 3000 absorb and the Grounding Ward, and both leave the owner when the golem expires."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Wildgolem", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildgolem" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "wild", "metric": "game_mode_mask", "min": 64 },
+    { "action": "learn", "actor": "wild", "spell": 280445 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "label": "War Golem", "actor": "wild", "spell": 280445 },
+    { "action": "assert", "label": "SETUP: War Golem is accepted", "actor": "wild", "metric": "cast_failure", "spell": 280445, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the War Golem is summoned", "actor": "wild", "metric": "owned_creature_count", "entry": 280450, "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The golem wears War Golem Scaling", "actor": "wild", "metric": "owned_creature_count", "entry": 280450, "spell": 280447, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the owner gains the War Golem Protection Aura", "actor": "wild", "metric": "aura", "spell": 280446, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The absorb is the DBC 3000", "actor": "wild", "metric": "aura_amount", "spell": 280446, "effect": 0, "equals": 3000 },
+    { "action": "assert", "label": "The owner gains the Grounding Ward from the golem", "actor": "wild", "metric": "aura", "spell": 280449, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The golem expires after 10 s", "actor": "wild", "metric": "owned_creature_count", "entry": 280450, "equals": 0, "within_ms": 12000 },
+    { "action": "assert", "label": "The protection fades with the golem", "actor": "wild", "metric": "aura", "spell": 280446, "equals": 0, "within_ms": 2000 }
+  ]
+}

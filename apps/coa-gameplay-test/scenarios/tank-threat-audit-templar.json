@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "Templar tank threat audit: Faith and Sacred Swing deal High Threat x2 while Absolution's AoE taunt lands",
+  "contract": "Faith 706466 (the Chastise/Faith Guard 705259 payload, client 'High Threat Holy damage') carries effect 63 SPELL_EFFECT_THREAT value 100 and a spell_threat pctMod of 2 (rev_20261103_01_templar_faith_threat.sql). Every other 'High Threat' ability in this codebase has a spell_threat pctMod around 2 (Heavy Blow, Hammer of the Law, Shieldgore, Chainwhip, Justicar's Wrath), so the tooltip-consistent expectation for Faith is the same ~2x threat_per_damage, independent of damage magnitude. The pctMod applies to the threat its direct damage generates. Faith's effect 63 reaches its target through Spell::EffectThreat (src/server/game/Spells/SpellEffects.cpp:4646), which calls ThreatManager::AddThreat with ignoreModifiers=true -- bypassing CalculateModifiedThreat entirely, so neither the pctMod nor SPELLMOD_THREAT nor the tank-stance multiplier (Rate.Threat.TankStance) applies to it; the +100 is added as a literal flat amount on top of the damage threat. data/sql/updates/pending_db_world/rev_20260909_04_templar_completion.sql also zeroes 706466's spell_bonus_data row (no AP/SP coefficient), so raising spell_power does not change its damage at all -- the flat/percent gap is visible at any spell_power, not only a high one. Absolution 800424 (client 'Taunt all enemies within 8 yds', aura 11 SPELL_AURA_MOD_TAUNT, implicit target 22 AoE around caster) must apply its taunt aura to a nearby target. Sacred Swing 572769 (client 'High Threat Weapon Damage') carries a spell_threat pctMod of 2 (rev_20261112_21_templar_sacred_swing_threat_x2.sql, owner ruling Q-r3a-1: 'High Threat' in a Templar tooltip means threat x2) and triggers 301061 on its target, whose effect 63 SPELL_EFFECT_THREAT adds a flat 50. Faith's line also reaches the Sacred Swing target, so that arm reads deltas around one cast with 681170 set: the threat gained divided by the health change is -(2 x damage + 50) / damage, -2.105 at the measured 474 damage, against -2.355 under the former 2.25; the -2.2 to -1.95 band separates the two for any damage above 228.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tp",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_power": 5000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "faith_target",
+      "owner": "tp",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "absolution_target",
+      "owner": "tp",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "swing_target",
+      "owner": "tp",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "tp",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "tp",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "tp",
+      "skill": 70,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "tp",
+      "skill": 71,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "tp",
+      "skill": 72,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "tp",
+      "skill": 136,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "tp",
+      "spell": 706466
+    },
+    {
+      "action": "cast",
+      "actor": "tp",
+      "spell": 706466,
+      "target": "faith_target"
+    },
+    {
+      "action": "assert",
+      "label": "Faith is cast",
+      "actor": "tp",
+      "metric": "cast_failure",
+      "spell": 706466,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Faith: threat is at least 2x its damage like the other High Threat abilities (spell_threat pctMod 2; the native flat effect 63 threat still adds on top)",
+      "actor": "faith_target",
+      "metric": "threat_per_damage",
+      "target": "tp",
+      "min": 1.9,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tp",
+      "spell": 572769
+    },
+    {
+      "action": "snapshot",
+      "actor": "swing_target",
+      "metric": "health",
+      "save_as": "swing_health_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "swing_target",
+      "metric": "threat",
+      "target": "tp",
+      "save_as": "swing_threat_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "tp",
+      "power": 3,
+      "value": 20
+    },
+    {
+      "action": "set_aura",
+      "actor": "tp",
+      "spell": 681170,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "tp",
+      "spell": 572769,
+      "target": "swing_target"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Sacred Swing is cast",
+      "actor": "tp",
+      "metric": "cast_failure",
+      "spell": 572769,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "swing_target",
+      "metric": "health",
+      "relative_to": "swing_health_before",
+      "save_as": "swing_health_change"
+    },
+    {
+      "action": "assert",
+      "label": "Sacred Swing: health change (readback)",
+      "actor": "swing_target",
+      "metric": "health",
+      "relative_to": "swing_health_before",
+      "min": -1000000000,
+      "max": 1000000000
+    },
+    {
+      "action": "assert",
+      "label": "Sacred Swing: threat gained on the caster (readback)",
+      "actor": "swing_target",
+      "metric": "threat",
+      "target": "tp",
+      "relative_to": "swing_threat_before",
+      "min": -1000000000,
+      "max": 1000000000
+    },
+    {
+      "action": "assert",
+      "label": "Sacred Swing: High Threat x2 plus the 301061 flat 50 (threat gained over health change), not the former 2.25",
+      "actor": "swing_target",
+      "metric": "threat",
+      "target": "tp",
+      "relative_to": "swing_threat_before",
+      "ratio_to": "swing_health_change",
+      "min": -2.2,
+      "max": -1.95
+    },
+    {
+      "action": "learn",
+      "actor": "tp",
+      "spell": 800424
+    },
+    {
+      "action": "cast",
+      "actor": "tp",
+      "spell": 800424,
+      "target": "tp"
+    },
+    {
+      "action": "assert",
+      "label": "Absolution is cast",
+      "actor": "tp",
+      "metric": "cast_failure",
+      "spell": 800424,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "OK: Absolution's AoE taunt applies to a nearby enemy",
+      "actor": "absolution_target",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

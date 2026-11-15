@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Accelerate 572633-572635 and Decelerate 572632 are buffs, not debuffs (#11558)",
+  "contract": "Accelerate and Decelerate are party buffs on the targeted party member, like Amplify Magic and Dampen Magic. Their damage-taken or healing-taken effect made the aura count as negative, so a self-cast listed it among the debuffs. Every rank is applied as a positive aura on the caster and on a grouped ally.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572632
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572633
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572633
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Accelerate rank 1 (572633) self-cast is on chrono",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 572633,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Accelerate rank 1 (572633) self-cast is applied as a buff on chrono",
+      "actor": "chrono",
+      "metric": "aura_positive",
+      "spell": 572633,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572632
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decelerate (572632) self-cast is on chrono",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 572632,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Decelerate (572632) self-cast is applied as a buff on chrono",
+      "actor": "chrono",
+      "metric": "aura_positive",
+      "spell": 572632,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572634
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572634
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Accelerate rank 2 (572634) self-cast is on chrono",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 572634,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Accelerate rank 2 (572634) self-cast is applied as a buff on chrono",
+      "actor": "chrono",
+      "metric": "aura_positive",
+      "spell": 572634,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572635
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572635
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Accelerate rank 3 (572635) self-cast is on chrono",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 572635,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Accelerate rank 3 (572635) self-cast is applied as a buff on chrono",
+      "actor": "chrono",
+      "metric": "aura_positive",
+      "spell": 572635,
+      "equals": 1
+    },
+    {
+      "action": "group",
+      "actor": "chrono",
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572635,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Accelerate rank 3 (572635) ally-cast is on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572635,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Accelerate rank 3 (572635) ally-cast is applied as a buff on ally",
+      "actor": "ally",
+      "metric": "aura_positive",
+      "spell": 572635,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572632,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decelerate (572632) ally-cast is on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572632,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Decelerate (572632) ally-cast is applied as a buff on ally",
+      "actor": "ally",
+      "metric": "aura_positive",
+      "spell": 572632,
+      "equals": 1
+    }
+  ]
+}

@@ -365,12 +365,19 @@ struct npc_batrider : public CreatureAI
     {
         if (_mode == BATRIDER_MODE_TRASH)
         {
-            if (me->HealthBelowPctDamaged(30, damage))
+            if (me->HealthBelowPctDamaged(30, damage) && !me->HasUnitState(UNIT_STATE_CASTING))
             {
                 _scheduler.CancelAll();
                 DoCastSelf(SPELL_BATRIDER_UNSTABLE_CONCOCTION);
             }
         }
+    }
+
+    // Unstable Concoction says it kills the caster, but has no effect that does.
+    void OnSpellCast(SpellInfo const* spell) override
+    {
+        if (spell->Id == SPELL_BATRIDER_UNSTABLE_CONCOCTION)
+            me->KillSelf();
     }
 
     void UpdateAI(uint32 /*diff*/) override

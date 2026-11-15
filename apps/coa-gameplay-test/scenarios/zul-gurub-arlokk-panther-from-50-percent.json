@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk takes panther form at 50% and keeps it, with bleeding Razor Claws",
+  "contract": [
+    "On live Arlokk (14515) neither vanishes after 30 s nor returns to troll form: she becomes a panther",
+    "(Aspect of Bethekk 2118323) when she drains her avatar at half health and stays one for the rest of the",
+    "fight (tester, 2026-11-03). Her passive Razor Claws (2118325) bleeds her target with 2118326 on her melee",
+    "hits (Pigeon's spell review: the aura had no proc data), and every Ravage hit (2118331) applies it too (44 of",
+    "44 in the live logs of 2026-04-22, 08-02 and 08-24). Arlokk is summoned at the entrance, away from her",
+    "avatar and her prowler spawners, so the drain is skipped and the gift comes at once."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk before she walks back to her temple",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "label": "Past the old 30-second vanish",
+      "ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: above half health she is still a troll",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and still fighting",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Arlokk below half health",
+      "actor": "hero",
+      "entry": 14515,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at half health she takes panther form",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with her Razor Claws",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118325,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a Ravage hit lands",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118331,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "arlokk",
+      "metric": "spell_proc_count",
+      "spell": 2118325,
+      "save_as": "razor_claws_procs"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her Ravage hits bleed the hero, beyond the bleeds her melee procs",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118326,
+      "relative_to": "razor_claws_procs",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero bleeds",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118326,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her melee hits proc Razor Claws",
+      "actor": "arlokk",
+      "metric": "spell_proc_count",
+      "spell": 2118325,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Past the old 30-40 s return to troll form",
+      "ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she stays a panther",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and is still fighting",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

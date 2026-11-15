@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Lightning Cage makes damaging spells generate 20 Static once per cast (#11544)",
+  "contract": "Lightning Cage 560030 (Spell.dbc, server set /srv/coa/server-data/dbc): tooltip 'While inside the cage, damaging spells generate 20 Static and their range is doubled'. Effect[1] is SPELL_AURA_PROC_TRIGGER_SPELL on 804086 'Add 20 Static' (SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS on Static 803102) with an EffectSpellClassMask of 6416/131090/0 (Shock, Forked Lightning, Arm of Thorim, Call Lightning and the other Lightning-family damage spells; 801851 carries SpellFamilyFlags[0] 256, inside 6416). The record's ProcFlags 664232 contain only taken-damage flags, so the proc never fires on the caster's own damage and no code casts 804086 for the cage: the report. The expected value is independent of the implementation: a Forked Lightning cast gains its own Static outside the cage, which the control cast measures, so the same cast inside the cage must end with exactly 20 more than that control (the 50 Static of the cage cast itself is cleared first). Forked Lightning chains to up to 4 targets, so a per-target proc would give a multiple of 20; once per cast gives exactly 20.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d1",
+      "owner": "p",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "d2",
+      "owner": "p",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801851
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 560030
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture has enough mana for two 37% base mana casts",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 803102,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Forked Lightning outside the cage",
+      "actor": "p",
+      "spell": 801851,
+      "target": "d1"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Static gained by one Forked Lightning cast outside the cage",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "save_as": "plain_gain"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control cast generated some Static of its own",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "min": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Lightning Cage",
+      "actor": "p",
+      "spell": 560030
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lightning Cage is up",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 560030,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 803102,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Static pool is empty before the caged cast",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 801851
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Forked Lightning inside the cage, chaining to a second enemy",
+      "actor": "p",
+      "spell": 801851,
+      "target": "d1"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the cast chained to the second enemy",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 801851,
+      "target": "d2",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the caged cast gains exactly 20 Static more than the same cast outside the cage, once for all chain targets",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "relative_to": "plain_gain",
+      "equals": 20
+    }
+  ]
+}

@@ -67,6 +67,81 @@ constexpr std::uint32_t CreatureTypeMask(std::uint32_t kind)
 {
     return 1u << (kind - 1);
 }
+
+constexpr std::uint32_t CLASS_HERO_ID = 10;
+constexpr std::uint32_t COSMETIC_PET_TIER_COUNT = 5;
+
+struct PetSpells
+{
+    std::uint32_t Summon;
+    std::uint32_t Dismiss;
+};
+
+enum class PetCaster
+{
+    Stock,
+    ConquestOfAzeroth,
+    Hero
+};
+
+constexpr PetCaster CasterOf(std::uint32_t classId)
+{
+    if ((classId >= 1 && classId <= 9) || classId == 11)
+        return PetCaster::Stock;
+    if (classId >= 12 && classId <= 32)
+        return PetCaster::ConquestOfAzeroth;
+    return PetCaster::Hero;
+}
+
+constexpr PetSpells CosmeticPetSpells(std::uint32_t classId, std::uint32_t tier)
+{
+    PetCaster const caster = CasterOf(classId);
+    bool const stock = caster == PetCaster::Stock;
+    switch (tier)
+    {
+        case 1:
+            if (stock)
+                return { 1100883, 1102641 };
+            return caster == PetCaster::ConquestOfAzeroth ? PetSpells{ 574302, 574303 } : PetSpells{ 883, 2641 };
+        case 2: return stock ? PetSpells{ 1100884, 1100892 } : PetSpells{ 884, 892 };
+        case 3: return { 885, 893 };
+        case 4: return stock ? PetSpells{ 1441602, 1441651 } : PetSpells{ 91602, 91651 };
+        case 5: return stock ? PetSpells{ 1441631, 1441652 } : PetSpells{ 91631, 91652 };
+        default: return { 0, 0 };
+    }
+}
+
+constexpr std::uint32_t CosmeticPetKind(std::uint32_t tier)
+{
+    switch (tier)
+    {
+        case 1: return KIND_BEAST;
+        case 2: return KIND_DEMON;
+        case 3: return KIND_UNDEAD;
+        case 4: return KIND_ELEMENTAL;
+        case 5: return KIND_DRAGONKIN;
+        default: return 0;
+    }
+}
+
+constexpr std::uint64_t ClassBit(std::uint32_t classId)
+{
+    return classId >= 1 && classId <= 64 ? std::uint64_t(1) << (classId - 1) : 0;
+}
+
+constexpr std::uint64_t RealmClassMask(bool conquestOfAzeroth, bool warcraftReborn)
+{
+    std::uint64_t mask = 0;
+    if (conquestOfAzeroth)
+        for (std::uint32_t classId = 12; classId <= 32; ++classId)
+            mask |= ClassBit(classId);
+    else if (warcraftReborn)
+        for (std::uint32_t classId : { 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 9u, 11u })
+            mask |= ClassBit(classId);
+    else
+        mask = ClassBit(CLASS_HERO_ID);
+    return mask;
+}
 }
 
 #endif

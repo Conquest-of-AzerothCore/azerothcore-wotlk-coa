@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Stromgarde Keep's forge counts as a forge for smelting (#11771)",
+  "contract": "The forges of Stromgarde Keep (Arathi Highlands) are part of the map model and had no Forge spell focus gameobject, so Smelt Copper 2657 (RequiresSpellFocus 3) failed there with \"Requires Forge\" (#11771). Expected: 20 yd away smelting still fails, and at the forge spot one Copper Ore 2770 smelts into a Copper Bar 2840.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -1647.98,
+    "y": -1652.092,
+    "z": 70.675,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 36
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 186,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 2657
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2770,
+      "count": 2
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -1647.98,
+      "y": -1672.092,
+      "z": 70.675
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Smelt Copper 20 yd from the forge",
+      "actor": "p",
+      "spell": 2657
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: away from the forge, smelting makes no Copper Bar",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2840,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -1647.98,
+      "y": -1652.092,
+      "z": 70.675
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Smelt Copper at Stromgarde Keep's forge",
+      "actor": "p",
+      "spell": 2657
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at Stromgarde Keep's forge, Copper Ore smelts into a Copper Bar",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2840,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "one Copper Ore was used",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2770,
+      "equals": 1
+    }
+  ]
+}

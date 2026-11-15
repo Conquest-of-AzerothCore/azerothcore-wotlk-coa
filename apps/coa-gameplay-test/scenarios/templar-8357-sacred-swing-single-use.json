@@ -6,8 +6,8 @@
     "681170 Recently Parried or Dodged (8 s dummy aura), granted by Keeping the Oath 92109 on dodge/parry and",
     "never consumed by the cast, so one avoidance enabled repeated casts within the 8 s window. Expected: casting",
     "Sacred Swing consumes 681170, so a second cast without a new avoidance is refused. QA Test 100% Dodge 10020",
-    "makes every swing a dodge; the attacker's hit rating removes misses. Threat (spell_threat 2.25x) has no",
-    "harness metric and is covered by data review plus in-game testing."
+    "makes every swing a dodge; the attacker's hit rating removes misses. Threat (spell_threat 2x, owner ruling",
+    "Q-r3a-1) is covered by tank-threat-audit-templar.json."
   ],
   "timeout_ms": 90000,
   "location": {

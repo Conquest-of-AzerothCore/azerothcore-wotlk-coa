@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Worldforged Special Seashell stands by the Ruined Lifeboat (#10417)",
+  "contract": "#10417 reported the Special Seashell pickup (gameobject entry 95718, guid 6941124) floating about 30 yd from the wrecked boat on the Wild Shore. The realm-map conversion had placed it at y 178.4; the catalog position (-14654.301, 147.365, 2.262) is 2.1 yd from the Ruined Lifeboat (guid 74, -14656.4, 148.0). It is restored there.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -14654.3,
+    "y": 147.4,
+    "z": 3.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95718,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup is at the lifeboat position",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6941124,
+      "spawn_type": "gameobject",
+      "x": -14654.301,
+      "y": 147.365,
+      "z": 2.262,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941124,
+      "spawn_type": "gameobject",
+      "min": -0.8,
+      "max": 0.8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it stands beside the Ruined Lifeboat",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6941124,
+      "spawn_type": "gameobject",
+      "x": -14656.4,
+      "y": 148.0,
+      "z": 3.3,
+      "max": 5
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95718
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

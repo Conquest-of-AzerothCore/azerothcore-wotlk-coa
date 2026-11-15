@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "name": "Dungeon boss kit spells cast at a single enemy reach 30 yards instead of 100",
+  "contract": [
+    "Ascension's kit spells for vanilla dungeon bosses mostly have SpellRange 6 (100 yards) in Spell.dbc, so casters hit from",
+    "across the room or beyond. Our tester asked for 30 yards on every kit spell that targets a single enemy. These 19 spells",
+    "get SpellRange 4 through coa_dungeon_spell_reach. Room-wide mechanics keep their range."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Baron Silverlaine: Veil of Shadow (2102658) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102658,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Bazzalan, Cookie: Throw Poison Vial (2102527) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102527,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Thalnos, Jargba, Plugger Spazzring, Ragglesnout, Zum'rah: Shadow Bolt (2102544) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102544,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Brightwing: Fae Magic (2102632) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102632,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Charlga Razorflank: Chain Lightning (2102502) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102502,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Electrocutioner 6000, Oggleflint, Skum: Chain Lightning (2102504) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102504,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Halmgar, Argelmach, Grimlok, Lorgus Jett, Revelosh: Lightning Bolt (2102710) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102710,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Gelihast: Throw Net (2102698) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102698,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Hydromancer Velratha: Shadow Bolt (2102542) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102542,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Interrogator Vishas, Ragglesnout: Shadow Word: Pain (2102726) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102726,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Anacondra, Cobrahn, Serpentis: Lightning Bolt (2102604) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102604,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Death Speaker Jargba: Dominate Mind (2102779) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102779,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Ramstein the Gorger: Flesh Hook (92578) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 92578,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Razorclaw the Butcher: Throw Cleaver (2102653) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102653,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rethilgore: Siphon Life (2102647) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102647,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Seeth'rel: Frostbolt (2101002) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2101002,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Twilight Lord Kelris: Mind Blast (2102722) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102722,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Twilight Lord Kelris: Shadow Word: Pain (2102724) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102724,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Lethtendris: Void Bolt (22709) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 22709,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jergosh's Shadow Bolt Storm (2102546) keeps its 100 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102546,
+      "equals": 100
+    }
+  ]
+}

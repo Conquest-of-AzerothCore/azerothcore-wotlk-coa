@@ -181,6 +181,30 @@ void RecheckAfterTeamBattleChange(Player* player)
     }, TEAM_BATTLE_RECHECK_DELAY);
 }
 
+void RestoreFreeForAllOnceAreaSettles(Player* player)
+{
+    ObjectGuid const guid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([guid]()
+    {
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (player && player->IsInWorld() && ActiveMercenary(player))
+            SetMercenaryFreeForAll(player);
+    }, 0ms);
+}
+
+void ResendFreeForAllOnceNoPvPAreaChanges(Player* player)
+{
+    ObjectGuid const guid = player->GetGUID();
+    bool const wasInNoPvPArea = player->pvpInfo.IsInNoPvPArea;
+    player->m_Events.AddEventAtOffset([guid, wasInNoPvPArea]()
+    {
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (player && player->IsInWorld() && player->pvpInfo.IsInNoPvPArea != wasInNoPvPArea &&
+            IsPvPRuleset(player) && !player->HasAura(SPELL_MERCENARY))
+            player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+    }, 0ms);
+}
+
 class spell_ascension_mercenary_aura : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mercenary_aura);
@@ -283,7 +307,7 @@ public:
         if (pos.UnitFieldFactionTemplatePos >= 0 && unit && target)
         {
             Player const* owner = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (owner && ActiveMercenary(owner) && (unit == target || !InMercenaryWar(target)))
+            if (owner && ActiveMercenary(owner) && (owner == target || !InMercenaryWar(target)))
                 data.put(pos.UnitFieldFactionTemplatePos, RaceFaction(owner));
         }
         if (pos.UnitFieldBytes2Pos < 0 || !unit || !ShowsFreeForAllTo(unit->ToPlayer(), target))
@@ -299,8 +323,16 @@ public:
     ascension_mercenary_player()
         : PlayerScript("ascension_mercenary_player", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEVEL_CHANGED,
                                                       PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_FFA_PVP_STATE_UPDATE,
-                                                      PLAYERHOOK_ON_MAP_CHANGED})
+                                                      PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_UPDATE_AREA})
     {
+    }
+
+    void OnPlayerUpdateArea(Player* player, uint32, uint32) override
+    {
+        if (player->HasAura(SPELL_MERCENARY))
+            RestoreFreeForAllOnceAreaSettles(player);
+        else if (IsPvPRuleset(player))
+            ResendFreeForAllOnceNoPvPAreaChanges(player);
     }
 
     void OnPlayerLogin(Player* player) override { LearnSpells(player); }

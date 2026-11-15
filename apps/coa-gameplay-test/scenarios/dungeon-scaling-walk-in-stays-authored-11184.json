@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "A dungeon entered on foot keeps its authored creatures and loot; a Dungeon Finder group scales (#11184)",
+  "contract": [
+    "Issue #11184: on Ascension a classic five-player dungeon scales only for a Random Dungeon Finder run; walking",
+    "in keeps the authored creature levels, whatever the Destiny Weaver switch says, and the loot keeps its authored",
+    "stats. Maraudon (map 349) is finder entry 26 with the band 20-59. A level-30 character who walked in with their",
+    "open world switch on sees a level-45 Black Riding Wolf 5194 at 45 and is sent 45, and loots War Master Voone's",
+    "9237 Flightblade Throwing Axe 28972 at its authored required level 55. Once their group is a Dungeon Finder",
+    "group assigned Maraudon, the same character sees and is sent the wolf at their own level 30, and turning the",
+    "open world switch off leaves that view in place."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 349, "x": 1019.69, "y": -458.31, "z": -43.43, "o": 0.31, "ignore_access": true},
+  "players": [
+    {"id": "walker", "race": 1, "class": 1, "level": 30, "melee_hit_rating": 10000, "expertise_rating": 10000},
+    {"id": "mate", "race": 1, "class": 1, "level": 30}
+  ],
+  "creatures": [
+    {"id": "wolf", "owner": "walker", "entry": 5194, "level": 45, "distance": 8},
+    {"id": "voone", "owner": "walker", "entry": 9237, "level": 59, "health": 1, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "level_scaling_packet", "actor": "walker", "value": 1},
+    { "action": "assert", "label": "CONTROL: the walker's open world switch is on", "actor": "walker",
+      "metric": "level_scaling_choice", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Walking in, the wolf keeps its authored level 45", "actor": "walker",
+      "metric": "view_level", "target": "wolf", "equals": 45, "within_ms": 2000 },
+    { "action": "assert", "label": "Walking in, the client is sent the authored level 45", "actor": "walker",
+      "metric": "sent_level", "target": "wolf", "equals": 45, "within_ms": 3000 },
+    {"action": "attack", "actor": "walker", "target": "voone"},
+    {"action": "assert", "actor": "voone", "metric": "alive", "equals": 0, "within_ms": 30000},
+    {"action": "loot_creature", "actor": "walker", "target": "voone"},
+    { "action": "assert", "label": "The corpse holds the authored Flightblade Throwing Axe", "actor": "walker",
+      "metric": "loot_entry", "item": 28972, "equals": 28972 },
+    {"action": "loot_slot", "actor": "walker", "item": 28972},
+    { "action": "assert", "label": "Walking in, the axe keeps its authored required level 55", "actor": "walker",
+      "metric": "carried_item_required_level", "item": 28972, "equals": 55, "within_ms": 2000 },
+    {"action": "close_loot", "actor": "walker"},
+    {"action": "group", "actor": "walker", "target": "mate"},
+    { "action": "lfg_dungeon", "label": "The group becomes a Dungeon Finder group assigned Maraudon",
+      "actor": "walker", "dungeon": 26 },
+    { "action": "assert", "label": "In a Dungeon Finder group the wolf stands at the walker's level 30",
+      "actor": "walker", "metric": "view_level", "target": "wolf", "equals": 30, "within_ms": 2000 },
+    { "action": "assert", "label": "In a Dungeon Finder group the client is sent level 30", "actor": "walker",
+      "metric": "sent_level", "target": "wolf", "equals": 30, "within_ms": 3000 },
+    {"action": "level_scaling_packet", "actor": "walker", "value": 0},
+    { "action": "assert", "label": "The open world switch off leaves the Dungeon Finder view in place",
+      "actor": "walker", "metric": "view_level", "target": "wolf", "equals": 30, "within_ms": 2000 }
+  ]
+}

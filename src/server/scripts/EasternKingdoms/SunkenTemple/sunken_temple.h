@@ -26,6 +26,7 @@ enum DataTypes
     DATA_DEFENDER_KILLED        = 11,
     DATA_ERANIKUS_FIGHT         = 12,
     DATA_AWAKEN_SOULFLAYER      = 13,
+    DATA_SANCTUM_DRAGONS        = 14,
     MAX_STATUE_PHASE            = 6,
     DEFENDERS_COUNT             = 6,
 
@@ -61,6 +62,8 @@ enum CreatureIds
     NPC_SHADE_OF_ERANIKUS       = 5709,
     NPC_SHADE_OF_HAKKAR         = 8440,
     NPC_HAKKARI_BLOODKEEPER     = 8438,
+    NPC_HAKKARI_MINION          = 8437,
+    NPC_NIGHTMARE_SUPPRESSOR    = 8497,
     NPC_AVATAR_OF_HAKKAR        = 8443,
     NPC_OGOM_THE_WRETCHED       = 5711,
     NPC_MORPHAZ                 = 5719,

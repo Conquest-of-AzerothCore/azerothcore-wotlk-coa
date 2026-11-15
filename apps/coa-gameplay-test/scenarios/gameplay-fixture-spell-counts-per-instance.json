@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Gameplay fixtures: spell cast counts stay with the creature in its own instance",
+  "contract": [
+    "Creature GUIDs are generated per map, so two fresh Zul'Gurub instances give the same entry summoned at the",
+    "same point the same GUID; parallel lanes running one boss scenario hit this. The harness counted casts by GUID",
+    "and spell only, so one instance's casts showed up on the other creature. Two solo heroes enter their own",
+    "instance at the same point and each summons entry 36 there. The second golem's GUID counter equals the first",
+    "one's (checked, so the test still discriminates), the first golem casts Power Word: Fortitude (1243) three",
+    "times and the second once, and each golem must read only its own casts."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "first", "race": 1, "class": 1, "level": 60 },
+    { "id": "second", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "teleport", "actor": "first", "map": 309, "x": -11916.1, "y": -1230.53, "z": 92.5334, "o": 4.71867,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport", "actor": "second", "map": 309, "x": -11916.1, "y": -1230.53, "z": 92.5334, "o": 4.71867,
+      "ignore_access": true
+    },
+    { "action": "wait", "label": "Let both transfers finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: the first hero is in Zul'Gurub", "actor": "first", "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert", "label": "CONTROL: the second hero is in Zul'Gurub", "actor": "second", "metric": "map_id",
+      "equals": 309
+    },
+    { "action": "summon", "actor": "first", "entry": 36, "as": "first_golem", "distance": 4 },
+    { "action": "summon", "actor": "second", "entry": 36, "as": "second_golem", "distance": 4 },
+    { "action": "snapshot", "actor": "first_golem", "metric": "guid_counter", "save_as": "first_guid" },
+    {
+      "action": "assert", "label": "CONTROL: both golems share one GUID", "actor": "second_golem",
+      "metric": "guid_counter", "relative_to": "first_guid", "equals": 0
+    },
+    { "action": "cast", "actor": "first_golem", "spell": 1243 },
+    { "action": "cast", "actor": "first_golem", "spell": 1243 },
+    { "action": "cast", "actor": "first_golem", "spell": 1243 },
+    { "action": "cast", "actor": "second_golem", "spell": 1243 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the first golem counts its own three casts", "actor": "first_golem",
+      "metric": "spell_cast_count", "spell": 1243, "equals": 3
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the second golem counts its one cast", "actor": "second_golem",
+      "metric": "spell_cast_count", "spell": 1243, "equals": 1
+    }
+  ]
+}

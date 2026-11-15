@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Flight Master's Whistle offers the three nearest flight masters and retreats after a 10 second cast (#8204, #9460)",
+  "contract": [
+    "Live Ascension's Flight Master's Whistle (item 10, spell 158) opens a choice: 'Choose between the 3 closest",
+    "Flightmasters below to teleport to that location.' Choosing one starts a 10 second cast of spell 2485",
+    "(CastingTimeIndex 7), and the 30 minute cooldown (category 101) starts only after that retreat completes. From",
+    "Goldshire (map 0, -9561.2 9.5 59.1) the three closest served Alliance taxi nodes are Stormwind (2, 867 yards),",
+    "Sentinel Hill (4, 1482 yards, -10629.3 1036.9 34.0) and Darkshire (12, 1590 yards). Choosing the second option",
+    "lands the player at Sentinel Hill."
+  ],
+  "timeout_ms": 90000,
+  "players": [{ "id": "cleric", "race": 1, "class": 32, "level": 18 }],
+  "location": { "map": 0, "x": -9561.2, "y": 9.5, "z": 59.1, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let the spawn settle", "ms": 4000 },
+    { "action": "add_item", "label": "Carry the whistle", "actor": "cleric", "item": 10 },
+    { "action": "use_item", "label": "Use the whistle in Goldshire", "actor": "cleric", "item": 10, "spell": 158 },
+    { "action": "assert", "label": "The whistle use is accepted", "actor": "cleric", "metric": "cast_failure", "spell": 158, "equals": 0 },
+    { "action": "assert", "label": "The whistle offers exactly three flight masters", "actor": "cleric",
+      "metric": "gossip_options", "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "Opening the choice does not start the cooldown", "actor": "cleric",
+      "metric": "cooldown_ms", "spell": 158, "equals": 0 },
+    { "action": "assert", "label": "Opening the choice does not move the player", "actor": "cleric",
+      "metric": "point_distance_2d", "x": -9561.2, "y": 9.5, "max": 5 },
+    { "action": "gossip_select", "label": "Choose Sentinel Hill", "actor": "cleric", "option": 1 },
+    { "action": "assert", "label": "The retreat is a cast", "actor": "cleric", "metric": "cast_remaining_ms",
+      "spell": 2485, "min": 5000, "within_ms": 2000 },
+    { "action": "assert", "label": "The player is still in Goldshire during the cast", "actor": "cleric",
+      "metric": "point_distance_2d", "x": -9561.2, "y": 9.5, "max": 5 },
+    { "action": "assert", "label": "The retreat lands at Sentinel Hill", "actor": "cleric",
+      "metric": "point_distance_2d", "x": -10629.3, "y": 1036.9, "max": 40, "within_ms": 20000 },
+    { "action": "assert", "label": "Still on the same continent", "actor": "cleric", "metric": "map_id", "equals": 0 },
+    { "action": "assert", "label": "The whistle is on its 30 minute cooldown after the retreat", "actor": "cleric",
+      "metric": "cooldown_ms", "spell": 158, "min": 1700000, "within_ms": 3000 }
+  ]
+}

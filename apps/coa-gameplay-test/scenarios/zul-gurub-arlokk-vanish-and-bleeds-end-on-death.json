@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk vanishes as she becomes a panther, and her bleeds end with her death",
+  "contract": [
+    "On live Arlokk (14515) casts Vanish (2118312) when she takes panther form and stays out of sight for 10 s;",
+    "11 s after the change she Shadowsteps behind a player and Ravages (2118331) them. Her Razor Claws bleed",
+    "(2118326, 10 s) disappears from every player when she dies (live logs, tester 2026-11-04). Arlokk is",
+    "summoned at the entrance, away from her avatar, so the panther form comes at once at half health."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk before she walks back to her temple",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Arlokk below half health",
+      "actor": "hero",
+      "entry": 14515,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she takes panther form",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she vanishes with the change",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Well inside the 10 seconds out of sight",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she is still out of sight",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Ravage yet",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118331,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she steps out and Ravages the hero 11 s after the change",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118331,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Vanish is gone",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero bleeds",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118326,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Arlokk while the hero still bleeds",
+      "actor": "hero",
+      "entry": 14515,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her bleed ends with her death",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118326,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

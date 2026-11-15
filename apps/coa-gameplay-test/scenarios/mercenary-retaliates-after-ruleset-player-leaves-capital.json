@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a Mercenary can attack back a ruleset player who walked out of a capital in view",
+  "contract": "A Mercenary sees a same-faction High-Risk or War Mode player as friendly unless that player's values carry the free-for-all PvP flag, which the server patches in only for Mercenary viewers and only outside no-PvP areas. Capitals mark players as being in a no-PvP area without changing their own fields, so leaving a capital must resend the patched field to watching Mercenaries; otherwise the other player can attack the Mercenary while the Mercenary's client refuses to attack back. Two Orcs pick High-Risk at the Orgrimmar gate and one takes up Mercenary for Hire!. The other steps out into Durotar while both stay in view: the Mercenary is sent the free-for-all PvP flag for it, both can attack each other once the Mercenary follows, and stepping back into Orgrimmar sends the flag off again.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "highrisk",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": 1406.44,
+    "y": -4378.1,
+    "z": 25.5624,
+    "o": 3.0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Orgrimmar gate lets both characters rest",
+      "actor": "mercenary",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "highrisk",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "One character is in High-Risk",
+      "actor": "highrisk",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "The other is in High-Risk too",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "and takes up Mercenary for Hire! in Orgrimmar",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Inside Orgrimmar the Mercenary is sent the High-Risk Orc without free-for-all PvP",
+      "actor": "mercenary",
+      "metric": "sent_free_for_all_pvp",
+      "target": "highrisk",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "highrisk",
+      "map": 1,
+      "x": 1380.18,
+      "y": -4367.96,
+      "z": 26.0744
+    },
+    {
+      "action": "assert",
+      "label": "When the High-Risk Orc steps out into Durotar the watching Mercenary is sent its free-for-all PvP flag",
+      "actor": "mercenary",
+      "metric": "sent_free_for_all_pvp",
+      "target": "highrisk",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 1,
+      "x": 1374.79,
+      "y": -4356.54,
+      "z": 26.3583
+    },
+    {
+      "action": "assert",
+      "label": "Out in Durotar the Mercenary is in free-for-all PvP",
+      "actor": "mercenary",
+      "metric": "free_for_all_pvp",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "and is still sent the High-Risk Orc with free-for-all PvP",
+      "actor": "mercenary",
+      "metric": "sent_free_for_all_pvp",
+      "target": "highrisk",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk Orc can attack the Mercenary",
+      "actor": "highrisk",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the Mercenary can attack the High-Risk Orc back",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "highrisk",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "highrisk",
+      "map": 1,
+      "x": 1406.44,
+      "y": -4378.1,
+      "z": 25.5624
+    },
+    {
+      "action": "assert",
+      "label": "Back inside Orgrimmar the Mercenary is sent the High-Risk Orc without free-for-all PvP again",
+      "actor": "mercenary",
+      "metric": "sent_free_for_all_pvp",
+      "target": "highrisk",
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

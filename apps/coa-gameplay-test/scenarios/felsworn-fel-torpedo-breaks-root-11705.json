@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Fel Torpedo breaks a root like the Chaos Rush it transforms (#11705)",
+  "contract": "Fel Torpedo 500610 is the transformation of Chaos Rush 500028 (talent 520853: 'Transforms your Chaos Rush into Fel Torpedo'), and Chaos Rush's tooltip reads 'Usable while rooted and removes root effects from you'. Both launch Chaos Rush Jump 802028, whose SPELL_EFFECT_CHARGE_DEST stays queued by the point movement generator while the caster is rooted, so a rooted cast only dashed once the root ended. Frost Nova 122 roots the caster for a few seconds; casting the dash must remove that root and move the caster toward the dummy 40 yd ahead by roughly the 10 yd radius within the next 1.5 seconds, well before the root's natural expiry. The expected displacement is derived from the fixture geometry, and Chaos Rush is run first as the control for the same expectation.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "dh", "race": 1, "class": 14, "level": 80 },
+    { "id": "enemy", "race": 5, "class": 23, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "dh", "entry": 36, "level": 80, "health": 500000, "distance": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "dh", "spell": 500028 },
+    { "action": "learn", "actor": "dh", "spell": 500610 },
+    { "action": "set_power", "actor": "dh", "power": 1, "value": 1000 },
+
+    { "action": "snapshot", "label": "Gap to the dummy before the control cast", "actor": "dh", "metric": "distance_2d", "target": "e", "save_as": "rush0" },
+    { "action": "set_aura", "actor": "dh", "spell": 122, "stacks": 1, "caster": "enemy" },
+    { "action": "assert", "label": "SETUP: the Felsworn is rooted by Frost Nova", "actor": "dh", "metric": "aura", "spell": 122, "equals": 1 },
+    { "action": "cast", "label": "CONTROL: Chaos Rush while rooted", "actor": "dh", "spell": 500028 },
+    { "action": "assert", "label": "SETUP: the rooted Chaos Rush cast was accepted", "actor": "dh", "metric": "cast_failure", "spell": 500028, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Chaos Rush removes the root", "actor": "dh", "metric": "aura", "spell": 122, "equals": 0, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the dash finish", "ms": 1500 },
+    {
+      "action": "assert", "label": "CONTROL: Chaos Rush closed the gap by the 10 yd radius while the root would still be active",
+      "actor": "dh", "metric": "distance_2d", "target": "e", "relative_to": "rush0", "min": -14, "max": -4
+    },
+
+    { "action": "wait", "label": "Let the combat state and charge settle", "ms": 3000 },
+    { "action": "snapshot", "label": "Gap to the dummy before the Fel Torpedo cast", "actor": "dh", "metric": "distance_2d", "target": "e", "save_as": "torpedo0" },
+    { "action": "set_aura", "actor": "dh", "spell": 122, "stacks": 1, "caster": "enemy" },
+    { "action": "assert", "label": "SETUP: the Felsworn is rooted again", "actor": "dh", "metric": "aura", "spell": 122, "equals": 1 },
+    { "action": "cast", "label": "Fel Torpedo while rooted", "actor": "dh", "spell": 500610 },
+    { "action": "assert", "label": "SETUP: the rooted Fel Torpedo cast was accepted", "actor": "dh", "metric": "cast_failure", "spell": 500610, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Fel Torpedo removes the root", "actor": "dh", "metric": "aura", "spell": 122, "equals": 0, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the dash finish", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Fel Torpedo closed the gap by the 10 yd radius while the root would still be active",
+      "actor": "dh", "metric": "distance_2d", "target": "e", "relative_to": "torpedo0", "min": -14, "max": -4
+    }
+  ]
+}

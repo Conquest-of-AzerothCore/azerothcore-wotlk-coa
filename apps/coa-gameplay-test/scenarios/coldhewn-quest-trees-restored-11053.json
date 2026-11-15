@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "The Coldhewn woods have their Dun Morogh Trees again (#11053)",
+  "contract": "Quest 500005 Timber for the Coldhewn needs Frostpine Logs, which drop at 100% from the Dun Morogh Tree 2300580. The 30 trees (guids 7914150-7914179) were deleted by the GatherMate import and never re-inserted, so only Forestwood trees stood around Coldhewn Camp. They are spawned again at the spots rev_20260925_12 placed them.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914150 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914150,
+      "spawn_type": "gameobject",
+      "x": -5734.5,
+      "y": -1188.5,
+      "z": 379.316,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914155 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914155,
+      "spawn_type": "gameobject",
+      "x": -5700.5,
+      "y": -1246.0,
+      "z": 389.695,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914160 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914160,
+      "spawn_type": "gameobject",
+      "x": -5674.0,
+      "y": -1268.0,
+      "z": 389.984,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914165 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914165,
+      "spawn_type": "gameobject",
+      "x": -5795.0,
+      "y": -1193.0,
+      "z": 377.073,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914170 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914170,
+      "spawn_type": "gameobject",
+      "x": -5767.0,
+      "y": -1190.0,
+      "z": 380.102,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914175 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914175,
+      "spawn_type": "gameobject",
+      "x": -5758.0,
+      "y": -1318.0,
+      "z": 389.826,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dun Morogh Tree 7914179 stands at its Coldhewn woods spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 7914179,
+      "spawn_type": "gameobject",
+      "x": -5728.0,
+      "y": -1312.0,
+      "z": 392.011,
+      "max": 0.5
+    }
+  ]
+}

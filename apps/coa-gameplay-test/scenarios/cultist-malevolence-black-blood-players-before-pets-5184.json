@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Cultist: Malevolence applies Black Blood to every party member before their pets (#5184)",
+  "contract": "Black Blood is applied to at most 5 allies (spell MaxAffectedTargets 5), ordered by health. A group of five players with a nearly dead pet among them must all receive it: players rank ahead of pets and minions.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 25,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "a",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "b",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "d",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "h",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "c",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "a"
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "b"
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "d"
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "h"
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 804834
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 804729
+    },
+    {
+      "action": "cast",
+      "actor": "h",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "pet present",
+      "actor": "h",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "h",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 500714
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 500714,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "black blood on c",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804153,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "black blood on a",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 804153,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "black blood on b",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 804153,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "black blood on d",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 804153,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: black blood on h (pet at 1 health competes for the slot)",
+      "actor": "h",
+      "metric": "aura",
+      "spell": 804153,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "cast succeeded",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 500714,
+      "equals": 0
+    }
+  ]
+}

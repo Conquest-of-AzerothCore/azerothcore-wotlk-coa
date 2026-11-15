@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Frostsaber Halberd's Bloodscent procs from physical periodic damage (#9909)",
+  "contract": "Frostsaber Halberd's equip spell is 312688, a passive aura 42 (proc trigger spell) on 312689 Bloodscent, with tiers 316688 and 320688 on the same item name. Their Spell.dbc records carry ProcFlags 0 and ProcChance 50 and the world had no spell_proc row, so Aura::GetProcEffectMask found no proc entry and the roll never ran (#9909). The tooltip promises a chance when dealing Physical damage over time. The repair grants PROC_FLAG_DONE_PERIODIC over the physical school at the hit phase and defers Chance to the record's ProcChance 50. spell_proc_chance reads the loaded entries' 50, and aura_proc_rate replays the aura's native proc decision 40000 times on a synthetic landed periodic tick naming Rend 772 (physical): about 50%; zero for a frost periodic tick (Frostbolt 116), for a physical direct hit and for a melee-class hit. Before the repair the chance lookups fail with 'Spell has no proc entry' and every rate reads 0.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Base item proc dummy",
+      "actor": "caster",
+      "spell": 303023,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 312688",
+      "actor": "caster",
+      "spell": 312688,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 320688",
+      "actor": "caster",
+      "spell": 320688,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy aura 312688 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 312688,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy aura 320688 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320688,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 312688 loads the record's 50% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312688,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 316688 loads the record's 50% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316688,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 320688 loads the record's 50% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320688,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 772,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "label": "DISCRIMINATING: a physical periodic tick procs 312688 at about 50%",
+      "spell": 312688,
+      "min": 47,
+      "max": 53
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 772,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "label": "DISCRIMINATING: a physical periodic tick procs 320688 at about 50%",
+      "spell": 320688,
+      "min": 47,
+      "max": 53
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "label": "CONTROL: a frost periodic tick is not physical damage",
+      "spell": 312688,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 772,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "label": "CONTROL: a physical direct melee-class hit is not damage over time",
+      "spell": 312688,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 772,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "label": "CONTROL: a physical direct spell-class hit is not damage over time",
+      "spell": 312688,
+      "equals": 0
+    }
+  ]
+}

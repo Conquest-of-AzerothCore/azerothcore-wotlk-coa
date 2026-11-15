@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Sanguine Mend consumes the Saturating Sutures cost reduction (#11227)",
+  "contract": "Saturating Sutures 504137 is a native aura 108 SPELLMOD_COST modifier with BasePoints -101 over the nine Sanguine Mend ranks and reads 'Reduces the cost of your next Sanguine Mend by 100%'. Nothing spent it, so every mend in its 8 s window stayed free and the proc kept renewing it (#11227). The buff is fixtured with set_aura, the acquisition path is covered by bloodmage-saturating-sutures-cost. With the buff the resource cost of 504086 must be 0; the successful mend must remove 504137 and restore the full cost.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504086
+    },
+    {
+      "action": "set_health",
+      "label": "Injured fixture so the mend has something to heal",
+      "actor": "bloodmage",
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sanguine Mend has a resource cost without the buff",
+      "actor": "bloodmage",
+      "metric": "spell_power_cost",
+      "spell": 504086,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 504137,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff makes Sanguine Mend free",
+      "actor": "bloodmage",
+      "metric": "spell_power_cost",
+      "spell": 504086,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504086
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the mend consumes the buff",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504137,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The next mend costs its full price again",
+      "actor": "bloodmage",
+      "metric": "spell_power_cost",
+      "spell": 504086,
+      "min": 1
+    }
+  ]
+}

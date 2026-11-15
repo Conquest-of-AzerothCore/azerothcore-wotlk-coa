@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Entomb makes a hostile player immune to physical melee (#10071)",
+  "contract": "Entomb 500341 carries SPELL_AURA_DAMAGE_IMMUNITY (physical) beside its stun. A hostile player under Entomb must take no melee damage from an attacker who damaged it before the cast; uncontrolled creatures deliberately ignore partial-school damage immunity (Unit.cpp IsIgnoredCreatureImmunity), so the target is a PvP-flagged player of the opposing faction.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "a",
+      "race": 2,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "t",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "p",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "a",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "t",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500341
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the control swings",
+      "actor": "t",
+      "metric": "health",
+      "save_as": "hp0"
+    },
+    {
+      "action": "attack",
+      "actor": "a",
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: melee damages the player before Entomb",
+      "actor": "t",
+      "metric": "health",
+      "relative_to": "hp0",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500341,
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Entomb applied",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 500341,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health once Entomb is up",
+      "actor": "t",
+      "metric": "health",
+      "save_as": "hp1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Entomb still active",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 500341,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no melee damage lands while entombed",
+      "actor": "t",
+      "metric": "health",
+      "relative_to": "hp1",
+      "min": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

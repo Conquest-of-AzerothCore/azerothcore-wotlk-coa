@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Tank stance auras multiply threat as their client data says (1/2)",
- "contract": "Each CoA tank aura (807725-807736) carries SPELL_AURA_MOD_THREAT. With it on, a fixed 1000 Holy damage hit (QA spell 45648) must put threat x(1 + amount/100) on the target when the aura school mask includes Holy, and exactly 1000 when it does not.",
+ "contract": "Each CoA tank aura (807725-807736) carries SPELL_AURA_MOD_THREAT. With it on, a fixed 1000 Holy damage hit (QA spell 45648, spell hit capped so it cannot miss) must put threat x(1 + amount/100) on the target when the aura school mask includes Holy, and exactly 1000 when it does not, then x2 from Rate.Threat.TankStance (default 2) for a player in any of these stances.",
  "timeout_ms": 120000,
  "players": [
   {
@@ -9,7 +9,8 @@
    "race": 1,
    "class": 1,
    "level": 60,
-   "allow_regeneration": false
+   "allow_regeneration": false,
+   "spell_hit_rating": 10000
   }
  ],
  "creatures": [
@@ -121,12 +122,12 @@
   },
   {
    "action": "assert",
-   "label": "Twilight Domain 807725: threat is 2.8x the Holy damage dealt",
+   "label": "Twilight Domain 807725: threat is 5.6x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807725",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.75,
-   "max": 2.85,
+   "min": 5.5,
+   "max": 5.7,
    "within_ms": 3000
   },
   {
@@ -153,12 +154,12 @@
   },
   {
    "action": "assert",
-   "label": "Tank Stance Aura (Fortitude Venomancer) 807726: threat is 2.4x the Holy damage dealt",
+   "label": "Tank Stance Aura (Fortitude Venomancer) 807726: threat is 4.8x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807726",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.35,
-   "max": 2.45,
+   "min": 4.7,
+   "max": 4.9,
    "within_ms": 3000
   },
   {
@@ -185,12 +186,12 @@
   },
   {
    "action": "assert",
-   "label": "Agonizing Presence 807727: threat is 3.1x the Holy damage dealt",
+   "label": "Agonizing Presence 807727: threat is 6.2x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807727",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 3.05,
-   "max": 3.15,
+   "min": 6.1,
+   "max": 6.3,
    "within_ms": 3000
   },
   {
@@ -217,12 +218,12 @@
   },
   {
    "action": "assert",
-   "label": "Tank Stance Aura (Vanguard Guardian) 807728: threat is 1x the Holy damage dealt",
+   "label": "Tank Stance Aura (Vanguard Guardian) 807728: threat is 2x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807728",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 0.95,
-   "max": 1.05,
+   "min": 1.9,
+   "max": 2.1,
    "within_ms": 3000
   },
   {
@@ -249,12 +250,12 @@
   },
   {
    "action": "assert",
-   "label": "Divine Stand 807729: threat is 3.15x the Holy damage dealt",
+   "label": "Divine Stand 807729: threat is 6.3x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807729",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 3.1,
-   "max": 3.2,
+   "min": 6.2,
+   "max": 6.4,
    "within_ms": 3000
   },
   {
@@ -281,12 +282,12 @@
   },
   {
    "action": "assert",
-   "label": "Demonic Power 807730: threat is 2.8x the Holy damage dealt",
+   "label": "Demonic Power 807730: threat is 5.6x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807730",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.75,
-   "max": 2.85,
+   "min": 5.5,
+   "max": 5.7,
    "within_ms": 3000
   },
   {

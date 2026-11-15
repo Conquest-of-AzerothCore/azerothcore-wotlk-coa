@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "A Warcraft Reborn Imp engages its target on the attack command even with Firebolt autocast off (#10225)",
+  "contract": "Warcraft Reborn Summon Imp 1100688 summons the Reborn Imp 1100416 (GetStockPetEntry = 416), which learns stock Firebolt 3110 from skill line 188 with autocast disabled (Pet::addSpell ACT_DECIDE, same in TrinityCore). PetAI::_canMeleeAttack only let an Imp chase when an autocast Firebolt with enough mana sat in its autocast list, so with autocast off the attack command left the Imp standing still, neither chasing, meleeing nor casting. TrinityCore (the live realm's core) chases to melee and swings in that state. This case sends a level-1 warlock's Imp at a target 8 yards away without enabling autocast and asserts it swings in melee; it then enables Firebolt autocast and asserts Firebolt damage, so the ranged behaviour is unchanged.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 9,
+      "level": 1,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "p", "spell": 1100688 },
+    { "action": "cast", "actor": "p", "spell": 1100688 },
+    { "action": "assert", "label": "SETUP: the Reborn Imp is out", "actor": "p", "metric": "pet_entry", "equals": 1100416, "within_ms": 15000 },
+    { "action": "assert", "label": "SETUP: the Imp knows stock Firebolt", "actor": "p", "metric": "pet_knows_spell", "spell": 3110, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Firebolt autocast starts disabled, as reported", "actor": "p", "metric": "pet_autocast_enabled", "spell": 3110, "equals": 0 },
+    { "action": "snapshot", "actor": "p", "metric": "pet_melee_swings", "save_as": "swings0" },
+    { "action": "attack", "label": "Pet bar Attack with autocast off", "actor": "p", "target": "enemy", "pet": true },
+    { "action": "assert", "label": "DISCRIMINATING: the Imp closes in and swings instead of standing still", "actor": "p", "metric": "pet_melee_swings", "relative_to": "swings0", "min": 1, "within_ms": 15000 },
+    { "action": "pet_autocast", "actor": "p", "spell": 3110, "enabled": true },
+    { "action": "assert", "actor": "p", "metric": "pet_autocast_enabled", "spell": 3110, "equals": 1 },
+    { "action": "attack", "actor": "p", "target": "enemy", "pet": true },
+    { "action": "assert", "label": "With autocast on the Imp still casts Firebolt", "actor": "p", "metric": "spell_damage_count", "spell": 3110, "pet": true, "target": "enemy", "min": 1, "within_ms": 15000 }
+  ]
+}

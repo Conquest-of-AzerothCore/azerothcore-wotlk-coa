@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Mystic Enchant Rush of Blood counts Hemorrhages and frees Ambush from Stealth and position",
+  "contract": [
+    "Rush of Blood 1587050 (enchant 1236001): \"Ambush has no positional requirement versus monsters and costs 10 less energy. Using Hemorrhage twice in a row makes your next Ambush usable outside Stealth. Using Hemorrhage a third time regenerates 30 energy. Using any other ability resets the sequence.\" Reported in #10890: it never procced.",
+    "It had no spell_proc row and no script, so nothing counted Hemorrhages, and its ignore-positional aura (334) had no handler. Now every ability the rogue casts is seen: the second Hemorrhage in a row gives 1587051 (next Ambush outside Stealth), the third casts 1587057 (+30 energy), anything else resets the count, and Ambush spends 1587051. Aura 334 lets an affected spell skip SPELL_FAILED_NOT_BEHIND, versus monsters only when its MiscValue is 1.",
+    "Checked: Ambush's 40 energy cost, no buff after one Hemorrhage, the buff after two, +30 energy on the third, Ambush hitting from the dummy's front without Stealth and spending the buff, Ambush failing again without the buff, and Sinister Strike between Hemorrhages resetting the sequence."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "r", "race": 1, "class": 4, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "r", "entry": 32666, "level": 60, "distance": 2.5, "health": 1000000, "stationary": true }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 3.14159 },
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "add_item", "actor": "r", "item": 2092 },
+    { "action": "equip", "actor": "r", "item": 2092, "slot": 15 },
+    { "action": "learn", "actor": "r", "spell": 1116511 },
+    { "action": "learn", "actor": "r", "spell": 1108676 },
+    { "action": "learn", "actor": "r", "spell": 1101752 },
+    { "action": "set_aura", "actor": "r", "spell": 1587050, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Rush of Blood is active", "actor": "r", "metric": "aura", "spell": 1587050, "equals": 1, "within_ms": 1000 },
+    { "action": "teleport", "label": "Face the dummy from its front", "actor": "r", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Ambush costs 10 less energy (50 - 10)", "actor": "r", "metric": "spell_power_cost", "spell": 1108676, "equals": 40 },
+
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "First Hemorrhage", "actor": "r", "spell": 1116511, "target": "d" },
+    { "action": "wait", "ms": 1100 },
+    { "action": "assert", "label": "one Hemorrhage does not free Ambush", "actor": "r", "metric": "aura", "spell": 1587051, "equals": 0 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Second Hemorrhage", "actor": "r", "spell": 1116511, "target": "d" },
+    { "action": "assert", "label": "THE FIX (#10890): two Hemorrhages in a row make the next Ambush usable outside Stealth", "actor": "r", "metric": "aura", "spell": 1587051, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 35 },
+    { "action": "cast", "label": "Third Hemorrhage with exactly its 35 energy", "actor": "r", "spell": 1116511, "target": "d" },
+    { "action": "assert", "label": "THE FIX: the third Hemorrhage regenerates 30 energy", "actor": "r", "metric": "power", "power": 3, "min": 28, "within_ms": 500 },
+
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Ambush from the dummy's front, not in Stealth", "actor": "r", "spell": 1108676, "target": "d" },
+    { "action": "assert", "label": "THE FIX: Ambush hits without Stealth and from the front of a monster", "actor": "r", "metric": "spell_damage_count", "spell": 1108676, "target": "d", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Ambush spends the buff", "actor": "r", "metric": "aura", "spell": 1587051, "equals": 0, "within_ms": 1000 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Ambush again without the buff", "actor": "r", "spell": 1108676, "target": "d" },
+    { "action": "assert", "label": "DISCRIMINATING: without the buff Ambush still needs Stealth", "actor": "r", "metric": "cast_failure", "spell": 1108676, "min": 1, "within_ms": 1000 },
+
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Hemorrhage", "actor": "r", "spell": 1116511, "target": "d" },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Sinister Strike between Hemorrhages", "actor": "r", "spell": 1101752, "target": "d" },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Hemorrhage", "actor": "r", "spell": 1116511, "target": "d" },
+    { "action": "wait", "ms": 1100 },
+    { "action": "assert", "label": "THE FIX: another ability resets the sequence", "actor": "r", "metric": "aura", "spell": 1587051, "equals": 0 }
+  ]
+}

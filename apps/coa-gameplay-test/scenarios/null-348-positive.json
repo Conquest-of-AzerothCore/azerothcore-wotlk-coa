@@ -1,0 +1,317 @@
+{
+  "schema": 1,
+  "name": "Aura348: native PvE casting defense with326 priority",
+  "contract": "Defensive Magic81171/275167/1574755 explicitly permits dodge/parry/block while casting except against players. Existing native cast and channel exceptions remain.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "defender",
+      "race": 1,
+      "class": 2,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "defender",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "defender",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "attacker",
+      "map": 0,
+      "x": -8946.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 3.141592653589793
+    },
+    {
+      "action": "learn",
+      "actor": "attacker",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "attacker",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "attacker",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "attacker",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "attacker",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "defender",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "defender",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 107
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 3127
+    },
+    {
+      "action": "add_item",
+      "actor": "defender",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "actor": "defender",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300,
+      "refresh_stats": true
+    },
+    {
+      "action": "assert",
+      "actor": "defender",
+      "metric": "block_chance",
+      "min": 1,
+      "label": "Shield provides an eligible block baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "defender",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "defender",
+      "spell": 116,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "defender",
+      "metric": "casting",
+      "equals": 1,
+      "label": "Real native cast is active"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "equals": 0,
+      "label": "Casting blocks ordinary dodge without348"
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 81171,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 81171,
+      "equals": 1,
+      "label": "Zero-valued Defensive Magic flag is present"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "min": 511,
+      "label": "PvE casting defense path 1"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 2,
+      "min": 511,
+      "label": "PvE casting defense path 2"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 3,
+      "min": 511,
+      "label": "PvE casting defense path 3"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 5,
+      "min": 1,
+      "label": "PvE melee spell avoidance while casting"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 6,
+      "min": 1,
+      "label": "PvE spell block while casting"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 4,
+      "equals": 512,
+      "label": "Miss is unchanged"
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 986065,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 1,
+      "equals": 0,
+      "label": "Aura326 retains suppression priority 1"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 2,
+      "equals": 0,
+      "label": "Aura326 retains suppression priority 2"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 3,
+      "equals": 0,
+      "label": "Aura326 retains suppression priority 3"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 5,
+      "equals": 0,
+      "label": "Aura326 retains suppression priority 5"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "avoidance_samples",
+      "target": "defender",
+      "spell": 78,
+      "id": 6,
+      "equals": 0,
+      "label": "Aura326 retains suppression priority 6"
+    }
+  ]
+}

@@ -199,6 +199,8 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
             RefreshUnphased(player);
             player->UpdateArmor();
         }
+        if (id == 806109 && mode != AURA_REMOVE_BY_EXPIRE)
+            player->RemoveAurasDueToSpell(807235, player->GetGUID());
         if (id == 806109 && alive)
             Cast(player, player, 806128);
         if (Named(GetSpellInfo(), 705129) && player->HasAura(560822) && alive)

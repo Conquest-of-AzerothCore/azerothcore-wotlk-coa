@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Survivalist hunger and thirst fall only for real food and drink, not regen buffs",
+  "contract": "Survivalist (challenge 213) raises thirst 1 per 10 s and hunger 1 per 16 s, shown as stacks of the Thirst 93176 and Hunger 93175 meter auras; while the player eats or drinks, the matching meter falls (drink 1 per 250 ms, food 1 per 500 ms) and stops rising. Eating and drinking mean a seated consumable: stock SpellInfo classifies a SPELLFAMILY_GENERIC spell with AURA_INTERRUPT_FLAG_NOT_SEATED and a regen aura as SPELL_SPECIFIC_FOOD or SPELL_SPECIFIC_DRINK, as for Drink 430 (Refreshing Spring Water 159; auras 85 and 226, interrupt flags 0x40080) and Food 433 (Tough Hunk of Bread 4540; aura 84, interrupt flags 0x40080). Grove Instinct 572810 is a Primalist family-37 buff whose only aura is SPELL_AURA_MOD_POWER_REGEN (85) with no interrupt flags, and Vitality 21614 is a generic buff whose only aura is SPELL_AURA_MOD_REGEN (84) with no interrupt flags; sharing those aura types with drink and food must not stop either meter rising or drain it. Grove Instinct and Vitality are fixture-applied observation carriers; their acquisition is outside this contract. After 33 s both actors must reach at least 3 thirst and 2 hunger; the regen-buffed actor keeps them while the control drinks and eats both meters back to zero.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "buffed",
+      "race": 1,
+      "class": 25,
+      "level": 1
+    },
+    {
+      "id": "diner",
+      "race": 1,
+      "class": 25,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "start_challenge",
+      "actor": "buffed",
+      "challenge": 213,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "challenge_start_code",
+      "label": "Survivalist activates through its native request",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "diner",
+      "challenge": 213,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "challenge_start_code",
+      "label": "Survivalist activates through its native request",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "buffed",
+      "spell": 572810,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "aura",
+      "label": "Grove Instinct mana regeneration is active",
+      "spell": 572810,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "buffed",
+      "spell": 21614,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "aura",
+      "label": "Vitality health regeneration is active",
+      "spell": 21614,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 33000
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "aura_stacks",
+      "label": "thirst keeps rising under a MOD_POWER_REGEN buff",
+      "spell": 93176,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "aura_stacks",
+      "label": "hunger keeps rising under a MOD_REGEN buff",
+      "spell": 93175,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "aura_stacks",
+      "label": "control thirst rises before drinking",
+      "spell": 93176,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "aura_stacks",
+      "label": "control hunger rises before eating",
+      "spell": 93175,
+      "min": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "diner",
+      "item": 159
+    },
+    {
+      "action": "add_item",
+      "actor": "diner",
+      "item": 4540
+    },
+    {
+      "action": "use_item",
+      "actor": "diner",
+      "item": 159,
+      "spell": 430
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "aura",
+      "label": "Refreshing Spring Water applies the seated Drink aura",
+      "spell": 430,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "aura_stacks",
+      "label": "a real drink drains thirst to zero",
+      "spell": 93176,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "diner",
+      "item": 4540,
+      "spell": 433
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "aura",
+      "label": "Tough Hunk of Bread applies the seated Food aura",
+      "spell": 433,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "diner",
+      "metric": "aura_stacks",
+      "label": "real food drains hunger to zero",
+      "spell": 93175,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "aura_stacks",
+      "label": "regen buffs never drain thirst",
+      "spell": 93176,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "buffed",
+      "metric": "aura_stacks",
+      "label": "regen buffs never drain hunger",
+      "spell": 93175,
+      "min": 2
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "buffed",
+      "challenge": 213
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "diner",
+      "challenge": 213
+    }
+  ]
+}

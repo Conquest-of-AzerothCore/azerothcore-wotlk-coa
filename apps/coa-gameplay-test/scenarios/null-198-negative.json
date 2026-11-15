@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Effect198: missing aura, family and ownership controls",
+  "contract": "The helper changes existing matching owned DoTs only; it must not apply an aura, refresh another caster or modify Corruption outside its mask.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 9,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "peer",
+      "race": 1,
+      "class": 9,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "peer",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 348
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 172
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 270430
+    },
+    {
+      "action": "learn",
+      "actor": "peer",
+      "spell": 348
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 270430,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 270430,
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Native helper execution; effect checked separately"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 348,
+      "caster": "hero",
+      "equals": 0,
+      "label": "No DoT is created by the helper"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 348,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 348,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "peer",
+      "spell": 348,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "peer",
+      "metric": "spell_go_count",
+      "spell": 348,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 172,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "save_as": "own",
+      "spell": 348,
+      "caster": "hero"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "save_as": "other",
+      "spell": 348,
+      "caster": "peer"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "save_as": "corruption",
+      "spell": 172,
+      "caster": "hero"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 270430,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 270430,
+      "min": 2,
+      "within_ms": 10000,
+      "label": "Native helper execution; effect checked separately"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "spell": 348,
+      "caster": "hero",
+      "relative_to": "own",
+      "min": 5900,
+      "max": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "spell": 348,
+      "caster": "peer",
+      "relative_to": "other",
+      "min": -100,
+      "max": 0,
+      "label": "Other caster ownership is preserved"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "caster": "hero",
+      "relative_to": "corruption",
+      "min": -100,
+      "max": 0,
+      "label": "Unmatched family mask is unchanged"
+    }
+  ]
+}

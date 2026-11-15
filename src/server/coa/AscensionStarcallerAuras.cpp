@@ -71,9 +71,11 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
             Replace(player, 800496, 801125);
         }
         if (id == 572319)
+        {
+            if (player->GetSpellMap().find(802682) == player->GetSpellMap().end())
+                player->learnSpell(802682, true);
             Replace(player, 801978, 802682);
-        if (id == 803573)
-            Replace(player, 801978, 801975);
+        }
         if (id == 704171)
             GetAura()->SetScriptValue(704171, 5);
         if (id == 805439 && player->HasAura(680772))
@@ -130,8 +132,11 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
             Replace(player, 800496, 0);
             player->removeSpell(801125, SPEC_MASK_ALL, true);
         }
-        if (id == 572319 || id == 803573)
-            Replace(player, 801978, player->HasAura(803573) ? 801975 : player->HasAura(572319) ? 802682 : 0);
+        if (id == 572319)
+        {
+            Replace(player, 801978, 0);
+            player->removeSpell(802682, SPEC_MASK_ALL, true);
+        }
         if (id == 300256)
             player->RemoveAurasDueToSpell(301328);
         if (id == 954791)

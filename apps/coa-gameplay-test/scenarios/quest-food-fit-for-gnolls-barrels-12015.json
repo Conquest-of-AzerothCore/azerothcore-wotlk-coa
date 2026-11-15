@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Food Fit for Gnolls: all ten Gnoll Food Barrels stand on the ground at the five camps (#12015)",
+  "contract": "Quest 255113 needs 8 Gnoll Food (355199) from Gnoll Food Barrel 255062. rev_20261010_98_coa_redridge_restore.sql spawns ten barrels (guids 9001300-9001309), a pair at each of the five camps of the quest's QuestSuperTrack row 32868 (nodes 21387-21391), and rev_20261027_13_coa_gnoll_food_barrel_respawn.sql sets their respawn to 60 s. The report found too few barrels. Barrel 9001309 had copied the height of 9001308 on a slope and stood 0.53 yd under the ground; rev_20261114_12015_coa_gnoll_food_barrel_height.sql raises it to 132.966, so all ten stand on the terrain height and none is buried or floating.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9466.77,
+    "y": -2186.57,
+    "z": 70.2,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 22
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001300 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001300,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001301 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001301,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001302 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001302,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001303 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001303,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001304 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001304,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001305 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001305,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001306 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001306,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001307 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001307,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001308 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001308,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Gnoll Food Barrel 9001309 rests on its ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9001309,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

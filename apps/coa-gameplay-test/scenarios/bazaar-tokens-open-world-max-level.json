@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Bazaar kill tokens from open-world level 55+ creatures at maximum level",
+  "contract": "At default settings a solo level-60 character earns 0-2 Bazaar Tokens (item 975001) per open-world creature of level 55 or higher, so twelve Blackrock kills in Burning Steppes (Sorcerer 7026 55-56, Battlemaster 7029 57-58, Slayer 7027 56-57, Warlock 7028 56-57, around spawn guid 5530) pay 3-24 tokens. With open-world scaling on, scaling shows these creatures at level 56 or higher, which pays too. After the character turns scaling off at the Destiny Weaver, green creatures at their authored level 54 and below pay nothing: two Firegut Brutes 7035 (52-53, around spawn guid 5356) add 0.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -7695.1,
+    "y": -1455.4,
+    "z": 141.0
+  },
+  "players": [
+    {
+      "id": "capped",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "label": "capped character sees the real Burning Steppes spawns",
+      "actor": "capped",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "label": "capped character outlasts the pulled Blackrock camp",
+      "actor": "capped",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "capped character reaches the Blackrock camp",
+      "actor": "capped",
+      "guid": 5530
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped character is in Eastern Kingdoms",
+      "actor": "capped",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 1 Blackrock Sorcerer at level 55+ nearby",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 7026,
+      "min_level": 55,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 6 Blackrock Battlemaster at level 57+ nearby",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 7029,
+      "min_level": 57,
+      "min": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 3 Blackrock Slayer at level 56+ nearby",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 7027,
+      "min_level": 56,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 2 Blackrock Warlock at level 56+ nearby",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 7028,
+      "min_level": 56,
+      "min": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_level_55_plus"
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Sorcerer (55-56)",
+      "actor": "capped",
+      "entry": 7026,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Battlemaster (57-58)",
+      "actor": "capped",
+      "entry": 7029,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Battlemaster (57-58)",
+      "actor": "capped",
+      "entry": 7029,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Battlemaster (57-58)",
+      "actor": "capped",
+      "entry": 7029,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Battlemaster (57-58)",
+      "actor": "capped",
+      "entry": 7029,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Battlemaster (57-58)",
+      "actor": "capped",
+      "entry": 7029,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Battlemaster (57-58)",
+      "actor": "capped",
+      "entry": 7029,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Slayer (56-57)",
+      "actor": "capped",
+      "entry": 7027,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Slayer (56-57)",
+      "actor": "capped",
+      "entry": 7027,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Slayer (56-57)",
+      "actor": "capped",
+      "entry": 7027,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Warlock (56-57)",
+      "actor": "capped",
+      "entry": 7028,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Blackrock Warlock (56-57)",
+      "actor": "capped",
+      "entry": 7028,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "twelve level 55+ kills pay 0-2 tokens each",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_level_55_plus",
+      "min": 3,
+      "max": 24,
+      "within_ms": 2000
+    },
+    {
+      "action": "level_scaling_packet",
+      "label": "capped character turns open-world scaling off",
+      "actor": "capped",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: open-world scaling is off",
+      "actor": "capped",
+      "metric": "level_scaling_choice",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "capped character reaches the Firegut camp",
+      "actor": "capped",
+      "guid": 5356
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped character is in Eastern Kingdoms",
+      "actor": "capped",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 2 green Firegut Brutes (52-54) nearby",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 7035,
+      "min_level": 52,
+      "max_level": 54,
+      "min": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_below_55"
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Firegut Brute (52-53)",
+      "actor": "capped",
+      "entry": 7035,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Firegut Brute (52-53)",
+      "actor": "capped",
+      "entry": 7035,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "unscaled green kills below level 55 pay nothing at level 60",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_below_55",
+      "equals": 0
+    }
+  ]
+}

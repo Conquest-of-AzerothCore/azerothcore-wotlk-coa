@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Heroic and Mythic dungeon bosses drop their own tier and a Mark of Triumph (#7513)",
-  "contract": "#7513: the Ring of Law bosses dropped no Mythic items, because their Heroic and Mythic templates still used the Normal loot list. Every Ring of Law boss now drops one item of the Ring of Law pool per kill in the tier of the instance: item level 64 on Mythic, 61 on Heroic, epic. The Scarlet Monastery bosses had the same gap; Herod on Mythic drops one of his Mythic items. Each kill of a dungeon boss on Heroic or Mythic gives every player in the instance one Mark of Triumph (1414502); on Normal it gives none. A boss with a single item of its own (Aggem Thorncurse) also draws from the Shared Dungeon Loot (AtlasLoot, pages Heroic 1-3, in the instance's tier): its own item half the time, otherwise one shared item, so a Mythic kill still drops exactly one epic of item level 64.",
+  "name": "Heroic and Mythic dungeon bosses drop their own tier; only Heroic ones give a Mark of Triumph (#7513, #11384)",
+  "contract": "#7513: the Ring of Law bosses dropped no Mythic items, because their Heroic and Mythic templates still used the Normal loot list. Every Ring of Law boss now drops one item of the Ring of Law pool per kill in the tier of the instance: item level 64 on Mythic, 61 on Heroic, epic. The Scarlet Monastery bosses had the same gap; Herod on Mythic drops one of his Mythic items. Each kill of a dungeon boss on Heroic gives every player in the instance one Mark of Triumph (1414502); on Normal and Mythic it gives none (#11384). A boss with a single item of its own (Aggem Thorncurse) also draws from the Shared Dungeon Loot (AtlasLoot, pages Heroic 1-3, in the instance's tier): its own item half the time, otherwise one shared item, so a Mythic kill still drops exactly one epic of item level 64.",
   "timeout_ms": 150000,
   "location": {
     "map": 0,
@@ -116,13 +116,16 @@
       "within_ms": 15000
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
-      "label": "The kill on Mythic gives a Mark of Triumph",
+      "label": "The kill on Mythic gives no Mark of Triumph (#11384)",
       "actor": "mythic",
       "metric": "item_count",
       "item": 1414502,
-      "equals": 1,
-      "within_ms": 3000
+      "equals": 0
     },
     {
       "action": "loot_creature",

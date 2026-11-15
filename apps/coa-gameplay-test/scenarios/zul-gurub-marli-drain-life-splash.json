@@ -1,0 +1,328 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Mar'li's Drain Life reaches a third of the raid while she channels it",
+  "contract": [
+    "On live Mar'li's (14510) Drain Life drained 16 of 25 players at once; the tester asked to meet in the",
+    "middle, so each Drain Life (2118105) adds 2118106 on 0.32 of the players within 100 yards, rounded, besides",
+    "its target: one of four. A group of four fights a Normal Mar'li. Drain Life is a 1 s cast followed by a 5 s",
+    "channel; in the Bronzebeard log of 2025-12-21 nobody got 2118106 when the cast was interrupted, and it left",
+    "every player 0.25-0.9 s after the channel was. So the extra players are drained only once the channel starts,",
+    "and a mage's Counterspell (2139, 100 % spell hit) on the channel ends it on all four. Infest, which this case",
+    "covered on Ascended until round 5 moved it to her spider form, has its own case",
+    "(zul-gurub-marli-infest-spider-form-ascended)."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate3",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "mate3",
+      "spell": 2139
+    },
+    {
+      "action": "set_health",
+      "actor": "lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate1",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate2",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate3",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "actor": "lead",
+      "target": "mate1"
+    },
+    {
+      "action": "group",
+      "actor": "lead",
+      "target": "mate2"
+    },
+    {
+      "action": "group",
+      "actor": "lead",
+      "target": "mate3"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "lead",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the first transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "mate1",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mate2",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mate3",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the groupmates' transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the group is in Zul'Gurub on Normal",
+      "actor": "mate3",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "lead",
+      "entry": 14510,
+      "as": "marli_normal",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "actor": "lead",
+      "target": "marli_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Mar'li fights",
+      "actor": "marli_normal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "lead"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Mar'li drains a player 6 s in",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118105,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one more of the four players is drained with her",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118106,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: her first channel is over",
+      "actor": "marli_normal",
+      "metric": "cast_remaining_ms",
+      "spell": 2118105,
+      "equals": 0,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she is casting her second Drain Life",
+      "actor": "marli_normal",
+      "metric": "cast_remaining_ms",
+      "spell": 2118105,
+      "min": 300,
+      "max": 1000,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cast has not finished yet",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118105,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nobody else is drained while the cast can still be interrupted",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118106,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: her second Drain Life 10 s later",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118105,
+      "min": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: again one more player, a third of the four rounded",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118106,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she is still channeling",
+      "actor": "marli_normal",
+      "metric": "cast_remaining_ms",
+      "spell": 2118105,
+      "min": 1000
+    },
+    {
+      "action": "cast",
+      "label": "The mage Counterspells the channel",
+      "actor": "mate3",
+      "spell": 2139,
+      "target": "marli_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the channel is interrupted",
+      "actor": "marli_normal",
+      "metric": "cast_remaining_ms",
+      "spell": 2118105,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: lead is no longer drained",
+      "actor": "lead",
+      "metric": "aura",
+      "spell": 2118106,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: mate1 is no longer drained",
+      "actor": "mate1",
+      "metric": "aura",
+      "spell": 2118106,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: mate2 is no longer drained",
+      "actor": "mate2",
+      "metric": "aura",
+      "spell": 2118106,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: mate3 is no longer drained",
+      "actor": "mate3",
+      "metric": "aura",
+      "spell": 2118106,
+      "equals": 0,
+      "within_ms": 1500
+    }
+  ]
+}

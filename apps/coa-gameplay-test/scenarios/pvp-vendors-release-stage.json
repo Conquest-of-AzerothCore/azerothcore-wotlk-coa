@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "PvP vendor release stages show each Season 1 phase's vendors only while it is released",
+  "contract": [
+    "rev_20261106_18_coa_pvp_vendor_release_stage puts the phase 1 PvP vendors of rev_20261106_17 in internal",
+    "event 197 and the phase 2 vendors of rev_20261008_02/03 in internal event 198. Under the default",
+    "Ascension.PvPVendors.ReleaseStage = 1 the worldserver starts only 197 at startup, so Lieutenant Thorne 48051",
+    "and Quartermaster Hadwin stand in Champion's Hall and Captain Korgash 49050 and Warbringer Krogash in the Hall",
+    "of Legends, while the phase 2 vendors 48053, 48066, 49053 and 49066 are absent. Starting 198, as stage 2 does,",
+    "brings the phase 2 vendors to their spawn points and keeps phase 1; stopping both, as stage 0 does, removes",
+    "every one of them."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8771.9, "y": 412.5, "z": 103.921, "o": 1.57},
+  "players": [
+    {"id": "hero", "race": 1, "class": 5, "level": 60}
+  ],
+  "steps": [
+    {"action": "set_phase", "actor": "hero", "value": 1},
+    {"action": "teleport_to_spawn", "actor": "hero", "guid": 9948053},
+    {"action": "assert", "label": "Stage 1 at startup: phase 1 Thorne 48051 stands in the hall", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48051, "min": 0, "max": 20, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 1 at startup: phase 1 Hadwin stands in the hall", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 666682, "min": 0, "max": 20, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 1 at startup: phase 2 Thorne 48053 is not at his spawn", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48053, "equals": -1},
+    {"action": "assert", "label": "Stage 1 at startup: phase 2 Vik \"Angry\" Smalls 48066 is not in the hall",
+     "actor": "hero", "metric": "nearest_creature_distance", "entry": 48066, "equals": -1},
+
+    {"action": "game_event", "event": 198, "active": true},
+    {"action": "assert", "label": "Stage 2: phase 2 Thorne 48053 stands at his spawn", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48053, "min": 0, "max": 0.5, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 2: phase 2 Vik \"Angry\" Smalls 48066 stands in the hall", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48066, "min": 0, "max": 20, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 2: phase 1 Thorne 48051 stays", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48051, "min": 0, "max": 20},
+    {"action": "assert", "label": "Stage 2: phase 1 Thorne 48052 stays", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48052, "min": 0, "max": 20},
+
+    {"action": "game_event", "event": 198, "active": false},
+    {"action": "game_event", "event": 197, "active": false},
+    {"action": "assert", "label": "Stage 0: phase 2 Thorne 48053 is gone", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48053, "equals": -1, "within_ms": 5000},
+    {"action": "assert", "label": "Stage 0: phase 1 Thorne 48051 is gone", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48051, "equals": -1, "within_ms": 5000},
+    {"action": "assert", "label": "Stage 0: phase 1 Thorne 48052 is gone", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48052, "equals": -1, "within_ms": 5000},
+    {"action": "assert", "label": "Stage 0: Hadwin is gone", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 666682, "equals": -1, "within_ms": 5000},
+
+    {"action": "game_event", "event": 197, "active": true},
+    {"action": "assert", "label": "Stage 1 again: Hadwin returns", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 666682, "min": 0, "max": 20, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 1 again: phase 2 Thorne 48053 stays away", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 48053, "equals": -1},
+
+    {"action": "teleport_to_spawn", "actor": "hero", "guid": 9949053},
+    {"action": "assert", "label": "Stage 1: phase 1 Korgash 49050 stands in the Hall of Legends", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 49050, "min": 0, "max": 20, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 1: phase 1 Krogash stands in the Hall of Legends", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 666683, "min": 0, "max": 20, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 1: phase 2 Korgash 49053 is not at his spawn", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 49053, "equals": -1},
+    {"action": "assert", "label": "Stage 1: phase 2 Vik \"Angry\" Smalls 49066 is not in the hall", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 49066, "equals": -1},
+    {"action": "game_event", "event": 198, "active": true},
+    {"action": "assert", "label": "Stage 2: Korgash 49053 stands at his spawn", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 49053, "min": 0, "max": 0.5, "within_ms": 10000},
+    {"action": "assert", "label": "Stage 2: Vik \"Angry\" Smalls 49066 stands in the hall", "actor": "hero",
+     "metric": "nearest_creature_distance", "entry": 49066, "min": 0, "max": 20, "within_ms": 10000}
+  ]
+}

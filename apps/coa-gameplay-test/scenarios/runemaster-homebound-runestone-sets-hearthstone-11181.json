@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Issue 11181: Homebound Runestone stays put and lets its Runemaster set their Hearthstone there",
+  "contract": "Homebound Runestone (560316) summons the Primordial Portal (50058) and says it allows the caster to set their Hearthstone at its destination; its aura 803022 reads 'The Runemaster can set their Hearthstone here'. The portal must stay where it was created when its owner walks away, although SummonProperties 61 makes it a guardian, and confirming 'Make this inn your home' at it (CMSG_BINDER_ACTIVATE) must bind the Runemaster there.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "runemaster",
+      "spell": 560316
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 560316
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "owned_creature_count",
+      "entry": 50058,
+      "equals": 1,
+      "within_ms": 15000,
+      "label": "The Runestone summons the Primordial Portal"
+    },
+    {
+      "action": "teleport",
+      "actor": "runemaster",
+      "map": 0,
+      "x": -9438.0,
+      "y": 42.0,
+      "z": 57.0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "nearby_creature_count",
+      "entry": 50058,
+      "equals": 1,
+      "label": "The portal is still out after its owner walks away"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "nearby_creature_count",
+      "entry": 50058,
+      "min_home_distance": 1,
+      "equals": 0,
+      "label": "The portal stays where it was created instead of following its owner"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "at_homebind",
+      "equals": 0
+    },
+    {
+      "action": "binder_activate",
+      "actor": "runemaster",
+      "owner": "runemaster",
+      "entry": 50058
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "at_homebind",
+      "equals": 1,
+      "label": "Making the portal your home binds the Hearthstone there"
+    }
+  ]
+}

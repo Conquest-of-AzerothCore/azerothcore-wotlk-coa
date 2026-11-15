@@ -1,0 +1,123 @@
+{
+ "schema": 1,
+ "name": "Sun Cleric (Seraphim) threat-related abilities generate the threat their tooltips promise",
+ "contract": [
+  "Justicar's Wrath 806980 (Seraphim talent, rank 1): 'Bring holy wrath down upon an enemy, dealing ... High Threat Holy damage ...' DBC Effect[1] carries SPELL_EFFECT_THREAT (effect 63, value 99 = 99%). rev_20261026_20_coa_tank_ability_threat.sql deletes the flat spell_threat row and replaces it with pctMod 2 for 806980 and its higher ranks (807789, 807790, 807791, which carry the same damage via Effect[0] SCHOOL_DAMAGE and a SPELL_EFFECT_TRIGGER_SPELL debuff rather than their own effect 63 -- the pctMod still applies against the whole cast's threat). threat_per_damage on a struck dummy should be close to 2.0 without a tank stance.",
+  "Injunction 800624 (ClassSpells level 16): 'Taunts an enemy for $d.' DBC Effects are SPELL_EFFECT_ATTACK_ME + SPELL_AURA_MOD_TAUNT; AscensionSunClericContracts.cpp clears SPELL_ATTR1_NO_THREAT so the taunt itself still generates native combat threat. Already covered by dedicated scenarios (sun-cleric-injunction-*); re-asserted here for the class-wide batched audit."
+ ],
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "cleric",
+   "race": 1,
+   "class": 27,
+   "level": 60,
+   "spell_hit_rating": 10000,
+   "melee_hit_rating": 10000,
+   "expertise_rating": 10000
+  },
+  {
+   "id": "decoy",
+   "race": 1,
+   "class": 8,
+   "level": 60,
+   "spell_hit_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "wrath_target",
+   "owner": "cleric",
+   "entry": 36,
+   "level": 60,
+   "health": 10000000,
+   "faction": 14,
+   "distance": 3
+  },
+  {
+   "id": "injunction_target",
+   "owner": "cleric",
+   "entry": 36,
+   "level": 60,
+   "health": 10000000,
+   "faction": 14,
+   "distance": 3,
+   "reaction": 1
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "actor": "cleric",
+   "spell": 806980
+  },
+  {
+   "action": "cast",
+   "actor": "cleric",
+   "spell": 806980,
+   "target": "wrath_target"
+  },
+  {
+   "action": "assert",
+   "label": "Justicar's Wrath is cast",
+   "actor": "cleric",
+   "metric": "cast_failure",
+   "spell": 806980,
+   "equals": 0,
+   "within_ms": 2000
+  },
+  {
+   "action": "assert",
+   "label": "Justicar's Wrath: threat on the struck target is at least 2x its damage (spell_threat pctMod 2; the native flat effect 63 threat still adds on top)",
+   "actor": "wrath_target",
+   "metric": "threat_per_damage",
+   "target": "cleric",
+   "min": 1.9,
+   "within_ms": 3000
+  },
+  {
+   "action": "learn",
+   "actor": "decoy",
+   "spell": 116
+  },
+  {
+   "action": "cast",
+   "actor": "decoy",
+   "spell": 116,
+   "target": "injunction_target"
+  },
+  {
+   "action": "assert",
+   "label": "injunction_target is attacking the decoy before the taunt",
+   "actor": "injunction_target",
+   "metric": "victim",
+   "target": "decoy",
+   "equals": 1,
+   "within_ms": 4000
+  },
+  {
+   "action": "learn",
+   "actor": "cleric",
+   "spell": 800624
+  },
+  {
+   "action": "cast",
+   "actor": "cleric",
+   "spell": 800624,
+   "target": "injunction_target"
+  },
+  {
+   "action": "assert",
+   "label": "Injunction: the single-target taunt switches the creature's victim to the caster",
+   "actor": "injunction_target",
+   "metric": "victim",
+   "target": "cleric",
+   "equals": 1,
+   "within_ms": 1500
+  }
+ ]
+}

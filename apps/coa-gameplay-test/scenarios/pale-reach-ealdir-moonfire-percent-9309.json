@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Pale Reach: Ealdir Dark Druid's Moonfire deals the percent of maximum health its tooltip states (#9309)",
+  "contract": [
+    "Ealdir Dark Druid (164033) casts Moonfire (365181) on its victim in combat every 10-14 s, first after 2-5 s",
+    "(smart_scripts 164033 id 0). Spell 365181 (client and server Spell.dbc identical): effect 1 is Ascension effect",
+    "174, 9-10% of the target's maximum health as Arcane damage (BasePoints 8, DieSides 2), effect 0 applies",
+    "SPELL_AURA_PERIODIC_DAMAGE_PERCENT for 2% of maximum health every 1 s (BasePoints 2, amplitude 1000) for 10 s",
+    "(SpellDuration 1). Tooltip: 'Inflicts 9 to 10% maximum health damage ..., then an additional 2% maximum health",
+    "damage ... every 1 sec. for 10 sec.' With 20,000 maximum health the hit is 1,800-2,000 (3,000 if critical) and",
+    "one full cast stays near 30% of maximum health, far from a one-shot."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -7239.74,
+    "y": 628.906,
+    "z": 338.35,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 22
+    }
+  ],
+  "creatures": [
+    {
+      "id": "druid",
+      "owner": "hero",
+      "entry": 164033,
+      "level": 22,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero has 20,000 maximum health",
+      "actor": "hero",
+      "metric": "max_health",
+      "equals": 20000
+    },
+    {
+      "action": "attack",
+      "label": "Engage the druid",
+      "actor": "hero",
+      "target": "druid"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the druid fights the hero",
+      "actor": "druid",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the druid's Moonfire damages the hero",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 365181,
+      "caster": "druid",
+      "target": "hero",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the initial hit is 9-10% of 20,000 maximum health (critical up to 3,000, plus at most one 2% tick)",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 365181,
+      "caster": "druid",
+      "target": "hero",
+      "min": 1800,
+      "max": 3600
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the periodic effect is 2% of maximum health per tick",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 365181,
+      "caster": "druid",
+      "equals": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the 10 s Moonfire run out, before the next cast 10-14 s after the first",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one Moonfire deals about 30% of maximum health, not a one-shot (bound 35% with crits)",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 365181,
+      "caster": "druid",
+      "target": "hero",
+      "min": 4600,
+      "max": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survived",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

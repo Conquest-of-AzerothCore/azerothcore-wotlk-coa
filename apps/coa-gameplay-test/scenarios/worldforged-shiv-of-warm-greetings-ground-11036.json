@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Worldforged Shiv of Warm Greetings rests on the floor of The Stockpile (#11036)",
+  "contract": "The Shiv of Warm Greetings pickup (entry 95880, guid 6941072) floated 1.09 yd above the floor of The Stockpile, the terrain height of rev_20261006_65 having been too low and the restored value too high. It rests on the floor the server measures at its x/y.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11522.8,
+    "y": -702.7,
+    "z": 35.8,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941072,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "it is clear of walls",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6941072,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95880
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "it is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

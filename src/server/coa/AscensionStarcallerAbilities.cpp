@@ -15,7 +15,10 @@
 namespace
 {
 using namespace AscensionStarcaller;
-constexpr uint32 selected[] = {800386, 680821, 503780, 561046, 801243, 707425, 504630, 504631, 680713, 802681, 572319};
+constexpr uint32 StarfireBarrageFlurryVisual = 993772;
+constexpr uint32 StarfireBarrageFlurryShots = 7;
+constexpr uint32 StarfireBarrageFlurryMs = 1000;
+constexpr uint32 selected[] ={800386, 680821, 503780, 561046, 801243, 707425, 504630, 504631, 680713, 802681, 572319};
 bool IsLunarEclipseActivation(Spell const* spell)
 {
     constexpr uint32 allowedFlags = TRIGGERED_IGNORE_CAST_IN_PROGRESS | TRIGGERED_CAST_DIRECTLY;
@@ -64,6 +67,31 @@ void Snapshot(Player* player, Spell* spell)
                     aura->SetScriptValue(800386, ++State(player).sequence);
                 spell->SetScriptValue(id, aura->GetScriptValue(800386));
             }
+}
+void FireBarrageFlurry(Player* player, Unit* target)
+{
+    for (uint32 shot = 0; shot < StarfireBarrageFlurryShots; ++shot)
+        player->m_Events.AddEventAtOffset(
+            [guid = player->GetGUID(), victim = target->GetGUID()]()
+            {
+                Player* owner = ObjectAccessor::FindPlayer(guid);
+                Unit* hit = owner ? ObjectAccessor::GetUnit(*owner, victim) : nullptr;
+                if (owner && hit && hit->IsAlive())
+                    owner->CastSpell(hit, StarfireBarrageFlurryVisual, TRIGGERED_FULL_MASK);
+            },
+            Milliseconds(shot * StarfireBarrageFlurryMs / (StarfireBarrageFlurryShots - 1)));
+}
+void SpendLunarPhase(Player* player)
+{
+    bool const wasFull = Count(player, 802985) >= MaxPhase(player);
+    if (Aura* phase = player->GetAura(802985))
+        phase->ModStackAmount(-int32(LunarPhaseThreshold));
+    if (Count(player, 802985) < LunarPhaseThreshold)
+        player->RemoveAurasDueToSpell(704519);
+    if (wasFull)
+        if (Aura* driver = player->GetAura(524781))
+            if (AuraEffect* tick = driver->GetEffect(EFFECT_0))
+                tick->SetPeriodicTimer(tick->GetAmplitude());
 }
 void FinishSelected(Player* player, Spell* spell)
 {
@@ -127,7 +155,7 @@ class starcaller_spells : public AllSpellScript
                           ALLSPELLHOOK_ON_CALC_MAX_DURATION})
     {
     }
-    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    void OnSpellCheckCast(Spell* spell, bool strict, SpellCastResult& result) override
     {
         Player* player = Owner(spell->GetCaster());
         if (!player || result != SPELL_CAST_OK || (spell->IsTriggered() && !IsLunarEclipseActivation(spell)))
@@ -137,6 +165,9 @@ class starcaller_spells : public AllSpellScript
             result = SPELL_FAILED_CASTER_AURASTATE;
         if ((id == 801125 && !player->HasAura(802681)) || (id == 802682 && !player->HasAura(572319)))
             result = SPELL_FAILED_CASTER_AURASTATE;
+        if (strict && Named(spell->GetSpellInfo(), 801978))
+            if (Unit* target = spell->m_targets.GetUnitTarget(); !target || !target->HasAura(804378))
+                result = SPELL_FAILED_TARGET_AURASTATE;
     }
     void OnCalcMaxDuration(Aura const* aura, int32& duration) override
     {
@@ -156,13 +187,10 @@ class starcaller_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 32)
             return;
         Snapshot(player, spell);
-        if (IsLunarEclipseActivation(spell))
-        {
-            if (Aura* phase = player->GetAura(802985))
-                phase->ModStackAmount(-int32(LunarPhaseThreshold));
-            if (Count(player, 802985) < LunarPhaseThreshold)
-                player->RemoveAurasDueToSpell(704519);
-        }
+        if (!spell->IsTriggered())
+            if (uint64 generation = spell->GetScriptValue(800386))
+                if (Aura* eclipse = player->GetAura(800386); eclipse && eclipse->GetScriptValue(800386) == generation)
+                    SpendLunarPhase(player);
         if (Named(info, 801132) && player->HasAura(520482))
             ExtraTargets(player, spell, 1);
         if (Named(info, 680220) && player->HasAura(520481))
@@ -243,7 +271,9 @@ class starcaller_spells : public AllSpellScript
         State(player).event = true;
         if (player != target && !player->IsFriendlyTo(target))
         {
-            if (id == 800507 && damage && player->HasAura(503584))
+            if (id == 802682)
+                FireBarrageFlurry(player, target);
+            if (id == 800507 && player->HasAura(503584))
                 Cast(player, player, 503585);
             if (Any(info, {680220, 801127, 800497, 680703}))
                 Stars(player, target, (Named(info, 680703) && player->HasAura(680708)) ? 2 : 1);
@@ -310,19 +340,19 @@ class starcaller_spells : public AllSpellScript
                         aura->Remove();
                 }
         }
+        if (spell->GetScriptHealingIncludingOverheal() && Named(info, 575039) && player->HasAura(704741))
+        {
+            uint32 remaining = 5;
+            for (Unit* enemy : Nearby(target, 15))
+                if (player->IsValidAttackTarget(enemy))
+                {
+                    Stars(player, enemy);
+                    if (!--remaining)
+                        break;
+                }
+        }
         if (healing)
         {
-            if (Named(info, 575039) && player->HasAura(704741))
-            {
-                uint32 remaining = 5;
-                for (Unit* enemy : Nearby(target, 15))
-                    if (player->IsValidAttackTarget(enemy))
-                    {
-                        Stars(player, enemy);
-                        if (!--remaining)
-                            break;
-                    }
-            }
             if (Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554)))
                 Cast(player, target, 574154);
             if (Any(info, {801990, 574328}) && player->HasAura(300237))
@@ -344,15 +374,9 @@ class starcaller_spells : public AllSpellScript
         if (Named(info, 801972) && player->HasAura(704764))
             for (uint32 root : {801987, 575030, 801231})
                 Reduce(player, root, root == 801987 ? 3000 : 2000);
-        if (!spell->IsTriggered() && Named(info, 801978) && Chance(player, 707639))
-        {
-            Cast(player, player, 803573);
-            if (Aura* aura = player->GetAura(803573))
-            {
-                aura->SetMaxDuration(5000);
-                aura->SetDuration(5000);
-            }
-        }
+        if (!spell->IsTriggered() && Named(info, 801978) && !player->HasAura(801975) &&
+            Chance(player, 707639))
+            Cast(player, player, 807673);
         if (Named(info, 805508))
         {
             if (player->HasAura(680212))
@@ -418,8 +442,13 @@ class starcaller_spells : public AllSpellScript
             Reduce(player, 680703, 5000);
         if (!spell->IsTriggered() && Named(info, 801978) && player->HasAura(704739))
         {
-            if (++State(player).barrage == 3)
-                State(player).barrage = 0, Cast(player, player, 572319);
+            Cast(player, player, 572318);
+            Aura* stacks = player->GetAura(572318);
+            if (stacks && stacks->GetStackAmount() >= 3)
+            {
+                player->RemoveAurasDueToSpell(572318);
+                Cast(player, player, 572319);
+            }
         }
         if (!spell->IsTriggered())
             FinishSelected(player, spell);

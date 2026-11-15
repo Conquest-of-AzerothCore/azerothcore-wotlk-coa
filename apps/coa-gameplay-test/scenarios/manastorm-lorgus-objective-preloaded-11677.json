@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Manastorm: the Blackfathom Deeps Lorgus Jett stage loads its objective at stage start (#11677)",
+  "contract": [
+    "Player report (#11677): the depth 20 Blackfathom Deeps stage showed \"Defeat: Lorgus Jett\", but Lorgus never",
+    "appeared. PR #7073 removed his stock spawn 26173 near the end of the stage route, so his only spawn is now",
+    "9780127 in the Twilight hall, about 255 yards from the arrival point 2155. A private stage loads a grid only",
+    "when a player comes near it, so the objective did not exist until a player wandered close to that hall.",
+    "Segments 73 (normal) and 240 (endgame) now load the objective's own native spawn when the stage starts, as the",
+    "Meshlok and Ragglesnout stages do. The player stays at the arrival point: Lorgus (12902) must exist on the map",
+    "within ten seconds although he is more than 60 yards away."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 73"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered the private Blackfathom Deeps stage",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the stage is Blackfathom Deeps",
+      "actor": "n",
+      "metric": "map_id",
+      "equals": 48
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Lorgus Jett is not within 60 yards of the arrival point",
+      "actor": "n",
+      "metric": "nearest_creature_distance",
+      "entry": 12902,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "Lorgus Jett is loaded on the stage map without the player moving",
+      "actor": "n",
+      "metric": "map_creature_count",
+      "entry": 12902,
+      "within_ms": 10000,
+      "equals": 1
+    }
+  ]
+}

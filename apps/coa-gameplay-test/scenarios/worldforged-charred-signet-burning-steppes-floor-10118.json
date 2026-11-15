@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Charred Signet rests on the Burning Steppes floor, not 0.9 yd under it (#10118)",
+  "contract": "Free Sample (entry 686930, guid 6940239) held the Charred Signet at z 213.904, 0.94 yd below the floor the reporter stood on at z 214.848. It rests on that floor at the same x/y.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -7791.84, "y": -1143.98, "z": 215.6, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup rests on the floor instead of 0.94 yd below it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940239, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 686930 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

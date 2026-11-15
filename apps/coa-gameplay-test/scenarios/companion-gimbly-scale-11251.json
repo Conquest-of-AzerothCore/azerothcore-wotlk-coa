@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Transmogrifier Gimbly is summoned at companion size, not shrunk to a speck (#11251)",
+  "contract": "Issue #11251. Transmogrifier Gimbly 83087 summons companion 79027 (model 48811, 1.87 yd tall at scale 1). The companion scale pass read a bounding box reaching 6.63 yd below the feet and set DisplayScale 0.1411, about 0.26 yd tall. The row now uses 0.64, the 1.2 yd companion height. A level 60 player summons Gimbly; the live companion is drawn at 0.64.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    { "id": "owner", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "owner", "spell": 83087 },
+    { "action": "cast", "actor": "owner", "spell": 83087 },
+    { "action": "assert", "label": "SETUP: Transmogrifier Gimbly summons the companion", "actor": "owner", "metric": "owned_creature_count", "entry": 79027, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTRACT: Gimbly is drawn at the 1.2 yd companion scale", "actor": "owner", "metric": "owned_creature_scale", "entry": 79027, "min": 0.639, "max": 0.641 }
+  ]
+}

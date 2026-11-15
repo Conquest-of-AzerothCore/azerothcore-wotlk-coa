@@ -1,0 +1,506 @@
+{
+  "schema": 1,
+  "name": "Stratholme: an early courtyard acolyte kill leaves the ziggurats completable",
+  "contract": [
+    "Issue #10739: a ziggurat stayed uncompletable. The lone Thuzadin Acolyte in the courtyard (guid 53267) tells",
+    "the closest Ash'ari Crystal, Baroness Anastari's, to finish her ziggurat when it dies. Killed before the",
+    "Baroness, it destroyed her crystal while the ziggurat state was still 0, so her ziggurat never reached 2 and",
+    "the Slaughter Square (175373) and Gauntlet (175374) gates stayed shut. Each crystal now reacts only after its",
+    "boss died. The hero kills the courtyard acolyte first, then every boss and acolyte, and both gates open."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 329,
+    "x": 3926.79,
+    "y": -3674.34,
+    "z": 157.56,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the lone courtyard Thuzadin Acolyte stands near the hero",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the courtyard acolyte before Baroness Anastari",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the courtyard acolyte is dead",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 3848.18,
+      "y": -3747.74,
+      "z": 149.17,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: Baroness Anastari's Ash'ari Crystal survives the early courtyard kill",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 3857.34,
+      "y": -3715.75,
+      "z": 149.18,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Baroness Anastari",
+      "actor": "hero",
+      "entry": 10436,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 3848.18,
+      "y": -3747.74,
+      "z": 149.17,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Baroness Anastari's ziggurat holds its crystal",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Baroness Anastari's ziggurat holds five acolytes",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 5
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 1 in Baroness Anastari's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 2 in Baroness Anastari's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 3 in Baroness Anastari's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 4 in Baroness Anastari's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 5 in Baroness Anastari's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Baroness Anastari's acolytes are dead",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Baroness Anastari's crystal shatters after the last acolyte",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 3856.98,
+      "y": -3528.84,
+      "z": 145.29,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Nerub'enkan",
+      "actor": "hero",
+      "entry": 10437,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 3839.72,
+      "y": -3500.14,
+      "z": 145.29,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Nerub'enkan's ziggurat holds its crystal",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Nerub'enkan's ziggurat holds five acolytes",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 5
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 1 in Nerub'enkan's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 2 in Nerub'enkan's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 3 in Nerub'enkan's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 4 in Nerub'enkan's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 5 in Nerub'enkan's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Nerub'enkan's acolytes are dead",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nerub'enkan's crystal shatters after the last acolyte",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 4037.81,
+      "y": -3647.78,
+      "z": 136.74,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Maleki the Pallid",
+      "actor": "hero",
+      "entry": 10438,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 4057.55,
+      "y": -3666.56,
+      "z": 136.74,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maleki the Pallid's ziggurat holds its crystal",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maleki the Pallid's ziggurat holds five acolytes",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 5
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 1 in Maleki the Pallid's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 2 in Maleki the Pallid's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 3 in Maleki the Pallid's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 4 in Maleki the Pallid's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill acolyte 5 in Maleki the Pallid's ziggurat",
+      "actor": "hero",
+      "entry": 10399,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maleki the Pallid's acolytes are dead",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Maleki the Pallid's crystal shatters after the last acolyte",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10415,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 4037.15,
+      "y": -3462.0,
+      "z": 122.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Slaughter Square gate opens",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 175373,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 4039.97,
+      "y": -3497.0,
+      "z": 122.71,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Gauntlet gate opens",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 175374,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

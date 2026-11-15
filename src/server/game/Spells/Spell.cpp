@@ -20,6 +20,7 @@
 #include "AscensionPooledVitality.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
+#include "BossControlTargeting.h"
 #include "CharmInfo.h"
 #include "CellImpl.h"
 #include "Common.h"
@@ -2854,7 +2855,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         int32 gain = caster->HealBySpell(healInfo, crit);
         m_scriptHealingIncludingOverheal = healInfo.GetHeal();
-        float threat = float(gain) * 0.5f;
+        float threat = float(gain) * sWorld->getRate(RATE_THREAT_HEALING);
         if (caster->IsClass(CLASS_PALADIN))
             threat *= 0.5f;
         unitTarget->GetThreatMgr().ForwardThreatForAssistingMe(caster, threat, m_spellInfo);
@@ -3189,7 +3190,14 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     }
 
     if (m_caster != unit && m_caster->IsHostileTo(unit) && !m_spellInfo->IsPositive() && !m_triggeredByAuraSpell && !m_spellInfo->HasAttribute(SPELL_ATTR0_CU_DONT_BREAK_STEALTH))
-        unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+    {
+        if (unit->HasAuraType(SPELL_AURA_MOD_STEALTH))
+            unit->RemoveAppliedAuras([](AuraApplication const* aurApp)
+            {
+                SpellInfo const* auraInfo = aurApp->GetBase()->GetSpellInfo();
+                return auraInfo->HasAura(SPELL_AURA_MOD_STEALTH) && !auraInfo->StealthSurvivesSpellHits;
+            });
+    }
 
     if (aura_effmask)
     {
@@ -3541,7 +3549,7 @@ SpellCastResult Spell::prepare(SpellCastTargets const* targets, AuraEffect const
     }
 
     // Fill aura scaling information
-    if (sScriptMgr->CanScalingEverything(this) || m_caster->IsTotem() || (m_caster->IsControlledByPlayer() && !m_spellInfo->IsPassive() && m_spellInfo->SpellLevel && !m_spellInfo->IsChanneled() && !HasTriggeredCastFlag(TRIGGERED_IGNORE_AURA_SCALING)))
+    if (sScriptMgr->CanScalingEverything(this) || m_caster->IsTotem() || (m_caster->IsControlledByPlayer() && !m_spellInfo->IsPassive() && m_spellInfo->SpellLevel && !m_spellInfo->IsChanneled() && !HasTriggeredCastFlag(TRIGGERED_IGNORE_AURA_SCALING) && !m_spellInfo->HasAttribute(SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF)))
     {
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
@@ -4057,6 +4065,11 @@ void Spell::_cast(bool skipCheck)
             }
         }
     }
+
+    // Path of Duality: "Spell casts no longer reset your next auto attack"; weapon abilities keep the reset
+    if (resetAttackTimers && m_caster->HasAura(820054) && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE &&
+        m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
+        resetAttackTimers = false;
 
     // CAST -> HIT -> FINISH ordering: fire CAST before handle_immediate so an aura
     // applied during HIT (e.g. Arcane Potency from Clearcasting) isn't consumed by
@@ -6051,6 +6064,14 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                         break;
                     }
                 if (!ignored)
+                    for (AuraEffect const* effect : m_caster->GetAuraEffectsByType(SPELL_AURA_ASCENSION_IGNORE_POSITIONAL))
+                        if (effect->IsAffectedOnSpell(m_spellInfo) &&
+                            (effect->GetMiscValue() != ASCENSION_IGNORE_POSITIONAL_VERSUS_MONSTERS || !target->IsPlayer()))
+                        {
+                            ignored = true;
+                            break;
+                        }
+                if (!ignored)
                     return SPELL_FAILED_NOT_BEHIND;
             }
 
@@ -6167,10 +6188,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
     }
 
     // Divine Charge explicitly permits its recipients to cast on the finite steed.
-    Aura const* divineCharge = m_caster->GetAura(527272);
-    Unit const* divineCaster = divineCharge ? divineCharge->GetCaster() : nullptr;
-    bool divineSteed = divineCaster && divineCaster->IsPlayer() && divineCaster->getClass() == CLASS_MONK &&
-        m_caster->GetMountID() == 14584 && !m_caster->IsInFlight();
+    bool divineSteed = m_caster->IsOnDivineSteed();
     bool tinkerMechsuitConsumable = m_CastItem && m_CastItem->GetTemplate()->Class == ITEM_CLASS_CONSUMABLE;
     bool tinkerMechsuit = m_caster->IsPlayer() && m_caster->getClass() == CLASS_TINKER &&
         (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable) && !m_caster->IsInFlight() &&
@@ -6375,7 +6393,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     // Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
                     if (m_caster->IsPlayer())
                         if (Unit* target = m_targets.GetUnitTarget())
-                            if (target != m_caster && !target->HasActivePowerType(Powers(m_spellInfo->Effects[i].MiscValue)))
+                            if (target != m_caster && !target->CanLosePowerToSpell(Powers(m_spellInfo->Effects[i].MiscValue)))
                                 return SPELL_FAILED_BAD_TARGETS;
                     break;
                 }
@@ -6511,7 +6529,9 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     if (GameObject* go = m_targets.GetGOTarget())
                     {
                         lockId = go->GetGOInfo()->GetLockId();
-                        if (!lockId && go->GetGoType() != GAMEOBJECT_TYPE_DOOR)
+                        if (!lockId && ((go->GetGoType() != GAMEOBJECT_TYPE_DOOR &&
+                            go->GetGoType() != GAMEOBJECT_TYPE_BUTTON) ||
+                            go->HasGameObjectFlag(GO_FLAG_NOT_SELECTABLE)))
                             return SPELL_FAILED_BAD_TARGETS;
                     }
                     else if (Item* itm = m_targets.GetItemTarget())
@@ -6923,7 +6943,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     if (!m_targets.GetUnitTarget())
                         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
-                    if (!m_targets.GetUnitTarget()->HasActivePowerType(POWER_MANA))
+                    if (!m_targets.GetUnitTarget()->CanLosePowerToSpell(POWER_MANA))
                         return SPELL_FAILED_BAD_TARGETS;
 
                     break;
@@ -8999,6 +9019,10 @@ void Spell::CallScriptAfterHitHandlers()
 
 void Spell::CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& targets, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
+    // Vanilla dungeon boss sleep and mind control never reach a tank or healer (BossControlTargeting.h).
+    if (BossControl::Applies(m_caster, m_spellInfo) && BossControl::SparesAreaTargets(m_spellInfo))
+        targets.remove_if([this](WorldObject* target) { return BossControl::Forbids(m_caster, target->ToUnit(), m_spellInfo); });
+
     for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
     {
         (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT);

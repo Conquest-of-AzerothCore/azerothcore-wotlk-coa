@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Effect198: family-masked owned DoT refresh and extension",
+  "contract": "Client helper270430 has WARLOCK mask4 and6000ms extension;283598 names Rend refresh with WARRIOR mask32 and zero value. Existing sibling SRC uses additive duration without a maximum-duration clamp.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 9,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "warrior",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 348
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 270430
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 348,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 348,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "save_as": "immolate_before",
+      "spell": 348,
+      "caster": "hero"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 270430,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 270430,
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Native helper execution; effect checked separately"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "spell": 348,
+      "caster": "hero",
+      "relative_to": "immolate_before",
+      "min": 5900,
+      "max": 6000,
+      "label": "Immolate extends by the documented six seconds"
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 772
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 283598
+    },
+    {
+      "action": "set_power",
+      "actor": "warrior",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "caster": "warrior",
+      "spell": 772,
+      "stacks": 1,
+      "target": "mob"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "save_as": "rend_initial",
+      "spell": 772,
+      "caster": "warrior"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "warrior",
+      "spell": 283598,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "warrior",
+      "metric": "spell_cast_count",
+      "spell": 283598,
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Native helper execution; effect checked separately"
+    },
+    {
+      "action": "assert",
+      "actor": "mob",
+      "metric": "aura_duration_ms",
+      "spell": 772,
+      "caster": "warrior",
+      "relative_to": "rend_initial",
+      "min": -100,
+      "max": 0,
+      "label": "Zero-valued helper refreshes owned Rend to full duration"
+    }
+  ]
+}

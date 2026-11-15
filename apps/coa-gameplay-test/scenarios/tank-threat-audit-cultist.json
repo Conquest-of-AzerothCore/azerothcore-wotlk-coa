@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "name": "Cultist (Dreadnought) threat-related abilities generate the threat their tooltips promise",
+  "contract": [
+    "Eldritch Strength 680600 (Dreadnought talent): 'Increases the damage of Hammer of Twilight and Entropic Slam by 25% and they now generate a large amount of threat.' Effect[1] is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 2 (SPELLMOD_THREAT), EffectBasePoints[1]=14 (the WotLK DBC off-by-one convention makes the real applied value basePoints+1 = 15, confirmed by the measured 115000 against a 100000 base), with EffectSpellClassMask bits selecting Hammer of Twilight (805116) and Entropic Slam (804152). Without the talent, SPELLMOD_THREAT for those spells is unmodified (spell_modifier(op=2) == base); with it, base is raised by 15%.",
+    "Dreadfall 806175/807815: 'Raise your shield and charge towards an enemy ... generating additional threat.' The charge (806175) has its TRIGGER_MISSILE effect zeroed by AscensionCultistContracts.cpp and is instead implemented by StartDash/UpdateDash (AscensionCultistSummons.cpp), which casts 807815 on every unit the player's charge path crosses. 807815 carries SPELL_EFFECT_THREAT (effect 63, value 20, converted by rev_20261026_20_coa_tank_ability_threat.sql to spell_threat pctMod 1.2) but ALSO carries AttributesEx bit 10 (SPELL_ATTR1_NO_THREAT, value 33792 = 0x8400), the exact same shortcut as Shadow Brand 680517: ThreatManager::AddThreat (src/server/game/Combat/ThreatManager.cpp:401) returns before CalculateModifiedThreat ever reads the pctMod row, so Dreadfall's threat generation is broken the same way, not fixed as report A concluded. threat_per_damage on the struck dummy should be >=1.1 without a tank stance; this assertion is placed last in this scenario so the confirmed-defect failure does not block verifying every other ability in this file.",
+    "Horrifying Presence 500723 (ClassSpells level 18): tooltip 'Taunts enemies within 8 yds for $d, and significantly increases threat generation for $500717d.' DBC shows 500723 has a single effect, an AoE SPELL_AURA_MOD_TAUNT with no SPELL_EFFECT_ATTACK_ME (confirmed OK for the taunt clause). Like Chosen of the Moon 680756 in the Starcaller scenario, ThreatManager::TauntUpdate (src/server/game/Combat/ThreatManager.cpp) only reorders taunt priority among ThreatReferences already on the target's threat list, so it cannot switch a victim the caster never had any threat against; this scenario's cultist never damaged presence_target before taunting, so only the taunt aura landing is asserted, not a victim switch. Spell 500717 (a separate SPELL_AURA_MOD_THREAT +199% self buff referenced only for its duration text) is never applied by 500723: the only C++ reference (AscensionCultistAbilities.cpp:288) runs the opposite direction ('if (id == 500717) Cast(player, player, 500723)'), and 500717 itself is never granted, learned, or triggered by anything else in ClassSpells, AscensionTaughtAbilityData or spell data. The 'significantly increases threat generation' clause is therefore unimplemented (MISSING): casting Horrifying Presence does not place aura 500717 on the caster.",
+    "Test of Pride 804412 (ClassSpells level 14): 'Attempt to drive an enemy mad, taunting the target for $d.' DBC Effect[0] is SPELL_EFFECT_ATTACK_ME targeting the enemy; no threat-amount claim beyond the taunt itself.",
+    "Hallucination 560301 (ClassSpells level 16): 'Significantly reduces your threat.' AscensionCultistAbilities.cpp calls player->GetThreatMgr().RemoveMeFromThreatLists() on cast, fully clearing the caster's threat on every creature that has it -- matches or exceeds the tooltip claim."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "decoy",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dreadfall_target",
+      "owner": "cultist",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 15
+    },
+    {
+      "id": "presence_target",
+      "owner": "cultist",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3,
+      "reaction": 1
+    },
+    {
+      "id": "pride_target",
+      "owner": "cultist",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3,
+      "reaction": 1
+    },
+    {
+      "id": "halluc_target",
+      "owner": "cultist",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Baseline: no SPELLMOD_THREAT on Hammer of Twilight without Eldritch Strength",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 805116,
+      "op": 2,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 680600
+    },
+    {
+      "action": "assert",
+      "label": "Eldritch Strength: Hammer of Twilight's threat is raised 15% (SPELLMOD_THREAT, basePoints 14 + 1)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 805116,
+      "op": 2,
+      "base": 100000,
+      "min": 114500,
+      "max": 115500
+    },
+    {
+      "action": "assert",
+      "label": "Eldritch Strength: Entropic Slam's threat is also raised 15% (SPELLMOD_THREAT, basePoints 14 + 1)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 804152,
+      "op": 2,
+      "base": 100000,
+      "min": 114500,
+      "max": 115500
+    },
+    {
+      "action": "learn",
+      "actor": "decoy",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "decoy",
+      "spell": 116,
+      "target": "presence_target"
+    },
+    {
+      "action": "assert",
+      "label": "presence_target is attacking the decoy before the taunt",
+      "actor": "presence_target",
+      "metric": "victim",
+      "target": "decoy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 500723
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 500723
+    },
+    {
+      "action": "assert",
+      "label": "Horrifying Presence: the AoE taunt (500723) lands on the engaged target",
+      "actor": "presence_target",
+      "metric": "aura",
+      "spell": 500723,
+      "caster": "cultist",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "decoy",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "decoy",
+      "spell": 116,
+      "target": "pride_target"
+    },
+    {
+      "action": "assert",
+      "label": "pride_target is attacking the decoy before the taunt",
+      "actor": "pride_target",
+      "metric": "victim",
+      "target": "decoy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 804412
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 804412,
+      "target": "pride_target"
+    },
+    {
+      "action": "assert",
+      "label": "Test of Pride: the single-target taunt switches the creature's victim to the caster",
+      "actor": "pride_target",
+      "metric": "victim",
+      "target": "cultist",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 500720
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 500720,
+      "target": "halluc_target"
+    },
+    {
+      "action": "assert",
+      "label": "Blade of the Empire is cast",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 500720,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "halluc_target holds threat from the cultist before Hallucination",
+      "actor": "halluc_target",
+      "metric": "threat",
+      "target": "cultist",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 560301
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 560301
+    },
+    {
+      "action": "assert",
+      "label": "Hallucination: 'significantly reduces your threat' drops the cultist's threat on halluc_target to 0",
+      "actor": "halluc_target",
+      "metric": "threat",
+      "target": "cultist",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "MISSING: Horrifying Presence tooltip claim: 'significantly increases threat generation' should place the 500717 buff on the caster -- currently unimplemented, see contract",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 500717,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 806175,
+      "label": "Learn Dreadfall last: its charge relocates the player, so every earlier AoE/single-target taunt in this file needs the player still standing at spawn"
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 806175,
+      "target": "dreadfall_target"
+    },
+    {
+      "action": "assert",
+      "label": "Dreadfall is cast",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 806175,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "WRONG: Dreadfall's 807815 carries SPELL_ATTR1_NO_THREAT, so ThreatManager::AddThreat shortcuts to near-zero before the spell_threat pctMod=1.2 row (rev_20261026_20_coa_tank_ability_threat.sql) is ever read, instead of the tooltip's 'generating additional threat'",
+      "actor": "dreadfall_target",
+      "metric": "threat_per_damage",
+      "target": "cultist",
+      "min": 1.1,
+      "within_ms": 2500
+    }
+  ]
+}

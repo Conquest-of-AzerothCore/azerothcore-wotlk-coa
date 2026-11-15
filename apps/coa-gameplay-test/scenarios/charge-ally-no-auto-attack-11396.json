@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "A charge to a friendly player does not start auto attack on them (#11396)",
+  "contract": [
+    "Silverhand Incantation 801465 has a CHARGE effect on any target (TARGET_UNIT_TARGET_ANY) and, per its description,",
+    "is meant for allies as well as enemies. A friendly player cannot be attacked (IsValidAttackTarget refuses them and",
+    "so do harmful spells), so arriving at them must not make them the charger's melee victim. Charging a hostile",
+    "creature keeps starting auto attack on it."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 100000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "foe",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 801465
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -8917.41,
+      "y": -100.853,
+      "z": 82.3711
+    },
+    {
+      "action": "wait",
+      "label": "Let the ally arrive",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally is a friendly player",
+      "actor": "templar",
+      "metric": "can_attack",
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "select",
+      "actor": "templar",
+      "target": "ally"
+    },
+    {
+      "action": "cast",
+      "label": "Charge to the ally",
+      "actor": "templar",
+      "spell": 801465,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the charge is accepted",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801465,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the charge brings the caster next to the ally",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "ally",
+      "max": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let the charge finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally is not the charger's melee victim",
+      "actor": "templar",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The charger is not in combat",
+      "actor": "templar",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "templar",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711
+    },
+    {
+      "action": "wait",
+      "label": "Let the charger return",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 801465
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "select",
+      "actor": "templar",
+      "target": "foe"
+    },
+    {
+      "action": "cast",
+      "label": "Charge to the enemy",
+      "actor": "templar",
+      "spell": 801465,
+      "target": "foe"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the charge to the enemy is accepted",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801465,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the charge brings the caster next to the enemy",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "foe",
+      "max": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the enemy becomes the charger's melee victim",
+      "actor": "templar",
+      "metric": "victim",
+      "target": "foe",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

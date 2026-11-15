@@ -197,6 +197,21 @@ namespace
             item->Class == ITEM_CLASS_ARMOR;
     }
 
+    bool PlayerCanUseGear(
+        Player const* player,
+        ItemTemplate const* item)
+    {
+        if (player->CanUseItem(item) !=
+            EQUIP_ERR_OK)
+            return false;
+
+        uint32 const skill =
+            item->GetSkill();
+
+        return !skill ||
+            player->GetSkillValue(skill);
+    }
+
     struct WeightedLootCandidate
     {
         LootStoreItem* Entry = nullptr;
@@ -329,7 +344,12 @@ namespace
             std::vector<WeightedLootCandidate>
                 candidates;
 
+            std::vector<WeightedLootCandidate>
+                usable;
+
             uint64 totalWeight = 0;
+
+            uint64 usableWeight = 0;
 
             for (LootStoreItem* entry :
                 entries)
@@ -367,6 +387,32 @@ namespace
                     });
 
                 totalWeight += weight;
+
+                if (PlayerCanUseGear(
+                    player,
+                    item))
+                {
+                    usable.push_back(
+                        {
+                            entry,
+                            weight
+                        });
+
+                    usableWeight += weight;
+                }
+            }
+
+            //
+            // Only pieces the player can use now; when none is usable the
+            // whole pool stays as it was.
+            //
+            if (!usable.empty())
+            {
+                candidates =
+                    std::move(usable);
+
+                totalWeight =
+                    usableWeight;
             }
 
             if (candidates.empty() ||
@@ -418,6 +464,7 @@ namespace
         uint32 Weight = 0;
         uint8 MinCount = 1;
         uint8 MaxCount = 5;
+        uint8 CoAChancePct = 100;
     };
 
     struct MaterialCategory
@@ -433,9 +480,16 @@ namespace
     void LoadMaterialCachePools()
     {
         auto pools = std::make_shared<MaterialPools>();
-        QueryResult result = WorldDatabase.Query(
-            "SELECT category, item_entry, weight, min_count, max_count "
-            "FROM manastorm_material_cache_pool WHERE enabled = 1 ORDER BY category, item_entry");
+        QueryResult result;
+        if (ManastormModuleConfig::CoALootModeEnabled())
+            result = WorldDatabase.Query(
+                "SELECT p.category, p.item_entry, p.weight, p.min_count, p.max_count, COALESCE(c.chance_pct, 100) "
+                "FROM manastorm_material_cache_pool p LEFT JOIN manastorm_coa_material_cache_chance c "
+                "ON c.item_entry = p.item_entry WHERE p.enabled = 1 ORDER BY p.category, p.item_entry");
+        else
+            result = WorldDatabase.Query(
+                "SELECT category, item_entry, weight, min_count, max_count, 100 "
+                "FROM manastorm_material_cache_pool WHERE enabled = 1 ORDER BY category, item_entry");
         bool valid = bool(result);
         if (result)
         {
@@ -447,7 +501,8 @@ namespace
                 uint32 const weight = fields[2].Get<uint32>();
                 uint8 const minimum = fields[3].Get<uint8>();
                 uint8 const maximum = fields[4].Get<uint8>();
-                if (category.empty() || !weight || !minimum || minimum > maximum ||
+                uint32 const coaChance = fields[5].Get<uint32>();
+                if (category.empty() || !weight || !minimum || minimum > maximum || coaChance > 100 ||
                     !sObjectMgr->GetItemTemplate(entry))
                 {
                     valid = false;
@@ -465,7 +520,7 @@ namespace
                 }
 
                 pool.TotalWeight += weight;
-                pool.Items.push_back({entry, weight, minimum, maximum});
+                pool.Items.push_back({entry, weight, minimum, maximum, uint8(coaChance)});
             }
             while (result->NextRow());
         }
@@ -475,7 +530,8 @@ namespace
             loaded = pools;
         else
             LOG_ERROR("module.manastorm.endless.rewards",
-                "Material cache 1478051 disabled: apply SQL 42 and configure at least three valid categories.");
+                "Material cache 1478051 disabled: check material pool and CoA chance migrations, "
+                "and configure at least three valid categories with chances from 0 to 100.");
 
         std::atomic_store(&MaterialCachePools, loaded);
     }
@@ -515,6 +571,8 @@ namespace
             if (!ManastormModuleConfig::Enabled() || !pools || pools->size() < 3)
                 return false;
 
+            bool const coaLoot = ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter());
+
             // Sample category indices without replacement; all categories are
             // equally likely. Item weights are relative within each category.
             std::vector<uint32> available;
@@ -537,6 +595,9 @@ namespace
                         roll -= candidate.Weight;
                         continue;
                     }
+
+                    if (coaLoot && !roll_chance_i(candidate.CoAChancePct))
+                        break;
 
                     LootStoreItem selected(candidate.ItemEntry, 0, 100.0f, false,
                         LOOT_MODE_DEFAULT, 0, candidate.MinCount, candidate.MaxCount);

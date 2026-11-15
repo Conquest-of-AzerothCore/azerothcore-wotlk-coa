@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Spending Lunar Phase from a full pool restarts the 4 s regeneration timer; spending with stacks missing does not",
+  "contract": [
+    "Lunar Phase regenerates one stack every 4 s from the passive driver 524781, which keeps ticking while the pool",
+    "is full and wastes those ticks. Consuming Lunar Eclipse right before such a tick handed a stack back at once.",
+    "Expected: with a full pool of 8 (Bright Moon), consuming an Eclipse leaves 4 and the next stack arrives a full",
+    "4 s later, not at the next stale tick. With stacks already missing (5 after that regeneration), consuming an",
+    "Eclipse keeps the running timer, so the next stack still arrives on the original schedule."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "star", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "star", "spell": 800386 },
+    { "action": "learn", "label": "Bright Moon raises the Lunar Phase cap to eight", "actor": "star", "spell": 801226 },
+    { "action": "learn", "label": "Moonwell Splash consumes the Eclipse", "actor": "star", "spell": 800370 },
+    { "action": "set_aura", "label": "Seven stacks, so the next regeneration tick fills the pool", "actor": "star", "spell": 802985, "stacks": 7 },
+    { "action": "set_aura", "actor": "star", "spell": 704519, "stacks": 1 },
+    { "action": "assert", "label": "SYNC: the pool fills to eight on a regeneration tick", "actor": "star", "metric": "aura_stacks", "spell": 802985, "equals": 8, "within_ms": 6000 },
+    { "action": "wait", "label": "Let most of the 4 s interval pass so the next stale tick is about 1 s away", "ms": 3000 },
+    { "action": "cast", "label": "Activate Lunar Eclipse from a full pool", "actor": "star", "spell": 800386 },
+    { "action": "assert", "label": "Eclipse is active", "actor": "star", "metric": "aura", "spell": 800386, "equals": 1, "within_ms": 1000 },
+    { "action": "set_health", "actor": "star", "value": 100 },
+    { "action": "cast", "label": "Moonwell Splash consumes the Eclipse", "actor": "star", "spell": 800370 },
+    { "action": "assert", "label": "Eclipse is consumed", "actor": "star", "metric": "aura", "spell": 800386, "equals": 0, "within_ms": 1500 },
+    { "action": "assert", "label": "Four of the eight stacks were spent", "actor": "star", "metric": "aura_stacks", "spell": 802985, "equals": 4 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: no stack came back at the stale tick", "actor": "star", "metric": "aura_stacks", "spell": 802985, "equals": 4 },
+    { "action": "wait", "label": "Let most of the 4 s interval pass", "ms": 1300 },
+    { "action": "assert", "label": "Stacks stay at four before the 4 s mark", "actor": "star", "metric": "aura_stacks", "spell": 802985, "equals": 4 },
+    { "action": "assert", "label": "A full 4 s after the spend, the first stack arrives", "actor": "star", "metric": "aura_stacks", "spell": 802985, "equals": 5, "within_ms": 1000 },
+    { "action": "wait", "label": "Let part of the interval pass with stacks missing", "ms": 1700 },
+    { "action": "reset_cooldown", "actor": "star", "spell": 800386 },
+    { "action": "reset_cooldown", "actor": "star", "spell": 800370 },
+    { "action": "cast", "label": "Activate Lunar Eclipse with five stacks", "actor": "star", "spell": 800386 },
+    { "action": "assert", "label": "Eclipse is active", "actor": "star", "metric": "aura", "spell": 800386, "equals": 1, "within_ms": 1000 },
+    { "action": "set_health", "actor": "star", "value": 100 },
+    { "action": "cast", "label": "Moonwell Splash consumes the Eclipse", "actor": "star", "spell": 800370 },
+    { "action": "assert", "label": "Eclipse is consumed", "actor": "star", "metric": "aura", "spell": 800386, "equals": 0, "within_ms": 1500 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the running timer was kept, so the next stack arrives on the original schedule",
+      "actor": "star",
+      "metric": "aura_stacks",
+      "spell": 802985,
+      "equals": 2,
+      "within_ms": 2500
+    }
+  ]
+}

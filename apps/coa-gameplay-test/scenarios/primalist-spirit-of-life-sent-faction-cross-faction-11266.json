@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "An opposite-faction group member receives Spirit of Life with their own faction (#11266)",
+  "contract": "Issue #11266. The client colours and offers attacks from UNIT_FIELD_FACTIONTEMPLATE, so the server-side reaction fix of #7692 left Spirit of Life 840002 red to opposite-faction group members. With AllowTwoSide.Interaction.Group, Unit::PatchValuesUpdate sends a player-controlled unit to a hostile-faction raid member with the viewer's faction. Spirit of Life is summoned by script with UNIT_FLAG_PLAYER_CONTROLLED but is not a minion, so the patch now also accepts that flag. An Orc Primalist (faction 2) is grouped with a Human warrior (faction 1): the warrior must receive faction 1 for the spirit, while the summoner itself still receives faction 2.",
+  "two_side": { "group": true },
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    { "id": "primalist", "race": 2, "class": 31, "level": 60, "allow_regeneration": false },
+    { "id": "ally", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "primalist", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -9615.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "group", "actor": "primalist", "target": "ally" },
+    { "action": "assert", "actor": "primalist", "metric": "faction", "equals": 2, "label": "SETUP: the summoner is Horde" },
+    { "action": "assert", "actor": "ally", "metric": "faction", "equals": 1, "label": "SETUP: the group member is Alliance" },
+    { "action": "learn", "actor": "primalist", "spell": 572853 },
+    { "action": "cast", "actor": "primalist", "spell": 572853 },
+    { "action": "assert", "label": "SETUP: Spirits of Life summons a Spirit of Life", "actor": "primalist", "metric": "owned_creature_count", "entry": 840002, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the Alliance group member receives the spirit with its own faction", "actor": "primalist", "metric": "owned_creature_sent_faction", "entry": 840002, "target": "ally", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the summoner receives the spirit's real faction", "actor": "primalist", "metric": "owned_creature_sent_faction", "entry": 840002, "target": "primalist", "equals": 2, "within_ms": 3000 }
+  ]
+}

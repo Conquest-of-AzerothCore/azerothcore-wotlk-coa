@@ -1,0 +1,287 @@
+{
+  "schema": 1,
+  "name": "Seismic Smash rank 1 is the Mountain King talent, not a trainer spell (#7555)",
+  "contract": [
+    "Seismic Smash 300693 is CharacterAdvancement entry 7498: tab MountainKing, TE cost 1, TabTEInvestment 23,",
+    "the tree's last tier (ascensionsidekick.com lists it as Mountain King row 9). Mathrengyl Bearwalker (4217,",
+    "trainer 900031) must not sell rank 1. A Mountain King spends 22 points over the 0 and 8 investment tiers,",
+    "is refused Seismic Smash, spends the 23rd, then learns it with the next point. Ranks 2-5 (301276-301279)",
+    "keep their trainer rows gated on 300693, so at level 62 the talent holder is offered and buys rank 2."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 3,
+      "class": 31,
+      "level": 59
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "primalist",
+      "entry": 4217,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "money",
+      "actor": "primalist",
+      "copper": 1000000,
+      "label": "FIXTURE: a purse for the lessons"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "primalist",
+      "target": "trainer",
+      "label": "right-click Mathrengyl Bearwalker at level 59"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "primalist",
+      "option": 0,
+      "label": "I seek training as a Primalist"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the trainer window opened",
+      "actor": "primalist",
+      "metric": "trainer_list_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the trainer does not sell the Mountain King talent's rank 1",
+      "actor": "primalist",
+      "metric": "trainer_window_state",
+      "spell": 300693,
+      "equals": -1
+    },
+    {
+      "action": "set_level",
+      "actor": "primalist",
+      "value": 60
+    },
+    {
+      "action": "specialization",
+      "label": "Enter Mountain King with its seven investment-0 entries",
+      "actor": "primalist",
+      "id": 60,
+      "entries": [
+        7488,
+        7492,
+        7493,
+        7507,
+        7516,
+        7501,
+        7514
+      ]
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Eighth Mountain King point: entry 7501 rank 2 opens the 8-point tier",
+      "actor": "primalist",
+      "entry": 7501,
+      "rank": 2
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 9",
+      "actor": "primalist",
+      "entry": 7494,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 10",
+      "actor": "primalist",
+      "entry": 7499,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 11",
+      "actor": "primalist",
+      "entry": 7500,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 12",
+      "actor": "primalist",
+      "entry": 7502,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 13",
+      "actor": "primalist",
+      "entry": 7503,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 14",
+      "actor": "primalist",
+      "entry": 7505,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 15",
+      "actor": "primalist",
+      "entry": 7506,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 16",
+      "actor": "primalist",
+      "entry": 7510,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 17",
+      "actor": "primalist",
+      "entry": 7513,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 18",
+      "actor": "primalist",
+      "entry": 7515,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 19",
+      "actor": "primalist",
+      "entry": 7517,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 20",
+      "actor": "primalist",
+      "entry": 7518,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 21",
+      "actor": "primalist",
+      "entry": 7524,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 22",
+      "actor": "primalist",
+      "entry": 7527,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 22nd point was learned",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 680405,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "CONTROL: Seismic Smash needs 23 points in the Mountain King tree",
+      "actor": "primalist",
+      "entry": 7498,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Seismic Smash stays unlearned at 22 points",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 300693,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Mountain King point 23",
+      "actor": "primalist",
+      "entry": 7528,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "THE TALENT: spend the 24th point on Seismic Smash",
+      "actor": "primalist",
+      "entry": 7498,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE TALENT: Seismic Smash rank 1 is learned from the tree",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 300693,
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "primalist",
+      "value": 62
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "primalist",
+      "target": "trainer",
+      "label": "right-click at level 62 holding the talent"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "primalist",
+      "option": 0,
+      "label": "I seek training as a Primalist"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 is offered once the talent is held and level 62 is reached",
+      "actor": "primalist",
+      "metric": "trainer_window_state",
+      "spell": 301276,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "primalist",
+      "spell": 301276,
+      "target": "trainer"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 is granted",
+      "actor": "primalist",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 301276,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 is known",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 301276,
+      "equals": 1
+    }
+  ]
+}

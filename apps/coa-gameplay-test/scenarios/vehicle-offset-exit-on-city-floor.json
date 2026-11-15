@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Vehicle passengers leave by their offset exit point on a city floor",
+  "contract": [
+    "The D.R.I.V.E Kart's passenger seats 9996/9997 sit on the kart model's passenger points with a small",
+    "negative seat offset, so their server positions lie just below the ground. Their vehicle_seat_addon offset",
+    "exit points put Backseat Beauty 110522 and Backseat Babe 110523 about 2.6 yards from the rider. On",
+    "Stormwind's WMO floor the line of sight from that underground seat position failed and both were dropped on",
+    "the rider's spot. Expected: after dismount both stand at least 1.5 yards from the rider until they leave.",
+    "Socketless sessions establish the server-side positions, not the client's animation."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "players": [
+    {"id": "rider", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "set_skill", "actor": "rider", "skill": 762, "value": 150, "maximum": 150},
+    {"action": "learn", "actor": "rider", "spell": 908072},
+    {"action": "cast", "actor": "rider", "spell": 908072},
+    {"action": "assert", "actor": "rider", "metric": "mount_display_id", "equals": 7710, "within_ms": 4000},
+    {"action": "assert", "label": "SETUP: Beauty rides", "actor": "rider", "metric": "nearby_creature_count",
+     "entry": 110522, "equals": 1, "within_ms": 4000},
+    {"action": "assert", "label": "SETUP: Babe rides", "actor": "rider", "metric": "nearby_creature_count",
+     "entry": 110523, "equals": 1, "within_ms": 4000},
+    {"action": "cancel_mount", "actor": "rider"},
+    {"action": "assert", "label": "Beauty steps out beside her seat", "actor": "rider",
+     "metric": "nearest_creature_distance", "entry": 110522, "min": 1.5, "within_ms": 1500},
+    {"action": "assert", "label": "Babe steps out beside her seat", "actor": "rider",
+     "metric": "nearest_creature_distance", "entry": 110523, "min": 1.5, "within_ms": 1500}
+  ]
+}

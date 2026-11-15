@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a Mercenary who took the mode in a capital can fight its own faction after leaving a sanctuary",
+  "contract": "Issue #12225. A Mercenary sees same-faction players with its own race's faction, so its client can attack them only while it carries the free-for-all PvP flag. Rulesets and Mercenary for Hire! are chosen while resting, typically in a capital, where no-PvP areas keep the flag off. Two Orcs pick High-Risk in Orgrimmar and one takes up Mercenary for Hire!. After walking out of Orgrimmar into Silithus, through the Cenarion Hold sanctuary and back out, the Mercenary carries the free-for-all PvP flag and both players can attack each other.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "highrisk",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": 1629.85,
+    "y": -4373.64,
+    "z": 31.5573,
+    "o": 3.5
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Orgrimmar lets both characters rest",
+      "actor": "mercenary",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "highrisk",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "One character is in High-Risk",
+      "actor": "highrisk",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "The other is in High-Risk too",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "and takes up Mercenary for Hire! in Orgrimmar",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Orgrimmar keeps the Mercenary out of free-for-all PvP",
+      "actor": "mercenary",
+      "metric": "free_for_all_pvp",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 1,
+      "x": -7426.87,
+      "y": 1005.31,
+      "z": 1.134
+    },
+    {
+      "action": "teleport",
+      "actor": "highrisk",
+      "map": 1,
+      "x": -7424.87,
+      "y": 1005.31,
+      "z": 1.134
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive in Silithus",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Out of Orgrimmar the Mercenary is in free-for-all PvP",
+      "actor": "mercenary",
+      "metric": "free_for_all_pvp",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "In Silithus the Mercenary can attack the High-Risk Orc",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "highrisk",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the High-Risk Orc can attack the Mercenary",
+      "actor": "highrisk",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 1,
+      "x": -6818.09,
+      "y": 733.814,
+      "z": 41.566
+    },
+    {
+      "action": "teleport",
+      "actor": "highrisk",
+      "map": 1,
+      "x": -6816.09,
+      "y": 733.814,
+      "z": 41.566
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive in the Cenarion Hold sanctuary",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Cenarion Hold keeps the Mercenary out of free-for-all PvP",
+      "actor": "mercenary",
+      "metric": "free_for_all_pvp",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 1,
+      "x": -7426.87,
+      "y": 1005.31,
+      "z": 1.134
+    },
+    {
+      "action": "teleport",
+      "actor": "highrisk",
+      "map": 1,
+      "x": -7424.87,
+      "y": 1005.31,
+      "z": 1.134
+    },
+    {
+      "action": "wait",
+      "label": "Let both leave the sanctuary",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "After the sanctuary the Mercenary is in free-for-all PvP again",
+      "actor": "mercenary",
+      "metric": "free_for_all_pvp",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and can attack the High-Risk Orc",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "highrisk",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "who can attack the Mercenary",
+      "actor": "highrisk",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Crossroads Darsok Swiftdagger is turned half a circle",
+  "contract": "Issue #11736: Darsok Swiftdagger (3449, spawn 14415) stands on the patch-WB1 Crossroads tower with his face to the tower wall and the reporter asks for a 180 degree turn. His orientation was 5.74213 since the move onto the tower; turned by pi it is 2.60054. The orientation is read from the loaded creature next to the player.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -514.888, "y": -2597.39, "z": 129.469, "o": 3.14 },
+  "players": [
+    { "id": "p", "race": 2, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Darsok is turned to 2.60054", "actor": "p", "metric": "nearby_creature_orientation", "entry": 3449, "min": 2.6000, "max": 2.6011 }
+  ]
+}

@@ -541,11 +541,8 @@ public:
             reviveGUID.Clear();
         }
 
-        void JustEngagedWith(Unit* who) override
+        void JustEngagedWith(Unit* /*who*/) override
         {
-            if (!who->IsPlayer())
-                return;
-
             _scheduler.Schedule(9s, [this](TaskContext context)
             {
                 DoCastVictim(SPELL_SHRED_ARMOR);

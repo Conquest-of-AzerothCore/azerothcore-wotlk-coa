@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Level boost NPC offers nothing while CoA.LevelBoostNpc.Enable is off",
+  "contract": "Creature 9990500 (npc_coa_level_boost) is a test-realm helper. With the default CoA.LevelBoostNpc.Enable = 0 its gossip must show the unavailable text with no option, and the player's level and experience must stay as they were.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "low", "race": 1, "class": 1, "level": 10 }
+  ],
+  "location": { "map": 0, "x": -9484.92, "y": -19.8784, "z": 56.9625, "o": 0 },
+  "creatures": [
+    { "id": "mentor", "owner": "low", "entry": 9990500, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "actor": "low", "metric": "gossip_text", "id": 9990501, "equals": 1, "label": "the unavailable text is loaded" },
+    { "action": "gossip_hello", "actor": "low", "target": "mentor", "label": "talk to the mentor" },
+    { "action": "assert", "actor": "low", "metric": "gossip_options", "equals": 0, "label": "no boost is offered while the feature is off" },
+    { "action": "assert", "actor": "low", "metric": "level", "equals": 10, "label": "the level is unchanged" }
+  ]
+}

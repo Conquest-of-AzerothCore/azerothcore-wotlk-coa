@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Mekgineer Thermaplugg can be taunted",
+  "contract": [
+    "Issue #9673: Mekgineer Thermaplugg (7800) kept stock AzerothCore's immunity row -230, whose NO_TAUNT flag, Attack Me",
+    "effect and Bind aura make him immune to taunts. He now uses row -229 like the other Gnomeregan bosses, the same",
+    "mechanic immunities without taunt immunity. Blood Howl 800782 is a taunt (aura 11 SPELL_AURA_MOD_TAUNT on enemies",
+    "within 10 yards); it lands on him and puts him in combat with the taunter. Fear is still among his immunities."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "thermaplugg",
+      "owner": "tank",
+      "entry": 7800,
+      "level": 30,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 800782
+    },
+    {
+      "action": "set_aura",
+      "actor": "tank",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "tank",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "tank",
+      "spell": 800782
+    },
+    {
+      "action": "assert",
+      "label": "Blood Howl's taunt lands on Thermaplugg",
+      "actor": "thermaplugg",
+      "metric": "aura",
+      "spell": 800782,
+      "caster": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Thermaplugg turns on the taunter",
+      "actor": "thermaplugg",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

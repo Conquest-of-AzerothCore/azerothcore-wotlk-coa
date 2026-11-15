@@ -1,0 +1,624 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn characters switch between up to 20 specializations, each with its own build, action bars and equipment set link",
+  "contract": [
+    "The client's specialization list (SpecializationUtil) offers #SPEC_SWAP_SPELLS = 20 specializations; spec 1 is always unlocked and spec N needs swap spell N. Activating one casts that swap spell (CastSpecialSpell); the active spec is only learned from SMSG 0x725, which also fires ASCENSION_CA_SPECIALIZATION_ACTIVE_ID_CHANGED (equip the spec's set, activate its Mystic Enchant preset).",
+    "A Warcraft Reborn character keeps its talents as a free-pick build, so it switches specializations like a free-pick Hero: each slot keeps its own build and action bars; trainer spells are shared; the stock talent spec is not used.",
+    "Before the fix the swap spells fell through to the stock dual-spec switch: Specialization II changed the stock talent group, III to XX did nothing, and 0x725 was never sent.",
+    "The per-specialization equipment set link (CMSG 0x73A { u32 spec-1, u8 linked, [u64 set guid] }) is saved and echoed as SMSG 0x738 with the same layout, and resent at world entry; a set the character does not own is refused.",
+    "The swap spells have a 5 s cast time (SpellCastTimes 6), like the stock 63644; every check after a cast waits for it.",
+    "Deleting a linked set leaves the link pointing at nothing: a set marked deleted (until the next save) cannot be linked, and a link whose set no longer exists is cleared at world entry instead of being resent."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "w",
+      "name": "Rebornslots",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: a Reborn character knows the first specialization's spell",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 979993,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "label": "Unlock Specialization II",
+      "actor": "w",
+      "spell": 979994
+    },
+    {
+      "action": "learn",
+      "label": "Unlock Specialization III",
+      "actor": "w",
+      "spell": 979995
+    },
+    {
+      "action": "learn",
+      "label": "Learn Reborn Heroic Strike (a trainer spell)",
+      "actor": "w",
+      "spell": 1100078
+    },
+    {
+      "action": "command",
+      "label": "Specialization I takes Reborn Mortal Strike (entry 12285)",
+      "actor": "w",
+      "command": ".ca2 player addentry Rebornslots 12285"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mortal Strike is known in Specialization I",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1112294,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "label": "Specialization I bar: Heroic Strike on button 2",
+      "actor": "w",
+      "button": 2,
+      "spell": 1100078
+    },
+    {
+      "action": "set_action_button",
+      "label": "Specialization I bar: Mortal Strike on button 5",
+      "actor": "w",
+      "button": 5,
+      "spell": 1112294
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "server_packets",
+      "save_as": "active_before",
+      "opcode": 1829
+    },
+    {
+      "action": "cast",
+      "label": "Cast Specialization II",
+      "actor": "w",
+      "spell": 979994
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the active specialization slot is II",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "within_ms": 8000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the client is told the active specialization",
+      "actor": "w",
+      "metric": "server_packets",
+      "opcode": 1829,
+      "relative_to": "active_before",
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The stock talent spec is not used",
+      "actor": "w",
+      "metric": "active_talent_spec",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Specialization II does not know Mortal Strike",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1112294,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Heroic Strike, a trainer spell, is kept",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1100078,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A first-use specialization starts with an empty bar (button 2)",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mortal Strike is not on Specialization II's bar",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 5,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "Specialization II takes Reborn Bloodthirst (entry 12435)",
+      "actor": "w",
+      "command": ".ca2 player addentry Rebornslots 12435"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bloodthirst is known in Specialization II",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1123881,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "label": "Specialization II bar: Bloodthirst on button 7",
+      "actor": "w",
+      "button": 7,
+      "spell": 1123881
+    },
+    {
+      "action": "cast",
+      "label": "Cast Specialization III",
+      "actor": "w",
+      "spell": 979995
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: a third specialization slot is reachable",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "within_ms": 8000,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Specialization III knows neither talent (Mortal Strike)",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1112294,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Specialization III knows neither talent (Bloodthirst)",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1123881,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Cast Specialization I",
+      "actor": "w",
+      "spell": 979993
+    },
+    {
+      "action": "assert",
+      "label": "Back in Specialization I",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "within_ms": 8000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mortal Strike is known again",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1112294,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Specialization II's Bloodthirst is gone",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1123881,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Specialization I's button 5 is back",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 5,
+      "equals": 1112294
+    },
+    {
+      "action": "assert",
+      "label": "Specialization I's button 2 is back",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 1100078
+    },
+    {
+      "action": "assert",
+      "label": "Specialization II's button 7 did not leak",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 7,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No button points at an unknown spell",
+      "actor": "w",
+      "metric": "action_bar_unknown_spells",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "label": "Relog in Specialization I",
+      "actor": "w"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Specialization I survives the relog",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mortal Strike survives the relog",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1112294,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Button 5 survives the relog",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 5,
+      "equals": 1112294
+    },
+    {
+      "action": "cast",
+      "label": "Cast Specialization II after the relog",
+      "actor": "w",
+      "spell": 979994
+    },
+    {
+      "action": "assert",
+      "label": "Specialization II is active",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "within_ms": 8000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Specialization II's Bloodthirst is restored",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1123881,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Specialization II's button 7 is restored",
+      "actor": "w",
+      "metric": "action_button",
+      "button": 7,
+      "equals": 1123881
+    },
+    {
+      "action": "assert",
+      "label": "Mortal Strike stays with Specialization I",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1112294,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No button points at an unknown spell after the switch",
+      "actor": "w",
+      "metric": "action_bar_unknown_spells",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Save an empty equipment set at index 0",
+      "actor": "w",
+      "opcode": 1213,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "string": "Tank"
+        },
+        {
+          "string": "INV_Misc_QuestionMark"
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "server_packets",
+      "save_as": "link_before",
+      "opcode": 1848
+    },
+    {
+      "action": "client_packet",
+      "label": "Link the set to Specialization II (CMSG 0x73A)",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u8": 1
+        },
+        {
+          "equipment_set_guid": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the link is echoed (SMSG 0x738)",
+      "actor": "w",
+      "metric": "server_packets",
+      "opcode": 1848,
+      "relative_to": "link_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the link is saved",
+      "actor": "w",
+      "metric": "player_setting",
+      "min": 1,
+      "source": "core.equipment_set.spec",
+      "index": 2
+    },
+    {
+      "action": "client_packet",
+      "label": "A link to a set the character does not own is refused",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 3
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u64": 99999999
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The refused link is not saved",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.equipment_set.spec",
+      "index": 6,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Unlink Specialization II",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The unlink is saved",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.equipment_set.spec",
+      "index": 2,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Link the set to Specialization II again",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u8": 1
+        },
+        {
+          "equipment_set_guid": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the link is saved",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.equipment_set.spec",
+      "index": 2,
+      "min": 1
+    },
+    {
+      "action": "relog",
+      "label": "Relog so the set is saved to the database",
+      "actor": "w"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Delete the linked set (CMSG_DELETEEQUIPMENT_SET)",
+      "actor": "w",
+      "opcode": 318,
+      "fields": [
+        {
+          "packed_equipment_set_guid": 0
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Try to link the deleted set to Specialization III before the next save",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u8": 1
+        },
+        {
+          "equipment_set_guid": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: a deleted set cannot be linked",
+      "actor": "w",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.equipment_set.spec",
+      "index": 4
+    },
+    {
+      "action": "relog",
+      "label": "Relog: the save removes the deleted set",
+      "actor": "w"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The client reports world entry (CMSG_EXTENSION_INITIALIZED)",
+      "actor": "w",
+      "opcode": 1377,
+      "fields": []
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the link to the deleted set is cleared at world entry",
+      "actor": "w",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.equipment_set.spec",
+      "index": 2,
+      "within_ms": 3000
+    }
+  ]
+}

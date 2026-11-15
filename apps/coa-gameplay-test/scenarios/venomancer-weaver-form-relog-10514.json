@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Weaver Form is saved with the character and not announced again after a relog (#10514)",
+  "contract": "Issue #10514 reports that Weaver Form reappears on the action bar at every login. AscensionVenomancer Refresh grants the form 804980 while the talent 706940 is known. It used Player::learnSpell(spell, true), a temporary grant: PLAYERSPELL_TEMPORARY spells are skipped when the character is saved (Player.cpp 'skip temporary spells'), so each login granted the form again, sent SMSG_LEARNED_SPELL for it and the client placed it on the bar as a new spell. The form is now a persisted grant: one SMSG_LEARNED_SPELL when the talent is learned, none after the character reloads from the database, and it is still removed together with the talent. spellbook_learned_alerts counts SMSG_LEARNED_SPELL packets for the spell over the whole scenario.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 706940 },
+    {
+      "action": "assert", "label": "SETUP: the talent grants Weaver Form", "actor": "v",
+      "metric": "knows_spell", "spell": 804980, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the client was told about Weaver Form once", "actor": "v",
+      "metric": "spellbook_learned_alerts", "spell": 804980, "equals": 1
+    },
+    { "action": "relog", "label": "Save and reload the character", "actor": "v" },
+    { "action": "wait", "label": "Let Refresh run after the login", "ms": 3000 },
+    {
+      "action": "assert", "label": "Weaver Form is still known after the relog", "actor": "v",
+      "metric": "knows_spell", "spell": 804980, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the relog does not announce Weaver Form again", "actor": "v",
+      "metric": "spellbook_learned_alerts", "spell": 804980, "equals": 1
+    },
+    { "action": "unlearn", "label": "Respec: drop the talent", "actor": "v", "spell": 706940, "all_specs": true },
+    {
+      "action": "assert", "label": "REGRESSION: Weaver Form leaves with the talent", "actor": "v",
+      "metric": "knows_spell", "spell": 804980, "equals": 0, "within_ms": 3000
+    }
+  ]
+}

@@ -57,6 +57,7 @@ enum TimeSpells : uint32
     RapidAcceleration = 570149,
     RapidAccelerationHeal = 804500,
     SingularityCoreTrigger = 804437,
+    SingularityCore = 804438,
     SpellRangeThirtyYards = 4
 };
 
@@ -89,10 +90,11 @@ std::list<Unit*> Nearby(Player* player, Unit* center, uint32 helper, bool friend
     Acore::AnyUnitInObjectRangeCheck check(center, radius);
     Acore::UnitListSearcher<Acore::AnyUnitInObjectRangeCheck> search(center, targets, check);
     Cell::VisitObjects(center, search, radius);
-    targets.remove_if([player, center, friendly](Unit* target)
+    bool playersOnly = info->HasAttribute(SPELL_ATTR3_ONLY_ON_PLAYER);
+    targets.remove_if([player, center, friendly, playersOnly](Unit* target)
     {
-        return target == center || !target->IsAlive() || !target->InSamePhase(player) ||
-            !center->IsWithinLOSInMap(target) || !player->IsWithinLOSInMap(target) ||
+        return target == center || (playersOnly && !target->IsPlayer()) || !target->IsAlive() ||
+            !target->InSamePhase(player) || !center->IsWithinLOSInMap(target) || !player->IsWithinLOSInMap(target) ||
             !(friendly ? player->IsValidAssistTarget(target) : player->IsValidAttackTarget(target));
     });
     targets.sort([center](Unit* first, Unit* second)
@@ -442,6 +444,26 @@ void ApplyTimeContracts(SpellInfo* info)
     }
 }
 
+class spell_ascension_time_is_a_circle : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_time_is_a_circle);
+
+    void ExtendSingularityCore(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        if (!Chronomancer(caster))
+            return;
+        if (Aura* core = caster->GetAuraOfRankedSpell(SingularityCore, caster->GetGUID()))
+            core->SetDuration(core->GetDuration() + GetEffectValue());
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_time_is_a_circle::ExtendSingularityCore,
+            EFFECT_0, SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION);
+    }
+};
+
 class chronomancer_time_contracts : public GlobalScript
 {
 public:
@@ -461,4 +483,5 @@ void AddSC_AscensionChronomancerTime()
     new chronomancer_time_contracts();
     RegisterSpellScript(aura_ascension_timeline_tether);
     RegisterSpellScript(aura_ascension_borrowed_time);
+    RegisterSpellScript(spell_ascension_time_is_a_circle);
 }

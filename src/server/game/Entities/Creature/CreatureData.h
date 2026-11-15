@@ -183,6 +183,13 @@ struct CreatureModel
 };
 
 // from `creature_template` table
+enum class QuestTargetRespawn : uint8
+{
+    None,
+    General,
+    Named
+};
+
 struct CreatureTemplate
 {
     uint32  Entry;
@@ -397,7 +404,7 @@ struct CreatureModelInfo
 };
 
 // Benchmarked: Faster than std::map (insert/find)
-typedef std::unordered_map<uint16, CreatureModelInfo> CreatureModelContainer;
+typedef std::unordered_map<uint32, CreatureModelInfo> CreatureModelContainer;
 
 enum InhabitTypeValues
 {

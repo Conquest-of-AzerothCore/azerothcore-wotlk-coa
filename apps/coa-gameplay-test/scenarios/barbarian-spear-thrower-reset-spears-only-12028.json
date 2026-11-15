@@ -1,0 +1,1186 @@
+{
+  "schema": 1,
+  "name": "Spear Thrower resets only the spear cooldowns, without a client-freezing packet flood (#12028)",
+  "contract": [
+    "Spear Thrower 574321: \"Casting Throw Weapon now has a 30% chance to reset the cooldown of your Spears.\" HandleAscensionBarbarianCast",
+    "rolls it when a family 18 spell with SpellFamilyFlags[1] 0x00040000 (Throw Weapon 806877) is cast. The four spears",
+    "(Headhunter's, Impaling, Barbed and Maiming Spear, 28 ranks) all use Spell.dbc Category 133 with a 6 s category cooldown,",
+    "so one spear cast stores a cooldown for all 28 ranks. Category 133 holds 178 spells in total; the reset used to call",
+    "Player::RemoveCategoryCooldown(133) for each of the 28 stored ranks, and that sends SMSG_CLEAR_COOLDOWN (0x1DE) for all 178",
+    "spells each time: about 5,000 packets per proc, which the client processes in one frame (the reported 1 s freeze).",
+    "The 28 family 18 spells of category 133 are exactly the spear ranks already cleared one by one, so the reset now sends",
+    "one clear per cooling spear rank. SMSG_CLEAR_COOLDOWN's first field is the spell id, so packet rows count clears per spell:",
+    "the owned spear rank 804137 gets at least one clear (a proc happened) and at most one per proc, and 40222, a category 133",
+    "spell outside family 18, gets none. Each cycle recasts the spear, throws while it cools down (6 s cooldown, throw ends",
+    "4.1 s after the spear) and waits until the cooldown has run out, so every throw is a fresh 30% trial. Right after",
+    "each throw the spear is cast again, 1.9 s before its cooldown ends: that cast completes only when a proc reset the",
+    "server cooldown, so more than 25 completed spear casts prove the reset itself and not only its packets. Player and",
+    "target are level 60, the realm cap."
+  ],
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "barbarian",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawn settle",
+      "ms": 4000
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 585
+    },
+    {
+      "action": "equip",
+      "actor": "barbarian",
+      "item": 585,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 806877
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 804137
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 574321
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Spear Thrower is active",
+      "actor": "barbarian",
+      "metric": "aura",
+      "spell": 574321,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 1: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the spear is on its 6 s cooldown",
+      "actor": "barbarian",
+      "metric": "cooldown_ms",
+      "spell": 804137,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 1: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 1: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 2: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 2: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 2: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 3: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 3: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 3: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 4: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 4: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 4: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 5: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 5: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 5: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 6: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 6: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 6: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 7: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 7: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 7: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 8: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 8: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 8: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 9: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 9: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 9: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 10: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 10: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 10: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 11: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 11: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 11: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 12: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 12: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 12: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 13: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 13: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 13: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 14: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 14: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 14: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 15: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 15: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 15: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 16: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 16: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 16: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 17: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 17: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 17: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 18: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 18: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 18: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 19: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 19: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 19: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 20: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 20: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 20: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 21: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 21: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 21: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 22: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 22: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 22: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 23: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 23: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 23: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 24: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 24: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 24: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 25: Headhunter's Spear starts the spear cooldown",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 25: Throw Weapon while the spear is on cooldown",
+      "actor": "barbarian",
+      "spell": 806877,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the 2.5 s cast finish",
+      "ms": 2600
+    },
+    {
+      "action": "cast",
+      "label": "Cycle 25: recast the spear before its cooldown ends; only a reset lets it through",
+      "actor": "barbarian",
+      "spell": 804137,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let every spear cooldown run out",
+      "ms": 6200
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every cycle's first spear cast completed",
+      "actor": "barbarian",
+      "metric": "spell_cast_count",
+      "spell": 804137,
+      "min": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a proc reset the server cooldown, so an early recast completed (no proc in 25 throws at 30%: 0.7^25, about 0.013%)",
+      "actor": "barbarian",
+      "metric": "spell_cast_count",
+      "spell": 804137,
+      "min": 26
+    },
+    {
+      "action": "assert",
+      "label": "The proc also cleared the client's spear cooldown",
+      "actor": "barbarian",
+      "metric": "server_packets",
+      "opcode": 478,
+      "row": 804137,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: each proc clears the spear once, not once more for every cooling spear rank (28 x 179 clears per proc before)",
+      "actor": "barbarian",
+      "metric": "server_packets",
+      "opcode": 478,
+      "row": 804137,
+      "max": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no clear is sent for a category 133 spell that is not a spear (Smash Shield 40222, family 0)",
+      "actor": "barbarian",
+      "metric": "server_packets",
+      "opcode": 478,
+      "row": 40222,
+      "equals": 0
+    }
+  ]
+}

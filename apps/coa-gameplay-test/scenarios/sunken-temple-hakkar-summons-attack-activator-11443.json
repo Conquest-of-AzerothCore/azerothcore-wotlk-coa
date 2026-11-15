@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Sunken Temple: the creatures of the Avatar of Hakkar event attack the player who started it (#11443)",
+  "contract": [
+    "Using the Hakkar Worship Altar 2310500 summons the Shade of Hakkar 8440, whose SmartAI summons Hakkari",
+    "Bloodkeepers 8438 (first after 15 s at -434.5, 288.3) and Nightmare Suppressors 8497 (first after 10 s at",
+    "-510.1, 287.4). #11443: the Bloodkeepers attacked the closest player and the Suppressors walked to the Shade, so",
+    "the player who started the event was not their target. Every creature the event summons now fixates on that player",
+    "while the event runs. The starter stands at the altar; a second player of the group stands next to the first",
+    "Bloodkeeper's summon point, so a closest-player pick would take the bystander. Health fixtures keep both alive.",
+    "Both players join world phase 1, where the altar and the event's creatures are.",
+    "A Bloodkeeper that the bystander pulls on spawn still turns to the starter: its Shadow Bolt 12471, cast at its victim, goes there. Its Corruption picks a random enemy and may still take the bystander."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "starter",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "bystander",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters finish logging in",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "bystander joins starter's group",
+      "actor": "starter",
+      "target": "bystander"
+    },
+    {
+      "action": "teleport",
+      "label": "starter goes to the altar",
+      "actor": "starter",
+      "map": 109,
+      "x": -470.0,
+      "y": 272.7,
+      "z": -90.4,
+      "o": 3.14
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: starter is inside the dungeon",
+      "actor": "starter",
+      "metric": "map_id",
+      "equals": 109,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "bystander waits at the Bloodkeeper's summon point",
+      "actor": "bystander",
+      "map": 109,
+      "x": -435.5,
+      "y": 288.3,
+      "z": -90.4,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: bystander is inside the dungeon",
+      "actor": "bystander",
+      "metric": "map_id",
+      "equals": 109,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_phase",
+      "label": "starter joins world phase 1, where the altar is spawned",
+      "actor": "starter",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "bystander joins world phase 1",
+      "actor": "bystander",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "starter",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "set_health",
+      "actor": "bystander",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "starter uses the Hakkar Worship Altar",
+      "actor": "starter",
+      "entry": 2310500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Shade of Hakkar appears",
+      "actor": "starter",
+      "metric": "nearby_creature_count",
+      "entry": 8440,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "encounter_start",
+      "actor": "starter",
+      "boss_entry": 8440,
+      "radius": 100
+    },
+    {
+      "action": "assert",
+      "label": "A Nightmare Suppressor engages the starter",
+      "actor": "starter",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 8497,
+      "target_actors": [
+        "starter"
+      ],
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "A Hakkari Bloodkeeper aims its Shadow Bolt at the starter",
+      "actor": "starter",
+      "metric": "timeline_count",
+      "event": "cast",
+      "source_entry": 8438,
+      "target_actors": [
+        "starter"
+      ],
+      "min": 1,
+      "within_ms": 25000,
+      "spell": 12471
+    },
+    {
+      "action": "assert",
+      "label": "No Hakkari Bloodkeeper aims its Shadow Bolt at the bystander",
+      "actor": "starter",
+      "metric": "timeline_count",
+      "event": "cast",
+      "source_entry": 8438,
+      "equals": 0,
+      "target_actors": [
+        "bystander"
+      ],
+      "spell": 12471
+    },
+    {
+      "action": "assert",
+      "label": "No Nightmare Suppressor engages anyone but the starter first",
+      "actor": "starter",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 8497,
+      "exclude_target_actors": [
+        "starter"
+      ],
+      "equals": 0
+    }
+  ]
+}

@@ -23,8 +23,14 @@ void WorldDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_WORLDDATABASE_STATEMENTS);
 
+    PrepareStatement(WORLD_SEL_COA_DAILY_LOGIN_REWARDS,
+        "SELECT item_entry, quantity FROM coa_daily_login_rewards WHERE enabled = 1 ORDER BY id", CONNECTION_SYNCH);
+
     PrepareStatement(WORLD_SEL_ASCENSION_NPC_OVERHEAD_ICONS,
         "SELECT creature_entry, spell_id FROM ascension_npc_overhead_icons WHERE enabled = 1", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_ASCENSION_RACE_CLASS_STATS,
+        "SELECT Race, Class, Level, Strength, Agility, Stamina, Intellect, Spirit FROM ascension_race_class_stats",
+        CONNECTION_SYNCH);
 
     PrepareStatement(WORLD_SEL_ASCENSION_QUEST_MARKER_STYLES,
         "SELECT m.CreatureEntry, m.QuestId, m.Style, m.Priority FROM ascension_quest_marker_style m "
@@ -145,12 +151,13 @@ void WorldDatabaseConnection::DoPrepareStatements()
         "SELECT enabled, rdf_dungeon_id, multiplier FROM manastorm_floor_experience WHERE id = 1", CONNECTION_SYNCH);
 #endif
     PrepareStatement(WORLD_SEL_COA_NAME_FILTER, "SELECT term FROM coa_name_filter", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_COA_DUNGEON_SPELL_REACH, "SELECT spell_id, range_index, line_of_sight FROM coa_dungeon_spell_reach", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_COA_DUNGEON_CREATURE_DAMAGE, "SELECT entry, spell_id, multiplier FROM coa_dungeon_creature_damage", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_PATCHES, "SELECT * FROM spell_dbc WHERE ID = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_DESCRIPTIONS,
         "SELECT ID, Description, ToolTip FROM coa_client_spell_description", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SKILL_LINE_ABILITIES,
         "SELECT ID, SkillLine FROM coa_client_skill_line_ability ORDER BY ID", CONNECTION_SYNCH);
-    PrepareStatement(WORLD_SEL_COA_DUNGEON_LOOT_VARIANT, "SELECT base_item, heroic_item, mythic_item FROM coa_dungeon_loot_variant", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_COA_DUNGEON_HEALTH, "SELECT map_id, difficulty, creature_entry, max_health FROM coa_dungeon_health", CONNECTION_SYNCH);
 }
 

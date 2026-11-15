@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Starcaller ranged abilities reach 45 yards, other classes keep their own range",
+  "contract": "Two hidden passives in Spell.dbc carry the Starcaller to 45 yd and were granted nowhere before this change. 573711 'Starcaller Auto Shot Range' (SPELL_ATTR0_PASSIVE|DO_NOT_DISPLAY|DO_NOT_LOG, SpellFamilyName 9) has one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 5 (SPELLMOD_RANGE), EffectBasePoints 9 and DieSides 1 resolving to +10, and EffectSpellClassMask word0 0x1. Auto Shot 75 is SpellFamilyName 9 with SpellFamilyFlags word0 0x1, so that mask selects Auto Shot and nothing else the Starcaller casts; its RangeIndex is 114 and SpellRange.dbc row 114 has RangeMax 35 for both hostile and friendly, giving 35 + 10 = 45. 805527 'Starcaller Range Passive' (passive, hidden, SpellFamilyName 32) carries the same modifier on effect 1 with EffectBasePoints 14 and DieSides 1 resolving to +15, mask (word0 0x2c00, word1 0x80204, word2 0x200). Moon Arrow 801972 (word1 0x4), Starfire Shot 801978 (word0 0x800), Trueshot 520590 (word0 0x400), Huntress Shot 680220 (word2 0x200) and Starfire Barrage 802682 (word0 0x800) carry those bits on every rank, and all of them have RangeIndex 113, whose SpellRange row has RangeMax 30 for both columns, giving 30 + 15 = 45. Native consumer: SpellInfo::GetMaxRange applies Player::ApplySpellMod(SPELLMOD_RANGE) and Spell::CheckRange does the same at cast time, and the modifier is mirrored to the client with SMSG_SET_FLAT_SPELL_MODIFIER, which CharacterHandler re-sends on login. Because both are player auras, a Hunter is unaffected and keeps Auto Shot's authored 35, which is the control here. The 50-yard override later in GetMaxRange needs aura 801975 (Drawstring of Elune), which no fixture has. 805527's mask also selects the zero-range passives Full Moon Hidden, Lunar Phase and Lunar Phase Gen, which have no range to extend; that is not asserted. Starfire Barrage 802682 is covered by the same mask but is only ever known temporarily while its proc is active, so it is not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hunter", "race": 1, "class": 3, "level": 80 },
+    { "id": "starcaller", "race": 4, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "The Auto Shot range passive is granted on login",
+      "actor": "starcaller", "metric": "aura", "spell": 573711, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The ability range passive is granted on login",
+      "actor": "starcaller", "metric": "aura", "spell": 805527, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "A Hunter keeps Auto Shot's authored 35 yards",
+      "actor": "hunter", "metric": "spell_max_range", "spell": 75, "equals": 35 },
+    { "action": "assert", "label": "Auto Shot reaches 45 yards for the Starcaller",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 75, "equals": 45 },
+    { "action": "assert", "label": "Moon Arrow rank 1 reaches 45 yards",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 801972, "equals": 45 },
+    { "action": "assert", "label": "Moon Arrow's top rank is covered by the same mask",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 803925, "equals": 45 },
+    { "action": "assert", "label": "Starfire Shot rank 1 reaches 45 yards",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 801978, "equals": 45 },
+    { "action": "assert", "label": "Starfire Shot's top rank is covered by the same mask",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 804469, "equals": 45 },
+    { "action": "assert", "label": "Huntress Shot reaches 45 yards",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 680220, "equals": 45 },
+    { "action": "assert", "label": "Trueshot reaches 45 yards",
+      "actor": "starcaller", "metric": "spell_max_range", "spell": 520590, "equals": 45 }
+  ]
+}

@@ -1,7 +1,18 @@
 {
   "schema": 1,
   "name": "Honorable Combat: Western Plaguelands locks a 1v1 and credits the win",
-  "contract": "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768 with the zone list 28 and 618. When an opposing High-Risk player attacks them, both receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them, and heals between a locked player and anyone else are refused at cast and zeroed on landing. When the challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled WildCard copy) and the lock ends; the bystander earns none. The winner is restored to full health, has every cooldown reset and receives Respite 9930878 for 30 seconds, during which the bystander can neither attack nor heal them and they cannot attack the bystander; the defeated defender gets no Respite. Winterspring, pets, untargeted shields or buffs from third parties, the lock ending on leaving combat and the private skull marker (MSG_RAID_TARGET_UPDATE is not recorded by the harness) are untested.",
+  "contract": [
+    "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768",
+    "with the zone list 28, 618 and 490 (Un'Goro Crater). When an opposing High-Risk player attacks them, both",
+    "receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them,",
+    "and heals between a locked player and anyone else are refused at cast and zeroed on landing. When the",
+    "challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled",
+    "WildCard copy) and the lock ends; the bystander earns none. The winner is restored to full health, has every",
+    "cooldown reset and receives Respite 9930878 for 30 seconds, during which the bystander can neither attack nor",
+    "heal them and they cannot attack the bystander; the defeated defender gets no Respite. Winterspring and",
+    "Un'Goro Crater in play, pets, untargeted shields or buffs from third parties, the lock ending on leaving",
+    "combat and the private skull marker (MSG_RAID_TARGET_UPDATE is not recorded by the harness) are untested."
+  ],
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -111,13 +122,13 @@
     },
     {
       "action": "assert",
-      "label": "The login stream lists two Honorable Combat zones",
+      "label": "The login stream lists three Honorable Combat zones",
       "actor": "challenger",
       "metric": "server_packet_u32",
       "opcode": 1896,
       "index": 0,
       "within_ms": 5000,
-      "equals": 2
+      "equals": 3
     },
     {
       "action": "assert",
@@ -136,6 +147,15 @@
       "opcode": 1896,
       "index": 2,
       "equals": 618
+    },
+    {
+      "action": "assert",
+      "label": "Un'Goro Crater is the third Honorable Combat zone",
+      "actor": "challenger",
+      "metric": "server_packet_u32",
+      "opcode": 1896,
+      "index": 3,
+      "equals": 490
     },
     {
       "action": "assert",

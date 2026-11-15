@@ -661,15 +661,15 @@ public:
 
         // The large portcullises stand open, and players cannot click them shut. On a locked run
         // (Mythic+ keystone or Dungeon Finder for the Service Entrance) they start closed: players
-        // may open 03 and 04 themselves, 01 and 02 stay shut, and 05/06 (Slaughter Square and the
-        // Gauntlet) open with the ziggurats as before.
+        // may open 03 and 04 themselves, and 01 and 02 stay shut. On every run 05/06 (Slaughter
+        // Square and the Gauntlet) open only once the three ziggurats are done.
         void ApplyGate(GameObject* go)
         {
             uint32 const entry = go->GetEntry();
             bool const playerGate = entry == GO_LARGE_PORTCULLIS_03 || entry == GO_LARGE_PORTCULLIS_04;
             bool open = !_gatesLocked;
             if (entry == GO_GAUNTLET_GATE || entry == GO_SLAUGTHER_GATE)
-                open = open || ZigguratsDone();
+                open = ZigguratsDone();
 
             go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
             if (_gatesLocked && playerGate)

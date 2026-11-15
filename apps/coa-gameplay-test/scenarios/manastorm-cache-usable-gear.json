@@ -1,0 +1,1453 @@
+{
+  "schema": 1,
+  "name": "Manastorm caches only give gear the opener can use",
+  "contract": "A level 17 Necromancer (armor skill: cloth only) opens 100 Manastorm Cache (11-24) items (97877) through the real open path: open the item, take the first loot slot, release. Every piece received must be usable by the character now: no piece needs an armor or weapon skill the character lacks, and no piece needs a level above 17. The cache table holds 765 gear rows, 399 of them above level 17; before the selector checked usability about 55 of 100 pieces needed a missing skill and about 52 a higher level. The snapshot step \"cache_gear_report\" records the received pieces. Four 36-slot bags (23162) hold the pieces.",
+  "timeout_ms": 600000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 23,
+      "level": 17,
+      "security": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let level scaling settle"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "level",
+      "equals": 17,
+      "label": "The Necromancer is level 17"
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 23162
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 23162
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 23162
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 23162
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 23162,
+      "slot": 19
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 23162,
+      "slot": 20
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 23162,
+      "slot": 21
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 23162,
+      "slot": 22
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 97877,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 97877,
+      "count": 100
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 97877,
+      "equals": 100
+    },
+    {
+      "action": "snapshot",
+      "save_as": "cache_gear_before",
+      "actor": "hero",
+      "metric": "carried_pool_item_count",
+      "cache": 97877,
+      "table": "loot"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 97877,
+      "equals": 0,
+      "label": "All 100 caches were opened"
+    },
+    {
+      "action": "assert",
+      "equals": 100,
+      "relative_to": "cache_gear_before",
+      "label": "100 caches put 100 pieces of their own table in the bags",
+      "actor": "hero",
+      "metric": "carried_pool_item_count",
+      "cache": 97877,
+      "table": "loot"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "cache_gear_report",
+      "actor": "hero",
+      "metric": "carried_pool_item_count",
+      "cache": 97877,
+      "table": "loot"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "carried_pool_item_count",
+      "cache": 97877,
+      "table": "loot",
+      "unwearable": true,
+      "equals": 0,
+      "label": "No piece needs an armor or weapon skill the character lacks"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "carried_pool_item_count",
+      "cache": 97877,
+      "table": "loot",
+      "min_required_level": 18,
+      "equals": 0,
+      "label": "No piece needs a level above the character's"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "Boon of the Lion dispels the Emerald Dragons' Sleep from the party (#11620)",
+  "contract": "Boon of the Lion (504856) dispels 1 fear, charm and sleep effect from party members every 3 seconds. Taerar's Sleep (2119519) is a sleep, so the active Boon must remove it from the Primalist and from a grouped ally within a few ticks.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "sleeper",
+      "race": 5,
+      "class": 23,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504856
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504856
+    },
+    {
+      "action": "assert",
+      "label": "Boon of the Lion is active",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504856,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2119519,
+      "stacks": 1,
+      "caster": "sleeper"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 2119519,
+      "stacks": 1,
+      "caster": "sleeper"
+    },
+    {
+      "action": "assert",
+      "label": "The ally is asleep before the next Boon tick",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2119519,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Primalist is asleep before the next Boon tick",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 2119519,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Boon dispels the sleep from the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2119519,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The Boon dispels the sleep from the Primalist",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 2119519,
+      "equals": 0,
+      "within_ms": 8000
+    }
+  ]
+}

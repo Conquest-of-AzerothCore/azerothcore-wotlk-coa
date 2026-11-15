@@ -1,0 +1,689 @@
+{
+  "schema": 1,
+  "name": "Righteous Lunge deals 5% more damage per held Oath",
+  "contract": "Righteous Lunge 570233 reads 'dealing $s2% Weapon Damage plus ${$m1+0} and granting an Oath. Oath: Your abilities damage or heal for $804904s2% more.' The server DBC gives Oath: Righteous Lunge 804904 e0 BasePoints 4, DieSides 1, so each held Oath adds 5%. Two level 60 Templars with forced critical strikes and a Walking Stick cast Righteous Lunge eight times; before each cast control holds no Oath and oathed holds four. The critical-strike totals compare 1.20 (1.18-1.22); an Oath that does not stack gives 1.05 and an Oath that does not reach Righteous Lunge gives 1.0. Repeated casts in one fight therefore carry the Oaths of the casts before them, which is the tooltip's bonus and not a deviation.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "oathed",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "dummy_oathed",
+      "owner": "oathed",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 136,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "add_item",
+      "actor": "oathed",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "oathed",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "oathed",
+      "skill": 136,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "assert",
+      "label": "Four Oaths of Righteous Lunge hold 4 x 5% damage",
+      "actor": "oathed",
+      "metric": "aura_amount",
+      "spell": 804904,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "oathed",
+      "spell": 804904,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "oathed",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "oathed",
+      "spell": 570233
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 40
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570233,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "oathed",
+      "spell": 570233,
+      "target": "dummy_oathed"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Righteous Lunge hits land and the global cooldown end",
+      "ms": 1750
+    },
+    {
+      "action": "assert",
+      "label": "Every control Righteous Lunge lands as an unblocked critical strike",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 570233,
+      "target": "dummy_control",
+      "critical": true,
+      "blocked": false,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No control Righteous Lunge lands otherwise",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 570233,
+      "target": "dummy_control",
+      "critical": false,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every oathed Righteous Lunge lands as an unblocked critical strike",
+      "actor": "oathed",
+      "metric": "spell_damage_count",
+      "spell": 570233,
+      "target": "dummy_oathed",
+      "critical": true,
+      "blocked": false,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No oathed Righteous Lunge lands otherwise",
+      "actor": "oathed",
+      "metric": "spell_damage_count",
+      "spell": 570233,
+      "target": "dummy_oathed",
+      "critical": false,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Each Righteous Lunge grants an Oath on cast",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 570233,
+      "target": "dummy_control",
+      "critical": true,
+      "blocked": false,
+      "save_as": "control_lunges"
+    },
+    {
+      "action": "assert",
+      "label": "Four held Oaths raise Righteous Lunge damage by 20%",
+      "actor": "oathed",
+      "metric": "spell_damage_total",
+      "spell": 570233,
+      "target": "dummy_oathed",
+      "critical": true,
+      "blocked": false,
+      "ratio_to": "control_lunges",
+      "min": 1.18,
+      "max": 1.22
+    }
+  ]
+}

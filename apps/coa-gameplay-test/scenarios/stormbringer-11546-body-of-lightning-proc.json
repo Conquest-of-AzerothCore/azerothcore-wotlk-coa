@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Body of Lightning deals its additional damage when the ally deals damage (#11546)",
+  "contract": "Body of Lightning 500041 (Spell.dbc, server set /srv/coa/server-data/dbc): Effect[0] is SPELL_AURA_PROC_TRIGGER_SPELL (42) on TriggerSpell 800406 with ProcChance 100 and ProcFlags 0, and its tooltip promises 'While active, damage dealt now deals an additional 800406 Nature Damage to up to N enemies'. 800406 is SCHOOL_DAMAGE (EffectBasePoints 74, TargetA 6 enemy, EffectChainTarget 4, SchoolMask 8). With ProcFlags 0 and no spell_proc row SpellMgr::LoadSpellProcs skips the aura and Aura::GetProcEffectMask returns zero, so the aura never procs, which is the report. The expected behavior comes from the tooltip and the DBC: after the buff lands, one damaging cast by the ally procs 800406 on the damaged enemy, and its chain of 4 reaches an enemy the ally's own spell never targeted. Call Lightning 500040 is a single-target damage cast (TargetA 6, no chain), so damage on a second dummy can only come from the chain. The control cast before the buff must produce no 800406. No absolute damage is asserted since it scales with level and spell power.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d1",
+      "owner": "storm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "d2",
+      "owner": "storm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    },
+    {
+      "id": "d3",
+      "owner": "storm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 9
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "label": "The buffed ally is a party member",
+      "actor": "storm",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 500041
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 500040
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture has enough mana for a Call Lightning cast",
+      "actor": "ally",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the ally damages the first enemy without Body of Lightning",
+      "actor": "ally",
+      "spell": 500040,
+      "target": "d1"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally's Call Lightning dealt damage to the first enemy",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 500040,
+      "target": "d1",
+      "min": 1,
+      "caster": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the buff nothing casts Body of Lightning (damage)",
+      "actor": "ally",
+      "metric": "spell_cast_count",
+      "spell": 800406,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the buff the first enemy takes no Body of Lightning damage",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 800406,
+      "target": "d1",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 80
+    },
+    {
+      "action": "cast",
+      "label": "Body of Lightning on the ally",
+      "actor": "storm",
+      "spell": 500041,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Body of Lightning lands on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500041,
+      "caster": "storm",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ally",
+      "spell": 500040
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "The buffed ally damages the first enemy",
+      "actor": "ally",
+      "spell": 500040,
+      "target": "d1"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the aura procs on the ally's damage",
+      "actor": "ally",
+      "metric": "spell_proc_count",
+      "spell": 500041,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Body of Lightning (damage) is cast",
+      "actor": "ally",
+      "metric": "spell_cast_count",
+      "spell": 800406,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first enemy takes Body of Lightning damage",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 800406,
+      "target": "d1",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the damage chains to the second enemy, which Call Lightning never targeted",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 800406,
+      "target": "d2",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second enemy took no Call Lightning damage",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 500040,
+      "target": "d2",
+      "equals": 0,
+      "caster": "ally"
+    }
+  ]
+}

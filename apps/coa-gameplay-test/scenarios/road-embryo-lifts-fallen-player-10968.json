@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: a player knocked into the Embryo pit is lifted back when the boss dies",
+  "contract": "Issue #10968: a player knocked off the Chimeric Embryo arena (map 937, arena middle 304.429, -206.081, 341.841) whose party then killed the boss was revived at the bottom of the pit with no way up. Expected: when the Chimeric Embryo (162716) dies, a player more than 15 yd below the arena and within 40 yd of its middle is resurrected if dead and put back on the arena.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "killer",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "fallen",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "killer",
+      "target": "fallen"
+    },
+    {
+      "action": "teleport",
+      "label": "killer enters the group's Road to De Other Side on the Embryo arena",
+      "actor": "killer",
+      "map": 937,
+      "x": 304.429,
+      "y": -206.081,
+      "z": 341.841,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: killer is in Road to De Other Side",
+      "actor": "killer",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "fallen lies in the pit 20 yd from the arena middle and 42 yd below it",
+      "actor": "fallen",
+      "map": 937,
+      "x": 324.429,
+      "y": -206.081,
+      "z": 300.0,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: fallen is in Road to De Other Side",
+      "actor": "fallen",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: fallen is below the arena",
+      "actor": "fallen",
+      "metric": "position_z",
+      "max": 310,
+      "within_ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "fallen"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: fallen's body lies in the pit",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon",
+      "label": "the Chimeric Embryo rises beside the killer",
+      "actor": "killer",
+      "as": "embryo",
+      "entry": 162716,
+      "distance": 8
+    },
+    {
+      "action": "wait",
+      "label": "the Embryo wakes and becomes attackable",
+      "ms": 5000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the party kills the Chimeric Embryo",
+      "actor": "killer",
+      "entry": 162716,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "the fallen player is resurrected",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the fallen player stands on the arena again",
+      "actor": "fallen",
+      "metric": "position_z",
+      "min": 335,
+      "max": 350,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the fallen player stays in Road to De Other Side",
+      "actor": "fallen",
+      "metric": "map_id",
+      "equals": 937
+    }
+  ]
+}

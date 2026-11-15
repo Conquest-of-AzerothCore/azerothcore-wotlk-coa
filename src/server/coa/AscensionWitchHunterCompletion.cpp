@@ -104,6 +104,8 @@ void ApplyContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != 21)
         return;
     uint32 id = info->Id;
+    if (id == 500351 || id == 680517)
+        info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
     if (id == 802272)
     {
         info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;

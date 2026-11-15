@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "X-53 Touring Rocket: the client spell row loses the flying-areas-only flag (#11300)",
+  "contract": "#11300 reported 'You can't use that here.' (SPELL_FAILED_NOT_HERE) when summoning the X-53 Touring Rocket in Stonetalon Mountains. #10460 made the summon spell 75973 a ground mount by clearing SPELL_ATTR4_ONLY_FLYING_AREAS (0x04000000) in the server SpellInfo only. The client Spell.dbc row still carries AttributesEx4 67108864, so the client refuses the cast outside flying areas before the server sees it. The login spell patch stream (SMSG 2346) now sends row 75973 with AttributesEx4 0 and keeps the client's Attributes 269582608 and AttributesEx6 131072. The rendered cast in game is not observed here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "ascension_client": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives a patched X-53 Touring Rocket row",
+      "actor": "p",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 75973,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the patched row clears the flying-areas-only flag (client DBC 67108864)",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 75973,
+      "index": 8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The patched row keeps the client's Attributes",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 75973,
+      "index": 4,
+      "equals": 269582608
+    },
+    {
+      "action": "assert",
+      "label": "The patched row keeps the client's AttributesEx6",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 75973,
+      "index": 10,
+      "equals": 131072
+    }
+  ]
+}

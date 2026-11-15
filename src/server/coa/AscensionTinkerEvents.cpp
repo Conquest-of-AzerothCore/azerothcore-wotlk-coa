@@ -66,10 +66,11 @@ void DeviceEvent(Player* player, Creature* device, Unit* target, SpellInfo const
             Cast(device,target,706696);
         }
     }
-    if (!periodic && info && Permanent(device->GetEntry()) && target->HasAura(524904,player->GetGUID()))
+    if (!periodic && info && info->Id != 524903 && Permanent(device->GetEntry()) &&
+        target->HasAura(524904,player->GetGUID()))
     {
-        target->RemoveAurasDueToSpell(524904,player->GetGUID());
         Cast(device,target,524903);
+        target->RemoveAurasDueToSpell(524904,player->GetGUID());
     }
     if (!info && device->HasAura(805519))
         Cast(device,target,805657);
@@ -118,7 +119,7 @@ class aura_ascension_tinker_event : public AuraScript
             case 92138: return damage && !periodic && fire && player->IsValidAttackTarget(target);
             case 707239: return damage && Any(info,{653238,653247}) && Chance(player,707239);
             case 704107: return damage && Named(info,805351);
-            case 705846: return healing && periodic && Named(info,801809);
+            case 705846: return healing && (event.GetTypeMask() & PROC_FLAG_DONE_PERIODIC) && Named(info,801809);
             case 806629: return damage && !periodic &&
                 ((!info && (event.GetTypeMask() & PROC_FLAG_DONE_RANGED_AUTO_ATTACK)) ||
                  (info && info->DmgClass == SPELL_DAMAGE_CLASS_RANGED)) && Chance(player,806629);
@@ -133,6 +134,7 @@ class aura_ascension_tinker_event : public AuraScript
             case 806627: return (damage || healing) && critical && Chance(player,806627,10000);
             case 503552: return healing && !periodic && critical;
             case 681001: return damage && info && info->Id == 504521 && player->HasAura(Mechsuit);
+            case 681311: return damage && info && !periodic && !Any(info,{681307,681308});
             case 706680: return damage && (Named(info,805372) || (info && info->Id == 801388));
             case 704449: return damage && Any(info,{504527,505160});
             case 504523: return damage && player->HasAura(Mechsuit) && (Shot(info) || Any(info,{504527,505160}));
@@ -197,8 +199,23 @@ class aura_ascension_tinker_event : public AuraScript
             case 573247: Cast(player,target,653247); break;
             case 806627: Cast(player,player,806628); break;
             case 503552: Grant(player,503553); break;
-            case 681001: Cast(player,player,681306); break;
-            case 706680: Cast(player,target,500612); break;
+            case 681001:
+                Cast(player,player,681306);
+                if (Count(player,681306) >= sSpellMgr->GetSpellInfo(681306)->StackAmount)
+                    Cast(player,player,681311);
+                break;
+            case 681311:
+                Copy(player,target,681308,CalculatePct(damage,Amount(681311,1)));
+                Cast(player,target,681307);
+                break;
+            case 706680:
+            {
+                bool cooling = player->HasSpellCooldown(500612);
+                Cast(player,target,500612);
+                if (!cooling)
+                    player->RemoveSpellCooldown(500612,true);
+                break;
+            }
             case 704449: Cast(player,target,524904); break;
             case 504523: Cast(player,target,504521); break;
             case 705817:

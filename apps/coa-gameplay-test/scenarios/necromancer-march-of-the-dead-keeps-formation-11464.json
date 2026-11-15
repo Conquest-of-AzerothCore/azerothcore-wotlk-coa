@@ -1,0 +1,84 @@
+{
+ "schema": 1,
+ "name": "Necromancer: March of the Dead charges keep their line while marching (#11464)",
+ "contract": "March of the Dead raises six charges side by side and each keeps its own lateral offset to the enemy, so they do not stack on one point before detonating.",
+ "timeout_ms": 120000,
+ "players": [
+  {
+   "id": "n",
+   "race": 5,
+   "class": 23,
+   "level": 60
+  }
+ ],
+ "creatures": [
+  {
+   "id": "d",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 20
+  }
+ ],
+ "location": {
+  "map": 0,
+  "x": -8949.95,
+  "y": -132.493,
+  "z": 83.5312,
+  "o": 0
+ },
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "spell": 707007,
+   "actor": "n"
+  },
+  {
+   "action": "cast",
+   "spell": 707007,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "assert",
+   "label": "six charges raised",
+   "actor": "n",
+   "metric": "owned_creature_count",
+   "entry": 523032,
+   "equals": 6,
+   "within_ms": 8000
+  },
+  {
+   "action": "assert",
+   "label": "charges start side by side",
+   "actor": "n",
+   "metric": "owned_creature_spacing",
+   "entry": 523032,
+   "min": 0.8
+  },
+  {
+   "action": "wait",
+   "ms": 5000
+  },
+  {
+   "action": "assert",
+   "label": "charges are still marching",
+   "actor": "n",
+   "metric": "owned_creature_count",
+   "entry": 523032,
+   "equals": 6
+  },
+  {
+   "action": "assert",
+   "label": "charges keep their spacing after marching",
+   "actor": "n",
+   "metric": "owned_creature_spacing",
+   "entry": 523032,
+   "min": 0.8
+  }
+ ]
+}

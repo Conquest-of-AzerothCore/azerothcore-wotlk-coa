@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Dreadnaught unleashes its wave from Storm Slam, not only from plain Slam (#9372)",
+  "contract": [
+    "Dreadnaught 285275: 'Dealing damage with Overpower, Slam and Rune Strike now unleashes a wave of force' (285276,",
+    "4 s cooldown). Its EffectSpellClassMask is family 4 0x200004, the Slam and Overpower flags. Storm Slam 903140",
+    "('This uses Slam modifiers') deals its damage through helper 903246 (spell_warr_slam), which carries the Slam",
+    "flag 0x200000 but is not in Dreadnaught's name-only coa_mystic_enchant_proc list.",
+    "The report: Dreadnaught stopped working with Stormchaser, Dawnchaser and Brilliant Slam. Brilliant Slam 907906 deals its damage through helper 903247 (Slam flag) since spell_warr_slam is bound to it in this change.",
+    "Brilliant Slam is checked after Storm Slam: its helper hit must also unleash the wave.",
+    "Expected: a Storm Slam hit fires the wave 285276 on the enemy; a plain Slam 4.5 s later fires it again."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "label": "Dreadnaught",
+      "actor": "hero",
+      "spell": 285275
+    },
+    {
+      "action": "learn",
+      "label": "Storm Slam rank 1",
+      "actor": "hero",
+      "spell": 903140
+    },
+    {
+      "action": "learn",
+      "label": "Slam rank 1",
+      "actor": "hero",
+      "spell": 1464
+    },
+    {
+      "action": "learn",
+      "label": "Brilliant Slam rank 1",
+      "actor": "hero",
+      "spell": 907906
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dreadnaught is active",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285275,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "enemy_before"
+    },
+    {
+      "action": "cast",
+      "label": "Storm Slam the enemy",
+      "actor": "hero",
+      "spell": 903140,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 903140,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Storm Slam's damage helper is cast",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 903246,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is damaged",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "enemy_before",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Storm Slam unleashes Dreadnaught's wave",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 285276,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Past the wave's 4 s cooldown",
+      "ms": 4500
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: plain Slam",
+      "actor": "hero",
+      "spell": 1464,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Slam's damage helper is cast",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 50783,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: plain Slam unleashes the wave",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 285276,
+      "target": "enemy",
+      "min": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Past the wave's 4 s cooldown",
+      "ms": 4500
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Brilliant Slam the enemy",
+      "actor": "hero",
+      "spell": 907906,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Brilliant Slam's damage helper 903247 hits",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 903247,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Brilliant Slam unleashes Dreadnaught's wave",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 285276,
+      "target": "enemy",
+      "min": 3,
+      "within_ms": 1000
+    }
+  ]
+}

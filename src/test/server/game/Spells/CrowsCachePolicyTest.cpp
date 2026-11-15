@@ -1,13 +1,14 @@
 #include "AscensionCrowsCachePolicy.h"
 #include <gtest/gtest.h>
 
-TEST(CrowsCache, OnlyLivingHighRiskLevelSixtyPlayersCanClaim)
+TEST(CrowsCache, OnlyLivingHighRiskMercenariesAtLevelSixtyCanClaim)
 {
-    EXPECT_TRUE(CrowsCache::Eligible(60, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(59, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(61, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(60, false, true));
-    EXPECT_FALSE(CrowsCache::Eligible(60, true, false));
+    EXPECT_TRUE(CrowsCache::Eligible(60, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(59, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(61, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, false, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, true, false, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, true, true, false));
 }
 
 TEST(CrowsCache, OriginalChestRequiresCompletedCastButDeathDropIsInstant)
@@ -70,4 +71,29 @@ TEST(CrowsCache, BothDeliveryTownsAllowSafeOpening)
     EXPECT_FALSE(CrowsCache::CanOpen(true, true, CrowsCache::Silithus, false));
     EXPECT_FALSE(CrowsCache::CarrySlow(true, CrowsCache::CenarionHold));
     EXPECT_TRUE(CrowsCache::CarrySlow(true, CrowsCache::Silithus));
+}
+
+TEST(CrowsCache, MarksOfWarRangesNeedMinimumAtMostMaximum)
+{
+    EXPECT_TRUE(CrowsCache::ValidMarkRange(CrowsCache::SilverMarksMin, CrowsCache::SilverMarksMax));
+    EXPECT_TRUE(CrowsCache::ValidMarkRange(CrowsCache::GoldenMarks, CrowsCache::GoldenMarks));
+    EXPECT_TRUE(CrowsCache::ValidMarkRange(0, 0));
+    EXPECT_TRUE(CrowsCache::ValidMarkRange(0, 200));
+    EXPECT_FALSE(CrowsCache::ValidMarkRange(11, 10));
+    EXPECT_FALSE(CrowsCache::ValidMarkRange(0, 201));
+}
+
+TEST(CrowsCache, StartsFromMythicDungeonsWithThreeRewards)
+{
+    EXPECT_FALSE(CrowsCache::RewardsReleased(0, 5, 5));
+    EXPECT_FALSE(CrowsCache::RewardsReleased(1, 5, 5));
+    EXPECT_TRUE(CrowsCache::RewardsReleased(2, 5, 5));
+    EXPECT_FALSE(CrowsCache::RewardsReleased(2, 0, 5));
+    EXPECT_FALSE(CrowsCache::RewardsReleased(3, 1, 2));
+    EXPECT_TRUE(CrowsCache::RewardsReleased(3, 1, 3));
+}
+
+TEST(CrowsCache, OpeningGivesFourHundredBazaarTokensByDefault)
+{
+    EXPECT_EQ(CrowsCache::DefaultBazaarTokens, 400u);
 }

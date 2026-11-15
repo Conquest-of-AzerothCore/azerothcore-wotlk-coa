@@ -14,8 +14,15 @@ namespace ManastormModuleConfig
     void Load(bool reload);
     bool Enabled();
     uint8 AffixMinimumLevel();
+    double ExperienceRate();
     bool WeeklyCacheLockoutEnabled();
     uint32 WeeklyCacheLockoutLimit();
+    bool CoALootModeEnabled();
+    bool CoAFirstClearEnabled();
+    bool CoARepeatEnabled();
+    bool CoAFirstClearResetsWithWindow();
+    uint32 CoATokenCap();
+    uint32 CoATokenWindowSeconds();
     ManastormClientMode ClientMode();
     bool IsReconstructedClientMode();
     bool IsNativeClientMode();

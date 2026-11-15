@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Dire Maul: Zevrim Thornhoof's Ascension Sacrifice carries its target to the altar",
+  "contract": [
+    "Zevrim Thornhoof 11490 casts the Ascension Sacrifice 2100215 at a random player in a dungeon group. Its effect 0",
+    "teleports the target to a database destination (TARGET_DEST_DB, spell_target_position), effect 1 stuns it and",
+    "effect 2 links the periodic drain 2100216. The stock Sacrifice 22651 has its altar row at map 429 (-25.98, -448.24,",
+    "-36.09); the Ascension spell needs the same destination row, or the teleport lands on the target itself. The",
+    "player enters the dungeon at the East Wing east entrance, 390 yd from the altar, the boss is summoned beside the",
+    "player and casts Sacrifice on it. The player must end up at the altar on map 429, stunned, with the drain linked.",
+    "A control checks the player starts far from the altar. The players are level 57 humans, matching the boss, and a",
+    "health fixture keeps the player alive."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914, "y": -133, "z": 80.6},
+  "players": [
+    {"id": "victim", "race": 1, "class": 18, "level": 57, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character finish logging in", "ms": 3000},
+    { "action": "teleport", "label": "victim enters the dungeon", "actor": "victim", "map": 429, "x": 9.31119,
+      "y": -837.085, "z": -32.5305, "o": 0 },
+    { "action": "assert", "label": "CONTROL: victim is inside the dungeon", "actor": "victim", "metric": "map_id",
+      "equals": 429, "within_ms": 10000 },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_health", "actor": "victim", "value": 100000000, "maximum": 100000000},
+    { "action": "assert", "label": "CONTROL: victim starts far from the altar", "actor": "victim",
+      "metric": "point_distance_2d", "x": -25.98, "y": -448.24, "min": 200 },
+    { "action": "summon", "label": "Summon the boss in the victim's instance", "actor": "victim", "entry": 11490,
+      "as": "zevrim", "distance": 3 },
+    {"action": "wait", "label": "Let the boss's spawn events settle", "ms": 3000},
+    { "action": "cast", "label": "Zevrim casts the Ascension Sacrifice on the victim", "actor": "zevrim",
+      "spell": 2100215, "target": "victim" },
+    { "action": "assert", "label": "Sacrifice carries the victim to the altar", "actor": "victim",
+      "metric": "point_distance_2d", "x": -25.95, "y": -448.34, "max": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: and faces 4.70 as on Ascension (the stock row faced 3.13)",
+      "actor": "victim", "metric": "position_o", "min": 4.65, "max": 4.75 },
+    { "action": "assert", "label": "the victim is still in the dungeon", "actor": "victim", "metric": "map_id",
+      "equals": 429 },
+    { "action": "assert", "label": "Sacrifice stuns the victim", "actor": "victim", "metric": "aura", "spell": 2100215,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Sacrifice links its periodic drain", "actor": "victim", "metric": "aura",
+      "spell": 2100216, "equals": 1, "within_ms": 3000 }
+  ]
+}

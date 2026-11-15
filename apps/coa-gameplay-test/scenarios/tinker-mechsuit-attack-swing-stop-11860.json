@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Tinker: an attack swing in the Mechsuit ends the client's attack state (#11860)",
+  "contract": [
+    "Build: Mechsuit (801384) mounts the Tinker through 803451, and the server keeps that mount when the client asks to dismount before an attack.",
+    "Unit::Attack refuses a mounted player, so a swing from the suit starts no melee. The server must then answer the client's CMSG_ATTACKSWING (321) with SMSG_ATTACKSTOP (324); without it the client stays in attack mode and every later click on a hostile unit starts an attack.",
+    "CONTROL: out of the suit, the same swing starts melee on the target and sends no SMSG_ATTACKSTOP."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 14
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 14,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "SETUP: Mechsuit talent",
+      "actor": "tinker",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "SETUP: Build: Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: pre-fill Scrap",
+      "actor": "tinker",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "The Tinker enters the Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the suit's mount aura is on",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "server_packets",
+      "opcode": 324,
+      "save_as": "stops_before_suit_swing"
+    },
+    {
+      "action": "cancel_mount",
+      "label": "The client asks to dismount before its attack, as a real client does",
+      "actor": "tinker"
+    },
+    {
+      "action": "client_packet",
+      "label": "The client starts an attack on the dummy from the suit",
+      "actor": "tinker",
+      "opcode": 321,
+      "fields": [{"actor_guid": "dummy"}],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "the suit stays on",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the server ends the client's attack state",
+      "actor": "tinker",
+      "metric": "server_packets",
+      "opcode": 324,
+      "relative_to": "stops_before_suit_swing",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "The Tinker leaves the suit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the suit's mount aura is gone",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "server_packets",
+      "opcode": 324,
+      "save_as": "stops_before_foot_swing"
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: the client starts an attack on foot",
+      "actor": "tinker",
+      "opcode": 321,
+      "fields": [{"actor_guid": "dummy"}],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: melee starts on the dummy",
+      "actor": "tinker",
+      "metric": "victim",
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no attack stop on foot",
+      "actor": "tinker",
+      "metric": "server_packets",
+      "opcode": 324,
+      "relative_to": "stops_before_foot_swing",
+      "equals": 0
+    }
+  ]
+}
