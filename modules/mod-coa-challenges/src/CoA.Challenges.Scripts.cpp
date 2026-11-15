@@ -3056,7 +3056,8 @@ namespace CoAChallenges
                 player = PlayerIdentifier::FromTargetOrSelf(handler);
             if (!player)
             {
-                handler->SendErrorMessage("No player (target someone or name one).");
+                handler->PSendSysMessage("Syntax: .coa trial objectives [player]");
+                handler->SendErrorMessage("No player: target someone or name one, with a two-word name in quotes.");
                 return false;
             }
 

@@ -102,7 +102,8 @@ Support commands for a player's run (administrator, also from the console; the p
   done or pending, and the challenge ids the player is locked out of. It also works for an offline character.
 - `credit` marks one objective done by the Challenge ID and Objective ID shown in that list, whatever the
   player's level, and runs the normal completion check. The player must be online. `credit` and `restore`
-  typed without their IDs print their syntax and point to `objectives`.
+  typed without their IDs print their syntax and point to `objectives`. `.help coa trial objectives`,
+  `.help coa trial credit` and `.help coa trial restore` print the syntax and a short explanation in game.
 - `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives
   and run timer it had when it failed, re-links a custom trial with its other bundled challenges, takes the
   fatal death back when the run was out of lives, and resurrects the character. Hunger and thirst restart at
