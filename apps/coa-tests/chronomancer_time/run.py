@@ -89,7 +89,8 @@ def main():
         r = spells[sid]
         duration = signed(durations[r[40]][1]) if r[40] else 0
         init.append(f'{{auto& s=manager.infos[{sid}];s.Id={sid};s.duration={duration};s.SpellFamilyName={r[208]};'
-                    f's.StackAmount={r[49]};s.MaxAffectedTargets={r[212]};s.AttributesEx4={r[8]};'
+                    f's.StackAmount={r[49]};s.MaxAffectedTargets={r[212]};s.AttributesEx3={r[7]}u;'
+                    f's.AttributesEx4={r[8]};'
                     f's.flags={{{r[209]},{r[210]},{r[211]}}};')
         for i in range(3):
             scaling = struct.unpack('<f', struct.pack('<I', r[77+i]))[0]
