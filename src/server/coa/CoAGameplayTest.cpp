@@ -4707,6 +4707,14 @@ private:
                 }
             return nearest;
         }
+        if (metric == "nearby_creature_facing_offset")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f);
+            Creature* other = player->FindNearestCreature(step.get<uint32>("target_entry"), 60.0f);
+            Require(creature != nullptr && other != nullptr, "Facing offset needs both creatures nearby");
+            return std::fabs(Position::NormalizeOrientation(creature->GetAngle(other) - creature->GetOrientation() + float(M_PI))
+                - float(M_PI));
+        }
         if (metric == "nearby_creature_orientation")
         {
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f);

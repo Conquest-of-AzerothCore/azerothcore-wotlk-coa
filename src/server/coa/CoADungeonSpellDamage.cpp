@@ -48,7 +48,8 @@ namespace
         if (!creature || creature->GetCharmerOrOwnerPlayerOrPlayerItself())
             return 1.0f;
         Map const* map = creature->GetMap();
-        if (!map || !map->IsDungeon() || map->GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL)
+        if (!map || !map->IsDungeon()
+            || (map->GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL && spellInfo->Id != 2102688))
             return 1.0f;
         auto itr = Multipliers.find(spellInfo->Id);
         return itr == Multipliers.end() ? 1.0f : itr->second;
