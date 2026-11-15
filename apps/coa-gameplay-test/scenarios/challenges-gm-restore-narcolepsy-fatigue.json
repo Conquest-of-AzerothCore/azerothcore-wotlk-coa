@@ -44,7 +44,11 @@
     {
       "action": "assert", "label": "DISCRIMINATING: the restore reports the meters restarted",
       "actor": "gm", "metric": "system_message_contains",
-      "text": "Hunger and thirst start from zero and the fatigue bar is full.", "equals": 1, "within_ms": 5000
+      "text": "objectives done. Resurrected. The fatigue bar is full.", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Narcolepsy has no hunger or thirst, so the restore does not mention them",
+      "actor": "gm", "metric": "system_message_contains", "text": "Hunger and thirst", "equals": 0
     },
     {
       "action": "assert", "label": "The character is alive again",

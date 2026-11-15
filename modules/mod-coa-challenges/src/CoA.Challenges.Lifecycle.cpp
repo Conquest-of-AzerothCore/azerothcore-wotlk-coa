@@ -2390,7 +2390,8 @@ namespace CoAChallenges
 
         uint32 restoredLevel = 1;
         uint32 restoredDeaths = 0;
-        bool metersReset = false;
+        bool hungerReset = false;
+        bool fatigueReset = false;
         // One transaction: the lock, the active rows, the meters, the trial
         // link and the snapshot change together or not at all.
         CharacterDatabaseTransaction restore = CharacterDatabase.BeginTransaction();
@@ -2418,7 +2419,8 @@ namespace CoAChallenges
                 "DELETE FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}", guid, row.challengeId);
             if (IsHungerChallenge(row.challengeId))
                 restore->Append("UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = {}", guid);
-            metersReset = metersReset || IsHungerChallenge(row.challengeId) || IsFatigueChallenge(row.challengeId);
+            hungerReset = hungerReset || IsHungerChallenge(row.challengeId);
+            fatigueReset = fatigueReset || IsFatigueChallenge(row.challengeId);
         }
         if (relinkTrial)
             restore->Append(
@@ -2468,8 +2470,10 @@ namespace CoAChallenges
         if (levelAtFailure && currentLevel > levelAtFailure)
             message += Acore::StringFormat(" The character was level {} at the failure and is now level {}.",
                 levelAtFailure, currentLevel);
-        if (metersReset)
-            message += " Hunger and thirst start from zero and the fatigue bar is full.";
+        if (hungerReset)
+            message += " Hunger and thirst start from zero.";
+        if (fatigueReset)
+            message += " The fatigue bar is full.";
         if (!fromSnapshot)
             message += " No snapshot existed for this failure: the run timer restarted.";
         return true;
