@@ -398,7 +398,8 @@ namespace
     // Parasitic Poison: when it ends, run out or removed, three Parasitic
     // Serpents break out of the target (live log: three per poison). Each one
     // hunts its own random player from Venoxis's threat list (live: six groups,
-    // every serpent on a different player).
+    // every serpent on a different player). A serpent stays until killed and
+    // turns on the rest of the raid when its prey dies.
     class spell_venoxis_coa_parasitic_poison : public AuraScript
     {
         PrepareAuraScript(spell_venoxis_coa_parasitic_poison);
@@ -431,6 +432,7 @@ namespace
                 Position const spot = target->GetNearPosition(2.0f, float(2 * M_PI) * i / PARASITIC_SERPENTS);
                 if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, spot, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                 {
+                    serpent->AI()->DoZoneInCombat();
                     serpent->GetThreatMgr().AddThreat(victim, SERPENT_PREY_THREAT);
                     serpent->AI()->AttackStart(victim);
                 }

@@ -1,20 +1,22 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Jeklik's Bat-tering Charge skips players within 8 yards",
+  "name": "Zul'Gurub: High Priestess Jeklik's Bat-tering Charge skips players within 9 yards",
   "contract": [
-    "The testers of 2026-11-13 report that her Bat-tering Charge (2106125) hits melee players. Our charge took",
-    "any player out of melee (5 yards in bat form) and within 25 yards; the user decided on 2026-11-13 to take",
-    "stock Jeklik's minimum as well, so she charges only players beyond 8 yards. Her bat form charges 2 s in and",
-    "every 20 s after that, and screeches in place of the charge when nobody is in reach. The close hero stands",
-    "about 8 yards from her, out of melee, and the far hero about 35 yards away: before the fix the close hero was",
-    "the one player in reach 2 s in, so a charge came; now none comes. Then the far hero steps in to about 18",
-    "yards and is the only player in reach at the next charge, which must land on them. Fear Ward keeps the tank",
-    "and the close hero in place through the first Screech.",
+    "The testers of 2026-11-13 report that her Bat-tering Charge (2106125) hits melee players; the user then took",
+    "stock Jeklik's 8-yard minimum. The round-7 tester (2026-11-14) asked for 9 yards, so that Sixfold Shot (807364,",
+    "5 yards) has room; the user agreed. Both minimums count the hitboxes: hers is 0.389 yards in bat form, a",
+    "player's 1.5, so she charges only players beyond 10.89 yards from her centre (9.89 with 8 yards). Her bat form",
+    "charges 2 s in and every 20 s after that, and screeches in place of the charge when nobody is in reach. The",
+    "close hero stands about 10.4 yards from her centre, out of melee, and the far hero about 35 yards away: with",
+    "8 yards the close hero was the one player in reach 2 s in, so a charge came; now none comes. Then the far",
+    "hero steps in to about 18 yards and is the only player in reach at the next charge, which must land on them.",
+    "Fear Ward keeps the tank and the close hero in place through the first Screech.",
     "Her bat form wipes her threat, and the hero who struck her last would draw her into melee; the tank is a",
     "raid-bot tank whose threat floor keeps her on the tank, so the close hero stays out of her melee range.",
     "Until the tank has engaged her, the other heroes wait about 34 yards away, where the far hero backs off to,",
     "and then come back beside the tank: she aggroes a hero beside her the moment she appears, and a hero she",
-    "chased as they backed away would end up in charge range."
+    "chased as they backed away would end up in charge range. She stands 4 yards along +x from the tank, so",
+    "9.6 yards along -y from the tank puts the close hero 10.4 yards from her."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -253,10 +255,10 @@
     },
     {
       "action": "relocate",
-      "label": "The close hero steps 7 yards away from the tank, out of her melee",
+      "label": "The close hero steps 9.6 yards away from the tank, about 10.4 from her",
       "actor": "close",
       "dx": 0.0,
-      "dy": -7.0,
+      "dy": -9.6,
       "dz": 0.0
     },
     {
@@ -301,12 +303,12 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the close hero stands beyond her 5-yard melee range and within 8 yards plus both reaches",
+      "label": "CONTROL: the close hero stands between the old and the new minimum (9.89 and 10.89 yards)",
       "actor": "close",
       "metric": "distance",
       "target": "jeklik",
-      "min": 6,
-      "max": 9
+      "min": 10.0,
+      "max": 10.8
     },
     {
       "action": "assert",
@@ -328,7 +330,7 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: no charge at the close hero within 8 yards",
+      "label": "DISCRIMINATING: no charge at the close hero within 9 yards",
       "actor": "close",
       "metric": "spell_go_count",
       "entry": 14517,
@@ -337,12 +339,12 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the close hero is still within 8 yards",
+      "label": "CONTROL: the close hero is still within 9 yards",
       "actor": "close",
       "metric": "distance",
       "target": "jeklik",
-      "min": 6,
-      "max": 9
+      "min": 10.0,
+      "max": 10.8
     },
     {
       "action": "relocate",
@@ -373,7 +375,7 @@
     },
     {
       "action": "assert",
-      "label": "It lands on the far hero, the only player beyond 8 yards",
+      "label": "It lands on the far hero, the only player beyond 9 yards",
       "actor": "far",
       "metric": "distance",
       "target": "jeklik",

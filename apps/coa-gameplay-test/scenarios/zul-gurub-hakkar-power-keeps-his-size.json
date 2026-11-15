@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar's Power keeps Hakkar's size, and the Heart of Hakkar appears inside his chest",
+  "contract": [
+    "Round-7 tester (2026-11-14, Heroic video): with the High Priests alive Hakkar (14834) was far too large; his",
+    "size should not change while they live. Hakkar's Power (24692) gives per stack +20% damage done (effect 0),",
+    "+10% health (effect 1) and +20% size (effect 2, MOD_SCALE); user decision 2026-11-14: keep the damage and",
+    "health, drop the size. A Mythic hero fights Hakkar alone in a fresh instance, where all five priests live: he",
+    "carries five stacks with +100% damage and +50% health, his scale stays 1 (the old script doubled him), and",
+    "each Blood Siphon (2118615) brings the Heart of Hakkar (92005) out 8 yards above him, inside his chest",
+    "(reported 2026-11-12)."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero is in Zul'Gurub on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14834,
+      "as": "hakkar_mythic",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with all five High Priests alive the Mythic Hakkar carries five stacks of Hakkar's Power",
+      "actor": "hakkar_mythic",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar's Power keeps +20% damage per stack",
+      "actor": "hakkar_mythic",
+      "metric": "aura_amount",
+      "spell": 24692,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar's Power keeps +10% health per stack",
+      "actor": "hakkar_mythic",
+      "metric": "aura_amount",
+      "spell": 24692,
+      "effect": 1,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Hakkar keeps his own size (old script: twice it)",
+      "actor": "hakkar_mythic",
+      "metric": "unit_scale",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Mythic Hakkar",
+      "actor": "mythic",
+      "target": "hakkar_mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar fights",
+      "actor": "hakkar_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar casts Blood Siphon",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118615,
+      "min": 1,
+      "within_ms": 100000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heart appears 8 yards above Hakkar, inside his chest",
+      "actor": "mythic",
+      "metric": "nearby_creature_height",
+      "entry": 92005,
+      "target": "hakkar_mythic",
+      "min": 7.0,
+      "max": 9.0,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,16 +1,19 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Hakkar drains the Avatar of every living High Priest's loa, one after another",
+  "name": "Zul'Gurub: Hakkar drains a living High Priest's loa avatar each time he loses another 15% of his health",
   "contract": [
-    "Tester feedback round 6 (2026-11-13): Hakkar (14834) devoured only one loa avatar. He summoned one avatar for",
-    "each living High Priest and cast Drain Power (2118700, a channel) on all of them at once, so each new channel",
-    "interrupted the one before and only the last avatar died; he kept a single Aspect. Drain Power's tooltip",
-    "drains the closest Loa Avatar, and live logs show the drains one at a time (user decision 2026-11-13: drain",
-    "them in turn from the pull, nearest first, the next when the previous avatar dies). In a fresh Normal",
-    "instance all five priests live, so Hakkar must consume all five avatars (666988-666992) and carry all five",
-    "Aspects (2118701-2118705). The hero joins phase 1, where Hakkar's ring of avatars appears."
+    "Tester feedback round 6 (2026-11-13): Hakkar (14834) devoured only one loa avatar; he drains them one at a time,",
+    "nearest first, with Drain Power (2118700). Round 7 (2026-11-14): not every avatar at the start, but over the",
+    "fight. Live logs (2025-12-21, 2026-08-02, 2026-08-09; seven pulls) tie each avatar's death to his health, not",
+    "to the clock: it died once the damage he took, Heart included, reached the same share, 46-149 s into the pull;",
+    "the one kill puts each step at 15.0 %. In a fresh Normal instance all five priests live: at full health",
+    "50 s into the fight Hakkar has no Aspect and all five avatars (666988-666992) stand (a 45 s timer would have",
+    "drained one); at 90 % still none; at 84 % one Aspect; at 80 % still one; at 69 % a second; at 20 % all five",
+    "Aspects (2118701-2118705) with every avatar consumed. The last drains run into the end of Blood Siphon",
+    "(first cast 59.5 s, 20 s long), which interrupted the drain that had replaced its channel and left Hakkar",
+    "with four Aspects. The hero joins phase 1, where the ring appears."
   ],
-  "timeout_ms": 150000,
+  "timeout_ms": 240000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -102,8 +105,13 @@
       "actor": "hero"
     },
     {
+      "action": "wait",
+      "label": "Fifty seconds into the fight at full health",
+      "ms": 50000
+    },
+    {
       "action": "assert",
-      "label": "CONTROL: Hakkar consumes a first avatar and takes its Aspect",
+      "label": "DISCRIMINATING: no Aspect at full health 50 s in (old script: all five; a 45 s timer: one)",
       "actor": "hakkar",
       "metric": "carried_aura_count",
       "spells": [
@@ -113,12 +121,154 @@
         2118704,
         2118705
       ],
-      "min": 1,
-      "within_ms": 15000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: he goes on to the other four and carries all five Aspects",
+      "label": "CONTROL: avatar 666988 still stands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666988,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: avatar 666989 still stands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666989,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: avatar 666990 still stands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666990,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: avatar 666991 still stands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666991,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: avatar 666992 still stands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666992,
+      "equals": 1
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar at 90 %, above the first step",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 90
+    },
+    {
+      "action": "wait",
+      "label": "Room for a drain to start",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: still no Aspect at 90 %",
+      "actor": "hakkar",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118701,
+        2118702,
+        2118703,
+        2118704,
+        2118705
+      ],
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar below 85 %",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 84
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: below 85 % he consumes a first avatar",
+      "actor": "hakkar",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118701,
+        2118702,
+        2118703,
+        2118704,
+        2118705
+      ],
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar at 80 %, above the second step",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 80
+    },
+    {
+      "action": "wait",
+      "label": "Room for a second drain to start",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second drain waits for 70 %, so still one Aspect",
+      "actor": "hakkar",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118701,
+        2118702,
+        2118703,
+        2118704,
+        2118705
+      ],
+      "equals": 1
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar below 70 %",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 69
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: below 70 % he consumes a second avatar",
+      "actor": "hakkar",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118701,
+        2118702,
+        2118703,
+        2118704,
+        2118705
+      ],
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar at 20 %, past every step",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 20
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he drains the last three through the end of Blood Siphon: five Aspects",
       "actor": "hakkar",
       "metric": "carried_aura_count",
       "spells": [

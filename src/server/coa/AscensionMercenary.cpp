@@ -192,6 +192,19 @@ void RestoreFreeForAllOnceAreaSettles(Player* player)
     }, 0ms);
 }
 
+void ResendFreeForAllOnceNoPvPAreaChanges(Player* player)
+{
+    ObjectGuid const guid = player->GetGUID();
+    bool const wasInNoPvPArea = player->pvpInfo.IsInNoPvPArea;
+    player->m_Events.AddEventAtOffset([guid, wasInNoPvPArea]()
+    {
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (player && player->IsInWorld() && player->pvpInfo.IsInNoPvPArea != wasInNoPvPArea &&
+            IsPvPRuleset(player) && !player->HasAura(SPELL_MERCENARY))
+            player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+    }, 0ms);
+}
+
 class spell_ascension_mercenary_aura : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mercenary_aura);
@@ -318,6 +331,8 @@ public:
     {
         if (player->HasAura(SPELL_MERCENARY))
             RestoreFreeForAllOnceAreaSettles(player);
+        else if (IsPvPRuleset(player))
+            ResendFreeForAllOnceNoPvPAreaChanges(player);
     }
 
     void OnPlayerLogin(Player* player) override { LearnSpells(player); }

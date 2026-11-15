@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a Spider Egg killed while it casts Hatching hatches no Spawn of Mar'li",
+  "contract": [
+    "Round-7 tester (2026-11-14): the hatching eggs must be creatures players can kill. The live logs of",
+    "2026-08-04 (Mythic) and 2025-12-21 (Ascended) show players damaging and killing Spider Eggs (14915), and a",
+    "killed egg hatches no Spawn of Mar'li (15041). One egg stands 3 yards north of the hero and one 6 yards",
+    "north; the lane has its own phase, so Mar'li (14510) sees only these two. Hatch Eggs (2118115) at 17 s",
+    "makes both cast Hatching (2118119, 10 s). The hero kills the nearer egg mid-cast: 10 s later only the other",
+    "egg has hatched, one spider; on the old behaviour the egg was an object nobody could attack. Egg health",
+    "follows live kills: 18,171 with 12 players on Normal (2026-08-02), 1,514 per player, so 15,140 alone."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the hero settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "label": "An egg stands 3 yards north of the hero",
+      "actor": "tank",
+      "entry": 14915,
+      "as": "egg_near",
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "summon",
+      "label": "An egg stands 6 yards north of the hero",
+      "actor": "tank",
+      "entry": 14915,
+      "as": "egg_far",
+      "distance": 6,
+      "unowned": true
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14510,
+      "as": "marli",
+      "distance": -4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero can attack the egg",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14915,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the egg has the live Normal health, 1,514 per player at the 10-player floor",
+      "actor": "egg_near",
+      "metric": "max_health",
+      "equals": 15140
+    },
+    {
+      "action": "attack",
+      "label": "Engage High Priestess Mar'li",
+      "actor": "tank",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li casts Hatch Eggs at 17 s",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the near egg casts Hatching",
+      "actor": "egg_near",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the far egg casts Hatching",
+      "actor": "egg_far",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The hero kills the near egg mid-cast",
+      "actor": "tank",
+      "entry": 14915,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: one egg is left",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 14915,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the egg left is the far one, still Hatching",
+      "actor": "egg_far",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The far egg hatches its spider",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Past the killed egg's own Hatching end",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the killed egg hatched nothing, one spider in all",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 1
+    }
+  ]
+}

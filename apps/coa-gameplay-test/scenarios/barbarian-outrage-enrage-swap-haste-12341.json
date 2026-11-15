@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Barbarian: a new enrage during Outrage 801759 does not stack its haste (#12341)",
+  "contract": [
+    "Outrage requires the enrage aura state and raises melee haste and critical strike chance by 20%. The report:",
+    "after the enrage that enabled Outrage ends, a new enrage before Outrage expires leaves the attack speed",
+    "bonus behind permanently, and repeating it stacks. Unbridled Rage 801761 is an enrage-dispel aura that",
+    "sets and clears the enrage aura state; each swap must keep Outrage's bonuses at one application, and",
+    "removing Outrage must restore the baseline swing time."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "b", "item": 25 },
+    { "action": "equip", "actor": "b", "item": 25, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "label": "Baseline main-hand swing time", "actor": "b", "metric": "attack_time_ms",
+      "hand": 0, "save_as": "swing0" },
+
+    { "action": "learn", "actor": "b", "spell": 801759 },
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 1 },
+    { "action": "cast", "actor": "b", "spell": 801759 },
+    { "action": "assert", "label": "SETUP: the cast Outrage is on the Barbarian", "actor": "b", "metric": "aura",
+      "spell": 801759, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Outrage makes swings 20% faster", "actor": "b", "metric": "attack_time_ms",
+      "hand": 0, "ratio_to": "swing0", "min": 0.82, "max": 0.85 },
+    { "action": "snapshot", "label": "Melee crit chance with Outrage", "actor": "b", "metric": "melee_crit_chance",
+      "save_as": "crit_outrage" },
+
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 0 },
+    { "action": "assert", "label": "SETUP: the first enrage ended", "actor": "b", "metric": "aura",
+      "spell": 801761, "equals": 0 },
+    { "action": "assert", "label": "Outrage outlasts the enrage that enabled it", "actor": "b",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing0", "min": 0.82, "max": 0.85 },
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 1 },
+    { "action": "assert", "label": "A new enrage keeps Outrage's haste at one application", "actor": "b",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing0", "min": 0.82, "max": 0.85 },
+    { "action": "assert", "label": "A new enrage keeps Outrage's crit chance at one application", "actor": "b",
+      "metric": "melee_crit_chance", "ratio_to": "crit_outrage", "min": 0.99, "max": 1.01 },
+
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 0 },
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 1 },
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 0 },
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 1 },
+    { "action": "assert", "label": "Repeated enrage swaps do not stack Outrage's haste", "actor": "b",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing0", "min": 0.82, "max": 0.85 },
+
+    { "action": "set_aura", "actor": "b", "spell": 801759, "stacks": 0 },
+    { "action": "assert", "label": "SETUP: Outrage ended", "actor": "b", "metric": "aura", "spell": 801759,
+      "equals": 0 },
+    { "action": "assert", "label": "Swing time is back to baseline after Outrage ends", "actor": "b",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing0", "min": 0.99, "max": 1.01 }
+  ]
+}

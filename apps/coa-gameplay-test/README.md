@@ -365,6 +365,11 @@ An omitted bonus uses the creature's normal stats. Require the observed hit as w
 Optional `stationary: true` disables native movement for that fixture using `UNIT_FLAG_DISABLE_MOVE` and stops
 its current motion. Other creatures retain their original movement. Use it for a fixed damage target when
 wandering or fleeing would invalidate ordinary cast range or facing; it does not change spell hit or proc chance.
+Optional `min_level_armor: true` sets that fixture's base armor, after its `level` is applied, to the armor of its
+template's lowest level (`creature_classlevelstats` at `minlevel` times the template's armor modifier), read at run
+time. A template with a level range otherwise rolls its level at spawn, and its armor with it. Melee damage, mana
+and the other level-derived stats still follow the rolled level; health comes from the `health` field. The
+conformance generator sets it on every creature fixture ([ADR 0658](../../docs/adr/0658-pin-generated-fixture-armor-to-the-template-minimum.md)).
 
 Start from [scenarios/frostbolt.json](scenarios/frostbolt.json). Schema version 1 accepts up to eight players,
 twelve creatures and 10,000 sequential steps (twelve since ADR 0221; eight before). Schema version 2 raises the
@@ -680,8 +685,9 @@ reports whether the player carries it (for example `8` customize, `64` faction c
 with a fixed base of 1000. The spell metric also requires `spell` and accepts `effect` (default 0); the melee metric uses a main-hand white hit.
 `spell_damage_taken` and `melee_damage_taken` query the corresponding incoming bonus calculations for any
 unit; `target` identifies the attacker, and `melee_damage_taken` optionally accepts a weapon-strike `spell`.
-These queries do not execute attacks or include hit rolls, critical hits, armor/resistance mitigation, or proc
-effects.
+`spell_damage_taken` also accepts `base` (default 1000, per stack), `periodic` for a DoT tick and `stacks`
+(default 1), which multiplies the base and is passed as the aura's stack count. These queries do not execute
+attacks or include hit rolls, critical hits, armor/resistance mitigation, or proc effects.
 `spell_power_cost` requires `spell` and queries its current native resource cost; it does not submit a cast.
 `skill_line_for_spell` requires `spell` and returns the server's loaded `SkillLineAbility` entry's `SkillLine`
 for it (the client spellbook tab the spell's own row places it under), or `-1` when no row carries a nonzero
@@ -1157,7 +1163,10 @@ It tests dispatch and deferral, not a real socket, packet delivery, or every pos
 `view_level` takes a player `actor` and unit `target` and queries the target-relative combat level.
 `sent_level`, `sent_max_health` and `sent_faction` (the faction template) use the same fields and observe
 values-only object updates emitted to the socketless session. They return zero until the corresponding field has been observed; they do not
-force updates or inspect client rendering. `sent_visible_item` takes a `slot` like `visible_item` and returns the
+force updates or inspect client rendering. `sent_free_for_all_pvp` takes the same `actor` and `target` and returns 1
+when the last observed `UNIT_FIELD_BYTES_2` sent to the `actor` for the `target` carries the free-for-all PvP flag,
+0 when it does not, or -1 before that field is observed.
+`sent_visible_item` takes a `slot` like `visible_item` and returns the
 item entry the `actor` was last sent for the `target` player's visible item in that slot, or -1 before one is
 observed. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
@@ -1215,6 +1224,7 @@ guid) and returns the seconds until the actor's map respawns that spawn, from th
 the current loot window (zero if absent). The three `vanilla-dungeons-*` scenarios use these to check
 all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM access bypass.
 `nearest_creature_distance` requires player `entry` and reads the 2D distance from the player to the nearest living creature with that entry in its phase within 60 yards, or -1 when there is none.
+An optional `radius` (yards, at most 200) replaces the 60-yard search.
 `nearby_creature_orientation` requires a player and `entry`, and returns the orientation in radians (0 to 2 pi) of the
 nearest living creature with that entry within 60 yards; it requires one to exist there.
 `nearby_creature_height` takes the same creature and returns its height in yards above the unit `target` (an actor

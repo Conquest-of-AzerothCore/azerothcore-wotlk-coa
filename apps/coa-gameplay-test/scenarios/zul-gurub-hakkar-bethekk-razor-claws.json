@@ -7,7 +7,8 @@
     "of Bethekk (2118705), never Arlokk's Razor Claws (2118325, a melee proc that bleeds on every landed swing). In a",
     "fresh Normal instance every High Priest but Arlokk is set DONE, so Hakkar drains only Bethekk's avatar; he must",
     "then carry 2118705 and 2118325, and his swings must bleed the hero. The hero cannot dodge or parry, so his",
-    "swings land, and joins phase 1, where Hakkar's avatar appears."
+    "swings land, and joins phase 1, where Hakkar's avatar appears.",
+    "Since round 7 (2026-11-14) the drain waits until he has lost 15 % of his health (live logs), so he is set to 84 %."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -150,13 +151,20 @@
       "actor": "hero"
     },
     {
+      "action": "set_health_pct",
+      "label": "Hakkar below 85 %, his first drain step",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 84
+    },
+    {
       "action": "assert",
       "label": "CONTROL: Hakkar consumes the Avatar of Bethekk and takes its Aspect",
       "actor": "hakkar",
       "metric": "aura",
       "spell": 2118705,
       "equals": 1,
-      "within_ms": 20000
+      "within_ms": 15000
     },
     {
       "action": "assert",

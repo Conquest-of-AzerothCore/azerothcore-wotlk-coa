@@ -303,7 +303,13 @@ void ApplyContracts(SpellInfo* info)
     if (IsJuju(info))
         info->Effects[EFFECT_1].Effect = 0;
     if (id == PuppetHit)
-        info->Effects[EFFECT_1].Effect = 0;
+    {
+        info->Effects[EFFECT_0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
+        info->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+        info->AttributesEx3 |= SPELL_ATTR3_NOT_A_PROC;
+        info->AttributesCu |= SPELL_ATTR0_CU_DIRECT_DAMAGE;
+        info->AttributesCu &= ~SPELL_ATTR0_CU_BINARY_SPELL;
+    }
     if (Family(info, 0, 8))
     {
         periodic(EFFECT_0, info->Effects[EFFECT_0].Amplitude);

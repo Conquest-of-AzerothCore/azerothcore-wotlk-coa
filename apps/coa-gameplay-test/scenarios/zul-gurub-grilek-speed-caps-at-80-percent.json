@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Gri'lek's run speed stops rising at 16 stacks (+80%)",
+  "contract": [
+    "Round-7 tester (2026-11-14, Mythic): Gri'lek (15082) grew fast enough to outrun every player; cap his run",
+    "speed at +80%. Each 20 s step adds one hidden +5% damage stack (92432) and one hidden +5% run-speed stack",
+    "(1002357, stack limit 200 in the DBC). The run-speed aura now stops at 16 stacks while the damage keeps",
+    "rising. Two grouped heroes fight the Mythic Gri'lek; his run-speed aura is set to 16 stacks of 5, and after",
+    "the next step his damage aura has two stacks while the run-speed aura still has 16 (the old script gave 17)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "lead",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "lead",
+      "target": "mate"
+    },
+    {
+      "action": "teleport",
+      "actor": "lead",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the leader's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "mate",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the mate's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader is in Zul'Gurub on Mythic",
+      "actor": "lead",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mate is in the same Mythic Zul'Gurub",
+      "actor": "mate",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "lead",
+      "entry": 15082,
+      "as": "grilek",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "actor": "lead",
+      "target": "grilek"
+    },
+    {
+      "action": "attack",
+      "actor": "mate",
+      "target": "grilek"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek fights",
+      "actor": "grilek",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "lead"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mate"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first rising-speed stack comes 1 s into the fight",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 1002357,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Gri'lek already carries the +80% run-speed cap",
+      "actor": "lead",
+      "target": "grilek",
+      "spell": 1002357,
+      "stacks": 16,
+      "amount": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: sixteen run-speed stacks",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 1002357,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the 21 s step adds a second damage stack",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 92432,
+      "equals": 2,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the run-speed aura stays at 16 stacks (old script: 17)",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 1002357,
+      "equals": 16
+    }
+  ]
+}

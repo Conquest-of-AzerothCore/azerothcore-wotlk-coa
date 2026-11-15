@@ -5,6 +5,7 @@ import unittest
 from unittest import mock
 
 import snapshots
+from conformance import pinned_fixture_armor
 from profile import DBC_DIR
 from snapshots import (FINISHED_CLASSES, GENERATIONS, check, differences, directory_digests,
                        snapshot_path, write)
@@ -112,6 +113,19 @@ class MutantTest(unittest.TestCase):
             problems = check(TEMPLAR, Path(directory))
         self.assertEqual(len(problems), 1)
         self.assertIn(f'changed (1): {name}', problems[0])
+
+
+class FixtureArmorPinTest(unittest.TestCase):
+    def test_every_creature_fixture_gets_the_pin(self):
+        creatures = [{'id': 'dummy', 'entry': 36}, {'id': 'striker', 'entry': 36, 'min_level_armor': False}]
+        scenario = {'name': 'x', 'creatures': creatures}
+        pinned = pinned_fixture_armor(scenario)
+        self.assertEqual([creature['min_level_armor'] for creature in pinned['creatures']], [True, True])
+        self.assertNotIn('min_level_armor', scenario['creatures'][0])
+
+    def test_scenarios_without_creatures_are_unchanged(self):
+        for scenario in ({'name': 'x'}, {'name': 'x', 'creatures': []}):
+            self.assertEqual(pinned_fixture_armor(scenario), scenario)
 
 
 if __name__ == '__main__':

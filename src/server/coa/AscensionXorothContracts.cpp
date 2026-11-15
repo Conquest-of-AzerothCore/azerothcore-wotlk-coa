@@ -190,16 +190,8 @@ void ApplyContracts(SpellInfo* info)
         info->CasterAuraSpell = 0;
         Ascension::ClientSpellPatches::Instance().Register(id);
     }
-    if (id == 805965)
-    {
-        auto& e = info->Effects[0];
-        e.Effect = SPELL_EFFECT_APPLY_AURA;
-        e.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-        e.MiscValue = SPELLMOD_COST;
-        e.SpellClassMask = flag96(32768, 0, 0);
-        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-        info->DurationEntry = sSpellDurationStore.LookupEntry(21);
-    }
+    if (id == 805916)
+        dummy(2);
     if (id == 800702)
         dummy(0);
     if (id == 801064)

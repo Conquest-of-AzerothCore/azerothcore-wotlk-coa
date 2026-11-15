@@ -88,6 +88,8 @@ keys are appended automatically on deploy.
 .coa reset [all] <player>
 ```
 
+A player with a two-word name is given in quotes, in any letter case: `.coa reset "Firstname Lastname"`.
+
 ## Scope / limitations
 
 - GroupRewards (`ChallengeGroupRewards.dbc`) — semantics not confirmed.

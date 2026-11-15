@@ -12,16 +12,20 @@
  *   Both forms
  *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
  *     Hatch Eggs         first 17s, every 30s   the ten eggs nearest the players
- *                                               hatch 10s later, one spider each
- *                                               (a DBM bar in the live video of
+ *                                               cast Hatching (10s), one spider
+ *                                               from each egg that finishes; a
+ *                                               killed egg hatches nothing (a DBM
+ *                                               bar in the live video of
  *                                               2026-08-04; count and delay:
- *                                               tester, live, 2026-11-04)
+ *                                               tester, live, 2026-11-04; killed
+ *                                               eggs: the live logs of 2026-08-04
+ *                                               and 2025-12-21)
  *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
- *     Evolve             first 22s, every 60s   an egg swells and hatches a
- *                                               colossal spider 10s later;
+ *     Evolve             first 22s, every 60s   cast on an egg: it swells and
+ *                                               hatches a colossal spider;
  *                                               Mythic and Ascended only (tester,
  *                                               round 5)
  *
@@ -57,13 +61,19 @@
  *                                               (the Ascended log of 2025-12-21)
  *     Furious Strikes    passive, her hits speed her up
  *
+ * The eggs are Spider Egg creatures (14915, the live client cache), each
+ * casting Hatching (2118119, 10s) when she calls on it.
+ *
  * Decided here, not in the data:
  *   - Infest acts on an egg she hatches for it at once (live, its egg hatches
  *     about 15s later);
- *   - Evolve cannot target the egg object, so the egg takes Evolve's scale and
- *     the spawn it hatches 10s later takes Evolve itself (three times the size,
- *     twice the health) and never grows (live, 2026-08-04: the egg hatched
- *     10.2s after Evolve, a spider without Growth);
+ *   - an evolved egg starts Hatching when Evolve lands, and the spawn it hatches
+ *     takes Evolve itself (three times the size, twice the health) and never
+ *     grows (live, 2026-08-04: the egg hatched 10.2s after Evolve, a spider
+ *     without Growth);
+ *   - a hatched or killed egg comes back 30s later, the Hatch Eggs interval: no
+ *     source shows how the arena fills again (round-7 tester, 2026-11-14: the
+ *     eggs ran out);
  *   - the festering spawn is a Spawn of Mar'li (15041), estimated: the live
  *     Festering Spawn of Mar'li has no creature data in any source;
  *   - Drain Life heals her for what each tick deals;
@@ -75,7 +85,6 @@
 
 #include "Containers.h"
 #include "CreatureScript.h"
-#include "GameObject.h"
 #include "ScriptedCreature.h"
 #include "Spell.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
@@ -133,9 +142,17 @@ namespace
 
     enum Misc
     {
-        GO_SPIDER_EGGS     = 179985,
+        NPC_SPIDER_EGG     = 14915,
         NPC_SPAWN_OF_MARLI = 15041,
-        NPC_AVATAR_OF_SHADRA = 666990
+        NPC_AVATAR_OF_SHADRA = 666990,
+        SPELL_HATCHING     = 2118119,
+    };
+
+    enum EggData
+    {
+        DATA_HATCH_FOR_MARLI = 1,
+        DATA_EGG_HATCHED,
+        DATA_EGG_DIED,
     };
 
     enum Events
@@ -144,9 +161,7 @@ namespace
         EVENT_DRAIN_LIFE,
         EVENT_POISON_BOLT_VOLLEY,
         EVENT_HATCH_EGGS,
-        EVENT_OPEN_EGGS,
         EVENT_EVOLVE,
-        EVENT_HATCH_EVOLVED_EGG,
         EVENT_INFEST,
         EVENT_ACID_SPIT,
         EVENT_WEB_SPRAY,
@@ -176,7 +191,7 @@ namespace
     constexpr Milliseconds SPIDER_CYCLE_MYTHIC  = 58s;
     constexpr Milliseconds POISON_SHOCK_AFTER_EMERGE = 1800ms;
     constexpr Milliseconds HATCH_EVERY          = 30s;
-    constexpr Milliseconds HATCH_DELAY          = 10s;
+    constexpr Seconds EGG_REFILL                = 30s;
     constexpr float EGG_SEARCH_RANGE = 100.0f;
     constexpr float DRAIN_LIFE_RANGE = 100.0f;
     constexpr float DRAIN_LIFE_SPLASH_SHARE = 0.32f;
@@ -196,20 +211,11 @@ namespace
             _avatar.Restore(me);
             _spider = false;
             _festering.clear();
-            _usedEggs.clear();
-            _hatchingEggs.clear();
-            ShrinkEvolvedEgg();
+            _evolvedEgg.Clear();
+            StopEggs(true);
             EndDrainLifeSplash();
             EndHunt();
             Emerge();
-
-            std::list<GameObject*> eggs;
-            me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, DEFAULT_VISIBILITY_INSTANCE);
-            for (GameObject* egg : eggs)
-            {
-                egg->Respawn();
-                egg->UpdateObjectVisibility();
-            }
             BossAI::Reset();
         }
 
@@ -231,7 +237,7 @@ namespace
 
         void JustDied(Unit* killer) override
         {
-            ShrinkEvolvedEgg();
+            StopEggs(false);
             EndDrainLifeSplash();
             EndHunt();
             BossAI::JustDied(killer);
@@ -330,6 +336,11 @@ namespace
             switch (spell->Id)
             {
                 case SPELL_EVOLVE:
+                    if (target->GetEntry() == NPC_SPIDER_EGG)
+                    {
+                        OrderHatching(target->ToCreature());
+                        break;
+                    }
                     target->SetMaxHealth(target->GetMaxHealth() * 2);
                     target->SetFullHealth();
                     break;
@@ -456,25 +467,69 @@ namespace
             return highest;
         }
 
-        std::vector<GameObject*> FreeEggs()
+        void SetGUID(ObjectGuid const& guid, int32 id) override
         {
-            std::list<GameObject*> eggs;
-            me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, EGG_SEARCH_RANGE);
-            std::vector<GameObject*> free;
-            for (GameObject* egg : eggs)
-                if (egg->isSpawned() && !_usedEggs.count(egg->GetGUID()))
+            if (id == DATA_EGG_DIED && guid == _evolvedEgg)
+                _evolvedEgg.Clear();
+            if (id != DATA_EGG_HATCHED || !me->IsAlive())
+                return;
+            if (Creature* egg = ObjectAccessor::GetCreature(*me, guid))
+                if (egg->IsAlive())
+                    HatchEgg(egg);
+        }
+
+        // Her eggs stop hatching with her; at a reset the arena is whole again.
+        void StopEggs(bool restore)
+        {
+            std::list<Creature*> eggs;
+            me->GetCreatureListWithEntryInGrid(eggs, NPC_SPIDER_EGG, DEFAULT_VISIBILITY_INSTANCE);
+            for (Creature* egg : eggs)
+            {
+                if (egg->IsAlive())
+                {
+                    egg->InterruptNonMeleeSpells(false);
+                    egg->RemoveAurasDueToSpell(SPELL_EVOLVE);
+                }
+                else if (restore && !egg->IsSummon())
+                    egg->Respawn(true);
+            }
+        }
+
+        std::vector<Creature*> FreeEggs()
+        {
+            std::list<Creature*> eggs;
+            me->GetCreatureListWithEntryInGrid(eggs, NPC_SPIDER_EGG, EGG_SEARCH_RANGE);
+            std::vector<Creature*> free;
+            for (Creature* egg : eggs)
+                if (egg->IsAlive() && !egg->HasUnitState(UNIT_STATE_CASTING) && !egg->HasAura(SPELL_EVOLVE) &&
+                    egg->GetGUID() != _evolvedEgg)
                     free.push_back(egg);
             return free;
         }
 
-        // Hatch Eggs marks the eggs nearest the raid; each hatches one spider after HATCH_DELAY.
+        Creature* NearestFreeEgg()
+        {
+            Creature* nearest = nullptr;
+            for (Creature* egg : FreeEggs())
+                if (!nearest || me->GetDistance(egg) < me->GetDistance(nearest))
+                    nearest = egg;
+            return nearest;
+        }
+
+        void OrderHatching(Creature* egg)
+        {
+            if (egg && egg->IsAlive() && egg->AI())
+                egg->AI()->SetGUID(me->GetGUID(), DATA_HATCH_FOR_MARLI);
+        }
+
+        // Hatch Eggs wakes the eggs nearest the raid; each that finishes Hatching hatches one spider.
         void ClaimEggsNearPlayers()
         {
             std::vector<Player*> const players = PlayersWithin(me, EGG_SEARCH_RANGE);
             if (players.empty())
                 return;
 
-            auto distanceToRaid = [&players](GameObject const* egg)
+            auto distanceToRaid = [&players](Creature const* egg)
             {
                 float nearest = std::numeric_limits<float>::max();
                 for (Player const* p : players)
@@ -482,87 +537,45 @@ namespace
                 return nearest;
             };
 
-            std::vector<GameObject*> eggs = FreeEggs();
-            std::sort(eggs.begin(), eggs.end(), [&](GameObject const* a, GameObject const* b)
+            std::vector<Creature*> eggs = FreeEggs();
+            std::sort(eggs.begin(), eggs.end(), [&](Creature const* a, Creature const* b)
             {
                 return distanceToRaid(a) < distanceToRaid(b);
             });
             if (eggs.size() > EGGS_PER_HATCH)
                 eggs.resize(EGGS_PER_HATCH);
-            if (eggs.empty())
-                return;
-
-            for (GameObject* egg : eggs)
-            {
-                _usedEggs.insert(egg->GetGUID());
-                _hatchingEggs.push_back(egg->GetGUID());
-            }
-            events.ScheduleEvent(EVENT_OPEN_EGGS, HATCH_DELAY);
-        }
-
-        void OpenClaimedEggs()
-        {
-            for (ObjectGuid const& guid : _hatchingEggs)
-                if (GameObject* egg = ObjectAccessor::GetGameObject(*me, guid))
-                    if (egg->isSpawned())
-                        HatchEgg(egg);
-            _hatchingEggs.clear();
-        }
-
-        GameObject* ClaimNearestEgg()
-        {
-            GameObject* nearest = nullptr;
-            for (GameObject* egg : FreeEggs())
-                if (!nearest || me->GetDistance(egg) < me->GetDistance(nearest))
-                    nearest = egg;
-            if (nearest)
-                _usedEggs.insert(nearest->GetGUID());
-            return nearest;
+            for (Creature* egg : eggs)
+                OrderHatching(egg);
         }
 
         Creature* HatchNearestEgg()
         {
-            GameObject* egg = ClaimNearestEgg();
+            Creature* egg = NearestFreeEgg();
             return egg ? HatchEgg(egg) : nullptr;
         }
 
         void EvolveNearestEgg()
         {
-            ShrinkEvolvedEgg();
-            GameObject* egg = ClaimNearestEgg();
+            Creature* egg = NearestFreeEgg();
             if (!egg)
                 return;
-
             _evolvedEgg = egg->GetGUID();
-            _evolvedEggScale = egg->GetObjectScale();
-            egg->SetObjectScale(_evolvedEggScale + CalculatePct(1.0f, Info(me, SPELL_EVOLVE, EFFECT_1)));
-            events.ScheduleEvent(EVENT_HATCH_EVOLVED_EGG, HATCH_DELAY);
+            me->CastSpell(egg, SPELL_EVOLVE, false);
         }
 
-        void HatchEvolvedEgg()
+        Creature* HatchEgg(Creature* egg)
         {
-            GameObject* egg = ShrinkEvolvedEgg();
-            if (!egg || !egg->isSpawned())
-                return;
-            if (Creature* spawn = HatchEgg(egg))
+            bool const evolved = egg->GetGUID() == _evolvedEgg;
+            if (evolved)
+                _evolvedEgg.Clear();
+            Creature* spawn = me->SummonCreature(NPC_SPAWN_OF_MARLI, egg->GetPosition(),
+                TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            egg->DespawnOrUnsummon(0ms, EGG_REFILL);
+            if (!spawn)
+                return nullptr;
+            spawn->SetInCombatWithZone();
+            if (evolved)
                 DoCast(spawn, SPELL_EVOLVE, true);
-        }
-
-        GameObject* ShrinkEvolvedEgg()
-        {
-            GameObject* egg = _evolvedEgg ? ObjectAccessor::GetGameObject(*me, _evolvedEgg) : nullptr;
-            if (egg)
-                egg->SetObjectScale(_evolvedEggScale);
-            _evolvedEgg.Clear();
-            return egg;
-        }
-
-        Creature* HatchEgg(GameObject* egg)
-        {
-            Creature* spawn = me->SummonCreature(NPC_SPAWN_OF_MARLI, egg->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-            egg->SetLootState(GO_JUST_DEACTIVATED);
-            if (spawn)
-                spawn->SetInCombatWithZone();
             return spawn;
         }
 
@@ -607,15 +620,9 @@ namespace
                         DoCastSelf(SPELL_HATCH_EGGS);
                         events.ScheduleEvent(EVENT_HATCH_EGGS, HATCH_EVERY);
                         break;
-                    case EVENT_OPEN_EGGS:
-                        OpenClaimedEggs();
-                        break;
                     case EVENT_EVOLVE:
                         EvolveNearestEgg();
                         events.ScheduleEvent(EVENT_EVOLVE, 60s, 0, PHASE_TROLL);
-                        break;
-                    case EVENT_HATCH_EVOLVED_EGG:
-                        HatchEvolvedEgg();
                         break;
                     case EVENT_INFEST:
                         if (Creature* spawn = HatchNearestEgg())
@@ -669,19 +676,75 @@ namespace
         bool _spider = false;
         LoaAvatar _avatar{ NPC_AVATAR_OF_SHADRA, SPELL_DRAIN_POWER };
         GuidSet _festering;
-        GuidSet _usedEggs;
-        GuidVector _hatchingEggs;
         ObjectGuid _evolvedEgg;
-        float _evolvedEggScale = 1.0f;
         GuidVector _drainSplashed;
         ObjectGuid _drainTarget;
         int32 _drainTick = 0;
         ObjectGuid _hunted;
         float _huntThreat = 0.0f;
     };
+
+    // A Spider Egg never fights; it hatches only through Mar'li, once its Hatching is cast.
+    struct npc_spider_egg_coa : public ScriptedAI
+    {
+        npc_spider_egg_coa(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()) { }
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            _marli.Clear();
+            _hatched = false;
+        }
+
+        void AttackStart(Unit* /*who*/) override { }
+
+        void SetGUID(ObjectGuid const& guid, int32 id) override
+        {
+            if (id != DATA_HATCH_FOR_MARLI || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+            _marli = guid;
+            DoCastSelf(SPELL_HATCHING);
+        }
+
+        void OnSpellCast(SpellInfo const* spell) override
+        {
+            if (spell->Id == SPELL_HATCHING)
+                _hatched = true;
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (_instance)
+                if (Creature* marli = _instance->GetCreature(DATA_MARLI))
+                    if (marli->AI())
+                        marli->AI()->SetGUID(me->GetGUID(), DATA_EGG_DIED);
+            me->DespawnOrUnsummon(0ms, EGG_REFILL);
+        }
+
+        void UpdateAI(uint32 /*diff*/) override
+        {
+            if (_hatched)
+            {
+                _hatched = false;
+                if (Creature* marli = ObjectAccessor::GetCreature(*me, _marli))
+                    if (marli->AI())
+                        marli->AI()->SetGUID(me->GetGUID(), DATA_EGG_HATCHED);
+                return;
+            }
+
+            if (me->IsInCombat() && (!_instance || _instance->GetBossState(DATA_MARLI) != IN_PROGRESS))
+                EnterEvadeMode(EVADE_REASON_OTHER);
+        }
+
+    private:
+        InstanceScript* _instance;
+        ObjectGuid _marli;
+        bool _hatched = false;
+    };
 }
 
 void AddCoaMarliScripts()
 {
     RegisterZulGurubCreatureAI(boss_marli_coa);
+    RegisterZulGurubCreatureAI(npc_spider_egg_coa);
 }

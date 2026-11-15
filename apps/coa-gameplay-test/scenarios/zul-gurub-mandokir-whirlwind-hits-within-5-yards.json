@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Bloodlord Mandokir's Whirlwind hits players within 5 yards every second of the spin",
+  "contract": [
+    "Whirlwind (2118408) is a 6 s spin whose periodic effect names no spell to trigger, so the spin hit nobody. Its",
+    "tooltip and the live CoA combat logs (2026-08-02 Normal, Mythic) show the hit 2118409 (100 % weapon damage,",
+    "5 yards) once a second, 1-6 s into the spin: about one melee hit per tick. The tank stands in melee and stops",
+    "attacking, so the first spin comes 10 s into the fight in the charge's place and ends by about 20 s."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage Mandokir",
+      "actor": "tank",
+      "target": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir fights",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first Whirlwind begins 10 s into the fight",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "min": 1,
+      "within_ms": 14500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir spins with the Whirlwind aura",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118408,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the spin casts its hit 2118409",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118409,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the spin hits the tank in melee once a second with 2118409",
+      "actor": "tank",
+      "metric": "spell_damage_count",
+      "spell": 2118409,
+      "target": "tank",
+      "min": 5,
+      "within_ms": 9000,
+      "caster": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hits deal damage",
+      "actor": "tank",
+      "metric": "spell_damage_total",
+      "spell": 2118409,
+      "target": "tank",
+      "min": 1,
+      "caster": "mandokir"
+    },
+    {
+      "action": "wait",
+      "label": "Let the spin end",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one spin hits six times at most",
+      "actor": "tank",
+      "metric": "spell_damage_count",
+      "spell": 2118409,
+      "target": "tank",
+      "max": 6,
+      "caster": "mandokir"
+    }
+  ]
+}

@@ -44,6 +44,7 @@ EVENT_STREAMS = {'spell_damage', 'spell_heal', 'spell_energize', 'melee_hit'}
 EVENT_TIME_FIELDS = {'stream', 'since_spell'}
 ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
+MAX_NEAREST_CREATURE_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
 SYSTEM_MAIL_KINDS = {'postmaster', 'reward', 'server'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
@@ -83,7 +84,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
-    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item', 'level_scaling_choice',
+    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp', 'sent_visible_item',
+    'level_scaling_choice',
     'spell_mod_mutants',
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
@@ -151,7 +153,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
     'nearby_gameobject_flags', 'nearby_gameobject_quest',
     'nearby_gameobject_display', 'nearby_gameobject_ground_offset', 'nearby_gameobject_orientation',
-    'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'nearby_creature_height',
+    'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'nearby_creature_facing_offset', 'nearby_creature_height',
     'map_creature_count',
     'map_creatures_below_floor',
     'nearby_gameobject_at_client',
@@ -260,9 +262,9 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
-                 'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead',
+                 'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius',
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
-                  'school_mask', 'rolls', 'target_entry'} \
+                  'school_mask', 'rolls', 'stacks', 'target_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -660,7 +662,7 @@ def validate(scenario, clock=REAL_CLOCK):
     for creature in creatures:
         keys(creature, {'id', 'owner', 'entry'},
              {'id', 'owner', 'entry', 'distance', 'faction', 'level', 'health', 'reaction', 'spell_hit_bonus',
-              'stationary'},
+              'stationary', 'min_level_armor'},
              'creature')
         identity = creature['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid creature id')
@@ -673,6 +675,7 @@ def validate(scenario, clock=REAL_CLOCK):
         number(creature.get('distance', 3), 'distance', 0, 100)
         number(creature.get('reaction', 0), 'reaction', 0, 2, True)
         require(type(creature.get('stationary', False)) is bool, 'stationary must be boolean')
+        require(type(creature.get('min_level_armor', False)) is bool, 'min_level_armor must be boolean')
         number(creature.get('spell_hit_bonus', 0), 'creature spell hit bonus', 0, 100)
     if 'location' in scenario:
         location = scenario['location']
@@ -1061,8 +1064,13 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
             if metric in {'pet_autocast_enabled', 'owned_creature_spell_proc_count', 'owned_creature_spell_cast_count'}:
                 number(step.get('spell'), f'{where}.spell', 1, 2**31 - 1, True)
-            if metric == 'spell_damage_done' and 'base' in step:
+            if metric in {'spell_damage_done', 'spell_damage_taken'} and 'base' in step:
                 number(step['base'], f'{where}.base', 0, 2**32 - 1, True)
+            if 'stacks' in step:
+                require(metric == 'spell_damage_taken', f'{where}: stacks applies to spell_damage_taken')
+                number(step['stacks'], f'{where}.stacks', 1, 255, True)
+                require(step.get('base', 1000) * step['stacks'] <= 2**32 - 1,
+                        f'{where}: base times stacks must fit in 32 bits')
             if metric in {'combo_points', 'game_mode_mask', 'pet_autocast_enabled'}:
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
             if metric == 'victim':
@@ -1079,7 +1087,8 @@ def validate(scenario, clock=REAL_CLOCK):
             elif 'spells' in step:
                 require(False, f'{where}: spells only applies to carried_aura_count')
             if 'periodic' in step:
-                require(metric in {'spell_damage_done', 'spell_healing_done', 'spell_healing_taken'}
+                require(metric in {'spell_damage_done', 'spell_damage_taken', 'spell_healing_done',
+                                   'spell_healing_taken'}
                         and type(step['periodic']) is bool,
                         f'{where}: periodic requires a damage/healing calculation and a boolean')
             require(metric in METRICS, f'{where}: unknown metric')
@@ -1092,7 +1101,8 @@ def validate(scenario, clock=REAL_CLOCK):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
-            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item'}:
+            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp',
+                          'sent_visible_item'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
             if metric == 'sent_visible_item':
@@ -1133,9 +1143,17 @@ def validate(scenario, clock=REAL_CLOCK):
                             f'{where}.entries must be a non-empty list')
                     for index, entry in enumerate(step['entries']):
                         number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
-            if metric in {'nearest_creature_distance', 'nearby_creature_orientation', 'nearby_creature_height'}:
+            if metric in {'nearest_creature_distance', 'nearby_creature_orientation', 'nearby_creature_height',
+                          'nearby_creature_facing_offset'}:
                 require(step['actor'] in player_ids, f'{where}: creature distance needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            if 'radius' in step:
+                require(metric == 'nearest_creature_distance',
+                        f'{where}: radius only applies to the nearest creature distance')
+                number(step['radius'], f'{where}.radius', 0, MAX_NEAREST_CREATURE_RADIUS)
+                require(step['radius'] > 0, f'{where}: radius must be positive')
+            if metric == 'nearby_creature_facing_offset':
+                number(step.get('target_entry'), f'{where}.target_entry', 1, 2**32 - 1, True)
             if metric == 'nearby_creature_height':
                 require(step.get('target') in actor_ids, f'{where}: creature height needs the reference unit')
             if metric == 'map_creatures_below_floor':
@@ -1236,7 +1254,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(not ({'entry', 'pet', 'caster'} & step.keys()),
                         f'{where}: caster_entry replaces the entry, pet and caster filters')
                 number(step['caster_entry'], f'{where}.caster_entry', 1, 2**32 - 1, True)
-            if 'target_entry' in step:
+            if 'target_entry' in step and metric != 'nearby_creature_facing_offset':
                 require(metric in SPELL_DAMAGE_METRICS, f'{where}: target_entry only filters spell damage events')
                 require('target' not in step, f'{where}: target_entry replaces the target filter')
                 number(step['target_entry'], f'{where}.target_entry', 1, 2**32 - 1, True)

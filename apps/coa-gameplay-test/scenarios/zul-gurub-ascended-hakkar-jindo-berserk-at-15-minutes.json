@@ -1,0 +1,315 @@
+{
+  "schema": 2,
+  "name": "Zul'Gurub: Ascended Hakkar and Jin'do berserk after 15 minutes",
+  "contract": [
+    "Round-7 tester (2026-11-14, Mythic): check that the bosses have enrage timers. User decision 2026-11-14:",
+    "Ascended Hakkar (14834) and Jin'do (11380) berserk after 15 minutes with the Ascended raid berserk of",
+    "Blackwing Lair (2100213); below Ascended Hakkar keeps Berserk (26662) at 10 minutes and Jin'do has none. A",
+    "Mythic hero and an Ascended hero each fight Hakkar on his altar (he evades off it) and a second Ascended hero",
+    "fights Jin'do, each in a fresh instance, all under .cheat god so the fight lasts. Ascended Delusions of Jin'do",
+    "(2118512) moves its target to phase 3 and back to phase 1, so Jin'do's hero joins phase 1 (an exclusive run)",
+    "at the instance entrance (areatrigger 3928), where no creature stands within 90 yd. When the Mythic Hakkar",
+    "berserks at 10 minutes the Ascended bosses have no berserk (the old script gave Ascended Hakkar 26662 then,",
+    "Jin'do never); 14 minutes 40 seconds in they still have none, and by 15 minutes both carry 2100213."
+  ],
+  "timeout_ms": 1100000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "jindo_hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "ascended",
+      "value": 3
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "jindo_hero",
+      "value": 3
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "ascended",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "jindo_hero",
+      "map": 309,
+      "x": -11916.1,
+      "y": -1230.53,
+      "z": 92.5334,
+      "o": 4.71867,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the three transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero is in Zul'Gurub on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended hero is in Zul'Gurub on Ascended",
+      "actor": "ascended",
+      "metric": "map_difficulty",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do's hero is in Zul'Gurub on Ascended",
+      "actor": "jindo_hero",
+      "metric": "map_difficulty",
+      "equals": 3
+    },
+    {
+      "action": "set_phase",
+      "label": "Jin'do's hero joins the world phase that Delusions returns to",
+      "actor": "jindo_hero",
+      "value": 1
+    },
+    {
+      "action": "command",
+      "label": "The Mythic hero survives the whole fight",
+      "actor": "mythic",
+      "command": ".cheat god on"
+    },
+    {
+      "action": "command",
+      "label": "The Ascended hero survives the whole fight",
+      "actor": "ascended",
+      "command": ".cheat god on"
+    },
+    {
+      "action": "command",
+      "label": "Jin'do's hero survives the whole fight",
+      "actor": "jindo_hero",
+      "command": ".cheat god on"
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14834,
+      "as": "hakkar_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "ascended",
+      "entry": 14834,
+      "as": "hakkar_ascended",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "jindo_hero",
+      "entry": 11380,
+      "as": "jindo_ascended",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Pull the Mythic Hakkar",
+      "actor": "mythic",
+      "target": "hakkar_mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar fights",
+      "actor": "hakkar_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "attack",
+      "label": "Pull the Ascended Jin'do",
+      "actor": "jindo_hero",
+      "target": "jindo_ascended"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Jin'do fights",
+      "actor": "jindo_ascended",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "jindo_hero"
+    },
+    {
+      "action": "attack",
+      "label": "Pull the Ascended Hakkar",
+      "actor": "ascended",
+      "target": "hakkar_ascended"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Hakkar fights",
+      "actor": "hakkar_ascended",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ascended"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar berserks at 10 minutes",
+      "actor": "hakkar_mythic",
+      "metric": "aura",
+      "spell": 26662,
+      "equals": 1,
+      "within_ms": 640000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ascended Hakkar has no 10-minute Berserk (old script: 26662)",
+      "actor": "hakkar_ascended",
+      "metric": "aura",
+      "spell": 26662,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nor the Ascended berserk yet",
+      "actor": "hakkar_ascended",
+      "metric": "aura",
+      "spell": 2100213,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Jin'do has no berserk yet",
+      "actor": "jindo_ascended",
+      "metric": "aura",
+      "spell": 2100213,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Fourteen minutes forty seconds into the fight",
+      "ms": 275000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Hakkar still fights",
+      "actor": "hakkar_ascended",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Jin'do still fights",
+      "actor": "jindo_ascended",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Ascended berserk on Hakkar before 15 minutes",
+      "actor": "hakkar_ascended",
+      "metric": "aura",
+      "spell": 2100213,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Ascended berserk on Jin'do before 15 minutes",
+      "actor": "jindo_ascended",
+      "metric": "aura",
+      "spell": 2100213,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ascended Hakkar berserks at 15 minutes",
+      "actor": "hakkar_ascended",
+      "metric": "aura",
+      "spell": 2100213,
+      "equals": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ascended Jin'do berserks at 15 minutes (old script: never)",
+      "actor": "jindo_ascended",
+      "metric": "aura",
+      "spell": 2100213,
+      "equals": 1,
+      "within_ms": 10000
+    }
+  ]
+}

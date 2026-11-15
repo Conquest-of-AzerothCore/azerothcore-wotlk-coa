@@ -57,6 +57,12 @@ def scenario_key(*parts) -> str:
     return KEY_SEPARATORS.sub('-', '-'.join(['conformance', *map(str, parts)]).lower()).strip('-')
 
 
+def pinned_fixture_armor(scenario: dict) -> dict:
+    if 'creatures' not in scenario:
+        return scenario
+    return {**scenario, 'creatures': [{**creature, 'min_level_armor': True} for creature in scenario['creatures']]}
+
+
 class ManifestWriter:
     def __init__(self, class_file: dict, out: Path):
         self.class_file = class_file
@@ -70,6 +76,7 @@ class ManifestWriter:
             raise ValueError(f'Duplicate scenario key {key}')
         file, sha = None, None
         if scenario is not None:
+            scenario = pinned_fixture_armor(scenario)
             text = json.dumps(run.validate(scenario, run.SIMULATED_CLOCK), indent=2) + '\n'
             file = f'{SCENARIO_DIR}/{key}.json'
             (self.out / file).write_text(text, encoding='utf-8')

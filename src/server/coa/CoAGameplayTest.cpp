@@ -3392,6 +3392,13 @@ private:
                 creature->SetRegeneratingHealth(false);
                 creature->SetFaction(definition.get<uint32>("faction", 14));
                 creature->SetLevel(uint8(definition.get<uint32>("level", 80)));
+                if (definition.get<bool>("min_level_armor", false))
+                {
+                    CreatureTemplate const* info = creature->GetCreatureTemplate();
+                    uint8 const lowest = std::min(info->minlevel, info->maxlevel);
+                    CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(lowest, info->unit_class);
+                    creature->SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, stats->GenerateArmor(info));
+                }
                 uint32 const health = definition.get<uint32>("health", 100000);
                 creature->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
                 creature->SetMaxHealth(health);
@@ -3726,6 +3733,14 @@ private:
                 return 0;
             return itr->second.at(field);
         }
+        if (metric == "sent_free_for_all_pvp")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.unitValues.find(GetUnit(step.get<std::string>("target"))->GetGUID().GetRawValue());
+            if (itr == actor.unitValues.end() || !itr->second.count(UNIT_FIELD_BYTES_2))
+                return -1;
+            return (itr->second.at(UNIT_FIELD_BYTES_2) >> 8) & UNIT_BYTE2_FLAG_FFA_PVP ? 1 : 0;
+        }
         if (metric == "sent_visible_item")
         {
             uint32 slot = step.get<uint32>("slot");
@@ -4035,7 +4050,12 @@ private:
                 return unit->MeleeDamageBonusTaken(attacker, 1000, BASE_ATTACK, info,
                     info ? info->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL);
             Require(info != nullptr, "Incoming spell damage needs a spell");
-            return unit->SpellDamageBonusTaken(attacker, info, 1000, SPELL_DIRECT_DAMAGE);
+            uint32 const stacks = step.get<uint32>("stacks", 1);
+            uint64 const total = uint64(step.get<uint32>("base", 1000)) * stacks;
+            Require(total <= std::numeric_limits<uint32>::max(),
+                "spell_damage_taken base times stacks exceeds 32 bits");
+            return unit->SpellDamageBonusTaken(attacker, info, uint32(total),
+                step.get<bool>("periodic", false) ? DOT : SPELL_DIRECT_DAMAGE, stacks);
         }
         if (metric == "applied_aura_count")
             return static_cast<double>(unit->GetAppliedAuras().size());
@@ -4675,7 +4695,8 @@ private:
         if (metric == "nearest_creature_distance")
         {
             std::list<Creature*> creatures;
-            player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"), 60.0f);
+            player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"),
+                step.get<float>("radius", 60.0f));
             float nearest = -1.0f;
             for (Creature* creature : creatures)
                 if (creature->IsInWorld() && creature->IsAlive() && player->InSamePhase(creature))
@@ -4685,6 +4706,14 @@ private:
                         nearest = distance;
                 }
             return nearest;
+        }
+        if (metric == "nearby_creature_facing_offset")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f);
+            Creature* other = player->FindNearestCreature(step.get<uint32>("target_entry"), 60.0f);
+            Require(creature != nullptr && other != nullptr, "Facing offset needs both creatures nearby");
+            return std::fabs(Position::NormalizeOrientation(creature->GetAngle(other) - creature->GetOrientation() + float(M_PI))
+                - float(M_PI));
         }
         if (metric == "nearby_creature_orientation")
         {

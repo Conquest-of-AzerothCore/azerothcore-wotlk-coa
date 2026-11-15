@@ -176,7 +176,7 @@ std::string PinPayload(Event const& event, bool visible)
         "\"TextureId\":\"hr-event-gear-active\",\"Scale\":0.50,\"POIFlags\":{}}}",
         EventZone(event), event.id,
         event.phase == Phase::Warning ? "High-Risk 60 PvP Event: materializing soon."
-            : "High-Risk 60 PvP Event: High-Risk level-60 players can claim it.",
+            : "High-Risk 60 PvP Event: level-60 High-Risk Mercenaries can claim it.",
         event.position.GetPositionX(), event.position.GetPositionY(), event.position.GetPositionZ(), PinFlags);
 }
 
@@ -273,7 +273,7 @@ void UpdateCarrier(Player* player)
 
 bool Eligible(Player const* player)
 {
-    return Eligible(player->GetLevel(), player->HasAura(HighRisk), player->IsAlive());
+    return Eligible(player->GetLevel(), player->HasAura(HighRisk), player->HasAura(Mercenary), player->IsAlive());
 }
 
 Event* Find(GameObject const* object)
@@ -416,7 +416,8 @@ bool Open(Player* player, Item* cache)
     if (!CanOpen(found != events.end(), Eligible(player), player->GetAreaId(), player->IsInCombat()))
     {
         ChatHandler(player->GetSession()).SendSysMessage(
-            "You must be level 60, in High-Risk mode and out of combat in Gadgetzan, Cenarion Hold or Ratchet to open a claimed Crow's Cache.");
+            "You must be level 60, in High-Risk and Mercenary mode and out of combat in Gadgetzan, "
+            "Cenarion Hold or Ratchet to open a claimed Crow's Cache.");
         return false;
     }
     std::vector<uint32> const newest = Bloodforged::NewestReleasedHeroicGear();
@@ -585,7 +586,7 @@ void UpdateEvents()
                             player->KnockbackFrom(event.position.GetPositionX(), event.position.GetPositionY(), 15, 6);
             BroadcastPin(event, true);
             BroadcastAnnouncement(Acore::StringFormat(
-                "Crow's Cache has appeared in {}! High-Risk level-60 players can claim it.", LocationName(event)));
+                "Crow's Cache has appeared in {}! Level-60 High-Risk Mercenaries can claim it.", LocationName(event)));
         }
         else if ((event.phase == Phase::Carried || event.phase == Phase::Dropped) && event.deadline <= now)
         {
@@ -773,7 +774,8 @@ public:
             return true;
         if (!Eligible(player))
         {
-            ChatHandler(player->GetSession()).SendSysMessage("Only living level-60 High-Risk players can claim Crow's Cache.");
+            ChatHandler(player->GetSession()).SendSysMessage(
+                "Only living level-60 High-Risk Mercenaries can claim Crow's Cache.");
             return true;
         }
         if (object->GetEntry() == DropEntry)

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Crow's Cache: a War Mode Mercenary cannot claim the cache, a High-Risk Mercenary can",
-  "contract": "Crow's Cache is claimable only by living level-60 High-Risk players; Mercenary for Hire! does not replace High-Risk. Two Orcs pick their rulesets in Orgrimmar, one War Mode and one High-Risk, and both take up Mercenary for Hire!. At the Thousand Needles cache, which has no wildlife nearby to interrupt the claim, the War Mode Mercenary is refused and gets no cache; the High-Risk Mercenary completes the ten-second claim and receives it. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 (the cache needs released Heroic Bloodforged rewards) with automatic cycles deferred so the manual three-second countdown is the only event.",
+  "name": "Crow's Cache: only a High-Risk Mercenary can claim the cache, not a War Mode Mercenary or a High-Risk player without Mercenary for Hire!",
+  "contract": "Crow's Cache is claimable only by living level-60 players who are both in High-Risk and Mercenary for Hire!; neither alone is enough. Three Orcs pick their rulesets in Orgrimmar: one War Mode and two High-Risk. The War Mode character and one High-Risk character take up Mercenary for Hire!. At the Thousand Needles cache, which has no wildlife nearby to interrupt the claim, the War Mode Mercenary and the High-Risk player without Mercenary for Hire! are refused and get no cache; the High-Risk Mercenary completes the ten-second claim and receives it. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 (the cache needs released Heroic Bloodforged rewards) with automatic cycles deferred so the manual three-second countdown is the only event.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -12,6 +12,12 @@
     },
     {
       "id": "highrisk",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "plain",
       "race": 2,
       "class": 1,
       "level": 60
@@ -67,6 +73,20 @@
       "within_ms": 3000
     },
     {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "and so is a third, who will not take up Mercenary for Hire!",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
       "action": "wait",
       "label": "Let the ruleset spells' global cooldown pass",
       "ms": 2000
@@ -116,6 +136,14 @@
       "z": -95.32
     },
     {
+      "action": "teleport",
+      "actor": "plain",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
       "action": "set_phase",
       "actor": "warmode",
       "value": 1
@@ -123,6 +151,11 @@
     {
       "action": "set_phase",
       "actor": "highrisk",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "plain",
       "value": 1
     },
     {
@@ -166,7 +199,7 @@
       "label": "The War Mode Mercenary is refused",
       "actor": "warmode",
       "metric": "system_message_contains",
-      "text": "Only living level-60 High-Risk players can claim Crow's Cache.",
+      "text": "Only living level-60 High-Risk Mercenaries can claim Crow's Cache.",
       "equals": 1,
       "within_ms": 1500
     },
@@ -174,6 +207,28 @@
       "action": "assert",
       "label": "and gets no cache",
       "actor": "warmode",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "plain",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk player without Mercenary for Hire! is refused",
+      "actor": "plain",
+      "metric": "system_message_contains",
+      "text": "Only living level-60 High-Risk Mercenaries can claim Crow's Cache.",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "and gets no cache either",
+      "actor": "plain",
       "metric": "item_count",
       "item": 1615010,
       "equals": 0

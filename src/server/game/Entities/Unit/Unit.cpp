@@ -8476,6 +8476,11 @@ void Unit::ModifyAuraState(AuraStateType flag, bool apply)
         if (!HasFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1)))
         {
             SetFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1));
+
+            // enrage auras are never unapplied when the state drops (see below), so reapplying them stacks their effects
+            if (flag == AURA_STATE_ENRAGE)
+                return;
+
             Unit::AuraMap& tAuras = GetOwnedAuras();
             for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end(); ++itr)
             {
@@ -10099,9 +10104,9 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
         if (coeff <= 0.0f)
         {
             if (caster)
-                coeff = caster->CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
+                coeff = caster->CalculateDefaultCoefficient(spellProto, damagetype);
             else
-                coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
+                coeff = CalculateDefaultCoefficient(spellProto, damagetype);
         }
 
         float factorMod = CalculateLevelPenalty(spellProto) * stack;

@@ -3188,7 +3188,8 @@ namespace CoAChallenges
         // GM-only: print the parsed reward entries for a challenge/level and,
         // when a player name is given (or target/self in-game), deliver them
         // (mail/achievement) using the same path as completion.
-        static bool HandleCoARewardCommand(ChatHandler* handler, uint32 challengeId, Optional<uint32> level, Optional<std::string> playerName)
+        static bool HandleCoARewardCommand(ChatHandler* handler, uint32 challengeId, Optional<uint32> level,
+            Optional<PlayerIdentifier> player)
         {
             uint32 lvl = level ? *level : 1;
             std::vector<RewardDef> rewards = GetChallengeRewards(challengeId, lvl);
@@ -3203,7 +3204,7 @@ namespace CoAChallenges
                 handler->PSendSysMessage("  item={} x{} ach={} special={} first={}",
                     r.itemId, r.amount, r.achievement, r.isSpecial ? 1 : 0, r.isFirst ? 1 : 0);
 
-            Player* p = playerName ? ObjectAccessor::FindPlayerByName(*playerName) : nullptr;
+            Player* p = player ? player->GetConnectedPlayer() : nullptr;
             if (!p)
             {
                 Optional<PlayerIdentifier> target = PlayerIdentifier::FromTargetOrSelf(handler);
@@ -3222,9 +3223,11 @@ namespace CoAChallenges
         // .coa e2e <player> <trialId> [intervalMs]
         // GM test harness (see CoAChallengeTests.cpp). Resets the character to
         // a freshly-created state and runs the trial's validation scenarios.
-        static bool HandleCoAE2ECommand(ChatHandler* handler, std::string playerName, uint32 challengeId, Optional<uint32> stepMs)
+        static bool HandleCoAE2ECommand(ChatHandler* handler, PlayerIdentifier player, uint32 challengeId,
+            Optional<uint32> stepMs)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3290,9 +3293,11 @@ namespace CoAChallenges
         // Sad path only (level-gated trials): every gate is force-leveled
         // WITHOUT its kill. Validates the XP-cap invariant that a reached-but-
         // unmet objective must not kill the character.
-        static bool HandleCoAE2EMissCommand(ChatHandler* handler, std::string playerName, uint32 challengeId, Optional<uint32> stepMs)
+        static bool HandleCoAE2EMissCommand(ChatHandler* handler, PlayerIdentifier player, uint32 challengeId,
+            Optional<uint32> stepMs)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3317,9 +3322,10 @@ namespace CoAChallenges
         // .coa ruletest <player> <id>
         // GM-only: activates the challenge and checks the custom rules through
         // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / NO_REALM_BANK).
-        static bool HandleCoARuleTestCommand(ChatHandler* handler, std::string playerName, uint32 challengeId)
+        static bool HandleCoARuleTestCommand(ChatHandler* handler, PlayerIdentifier player, uint32 challengeId)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3335,9 +3341,10 @@ namespace CoAChallenges
         // .coa ruletestall <player>
         // GM-only: runs a behavioral gate test for EVERY implemented rule,
         // driving the real hook dispatchers (see Test_RuleGates).
-        static bool HandleCoARuleTestAllCommand(ChatHandler* handler, std::string playerName)
+        static bool HandleCoARuleTestAllCommand(ChatHandler* handler, PlayerIdentifier player)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3353,9 +3360,10 @@ namespace CoAChallenges
         // .coa conditiontest <player>
         // GM-only: exercises every implemented activation condition through the
         // real EvaluateConditions, using a synthetic condition string.
-        static bool HandleCoAConditionTestCommand(ChatHandler* handler, std::string playerName)
+        static bool HandleCoAConditionTestCommand(ChatHandler* handler, PlayerIdentifier player)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3372,10 +3380,11 @@ namespace CoAChallenges
         // GM-only: set/clear a persistent activation-condition flag on a
         // character (e.g. OUTSIDE_BANK) to exercise the activation gate without
         // performing the real action. Then `.coa trial check <id>`.
-        static bool HandleCoAFlagCommand(ChatHandler* handler, std::string playerName,
+        static bool HandleCoAFlagCommand(ChatHandler* handler, PlayerIdentifier player,
             std::string flag, Optional<bool> on)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3398,10 +3407,12 @@ namespace CoAChallenges
         // .coa ruletestparty <p1> <p2>
         // GM-only: drives the rules whose check needs a second player
         // (trade / group / PvP range). Both must be online.
-        static bool HandleCoARuleTestPartyCommand(ChatHandler* handler, std::string p1, std::string p2)
+        static bool HandleCoARuleTestPartyCommand(ChatHandler* handler, PlayerIdentifier first, PlayerIdentifier second)
         {
-            Player* a = ObjectAccessor::FindPlayerByName(p1);
-            Player* b = ObjectAccessor::FindPlayerByName(p2);
+            std::string const& p1 = first.GetName();
+            std::string const& p2 = second.GetName();
+            Player* a = first.GetConnectedPlayer();
+            Player* b = second.GetConnectedPlayer();
             if (!a || !b)
             {
                 handler->SendErrorMessage("Both players must be online ('{}' / '{}').", p1, p2);
@@ -3417,9 +3428,10 @@ namespace CoAChallenges
         // .coa ruleaudit <player>
         // GM-only: sweeps every generated challenge ID and compares the
         // declared rules with the real hook dispatchers; prints divergences.
-        static bool HandleCoARuleAuditCommand(ChatHandler* handler, std::string playerName)
+        static bool HandleCoARuleAuditCommand(ChatHandler* handler, PlayerIdentifier player)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3433,9 +3445,10 @@ namespace CoAChallenges
         // .coa auditdefs <player>
         // GM-only: data-integrity sweep over every definition (rules/conditions/
         // objectives known + auras/rewards resolvable); prints divergences.
-        static bool HandleCoAAuditDefsCommand(ChatHandler* handler, std::string playerName)
+        static bool HandleCoAAuditDefsCommand(ChatHandler* handler, PlayerIdentifier player)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3450,9 +3463,10 @@ namespace CoAChallenges
         // GM-only: deterministically forces the cache TOCTOU window (an invalidation
         // between the DB load and the cache publish) and checks the generation guard,
         // running each cache with the guard OFF (bug must appear) and ON (bug gone).
-        static bool HandleCoACacheToctouCommand(ChatHandler* handler, std::string playerName)
+        static bool HandleCoACacheToctouCommand(ChatHandler* handler, PlayerIdentifier player)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3467,9 +3481,10 @@ namespace CoAChallenges
 
         // .coa pettest <player>
         // GM-only: regression test for Issue #4343 (trial auras applied to summons).
-        static bool HandleCoAPetTestCommand(ChatHandler* handler, std::string playerName)
+        static bool HandleCoAPetTestCommand(ChatHandler* handler, PlayerIdentifier player)
         {
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            std::string const& playerName = player.GetName();
+            Player* p = player.GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3487,21 +3502,17 @@ namespace CoAChallenges
         //                             conditions + auras/meters)
         // .coa reset all <player>  -> also level 1, 0 money, no auras
         // Keeps inventory/equipment and bank in both modes.
-        static bool HandleCoAResetCommand(ChatHandler* handler, std::string first, Optional<std::string> second)
+        static bool HandleCoAResetCommand(ChatHandler* handler, Optional<EXACT_SEQUENCE("all")> allState,
+            Optional<PlayerIdentifier> player)
         {
-            bool all = false;
-            std::string playerName = first;
-            if (first == "all")
+            if (!player)
             {
-                if (!second)
-                {
-                    handler->SendErrorMessage("Usage: .coa reset all <player>");
-                    return false;
-                }
-                all = true;
-                playerName = *second;
+                handler->SendErrorMessage("Usage: .coa reset [all] <player>");
+                return false;
             }
-            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            bool const all = allState.has_value();
+            std::string const& playerName = player->GetName();
+            Player* p = player->GetConnectedPlayer();
             if (!p)
             {
                 handler->SendErrorMessage("Player '{}' is not online.", playerName);
@@ -3564,9 +3575,9 @@ namespace CoAChallenges
         // be validated without the client. type = EnviromentalDamage
         // (0 Exhausted, 1 Drowning, 2 Fall, 3 Lava, 4 Slime, 5 Fire, 6 FallToVoid).
         static bool HandleCoAEnvTestCommand(ChatHandler* handler, uint32 type,
-            Optional<uint32> damage, Optional<std::string> playerName)
+            Optional<uint32> damage, Optional<PlayerIdentifier> player)
         {
-            Player* p = playerName ? ObjectAccessor::FindPlayerByName(*playerName) : nullptr;
+            Player* p = player ? player->GetConnectedPlayer() : nullptr;
             if (!p)
             {
                 Optional<PlayerIdentifier> target = PlayerIdentifier::FromTargetOrSelf(handler);
