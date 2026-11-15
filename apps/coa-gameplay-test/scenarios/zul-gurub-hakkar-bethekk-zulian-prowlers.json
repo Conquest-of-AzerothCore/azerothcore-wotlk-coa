@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: after consuming the Avatar of Bethekk Hakkar brings four Zulian Prowlers that join the fight",
+  "contract": [
+    "Round-8 tester (2026-11-15): Hakkar (14834) does not summon the consumed Spirit Beast's adds. The live CoA",
+    "Normal log of 2026-08-09 shows four Zulian Prowlers (15101) within 7 s of the Avatar of Bethekk's death",
+    "(Arlokk's loa), and four more 45 s later. The logs hold no positions, so the prowlers appearing at Hakkar is",
+    "an estimate. The stock prowler script walks to Arlokk, who lives here, so Hakkar's prowlers must fight at",
+    "once. In a fresh Normal instance every High Priest but Arlokk is set DONE; once Hakkar has lost 15 % of his",
+    "health he drains Bethekk, takes its Aspect (2118705) and four prowlers come and stay at the hero."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_phase",
+      "label": "See the avatar Hakkar summons into the instance's own phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "encounter_start",
+      "label": "Record the instance's boss states",
+      "actor": "hero",
+      "boss_entry": 14834,
+      "radius": 10
+    },
+    {
+      "action": "command",
+      "label": "The raid has killed Jeklik",
+      "actor": "hero",
+      "command": ".instance setbossstate 0 3"
+    },
+    {
+      "action": "command",
+      "label": "Venoxis",
+      "actor": "hero",
+      "command": ".instance setbossstate 1 3"
+    },
+    {
+      "action": "command",
+      "label": "Mar'li",
+      "actor": "hero",
+      "command": ".instance setbossstate 2 3"
+    },
+    {
+      "action": "command",
+      "label": "and Thekal; only Arlokk lives",
+      "actor": "hero",
+      "command": ".instance setbossstate 4 3"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: four High Priests are DONE before Hakkar comes",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "boss_state",
+      "state": "DONE",
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Pull Hakkar",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Zulian Prowler before the drain",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15101,
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar below 85 %, his first drain step",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 84
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar consumes the Avatar of Bethekk and takes its Aspect",
+      "actor": "hakkar",
+      "metric": "aura",
+      "spell": 2118705,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: four Zulian Prowlers come with the Aspect",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15101,
+      "min": 4,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "label": "Give a prowler that walks off to Arlokk time to leave",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all four are still here",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15101,
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: they fight the hero instead of walking to Arlokk",
+      "actor": "hero",
+      "metric": "nearest_creature_distance",
+      "entry": 15101,
+      "min": 0,
+      "max": 8
+    }
+  ]
+}
