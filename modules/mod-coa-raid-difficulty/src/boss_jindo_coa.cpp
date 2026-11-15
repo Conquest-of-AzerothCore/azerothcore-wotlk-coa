@@ -571,6 +571,23 @@ namespace
                 SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
+
+    // The Shade detection borrowed from 24306 outlasts the vision; it ends with the vision, by expiry or dispel.
+    class spell_jindo_coa_delusions_vision : public AuraScript
+    {
+        PrepareAuraScript(spell_jindo_coa_delusions_vision);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetTarget()->RemoveAurasDueToSpell(SPELL_DELUSIONS_OF_JINDO);
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_jindo_coa_delusions_vision::HandleRemove, EFFECT_0,
+                SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
 }
 
 void AddCoaJindoScripts()
@@ -579,4 +596,5 @@ void AddCoaJindoScripts()
     RegisterZulGurubCreatureAI(npc_jindo_coa_totem);
     RegisterZulGurubCreatureAI(npc_shade_of_jindo_coa);
     RegisterSpellScript(spell_jindo_coa_healing_stream);
+    RegisterSpellScript(spell_jindo_coa_delusions_vision);
 }
