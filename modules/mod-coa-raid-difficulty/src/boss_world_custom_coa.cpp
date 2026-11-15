@@ -1182,6 +1182,7 @@ namespace
         SPELL_SOUL_LINK         = 2119847,
         SPELL_VESSEL_CHANNEL    = 33827,
         SPELL_VESSEL_SOULS      = 84848,
+        GO_VESSEL_ALTAR         = 978093,
         SPELL_VESSEL_SHADOWMOURNE = 72523,
         SPELL_VESSEL_HORROR     = 69105,
 
@@ -1323,22 +1324,35 @@ namespace
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
-            if (state == VESSEL_OPEN || state == VESSEL_IDLE || state == VESSEL_LINKED)
+            if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             _assaulted = false;
             Keep(_barrier, state == VESSEL_SHIELDED, NPC_VESSEL_BARRIER, BARRIER_RISE);
-            bool const dormant = state == VESSEL_IDLE || state == VESSEL_LINKED;
-            Keep(_anchor, dormant || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
-            if (Creature* anchor = ObjectAccessor::GetCreature(*me, _anchor))
+            Keep(_anchor, state == VESSEL_LINKED || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
+            Glow(state == VESSEL_IDLE || state == VESSEL_LINKED);
+        }
+
+        void Glow(bool wanted)
+        {
+            Creature* glow = ObjectAccessor::GetCreature(*me, _glow);
+            if (glow && wanted)
+                return;
+            if (glow)
+                glow->DespawnOrUnsummon();
+            _glow.Clear();
+            if (!wanted)
+                return;
+            GameObject* altar = me->FindNearestGameObject(GO_VESSEL_ALTAR, 8.0f);
+            Position const at = altar ? altar->GetPosition() : me->GetPosition();
+            if (TempSummon* made = me->SummonCreature(NPC_VESSEL_ANCHOR, at, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                made->SetReactState(REACT_PASSIVE);
                 for (uint32 visual : { SPELL_VESSEL_SHADOWMOURNE, SPELL_VESSEL_SOULS, SPELL_VESSEL_HORROR })
-                {
-                    if (dormant && !anchor->HasAura(visual))
-                        anchor->AddAura(visual, anchor);
-                    else if (!dormant)
-                        anchor->RemoveAurasDueToSpell(visual);
-                }
+                    made->AddAura(visual, made);
+                _glow = made->GetGUID();
+            }
         }
 
         void Keep(ObjectGuid& guid, bool wanted, uint32 entry, float rise)
@@ -1410,8 +1424,8 @@ namespace
         {
             if (_state == VESSEL_IDLE || _state == VESSEL_LINKED)
             {
-                if (!ObjectAccessor::GetCreature(*me, _anchor))
-                    SetState(_state);
+                if (!ObjectAccessor::GetCreature(*me, _glow))
+                    Glow(true);
                 bool const held = Channeler() != nullptr;
                 if (held && _state == VESSEL_IDLE)
                 {
@@ -1437,6 +1451,7 @@ namespace
         ObjectGuid _barrier;
         bool _assaulted = false;
         ObjectGuid _anchor;
+        ObjectGuid _glow;
         VesselState _state = VESSEL_IDLE;
     };
 
