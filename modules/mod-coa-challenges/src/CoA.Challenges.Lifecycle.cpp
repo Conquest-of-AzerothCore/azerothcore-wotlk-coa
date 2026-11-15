@@ -259,7 +259,9 @@ namespace CoAChallenges
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_objective WHERE guid = {}", guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_completion WHERE guid = {}", guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_failure WHERE guid = {}", guid);
-        CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_failure_snapshot WHERE guid = {}", guid);
+        auto* snapshots = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOTS);
+        snapshots->SetData(0, guid);
+        CharacterDatabase.DirectExecute(snapshots);
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_condition WHERE guid = {}", guid);
         ResetConditionFlags(guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_gamemode WHERE guid = {}", guid);
@@ -2198,23 +2200,25 @@ namespace CoAChallenges
     // what the failure is about to discard (the run timer) for
     // `.coa trial restore`, with the character's level so a restore can tell
     // which objective gates the character has passed since.
-    // A repeat failure call finds no active row and leaves the snapshot alone.
+    // The statement copies the active row, so a repeat failure call, which
+    // finds none, writes nothing and leaves the snapshot alone.
     void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel)
     {
-        if (!CharacterDatabase.Query(
-                "SELECT 1 FROM coa_character_challenge WHERE guid = {} AND challengeId = {}", guid, challengeID))
-            return;
-        CharacterDatabase.DirectExecute(
-            "REPLACE INTO coa_challenge_failure_snapshot (guid, challengeId, level, deaths, startTime, "
-            "characterLevel) SELECT guid, challengeId, level, deaths, startTime, {} FROM coa_character_challenge "
-            "WHERE guid = {} AND challengeId = {}",
-            characterLevel, guid, challengeID);
+        auto* snapshot = CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        snapshot->SetData(0, characterLevel);
+        snapshot->SetData(1, guid);
+        snapshot->SetData(2, challengeID);
+        CharacterDatabase.DirectExecute(snapshot);
     }
 
+    // Synchronous, so a failure right after an activation cannot have its
+    // fresh snapshot removed by a delete still waiting in the async queue.
     void ForgetFailureSnapshot(uint32 guid, uint32 challengeID)
     {
-        CharacterDatabase.Execute(
-            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        auto* forget = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        forget->SetData(0, guid);
+        forget->SetData(1, challengeID);
+        CharacterDatabase.DirectExecute(forget);
     }
 
     // GM restore of a failed run: drops the failure lock and puts the challenge
@@ -2224,9 +2228,10 @@ namespace CoAChallenges
     bool RestoreFailedChallenge(Player* player, uint32 challengeID, std::string& message)
     {
         uint32 const guid = player->GetGUID().GetCounter();
-        QueryResult failure = CharacterDatabase.Query(
-            "SELECT level, deaths FROM coa_challenge_failure WHERE guid = {} AND challengeId = {}",
-            guid, challengeID);
+        auto* selectFailure = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CHALLENGE_FAILURE);
+        selectFailure->SetData(0, guid);
+        selectFailure->SetData(1, challengeID);
+        PreparedQueryResult failure = CharacterDatabase.Query(selectFailure);
         if (!failure)
         {
             message = Acore::StringFormat("{} has no failure lock on challenge {}.", player->GetName(), challengeID);
@@ -2242,9 +2247,10 @@ namespace CoAChallenges
         uint32 deaths = failure->Fetch()[1].Get<uint32>();
         uint32 startTime = uint32(::time(nullptr));
         uint32 levelAtFailure = 0;
-        QueryResult snapshot = CharacterDatabase.Query(
-            "SELECT level, deaths, startTime, characterLevel FROM coa_challenge_failure_snapshot "
-            "WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        auto* selectSnapshot = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        selectSnapshot->SetData(0, guid);
+        selectSnapshot->SetData(1, challengeID);
+        PreparedQueryResult snapshot = CharacterDatabase.Query(selectSnapshot);
         bool const fromSnapshot = snapshot != nullptr;
         if (fromSnapshot)
         {
@@ -2317,21 +2323,36 @@ namespace CoAChallenges
         // One transaction: the lock, the active row, the meters and the
         // snapshot change together or not at all.
         CharacterDatabaseTransaction restore = CharacterDatabase.BeginTransaction();
-        restore->Append("DELETE FROM coa_challenge_failure WHERE guid = {} AND challengeId = {}", guid, challengeID);
-        restore->Append(
-            "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
-            "VALUES ({}, {}, {}, {}, 0, 0, {})",
-            guid, challengeID, level, deaths, startTime);
+        auto* deleteFailure = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE);
+        deleteFailure->SetData(0, guid);
+        deleteFailure->SetData(1, challengeID);
+        restore->Append(deleteFailure);
+        auto* activate = CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_CHARACTER_CHALLENGE);
+        activate->SetData(0, guid);
+        activate->SetData(1, challengeID);
+        activate->SetData(2, level);
+        activate->SetData(3, deaths);
+        activate->SetData(4, startTime);
+        restore->Append(activate);
         // The meters restart fresh, as on activation: a run that failed on a
         // full hunger or thirst meter or an empty fatigue bar would otherwise
         // die again at once. No fatigue row means a full bar.
-        restore->Append("DELETE FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        auto* deleteFatigue = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHARACTER_FATIGUE);
+        deleteFatigue->SetData(0, guid);
+        deleteFatigue->SetData(1, challengeID);
+        restore->Append(deleteFatigue);
         bool const hungerReset = IsHungerChallenge(challengeID);
         bool const fatigueReset = IsFatigueChallenge(challengeID);
         if (hungerReset)
-            restore->Append("UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = {}", guid);
-        restore->Append(
-            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        {
+            auto* resetSurvival = CharacterDatabase.GetPreparedStatement(CHAR_UPD_COA_CHARACTER_SURVIVAL_RESET);
+            resetSurvival->SetData(0, guid);
+            restore->Append(resetSurvival);
+        }
+        auto* deleteSnapshot = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        deleteSnapshot->SetData(0, guid);
+        deleteSnapshot->SetData(1, challengeID);
+        restore->Append(deleteSnapshot);
         CharacterDatabase.DirectCommitTransaction(restore);
         ClearCharChallengeCache(guid);
 

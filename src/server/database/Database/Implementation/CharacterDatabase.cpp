@@ -67,6 +67,32 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "UPDATE coa_character_challenge SET level = ? WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
         "DELETE FROM coa_account_challenge_completion WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_CHALLENGE_FAILURE,
+        "SELECT level, deaths FROM coa_challenge_failure WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_CHALLENGE_FAILURES,
+        "SELECT f.challengeId, f.level, f.failTime, s.characterLevel FROM coa_challenge_failure f "
+        "LEFT JOIN coa_challenge_failure_snapshot s ON s.guid = f.guid AND s.challengeId = f.challengeId "
+        "WHERE f.guid = ? ORDER BY f.failTime DESC, f.challengeId", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHALLENGE_FAILURE,
+        "DELETE FROM coa_challenge_failure WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_COA_CHALLENGE_FAILURE_SNAPSHOT,
+        "REPLACE INTO coa_challenge_failure_snapshot (guid, challengeId, level, deaths, startTime, characterLevel) "
+        "SELECT guid, challengeId, level, deaths, startTime, ? FROM coa_character_challenge "
+        "WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_CHALLENGE_FAILURE_SNAPSHOT,
+        "SELECT level, deaths, startTime, characterLevel FROM coa_challenge_failure_snapshot "
+        "WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOT,
+        "DELETE FROM coa_challenge_failure_snapshot WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOTS,
+        "DELETE FROM coa_challenge_failure_snapshot WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_COA_CHARACTER_CHALLENGE,
+        "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
+        "VALUES (?, ?, ?, ?, 0, 0, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_CHARACTER_FATIGUE,
+        "DELETE FROM coa_character_fatigue WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_COA_CHARACTER_SURVIVAL_RESET,
+        "UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = ?", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION,
         "INSERT IGNORE INTO account_vanity_collection (account_id, item_id) VALUES (?, ?)", CONNECTION_ASYNC);

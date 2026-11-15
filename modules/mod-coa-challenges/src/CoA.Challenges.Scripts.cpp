@@ -1488,8 +1488,9 @@ namespace CoAChallenges
         {
             if (player)
             {
-                CharacterDatabase.Execute("DELETE FROM coa_challenge_failure_snapshot WHERE guid = {}",
-                    player->GetGUID().GetCounter());
+                auto* snapshots = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOTS);
+                snapshots->SetData(0, player->GetGUID().GetCounter());
+                CharacterDatabase.DirectExecute(snapshots);
                 SendFailureList(player);
                 SendCriteriaState(player);
             }
@@ -3108,10 +3109,9 @@ namespace CoAChallenges
             // The failed challenges, newest first, with what a GM needs to pick
             // the Challenge ID for `.coa trial restore`. The character level comes
             // from the failure snapshot and is absent for older failures.
-            QueryResult failed = CharacterDatabase.Query(
-                "SELECT f.challengeId, f.level, f.failTime, s.characterLevel FROM coa_challenge_failure f "
-                "LEFT JOIN coa_challenge_failure_snapshot s ON s.guid = f.guid AND s.challengeId = f.challengeId "
-                "WHERE f.guid = {} ORDER BY f.failTime DESC, f.challengeId", guid);
+            auto* selectFailed = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CHALLENGE_FAILURES);
+            selectFailed->SetData(0, guid);
+            PreparedQueryResult failed = CharacterDatabase.Query(selectFailed);
             if (failed)
             {
                 handler->PSendSysMessage("Failed challenges:");
