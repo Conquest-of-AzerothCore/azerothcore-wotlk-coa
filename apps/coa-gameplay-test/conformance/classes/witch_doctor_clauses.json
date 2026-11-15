@@ -285,7 +285,11 @@
   {
     "spell": 500472,
     "clause": "Instantly swaps your Ingredients to Jungle Shrooms and Bloodthistle.",
-    "labels": [],
+    "labels": [
+      "500472 behaviour_metric_delta shrooms",
+      "500472 behaviour_metric_delta thistle",
+      "500472 behaviour_metric_delta swapped"
+    ],
     "kind": "claim"
   },
   {
@@ -428,7 +432,10 @@
   {
     "spell": 500962,
     "clause": "Only 1 Base can be active at a time.",
-    "labels": [],
+    "labels": [
+      "500962 behaviour_exclusivity",
+      "705870 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
@@ -476,7 +483,8 @@
     "spell": 501136,
     "clause": "While invisible, you can only see other invisible targets and those who can see invisible.",
     "labels": [
-      "501136 behaviour_metric_delta sight"
+      "501136 behaviour_metric_delta sight",
+      "501136 behaviour_metric_delta sight_client"
     ],
     "kind": "claim"
   },
@@ -844,8 +852,13 @@
   {
     "spell": 525377,
     "clause": "Dealing damage with Shadowflare now applies Hex of Malice if it strikes at least 3 enemies.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "525377 hex_three behaviour_fixed_count",
+      "525377 hex_control behaviour_fixed_count",
+      "525377 hex_two behaviour_fixed_count"
+    ],
+    "kind": "claim",
+    "reason": "The primary enemy's Hex is not read (fixed_count counts the additional dummies only in this layout): hex_three proves the Hex on the additional enemies struck, hex_control and hex_two the cause and the threshold of 3."
   },
   {
     "spell": 525377,
@@ -1231,7 +1244,9 @@
     "spell": 704497,
     "clause": "Increases your haste by 1% per stack.",
     "labels": [
-      "807038 behaviour_metric_delta haste"
+      "807038 behaviour_metric_delta haste",
+      "704497 behaviour_metric_delta haste_cast_held",
+      "704497 behaviour_metric_delta haste_cast_done"
     ],
     "kind": "claim"
   },
@@ -1619,7 +1634,10 @@
   {
     "spell": 705870,
     "clause": "Only 1 Base can be active at a time.",
-    "labels": [],
+    "labels": [
+      "500962 behaviour_exclusivity",
+      "705870 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
@@ -1945,7 +1963,8 @@
     "spell": 705948,
     "clause": "Casting Spirit Eclipse with 5 Spirits now resets the cooldown of Spirit Glaive",
     "labels": [
-      "705948 behaviour_metric_delta reset"
+      "705948 behaviour_metric_delta reset",
+      "705948 behaviour_metric_delta reset_packet"
     ],
     "kind": "claim"
   },
@@ -2595,7 +2614,9 @@
   {
     "spell": 801664,
     "clause": "Can only occur once every 0.5 sec.",
-    "labels": [],
+    "labels": [
+      "801664 behaviour_metric_delta gate"
+    ],
     "kind": "claim"
   },
   {
@@ -2711,8 +2732,12 @@
   {
     "spell": 802219,
     "clause": "Effective healing done by Mojo Beam now reduces the cooldown of Potion Toss and Splash Potion by 1 sec.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "802219 behaviour_metric_delta beam_potion",
+      "802219 behaviour_metric_delta beam_splash"
+    ],
+    "kind": "claim",
+    "reason": "Each label holds three arms: no talent (no cut), the talent with effective heals (1 sec per heal) and the talent with only overhealing heals (no cut), so 'Effective' is tested."
   },
   {
     "spell": 802219,
@@ -3155,7 +3180,9 @@
   {
     "spell": 807450,
     "clause": "Can only occur once every 3 sec.",
-    "labels": [],
+    "labels": [
+      "807450 behaviour_metric_delta gate"
+    ],
     "kind": "claim"
   },
   {
@@ -3177,7 +3204,9 @@
   {
     "spell": 807855,
     "clause": "Your Amphibimorph is now instant cast.",
-    "labels": [],
+    "labels": [
+      "807855 behaviour_metric_delta instant"
+    ],
     "kind": "claim"
   },
   {
