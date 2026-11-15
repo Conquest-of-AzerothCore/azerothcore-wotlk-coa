@@ -21,6 +21,7 @@
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
 #include "AscensionResilientConstitution.h"
+#include "AscensionTankStances.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -4485,6 +4486,9 @@ int32 Unit::GetAscensionConditionalCombatModifier(Unit const* victim, SpellInfo 
 
 float Unit::GetMeleeDazeChance(Unit const* victim) const
 {
+    if (victim->HasAura(Ascension::TANK_STANCE_CRIT_REDUCTION_AURA))
+        return 0.0f;
+
     // -probability is between 0% and 40%
     // 20% base chance
     float Probability = 20.0f;
