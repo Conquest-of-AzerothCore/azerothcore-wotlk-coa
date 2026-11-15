@@ -8,9 +8,11 @@
     "23992 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the buff never",
     "appeared. The fix adds the row: done negative magic spell hits, damage type, Spell.dbc ProcChance 100 and a",
     "60 s cooldown. Frostbolt rank 1 (116) hits once with no periodic damage. With a 100% chance one Frostbolt",
-    "hit must apply 24025; after it expires a second hit inside the minute must not apply it again."
+    "hit must apply 24025; after it expires a second hit inside the minute must not apply it again.",
+    "Player::ApplyEquipCooldown starts an on-equip proc cooldown when the item is equipped, so the first cast",
+    "comes 61 s after equipping."
   ],
-  "timeout_ms": 90000,
+  "timeout_ms": 180000,
   "players": [
     {
       "id": "mage",
@@ -35,6 +37,7 @@
     { "action": "add_item", "actor": "mage", "item": 1414516 },
     { "action": "equip", "actor": "mage", "item": 1414516, "slot": 12 },
     { "action": "learn", "actor": "mage", "spell": 116 },
+    { "action": "wait", "label": "Equipping starts the 60 s proc cooldown (Player::ApplyEquipCooldown)", "ms": 61000 },
     { "action": "assert", "label": "SETUP: the trinket's passive is active", "actor": "mage", "metric": "aura",
       "spell": 23992, "equals": 1, "within_ms": 3000 },
     { "action": "set_power", "actor": "mage", "power": 0, "value": 500 },
