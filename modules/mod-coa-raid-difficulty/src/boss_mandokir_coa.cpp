@@ -87,11 +87,12 @@ namespace
     enum Says
     {
         SAY_AGGRO       = 0,
-        SAY_DING_KILL   = 1,
         SAY_WATCH       = 2,
         SAY_OHGAN_DEAD  = 4,
         SAY_GRATS_JINDO = 0
     };
+
+    constexpr uint32 BROADCAST_TEXT_DING = 10505;
 
     enum Spells
     {
@@ -109,6 +110,7 @@ namespace
         SPELL_LEAP              = 2118413,
         SPELL_BLOODLORDS_PRESENCE = 2118415,
         SPELL_LEVEL_UP          = 2118416,
+        SPELL_STOCK_LEVEL_UP    = 24312,
         SPELL_FIRST_BLOOD       = 2118417,
         SPELL_KILLING_SPREE     = 2118418,
         SPELL_RAMPAGE           = 2118419,
@@ -204,12 +206,16 @@ namespace
 
     struct boss_mandokir_coa : public BossAI
     {
-        boss_mandokir_coa(Creature* creature) : BossAI(creature, DATA_MANDOKIR) { }
+        boss_mandokir_coa(Creature* creature) : BossAI(creature, DATA_MANDOKIR),
+            _baseScale(creature->GetNativeObjectScale()),
+            _growthPerKill(sSpellMgr->AssertSpellInfo(SPELL_STOCK_LEVEL_UP)->Effects[EFFECT_1].CalcValue() / 100.0f)
+        { }
 
         void Reset() override
         {
             BossAI::Reset();
             _kills = 0;
+            me->SetObjectScale(_baseScale);
             _useExecute = false;
             _whirlwindOnLanding = false;
             _gazed.Clear();
@@ -301,8 +307,10 @@ namespace
             _reviveGUID = victim->GetGUID();
             RevivePlayer(victim, _reviveGUID);
 
-            AddStack(me, me, SPELL_LEVEL_UP);
+            DoCastSelf(SPELL_LEVEL_UP, true);
             ++_kills;
+            me->SetObjectScale(_baseScale * (1.0f + _growthPerKill * _kills));
+            me->Yell(BROADCAST_TEXT_DING);
             uint32 streak = 0;
             switch (_kills)
             {
@@ -316,7 +324,6 @@ namespace
             if (streak)
             {
                 DoCastSelf(streak, true);
-                Talk(SAY_DING_KILL);
                 if (_kills == 3)
                     if (Creature* jindo = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_JINDO)))
                         if (jindo->IsAlive())
@@ -506,7 +513,9 @@ namespace
         }
 
     private:
-        uint8 _kills = 0;
+        float const _baseScale;
+        float const _growthPerKill;
+        uint32 _kills = 0;
         bool _useExecute = false;
         bool _whirlwindOnLanding = false;
         ObjectGuid _gazed;
@@ -546,8 +555,8 @@ namespace
         }
     };
 
-    // Whirlwind's periodic aura names no spell to trigger; its tooltip and the live logs show the 5-yard hit
-    // 2118409 once a second, 1 to 6 s into the spin.
+    // Whirlwind's periodic aura names 2118409, yet the stock trigger dealt no damage. Mandokir casts it on
+    // himself instead, so each tick hits everyone within 5 yards, once a second, 1 to 6 s into the spin.
     class spell_mandokir_coa_whirlwind : public AuraScript
     {
         PrepareAuraScript(spell_mandokir_coa_whirlwind);

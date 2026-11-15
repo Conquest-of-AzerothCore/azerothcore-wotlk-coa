@@ -124,6 +124,8 @@ namespace
     enum Npcs
     {
         NPC_SON_OF_HAKKAR   = 11357,
+        NPC_BLOODSEEKER_BAT = 11368,
+        NPC_ZULIAN_PROWLER  = 15101,
         NPC_WORLD_TRIGGER   = 12999,
         NPC_HEART_OF_HAKKAR = 92005,
         NPC_AVATAR_OF_BETHEKK    = 666988,
@@ -146,6 +148,8 @@ namespace
         EVENT_SONS,
         EVENT_BERSERK,
         EVENT_FIERCE_BLOW,
+        EVENT_BLOODSEEKER_BATS,
+        EVENT_ZULIAN_PROWLERS,
     };
 
     enum Actions
@@ -163,6 +167,9 @@ namespace
     constexpr float HEART_HEIGHT         = 8.0f;
     constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
     constexpr int32 DRAIN_HEALTH_STEP    = 15;
+    constexpr uint8 BAT_WAVE             = 6;
+    constexpr uint8 PROWLER_WAVE         = 4;
+    constexpr Milliseconds ADD_WAVE_INTERVAL = 45s;
     constexpr std::array<uint32, 4> CORRUPTED_BLOOD_VARIANTS = { 2118601, 2118602, 2118603, 2118604 };
     constexpr std::array<uint32, 4> STRAIGHT_TO_THE_HEART = { 2107157, 2107158, 2107159, 2107160 };
 
@@ -291,7 +298,24 @@ namespace
         {
             DoCastSelf(loa.aspect, true);
             if (loa.priest == DATA_ARLOKK)
+            {
                 DoCastSelf(SPELL_RAZOR_CLAWS, true);
+                _clock.ScheduleEvent(EVENT_ZULIAN_PROWLERS, 0ms);
+            }
+            else if (loa.priest == DATA_JEKLIK)
+                _clock.ScheduleEvent(EVENT_BLOODSEEKER_BATS, 0ms);
+        }
+
+        void SummonWave(uint32 entry, uint8 count)
+        {
+            for (uint8 i = 0; i < count; ++i)
+            {
+                Creature* add = me->SummonCreature(entry, me->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                if (!add)
+                    continue;
+                if (Unit* target = SelectTarget(SelectTargetMethod::Random))
+                    add->AI()->AttackStart(target);
+            }
         }
 
         void TakeConsumedAspects()
@@ -483,6 +507,14 @@ namespace
                         break;
                     case EVENT_SIPHON_END:
                         EndSiphon();
+                        break;
+                    case EVENT_BLOODSEEKER_BATS:
+                        SummonWave(NPC_BLOODSEEKER_BAT, BAT_WAVE);
+                        _clock.ScheduleEvent(EVENT_BLOODSEEKER_BATS, ADD_WAVE_INTERVAL);
+                        break;
+                    case EVENT_ZULIAN_PROWLERS:
+                        SummonWave(NPC_ZULIAN_PROWLER, PROWLER_WAVE);
+                        _clock.ScheduleEvent(EVENT_ZULIAN_PROWLERS, ADD_WAVE_INTERVAL);
                         break;
                     default:
                         break;

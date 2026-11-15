@@ -36,11 +36,14 @@
  *     Stream is read from the spells' names and targets. Both auras last
  *     seven days in the data, so they end when their totem dies or despawns;
  *   - the totems spread over the Bloodfire Pit (tester 2026-11-14, marked on a
- *     screenshot): each stands on a free trash pack spot, at least 20 yards from
- *     the others of its wave where the spots allow, and within its spell's range
- *     of him. The spots and the spacing are estimated; the live video does not
- *     show where the totems stand. Away from the pit they stand ten yards
- *     around him. Mythic and Ascended use the Heroic totem counts and health;
+ *     screenshot): each stands at a random point of the area its outer trash
+ *     pack spots enclose (tester 2026-11-15: random, not fixed spots), on the
+ *     floor those spots stand on, out of the water, in his sight and within its
+ *     spell's range of him, and at least 20 yards from the others of its wave
+ *     where the floor allows. The area and the spacing are estimated; the live
+ *     video does not show where the totems stand. Away from the pit they stand
+ *     ten yards around him. Mythic and Ascended use the Heroic totem counts and
+ *     health;
  *   - the Shade of Jin'do neither swings nor casts Shadow Shock: in the CoA logs
  *     of 2026-08-02 and 2026-08-24 it only casts Seeking Shadow Bolts (2118556,
  *     4s, interruptible) over and over, while every 4s each player takes a
@@ -51,6 +54,7 @@
 #include "CreatureScript.h"
 #include "GameTime.h"
 #include "PassiveAI.h"
+#include "PathGenerator.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
@@ -62,8 +66,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <list>
 #include <map>
+#include <optional>
 #include <vector>
 
 using namespace coa_zg;
@@ -129,6 +135,11 @@ namespace
     constexpr uint8 ANIMATED_TROLLS           = 8;
     constexpr Milliseconds SEEKING_SHADOW_BOLTS = 4s;
     constexpr float SEEKING_SHADOW_BOLTS_RANGE  = 200.0f;
+    constexpr float SHADE_SPAWN_MIN             = 15.0f;
+    constexpr float SHADE_SPAWN_MAX             = 30.0f;
+    constexpr float SHADE_SPOT_CLIMB            = 10.0f;
+    constexpr float SHADE_SPOT_ON_GROUND        = 1.5f;
+    constexpr uint8 SHADE_SPOT_ATTEMPTS         = 32;
 
     std::array<Position, 10> const BloodPitTrolls =
     { {
@@ -144,19 +155,34 @@ namespace
         { -11580.6f, -1254.79f, 77.6299f, 2.28638f },
     } };
 
-    std::array<Position, 10> const BloodfirePitTotemSpots =
+    std::array<Position, 6> const BloodfirePitCorners =
     { {
+        { -11613.4f, -1278.9f, 79.84f, 0.0f },
+        { -11571.1f, -1308.7f, 79.17f, 0.0f },
+        { -11537.6f, -1289.9f, 78.85f, 0.0f },
+        { -11532.0f, -1270.0f, 79.11f, 0.0f },
         { -11550.1f, -1223.9f, 80.22f, 0.0f },
         { -11601.1f, -1228.4f, 79.11f, 0.0f },
-        { -11549.8f, -1243.9f, 78.35f, 0.0f },
-        { -11569.4f, -1266.4f, 77.62f, 0.0f },
-        { -11588.6f, -1263.0f, 78.67f, 0.0f },
-        { -11532.0f, -1270.0f, 79.11f, 0.0f },
-        { -11537.6f, -1289.9f, 78.85f, 0.0f },
-        { -11573.3f, -1292.3f, 77.61f, 0.0f },
-        { -11571.1f, -1308.7f, 79.17f, 0.0f },
-        { -11613.4f, -1278.9f, 79.84f, 0.0f },
     } };
+    constexpr float BLOODFIRE_PIT_FLOOR_LOW   = 76.6f;
+    constexpr float BLOODFIRE_PIT_FLOOR_HIGH  = 81.2f;
+    constexpr uint8 TOTEM_SPOT_ATTEMPTS       = 64;
+
+    bool InsideBloodfirePit(float x, float y)
+    {
+        bool left = false;
+        bool right = false;
+        for (std::size_t i = 0; i < BloodfirePitCorners.size(); ++i)
+        {
+            Position const& from = BloodfirePitCorners[i];
+            Position const& to = BloodfirePitCorners[(i + 1) % BloodfirePitCorners.size()];
+            float const side = (to.GetPositionX() - from.GetPositionX()) * (y - from.GetPositionY()) -
+                (to.GetPositionY() - from.GetPositionY()) * (x - from.GetPositionX());
+            left = left || side > 0.0f;
+            right = right || side < 0.0f;
+        }
+        return !(left && right);
+    }
 
     bool AboveNormal(Unit const* unit)
     {
@@ -234,31 +260,41 @@ namespace
             return false;
         }
 
+        std::optional<Position> RandomPitSpot(float reach) const
+        {
+            auto [lowX, highX] = std::minmax_element(BloodfirePitCorners.begin(), BloodfirePitCorners.end(),
+                [](Position const& a, Position const& b) { return a.GetPositionX() < b.GetPositionX(); });
+            auto [lowY, highY] = std::minmax_element(BloodfirePitCorners.begin(), BloodfirePitCorners.end(),
+                [](Position const& a, Position const& b) { return a.GetPositionY() < b.GetPositionY(); });
+            float const x = frand(lowX->GetPositionX(), highX->GetPositionX());
+            float const y = frand(lowY->GetPositionY(), highY->GetPositionY());
+            if (!InsideBloodfirePit(x, y))
+                return std::nullopt;
+
+            float const z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, BLOODFIRE_PIT_FLOOR_HIGH);
+            if (z < BLOODFIRE_PIT_FLOOR_LOW || z > BLOODFIRE_PIT_FLOOR_HIGH)
+                return std::nullopt;
+
+            Position const spot(x, y, z, frand(0.0f, 2.0f * float(M_PI)));
+            if (me->GetExactDist2d(spot) > reach || !me->IsWithinLOS(x, y, z) ||
+                me->GetMap()->IsInWater(me->GetPhaseMask(), x, y, z, DEFAULT_COLLISION_HEIGHT))
+                return std::nullopt;
+            return spot;
+        }
+
         std::vector<Position> SpreadTotemSpots(uint8 count, float reach) const
         {
-            std::vector<Position> free;
-            std::vector<Position> taken;
-            for (Position const& spot : BloodfirePitTotemSpots)
-                if (me->GetExactDist2d(spot) <= reach)
-                    (TotemStandsAt(spot) ? taken : free).push_back(spot);
-            Acore::Containers::RandomShuffle(free);
-            Acore::Containers::RandomShuffle(taken);
-            free.insert(free.end(), taken.begin(), taken.end());
-
             std::vector<Position> picked;
-            auto spaced = [&picked](Position const& spot)
+            auto clear = [this, &picked](Position const& spot, float spacing)
             {
-                return std::none_of(picked.begin(), picked.end(), [&spot](Position const& other)
-                {
-                    return other.GetExactDist2d(spot) < TOTEM_SPACING;
-                });
+                return !TotemStandsAt(spot) && std::none_of(picked.begin(), picked.end(),
+                    [&spot, spacing](Position const& other) { return other.GetExactDist2d(spot) < spacing; });
             };
-            for (Position const& spot : free)
-                if (picked.size() < count && spaced(spot))
-                    picked.push_back(spot);
-            for (Position const& spot : free)
-                if (picked.size() < count && std::find(picked.begin(), picked.end(), spot) == picked.end())
-                    picked.push_back(spot);
+            for (float const spacing : { TOTEM_SPACING, TOTEM_SPOT_TAKEN })
+                for (uint8 attempt = 0; attempt < TOTEM_SPOT_ATTEMPTS && picked.size() < count; ++attempt)
+                    if (std::optional<Position> spot = RandomPitSpot(reach))
+                        if (clear(*spot, spacing))
+                            picked.push_back(*spot);
             return picked;
         }
 
@@ -330,13 +366,50 @@ namespace
             me->CastCustomSpell(me, SPELL_FRIENDS_ON_THE_OTHER_SIDE, nullptr, &bonus, nullptr, true);
         }
 
-        void TrackShades(Unit* summoner)
+        bool WalkableFromJindo(float x, float y, float z) const
         {
-            std::list<Creature*> shades;
-            summoner->GetCreatureListWithEntryInGrid(shades, NPC_SHADE_OF_JINDO, 5.0f);
-            for (Creature* shade : shades)
-                if (shade->IsSummon() && shade->ToTempSummon()->GetSummonerGUID() == summoner->GetGUID())
-                    _shadeGuids.insert(shade->GetGUID());
+            dtNavMeshQuery const* navMesh = me->GetMap()->GetMapCollisionData().GetMMapData().GetNavMeshQuery();
+            if (!navMesh)
+                return true;
+
+            float const spot[VERTEX_SIZE] = { y, z, x };
+            float const extents[VERTEX_SIZE] = { SHADE_SPOT_ON_GROUND, SHADE_SPOT_ON_GROUND, SHADE_SPOT_ON_GROUND };
+            dtQueryFilter const filter;
+            dtPolyRef ground = INVALID_POLYREF;
+            if (dtStatusFailed(navMesh->findNearestPoly(spot, extents, &filter, &ground, nullptr)) ||
+                ground == INVALID_POLYREF)
+                return false;
+
+            PathGenerator path(me);
+            path.CalculatePath(x, y, z);
+            return path.GetPathType() == PATHFIND_NORMAL;
+        }
+
+        Position RandomShadeSpot()
+        {
+            for (uint8 attempt = 0; attempt < SHADE_SPOT_ATTEMPTS; ++attempt)
+            {
+                float const angle = frand(0.0f, 2.0f * float(M_PI));
+                float const distance =
+                    std::sqrt(frand(SHADE_SPAWN_MIN * SHADE_SPAWN_MIN, SHADE_SPAWN_MAX * SHADE_SPAWN_MAX));
+                float const x = me->GetPositionX() + distance * std::cos(angle);
+                float const y = me->GetPositionY() + distance * std::sin(angle);
+                float const z =
+                    me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, me->GetPositionZ() + SHADE_SPOT_CLIMB);
+                if (std::fabs(z - me->GetPositionZ()) <= SHADE_SPOT_CLIMB && me->IsWithinLOS(x, y, z) &&
+                    !me->GetMap()->IsInWater(me->GetPhaseMask(), x, y, z, DEFAULT_COLLISION_HEIGHT) &&
+                    WalkableFromJindo(x, y, z))
+                    return Position(x, y, z, Position::NormalizeOrientation(angle + float(M_PI)));
+            }
+            return me->GetFirstCollisionPosition(SHADE_SPAWN_MIN, frand(0.0f, 2.0f * float(M_PI)));
+        }
+
+        void SummonShade(Unit* cursed)
+        {
+            uint32 const lifetime = uint32(sSpellMgr->AssertSpellInfo(SPELL_SUMMON_SHADE_OF_JINDO)->GetDuration());
+            if (TempSummon* shade = cursed->SummonCreature(NPC_SHADE_OF_JINDO, RandomShadeSpot(),
+                TEMPSUMMON_TIMED_DESPAWN, lifetime))
+                _shadeGuids.insert(shade->GetGUID());
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -355,8 +428,7 @@ namespace
                         // effect, so reuse only that effect here.
                         me->AddAura(sSpellMgr->GetSpellInfo(SPELL_DELUSIONS_OF_JINDO), 1 << EFFECT_2, target);
                         me->CastSpell(target, SPELL_DELUSIONS_DOT, true);
-                        target->CastSpell(target, SPELL_SUMMON_SHADE_OF_JINDO, true);
-                        TrackShades(target);
+                        SummonShade(target);
                         _delusions[target->GetGUID()] = GameTime::GetGameTimeMS();
                     }
                     break;
@@ -571,6 +643,23 @@ namespace
                 SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
+
+    // The Shade detection borrowed from 24306 outlasts the vision; it ends with the vision, by expiry or dispel.
+    class spell_jindo_coa_delusions_vision : public AuraScript
+    {
+        PrepareAuraScript(spell_jindo_coa_delusions_vision);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetTarget()->RemoveAurasDueToSpell(SPELL_DELUSIONS_OF_JINDO);
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_jindo_coa_delusions_vision::HandleRemove, EFFECT_0,
+                SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
 }
 
 void AddCoaJindoScripts()
@@ -579,4 +668,5 @@ void AddCoaJindoScripts()
     RegisterZulGurubCreatureAI(npc_jindo_coa_totem);
     RegisterZulGurubCreatureAI(npc_shade_of_jindo_coa);
     RegisterSpellScript(spell_jindo_coa_healing_stream);
+    RegisterSpellScript(spell_jindo_coa_delusions_vision);
 }
