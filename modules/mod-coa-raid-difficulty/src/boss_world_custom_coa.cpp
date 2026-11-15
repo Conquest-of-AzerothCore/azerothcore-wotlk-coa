@@ -1180,6 +1180,7 @@ namespace
         SPELL_SOUL_BIND         = 2119845,
         SPELL_SOUL_FLAY_BEAM    = 2146711,
         SPELL_SOUL_LINK         = 2119847,
+        SPELL_VESSEL_CHANNEL    = 33827,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
@@ -1319,7 +1320,7 @@ namespace
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
-            if (state == VESSEL_OPEN)
+            if (state == VESSEL_OPEN || state == VESSEL_IDLE || state == VESSEL_LINKED)
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
@@ -1355,13 +1356,23 @@ namespace
             Beam(anchor ? static_cast<Unit*>(anchor) : static_cast<Unit*>(me), atal);
         }
 
-        void Click()
+        void Click(Player* player)
         {
-            if (_state != VESSEL_IDLE)
+            if (_state != VESSEL_IDLE && _state != VESSEL_LINKED)
                 return;
-            SetState(VESSEL_LINKED);
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
-                atal->AI()->DoAction(ACTION_VESSEL_LINKED);
+            if (Channeler())
+                return;
+            player->CastSpell(me, SPELL_VESSEL_CHANNEL, TRIGGERED_IGNORE_GCD);
+        }
+
+        Player* Channeler() const
+        {
+            for (Player* p : Players(me, [&](Player* x) { return me->IsWithinDistInMap(x, 40.0f); }))
+                if (Spell* channel = p->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                    if (channel->GetSpellInfo()->Id == SPELL_VESSEL_CHANNEL &&
+                        channel->m_targets.GetUnitTargetGUID() == me->GetGUID())
+                        return p;
+            return nullptr;
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/,
@@ -1385,9 +1396,19 @@ namespace
 
         void UpdateAI(uint32 diff) override
         {
-            if (_state == VESSEL_LINKED)
+            if (_state == VESSEL_IDLE || _state == VESSEL_LINKED)
             {
-                Link();
+                bool const held = Channeler() != nullptr;
+                if (held && _state == VESSEL_IDLE)
+                {
+                    SetState(VESSEL_LINKED);
+                    if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                        atal->AI()->DoAction(ACTION_VESSEL_LINKED);
+                }
+                else if (!held && _state == VESSEL_LINKED)
+                    SetState(VESSEL_IDLE);
+                if (_state == VESSEL_LINKED)
+                    Link();
                 return;
             }
             if (_state != VESSEL_OPEN)
@@ -1410,11 +1431,11 @@ namespace
     public:
         go_soul_vessel_altar() : GameObjectScript("go_atalzul_vessel_coa") { }
 
-        bool OnGossipHello(Player* /*player*/, GameObject* go) override
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             if (Creature* vessel = go->FindNearestCreature(NPC_SOUL_VESSEL, 5.0f))
                 if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(vessel->AI()))
-                    ai->Click();
+                    ai->Click(player);
             return true;
         }
     };
