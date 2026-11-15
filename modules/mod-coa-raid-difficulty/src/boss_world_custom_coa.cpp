@@ -611,7 +611,7 @@ namespace
     enum SnowgraveEvents
     {
         EW_STOMP = 1, EW_HAIL, EW_GRASP, EW_WARMTH, EW_SHOCK, EW_FIERCE,
-        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_HAIL_IMPACT, TW_RING, TW_RING_HIT, TW_WARMTH,
+        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_HAIL_IMPACT, TW_RING, TW_RING_HIT, TW_WARMTH, TW_ICICLE_DROP,
     };
 
     constexpr uint8 CHILL_FROZEN      = 10;
@@ -627,6 +627,8 @@ namespace
     constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_SINK   = 4.0f;
+    constexpr Milliseconds ICICLE_DROP = 3300ms;
+    constexpr uint32 NPC_ICICLE_DROPPER = 67538;
     constexpr float CAVE_FLOOR_STEP   = 10.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
     constexpr float SNOWGRAVE_LEASH   = 120.0f;
@@ -706,10 +708,12 @@ namespace
                         rz >= ground + CEILING_SEARCH - 1.0f)
                         continue;
                     float const turn = frand(0.0f, 2 * float(M_PI));
-                    G3D::Quat const tip(G3D::Matrix3::fromEulerAnglesZYX(turn, 0.0f, float(M_PI) - 0.05f));
                     if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz - STALACTITE_SINK, turn,
-                            tip.x, tip.y, tip.z, tip.w, 0))
-                        _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
+                            0, 0, 0, 0, 0))
+                    {
+                        hanging->SetTransportPathRotation(1.0f, 0.0f, 0.0f, 0.0f);
+                        _stalactites.push_back({ Position(x, y, ground), rz - STALACTITE_SINK, hanging->GetGUID() });
+                    }
                 }
         }
 
@@ -843,14 +847,27 @@ namespace
                         if (nearest == _stalactites.end())
                             continue;
                         if (GameObject* hanging = me->GetMap()->GetGameObject(nearest->hanging))
-                            hanging->DespawnOrUnsummon(4s);
+                            hanging->DespawnOrUnsummon(ICICLE_DROP);
                         nearest->hanging.Clear();
                         _icicles.push_back(nearest->ground);
+                        _drops.push_back({ nearest->ground, nearest->ceiling, ObjectGuid::Empty });
                         CastAt(nearest->ground, SPELL_CAVE_IN_WARNING);
                     }
+                    _clock.ScheduleEvent(TW_ICICLE_DROP, ICICLE_DROP);
                     _clock.ScheduleEvent(TW_ICICLE, 4s);
                     break;
                 }
+                case TW_ICICLE_DROP:
+                    for (Stalactite const& drop : _drops)
+                        if (Creature* from = me->SummonCreature(NPC_ICICLE_DROPPER, drop.ground.GetPositionX(),
+                                drop.ground.GetPositionY(), drop.ceiling, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                        {
+                            from->SetDisableGravity(true);
+                            from->CastSpell(drop.ground.GetPositionX(), drop.ground.GetPositionY(),
+                                drop.ground.GetPositionZ(), SPELL_HAIL_MISSILE_LEFT, true);
+                        }
+                    _drops.clear();
+                    break;
                 case TW_ICICLE:
                     for (Position const& pos : _icicles)
                     {
@@ -971,9 +988,11 @@ namespace
         struct Stalactite
         {
             Position ground;
+            float ceiling;
             ObjectGuid hanging;
         };
         std::vector<Stalactite> _stalactites;
+        std::vector<Stalactite> _drops;
         bool _hung = false;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
