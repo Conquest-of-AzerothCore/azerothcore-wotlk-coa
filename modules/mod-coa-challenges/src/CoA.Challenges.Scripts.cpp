@@ -1488,6 +1488,9 @@ namespace CoAChallenges
         {
             if (player)
             {
+                auto* snapshots = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOTS);
+                snapshots->SetData(0, player->GetGUID().GetCounter());
+                CharacterDatabase.DirectExecute(snapshots);
                 SendFailureList(player);
                 SendCriteriaState(player);
             }
@@ -2537,6 +2540,7 @@ namespace CoAChallenges
                 "coa_character_gamemode_lives", "coa_character_survival", "coa_character_fatigue",
                 "coa_character_looted_item", "coa_custom_trial", "coa_custom_trial_active",
                 "coa_custom_trial_entry", "coa_custom_trial_vote", "coa_custom_trial_completion",
+                "coa_challenge_failure_snapshot",
             };
             for (char const* table : kCharTables)
                 trans->Append("DELETE FROM {} WHERE guid = {}", table, guid);
@@ -2957,7 +2961,10 @@ namespace CoAChallenges
             static ChatCommandTable coaActionsTable =
             {
                 { "unlock", HandleCoAUnlockCommand, SEC_ADMINISTRATOR, Console::Yes },
-                { "check",  HandleCoACheckCommand,  SEC_ADMINISTRATOR, Console::Yes }
+                { "check",  HandleCoACheckCommand,  SEC_ADMINISTRATOR, Console::Yes },
+                { "objectives", HandleCoAObjectivesCommand, SEC_ADMINISTRATOR, Console::Yes },
+                { "credit", HandleCoACreditCommand, SEC_ADMINISTRATOR, Console::Yes },
+                { "restore", HandleCoARestoreCommand, SEC_ADMINISTRATOR, Console::Yes }
             };
             static ChatCommandTable coaChallengesTable =
             {
@@ -3025,6 +3032,7 @@ namespace CoAChallenges
             CharacterDatabase.DirectExecute(
                 "DELETE FROM coa_challenge_failure WHERE guid = {} AND challengeId = {}",
                 guid, challengeId);
+            ForgetFailureSnapshot(guid, challengeId);
 
             if (had)
             {
@@ -3036,6 +3044,175 @@ namespace CoAChallenges
             {
                 handler->SendErrorMessage("{} had no failure lock on challenge {}.", player->GetName(), challengeId);
             }
+            return true;
+        }
+
+        // .coa <trial|challenge> objectives [player]
+        // Lists every active challenge of the player with its tracked objectives
+        // numbered as `.coa trial credit` expects them. Works for an offline
+        // character too (without the level-cap note, which needs the live level).
+        static bool HandleCoAObjectivesCommand(ChatHandler* handler, Optional<PlayerIdentifier> player)
+        {
+            if (!player)
+                player = PlayerIdentifier::FromTargetOrSelf(handler);
+            if (!player)
+            {
+                handler->PSendSysMessage("Syntax: .coa trial objectives [player]");
+                handler->SendErrorMessage("No player: target someone or name one, with a two-word name in quotes.");
+                return false;
+            }
+
+            uint32 const guid = player->GetGUID().GetCounter();
+            Player* online = player->GetConnectedPlayer();
+            std::set<uint32> const actives = ActiveChallenges(guid);
+            if (online)
+                handler->PSendSysMessage("{}, level {}, {} active challenge(s):",
+                    player->GetName(), online->GetLevel(), actives.size());
+            else
+                handler->PSendSysMessage("{} (offline), {} active challenge(s):", player->GetName(), actives.size());
+
+            uint32 const cappedGate = online ? NextGatedLevel(online) : 0;
+            uint32 const maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+            for (uint32 challengeId : actives)
+            {
+                uint32 deaths = 0;
+                if (QueryResult r = CharacterDatabase.Query(
+                        "SELECT deaths FROM coa_character_challenge WHERE guid = {} AND challengeId = {}",
+                        guid, challengeId))
+                    deaths = r->Fetch()[0].Get<uint32>();
+                uint32 const lives = LivesTotal(challengeId);
+                handler->PSendSysMessage("{}, Challenge ID {}, level {}, deaths {}{}",
+                    ChallengeName(challengeId), challengeId, ActiveChallengeLevel(guid, challengeId), deaths,
+                    lives ? Acore::StringFormat(" of {} lives", lives) : std::string());
+
+                std::vector<Objective> const tracked = TrackedObjectives(challengeId);
+                if (tracked.empty())
+                {
+                    handler->PSendSysMessage("  (no tracked objectives)");
+                    continue;
+                }
+                bool allDone = true;
+                for (std::size_t i = 0; i < tracked.size(); ++i)
+                {
+                    Objective const& o = tracked[i];
+                    bool const done = IsObjectiveDone(guid, challengeId, o.key);
+                    allDone = allDone && done;
+                    uint32 const gate = CoAParse::ObjectiveGateLevel(o);
+                    handler->PSendSysMessage("  {}. [{}] {}, Objective ID {}{}", i + 1, done ? "done" : "pending",
+                        DescribeObjective(o), i + 1, (!done && gate && gate == cappedGate)
+                            ? Acore::StringFormat(" (levelling capped at {})", gate - 1) : std::string());
+                }
+                if (allDone && IsTrialChallenge(challengeId) && (!online || online->GetLevel() < maxLevel))
+                    handler->PSendSysMessage("  All objectives done; completes at level {}.", maxLevel);
+            }
+
+            // The failed challenges, newest first, with what a GM needs to pick
+            // the Challenge ID for `.coa trial restore`. The character level comes
+            // from the failure snapshot and is absent for older failures.
+            auto* selectFailed = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CHALLENGE_FAILURES);
+            selectFailed->SetData(0, guid);
+            PreparedQueryResult failed = CharacterDatabase.Query(selectFailed);
+            if (failed)
+            {
+                handler->PSendSysMessage("Failed challenges:");
+                uint32 const now = uint32(::time(nullptr));
+                do
+                {
+                    Field* f = failed->Fetch();
+                    uint32 const challengeId = f[0].Get<uint32>();
+                    uint32 const failTime = f[2].Get<uint32>();
+                    handler->PSendSysMessage("  {}, Challenge ID {}, level {}, failed {}{}",
+                        ChallengeName(challengeId), challengeId, f[1].Get<uint32>(),
+                        TimeAgo(failTime, now), f[3].IsNull() ? std::string()
+                            : Acore::StringFormat(" at character level {}", f[3].Get<uint32>()));
+                } while (failed->NextRow());
+            }
+            if (!actives.empty())
+                handler->PSendSysMessage("Credit an objective: {}", CreditSyntax);
+            if (failed)
+                handler->PSendSysMessage("Restore a failed challenge: {}", RestoreSyntax);
+            return true;
+        }
+
+        static std::string TimeAgo(uint32 then, uint32 now)
+        {
+            if (!then || then > now)
+                return "at an unknown time";
+            uint32 const seconds = now - then;
+            if (seconds < MINUTE)
+                return "less than a minute ago";
+            if (seconds < HOUR)
+                return Acore::StringFormat("{} minute(s) ago", seconds / MINUTE);
+            if (seconds < DAY)
+                return Acore::StringFormat("{} hour(s) ago", seconds / HOUR);
+            return Acore::StringFormat("{} day(s) ago", seconds / DAY);
+        }
+
+        static constexpr char const* CreditSyntax = ".coa trial credit <Challenge ID> <Objective ID> [player]";
+        static constexpr char const* RestoreSyntax = ".coa trial restore <Challenge ID> [player]";
+        static constexpr char const* ObjectivesHint =
+            "Use .coa trial objectives \"Player Name\" to find the IDs. The player defaults to your target.";
+
+        // .coa <trial|challenge> credit <id> <objective number> [player]
+        // Marks one tracked objective done, whatever the player's level.
+        static bool HandleCoACreditCommand(ChatHandler* handler, Optional<uint32> challengeId,
+            Optional<uint32> objectiveNumber, Optional<PlayerIdentifier> player)
+        {
+            if (!challengeId || !objectiveNumber)
+            {
+                handler->PSendSysMessage("Syntax: {}", CreditSyntax);
+                handler->SendErrorMessage("{}", ObjectivesHint);
+                return false;
+            }
+            if (!player)
+                player = PlayerIdentifier::FromTargetOrSelf(handler);
+            Player* p = player ? player->GetConnectedPlayer() : nullptr;
+            if (!p)
+            {
+                handler->SendErrorMessage("Player must be online to credit an objective.");
+                return false;
+            }
+
+            std::string message;
+            if (!CreditObjective(p, *challengeId, *objectiveNumber, message))
+            {
+                handler->SendErrorMessage("{}", message);
+                return false;
+            }
+            handler->PSendSysMessage("{}", message);
+            return true;
+        }
+
+        // .coa <trial|challenge> restore <id> [player]
+        // Puts a failed challenge back as active with the state it had at the
+        // failure, and resurrects the character when still dead. Refused when
+        // the character has since levelled past a pending objective's gate (see
+        // the module README).
+        static bool HandleCoARestoreCommand(ChatHandler* handler, Optional<uint32> challengeId,
+            Optional<PlayerIdentifier> player)
+        {
+            if (!challengeId)
+            {
+                handler->PSendSysMessage("Syntax: {}", RestoreSyntax);
+                handler->SendErrorMessage("{}", ObjectivesHint);
+                return false;
+            }
+            if (!player)
+                player = PlayerIdentifier::FromTargetOrSelf(handler);
+            Player* p = player ? player->GetConnectedPlayer() : nullptr;
+            if (!p)
+            {
+                handler->SendErrorMessage("Player must be online to restore a challenge.");
+                return false;
+            }
+
+            std::string message;
+            if (!RestoreFailedChallenge(p, *challengeId, message))
+            {
+                handler->SendErrorMessage("{}", message);
+                return false;
+            }
+            handler->PSendSysMessage("{}", message);
             return true;
         }
 

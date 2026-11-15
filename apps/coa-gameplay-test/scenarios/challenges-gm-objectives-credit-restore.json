@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Challenge GM commands list objectives, credit one and restore a failed run",
+  "contract": [
+    "GM tooling with no live reference: .coa trial objectives lists a player's active challenges with each tracked objective numbered as done or pending, .coa trial credit marks one objective done whatever the player's level, and .coa trial restore puts a failed challenge back as active with its progress and resurrects the character.",
+    "Hardcore - Boss Blitz (60) has one life, caps levelling one below each kill gate and starts with Edwin VanCleef before 21, Mutanus the Devourer before 22 and Archmage Arugal before 26 among its 25 kill objectives.",
+    "Expected: the list flips exactly the credited objectives, a credit past the level 21 gate is accepted and says so, a death fails the run and leaves a failure lock, a restore is refused four levels above the failure (allowance 3) and at the pending level 26 gate but allowed one level above the failure with no gate passed, and that restore returns level 1 with the fatal death taken back, both credits kept and the character alive; a further credit proves the run is active again."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 20, "security": 3 },
+    { "id": "runner", "name": "Blitzprobe Dunmere", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "start_challenge", "actor": "runner", "challenge": 60, "level": 1 },
+    {
+      "action": "assert", "label": "Boss Blitz activates through its native request",
+      "actor": "runner", "metric": "challenge_start_code", "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "command", "label": "List the fresh run",
+      "actor": "gm", "command": ".coa trial objectives \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "The run is listed with its level, deaths and lives",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Hardcore - Boss Blitz, Challenge ID 60, level 1, deaths 0 of 1 lives", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The first gate is pending and caps levelling",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "1. [pending] Kill Edwin VanCleef before level 21, Objective ID 1 (levelling capped at 20)", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Nothing is done before any credit",
+      "actor": "gm", "metric": "system_message_contains", "text": "[done]", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The list ends with the credit syntax",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Credit an objective: .coa trial credit <Challenge ID> <Objective ID> [player]", "equals": 1
+    },
+    {
+      "action": "command", "label": "Ask the in-game help for the credit command",
+      "actor": "gm", "command": ".help coa trial credit"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the help row explains the command",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Marks one objective of the player's active challenge as done, whatever the player's level.",
+      "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "command", "label": "A bare credit command is refused with its syntax",
+      "actor": "gm", "command": ".coa trial credit", "rejected": true
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the bare command shows the syntax",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Syntax: .coa trial credit <Challenge ID> <Objective ID> [player]", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: and points to the objectives command for the IDs",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Use .coa trial objectives \"Player Name\" to find the IDs.", "equals": 1
+    },
+    {
+      "action": "command", "label": "Credit Mutanus below its gate",
+      "actor": "gm", "command": ".coa trial credit 60 2 \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the credit names the objective and no gate bypass",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Credited objective 2 (Kill Mutanus the Devourer before level 22) on challenge 60 for Blitzprobe Dunmere.",
+      "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_level", "actor": "runner", "value": 23 },
+    {
+      "action": "assert", "label": "The forced level lands past the first gate",
+      "actor": "runner", "metric": "level", "equals": 23
+    },
+    {
+      "action": "command", "label": "Credit VanCleef past its gate",
+      "actor": "gm", "command": ".coa trial credit 60 1 \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a credit past the gate is accepted and reported",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Credited objective 1 (Kill Edwin VanCleef before level 21) on challenge 60 for Blitzprobe Dunmere (past its level 21 gate).",
+      "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "command", "label": "A second credit of the same objective is refused",
+      "actor": "gm", "command": ".coa trial credit 60 1 \"Blitzprobe Dunmere\"", "rejected": true
+    },
+    {
+      "action": "command", "label": "List after the credits",
+      "actor": "gm", "command": ".coa trial objectives \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the list shows the credited objective done",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "2. [done] Kill Mutanus the Devourer before level 22, Objective ID 2", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The cap moved to the next pending gate",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "3. [pending] Kill Archmage Arugal before level 26, Objective ID 3 (levelling capped at 25)", "equals": 1
+    },
+    { "action": "die", "actor": "runner" },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "command", "label": "A credit on the failed run is refused",
+      "actor": "gm", "command": ".coa trial credit 60 3 \"Blitzprobe Dunmere\"", "rejected": true
+    },
+    {
+      "action": "command", "label": "List after the death",
+      "actor": "gm", "command": ".coa trial objectives \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "The death failed the one-life run",
+      "actor": "gm", "metric": "system_message_contains", "text": "Hardcore - Boss Blitz, Challenge ID 60, level 1, failed less than a minute ago at character level 23", "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_level", "actor": "runner", "value": 27 },
+    {
+      "action": "command", "label": "A restore more than three levels above the failure is refused",
+      "actor": "gm", "command": ".coa trial restore 60 \"Blitzprobe Dunmere\"", "rejected": true
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the refusal names both levels and the allowance",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Restore refused: Blitzprobe Dunmere was level 23 when challenge 60 failed and is now level 27, more than the 3 levels allowed",
+      "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_level", "actor": "runner", "value": 26 },
+    {
+      "action": "command", "label": "A restore after levelling past a pending gate is refused",
+      "actor": "gm", "command": ".coa trial restore 60 \"Blitzprobe Dunmere\"", "rejected": true
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the refusal names the passed gate and its objective",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Restore refused: Blitzprobe Dunmere is level 26, past the level 26 gate of pending objective 3 (Kill Archmage Arugal before level 26) on challenge 60.",
+      "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_level", "actor": "runner", "value": 24 },
+    {
+      "action": "command", "label": "Restore the failed run one level above the failure",
+      "actor": "gm", "command": ".coa trial restore 60 \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the restore keeps level and credits and takes the fatal death back",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Restored challenge 60 (Hardcore - Boss Blitz) for Blitzprobe Dunmere: level 1, deaths 0, 2 of 25 objectives done.",
+      "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: levels gained without passing a gate are allowed and reported",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "The character was level 23 at the failure and is now level 24.", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The restore used the snapshot taken at the failure",
+      "actor": "gm", "metric": "system_message_contains", "text": "No snapshot existed", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the character is alive again",
+      "actor": "runner", "metric": "alive", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "command", "label": "A second restore is refused",
+      "actor": "gm", "command": ".coa trial restore 60 \"Blitzprobe Dunmere\"", "rejected": true
+    },
+    {
+      "action": "command", "label": "Credit on the restored run",
+      "actor": "gm", "command": ".coa trial credit 60 3 \"Blitzprobe Dunmere\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the restored run is active and accepts credit",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Credited objective 3 (Kill Archmage Arugal before level 26) on challenge 60 for Blitzprobe Dunmere",
+      "equals": 1, "within_ms": 5000
+    }
+  ]
+}
