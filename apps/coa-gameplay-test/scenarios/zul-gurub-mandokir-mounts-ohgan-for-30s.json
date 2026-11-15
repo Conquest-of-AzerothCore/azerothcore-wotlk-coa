@@ -9,7 +9,9 @@
     "dismounts, and mounts again 30 s later (estimated) when Ohgan is in reach. Neither Mounted aura is in any",
     "live log. Before round 9 Mandokir never cast Mounted. Ohgan runs in from the arena entrance, so the first",
     "mount comes once he arrives. Mandokir's timers wait while he casts, so a Whirlwind (3 s cast, 6 s spin) can",
-    "hold the dismount or the next mount back by up to 9 s; 25 s waits plus 16 s windows allow 41 s."
+    "hold the dismount or the next mount back by up to 9 s; 25 s waits plus 16 s windows allow 41 s.",
+    "The tank is the only player, so every melee swing of Ohgan's the tank sees during the ride is at Mandokir's",
+    "target; at least 3 in 25 s shows he keeps fighting (threshold estimated, his attack speed is not asserted)."
   ],
   "timeout_ms": 170000,
   "location": {
@@ -141,9 +143,26 @@
       "equals": 1
     },
     {
+      "action": "snapshot",
+      "label": "Ohgan's melee swings seen by the tank when the ride starts",
+      "actor": "tank",
+      "metric": "owned_creature_attack_count",
+      "entry": 14988,
+      "save_as": "ohgan_swings"
+    },
+    {
       "action": "wait",
       "label": "Most of the 30 s ride",
       "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the mounted Ohgan keeps attacking his rider's target (idle: 0 swings)",
+      "actor": "tank",
+      "metric": "owned_creature_attack_count",
+      "entry": 14988,
+      "relative_to": "ohgan_swings",
+      "min": 3
     },
     {
       "action": "assert",
