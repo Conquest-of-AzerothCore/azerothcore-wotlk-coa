@@ -611,7 +611,7 @@ namespace
     enum SnowgraveEvents
     {
         EW_STOMP = 1, EW_HAIL, EW_GRASP, EW_WARMTH, EW_SHOCK, EW_FIERCE,
-        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_HAIL_IMPACT, TW_RING, TW_RING_HIT, TW_WARMTH, TW_ICICLE_DROP,
+        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_HAIL_IMPACT, TW_RING, TW_RING_HIT, TW_WARMTH,
     };
 
     constexpr uint8 CHILL_FROZEN      = 10;
@@ -627,7 +627,7 @@ namespace
     constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_SINK   = 4.0f;
-    constexpr Milliseconds ICICLE_DROP = 1600ms;
+    constexpr Milliseconds ICICLE_IMPACT = 4000ms;
     constexpr uint32 NPC_FALLING_ICICLE = 978100;
     constexpr float CAVE_FLOOR_STEP   = 10.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
@@ -737,8 +737,24 @@ namespace
                 if (GameObject* hanging = me->GetMap()->GetGameObject(stalactite.hanging))
                     hanging->DespawnOrUnsummon();
             _stalactites.clear();
-            _drops.clear();
             DespawnFalling();
+        }
+
+        static Milliseconds FallTime(float height)
+        {
+            return Milliseconds(uint32(std::sqrt(2.0f * std::max(height, 0.0f) / Movement::gravity) * 1000));
+        }
+
+        void Drop(Position const& ground, float ceiling)
+        {
+            if (!me->IsInCombat())
+                return;
+            if (Creature* falling = me->SummonCreature(NPC_FALLING_ICICLE, ground.GetPositionX(), ground.GetPositionY(),
+                    ceiling, frand(0.0f, 2 * float(M_PI)), TEMPSUMMON_TIMED_DESPAWN, 6000))
+            {
+                falling->GetMotionMaster()->MoveFall();
+                _falling.push_back(falling->GetGUID());
+            }
         }
 
         void DespawnFalling()
@@ -856,28 +872,20 @@ namespace
                                 nearest = it;
                         if (nearest == _stalactites.end())
                             continue;
+                        Milliseconds const dropAt = std::max(ICICLE_IMPACT - FallTime(nearest->ceiling -
+                            nearest->ground.GetPositionZ()), 0ms);
                         if (GameObject* hanging = me->GetMap()->GetGameObject(nearest->hanging))
-                            hanging->DespawnOrUnsummon(ICICLE_DROP);
+                            hanging->DespawnOrUnsummon(dropAt);
                         nearest->hanging.Clear();
                         _icicles.push_back(nearest->ground);
-                        _drops.push_back({ nearest->ground, nearest->ceiling, ObjectGuid::Empty });
                         CastAt(nearest->ground, SPELL_CAVE_IN_WARNING);
+                        Position const ground = nearest->ground;
+                        float const ceiling = nearest->ceiling;
+                        me->m_Events.AddEventAtOffset([this, ground, ceiling]() { Drop(ground, ceiling); }, dropAt);
                     }
-                    _clock.ScheduleEvent(TW_ICICLE_DROP, ICICLE_DROP);
-                    _clock.ScheduleEvent(TW_ICICLE, 4s);
+                    _clock.ScheduleEvent(TW_ICICLE, ICICLE_IMPACT);
                     break;
                 }
-                case TW_ICICLE_DROP:
-                    for (Stalactite const& drop : _drops)
-                        if (Creature* falling = me->SummonCreature(NPC_FALLING_ICICLE, drop.ground.GetPositionX(),
-                                drop.ground.GetPositionY(), drop.ceiling, frand(0.0f, 2 * float(M_PI)),
-                                TEMPSUMMON_TIMED_DESPAWN, 4000))
-                        {
-                            falling->GetMotionMaster()->MoveFall();
-                            _falling.push_back(falling->GetGUID());
-                        }
-                    _drops.clear();
-                    break;
                 case TW_ICICLE:
                     DespawnFalling();
                     me->RemoveDynObject(SPELL_WATER_SPIKE);
@@ -1004,7 +1012,6 @@ namespace
             ObjectGuid hanging;
         };
         std::vector<Stalactite> _stalactites;
-        std::vector<Stalactite> _drops;
         std::vector<ObjectGuid> _falling;
         bool _hung = false;
         std::vector<ObjectGuid> _fallen;
