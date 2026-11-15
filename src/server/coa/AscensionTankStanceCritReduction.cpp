@@ -12,6 +12,9 @@ namespace
     constexpr uint32 SPELL_VENOMANCER_BEETLE_FORM_TANK_AURA = 807726;
     constexpr uint32 SPELL_VENOMANCER_EXPOSED_FLESH = 92144;
     constexpr uint32 SPELL_VENOMANCER_EXPOSED_FLESH_HELPER = 805098;
+    constexpr uint32 SPELL_PALADIN_RIGHTEOUS_FURY = 25780;
+    constexpr uint32 SPELL_PALADIN_RIGHTEOUS_FURY_REBORN = 1125780;
+    constexpr uint8 PALADIN_PROTECTION_TAB_PAGE = 1;
 
     struct StockTankStance
     {
@@ -37,9 +40,21 @@ namespace
             { return stance.classId == classId && player->HasAura(stance.spellId); });
     }
 
+    bool IsRighteousFury(uint32 spellId)
+    {
+        return spellId == SPELL_PALADIN_RIGHTEOUS_FURY || spellId == SPELL_PALADIN_RIGHTEOUS_FURY_REBORN;
+    }
+
+    bool HoldsProtectionRighteousFury(Player const* player)
+    {
+        return player->getClass() == CLASS_PALADIN &&
+            (player->HasAura(SPELL_PALADIN_RIGHTEOUS_FURY) || player->HasAura(SPELL_PALADIN_RIGHTEOUS_FURY_REBORN)) &&
+            player->GetMostPointsTalentTree() == PALADIN_PROTECTION_TAB_PAGE;
+    }
+
     bool IsResyncTrigger(uint32 spellId)
     {
-        return Ascension::IsTankStanceAura(spellId) || IsStockTankStanceAura(spellId) ||
+        return Ascension::IsTankStanceAura(spellId) || IsStockTankStanceAura(spellId) || IsRighteousFury(spellId) ||
             spellId == SPELL_VENOMANCER_EXPOSED_FLESH || spellId == SPELL_VENOMANCER_EXPOSED_FLESH_HELPER;
     }
 
@@ -54,7 +69,7 @@ namespace
         for (auto const& [spellId, application] : player->GetAppliedAuras())
             if (spellId != SPELL_VENOMANCER_BEETLE_FORM_TANK_AURA && Ascension::IsTankStanceAura(spellId))
                 return true;
-        return HasFortitudeBeetleForm(player) || HoldsStockTankStance(player);
+        return HasFortitudeBeetleForm(player) || HoldsStockTankStance(player) || HoldsProtectionRighteousFury(player);
     }
 
     void SyncCritReduction(Player* player)
@@ -88,7 +103,38 @@ public:
     }
 };
 
+class ascension_tank_stance_crit_reduction_talents : public PlayerScript
+{
+public:
+    ascension_tank_stance_crit_reduction_talents() : PlayerScript("ascension_tank_stance_crit_reduction_talents",
+        {PLAYERHOOK_ON_PLAYER_LEARN_TALENTS, PLAYERHOOK_ON_FREE_TALENT_POINTS_CHANGED,
+            PLAYERHOOK_ON_AFTER_SPEC_SLOT_CHANGED}) { }
+
+    void OnPlayerLearnTalents(Player* player, uint32, uint32, uint32) override
+    {
+        SyncPaladin(player);
+    }
+
+    void OnPlayerFreeTalentPointsChanged(Player* player, uint32) override
+    {
+        SyncPaladin(player);
+    }
+
+    void OnPlayerAfterSpecSlotChanged(Player* player, uint8) override
+    {
+        SyncPaladin(player);
+    }
+
+private:
+    static void SyncPaladin(Player* player)
+    {
+        if (player && player->getClass() == CLASS_PALADIN)
+            SyncCritReduction(player);
+    }
+};
+
 void AddSC_AscensionTankStanceCritReduction()
 {
     new ascension_tank_stance_crit_reduction();
+    new ascension_tank_stance_crit_reduction_talents();
 }
