@@ -769,9 +769,12 @@ class bloodmage_running_wild_journeyman : public PlayerScript
 {
 public:
     bloodmage_running_wild_journeyman() : PlayerScript("bloodmage_running_wild_journeyman",
-        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL, PLAYERHOOK_ON_SET_SKILL}) { }
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL, PLAYERHOOK_ON_SET_SKILL,
+        PLAYERHOOK_ON_MAP_CHANGED}) { }
 
     void OnPlayerLogin(Player* player) override { SyncRunningWildJourneyman(player); }
+
+    void OnPlayerMapChanged(Player* player) override { SyncRunningWildJourneyman(player); }
 
     void OnPlayerLearnSpell(Player* player, uint32 spell) override
     {
