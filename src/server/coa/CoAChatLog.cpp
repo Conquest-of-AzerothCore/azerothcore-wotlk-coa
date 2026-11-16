@@ -1,8 +1,10 @@
 #include "CoAChatLog.h"
 
 #include "Config.h"
+#include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -182,7 +184,17 @@ namespace
     class CoAChatLogPlayer : public PlayerScript
     {
     public:
-        CoAChatLogPlayer() : PlayerScript("CoAChatLogPlayer", { PLAYERHOOK_ON_AFTER_PRIVATE_CHAT }) { }
+        CoAChatLogPlayer() : PlayerScript("CoAChatLogPlayer", { PLAYERHOOK_ON_AFTER_CHAT, PLAYERHOOK_ON_AFTER_PRIVATE_CHAT,
+            PLAYERHOOK_ON_TEXT_EMOTE }) { }
+
+        void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg) override
+        {
+            if (!CoAChatLog::ShouldLog(player, lang))
+                return;
+            CoAChatRow row = CoAChatLog::From(player, uint8(type), lang, msg);
+            CoAChatLog::WithPosition(row, player);
+            CoAChatLog::Record(std::move(row));
+        }
 
         void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg, Player* receiver) override
         {
@@ -190,6 +202,20 @@ namespace
                 return;
             CoAChatRow row = CoAChatLog::From(player, uint8(type), lang, msg);
             CoAChatLog::WithTarget(row, receiver);
+            CoAChatLog::Record(std::move(row));
+        }
+
+        void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 /*emoteNum*/, ObjectGuid guid) override
+        {
+            if (!CoAChatLog::ShouldLog(player, LANG_UNIVERSAL) || !guid.IsPlayer() || !sEmotesTextStore.LookupEntry(textEmote))
+                return;
+            Player* target = ObjectAccessor::FindPlayer(guid);
+            if (!target)
+                return;
+            CoAChatRow row = CoAChatLog::From(player, CHAT_MSG_TEXT_EMOTE, LANG_UNIVERSAL, "");
+            CoAChatLog::WithPosition(row, player);
+            CoAChatLog::WithTarget(row, target);
+            row.emote = uint16(textEmote);
             CoAChatLog::Record(std::move(row));
         }
     };
