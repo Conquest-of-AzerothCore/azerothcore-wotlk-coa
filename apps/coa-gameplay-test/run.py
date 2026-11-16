@@ -56,6 +56,11 @@ SPAWN_TYPES = {'creature', 'gameobject'}
 MAX_PLACEMENT_TOLERANCE = 10
 PLACEMENT_AUDIT_METRICS = {'placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'}
 MAX_GAMEOBJECT_TYPE = 35
+CHAT_TYPES = {
+    'say', 'yell', 'emote', 'text_emote', 'whisper', 'party', 'party_leader', 'raid', 'raid_leader', 'raid_warning',
+    'battleground', 'battleground_leader', 'guild', 'officer', 'channel', 'mail',
+}
+CHAT_LOG_FLAGS = ('chat_has_position', 'chat_has_group', 'chat_has_guild', 'chat_has_mail_id')
 MAX_SPELL_MOD_OP = 31
 MIN_MUTANT_PERCENT = -100
 MAX_MUTANT_PERCENT = 1000
@@ -102,7 +107,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
-    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
+    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
     'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
@@ -264,6 +269,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius',
+                 'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
+                 'chat_target_name', *CHAT_LOG_FLAGS,
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
                   'school_mask', 'rolls', 'stacks', 'target_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
@@ -583,7 +590,7 @@ def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
-          'two_side', 'quest_log_size'},
+          'two_side', 'quest_log_size', 'chat_log'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -592,6 +599,7 @@ def validate(scenario, clock=REAL_CLOCK):
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
+    require(type(scenario.get('chat_log', False)) is bool, 'chat_log must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'ptr_character_copy_interruption' in scenario:
         require(scenario.get('ptr_character_copy') is True,
@@ -1046,6 +1054,22 @@ def validate(scenario, clock=REAL_CLOCK):
                 validate_timeline_step(step, where, encounter_started, actor_ids)
             else:
                 require(not TIMELINE_FIELDS & step.keys(), f'{where}: event fields only apply to timeline metrics')
+            require(('chat_type' in step) == (metric == 'chat_log_rows'), f'{where}: chat_type belongs to chat_log_rows')
+            require(metric == 'chat_log_rows' or not {f for f in step if f.startswith('chat_')},
+                    f'{where}: chat fields belong to chat_log_rows')
+            if metric == 'chat_log_rows':
+                require(step['actor'] in player_ids, f'{where}: chat_log_rows needs a player')
+                require(step['chat_type'] in CHAT_TYPES, f'{where}: unknown chat_type')
+                if 'chat_target' in step:
+                    require(step['chat_target'] in player_ids, f'{where}: chat_target must name a player')
+                for field in ('chat_text', 'chat_channel', 'chat_subject', 'chat_name', 'chat_target_name'):
+                    if field in step:
+                        require(isinstance(step[field], str), f'{where}: {field} must be a string')
+                for field in CHAT_LOG_FLAGS:
+                    if field in step:
+                        require(type(step[field]) is bool, f'{where}: {field} must be boolean')
+                if 'chat_emote' in step:
+                    number(step['chat_emote'], f'{where}.chat_emote', 0, 65535, True)
             if metric in EVENT_TIME_METRICS:
                 validate_event_time_step(step, where, actor_ids, player_ids)
             else:

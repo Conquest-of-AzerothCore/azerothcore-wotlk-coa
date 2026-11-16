@@ -264,6 +264,11 @@ enum PlayerHook
     PLAYERHOOK_CAN_LFG_TELEPORT,
     PLAYERHOOK_ON_HOLDS_TANK_OR_HEALER_ROLE,
     PLAYERHOOK_ON_SAVE_INVENTORY,
+    PLAYERHOOK_ON_AFTER_CHAT,
+    PLAYERHOOK_ON_AFTER_PRIVATE_CHAT,
+    PLAYERHOOK_ON_AFTER_GROUP_CHAT,
+    PLAYERHOOK_ON_AFTER_GUILD_CHAT,
+    PLAYERHOOK_ON_AFTER_CHANNEL_CHAT,
     PLAYERHOOK_END
 };
 
@@ -856,6 +861,12 @@ public:
      * @return True if you want to continue sending the message, false if you want to disable sending the message
      */
     [[nodiscard]] virtual bool OnPlayerCanUseChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string& /*msg*/, Channel* /*channel*/) { return true; }
+
+    virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/) { }
+    virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Player* /*receiver*/) { }
+    virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Group* /*group*/) { }
+    virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Guild* /*guild*/) { }
+    virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Channel* /*channel*/) { }
 
     /**
      * @brief This hook called after player learning talents

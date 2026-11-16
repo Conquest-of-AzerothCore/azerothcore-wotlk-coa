@@ -911,6 +911,31 @@ bool ScriptMgr::OnPlayerCanUseChat(Player* player, uint32 type, uint32 language,
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_PLAYER_USE_CHANNEL_CHAT, !script->OnPlayerCanUseChat(player, type, language, msg, channel));
 }
 
+void ScriptMgr::OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_CHAT, script->OnPlayerAfterChat(player, type, language, msg));
+}
+
+void ScriptMgr::OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Player* receiver)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_PRIVATE_CHAT, script->OnPlayerAfterChat(player, type, language, msg, receiver));
+}
+
+void ScriptMgr::OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Group* group)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_GROUP_CHAT, script->OnPlayerAfterChat(player, type, language, msg, group));
+}
+
+void ScriptMgr::OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Guild* guild)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_GUILD_CHAT, script->OnPlayerAfterChat(player, type, language, msg, guild));
+}
+
+void ScriptMgr::OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Channel* channel)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_CHANNEL_CHAT, script->OnPlayerAfterChat(player, type, language, msg, channel));
+}
+
 void ScriptMgr::OnPlayerLearnTalents(Player* player, uint32 talentId, uint32 talentRank, uint32 spellid)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_PLAYER_LEARN_TALENTS, script->OnPlayerLearnTalents(player, talentId, talentRank, spellid));

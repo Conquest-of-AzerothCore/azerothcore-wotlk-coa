@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Chat log writes nothing while it is off",
+  "contract": "CoA.ChatLog.Enable is off by default. A whisper then reaches its receiver and writes no row to coa_chat_log.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "sender", "name": "Chatlogoffs", "race": 1, "class": 1, "level": 20},
+    {"id": "friend", "name": "Chatlogoffr", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "whisper", "actor": "sender", "to": "Chatlogoffr", "text": "nobody writes this down"},
+    {"action": "assert", "label": "The whisper was delivered", "actor": "friend", "metric": "whispers_received", "from": "sender", "text": "nobody writes this down", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "no row while the log is off", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 0}
+  ]
+}

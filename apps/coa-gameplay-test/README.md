@@ -389,7 +389,9 @@ runs such a case exclusively because the setting is process-global. Optional
 `CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
 `two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
-`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional
+`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional `chat_log: true`
+turns `CoA.ChatLog.Enable` on for that case and back to the configured state when it ends, and is likewise run
+exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
 the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
@@ -1001,6 +1003,12 @@ commands and reactions are excluded. It requires a pet with charm information an
 `bank_shows` counts the native bank windows the actor's session has been sent, which is what a
 banker click is answered with. `system_messages` counts the chat lines the session has been sent.
 `whispers_received` counts whispers the actor received from player `from` with exactly `text`.
+`chat_log_rows` writes the chat log's pending rows, then counts the `coa_chat_log` rows the actor sent of
+`chat_type` (`say`, `yell`, `emote`, `text_emote`, `whisper`, `party`, `party_leader`, `raid`, `raid_leader`,
+`raid_warning`, `battleground`, `battleground_leader`, `guild`, `officer`, `channel`, `mail`); optional
+`chat_text`, `chat_channel`, `chat_subject`, `chat_name` (the sender's name as written on the row) and `chat_target_name` must match exactly, `chat_target` names the player the row is
+addressed to, `chat_emote` is the text emote id, and `chat_has_position`, `chat_has_group`, `chat_has_guild` and
+`chat_has_mail_id` require that value to be set (true) or zero (false).
 `cast_failure` requires `spell` and reports the reason the client was told the last submitted cast of
 that spell was refused, or zero if it was not refused since (the record is cleared when the scenario
 submits that spell again).

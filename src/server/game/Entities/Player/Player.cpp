@@ -10200,6 +10200,7 @@ void Player::Whisper(std::string_view text, Language language, Player* target, b
     {
         ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, language, this, this, _text);
         target->SendDirectMessage(&data);
+        sScriptMgr->OnPlayerAfterChat(this, CHAT_MSG_WHISPER, language, _text, target);
     }
 
     // rest stuff shouldn't happen in case of addon message

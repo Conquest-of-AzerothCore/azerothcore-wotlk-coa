@@ -31,6 +31,7 @@ void AddSC_AscensionClientHotPatch();
 void AddSC_AscensionCrowsCache();
 void AddSC_AscensionAetherialReliquary();
 void AddSC_CoAProbeRelay();
+void AddSC_CoAChatLog();
 void AddSC_AscensionItemScaling();
 void AddSC_AscensionNativeItemScaling();
 void AddSC_AscensionQuestScaling();
@@ -846,6 +847,7 @@ void AddCoAScripts()
     AddSC_AscensionCrowsCache();
     AddSC_AscensionAetherialReliquary();
     AddSC_CoAProbeRelay();
+    AddSC_CoAChatLog();
     AddSC_AscensionItemScaling();
     AddSC_AscensionNativeItemScaling();
     AddSC_AscensionQuestScaling();

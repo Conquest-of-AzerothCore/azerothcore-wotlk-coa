@@ -1045,6 +1045,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "UNION ALL SELECT 0,0,'','',0,0 ORDER BY owner_guid,original_guid,flags", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_INS_PLAYER_ANTICHEAT_ALERT, "INSERT INTO player_anticheat_alert (account, guid, name, reason, details, size) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_COA_CHAT_LOG, "INSERT INTO coa_chat_log (time, account, guid, name, type, lang, team, channel, target_guid, "
+        "target_account, target_name, group_id, guild_id, map, zone, x, y, z, emote, mail_id, subject, message) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 #ifdef MOD_MANASTORM_ENDLESS
     PrepareStatement(CHAR_SEL_MANASTORM_XP_LEVEL,
         "SELECT level, playerFlags FROM characters WHERE guid = ?", CONNECTION_SYNCH);
