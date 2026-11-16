@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Necromancer: Skeletal Mage stays at range and casts its frost bolt (#4178)",
- "contract": "A Skeletal Mage (50075) fights from range with its Frost auto-attack (801513) instead of walking up to melee its target.",
+ "contract": "A Skeletal Mage (50075) fights from range with its Frost Nova (Skeletal Mage) auto-attack (805955) instead of walking up to melee its target.",
  "timeout_ms": 120000,
  "players": [
   {

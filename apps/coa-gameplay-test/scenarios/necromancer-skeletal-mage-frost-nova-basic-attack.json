@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a Skeletal Mage attacks with its own Frost Nova and keeps Command: Skeletal Mage for Commands",
+  "contract": "Raise: Skeletal Mage 500331 summons creature 50075. Spell.dbc labels 805955 'Frost Nova (Skeletal Mage)': a 3 s Frost bolt that bounces to 2 more targets, and the db.exil.es CoA creature export (2026-09-13) lists 805955 among creature 50075's spells. Command: Skeletal Mage 801513 is the Command effect in the Raise tooltip. The minion attack loop fired 801513 every 3 s, so an idle-commanded mage dealt Command damage (0.8 x the owner's Frost spell power) on every basic attack. Without any Command the mage casts only 805955; Command: Undead 504868 still fires exactly one 801513.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_power": 1000, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 5000000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500331 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    { "action": "cast", "label": "Raise: Skeletal Mage", "actor": "n", "spell": 500331 },
+    {
+      "action": "assert", "label": "SETUP: Skeletal Mage raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50075, "equals": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let it take formation", "ms": 1500 },
+    { "action": "attack", "actor": "n", "target": "golem" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the mage keeps casting its Frost Nova basic attack",
+      "actor": "n", "metric": "spell_go_count", "spell": 805955, "entry": 50075, "min": 3, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no Command: Skeletal Mage without a Command", "actor": "n",
+      "metric": "spell_go_count", "spell": 801513, "entry": 50075, "equals": 0
+    },
+    { "action": "cast", "label": "Command: Undead on the golem", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "The Command fires Command: Skeletal Mage once", "actor": "n",
+      "metric": "spell_go_count", "spell": 801513, "entry": 50075, "equals": 1, "within_ms": 3000
+    }
+  ]
+}
