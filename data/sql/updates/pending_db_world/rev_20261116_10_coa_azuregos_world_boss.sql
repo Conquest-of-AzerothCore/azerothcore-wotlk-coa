@@ -41,8 +41,8 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 -- His map belongs to Kalimdor, as Setis' 880 does.
 UPDATE `instance_template` SET `parent` = 1 WHERE `map` = 881;
 
--- 64601 waits where Ascension has him in his map (spot taken in game).
-DELETE FROM `creature` WHERE `guid` = 9780912;
+-- 64601 waits where Ascension has him in his map (spot taken in game); the open-world 6109 is not spawned.
+DELETE FROM `creature` WHERE `guid` = 9780912 OR `id` = 6109;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
     `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780912, 64601, 881, 10236, 10236, 15, 1, 2920.7097, -4775.049, 238.013, 5.1369, 604800, 0, 0);

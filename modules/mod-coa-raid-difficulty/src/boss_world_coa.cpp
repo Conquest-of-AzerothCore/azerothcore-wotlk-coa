@@ -209,25 +209,29 @@ namespace
     {
         SPELL_DRACONIC_STRIKE       = 2119101,
         SPELL_FIERCE_DRACONIC_STRIKE= 2119102,
-        SPELL_DRACONIC_CLEAVE       = 2119103,
         SPELL_FREEZING_BREATH_CAST  = 2119107,
         SPELL_FREEZING_BREATH_HIT   = 2119109,
         SPELL_FREEZING_BREATH_SLOW  = 2119110,
         SPELL_FROZEN_SOLID          = 2119111,
         SPELL_BLIZZARD_CAST         = 2119112,
-        SPELL_BLIZZARD              = 2119114,
         SPELL_PRISON_OF_FROST       = 2119116,
         SPELL_MARK_OF_FROST         = 2119117,
         SPELL_ICE_SPIKES_WARNING    = 2119120,
         SPELL_ICE_SPIKES            = 2119121,
         SPELL_CHILL                 = 21098,
         SPELL_REFLECTION            = 22067,
+        SPELL_CLEAVE_CONE           = 19983,
+        SPELL_FROST_BREATH_CONE     = 21099,
+        SPELL_BLIZZARD_AREA         = 46195,
+        SPELL_TAIL_SWEEP            = 15847,
+        SPELL_ARCANE_VACUUM         = 21147,
     };
 
     enum AzuregosEvents
     {
         EV_STRIKE = 1, EV_CLEAVE, EV_FIERCE, EV_BREATH, EV_CHILL, EV_BLIZZARD, EV_REFLECTION, EV_ICE_SPIKES,
-        TK_BREATH_PULSE, TK_BLIZZARD, TK_ICE_SPIKES,
+        EV_TAIL, EV_VACUUM,
+        TK_BREATH_PULSE, TK_ICE_SPIKES,
     };
 
     struct boss_azuregos_coa : public world_boss_coa
@@ -244,6 +248,8 @@ namespace
             events.ScheduleEvent(EV_REFLECTION, 20s);
             events.ScheduleEvent(EV_BLIZZARD, 25s);
             events.ScheduleEvent(EV_ICE_SPIKES, 64s);
+            events.ScheduleEvent(EV_TAIL, 12s);
+            events.ScheduleEvent(EV_VACUUM, 30s);
         }
 
         void Execute(uint32 eventId) override
@@ -253,13 +259,11 @@ namespace
                 case EV_STRIKE:     DoCastVictim(SPELL_DRACONIC_STRIKE);        events.Repeat(13200ms); break;
                 case EV_FIERCE:     DoCastVictim(SPELL_FIERCE_DRACONIC_STRIKE); events.Repeat(24800ms); break;
                 case EV_CHILL:      DoCastAOE(SPELL_CHILL);                     events.Repeat(31s);     break;
-                case EV_REFLECTION: DoCastSelf(SPELL_REFLECTION);               events.Repeat(62s);     break;
+                case EV_REFLECTION: DoCastSelf(SPELL_REFLECTION, true);         events.Repeat(62s);     break;
                 case EV_BREATH:     DoCastVictim(SPELL_FREEZING_BREATH_CAST);   events.Repeat(20s);     break;
-                case EV_CLEAVE:
-                    for (Player* p : PlayersNear(me, 20.0f, [&](Player* x) { return me->isInFront(x, CONE_ARC); }))
-                        me->CastSpell(p, SPELL_DRACONIC_CLEAVE, true);
-                    events.Repeat(16900ms);
-                    break;
+                case EV_CLEAVE:     DoCastVictim(SPELL_CLEAVE_CONE, true);      events.Repeat(16900ms); break;
+                case EV_TAIL:       DoCastAOE(SPELL_TAIL_SWEEP, true);          events.Repeat(15s);     break;
+                case EV_VACUUM:     DoCastAOE(SPELL_ARCANE_VACUUM);             events.Repeat(30s);     break;
                 case EV_BLIZZARD:
                     if (Unit* target = RandomNonTank())
                     {
@@ -290,13 +294,12 @@ namespace
             if (spell->Id == SPELL_FREEZING_BREATH_CAST)
             {
                 _pulses = 6;
+                DoCastVictim(SPELL_FROST_BREATH_CONE, true);
                 _clock.ScheduleEvent(TK_BREATH_PULSE, 0ms);
             }
             else if (spell->Id == SPELL_BLIZZARD_CAST)
-            {
-                _blizzardSeconds = 10;
-                _clock.ScheduleEvent(TK_BLIZZARD, 0ms);
-            }
+                me->CastSpell(_blizzardSpot.GetPositionX(), _blizzardSpot.GetPositionY(),
+                    _blizzardSpot.GetPositionZ(), SPELL_BLIZZARD_AREA, true);
         }
 
         void Tick(uint32 tick) override
@@ -328,11 +331,6 @@ namespace
                         _clock.ScheduleEvent(TK_BREATH_PULSE, 500ms);
                     break;
                 }
-                case TK_BLIZZARD:
-                    me->CastSpell(_blizzardSpot.GetPositionX(), _blizzardSpot.GetPositionY(), _blizzardSpot.GetPositionZ(), SPELL_BLIZZARD, true);
-                    if (--_blizzardSeconds)
-                        _clock.ScheduleEvent(TK_BLIZZARD, 1s);
-                    break;
                 case TK_ICE_SPIKES:
                     for (Position const& pos : _spikes)
                         me->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_ICE_SPIKES, true);
@@ -356,7 +354,6 @@ namespace
 
     private:
         uint8 _pulses = 0;
-        uint8 _blizzardSeconds = 0;
         Position _blizzardSpot;
         std::vector<Position> _spikes;
     };
