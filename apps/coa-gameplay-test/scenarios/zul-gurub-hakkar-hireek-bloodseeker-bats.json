@@ -5,12 +5,14 @@
     "Round-8 tester (2026-11-15): Hakkar (14834) does not summon the consumed Spirit Beast's adds. The live logs",
     "show six Bloodseeker Bats (11368) within about 11 s of the Avatar of Hir'eek's death (Jeklik's loa;",
     "CoA Normal 2026-08-09, CoA Ascended 2026-08-01, Bronzebeard Ascended 2025-12-21: 0.4 s), then six more",
-    "about every 45 s (2026-08-01: 108 bats in 15 waves). The logs hold no positions, so the bats appearing at",
-    "Hakkar is an estimate. In a fresh Normal instance every High Priest but Jeklik is set DONE; once Hakkar has",
-    "lost 15 % of his health he drains Hir'eek, takes its Aspect (2118701) and the first six bats come, a second",
-    "wave follows, and his death takes them away."
+    "about every 45 s (2026-08-01: 108 bats in 15 waves). They come up the stairs from the platforms below them",
+    "(round-10 tester). In a fresh Normal instance every High Priest but Jeklik is set DONE; once Hakkar has",
+    "lost 15 % of his health he drains Hir'eek, takes its Aspect (2118701) and the first six bats reach the hero,",
+    "a second wave follows, and his death takes them away. Each wave pulls whatever trash still stands on the",
+    "platforms and the stairs, so the hero first clears every trash creature within 120 yards of the altar, as a",
+    "raid does on its way up (round 10: a Soulflayer's Soul Tap sent the hero into the Blood Realm and Hakkar reset)."
   ],
-  "timeout_ms": 150000,
+  "timeout_ms": 185000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -64,6 +66,83 @@
       "label": "See the avatar Hakkar summons into the instance's own phase",
       "actor": "hero",
       "value": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The raid has cleared the Sons of Hakkar",
+      "actor": "hero",
+      "entry": 11357,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Soulflayers",
+      "actor": "hero",
+      "entry": 11359,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Hakkari Blood Priests",
+      "actor": "hero",
+      "entry": 11340,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Hakkari Priests",
+      "actor": "hero",
+      "entry": 11830,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Gurubashi Champions",
+      "actor": "hero",
+      "entry": 11356,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Gurubashi Berserkers",
+      "actor": "hero",
+      "entry": 11352,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Gurubashi Blood Drinker",
+      "actor": "hero",
+      "entry": 11353,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "and the Hakkari Shadowcaster around the altar",
+      "actor": "hero",
+      "entry": 11338,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".combatstop"
     },
     {
       "action": "encounter_start",
@@ -166,7 +245,7 @@
       "metric": "nearby_creature_count",
       "entry": 11368,
       "min": 6,
-      "within_ms": 15000
+      "within_ms": 30000
     },
     {
       "action": "assert",
@@ -175,7 +254,7 @@
       "metric": "nearby_creature_count",
       "entry": 11368,
       "min": 12,
-      "within_ms": 50000
+      "within_ms": 60000
     },
     {
       "action": "attack_nearby",

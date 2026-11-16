@@ -1,15 +1,17 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir whirls the moment his Berserker Charge lands, for 6 seconds",
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls the moment Ohgan's Berserker Charge lands, for 6 seconds",
   "contract": [
     "The tester (live video, 2026-11-04) reports Mortal Strike, Mortal Strike, Berserker Charge (2118406) and a",
     "Whirlwind (2118408) begun as the charge lands; the live CoA combat log of 2026-08-02 starts each Whirlwind",
-    "on the landing too. The old script whirled on its own timer 2 s after the charge began, so the Whirlwind",
-    "came about a second after he landed. The tank holds Mandokir in melee and an archer stands about 18 yards",
-    "away, the only charge target. Within 300 ms of reaching the archer, Mandokir is casting Whirlwind. Its",
-    "spinning aura then lasts its full 6 s (DBC duration), not shorter."
+    "on the landing too. Since round 10 Mandokir (11382) charges only on Ohgan's back (user, 2026-11-16), so",
+    "Ohgan (14988) casts the charge for his rider, the first one a second after Mandokir mounts. The fight is",
+    "in the arena, where Ohgan arrives from the entrance within seconds. The tank holds Mandokir in melee and",
+    "an archer stands about 23 yards away, the only charge target. Within 500 ms of Ohgan reaching the archer,",
+    "Mandokir is casting Whirlwind; the old script whirled on its own timer about a second after the landing.",
+    "Its spinning aura then lasts its full 6 s (DBC duration), and the charge brings exactly one Whirlwind."
   ],
-  "timeout_ms": 120000,
+  "timeout_ms": 150000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -57,21 +59,23 @@
     },
     {
       "action": "teleport",
+      "label": "Into Mandokir's arena, 30 yards in from the entrance",
       "actor": "tank",
       "map": 309,
-      "x": -12326.5,
-      "y": -1577.11,
-      "z": 133.588,
+      "x": -12246.7,
+      "y": -1924.7,
+      "z": 131.5,
       "o": 0.0,
       "ignore_access": true
     },
     {
       "action": "teleport",
+      "label": "Into Mandokir's arena, 30 yards in from the entrance",
       "actor": "archer",
       "map": 309,
-      "x": -12326.5,
-      "y": -1577.11,
-      "z": 133.588,
+      "x": -12246.7,
+      "y": -1924.7,
+      "z": 131.5,
       "o": 0.0,
       "ignore_access": true
     },
@@ -89,11 +93,11 @@
     },
     {
       "action": "relocate",
-      "label": "The archer steps back about 16 yards",
+      "label": "The archer steps about 23 yards toward the arena's middle",
       "actor": "archer",
-      "dx": -10.15,
-      "dy": -12.955,
-      "dz": -0.665
+      "dx": 20.0,
+      "dy": -12.0,
+      "dz": 0.0
     },
     {
       "action": "summon",
@@ -134,29 +138,42 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mandokir charges the archer 10 s into the fight",
+      "label": "CONTROL: Mandokir mounts Ohgan once he arrives",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ohgan charges the archer with his rider",
+      "actor": "archer",
+      "metric": "spell_go_count",
+      "entry": 14988,
+      "spell": 2118406,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Whirlwinds before the landing",
       "actor": "archer",
       "metric": "spell_go_count",
       "entry": 11382,
-      "spell": 2118406,
-      "min": 1,
-      "within_ms": 15000
+      "spell": 2118408,
+      "save_as": "whirls_before"
     },
     {
       "action": "assert",
-      "label": "CONTROL: the charge lands",
-      "actor": "mandokir",
-      "metric": "moving",
-      "equals": 0,
-      "within_ms": 3000
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: it lands at the archer",
+      "label": "CONTROL: the charge lands at the archer",
       "actor": "archer",
-      "metric": "distance",
-      "target": "mandokir",
-      "max": 5
+      "metric": "nearest_creature_distance",
+      "entry": 14988,
+      "radius": 60,
+      "min": 0,
+      "max": 5,
+      "within_ms": 3000
     },
     {
       "action": "assert",
@@ -165,7 +182,7 @@
       "metric": "cast_remaining_ms",
       "spell": 2118408,
       "min": 1,
-      "within_ms": 300
+      "within_ms": 500
     },
     {
       "action": "assert",
@@ -204,6 +221,7 @@
       "metric": "spell_go_count",
       "entry": 11382,
       "spell": 2118408,
+      "relative_to": "whirls_before",
       "equals": 1
     }
   ]

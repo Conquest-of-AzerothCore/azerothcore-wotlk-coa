@@ -3510,6 +3510,11 @@ private:
         }
         if (metric == "mount_display_id")
             return unit->GetMountID();
+        if (metric == "vehicle_base_entry")
+        {
+            Unit const* base = unit->GetVehicleBase();
+            return base ? base->GetEntry() : 0;
+        }
         if (metric == "can_fly")
             return unit->CanFly();
         if (metric == "unit_scale")
@@ -3935,7 +3940,7 @@ private:
             }
             uint32 count = 0;
             for (SpellCastEvent const& event : _actors.at(step.get<std::string>("actor")).spellCasts)
-                if (event.spell == spell && (entry ? event.caster.IsCreature() && event.caster.GetEntry() == *entry
+                if (event.spell == spell && (entry ? event.caster.IsCreatureOrVehicle() && event.caster.GetEntry() == *entry
                                                    : event.caster == caster))
                     ++count;
             return count;
@@ -4649,6 +4654,12 @@ private:
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
             Require(creature != nullptr, "Creature display metric needs a living nearby creature");
             return creature->GetDisplayId();
+        }
+        if (metric == "nearby_creature_scale")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Creature scale metric needs a living nearby creature");
+            return creature->GetObjectScale();
         }
         if (metric == "nearby_creature_aura_count")
         {
@@ -7766,7 +7777,8 @@ private:
         else if (action == "attack_nearby" || action == "loot_nearby")
         {
             std::list<Creature*> creatures;
-            player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"), 40.0f);
+            player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"),
+                step.get<float>("radius", 40.0f));
             size_t found = creatures.size();
             creatures.remove_if([player, &action](Creature* creature)
             {
@@ -7790,10 +7802,16 @@ private:
                 Require(player->IsValidAttackTarget(creatures.front()), "Invalid melee attack target");
                 if (step.get<bool>("kill", false))
                 {
-                    Unit::DealDamage(player, creatures.front(), creatures.front()->GetMaxHealth() * 100u, nullptr, DIRECT_DAMAGE,
-                        SPELL_SCHOOL_MASK_NORMAL);
-                    Require(!creatures.front()->IsAlive(),
-                        "Killing blow did not kill, health left " + std::to_string(creatures.front()->GetHealth()));
+                    if (!step.get<bool>("all", false))
+                        creatures.resize(1);
+                    for (Creature* creature : creatures)
+                    {
+                        Require(player->IsValidAttackTarget(creature), "Invalid melee attack target");
+                        Unit::DealDamage(player, creature, creature->GetMaxHealth() * 100u, nullptr, DIRECT_DAMAGE,
+                            SPELL_SCHOOL_MASK_NORMAL);
+                        Require(!creature->IsAlive(),
+                            "Killing blow did not kill, health left " + std::to_string(creature->GetHealth()));
+                    }
                 }
                 else if (auto damagePct = step.get_optional<int32>("damage_pct"))
                 {

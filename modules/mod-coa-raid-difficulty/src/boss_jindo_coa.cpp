@@ -44,6 +44,11 @@
  *     video does not show where the totems stand. Away from the pit they stand
  *     ten yards around him. Mythic and Ascended use the Heroic totem counts and
  *     health;
+ *   - he resets once no living player near him is in combat, whatever his
+ *     ward, totems or shades still do (testers 2026-11-16: the ward kept him in
+ *     the fight after a wipe); the 250 yard reach is estimated;
+ *   - a curse is the vision 2118511 and one damage tier, as in the live logs;
+ *     the vision itself lets its target see the shades;
  *   - the Shade of Jin'do neither swings nor casts Shadow Shock: in the CoA logs
  *     of 2026-08-02 and 2026-08-24 it only casts Seeking Shadow Bolts (2118556,
  *     4s, interruptible) over and over, while every 4s each player takes a
@@ -84,7 +89,6 @@ namespace
     enum Spells
     {
         SPELL_SUMMON_SHADE_OF_JINDO    = 24308,
-        SPELL_DELUSIONS_OF_JINDO       = 24306,
 
         SPELL_SUMMON_BRAIN_WASH        = 2118501,
         SPELL_BRAINWASH                = 2118502,
@@ -121,6 +125,7 @@ namespace
     };
 
     constexpr Milliseconds DELUSIONS_DOUBLING = 10s;
+    constexpr float JINDO_RAID_REACH = 250.0f;
     constexpr Milliseconds TOTEM_LIFETIME     = 240s;
     constexpr Milliseconds TROLL_CORPSE_DECAY = 5s;
     constexpr Milliseconds JINDO_FIERCE_BLOW  = 8s;
@@ -422,11 +427,6 @@ namespace
                     if (Unit* target = ObjectAccessor::GetUnit(*me, _target))
                     {
                         me->AddAura(SPELL_DELUSIONS_VISION, target);
-                        // 2118511/2118512 carry the vision and the damage but not the detection the
-                        // Shade of Jin'do's own invisibility (24307, type 2) needs; vanilla's Delusions
-                        // of Jin'do (24306) already paired the curse with that detection as its third
-                        // effect, so reuse only that effect here.
-                        me->AddAura(sSpellMgr->GetSpellInfo(SPELL_DELUSIONS_OF_JINDO), 1 << EFFECT_2, target);
                         me->CastSpell(target, SPELL_DELUSIONS_DOT, true);
                         SummonShade(target);
                         _delusions[target->GetGUID()] = GameTime::GetGameTimeMS();
@@ -493,8 +493,22 @@ namespace
             }
         }
 
+        bool RaidStillFights()
+        {
+            return !Players(me, [this](Player* player)
+            {
+                return player->IsInCombat() && me->IsWithinDistInMap(player, JINDO_RAID_REACH);
+            }).empty();
+        }
+
         void UpdateAI(uint32 diff) override
         {
+            if (me->IsEngaged() && !RaidStillFights())
+            {
+                EnterEvadeMode(EVADE_REASON_NO_HOSTILES);
+                return;
+            }
+
             if (!UpdateVictim())
                 return;
 
@@ -596,13 +610,19 @@ namespace
             {
                 if (!me->HasUnitState(UNIT_STATE_CASTING))
                     if (Unit* target = me->GetVictim() ? me->GetVictim() : SelectTarget(SelectTargetMethod::Random, 0))
-                        DoCast(target, SPELL_SEEKING_SHADOW_BOLTS_BAR);
+                        me->CastSpell(target, SPELL_SEEKING_SHADOW_BOLTS_BAR, TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
                 bar.Repeat(500ms);
             }).Schedule(1s, [this](TaskContext aggro)
             {
                 DoCastAOE(SPELL_RANDOM_AGGRO, true);
                 aggro.Repeat();
             });
+        }
+
+        bool CanAlwaysBeDetectable(WorldObject const* seer) override
+        {
+            Unit const* unit = seer->ToUnit();
+            return unit && unit->HasAura(SPELL_DELUSIONS_VISION);
         }
 
         void UpdateAI(uint32 diff) override
@@ -644,19 +664,20 @@ namespace
         }
     };
 
-    // The Shade detection borrowed from 24306 outlasts the vision; it ends with the vision, by expiry or dispel.
     class spell_jindo_coa_delusions_vision : public AuraScript
     {
         PrepareAuraScript(spell_jindo_coa_delusions_vision);
 
-        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        void RefreshShadeSight(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            GetTarget()->RemoveAurasDueToSpell(SPELL_DELUSIONS_OF_JINDO);
+            GetTarget()->UpdateObjectVisibility();
         }
 
         void Register() override
         {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_jindo_coa_delusions_vision::HandleRemove, EFFECT_0,
+            AfterEffectApply += AuraEffectApplyFn(spell_jindo_coa_delusions_vision::RefreshShadeSight, EFFECT_0,
+                SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_jindo_coa_delusions_vision::RefreshShadeSight, EFFECT_0,
                 SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };

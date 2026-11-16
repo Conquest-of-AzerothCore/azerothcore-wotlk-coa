@@ -11,7 +11,10 @@
     "drained one); at 90 % still none; at 84 % one Aspect; at 80 % still one; at 69 % a second; at 20 % all five",
     "Aspects (2118701-2118705) with every avatar consumed. The last drains run into the end of Blood Siphon",
     "(first cast 59.5 s, 20 s long), which interrupted the drain that had replaced its channel and left Hakkar",
-    "with four Aspects. The hero joins phase 1, where the ring appears."
+    "with four Aspects. The hero joins phase 1, where the ring appears, and first clears the trash within",
+    "120 yards of the altar, as a raid does: the Sons come from the platforms below it and pull what still stands.",
+    "The instance's own Hakkar stands on the same spot and would call a second set of avatars, so the hero",
+    "kills it before summoning the Hakkar under test."
   ],
   "timeout_ms": 240000,
   "location": {
@@ -25,7 +28,8 @@
       "id": "hero",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 60,
+      "security": 3
     }
   ],
   "steps": [
@@ -66,6 +70,99 @@
       "label": "See the avatars Hakkar summons into the instance's own phase",
       "actor": "hero",
       "value": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The raid has cleared the Sons of Hakkar",
+      "actor": "hero",
+      "entry": 11357,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Soulflayers",
+      "actor": "hero",
+      "entry": 11359,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Hakkari Blood Priests",
+      "actor": "hero",
+      "entry": 11340,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Hakkari Priests",
+      "actor": "hero",
+      "entry": 11830,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Gurubashi Champions",
+      "actor": "hero",
+      "entry": 11356,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Gurubashi Berserkers",
+      "actor": "hero",
+      "entry": 11352,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the Gurubashi Blood Drinker",
+      "actor": "hero",
+      "entry": 11353,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "and the Hakkari Shadowcaster around the altar",
+      "actor": "hero",
+      "entry": 11338,
+      "radius": 120,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The instance's own Hakkar is out of the way, so only the summoned one calls avatars",
+      "actor": "hero",
+      "entry": 14834,
+      "radius": 20,
+      "kill": true
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".combatstop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no loa avatar stands before the pull",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666988,
+      "equals": 0
     },
     {
       "action": "summon",
