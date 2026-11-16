@@ -782,6 +782,21 @@ public:
     }
 };
 
+constexpr uint32 RunningWildTransformKit = 14140;
+
+class bloodmage_running_wild_transform_visual : public UnitScript
+{
+public:
+    bloodmage_running_wild_transform_visual() : UnitScript("bloodmage_running_wild_transform_visual", true,
+        {UNITHOOK_ON_AURA_APPLY}) { }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (aura->GetId() == SPELL_RUNNING_WILD && unit->getTransForm() == SPELL_RUNNING_WILD)
+            unit->SendPlaySpellVisual(RunningWildTransformKit);
+    }
+};
+
 constexpr uint32 FemaleWorgenDisplay = 142818;
 
 bool ShowsFemaleWorgen(Player const* player)
@@ -913,4 +928,5 @@ void AddSC_AscensionBloodmageSecondary()
     RegisterSpellScript(aura_ascension_bloodmage_hemal_excision);
     RegisterSpellScript(spell_ascension_bloodmage_excision);
     new bloodmage_running_wild_journeyman();
+    new bloodmage_running_wild_transform_visual();
 }
