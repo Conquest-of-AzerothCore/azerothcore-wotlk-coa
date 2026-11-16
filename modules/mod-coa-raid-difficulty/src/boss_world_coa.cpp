@@ -225,6 +225,7 @@ namespace
         SPELL_BLIZZARD_AREA         = 46195,
         SPELL_TAIL_SWEEP            = 15847,
         SPELL_ARCANE_VACUUM         = 21147,
+        NPC_INVISIBLE_TRIGGER       = 12999,
     };
 
     enum AzuregosEvents
@@ -298,8 +299,19 @@ namespace
                 _clock.ScheduleEvent(TK_BREATH_PULSE, 0ms);
             }
             else if (spell->Id == SPELL_BLIZZARD_CAST)
-                me->CastSpell(_blizzardSpot.GetPositionX(), _blizzardSpot.GetPositionY(),
-                    _blizzardSpot.GetPositionZ(), SPELL_BLIZZARD_AREA, true);
+            {
+                if (Creature* spot = me->SummonCreature(NPC_INVISIBLE_TRIGGER, _blizzardSpot,
+                        TEMPSUMMON_TIMED_DESPAWN, 21000))
+                {
+                    spot->SetFaction(me->GetFaction());
+                    CastSpellExtraArgs args(true);
+                    args.SetOriginalCaster(me->GetGUID());
+                    args.AddSpellMod(SPELLVALUE_RADIUS_MOD, 20000);
+                    args.AddSpellMod(SPELLVALUE_AURA_DURATION, 20000);
+                    spot->CastSpell(_blizzardSpot.GetPositionX(), _blizzardSpot.GetPositionY(),
+                        _blizzardSpot.GetPositionZ(), SPELL_BLIZZARD_AREA, args);
+                }
+            }
         }
 
         void Tick(uint32 tick) override
