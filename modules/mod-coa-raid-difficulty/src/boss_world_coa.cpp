@@ -58,6 +58,7 @@
 #include "QueryResult.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
@@ -304,12 +305,13 @@ namespace
                         TEMPSUMMON_TIMED_DESPAWN, 21000))
                 {
                     spot->SetFaction(me->GetFaction());
-                    CastSpellExtraArgs args(true);
-                    args.SetOriginalCaster(me->GetGUID());
-                    args.AddSpellMod(SPELLVALUE_RADIUS_MOD, 20000);
-                    args.AddSpellMod(SPELLVALUE_AURA_DURATION, 20000);
-                    spot->CastSpell(_blizzardSpot.GetPositionX(), _blizzardSpot.GetPositionY(),
-                        _blizzardSpot.GetPositionZ(), SPELL_BLIZZARD_AREA, args);
+                    SpellCastTargets targets;
+                    targets.SetDst(_blizzardSpot);
+                    CustomSpellValues values;
+                    values.AddSpellMod(SPELLVALUE_RADIUS_MOD, 20000);
+                    values.AddSpellMod(SPELLVALUE_AURA_DURATION, 20000);
+                    spot->CastSpell(targets, sSpellMgr->GetSpellInfo(SPELL_BLIZZARD_AREA), &values,
+                        TRIGGERED_FULL_MASK, nullptr, nullptr, me->GetGUID());
                 }
             }
         }
