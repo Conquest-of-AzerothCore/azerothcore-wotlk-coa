@@ -1,16 +1,15 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, on Ohgan's back and on foot alike",
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, on foot and on Ohgan's back alike",
   "contract": [
     "The live CoA combat log of 2026-08-02 (Normal kill) shows Mandokir's (11382) Whirlwind (2118408) every",
     "25.0-25.2 s, also in cycles where he charges nobody; with a charge target it begins as the charge lands",
-    "(tester, 2026-11-04). Since round 10 he charges only on Ohgan's back (user, 2026-11-16): a second after",
-    "he mounts, then every 25 s, so a 30 s ride holds two charge slots and the third slot falls on foot",
-    "before he mounts again 45 s after dismounting. With nobody out of melee every slot is a Whirlwind",
-    "(3 s cast), on Ohgan and on foot alike; the first round-10 draft skipped the slot on foot, so the third",
-    "Whirlwind discriminates. An older script whirled twice per 25 s cycle. The hero stands in melee in the",
-    "arena, where Ohgan arrives within seconds, and stops attacking, so there is no charge target and no gaze",
-    "punishment."
+    "(tester, 2026-11-04). His charges come 10.4 s into the pull, then 25 and 50 s apart in turn, so every",
+    "third 25 s slot is a Whirlwind alone (user decision 2026-11-16, charges on foot). With nobody out of",
+    "melee every slot is a Whirlwind (3 s cast): about 10 and 35 s in on foot, and about 60 s in on Ohgan's",
+    "back, since he mounts from 55 s. The third slot is the Whirlwind-only one, so a script that skipped it",
+    "would whirl only twice; an older script whirled twice per 25 s cycle. The hero stands in melee in the",
+    "arena and stops attacking, so there is no charge target and no gaze punishment."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -94,22 +93,13 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mandokir mounts Ohgan once he arrives",
-      "actor": "mandokir",
-      "metric": "aura",
-      "spell": 2118412,
-      "equals": 1,
-      "within_ms": 25000
-    },
-    {
-      "action": "assert",
-      "label": "DISCRIMINATING: the first Whirlwind comes in the charge's place as he mounts",
+      "label": "the first Whirlwind comes about 10 s in, in the first charge's place",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
       "spell": 2118408,
       "min": 1,
-      "within_ms": 6000
+      "within_ms": 15000
     },
     {
       "action": "wait",
@@ -127,7 +117,7 @@
     },
     {
       "action": "assert",
-      "label": "the second Whirlwind comes 25 s after the first, still on Ohgan's back",
+      "label": "the second Whirlwind comes 25 s after the first",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
@@ -137,30 +127,38 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: he dismounts after the 30 s ride",
+      "label": "CONTROL: both on foot",
       "actor": "mandokir",
       "metric": "aura",
       "spell": 2118412,
-      "equals": 0,
-      "within_ms": 12000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the third Whirlwind comes 25 s after the second, on foot",
+      "label": "CONTROL: he mounts Ohgan from 55 s",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the third, Whirlwind-only slot comes 25 s after the second",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
       "spell": 2118408,
       "min": 3,
-      "within_ms": 28000
+      "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "CONTROL: he whirled on foot, before mounting again",
+      "label": "CONTROL: he whirled on Ohgan's back",
       "actor": "mandokir",
       "metric": "aura",
       "spell": 2118412,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",

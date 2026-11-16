@@ -13,19 +13,22 @@
  * Speaker dies (live: he engaged 4.1-5.5s after the Speaker's death in 6 of 6
  * pulls); he engages the moment his ride down ends (tester video, 2026-11-15).
  *
- *   Berserker Charge  as he mounts, then       Ohgan carries him at a random
- *                     every 25s while he rides player out of his melee range
- *                                            he can see, knocked down;
+ *   Berserker Charge  first 10s, then 25s     he casts it himself (1s) at a
+ *                     and 50s apart in turn   random player out of his melee
+ *                     while Ohgan lives       range he can see, knocked down;
  *                                            the tank keeps his threat (the
  *                                            live log: 21 charges, never on
- *                                            his victim, 13 on ranged players)
+ *                                            his victim, 13 on ranged players);
+ *                                            a charge due while he rides
+ *                                            dismounts him first
  *   Whirlwind         as the charge lands     a 6s spin, 100% weapon damage
  *                                            (2118409) every second to all
  *                                            within 5 yards, 1-6s in (live
  *                                            logs); every 25s in the
- *                                            charge's place on foot, once
- *                                            Ohgan is dead or when no one
- *                                            stands out of melee
+ *                                            charge's place in the slot
+ *                                            between charges, once Ohgan is
+ *                                            dead or when no one stands out
+ *                                            of melee
  *   Mortal Strike     first 8s,  every 12s   the tank in melee range, -25%
  *                                            healing, stacks 3; it and
  *                                            Decapitate always hit (live:
@@ -45,11 +48,11 @@
  *                                            rarer than on the other bosses
  *   Level Up!         +4% damage for every player who dies near him
  *   Frenzy            when Ohgan dies
- *   Mounted           when Ohgan comes within 10 yards: Mandokir sits on
- *                     Ohgan's back (vehicle seat) with Mounted 2118412 (+20%
- *                     damage done, -20% taken) for 30s, while Ohgan carries
- *                     him and fights with Mounted 2118411 on his rider's
- *                     target; again 45s after he dismounts
+ *   Mounted           from 55s, when Ohgan is within 15 yards: Mandokir sits
+ *                     on Ohgan's back (vehicle seat) with Mounted 2118412
+ *                     (+20% damage done, -20% taken) for 30s, while Ohgan
+ *                     carries him and fights with Mounted 2118411 on his
+ *                     rider's target; again 45s after he dismounts
  *   Bloodlord's Presence  at the pull, on enemies within 30 yards: no
  *                     durability loss; taken off when the fight ends
  *
@@ -64,12 +67,14 @@
  *     (tester video and user, 2026-11-15); he sits on Ohgan's back instead
  *     of a second raptor (testers, 2026-11-16); the seat, vehicle 485 of
  *     Zul'tore's Mount, is a stand-in, as no live log carries vehicle data;
- *   - he charges only while riding (user, 2026-11-16): the live logs charge
- *     10.4s into the pull, then 25s and 50s apart in turn, and never once
- *     Ohgan is dead, while he whirls every 25s throughout, so the ride cycle
- *     is 75s and the 25s slot between rides is a Whirlwind alone; the 30s
- *     ride is the tester's measure from the video, the 10 yard reach is
- *     estimated;
+ *   - he charges on foot (user, 2026-11-16): in the live log of 2026-08-02
+ *     he casts all six charges himself while Ohgan keeps hitting his own
+ *     tank; they come 10.4s and 11.3s into the pulls, then 25s and 50s apart
+ *     in turn, and never once Ohgan is dead, while he whirls every 25s
+ *     throughout, so every third 25s slot is a Whirlwind alone;
+ *   - the first mount no earlier than 55s, the 15 yard reach and the 30s ride
+ *     come from the testers (video 28:07-28:40, 57s after the pull at
+ *     27:10); the 45s before he mounts again is estimated;
  *   - Ohgan runs in from the arena entrance at the pull (tester, live,
  *     2026-11-04); the spot, the gap in the chained spirits' ring on the
  *     north-west side, is estimated;
@@ -170,7 +175,7 @@ namespace
 
     constexpr uint8 MORTAL_WOUND_STACKS = 3;
     constexpr Milliseconds MANDOKIR_CHARGE_INTERVAL = 25s;
-    constexpr Milliseconds MANDOKIR_RIDE_FIRST_CHARGE = 1s;
+    constexpr uint8 MANDOKIR_CHARGE_SLOTS = 3;
     constexpr Milliseconds MANDOKIR_CHARGE_LANDING_FALLBACK = 4s;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MIN = 30700ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MAX = 31600ms;
@@ -178,8 +183,9 @@ namespace
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MAX = 44s;
     constexpr Milliseconds MANDOKIR_RIDE_DOWN_FALLBACK = 10s;
     constexpr Milliseconds MANDOKIR_MOUNT_DURATION = 30s;
+    constexpr Milliseconds MANDOKIR_FIRST_MOUNT = 55s;
     constexpr Milliseconds MANDOKIR_MOUNT_COOLDOWN = 45s;
-    constexpr float MANDOKIR_MOUNT_REACH = 10.0f;
+    constexpr float MANDOKIR_MOUNT_REACH = 15.0f;
     constexpr uint32 OHGAN_VEHICLE = 485;
     constexpr uint32 OHGAN_DESPAWN_OUT_OF_COMBAT_MS = 35000;
 
@@ -247,6 +253,7 @@ namespace
             me->SetObjectScale(_baseScale);
             _useExecute = false;
             _whirlwindOnLanding = false;
+            _chargeSlot = 0;
             _gazed.Clear();
             _reviveGUID.Clear();
             Dismount();
@@ -303,12 +310,6 @@ namespace
                 ohgan->AI()->AttackStart(victim);
         }
 
-        Creature* GetRiddenOhgan() const
-        {
-            Creature* ohgan = GetOhgan();
-            return ohgan && me->GetVehicleBase() == ohgan ? ohgan : nullptr;
-        }
-
         void MountOhgan(Creature* ohgan)
         {
             me->EnterVehicle(ohgan, 0);
@@ -322,7 +323,12 @@ namespace
             CommandOhgan(ohgan);
             events.ScheduleEvent(EVENT_DISMOUNT, MANDOKIR_MOUNT_DURATION);
             events.ScheduleEvent(EVENT_COMMAND_OHGAN, 1s);
-            events.RescheduleEvent(EVENT_BERSERKER_CHARGE, MANDOKIR_RIDE_FIRST_CHARGE);
+        }
+
+        void EndRide()
+        {
+            Dismount();
+            events.ScheduleEvent(EVENT_MOUNT, MANDOKIR_MOUNT_COOLDOWN);
         }
 
         void Dismount()
@@ -378,7 +384,7 @@ namespace
             events.ScheduleEvent(EVENT_GAZE, 15s);
             events.ScheduleEvent(EVENT_CHECK_OHGAN, 1s);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_FIRST_MIN, MANDOKIR_FIERCE_BLOW_FIRST_MAX);
-            events.ScheduleEvent(EVENT_MOUNT, 1s);
+            events.ScheduleEvent(EVENT_MOUNT, MANDOKIR_FIRST_MOUNT);
 
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             Talk(SAY_AGGRO);
@@ -437,21 +443,28 @@ namespace
                 _reviveGUID = guid;
         }
 
-        void RideDownChargeTarget()
+        Unit* SelectChargeTarget()
         {
-            Creature* ohgan = GetRiddenOhgan();
-            if (!ohgan)
+            bool const chargeSlot = _chargeSlot++ % MANDOKIR_CHARGE_SLOTS != MANDOKIR_CHARGE_SLOTS - 1;
+            if (!chargeSlot || !GetOhgan())
+                return nullptr;
+            return SelectTarget(SelectTargetMethod::Random, 0, [this](Unit const* u)
+            {
+                return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinLOSInMap(u);
+            });
+        }
+
+        void ChargeOrWhirl()
+        {
+            Unit* target = SelectChargeTarget();
+            if (!target)
             {
                 DoCastSelf(SPELL_WHIRLWIND);
                 return;
             }
-            Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit const* u)
-            {
-                return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinLOSInMap(u);
-            });
-            ohgan->InterruptNonMeleeSpells(false);
-            if (!target || ohgan->CastSpell(target, SPELL_BERSERKER_CHARGE, TRIGGERED_NONE, nullptr, nullptr,
-                me->GetGUID()) != SPELL_CAST_OK || !IsCharging(ohgan))
+            if (me->GetVehicle())
+                EndRide();
+            if (me->CastSpell(target, SPELL_BERSERKER_CHARGE) != SPELL_CAST_OK)
             {
                 DoCastSelf(SPELL_WHIRLWIND);
                 return;
@@ -460,9 +473,10 @@ namespace
             events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_CHARGE_LANDING_FALLBACK);
         }
 
-        static bool IsCharging(Creature const* ohgan)
+        bool IsChargePending() const
         {
-            return ohgan->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == POINT_MOTION_TYPE;
+            return me->FindCurrentSpellBySpellId(SPELL_BERSERKER_CHARGE)
+                || me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == POINT_MOTION_TYPE;
         }
 
         void WhirlwindOnLanding()
@@ -565,12 +579,8 @@ namespace
                 return;
             }
 
-            if (_whirlwindOnLanding)
-            {
-                Creature* ohgan = GetRiddenOhgan();
-                if (!ohgan || !IsCharging(ohgan))
-                    WhirlwindOnLanding();
-            }
+            if (_whirlwindOnLanding && !IsChargePending())
+                WhirlwindOnLanding();
 
             if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_CHARGING))
                 return;
@@ -580,7 +590,7 @@ namespace
                 switch (eventId)
                 {
                     case EVENT_BERSERKER_CHARGE:
-                        RideDownChargeTarget();
+                        ChargeOrWhirl();
                         events.ScheduleEvent(EVENT_BERSERKER_CHARGE, MANDOKIR_CHARGE_INTERVAL);
                         break;
                     case EVENT_WHIRLWIND:
@@ -639,13 +649,7 @@ namespace
                             events.ScheduleEvent(EVENT_MOUNT, 1s);
                         break;
                     case EVENT_DISMOUNT:
-                        if (_whirlwindOnLanding)
-                        {
-                            events.ScheduleEvent(EVENT_DISMOUNT, 1s);
-                            break;
-                        }
-                        Dismount();
-                        events.ScheduleEvent(EVENT_MOUNT, MANDOKIR_MOUNT_COOLDOWN);
+                        EndRide();
                         break;
                     case EVENT_COMMAND_OHGAN:
                         if (Creature* ohgan = GetOhgan())
@@ -676,6 +680,7 @@ namespace
         uint32 _kills = 0;
         bool _useExecute = false;
         bool _whirlwindOnLanding = false;
+        uint8 _chargeSlot = 0;
         ObjectGuid _gazed;
         ObjectGuid _reviveGUID;
         ObjectGuid _ohganGUID;

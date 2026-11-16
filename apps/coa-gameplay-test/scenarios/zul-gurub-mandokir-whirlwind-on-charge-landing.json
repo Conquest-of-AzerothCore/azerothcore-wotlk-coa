@@ -1,15 +1,17 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir whirls the moment Ohgan's Berserker Charge lands, for 6 seconds",
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls the moment his own Berserker Charge lands, for 6 seconds",
   "contract": [
     "The tester (live video, 2026-11-04) reports Mortal Strike, Mortal Strike, Berserker Charge (2118406) and a",
     "Whirlwind (2118408) begun as the charge lands; the live CoA combat log of 2026-08-02 starts each Whirlwind",
-    "on the landing too. Since round 10 Mandokir (11382) charges only on Ohgan's back (user, 2026-11-16), so",
-    "Ohgan (14988) casts the charge for his rider, the first one a second after Mandokir mounts. The fight is",
-    "in the arena, where Ohgan arrives from the entrance within seconds. The tank holds Mandokir in melee and",
-    "an archer stands about 23 yards away, the only charge target. Within 500 ms of Ohgan reaching the archer,",
-    "Mandokir is casting Whirlwind; the old script whirled on its own timer about a second after the landing.",
-    "Its spinning aura then lasts its full 6 s (DBC duration), and the charge brings exactly one Whirlwind."
+    "on the landing too. In that log Mandokir (11382) casts all six charges himself, 10.4 s and 11.3 s into",
+    "the pulls, while Ohgan (14988) keeps hitting his own tank; round 10's first draft had Ohgan cast the",
+    "charge with Mandokir on his back (user decision 2026-11-16: back to charging on foot). The tank holds",
+    "Mandokir in melee and an archer stands about 23 yards away, the only charge target, so the first charge",
+    "about 10 s in goes at the archer, cast by Mandokir, who is not riding (no mount before 55 s). Within",
+    "500 ms of Mandokir reaching the archer he is casting Whirlwind; the old script whirled on its own timer",
+    "about a second after the landing. Its spinning aura then lasts its full 6 s (DBC duration), and the",
+    "charge brings exactly one Whirlwind."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -138,22 +140,29 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mandokir mounts Ohgan once he arrives",
-      "actor": "mandokir",
-      "metric": "aura",
-      "spell": 2118412,
-      "equals": 1,
-      "within_ms": 25000
+      "label": "DISCRIMINATING: Mandokir casts the charge at the archer himself (round 10: Ohgan)",
+      "actor": "archer",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118406,
+      "min": 1,
+      "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Ohgan charges the archer with his rider",
+      "label": "CONTROL: on foot, not on Ohgan's back",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ohgan casts no charge",
       "actor": "archer",
       "metric": "spell_go_count",
       "entry": 14988,
       "spell": 2118406,
-      "min": 1,
-      "within_ms": 5000
+      "equals": 0
     },
     {
       "action": "snapshot",
@@ -169,7 +178,7 @@
       "label": "CONTROL: the charge lands at the archer",
       "actor": "archer",
       "metric": "nearest_creature_distance",
-      "entry": 14988,
+      "entry": 11382,
       "radius": 60,
       "min": 0,
       "max": 5,

@@ -1,22 +1,24 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir rides on Ohgan's back for 30 s when he comes close and again 45 s later",
+  "name": "Zul'Gurub: Bloodlord Mandokir rides on Ohgan's back for 30 s from 55 s into the fight and again 45 s after he dismounts",
   "contract": [
-    "Round-9 tester (2026-11-15, Bronzebeard video of 2025-11-13, 28:07-28:40): when Ohgan (14988) gets",
-    "close, Mandokir (11382) mounts up, both stay active and attackable, and he dismounts about 30 s later.",
-    "Round-10 testers (2026-11-16): he must sit on Ohgan's back, not change to a mounted model while Ohgan",
-    "fights beside him. User decision 2026-11-16: within 10 yards of Ohgan (estimated) Mandokir enters",
-    "Ohgan as a vehicle passenger (vehicle 485, a stand-in seat) with Mounted 2118412, while Ohgan carries",
-    "Mounted 2118411 and fights his rider's target; after 30 s he dismounts, and mounts again 45 s later",
-    "when Ohgan is in reach, a 75 s cycle (charges 25 and 50 s apart in the live logs). Round 9 gave him",
-    "Ohgan's display 215271 as a mount of his own instead, so the passenger and no-display assertions",
-    "discriminate. Mandokir's timers wait while he casts, so a Whirlwind (3 s cast, 6 s spin) can hold the",
-    "dismount or the next mount back by up to 9 s; 25 s waits plus 16 s windows allow 41 s, and the 40 s",
-    "wait plus a 16 s window allow 56 s for the 45 s cooldown.",
-    "The tank is the only player, so every melee swing of Ohgan's the tank sees during the ride is at Mandokir's",
-    "target; at least 3 in 25 s shows he keeps fighting (threshold estimated, his attack speed is not asserted)."
+    "Round-9 tester (2026-11-15, Bronzebeard video of 2025-11-13): the pull is at 27:10 and Mandokir (11382)",
+    "rides Ohgan (14988) from 28:07 to 28:40, so he mounts about 57 s in and dismounts about 30 s later; both",
+    "stay active and attackable. Round-10 testers (2026-11-16): he sits on Ohgan's back, not on a mounted model",
+    "of his own, and mounts when Ohgan is within 15 yards. User decision 2026-11-16: no mount before 55 s,",
+    "then within 15 yards Mandokir enters Ohgan as a vehicle passenger (vehicle 485, a stand-in seat) with",
+    "Mounted 2118412, while Ohgan carries Mounted 2118411 and fights his rider's target; after 30 s he",
+    "dismounts, and mounts again 45 s later (estimated) when Ohgan is in reach. The first round-10 draft",
+    "mounted as soon as Ohgan arrived, so the 45 s on foot discriminates; round 9 gave him Ohgan's display",
+    "215271 as a mount of his own, so the passenger and no-display assertions discriminate. Mandokir's timers",
+    "wait while he casts, so a Whirlwind (3 s cast, 6 s spin) can hold a step back by up to 9 s: the first",
+    "mount is due at 55 s and asserted within 25 s of the 45 s check, the dismount within 16 s of a 25 s",
+    "wait, and the next mount within 16 s of a 40 s wait. The tank is the only player and stands in melee,",
+    "so Mandokir has no charge target and never leaves the seat early. Every melee swing of Ohgan's the tank",
+    "sees during the ride is at Mandokir's target; at least 3 in 25 s shows he keeps fighting (threshold",
+    "estimated, his attack speed is not asserted)."
   ],
-  "timeout_ms": 190000,
+  "timeout_ms": 240000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -105,8 +107,28 @@
       "equals": 0
     },
     {
+      "action": "wait",
+      "label": "Most of the 55 s before the first mount",
+      "ms": 45000
+    },
+    {
       "action": "assert",
-      "label": "DISCRIMINATING: once Ohgan arrives, Mandokir is Mounted (2118412)",
+      "label": "DISCRIMINATING: still on foot 45 s in (first round-10 draft: mounted at once)",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and on nobody's back",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: from 55 s, Mandokir is Mounted (2118412)",
       "actor": "mandokir",
       "metric": "aura",
       "spell": 2118412,
