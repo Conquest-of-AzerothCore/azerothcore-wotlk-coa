@@ -2948,6 +2948,7 @@ void Player::SendInitialSpells()
     std::size_t countPos = data.wpos();
     data << uint16(spellCount);                             // spell count placeholder
 
+    std::unordered_set<uint32> listedSpells;
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second->State == PLAYERSPELL_REMOVED)
@@ -2957,7 +2958,12 @@ void Player::SendInitialSpells()
             !itr->second->IsInSpec(GetActiveSpec()) || IsTemporarySpellReplacementStandIn(itr->first))
             continue;
 
-        data << uint32(GetTemporarySpellReplacement(itr->first));
+        // Several ranks of one spell can share a temporary replacement; the client lists each spell once.
+        uint32 const listed = GetTemporarySpellReplacement(itr->first);
+        if (!listedSpells.insert(listed).second)
+            continue;
+
+        data << uint32(listed);
         data << uint16(0);                                  // it's not slot id
 
         ++spellCount;
@@ -14207,6 +14213,11 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, b
         {
             return entry.first != original && entry.second == replacement && HasActiveSpell(entry.first);
         });
+    bool const previousShared = previous != original && std::any_of(m_temporarySpellReplacements.begin(),
+        m_temporarySpellReplacements.end(), [this, original, previous](auto const& entry)
+        {
+            return entry.first != original && entry.second == previous && HasActiveSpell(entry.first);
+        });
     if (!replacement)
     {
         m_temporarySpellReplacements.erase(original);
@@ -14233,9 +14244,15 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, b
             sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, replacement, true);
         }
         sScriptMgr->OnPlayerTemporarySpellReplacementNotice(this, previous, replacement, false);
-        WorldPacket packet(SMSG_SUPERCEDED_SPELL, 8);
-        packet << previous << replacement;
-        GetSession()->SendPacket(&packet);
+        // Another rank still shows the previous spell, so its row stays and this rank gets a row of its own.
+        if (previousShared)
+            SendLearnPacket(replacement, true);
+        else
+        {
+            WorldPacket packet(SMSG_SUPERCEDED_SPELL, 8);
+            packet << previous << replacement;
+            GetSession()->SendPacket(&packet);
+        }
         sScriptMgr->OnPlayerTemporarySpellReplacementNotice(this, previous, replacement, true);
     }
 }

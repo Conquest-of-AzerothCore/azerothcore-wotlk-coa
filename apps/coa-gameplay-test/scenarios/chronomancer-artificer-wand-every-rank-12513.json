@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Artificer lists every reached Artificer's Wand rank in the spellbook (#12513)",
+  "contract": "Artificer 804478 (specialization 33) replaces Unmake 804418 with Artificer's Wand 561284, 561354, 561355, 561356 and 561357 (required levels 0, 22, 32, 42, 52). Unmake is a mana spell that stacks with ranks, so every learned Unmake rank stays active and is its own spellbook row. A level-60 Artificer who knows all eleven Unmake ranks must see all five wand ranks so lower ranks can be downcast: the highest active Unmake rank 574345 shows wand rank 5 561357, the next ranks 574344, 504574 and 503790 show wand ranks 4, 3 and 2, and 503789 and every lower Unmake rank show wand rank 1 561284. After a relog the initial spell list holds each wand rank exactly once and no Unmake row.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "chrono", "spell": 503784 },
+    { "action": "learn", "actor": "chrono", "spell": 503785 },
+    { "action": "learn", "actor": "chrono", "spell": 503786 },
+    { "action": "learn", "actor": "chrono", "spell": 503787 },
+    { "action": "learn", "actor": "chrono", "spell": 503788 },
+    { "action": "learn", "actor": "chrono", "spell": 503789 },
+    { "action": "learn", "actor": "chrono", "spell": 503790 },
+    { "action": "learn", "actor": "chrono", "spell": 504574 },
+    { "action": "learn", "actor": "chrono", "spell": 574344 },
+    { "action": "learn", "actor": "chrono", "spell": 574345 },
+    {
+      "action": "assert",
+      "label": "A lower Unmake rank stays active beside the top rank",
+      "actor": "chrono",
+      "metric": "spell_active",
+      "spell": 503789,
+      "equals": 1
+    },
+    { "action": "specialization", "actor": "chrono", "id": 33 },
+    {
+      "action": "assert",
+      "label": "The top Unmake rank shows wand rank 5",
+      "actor": "chrono",
+      "metric": "temporary_spell_replacement",
+      "spell": 574345,
+      "equals": 561357,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The next Unmake rank shows wand rank 4",
+      "actor": "chrono",
+      "metric": "temporary_spell_replacement",
+      "spell": 574344,
+      "equals": 561356
+    },
+    {
+      "action": "assert",
+      "label": "Unmake rank 9 shows wand rank 3",
+      "actor": "chrono",
+      "metric": "temporary_spell_replacement",
+      "spell": 504574,
+      "equals": 561355
+    },
+    {
+      "action": "assert",
+      "label": "Unmake rank 8 shows wand rank 2",
+      "actor": "chrono",
+      "metric": "temporary_spell_replacement",
+      "spell": 503790,
+      "equals": 561354
+    },
+    {
+      "action": "assert",
+      "label": "Unmake rank 7 shows wand rank 1",
+      "actor": "chrono",
+      "metric": "temporary_spell_replacement",
+      "spell": 503789,
+      "equals": 561284
+    },
+    {
+      "action": "assert",
+      "label": "The lowest Unmake rank shows wand rank 1 too",
+      "actor": "chrono",
+      "metric": "temporary_spell_replacement",
+      "spell": 804418,
+      "equals": 561284
+    },
+    { "action": "assert", "actor": "chrono", "metric": "knows_spell", "spell": 561284, "equals": 1 },
+    { "action": "assert", "actor": "chrono", "metric": "knows_spell", "spell": 561354, "equals": 1 },
+    { "action": "assert", "actor": "chrono", "metric": "knows_spell", "spell": 561355, "equals": 1 },
+    { "action": "assert", "actor": "chrono", "metric": "knows_spell", "spell": 561356, "equals": 1 },
+    { "action": "assert", "actor": "chrono", "metric": "knows_spell", "spell": 561357, "equals": 1 },
+    { "action": "relog", "actor": "chrono" },
+    {
+      "action": "assert",
+      "label": "After relog wand rank 5 is listed once",
+      "actor": "chrono",
+      "metric": "client_spellbook_copies",
+      "spell": 561357,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    { "action": "assert", "actor": "chrono", "metric": "client_spellbook_copies", "spell": 561356, "equals": 1 },
+    { "action": "assert", "actor": "chrono", "metric": "client_spellbook_copies", "spell": 561355, "equals": 1 },
+    { "action": "assert", "actor": "chrono", "metric": "client_spellbook_copies", "spell": 561354, "equals": 1 },
+    {
+      "action": "assert",
+      "label": "Wand rank 1 is listed once although several Unmake ranks show it",
+      "actor": "chrono",
+      "metric": "client_spellbook_copies",
+      "spell": 561284,
+      "equals": 1
+    },
+    { "action": "assert", "actor": "chrono", "metric": "client_knows_spell", "spell": 574345, "equals": 0 },
+    { "action": "assert", "actor": "chrono", "metric": "client_knows_spell", "spell": 804418, "equals": 0 }
+  ]
+}
