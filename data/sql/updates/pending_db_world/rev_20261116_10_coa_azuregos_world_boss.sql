@@ -8,9 +8,11 @@
 DROP TEMPORARY TABLE IF EXISTS `coa_azuregos_tmp`;
 CREATE TEMPORARY TABLE `coa_azuregos_tmp` SELECT * FROM `creature_template` WHERE `entry` = 6109;
 UPDATE `coa_azuregos_tmp` SET `entry` = 64601, `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109,
-    `HealthModifier` = 3200, `AIName` = '', `ScriptName` = 'boss_azuregos_coa', `flags_extra` = `flags_extra` & ~1;
+    `HealthModifier` = 3200, `AIName` = '', `ScriptName` = 'boss_azuregos_coa', `flags_extra` = `flags_extra` & ~1,
+    `faction` = 14, `npcflag` = 0, `gossip_menu_id` = 0;
 INSERT INTO `creature_template` SELECT * FROM `coa_azuregos_tmp`
 ON DUPLICATE KEY UPDATE `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109, `HealthModifier` = 3200,
+    `faction` = 14, `npcflag` = 0, `gossip_menu_id` = 0,
     `ScriptName` = 'boss_azuregos_coa', `flags_extra` = `creature_template`.`flags_extra` & ~1;
 DROP TEMPORARY TABLE `coa_azuregos_tmp`;
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 64601 AND `Idx` = 0;
