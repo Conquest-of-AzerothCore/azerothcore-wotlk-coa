@@ -792,7 +792,7 @@ public:
 
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
-        if (aura->GetId() == SPELL_RUNNING_WILD && unit->getTransForm() == SPELL_RUNNING_WILD)
+        if (aura->GetId() == SPELL_RUNNING_WILD)
             unit->SendPlaySpellVisual(RunningWildTransformKit);
     }
 };
