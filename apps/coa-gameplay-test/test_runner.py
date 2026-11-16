@@ -588,6 +588,23 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
+    def test_guild_fixture_and_raid_group_take_players(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['players'].append({'id': 'mate', 'race': 1, 'class': 1, 'level': 20})
+        scenario['steps'][:0] = [{'action': 'group', 'actor': 'caster', 'target': 'mate', 'raid': True},
+                                 {'action': 'guild', 'actor': 'caster', 'members': ['mate'], 'name': 'Testguild'}]
+        self.assertIs(run.validate(scenario), scenario)
+        for index, change, error in ((0, {'raid': 'yes'}, 'raid must be boolean'),
+                                     (1, {'actor': 'target'}, 'guild needs a player leader'),
+                                     (1, {'members': []}, 'guild members must be other players'),
+                                     (1, {'members': ['caster']}, 'guild members must be other players'),
+                                     (1, {'members': ['target']}, 'guild members must be other players'),
+                                     (1, {'name': 'Bad1'}, 'guild name must be 1 to 24 letters')):
+            bad = copy.deepcopy(scenario)
+            bad['steps'][index].update(change)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(bad)
+
     def test_chat_log_rows_takes_a_type_and_filters(self):
         rows = {'action': 'assert', 'actor': 'caster', 'metric': 'chat_log_rows', 'chat_type': 'whisper',
                 'chat_text': "it's me", 'chat_target': 'caster', 'chat_channel': 'World', 'chat_subject': 'Hello',

@@ -45,6 +45,7 @@
 #include "Group.h"
 #include "GroupMgr.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "InstanceScript.h"
 #include "Item.h"
 #include "LFGMgr.h"
@@ -7566,6 +7567,8 @@ private:
             if (group->IsFull() && !group->isRaidGroup())
                 group->ConvertToRaid();
             Require(group->AddMember(member), "Could not join fixture group");
+            if (step.get<bool>("raid", false) && !group->isRaidGroup())
+                group->ConvertToRaid();
             if (auto method = step.get_optional<uint32>("loot_method"))
             {
                 group->SetLootMethod(LootMethod(*method));
@@ -7573,6 +7576,22 @@ private:
                     group->SetMasterLooterGuid(GetPlayer(*looter)->GetGUID());
                 group->SendUpdate();
             }
+        }
+        else if (action == "guild")
+        {
+            std::string const name = step.get<std::string>("name", "Chatlogguild");
+            Require(!player->GetGuildId(), "Guild fixture needs a leader without a guild");
+            Guild* guild = new Guild();
+            if (!guild->Create(player, name))
+            {
+                delete guild;
+                throw std::runtime_error("Could not create fixture guild");
+            }
+            sGuildMgr->AddGuild(guild);
+            _consoleRestores.Add("guild delete \"" + name + "\"");
+            for (auto const& member : step.get_child("members"))
+                Require(guild->AddMember(GetPlayer(member.second.get_value<std::string>())->GetGUID()),
+                    "Could not add a fixture guild member");
         }
         else if (action == "lfg_dungeon")
         {

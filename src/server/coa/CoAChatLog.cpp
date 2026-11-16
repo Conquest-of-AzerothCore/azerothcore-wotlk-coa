@@ -1,9 +1,12 @@
 #include "CoAChatLog.h"
 
+#include "Channel.h"
 #include "Config.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
+#include "Group.h"
+#include "Guild.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -185,7 +188,34 @@ namespace
     {
     public:
         CoAChatLogPlayer() : PlayerScript("CoAChatLogPlayer", { PLAYERHOOK_ON_AFTER_CHAT, PLAYERHOOK_ON_AFTER_PRIVATE_CHAT,
-            PLAYERHOOK_ON_TEXT_EMOTE }) { }
+            PLAYERHOOK_ON_AFTER_GROUP_CHAT, PLAYERHOOK_ON_AFTER_GUILD_CHAT, PLAYERHOOK_ON_AFTER_CHANNEL_CHAT, PLAYERHOOK_ON_TEXT_EMOTE }) { }
+
+        void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg, Group* group) override
+        {
+            if (!group || !CoAChatLog::ShouldLog(player, lang))
+                return;
+            CoAChatRow row = CoAChatLog::From(player, uint8(type), lang, msg);
+            row.groupId = group->GetGUID().GetCounter();
+            CoAChatLog::Record(std::move(row));
+        }
+
+        void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg, Guild* guild) override
+        {
+            if (!guild || !CoAChatLog::ShouldLog(player, lang))
+                return;
+            CoAChatRow row = CoAChatLog::From(player, uint8(type), lang, msg);
+            row.guildId = guild->GetId();
+            CoAChatLog::Record(std::move(row));
+        }
+
+        void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg, Channel* channel) override
+        {
+            if (!channel || !CoAChatLog::ShouldLog(player, lang))
+                return;
+            CoAChatRow row = CoAChatLog::From(player, uint8(type), lang, msg);
+            row.channel = channel->GetName();
+            CoAChatLog::Record(std::move(row));
+        }
 
         void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg) override
         {

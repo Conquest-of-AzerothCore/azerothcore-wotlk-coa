@@ -316,7 +316,8 @@ ACTIONS = {
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
-    'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method', 'master_looter'}),
+    'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method', 'master_looter', 'raid'}),
+    'guild': ({'actor', 'members'}, {'actor', 'members', 'name'}),
     'lfg_dungeon': ({'actor', 'dungeon'}, {'actor', 'dungeon', 'loot_method'}),
     'lfg_teleport': ({'actor'}, {'actor', 'out'}),
     'lfg_join': ({'actor', 'dungeons', 'roles'}, {'actor', 'dungeons', 'roles'}),
@@ -729,6 +730,15 @@ def validate(scenario, clock=REAL_CLOCK):
                     f'{where}: whisper needs a target and text')
             if 'language' in step:
                 number(step['language'], f'{where}.language', 0, 2**32 - 1, True)
+        if action == 'group' and 'raid' in step:
+            require(type(step['raid']) is bool, f'{where}: raid must be boolean')
+        if action == 'guild':
+            require(step['actor'] in player_ids, f'{where}: guild needs a player leader')
+            require(type(step['members']) is list and step['members'] and all(m in player_ids and m != step['actor']
+                    for m in step['members']), f'{where}: guild members must be other players')
+            if 'name' in step:
+                require(isinstance(step['name'], str) and step['name'].isalpha() and 0 < len(step['name']) <= 24,
+                        f'{where}: guild name must be 1 to 24 letters')
         if action == 'addon_message':
             require(isinstance(step['prefix'], str) and step['prefix'].strip() and '\t' not in step['prefix']
                     and isinstance(step['text'], str), f'{where}: addon_message needs a prefix without tabs and text')

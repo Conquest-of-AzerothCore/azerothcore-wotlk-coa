@@ -24,6 +24,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "RBAC.h"
+#include "ScriptMgr.h"
 #include "SocialMgr.h"
 #include "World.h"
 
@@ -806,6 +807,8 @@ void Channel::Say(ObjectGuid guid, std::string const& what, uint32 lang)
     }
 
     SendToAll(&data, pinfo.IsModerator() ? ObjectGuid::Empty : guid);
+    if (player)
+        sScriptMgr->OnPlayerAfterChat(player, CHAT_MSG_CHANNEL, lang, what, this);
 }
 
 void Channel::Invite(Player const* player, std::string const& newname)
