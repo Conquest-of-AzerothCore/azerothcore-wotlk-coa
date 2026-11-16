@@ -205,7 +205,7 @@ namespace
             CoAChatLog::Record(std::move(row));
         }
 
-        void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 /*emoteNum*/, ObjectGuid guid) override
+        void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32, ObjectGuid guid) override
         {
             if (!CoAChatLog::ShouldLog(player, LANG_UNIVERSAL) || !guid.IsPlayer() || !sEmotesTextStore.LookupEntry(textEmote))
                 return;
