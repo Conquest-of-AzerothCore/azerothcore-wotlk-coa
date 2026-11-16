@@ -23,10 +23,12 @@
 namespace
 {
     std::atomic<bool> s_enabled{false};
+    std::atomic<uint32> s_keepDays{30};
     std::mutex s_mutex;
     std::vector<CoAChatRow> s_rows;
 
     constexpr uint32 FlushIntervalMs = 1000;
+    constexpr uint32 CleanupBatch = 10000;
     constexpr std::size_t NameLength = MAX_PLAYER_NAME;
     constexpr std::size_t ChannelLength = 64;
     constexpr std::size_t SubjectLength = 255;
@@ -174,6 +176,23 @@ std::size_t CoAChatLog::Pending()
     return s_rows.size();
 }
 
+void CoAChatLog::Cleanup(uint32 now, bool wait)
+{
+    uint64 const keep = uint64(s_keepDays.load()) * DAY;
+    if (!keep || now <= keep)
+        return;
+    uint32 const cutoff = uint32(now - keep);
+    QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_chat_log WHERE time < {}", cutoff);
+    uint64 const old = result ? result->Fetch()[0].Get<uint64>() : 0;
+    for (uint64 deleted = 0; deleted < old; deleted += CleanupBatch)
+    {
+        if (wait)
+            CharacterDatabase.DirectExecute("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+        else
+            CharacterDatabase.Execute("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+    }
+}
+
 std::optional<uint8> CoAChatLog::TypeByName(std::string_view name)
 {
     for (auto const& [typeName, type] : TypeNames)
@@ -268,17 +287,29 @@ namespace
     class CoAChatLogWorld : public WorldScript
     {
     public:
-        CoAChatLogWorld() : WorldScript("CoAChatLogWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_UPDATE,
-            WORLDHOOK_ON_SHUTDOWN }) { }
+        CoAChatLogWorld() : WorldScript("CoAChatLogWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP,
+            WORLDHOOK_ON_UPDATE, WORLDHOOK_ON_SHUTDOWN }) { }
 
         void OnAfterConfigLoad(bool) override
         {
             s_enabled = sConfigMgr->GetOption<bool>("CoA.ChatLog.Enable", false);
+            s_keepDays = sConfigMgr->GetOption<uint32>("CoA.ChatLog.KeepDays", 30);
+        }
+
+        void OnStartup() override
+        {
+            CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()), false);
         }
 
         void OnUpdate(uint32 diff) override
         {
             _sinceFlush += diff;
+            _sinceCleanup += diff;
+            if (_sinceCleanup >= DAY * IN_MILLISECONDS)
+            {
+                _sinceCleanup = 0;
+                CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()), false);
+            }
             if (_sinceFlush < FlushIntervalMs)
                 return;
             _sinceFlush = 0;
@@ -292,6 +323,7 @@ namespace
 
     private:
         uint32 _sinceFlush = 0;
+        uint32 _sinceCleanup = 0;
     };
 }
 

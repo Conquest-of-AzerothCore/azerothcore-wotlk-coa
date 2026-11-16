@@ -1131,3 +1131,4 @@ XPHotspots.BuffSpell = 993945
 XPHotspots.Brand = ""
 
 CoA.ChatLog.Enable = 0
+CoA.ChatLog.KeepDays = 30

@@ -7720,6 +7720,11 @@ private:
             player->GetSession()->HandleMessagechatOpcode(packet);
             record.put("result", "whisper sent; verify delivery with assertions");
         }
+        else if (action == "chat_log_cleanup")
+        {
+            Require(CoAChatLog::Flush(true), "chat_log_cleanup could not write the pending rows");
+            CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY, true);
+        }
         else if (action == "addon_message")
         {
             WorldPacket packet(CMSG_MESSAGECHAT, 64);

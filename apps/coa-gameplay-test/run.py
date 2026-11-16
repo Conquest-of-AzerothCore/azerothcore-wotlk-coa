@@ -296,6 +296,7 @@ ACTIONS = {
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
     'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language'}),
     'addon_message': ({'actor', 'prefix', 'text'}, {'actor', 'prefix', 'text'}),
+    'chat_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead'}),
     'wait': ({'ms'}, {'ms'}),
     'snapshot': ({'actor', 'metric', 'save_as'}, METRIC_FIELDS | {'save_as'}),
     'assert': ({'actor', 'metric'}, METRIC_FIELDS | {'equals', 'min', 'max', 'within_ms'}),
@@ -730,6 +731,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     f'{where}: whisper needs a target and text')
             if 'language' in step:
                 number(step['language'], f'{where}.language', 0, 2**32 - 1, True)
+        if action == 'chat_log_cleanup':
+            number(step['days_ahead'], f'{where}.days_ahead', 0, 3650, True)
         if action == 'group' and 'raid' in step:
             require(type(step['raid']) is bool, f'{where}: raid must be boolean')
         if action == 'guild':

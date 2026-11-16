@@ -49,6 +49,7 @@ namespace CoAChatLog
     void Record(CoAChatRow row);
     bool Flush(bool wait);
     std::size_t Pending();
+    void Cleanup(uint32 now, bool wait);
     std::optional<uint8> TypeByName(std::string_view name);
 }
 

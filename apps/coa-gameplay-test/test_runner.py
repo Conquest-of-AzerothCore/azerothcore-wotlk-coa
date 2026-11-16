@@ -605,6 +605,21 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
                 run.validate(bad)
 
+    def test_chat_log_cleanup_takes_a_day_count(self):
+        step = {'action': 'chat_log_cleanup', 'actor': 'caster', 'days_ahead': 3650}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, step)
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'days_ahead': -1}, {'days_ahead': 3651}, {'days_ahead': '31'}, {'days_ahead': 1.5}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**step, **change})
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'days_ahead'):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'chat_log_cleanup', 'actor': 'caster'})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
     def test_chat_log_rows_takes_a_type_and_filters(self):
         rows = {'action': 'assert', 'actor': 'caster', 'metric': 'chat_log_rows', 'chat_type': 'whisper',
                 'chat_text': "it's me", 'chat_target': 'caster', 'chat_channel': 'World', 'chat_subject': 'Hello',
