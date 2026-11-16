@@ -765,32 +765,29 @@ void SyncRunningWildJourneyman(Player* player)
         speed->RecalculateAmount();
 }
 
-bool ChangesRunningWildSpeed(uint32 spell)
-{
-    if (spell == SPELL_RUNNING_WILD)
-        return true;
-
-    SpellLearnSkillNode const* skill = sSpellMgr->GetSpellLearnSkill(spell);
-    return skill && skill->skill == SKILL_RIDING;
-}
-
 class bloodmage_running_wild_journeyman : public PlayerScript
 {
 public:
     bloodmage_running_wild_journeyman() : PlayerScript("bloodmage_running_wild_journeyman",
-        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL}) { }
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL, PLAYERHOOK_ON_SET_SKILL}) { }
 
     void OnPlayerLogin(Player* player) override { SyncRunningWildJourneyman(player); }
 
     void OnPlayerLearnSpell(Player* player, uint32 spell) override
     {
-        if (ChangesRunningWildSpeed(spell))
+        if (spell == SPELL_RUNNING_WILD)
             SyncRunningWildJourneyman(player);
     }
 
     void OnPlayerForgotSpell(Player* player, uint32 spell) override
     {
-        if (ChangesRunningWildSpeed(spell))
+        if (spell == SPELL_RUNNING_WILD)
+            SyncRunningWildJourneyman(player);
+    }
+
+    void OnPlayerSetSkill(Player* player, uint32 skill, uint32, uint32, uint32, uint32) override
+    {
+        if (skill == SKILL_RIDING && player->IsInWorld())
             SyncRunningWildJourneyman(player);
     }
 };
