@@ -1,19 +1,24 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir mounts Ohgan for 30 s when he comes close and mounts him again",
+  "name": "Zul'Gurub: Bloodlord Mandokir rides on Ohgan's back for 30 s from 55 s into the fight and again 45 s after he dismounts",
   "contract": [
-    "Round-9 tester (2026-11-15, Bronzebeard video of 2025-11-13, 28:07-28:40): when Ohgan (14988) gets",
-    "close, Mandokir (11382) mounts up, both stay active and attackable, and he dismounts about 30 s later.",
-    "User decision 2026-11-15: within 10 yards of Ohgan (estimated) Mandokir rides Ohgan's display 215271 with",
-    "Mounted 2118412 while Ohgan carries Mounted 2118411 and keeps fighting his rider's target; after 30 s he",
-    "dismounts, and mounts again 30 s later (estimated) when Ohgan is in reach. Neither Mounted aura is in any",
-    "live log. Before round 9 Mandokir never cast Mounted. Ohgan runs in from the arena entrance, so the first",
-    "mount comes once he arrives. Mandokir's timers wait while he casts, so a Whirlwind (3 s cast, 6 s spin) can",
-    "hold the dismount or the next mount back by up to 9 s; 25 s waits plus 16 s windows allow 41 s.",
-    "The tank is the only player, so every melee swing of Ohgan's the tank sees during the ride is at Mandokir's",
-    "target; at least 3 in 25 s shows he keeps fighting (threshold estimated, his attack speed is not asserted)."
+    "Round-9 tester (2026-11-15, Bronzebeard video of 2025-11-13): the pull is at 27:10 and Mandokir (11382)",
+    "rides Ohgan (14988) from 28:07 to 28:40, so he mounts about 57 s in and dismounts about 30 s later; both",
+    "stay active and attackable. Round-10 testers (2026-11-16): he sits on Ohgan's back, not on a mounted model",
+    "of his own, and mounts when Ohgan is within 15 yards. User decision 2026-11-16: no mount before 55 s,",
+    "then within 15 yards Mandokir enters Ohgan as a vehicle passenger (vehicle 485, a stand-in seat) with",
+    "Mounted 2118412, while Ohgan carries Mounted 2118411 and fights his rider's target; after 30 s he",
+    "dismounts, and mounts again 45 s later (estimated) when Ohgan is in reach. The first round-10 draft",
+    "mounted as soon as Ohgan arrived, so the 45 s on foot discriminates; round 9 gave him Ohgan's display",
+    "215271 as a mount of his own, so the passenger and no-display assertions discriminate. Mandokir's timers",
+    "wait while he casts, so a Whirlwind (3 s cast, 6 s spin) can hold a step back by up to 9 s: the first",
+    "mount is due at 55 s and asserted within 25 s of the 45 s check, the dismount within 16 s of a 25 s",
+    "wait, and the next mount within 16 s of a 40 s wait. The tank is the only player and stands in melee,",
+    "so Mandokir has no charge target and never leaves the seat early. Every melee swing of Ohgan's the tank",
+    "sees during the ride is at Mandokir's target; at least 3 in 25 s shows he keeps fighting (threshold",
+    "estimated, his attack speed is not asserted)."
   ],
-  "timeout_ms": 170000,
+  "timeout_ms": 240000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -96,7 +101,34 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: once Ohgan arrives, Mandokir is Mounted (2118412)",
+      "label": "CONTROL: he rides nothing before Ohgan comes",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Most of the 55 s before the first mount",
+      "ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: still on foot 45 s in (first round-10 draft: mounted at once)",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and on nobody's back",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: from 55 s, Mandokir is Mounted (2118412)",
       "actor": "mandokir",
       "metric": "aura",
       "spell": 2118412,
@@ -105,10 +137,17 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: and rides Ohgan's display",
+      "label": "DISCRIMINATING: he sits on Ohgan's back as a passenger",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 14988
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with no mount display of his own (round 9: 215271)",
       "actor": "mandokir",
       "metric": "mount_display_id",
-      "equals": 215271
+      "equals": 0
     },
     {
       "action": "assert",
@@ -174,12 +213,26 @@
     },
     {
       "action": "assert",
+      "label": "CONTROL: still on Ohgan's back",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 14988
+    },
+    {
+      "action": "assert",
       "label": "DISCRIMINATING: he dismounts about 30 s after mounting",
       "actor": "mandokir",
       "metric": "aura",
       "spell": 2118412,
       "equals": 0,
       "within_ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he has left Ohgan's back",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 0
     },
     {
       "action": "assert",
@@ -207,12 +260,12 @@
     },
     {
       "action": "wait",
-      "label": "Most of the 30 s before he mounts again",
-      "ms": 25000
+      "label": "Most of the 45 s before he mounts again",
+      "ms": 40000
     },
     {
       "action": "assert",
-      "label": "CONTROL: still on foot 25 s later",
+      "label": "CONTROL: still on foot 40 s later",
       "actor": "mandokir",
       "metric": "aura",
       "spell": 2118412,
@@ -226,6 +279,13 @@
       "spell": 2118412,
       "equals": 1,
       "within_ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: back on Ohgan's back",
+      "actor": "mandokir",
+      "metric": "vehicle_base_entry",
+      "equals": 14988
     },
     {
       "action": "assert",

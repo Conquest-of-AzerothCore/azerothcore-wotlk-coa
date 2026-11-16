@@ -4,7 +4,8 @@
   "contract": [
     "On live a Blood Orb (92008, display 462101) floats over the Blood Pit next to Jin'do (11380) (tester video",
     "round 8, CoA combat log 2026-08-24). A hero standing on the pit floor sees one orb with that display, high",
-    "above them, and cannot attack it. Its height, faction and flags are estimates."
+    "above them, and cannot attack it. Its height, faction and flags are estimates. Round-10 testers asked for an",
+    "orb three times larger, so it has scale 3."
   ],
   "timeout_ms": 60000,
   "location": {
@@ -64,6 +65,15 @@
       "metric": "nearby_creature_display",
       "entry": 92008,
       "equals": 462101
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it is three times its model's size (tester round 10)",
+      "actor": "hero",
+      "metric": "nearby_creature_scale",
+      "entry": 92008,
+      "min": 2.99,
+      "max": 3.01
     },
     {
       "action": "assert",

@@ -4,8 +4,8 @@
   "contract": [
     "Round-8 tester (2026-11-15): Hakkar (14834) does not summon the consumed Spirit Beast's adds. The live CoA",
     "Normal log of 2026-08-09 shows four Zulian Prowlers (15101) within 7 s of the Avatar of Bethekk's death",
-    "(Arlokk's loa), and four more 45 s later. The logs hold no positions, so the prowlers appearing at Hakkar is",
-    "an estimate. The stock prowler script walks to Arlokk, who lives here, so Hakkar's prowlers must fight at",
+    "(Arlokk's loa), and four more 45 s later. They come up the stairs from the platforms below them (round-10",
+    "tester). The stock prowler script walks to Arlokk, who lives here, so Hakkar's prowlers must fight at",
     "once. In a fresh Normal instance every High Priest but Arlokk is set DONE; once Hakkar has lost 15 % of his",
     "health he drains Bethekk, takes its Aspect (2118705) and four prowlers come and stay at the hero."
   ],
@@ -165,7 +165,7 @@
       "metric": "nearby_creature_count",
       "entry": 15101,
       "min": 4,
-      "within_ms": 15000
+      "within_ms": 30000
     },
     {
       "action": "wait",

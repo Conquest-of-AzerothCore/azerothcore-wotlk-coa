@@ -7,7 +7,7 @@
     "cannot attack the nearer egg; once it casts Hatching (2118119) the hero can. By the user's decision the egg is",
     "immune to all crowd control: stun, fear, polymorph and silence probes are immune, Shadow Bolt is not. Mar'li",
     "dies mid-cast, her eggs' Hatching breaks, and the out-of-combat egg is sealed again; on the old behaviour every",
-    "egg was attackable and could be crowd controlled."
+    "egg was attackable and could be crowd controlled. Round 10 (user, 2026-11-16): each egg has scale 1.5."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -89,6 +89,15 @@
       "metric": "nearby_creature_can_attack",
       "entry": 14915,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the egg is half as large again as its model (round-10 user decision)",
+      "actor": "tank",
+      "metric": "nearby_creature_scale",
+      "entry": 14915,
+      "min": 1.49,
+      "max": 1.51
     },
     {
       "action": "attack",

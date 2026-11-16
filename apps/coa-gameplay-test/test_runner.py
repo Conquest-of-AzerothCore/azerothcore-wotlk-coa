@@ -212,6 +212,14 @@ class RunnerTests(unittest.TestCase):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
 
+    def test_nearby_creature_scale_needs_a_player_and_entry(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_scale', 'entry': 92008,
+                'equals': 3}
+        self.assert_step_validates(step)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'entry': '92008'}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+
     def test_nearby_creature_aura_count_needs_a_player_entry_and_spell(self):
         step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_aura_count', 'entry': 23686,
                 'spell': 42074, 'min': 1}
@@ -244,6 +252,14 @@ class RunnerTests(unittest.TestCase):
         scenario['steps'].append(step)
         with self.subTest(step=step), self.assertRaises(ValueError):
             run.validate(scenario)
+
+    def test_attack_nearby_needs_a_positive_radius_and_a_boolean_all(self):
+        step = {'action': 'attack_nearby', 'actor': 'caster', 'entry': 14834, 'radius': 120, 'kill': True,
+                'all': True}
+        self.assert_step_validates(step)
+        for change in ({'radius': 'wide'}, {'radius': 0}, {'radius': -5}, {'radius': float('inf')},
+                       {'radius': True}, {'all': []}, {'all': 1}, {'all': 'yes'}):
+            self.assert_step_rejected({**step, **change})
 
     def test_spawn_placement_metrics_need_a_player_guid_and_spawn_type(self):
         for metric in ('spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
