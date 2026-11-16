@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Artificer keeps one client wand row across Unmake and replacement rank upgrades (6245)",
-  "contract": "Artificer804478 transforms active Unmake. Acquiring Unmake rank3 at level13 must rebind that active original to wand561284 without announcing the existing replacement twice. Wand rank2 SpellLevel22 is not promised atlevel13; after native level22 progression it must replace wandrank1 with561354, one client row and no oldwand row. Switching out restores Unmake, removes the wand, and switching back grants exactly one replacement row. Native spellbook packet tracking is distinct from rendering the client UI.",
+  "contract": "Artificer804478 transforms active Unmake. Acquiring Unmake rank3 at level13 must rebind that active original to wand561284 without announcing the existing replacement twice. Wand rank2 SpellLevel22 is not promised atlevel13; after native level22 progression the top active Unmake rank503785 must show wandrank2 561354 while the lower active Unmake rank804418 keeps wandrank1, one client row each (#12513). Switching out restores Unmake, removes the wand, and switching back grants exactly one replacement row. Native spellbook packet tracking is distinct from rendering the client UI.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -114,7 +114,7 @@
       "actor": "c",
       "metric": "client_spellbook_copies",
       "spell": 561284,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",
