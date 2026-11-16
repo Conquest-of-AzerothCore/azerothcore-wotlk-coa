@@ -253,6 +253,14 @@ class RunnerTests(unittest.TestCase):
         with self.subTest(step=step), self.assertRaises(ValueError):
             run.validate(scenario)
 
+    def test_attack_nearby_needs_a_positive_radius_and_a_boolean_all(self):
+        step = {'action': 'attack_nearby', 'actor': 'caster', 'entry': 14834, 'radius': 120, 'kill': True,
+                'all': True}
+        self.assert_step_validates(step)
+        for change in ({'radius': 'wide'}, {'radius': 0}, {'radius': -5}, {'radius': float('inf')},
+                       {'radius': True}, {'all': []}, {'all': 1}, {'all': 'yes'}):
+            self.assert_step_rejected({**step, **change})
+
     def test_spawn_placement_metrics_need_a_player_guid_and_spawn_type(self):
         for metric in ('spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
                        'spawn_stand_state', 'spawn_clearance', 'spawn_headroom', 'spawn_distance'):

@@ -888,6 +888,12 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(step['radius'] > 0, f'{where}: radius must be positive')
             require(not encounter_started, f'{where}: a scenario allows only one encounter_start')
             encounter_started = True
+        if action == 'attack_nearby':
+            if 'radius' in step:
+                number(step['radius'], f'{where}.radius', 0, MAX_NEAREST_CREATURE_RADIUS)
+                require(step['radius'] > 0, f'{where}: radius must be positive')
+            if 'all' in step:
+                require(type(step['all']) is bool, f'{where}: all must be boolean')
         if action == 'lfg_join':
             require(type(step['dungeons']) is list and 0 < len(step['dungeons']) <= 50,
                     f'{where}: dungeons must list 1-50 LFGDungeons ids')

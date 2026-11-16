@@ -3940,8 +3940,9 @@ private:
             }
             uint32 count = 0;
             for (SpellCastEvent const& event : _actors.at(step.get<std::string>("actor")).spellCasts)
-                if (event.spell == spell && (entry ? event.caster.IsCreatureOrVehicle() && event.caster.GetEntry() == *entry
-                                                   : event.caster == caster))
+                if (event.spell == spell
+                    && (entry ? event.caster.IsCreatureOrVehicle() && event.caster.GetEntry() == *entry
+                              : event.caster == caster))
                     ++count;
             return count;
         }
