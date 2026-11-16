@@ -9,7 +9,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
 
-EXPECTED_STAGES = {309: 3, 880: 3, 409: 4, 889: 4, 890: 4, 249: 5, 469: 6, 509: 7, 531: 7}
+EXPECTED_STAGES = {309: 3, 880: 3, 881: 3, 409: 4, 889: 4, 890: 4, 249: 5, 469: 6, 509: 7, 531: 7}
 DIFFICULTY_STAGES = {0: 0, 1: 1, 2: 2}
 UNGATED_MAPS = (0, 1, 36, 229, 230, 532, 533, 535, 603, 883, 951)
 UNGATED_RAIDS = (532, 533, 535, 603)

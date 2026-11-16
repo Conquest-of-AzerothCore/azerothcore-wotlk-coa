@@ -1,0 +1,107 @@
+-- Azuregos in the boss map Ascension built for him (881, "Azuregos (PvE)"), the way Setis and Snowgrave are fought:
+-- a shrine in Azshara takes players in (Normal only), the portal he leaves where he falls and the shrine at the
+-- entrance take them back, and players who die in his map rise at its start.
+
+-- Ascension fights him in his map as his own entry, 64601 "Azuregos" (kill credit 6109, his spells and model); the
+-- open-world 6109 keeps his template. Same loot table, his live drops: one roll of his items here, and
+-- azuregos_instance_death_coa rolls one more for every four players in his map.
+DROP TEMPORARY TABLE IF EXISTS `coa_azuregos_tmp`;
+CREATE TEMPORARY TABLE `coa_azuregos_tmp` SELECT * FROM `creature_template` WHERE `entry` = 6109;
+UPDATE `coa_azuregos_tmp` SET `entry` = 64601, `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109,
+    `HealthModifier` = 3200, `AIName` = '', `ScriptName` = 'boss_azuregos_coa', `flags_extra` = `flags_extra` & ~1,
+    `faction` = 14, `npcflag` = 0, `gossip_menu_id` = 0;
+INSERT INTO `creature_template` SELECT * FROM `coa_azuregos_tmp`
+ON DUPLICATE KEY UPDATE `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109, `HealthModifier` = 3200,
+    `faction` = 14, `npcflag` = 0, `gossip_menu_id` = 0,
+    `ScriptName` = 'boss_azuregos_coa', `flags_extra` = `creature_template`.`flags_extra` & ~1;
+DROP TEMPORARY TABLE `coa_azuregos_tmp`;
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 64601 AND `Idx` = 0;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+    `VerifiedBuild`) VALUES
+(64601, 0, 11460, 1, 1, 12340);
+UPDATE `creature_template` SET `lootid` = 6109 WHERE `entry` = 6109;
+DELETE FROM `creature_loot_template` WHERE `Entry` = 6109;
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
+    `MinCount`, `MaxCount`, `Comment`) VALUES
+(6109, 17070, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Fang of the Mystics'),
+(6109, 18202, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Eskhandar''s Left Claw'),
+(6109, 18208, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Drape of Benediction'),
+(6109, 18541, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Puissant Cape'),
+(6109, 18542, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Typhoon'),
+(6109, 18545, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Leggings of Arcane Supremacy'),
+(6109, 18547, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Unmelting Ice Girdle'),
+(6109, 19130, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Cold Snap'),
+(6109, 19131, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Snowblind Shoes'),
+(6109, 19132, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Crystal Adorned Crown'),
+(6109, 18704, 0, 60, 0, 1, 0, 1, 1, 'Azuregos - Mature Blue Dragon Sinew'),
+(6109, 1005012, 0, 100, 0, 1, 0, 1, 1, 'Azuregos - Scale of Azuregos'),
+(6109, 1180234, 0, 1, 0, 1, 0, 1, 1, 'Azuregos - Draconic Warhorn: Azuregos'),
+(6109, 11938, 0, 100, 0, 1, 0, 1, 1, 'Azuregos - Sack of Gems');
+
+-- His map belongs to Kalimdor, as Setis' 880 does.
+UPDATE `instance_template` SET `parent` = 1 WHERE `map` = 881;
+
+-- 64601 waits where Ascension has him in his map (spot taken in game); the open-world 6109 is not spawned.
+DELETE FROM `creature` WHERE `guid` = 9780912 OR `id` = 6109;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+    `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
+(9780912, 64601, 881, 10236, 10236, 15, 1, 2920.7097, -4775.049, 238.013, 5.1369, 604800, 0, 0);
+
+-- His health is per player in his map (10 to 40): the Ascension kill's pool over its 24 players.
+DELETE FROM `coa_world_boss` WHERE `entry` = 64601;
+INSERT INTO `coa_world_boss` (`entry`, `health`, `per_player`, `radius`, `min_players`, `max_players`, `comment`)
+VALUES (64601, 38760524, 1615022, 1000, 10, 40, 'Azuregos (map 881): per player, the Ascension kill of 24 players');
+
+-- The shrine in Azshara (Ascension's 280139), the portal out and the shrine at the entrance of his map, all at
+-- spots taken in game. The Azshara shrine sits off the paths the creatures there walk.
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
+    `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(280139, 10, 4076, 'Shrine of Azuregos', '', '', '', 3, '', 'go_azuregos_altar_coa', 12340),
+(978071, 10, 4396, 'Portal to Azshara', '', '', '', 1.5, '', 'go_azuregos_exit_coa', 12340),
+(978072, 10, 4076, 'Shrine of Azuregos', '', '', '', 3, '', 'go_azuregos_leave_coa', 12340)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
+    `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `gameobject` WHERE `guid` IN (9780910, 9780911);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+    `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
+    `animprogress`, `state`) VALUES
+(9780910, 280139, 1, 0, 0, 1, 1, 2597.352, -5993.585, 103.908, 0.7092, 0, 0, 0.347136, 0.937815, 300, 100, 1),
+(9780911, 978072, 881, 10236, 10236, 15, 1, 2949.676, -4877.643, 240.156, 1.7613, 0, 0, 0.771128, 0.636680,
+    300, 100, 1);
+
+-- Players who die in his map rise at its start: WorldSafeLocs.dbc 6081 "Azuregos Graveyard".
+DELETE FROM `game_graveyard` WHERE `ID` = 6081;
+INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
+(6081, 881, 2948.83, -4882.32, 241.063, 'Azuregos Graveyard');
+DELETE FROM `graveyard_zone` WHERE `ID` = 6081 AND `GhostZone` = 10236;
+INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
+(6081, 10236, 0, 'Azuregos (PvE) boss map');
+
+-- The shrine's words.
+DELETE FROM `npc_text` WHERE `ID` = 978070;
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
+(978070, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
+    'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.');
+
+-- His hologram above both shrines: ghostly (22650), flying in place with his wings beating.
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+    `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+    `VerifiedBuild`) VALUES
+(978070, 'Azuregos', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 2, 0, '', '', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), `faction` = VALUES(`faction`),
+    `npcflag` = VALUES(`npcflag`), `unit_flags` = VALUES(`unit_flags`), `type_flags` = VALUES(`type_flags`),
+    `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 978070 AND `Idx` = 0;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+    `VerifiedBuild`) VALUES
+(978070, 0, 11460, 0.15, 1, 12340);
+DELETE FROM `creature_template_addon` WHERE `entry` = 978070;
+INSERT INTO `creature_template_addon` (`entry`, `bytes1`, `auras`) VALUES (978070, 50331648, '22650');
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978070;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(978070, 0, 0, 1, 1);
+DELETE FROM `creature` WHERE `guid` IN (9780910, 9780911);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+    `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
+(9780910, 978070, 1, 0, 0, 1, 1, 2597.352, -5993.585, 110.0, 0.7092, 300, 0, 0),
+(9780911, 978070, 881, 10236, 10236, 15, 1, 2949.676, -4877.643, 246.2, 1.7613, 300, 0, 0);
