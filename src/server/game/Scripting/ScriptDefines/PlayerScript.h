@@ -269,6 +269,7 @@ enum PlayerHook
     PLAYERHOOK_ON_AFTER_GROUP_CHAT,
     PLAYERHOOK_ON_AFTER_GUILD_CHAT,
     PLAYERHOOK_ON_AFTER_CHANNEL_CHAT,
+    PLAYERHOOK_ON_AFTER_SEND_MAIL,
     PLAYERHOOK_END
 };
 
@@ -867,6 +868,8 @@ public:
     virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Group* /*group*/) { }
     virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Guild* /*guild*/) { }
     virtual void OnPlayerAfterChat(Player* /*player*/, uint32 /*type*/, uint32 /*language*/, std::string const& /*msg*/, Channel* /*channel*/) { }
+    virtual void OnPlayerAfterSendMail(Player* /*player*/, ObjectGuid /*receiverGuid*/, uint32 /*receiverAccount*/, std::string const& /*receiverName*/,
+        uint32 /*mailId*/, std::string const& /*subject*/, std::string const& /*body*/) { }
 
     /**
      * @brief This hook called after player learning talents

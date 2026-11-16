@@ -936,6 +936,13 @@ void ScriptMgr::OnPlayerAfterChat(Player* player, uint32 type, uint32 language, 
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_CHANNEL_CHAT, script->OnPlayerAfterChat(player, type, language, msg, channel));
 }
 
+void ScriptMgr::OnPlayerAfterSendMail(Player* player, ObjectGuid receiverGuid, uint32 receiverAccount, std::string const& receiverName, uint32 mailId,
+    std::string const& subject, std::string const& body)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_SEND_MAIL, script->OnPlayerAfterSendMail(player, receiverGuid, receiverAccount, receiverName,
+        mailId, subject, body));
+}
+
 void ScriptMgr::OnPlayerLearnTalents(Player* player, uint32 talentId, uint32 talentRank, uint32 spellid)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_PLAYER_LEARN_TALENTS, script->OnPlayerLearnTalents(player, talentId, talentRank, spellid));

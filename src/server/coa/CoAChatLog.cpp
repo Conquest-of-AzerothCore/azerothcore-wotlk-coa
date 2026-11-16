@@ -188,7 +188,22 @@ namespace
     {
     public:
         CoAChatLogPlayer() : PlayerScript("CoAChatLogPlayer", { PLAYERHOOK_ON_AFTER_CHAT, PLAYERHOOK_ON_AFTER_PRIVATE_CHAT,
-            PLAYERHOOK_ON_AFTER_GROUP_CHAT, PLAYERHOOK_ON_AFTER_GUILD_CHAT, PLAYERHOOK_ON_AFTER_CHANNEL_CHAT, PLAYERHOOK_ON_TEXT_EMOTE }) { }
+            PLAYERHOOK_ON_AFTER_GROUP_CHAT, PLAYERHOOK_ON_AFTER_GUILD_CHAT, PLAYERHOOK_ON_AFTER_CHANNEL_CHAT, PLAYERHOOK_ON_TEXT_EMOTE,
+            PLAYERHOOK_ON_AFTER_SEND_MAIL }) { }
+
+        void OnPlayerAfterSendMail(Player* player, ObjectGuid receiverGuid, uint32 receiverAccount, std::string const& receiverName,
+            uint32 mailId, std::string const& subject, std::string const& body) override
+        {
+            if (!mailId || (subject.empty() && body.empty()) || !CoAChatLog::ShouldLog(player, LANG_UNIVERSAL))
+                return;
+            CoAChatRow row = CoAChatLog::From(player, CoAChatLog::TypeMail, LANG_UNIVERSAL, body);
+            row.targetGuid = receiverGuid.GetCounter();
+            row.targetAccount = receiverAccount;
+            row.targetName = receiverName;
+            row.mailId = mailId;
+            row.subject = subject;
+            CoAChatLog::Record(std::move(row));
+        }
 
         void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg, Group* group) override
         {
