@@ -12434,6 +12434,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                     stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
                     non_stack_bonus += GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK) / 100.0f;
                 }
+                sScriptMgr->OnUnitUpdateRunSpeed(this, main_speed_mod, stack_bonus, non_stack_bonus);
                 break;
             }
         case MOVE_SWIM:

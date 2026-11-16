@@ -65,6 +65,12 @@ void ScriptMgr::ModifyMeleeDamageRange(Unit* target, Unit* attacker, float& minD
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_MELEE_DAMAGE_RANGE, script->ModifyMeleeDamageRange(target, attacker, minDamage, maxDamage));
 }
 
+void ScriptMgr::OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_UPDATE_RUN_SPEED,
+        script->OnUnitUpdateRunSpeed(unit, mainSpeedMod, stackBonus, nonStackBonus));
+}
+
 void ScriptMgr::ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, script->ModifySpellDamageTaken(target, attacker, damage, spellInfo));

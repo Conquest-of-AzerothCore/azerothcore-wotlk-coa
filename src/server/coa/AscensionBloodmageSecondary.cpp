@@ -753,12 +753,25 @@ class spell_ascension_bloodmage_excision : public SpellScript
 
 void SyncRunningWildJourneyman(Player* player)
 {
-    bool const runningWild = player->HasSpell(SPELL_RUNNING_WILD);
+    bool const wanted = player->HasSpell(SPELL_RUNNING_WILD) &&
+        player->GetBaseSkillValue(SKILL_RIDING) >= RIDING_SKILL_JOURNEYMAN;
     bool const journeyman = player->HasSpell(SPELL_RUNNING_WILD_JOURNEYMAN);
-    if (runningWild && !journeyman)
+    if (wanted && !journeyman)
         player->learnSpell(SPELL_RUNNING_WILD_JOURNEYMAN);
-    else if (!runningWild && journeyman)
+    else if (!wanted && journeyman)
         player->removeSpell(SPELL_RUNNING_WILD_JOURNEYMAN, SPEC_MASK_ALL, false);
+
+    if (AuraEffect* speed = player->GetAuraEffect(SPELL_RUNNING_WILD, EFFECT_0))
+        speed->RecalculateAmount();
+}
+
+bool ChangesRunningWildSpeed(uint32 spell)
+{
+    if (spell == SPELL_RUNNING_WILD)
+        return true;
+
+    SpellLearnSkillNode const* skill = sSpellMgr->GetSpellLearnSkill(spell);
+    return skill && skill->skill == SKILL_RIDING;
 }
 
 class bloodmage_running_wild_journeyman : public PlayerScript
@@ -771,13 +784,13 @@ public:
 
     void OnPlayerLearnSpell(Player* player, uint32 spell) override
     {
-        if (spell == SPELL_RUNNING_WILD)
+        if (ChangesRunningWildSpeed(spell))
             SyncRunningWildJourneyman(player);
     }
 
     void OnPlayerForgotSpell(Player* player, uint32 spell) override
     {
-        if (spell == SPELL_RUNNING_WILD)
+        if (ChangesRunningWildSpeed(spell))
             SyncRunningWildJourneyman(player);
     }
 };
