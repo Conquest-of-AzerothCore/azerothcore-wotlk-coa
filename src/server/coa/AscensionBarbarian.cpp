@@ -109,6 +109,31 @@ void HandleAscensionBarbarianAura(Player* player, uint32 spellId, bool apply)
     }
     else
         player->RemoveAurasDueToSpell(helper);
+
+    if (spellId == BODY_BUILDER)
+        player->UpdateAttackPowerAndDamage(false);
+}
+
+float AscensionBarbarian::UnbuffedAgility(Player const* player)
+{
+    UnitMods const agility = UnitMods(UNIT_MOD_STAT_START + AsUnderlyingType(STAT_AGILITY));
+    return player->GetCreateStat(STAT_AGILITY) + player->GetFlatModifierValue(agility, BASE_VALUE);
+}
+
+float AscensionBarbarian::BodyBuilderAttackPowerCorrection(Player* player)
+{
+    if (!player || player->getClass() != CLASS_BARBARIAN)
+        return 0.0f;
+
+    AuraEffect const* bonus = player->GetAuraEffect(BODY_BUILDER, EFFECT_0);
+    if (!bonus || bonus->GetAuraType() != SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT)
+        return 0.0f;
+
+    float const strength = player->GetStat(STAT_STRENGTH);
+    if (strength < UnbuffedAgility(player))
+        return 0.0f;
+
+    return -CalculatePct(strength, bonus->GetAmount());
 }
 
 void HandleAscensionBarbarianCast(Spell* spell)

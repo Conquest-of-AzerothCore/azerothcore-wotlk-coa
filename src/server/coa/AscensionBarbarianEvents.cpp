@@ -420,6 +420,20 @@ private:
     }
 };
 
+class barbarian_body_builder : public PlayerScript
+{
+public:
+    barbarian_body_builder() : PlayerScript("barbarian_body_builder",
+        {PLAYERHOOK_ON_AFTER_UPDATE_ATTACK_POWER_AND_DAMAGE}) { }
+
+    void OnPlayerAfterUpdateAttackPowerAndDamage(Player* player, float&, float&, float& attackPowerMod, float&,
+        bool ranged) override
+    {
+        if (!ranged)
+            attackPowerMod += BodyBuilderAttackPowerCorrection(player);
+    }
+};
+
 class barbarian_thanes_grip : public PlayerScript
 {
 public:
@@ -446,5 +460,6 @@ void AddAscensionBarbarianEventScripts()
     RegisterSpellScript(aura_ascension_barbarian_bleed);
     new barbarian_grisly_meal();
     new barbarian_killing_spree();
+    new barbarian_body_builder();
     new barbarian_thanes_grip();
 }
