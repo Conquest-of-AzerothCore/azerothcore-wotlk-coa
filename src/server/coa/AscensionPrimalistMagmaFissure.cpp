@@ -1,7 +1,9 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "Creature.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
@@ -48,10 +50,31 @@ public:
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* spellInfo, bool) override
     {
-        if (caster && caster->IsPlayer() && !spell->IsTriggered() && IsMagmaFissure(spellInfo))
+        if (!caster || !caster->IsPlayer() || spell->IsTriggered())
+            return;
+
+        if (IsMagmaFissure(spellInfo))
+        {
             caster->CastSpell(caster, MagmaFissureInstantCast, true);
+            return;
+        }
+
+        if (AuraEffect const* instantCast = caster->GetAuraEffect(MagmaFissureInstantCast, EFFECT_0))
+            if (instantCast->IsAffectedOnSpell(spellInfo))
+                caster->RemoveAurasDueToSpell(MagmaFissureInstantCast);
     }
 };
+
+bool CanBeKnockedBack(Unit* target)
+{
+    if ((target->IsVehicle() && target->GetCreatureType() != CREATURE_TYPE_BEAST) || target->GetVehicle() ||
+        target->HasUnitState(UNIT_STATE_ROOT))
+        return false;
+
+    Creature* creature = target->ToCreature();
+    return !creature || (!creature->isWorldBoss() && !creature->IsDungeonBoss() && !creature->IsImmuneToKnockback() &&
+        creature->GetCreatureType() != CREATURE_TYPE_GIANT);
+}
 
 class spell_primalist_magma_fissure_knockback : public SpellScript
 {
@@ -61,7 +84,7 @@ class spell_primalist_magma_fissure_knockback : public SpellScript
     {
         Unit* caster = GetCaster();
         Unit* target = GetHitUnit();
-        if (!caster || !target || target == caster)
+        if (!caster || !target || target == caster || !CanBeKnockedBack(target))
             return;
 
         float const facing = caster->GetOrientation();
