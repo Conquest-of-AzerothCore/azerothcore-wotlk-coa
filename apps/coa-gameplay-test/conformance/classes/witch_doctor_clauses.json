@@ -133,9 +133,7 @@
   {
     "spell": 300662,
     "clause": "Increases the duration and effectiveness of your Jinxes by $s1%.",
-    "labels": [
-      "300662 effect_value e0 #0"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -203,10 +201,7 @@
   {
     "spell": 301175,
     "clause": "and mana, repeating every $T2 sec$?s707335[and increases your movement speed by $561071s1%][] for $d,",
-    "labels": [
-      "301175 aura_amplitude_ms #1",
-      "301175 spell_duration 561136 #2"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -569,9 +564,7 @@
   {
     "spell": 503608,
     "clause": "Increases your Agility, Intellect and Spirit by $s1%.",
-    "labels": [
-      "503608 effect_value e0 #0"
-    ],
+    "labels": [],
     "kind": "claim",
     "dbc_clause": "Increases your Agility and Intellect by $s1%.",
     "text_source": {
@@ -671,10 +664,7 @@
   {
     "spell": 503707,
     "clause": "and mana, repeating every $T2 sec$?s707335[and increases your movement speed by $561071s1%][] for $d,",
-    "labels": [
-      "503707 aura_amplitude_ms #3",
-      "503707 spell_duration 561136 #4"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -734,11 +724,7 @@
   {
     "spell": 503712,
     "clause": "Launch a spirit volley at your enemy, dealing ${$m1+0+$RAP*.285} Shadow damage to them and up to $i enemies within $a1 yds and collects a Spirit.",
-    "labels": [
-      "503712 effect_value 504582e0 #2",
-      "503712 effect_value #3",
-      "503712 effect_radius 504582e0 #4"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -1581,9 +1567,7 @@
   {
     "spell": 705840,
     "clause": "Increases the damage of Bad Juju, Malefic Wrath and Hexfire by $s1% against enemies affected by Hex of Malice.",
-    "labels": [
-      "705840 effect_value e0 #0"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -2796,9 +2780,7 @@
   {
     "spell": 801664,
     "clause": "Can only occur once every 0.5 sec.",
-    "labels": [
-      "801664 behaviour_metric_delta gate"
-    ],
+    "labels": [],
     "kind": "claim"
   },
   {
@@ -3203,10 +3185,7 @@
   {
     "spell": 572383,
     "clause": "Shoot a quick voodoo arrow at an enemy dealing $s2% Ranged Weapon Damage plus ${$m1+0} as Nature damage and collecting a Spirit.",
-    "labels": [
-      "572383 effect_value e1 #0",
-      "572383 effect_value e0 #1"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -3240,10 +3219,7 @@
   {
     "spell": 572383,
     "clause": "and mana, repeating every $T2 sec$?s707335[and increases your movement speed by $561071s1%][] for $d,",
-    "labels": [
-      "572383 aura_amplitude_ms #3",
-      "572383 spell_duration 561136 #4"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
@@ -3301,10 +3277,7 @@
   {
     "spell": 562719,
     "clause": "and reducing their Shadow Resistance by ${1*$PL+1} for $d.",
-    "labels": [
-      "562719 effect_value #1",
-      "562719 aura_duration_ms #2"
-    ],
+    "labels": [],
     "kind": "claim",
     "claims": [
       {
