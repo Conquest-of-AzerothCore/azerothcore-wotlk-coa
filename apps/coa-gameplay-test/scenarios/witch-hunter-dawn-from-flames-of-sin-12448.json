@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Flames of Sin's Fire hits from auto attacks stack Dawn (#12448)",
+  "contract": [
+    "Dawn 705484 reads 'Dealing Fire damage now increases the damage dealt by Torchlight and Dusk Blade by",
+    "$503658s1% for $503658d, stacking $503658u times.' aura_ascension_witch_hunter_event::Check accepts any",
+    "outgoing damage with a Fire school mask for it. Flames of Sin 803422 makes each auto attack add 802850",
+    "'Flames of Sin: Deals Fire Damage.' (SchoolMask 4), but Check returned false for every outgoing spell in",
+    "Extra(), which lists 802850, so those Fire hits never reached Dawn and its buff 503658 never stacked from",
+    "them. Physical auto attacks alone must leave 503658 absent (control); with Flames of Sin on the Witch",
+    "Hunter, the 802850 hits that follow the swings must apply 503658. Ratings remove melee misses, dodges and",
+    "parries and the Fire hit's spell miss; the fixture dual-wields as in witch-hunter-flames-of-sin-auto-attack."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000,
+      "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "learn", "actor": "hunter", "spell": 705484 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: Dawn is active", "actor": "hunter",
+      "metric": "aura", "spell": 705484, "equals": 1, "within_ms": 3000
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 2, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Control: Physical auto attacks alone do not stack Dawn", "actor": "hunter",
+      "metric": "aura", "spell": 503658, "equals": 0
+    },
+    {
+      "action": "set_aura", "label": "Flames of Sin on the Witch Hunter", "actor": "hunter", "spell": 803422,
+      "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: an auto attack under Flames of Sin is followed by a Fire hit",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "target": "enemy", "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Flames of Sin Fire hit stacks Dawn", "actor": "hunter",
+      "metric": "aura_stacks", "spell": 503658, "caster": "hunter", "min": 1, "within_ms": 1000
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}
