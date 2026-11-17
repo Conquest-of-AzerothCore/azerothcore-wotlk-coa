@@ -20,6 +20,7 @@ using namespace Acore::ChatCommands;
 namespace
 {
 constexpr uint32 WorldStateStageOverride = 20120;
+constexpr uint32 WorldStateReleasedStage = 20121;
 
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
@@ -28,6 +29,7 @@ void RefreshReleasedStage()
 {
     uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
     g_raidReleaseStage = stageOverride ? stageOverride - 1 : g_configuredStage;
+    sWorldState->setWorldState(WorldStateReleasedStage, g_raidReleaseStage);
 }
 
 void LoadRaidReleaseStage()

@@ -68,6 +68,7 @@ struct Settings
     uint32 minMoneyCost = 100000;
     double tokenCostMultiplier = 2.0;
     uint32 minTokenCost = 50;
+    PaymentOptions payment;
 };
 
 struct LedgerData final : DataMap::Base
@@ -108,6 +109,8 @@ void LoadSettings()
     loaded.minMoneyCost = positive("CoA.CallboardContracts.MinMoneyCost", 100000);
     loaded.tokenCostMultiplier = sConfigMgr->GetOption<float>("CoA.CallboardContracts.TokenCostMultiplier", 2.0f);
     loaded.minTokenCost = positive("CoA.CallboardContracts.MinTokenCost", 50);
+    loaded.payment.gold = sConfigMgr->GetOption<bool>("CoA.CallboardContracts.GoldEnable", true);
+    loaded.payment.tokens = sConfigMgr->GetOption<bool>("CoA.CallboardContracts.TokenEnable", true);
     {
         std::lock_guard lock(stateMutex);
         settings = loaded;
@@ -177,10 +180,20 @@ uint32 CurrentDaysBegun()
     return DaysBegun(sWorld->GetNextDailyQuestsResetTime().count(), sWorld->GetNextWeeklyQuestsResetTime().count());
 }
 
-uint32 CompletedThisWeek(Player const* player, ContractType const& contract)
+Tally ThisWeek(Player const* player, ContractType const& contract)
 {
     LedgerData const* data = player->CustomData.Get<LedgerData>(LedgerKey);
-    return data ? data->ledger.Completions(contract.type, CurrentWeekStart()) : 0;
+    return data ? data->ledger.For(contract.type, CurrentWeekStart()) : Tally{};
+}
+
+uint32 CompletedThisWeek(Player const* player, ContractType const& contract)
+{
+    return ThisWeek(player, contract).completions;
+}
+
+uint32 PurchasedThisWeek(Player const* player, ContractType const& contract)
+{
+    return ThisWeek(player, contract).purchases;
 }
 
 bool LedgerLoaded(Player const* player)
@@ -253,12 +266,24 @@ Reward RewardFor(Player const* player, Catalogue const& contracts, Quest const* 
     return reward;
 }
 
-uint32 PriceFor(Player const* player, Catalogue const& contracts, Quest const* quest, Settings const& current,
-    bool payWithGold)
+uint32 NextMoneyCost(Reward const& reward, Settings const& current, uint32 purchased)
+{
+    uint32 const base = MoneyCost(reward.money, current.moneyCostMultiplier, current.minMoneyCost);
+    return EscalatedMoneyCost(base, current.moneyCostMultiplier, purchased);
+}
+
+uint32 NextTokenCost(Reward const& reward, Settings const& current, uint32 purchased)
+{
+    uint32 const base = TokenCost(reward.ItemAmount(BazaarToken), current.tokenCostMultiplier, current.minTokenCost);
+    return EscalatedTokenCost(base, current.tokenCostMultiplier, purchased);
+}
+
+uint32 PriceFor(Player const* player, Catalogue const& contracts, ContractType const& contract, Quest const* quest,
+    Settings const& current, bool payWithGold)
 {
     Reward const reward = RewardFor(player, contracts, quest);
-    return payWithGold ? MoneyCost(reward.money, current.moneyCostMultiplier, current.minMoneyCost)
-        : TokenCost(reward.ItemAmount(BazaarToken), current.tokenCostMultiplier, current.minTokenCost);
+    uint32 const purchased = PurchasedThisWeek(player, contract);
+    return payWithGold ? NextMoneyCost(reward, current, purchased) : NextTokenCost(reward, current, purchased);
 }
 
 void SendView(Player* player)
@@ -282,9 +307,9 @@ void SendView(Player* player)
             {
                 sub.remaining = SpareFor(player, *contracts, contract, current);
                 sub.reward = RewardFor(player, *contracts, quest);
-                sub.moneyCost = MoneyCost(sub.reward.money, current.moneyCostMultiplier, current.minMoneyCost);
-                sub.tokenCost = TokenCost(sub.reward.ItemAmount(BazaarToken), current.tokenCostMultiplier,
-                    current.minTokenCost);
+                uint32 const purchased = PurchasedThisWeek(player, contract);
+                sub.moneyCost = NextMoneyCost(sub.reward, current, purchased);
+                sub.tokenCost = NextTokenCost(sub.reward, current, purchased);
             }
             else
             {
@@ -296,31 +321,32 @@ void SendView(Player* player)
         categories.push_back(std::move(category));
     }
 
-    std::vector<uint8> const bytes = SerializeView(categories);
+    std::vector<uint8> const bytes = SerializeView(categories, current.payment);
     WorldPacket packet(ViewOpcode, bytes.size());
     packet.append(bytes.data(), bytes.size());
     player->GetSession()->SendPacket(&packet);
 }
 
-void SaveCompletions(ObjectGuid::LowType guid, std::string const& type, uint32 completions, int64 weekStart)
+void SaveTally(ObjectGuid::LowType guid, std::string const& type, Tally const& tally, int64 weekStart)
 {
     CharacterDatabasePreparedStatement* statement =
         CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_CALLBOARD_CONTRACT);
     statement->SetData(0, guid);
     statement->SetData(1, type);
     statement->SetData(2, uint32(weekStart));
-    statement->SetData(3, completions);
+    statement->SetData(3, tally.completions);
+    statement->SetData(4, tally.purchases);
     CharacterDatabase.Execute(statement);
 }
 
-void CountCompletion(Player* player, ContractType const& contract)
+void CountCompletion(Player* player, ContractType const& contract, bool purchased)
 {
     int64 const weekStart = CurrentWeekStart();
     LedgerData* data = player->CustomData.GetDefault<LedgerData>(LedgerKey);
     data->ledger.Roll(weekStart);
-    uint32 const completions = data->ledger.Add(contract.type);
+    Tally const tally = data->ledger.Add(contract.type, purchased);
     if (data->loaded)
-        SaveCompletions(player->GetGUID().GetCounter(), contract.type, completions, weekStart);
+        SaveTally(player->GetGUID().GetCounter(), contract.type, tally, weekStart);
 }
 
 void ApplyStoredLedger(Player* player, PreparedQueryResult result, int64 weekStart)
@@ -336,7 +362,7 @@ void ApplyStoredLedger(Player* player, PreparedQueryResult result, int64 weekSta
         do
         {
             Field* fields = result->Fetch();
-            stored.Set(fields[0].Get<std::string>(), fields[1].Get<uint32>());
+            stored.Set(fields[0].Get<std::string>(), fields[1].Get<uint32>(), fields[2].Get<uint32>());
         } while (result->NextRow());
     }
 
@@ -346,7 +372,7 @@ void ApplyStoredLedger(Player* player, PreparedQueryResult result, int64 weekSta
 
     int64 const ledgerWeek = data->ledger.WeekStartTime();
     for (std::string const& type : unsaved)
-        SaveCompletions(player->GetGUID().GetCounter(), type, data->ledger.Completions(type, ledgerWeek), ledgerWeek);
+        SaveTally(player->GetGUID().GetCounter(), type, data->ledger.For(type, ledgerWeek), ledgerWeek);
 }
 
 void LoadLedger(Player* player)
@@ -477,6 +503,13 @@ uint32 Activate(Player* player, Catalogue const& contracts, Settings const& curr
         return 0;
 
     std::string const name = DisplayName(contract->type);
+    if (!current.payment.Allows(request.payWithGold))
+    {
+        chat.SendSysMessage(request.payWithGold ? "Temporal Contracts cannot be paid with gold."
+            : "Temporal Contracts cannot be paid with Bazaar Tokens.");
+        return 0;
+    }
+
     Quest const* quest = ChooseQuest(player, *contract);
     if (!quest)
     {
@@ -496,7 +529,7 @@ uint32 Activate(Player* player, Catalogue const& contracts, Settings const& curr
     activating = true;
     for (; completed < wanted; ++completed)
     {
-        uint32 const price = PriceFor(player, contracts, quest, current, request.payWithGold);
+        uint32 const price = PriceFor(player, contracts, *contract, quest, current, request.payWithGold);
         if (!Charge(player, price, request.payWithGold))
         {
             chat.PSendSysMessage(request.payWithGold ? "You do not have enough gold to complete {}."
@@ -641,7 +674,7 @@ public:
         if (!contract)
             return;
 
-        CountCompletion(player, *contract);
+        CountCompletion(player, *contract, activating);
         if (!activating)
             SendView(player);
     }

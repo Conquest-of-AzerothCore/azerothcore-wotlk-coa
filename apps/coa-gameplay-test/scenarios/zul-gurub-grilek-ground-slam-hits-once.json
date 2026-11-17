@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Gri'lek's Ground Slam hits each player once",
+  "contract": [
+    "Testers took Gri'lek's (15082) Ground Slam once per raid member: the script cast its damage (2118807, an",
+    "area around a point with a 100-yard radius) at every player, so each one was hit by every copy. On live it",
+    "hits everyone once with an 8 s Trauma (2118802) each. Two grouped heroes fight him; each Ground Slam",
+    "(2118806) must hit each hero with one damage log, where the old script sent one per player."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "actor": "lead",
+      "target": "mate"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "lead",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the leader's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "mate",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the mate's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both heroes are in Zul'Gurub",
+      "actor": "mate",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "lead",
+      "entry": 15082,
+      "as": "grilek",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "actor": "lead",
+      "target": "grilek"
+    },
+    {
+      "action": "attack",
+      "actor": "mate",
+      "target": "grilek"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek fights",
+      "actor": "grilek",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "lead"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mate"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek casts Ground Slam 24 s in",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 15082,
+      "spell": 2118806,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the slam leaves Trauma on the leader",
+      "actor": "lead",
+      "metric": "aura",
+      "spell": 2118802,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and on the mate",
+      "actor": "mate",
+      "metric": "aura",
+      "spell": 2118802,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the slam's damage hits the lead once, not once per player",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "lead",
+      "spell": 2118807,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the slam's damage hits the mate once, not once per player",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "mate",
+      "spell": 2118807,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second slam 25 s later",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 15082,
+      "spell": 2118806,
+      "min": 2,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: still one hit on the lead per slam",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "lead",
+      "spell": 2118807,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: still one hit on the mate per slam",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "mate",
+      "spell": 2118807,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader survived",
+      "actor": "lead",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

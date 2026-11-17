@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionMountSpeed.h"
+#include "AllBattlegroundScript.h"
 #include "AllSpellScript.h"
 #include "AreaDefines.h"
 #include "Battlefield.h"
@@ -22,13 +23,9 @@ namespace
 constexpr uint32 ColdWeatherFlying = 54197;
 constexpr uint32 AshadarItemMount = 287665;
 constexpr uint32 AshadarMount = 917000;
+constexpr int32 BattlegroundGroundMountSpeed = 100;
 
 std::atomic<bool> legacyFlight{ false };
-
-bool IsLearnedMount(Player const* player, SpellInfo const* spell)
-{
-    return spell->HasAura(SPELL_AURA_MOUNTED) && player->HasSpell(spell->Id);
-}
 
 uint8 LegacyAshadarFlightMask(SpellInfo const* spell)
 {
@@ -137,12 +134,37 @@ public:
             return;
 
         Player* player = caster ? caster->ToPlayer() : nullptr;
-        if (!player || effect->GetBase()->GetOwner() != player || !IsLearnedMount(player, effect->GetSpellInfo()))
+        SpellInfo const* spell = effect->GetSpellInfo();
+        if (!player || effect->GetBase()->GetOwner() != player || !spell->HasAura(SPELL_AURA_MOUNTED))
+            return;
+
+        if (type == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED && player->InBattleground() && !player->InArena())
+        {
+            amount = BattlegroundGroundMountSpeed;
+            return;
+        }
+
+        if (!player->HasSpell(spell->Id))
             return;
 
         uint16 const riding = player->GetBaseSkillValue(SKILL_RIDING);
         amount = type == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED ? GetRidingGroundMountSpeed(riding) :
             GetRidingFlightMountSpeed(riding);
+    }
+};
+
+class BattlegroundMountSpeed : public AllBattlegroundScript
+{
+public:
+    BattlegroundMountSpeed() : AllBattlegroundScript("AscensionBattlegroundMountSpeed",
+        { ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER }) { }
+
+    void OnBattlegroundAddPlayer(Battleground*, Player* player) override
+    {
+        auto const& mounted = player->GetAuraEffectsByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+        std::vector<AuraEffect*> const speeds(mounted.begin(), mounted.end());
+        for (AuraEffect* speed : speeds)
+            speed->RecalculateAmount();
     }
 };
 }
@@ -174,4 +196,5 @@ void AddSC_AscensionMountSpeed()
     new MountFlight();
     new MountFlightArea();
     new LearnedMountSpeed();
+    new BattlegroundMountSpeed();
 }

@@ -402,6 +402,11 @@ uint32 SpellEffectInfo::GetItemArmorSubclassMask() const
         return EffectIndex == EFFECT_1 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
             MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 64 ? 64 : 0;
 
+    if (_spellInfo && _spellInfo->SpellFamilyName == 25 &&
+        (_spellInfo->Id == 301311 || _spellInfo->Id == 301360)) // Blessed Padding
+        return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 8 ? 8 : 0;
+
     if (!_spellInfo || _spellInfo->SpellFamilyName != 24 || MiscValue != SPELL_SCHOOL_MASK_NORMAL)
         return 0;
 
@@ -2757,6 +2762,10 @@ void SpellInfo::_LoadImmunityInfo()
                         break;
                     case 54508: // Demonic Empowerment
                         mechanicImmunityMask |= (1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_ROOT) | (1ULL << MECHANIC_STUN);
+                        break;
+                    case 804652: // Vial of Moonwell Water
+                        mechanicImmunityMask |= IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK &
+                            ~((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_DAZE));
                         break;
                     default:
                         if (miscVal < 1)

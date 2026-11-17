@@ -216,6 +216,7 @@ struct Cosmetics
     { assert(&owner==state.get() && notify); collected.emplace_back(itemId, bound); }
 """
     for signature in ("void HandlePointSpendRequest(Player* player, WorldPacket& packet)",
+                      "[[nodiscard]] static bool IsVanityItemForPlayer(Player const* player, VanityInfo const& vanity)",
                       "[[nodiscard]] static bool IsVanityItemOffered(Player* player, VanityInfo const& vanity)",
                       "void PurchaseVanityItemWithBazaarTokens(Player* player, uint32 itemId)",
                       "[[nodiscard]] static bool IsConsumableVanityItem(VanityInfo const& vanity)",

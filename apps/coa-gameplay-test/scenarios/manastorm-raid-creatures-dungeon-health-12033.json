@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Manastorm raids: Onyxia, Garr and Firesworn carry dungeon-scale health (#12033)",
+  "contract": [
+    "Player report (#12033): raid stages in Manastorm were far too tanky. Their creatures kept forty-player health, and",
+    "flex health (coa_boss_flex) sized Onyxia and the Molten Core bosses for ten players, even again on the pull.",
+    "Before the fix a depth-1 level-60 run measured Onyxia at 5,052,348 (842,058 x 10 x 0.6), Garr at 31,507,320",
+    "(1,105,520 x 10 x 0.6 x 4.75 for 15 Chaotic Link stacks) and Firesworn at 59,749. Flex health now leaves",
+    "Manastorm stages alone, and Manastorm divides raid creature health by the median HealthModifier gap to level-60",
+    "dungeons: bosses 292.03 / 29.0, elite trash 41.25 / 4.0. Onyxia's expansion-2 template is rebased on the",
+    "Classic base health. Expected at depth 1 (x0.6), level 60: Onyxia 3052 x 520 / 10.07 x 0.6 = 94,562;",
+    "Garr 3052 x 328.534 / 10.07 x 0.6 x 4.75 = 283,778; Firesworn 3052 x 32.6278 / 10.31 x 0.6 = 5,795. The bosses",
+    "keep that health after the pull."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "o",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "g",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "o",
+      "command": ".manastorm segment test 707"
+    },
+    {
+      "action": "command",
+      "actor": "g",
+      "command": ".manastorm segment test 611"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: o entered the private Onyxia stage",
+      "actor": "o",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: g entered the private Garr stage",
+      "actor": "g",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so Onyxia is visible to this lane",
+      "actor": "o",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so Garr is visible to this lane",
+      "actor": "g",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "o",
+      "guid": 47572
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "g",
+      "guid": 56609
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: o left the entrance protection, so the stage is active",
+      "actor": "o",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: g left the entrance protection, so the stage is active",
+      "actor": "g",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Onyxia has dungeon-scale health on the Classic base",
+      "actor": "o",
+      "metric": "nearby_creature_max_health",
+      "entry": 10184,
+      "within_ms": 5000,
+      "min": 85000,
+      "max": 105000
+    },
+    {
+      "action": "assert",
+      "label": "Garr has dungeon-scale health with his 15 Chaotic Link stacks",
+      "actor": "g",
+      "metric": "nearby_creature_max_health",
+      "entry": 12057,
+      "within_ms": 5000,
+      "min": 255000,
+      "max": 315000
+    },
+    {
+      "action": "assert",
+      "label": "Firesworn trash has dungeon-scale health",
+      "actor": "g",
+      "metric": "nearby_creature_max_health",
+      "entry": 12099,
+      "within_ms": 5000,
+      "min": 5200,
+      "max": 6400
+    },
+    {
+      "action": "attack_nearby",
+      "label": "o pulls Onyxia",
+      "actor": "o",
+      "entry": 10184
+    },
+    {
+      "action": "attack_nearby",
+      "label": "g pulls Garr",
+      "actor": "g",
+      "entry": 12057
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Onyxia keeps her Manastorm health after the pull",
+      "actor": "o",
+      "metric": "nearby_creature_max_health",
+      "entry": 10184,
+      "min": 85000,
+      "max": 105000
+    },
+    {
+      "action": "assert",
+      "label": "Garr keeps his Manastorm health after the pull",
+      "actor": "g",
+      "metric": "nearby_creature_max_health",
+      "entry": 12057,
+      "min": 255000,
+      "max": 315000
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "schema": 1,
+  "name": "Mythical Boon: a click from 12 yards, where the client allows it, still picks the boon up",
+  "contract": [
+    "The boon orb is drawn 3.5 times its size, so the client lets players click it from about 15 yards away.",
+    "The server used to drop such a click without a word unless the player stood within 5.5 yards of the orb's edge.",
+    "A click from 12 yards now picks the boon up like a click from beside it."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "far"
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "ally"
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally is in the Mythic Armory",
+      "actor": "ally",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1233152,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 1233152,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: socket window",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1319
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Start Keystone starts the countdown",
+      "actor": "ally",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the run is under way",
+      "actor": "hero",
+      "metric": "rooted",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 189,
+      "x": 1707.79,
+      "y": -338.49,
+      "z": 18.68
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the third member stands beyond 50 yards",
+      "actor": "far",
+      "metric": "distance",
+      "target": "hero",
+      "min": 60
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "carried_item_count",
+      "save_as": "hero_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "carried_item_count",
+      "save_as": "ally_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "carried_item_count",
+      "save_as": "far_items"
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 80215,
+      "as": "boon",
+      "distance": 12
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the clicker stands 12 yards from the boon",
+      "actor": "hero",
+      "metric": "distance",
+      "target": "boon",
+      "min": 11.5
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "hero",
+      "target": "boon"
+    },
+    {
+      "action": "assert",
+      "label": "the ally beside the clicker sees Mythical Blessing's Holy Nova",
+      "actor": "ally",
+      "metric": "spell_go_count",
+      "spell": 2104919,
+      "caster": "hero",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the clicker gets one boon item",
+      "actor": "hero",
+      "metric": "carried_item_count",
+      "relative_to": "hero_items",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the clicker's new item is a Mythical Boon",
+      "actor": "hero",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Durnholde Keep: Tog'thar and his ball and chain are in the barracks cellar (#10502)",
+  "contract": "#10502 reported Tog'thar (The Rescue, creature guid 15582, entry 2238) at the top of the Durnholde barracks cellar stairs with his Locked ball and chain (gameobject guid 20784, entry 1722) in the air. patch-WB1 replaced the barracks with WESTFALL_BARRACKS.WMO (as #8332 found for the Solid Chest); the vanilla spot (-445.588, -1485.22, 91.977) now lies 2.94 yd above the stair surface with 1.25 yd of headroom and 0.76 yd to the nearest wall in that WMO. Both move to the cellar floor at z 82.30, about 5 yd north-east, where the WMO gives a flat floor, 6.19 yd to the ceiling and at least 4.27 yd to the walls. The chain stays 1.49 yd from Tog'thar, as in the vanilla pair; orientations are unchanged.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -442.0,
+    "y": -1481.5,
+    "z": 82.4,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Tog'thar stands at the cellar spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -442.0,
+      "y": -1481.5,
+      "z": 82.30,
+      "max": 0.3,
+      "guid": 15582,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tog'thar stands on the cellar floor (was 2.94 yd above the stairs)",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 15582,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Tog'thar is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 15582,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Tog'thar is clear of the cellar walls",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 1,
+      "guid": 15582,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cellar ceiling lies above Tog'thar (headroom was 1.25 yd)",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 3,
+      "max": 7,
+      "guid": 15582,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "The ball and chain lies at the cellar spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -442.263,
+      "y": -1482.97,
+      "z": 82.30,
+      "max": 0.3,
+      "guid": 20784,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ball and chain rests on the cellar floor (was floating)",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 20784,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "The ball and chain stays beside Tog'thar",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -442.0,
+      "y": -1481.5,
+      "z": 82.30,
+      "max": 2,
+      "guid": 20784,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

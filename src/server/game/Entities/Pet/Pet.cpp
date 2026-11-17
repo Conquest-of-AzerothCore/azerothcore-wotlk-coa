@@ -38,6 +38,15 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+namespace
+{
+    // The Witch Hunter's Shadowhound keeps its corpse like a hunter pet, for Call From The Shadows to revive.
+    bool KeepsCorpse(Pet const* pet)
+    {
+        return pet->getPetType() == HUNTER_PET || pet->GetEntry() == 50124;
+    }
+}
+
 Pet::Pet(Player* owner, PetType type) : Guardian(nullptr, owner ? owner->GetGUID() : ObjectGuid::Empty),
     m_usedTalentCount(0),
     m_removed(false),
@@ -484,7 +493,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         }
         else
         {
-            if (!curHealth && getPetType() == HUNTER_PET)
+            if (!curHealth && KeepsCorpse(this))
                 setDeathState(DeathState::JustDied);
             else
             {
@@ -642,12 +651,15 @@ void Pet::setDeathState(DeathState s, bool /*despawn = false*/)                 
     Creature::setDeathState(s);
     if (getDeathState() == DeathState::Corpse)
     {
-        if (getPetType() == HUNTER_PET)
+        if (KeepsCorpse(this))
         {
             // pet corpse non lootable and non skinnable
             ReplaceAllDynamicFlags(UNIT_DYNFLAG_NONE);
             RemoveUnitFlag(UNIT_FLAG_SKINNABLE);
+        }
 
+        if (getPetType() == HUNTER_PET)
+        {
             //lose happiness when died and not in BG/Arena
             MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
             if (!mapEntry || (mapEntry->map_type != MAP_ARENA && mapEntry->map_type != MAP_BATTLEGROUND))
@@ -677,7 +689,7 @@ void Pet::Update(uint32 diff)
     {
         case DeathState::Corpse:
             {
-                if (getPetType() != HUNTER_PET || m_corpseRemoveTime <= GameTime::GetGameTime().count())
+                if (!KeepsCorpse(this) || m_corpseRemoveTime <= GameTime::GetGameTime().count())
                 {
                     Remove(PET_SAVE_NOT_IN_SLOT);               //hunters' pets never get removed because of death, NEVER!
                     return;

@@ -1134,6 +1134,8 @@ public:
     [[nodiscard]] Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
     [[nodiscard]] virtual bool HasActivePowerType(Powers power) { return getPowerType() == power; }
     [[nodiscard]] bool CanReceivePowerFromSpell(Powers power);
+    [[nodiscard]] bool CanLosePowerToSpell(Powers power);
+    [[nodiscard]] bool HasNecromancerManaPool(Powers power) const;
     [[nodiscard]] Powers GetPowerTypeByAuraGroup(UnitMods unitMod) const;
 
     [[nodiscard]] uint32 GetPower(Powers power) const { return GetUInt32Value(static_cast<uint16>(UNIT_FIELD_POWER1) + power); }
@@ -1167,6 +1169,7 @@ public:
 
     [[nodiscard]] float GetUnitMissChance(WeaponAttackType attType) const;
     float GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victim) const;
+    [[nodiscard]] float GetMeleeDazeChance(Unit const* victim) const;
     bool HasAscensionConditionalCombatState(int32 state) const;
     int32 GetAscensionConditionalCombatModifier(Unit const* victim, SpellInfo const* spellInfo,
         AscensionConditionalCombatModifier modifier) const;

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A dead Shadowhound leaves a corpse for the hunter pet corpse time (#1450)",
+  "contract": [
+    "A Witch Hunter's Shadowhound 50124 vanished the moment it died. Like a hunter pet, its corpse now stays for the",
+    "pet corpse time (60 seconds, the creature default that every pet keeps) and Call From The Shadows 578118 can",
+    "revive it in place. A corpse left alone is then removed and saved dead, so the Whistle 801343 still refuses it",
+    "(SPELL_FAILED_DONT_REPORT 27) and Call From The Shadows still brings it back. Expected: 50 seconds after death",
+    "the corpse is still there at 0 health; it is gone within the next 15 seconds; the Whistle then fails with 27",
+    "and Call From The Shadows returns a living Shadowhound."
+  ],
+  "timeout_ms": 150000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "wh", "entry": 36, "level": 60, "distance": 3, "health": 1000000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "wh", "spell": 801343},
+    {"action": "learn", "actor": "wh", "spell": 578118},
+    {"action": "cast", "label": "Whistle the hound", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "SETUP: the Shadowhound is out", "actor": "wh", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 4000},
+    {"action": "wait", "label": "The hound settles beside the Witch Hunter", "ms": 2000},
+    {"action": "set_health", "label": "The Witch Hunter can take the blast", "actor": "wh", "value": 100000,
+     "maximum": 100000},
+    {"action": "set_health", "label": "The hound is down to 1 health", "actor": "wh", "pet": true, "value": 1},
+    {"action": "cast", "label": "The golem's blast hits the hound", "actor": "golem", "spell": 53273},
+    {"action": "assert", "label": "SETUP: the hound dies", "actor": "wh", "metric": "pet_health", "equals": 0,
+     "within_ms": 3000},
+    {"action": "wait", "label": "Most of the corpse time passes", "ms": 50000},
+    {"action": "assert", "label": "The corpse is still there after 50 seconds", "actor": "wh",
+     "metric": "pet_entry", "equals": 50124},
+    {"action": "assert", "label": "The corpse is still dead", "actor": "wh", "metric": "pet_health", "equals": 0},
+    {"action": "assert", "label": "The corpse is removed when the corpse time ends", "actor": "wh",
+     "metric": "pet_entry", "equals": 0, "within_ms": 15000},
+    {"action": "reset_cooldown", "actor": "wh", "spell": 801343},
+    {"action": "cast", "label": "Whistle for the dead hound", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "The Whistle still refuses the dead hound", "actor": "wh",
+     "metric": "cast_failure", "spell": 801343, "equals": 27, "within_ms": 2000},
+    {"action": "cast", "label": "Call From The Shadows", "actor": "wh", "spell": 578118},
+    {"action": "assert", "label": "Call From The Shadows brings the hound back", "actor": "wh",
+     "metric": "pet_entry", "equals": 50124, "within_ms": 6000},
+    {"action": "assert", "label": "The hound is alive", "actor": "wh", "metric": "pet_health", "min": 1}
+  ]
+}

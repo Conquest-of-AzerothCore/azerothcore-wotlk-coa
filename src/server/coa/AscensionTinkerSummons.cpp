@@ -613,7 +613,10 @@ struct npc_ascension_tinker_device : ScriptedAI
             (player != creator && !creator->IsInRaidWith(player)))
             return;
         if (me->GetVehicleKit())
+        {
+            player->PlayerTalkClass->SendCloseGossip();
             player->EnterVehicle(me);
+        }
         else if (me->GetEntry() == 506051 && used.insert(player->GetGUID()).second)
         {
             player->ModifyHealth(player->CountPctFromMaxHealth(Amount(570715)));

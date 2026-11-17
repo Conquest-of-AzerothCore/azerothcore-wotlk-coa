@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Jergosh's Incinerate and Immolate and Archmage Arugal's Wrath and Curse reach 30 yards and need line of sight",
+  "contract": [
+    "Ascension's kit spells for Jergosh the Invoker (11518) and Archmage Arugal (4275) have 100 yards or unlimited range in",
+    "Spell.dbc, and Arugal's two also ignore line of sight. Our tester saw Jergosh's Incinerate hit from any distance and Curse",
+    "of Arugal through a wall. Incinerate 2102540, Immolate 2102536, Wrath of Arugal 2102677 and Curse of Arugal 2102679 now",
+    "reach 30 yards (SpellRange 4) and need line of sight. The bosses' other spells keep their data."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Jergosh's Incinerate (2102540) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102540,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Jergosh's Immolate (2102536) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102536,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Wrath of Arugal (2102677) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102677,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Curse of Arugal (2102679) reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102679,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Wrath of Arugal (2102677) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102677,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Curse of Arugal (2102679) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102679,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jergosh's Shadow Bolt Storm (2102546) keeps its 100 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102546,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Shadow Bolt Storm keeps ignoring line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102546,
+      "equals": 1
+    }
+  ]
+}

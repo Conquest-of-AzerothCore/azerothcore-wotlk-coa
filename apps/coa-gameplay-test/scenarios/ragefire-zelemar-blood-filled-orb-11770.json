@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Ragefire Chasm: the Blood Filled Orb summons Zelemar the Wrathful for everybody (#11770)",
+  "contract": [
+    "On Ascension the Blood Filled Orb 182024 beside Jergosh could be clicked without a quest. Zelemar the Wrathful",
+    "17830 appears, shouts 'Who dare summon me!', cannot be attacked for three seconds and then attacks the player at",
+    "the orb. Here the orb kept the quest lock of 9692 (Data1 and the interaction-condition flag), so nobody could use it. The server does not check that lock; the client does, so the scenario checks what the client gets."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 389,
+    "x": -372.0,
+    "y": 160.0,
+    "z": -21.1,
+    "o": 0.8,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "label": "CONTROL: the orb stands beside the hero",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 182024,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "label": "DISCRIMINATING: the client may use the orb (no interaction-condition flag 4)",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_gameobject_flags",
+      "entry": 182024,
+      "max": 3
+    },
+    {
+      "label": "DISCRIMINATING: the orb requires no quest (it required 9692)",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_gameobject_quest",
+      "entry": 182024,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "hero",
+      "entry": 182024
+    },
+    {
+      "label": "DISCRIMINATING: using the orb without the quest summons Zelemar",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 17830,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "label": "He cannot be attacked right after he appears",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_can_attack",
+      "entry": 17830,
+      "equals": 0
+    },
+    {
+      "label": "Three seconds later he attacks the hero",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "label": "and can be attacked",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_can_attack",
+      "entry": 17830,
+      "equals": 1
+    }
+  ]
+}

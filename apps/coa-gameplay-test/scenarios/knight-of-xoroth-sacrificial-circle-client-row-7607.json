@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Knight of Xoroth: Sacrificial Circle client patch drops the Hellfire Imp caster aura (#7607)",
-  "contract": "Requires CoA.SendDisplayPatches=1. Raw Sacrificial Circle 805677 requires caster aura 805916 (Hellfire Imp) in Spell.dbc, which no imp applies in CoA; the server clears it (#1489) and checks the caster's own living imps instead. The client evaluates CasterAuraSpell against its own Spell.dbc, so the login SMSG_PATCH_SPELL stream (opcode 2346) must carry the 805677 row with numeric field 24 (CasterAuraSpell) equal to 0 and field 26 (ExcludeCasterAuraSpell) equal to 0. Runeshroud 500639 is the control proving the login patch stream is present. This verifies emitted client data; client rendering and input remain outside the native harness.",
+  "contract": "Requires CoA.SendDisplayPatches=1. Raw Sacrificial Circle 805677 requires caster aura 805916 (Hellfire Imp) in Spell.dbc; the server clears it (#1489) and checks the caster's own living imps instead. The client evaluates CasterAuraSpell against its own Spell.dbc, so the login SMSG_PATCH_SPELL stream (opcode 2346) must carry the 805677 row with numeric field 24 (CasterAuraSpell) equal to 0 and field 26 (ExcludeCasterAuraSpell) equal to 0. Runeshroud 500639 is the control proving the login patch stream is present. This verifies emitted client data; client rendering and input remain outside the native harness.",
   "timeout_ms": 60000,
   "players": [
     {

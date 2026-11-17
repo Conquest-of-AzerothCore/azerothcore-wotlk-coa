@@ -14,9 +14,6 @@ using uint8 = std::uint8_t;
 using uint16 = std::uint16_t;
 using uint32 = std::uint32_t;
 
-constexpr uint16 SMSG_COA_CHALLENGE_ACTIVE_LIST = 0x596;
-constexpr uint16 SMSG_COA_CHALLENGE_CRITERIA_UPDATED = 0x59A;
-constexpr uint16 SMSG_COA_CHALLENGE_REQUIREMENT = 0x5B6;
 constexpr uint16 SMSG_COA_PATCH_CHALLENGE_REQUIREMENT_TYPE = 0x5BC;
 
 struct WorldPacket
@@ -109,6 +106,8 @@ struct ManastormRewards
     std::string Value = "{enabled=false}";
 };
 
+#define LOG_DEBUG(...) ((void)0)
+
 // ACTUAL_CLIENT_LUA
 
 // ACTUAL_UI_FIXES
@@ -159,54 +158,6 @@ namespace
         return chunk;
     }
 
-    void CheckTriggerSequence(std::vector<WorldPacket> const& sent, AscensionClientLuaChunk const& chunk)
-    {
-        Check(sent.size() >= 5, "the trigger sequence sends five packets");
-        if (sent.size() < 5)
-            return;
-
-        Check(sent[0].opcode == SMSG_COA_PATCH_CHALLENGE_REQUIREMENT_TYPE, "first packet patches the requirement type");
-        Reader type{ sent[0].bytes };
-        Check(type.Get<uint32>() == chunk.RequirementTypeId, "requirement type id leads the 36-byte block");
-        for (int i = 0; i < 8; ++i)
-            Check(type.Get<uint32>() == 0, "requirement type string placeholders are zero");
-        Check(type.Sized() == chunk.Token, "string 1 is the token the lookup matches");
-        Check(type.Sized() == chunk.Token, "string 2 is the name");
-        for (int i = 0; i < 3; ++i)
-            Check(type.Sized().empty(), "description and atlases are empty");
-        Check(type.Sized() == BuildAscensionClientLuaFormatter(chunk.Token, chunk.Lua), "string 6 is formatter 1");
-        Check(type.Sized().empty() && type.Sized().empty(), "formatters 2 and 3 are empty");
-        Check(type.offset == sent[0].bytes.size(), "requirement type packet has no trailing bytes");
-
-        Check(sent[1].opcode == SMSG_COA_CHALLENGE_REQUIREMENT, "second packet defines the requirement row");
-        Reader requirement{ sent[1].bytes };
-        Check(requirement.Get<uint32>() == chunk.RequirementId, "requirement row id");
-        requirement.offset = 36;
-        Check(requirement.Sized() == chunk.Token, "requirement row names the token");
-        Check(requirement.offset == sent[1].bytes.size(), "requirement packet has no trailing bytes");
-
-        Check(sent[2].opcode == SMSG_COA_CHALLENGE_ACTIVE_LIST && sent[2].bytes.size() == 30,
-            "third packet activates exactly one 26-byte challenge record");
-        Reader active{ sent[2].bytes };
-        Check(active.Get<uint32>() == 1 && active.Get<uint32>() == 0 && active.Get<uint32>() == 5,
-            "the named challenge 5 is active");
-
-        for (uint32 i = 0; i < 2; ++i)
-        {
-            WorldPacket const& packet = sent[3 + i];
-            Check(packet.opcode == SMSG_COA_CHALLENGE_CRITERIA_UPDATED && packet.bytes.size() == 33,
-                "criteria updates are one 33-byte entry");
-            Reader criteria{ packet.bytes };
-            criteria.Get<uint32>();
-            Check(criteria.Get<uint32>() == 5, "criteria belong to challenge 5");
-            criteria.Get<uint32>();
-            Check(criteria.Get<uint32>() == chunk.RequirementId, "criteria use the requirement row");
-            criteria.offset = 24;
-            Check(criteria.Get<uint32>() == i, "progress goes 0 then 1");
-        }
-    }
-
-    int syncCalls = 0;
 }
 
 int main(int argc, char** argv)
@@ -219,21 +170,27 @@ int main(int argc, char** argv)
         WorldSession session;
         Player player;
         player.session = &session;
+        BeginAscensionClientLuaSession(1);
         RunAscensionClientLua(&player, chunk);
-        CheckTriggerSequence(session.sent, chunk);
-        Check(session.sent.size() == 6, "without a challenge state owner the list is cleared");
-        if (session.sent.size() == 6)
-            Check(session.sent[5].opcode == SMSG_COA_CHALLENGE_ACTIVE_LIST && session.sent[5].bytes.size() == 4,
-                "the trailing packet is an empty active list");
+        Check(session.sent.empty(), "before the capability packet the chunk waits, with no 0x5BC formatter fallback");
+        Check(SetAscensionClientLuaCapability(&session, 1, 2) == 1 && session.sent.size() == 1 &&
+            session.sent[0].opcode == AscensionClientLuaHotPatchOpcode,
+            "the capability packet releases the waiting chunk as one 0x8F0 packet");
+        if (session.sent.size() == 1)
+        {
+            Reader hotPatch{ session.sent[0].bytes };
+            Check(hotPatch.Sized() == chunk.Token, "0x8F0 names the token");
+            Check(hotPatch.Sized().empty(), "an empty target runs at once");
+            Check(hotPatch.Sized() == chunk.Lua, "0x8F0 carries the Lua without the formatter wrapper");
+        }
     }
     {
-        RegisterAscensionChallengeStateSync([](Player*) { ++syncCalls; });
         WorldSession session;
         Player player;
         player.session = &session;
+        ForgetAscensionClientLuaCapability(1);
         RunAscensionClientLua(&player, chunk);
-        CheckTriggerSequence(session.sent, chunk);
-        Check(session.sent.size() == 5 && syncCalls == 1, "the challenge state owner restores the real list");
+        Check(session.sent.empty(), "a client without the hot-patch channel is sent nothing");
     }
     {
         Player player;
@@ -241,6 +198,11 @@ int main(int argc, char** argv)
         RunAscensionClientLua(nullptr, chunk);
     }
 
+    BeginAscensionClientLuaSession(1);
+    {
+        WorldSession session;
+        SetAscensionClientLuaCapability(&session, 1, 2);
+    }
     {
         WorldSession session;
         Player player;

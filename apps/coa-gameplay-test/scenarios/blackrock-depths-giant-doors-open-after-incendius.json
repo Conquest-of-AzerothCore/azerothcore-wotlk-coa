@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "The Giant Doors in Blackrock Depths stay shut until Lord Incendius dies",
+  "contract": [
+    "On Ascension the Giant Doors (157923, spawn 15576) toward Bael'Gar are shut, and the walkway across leads through",
+    "the inside of the closed door. Ours spawned open. The door now spawns shut and opens when Lord Incendius (9017,",
+    "spawn 47733) dies. A door that is created while Incendius is dead in that instance starts open."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "teleport", "actor": "p", "map": 230, "x": 716.0, "y": -112.0, "z": -71.4, "o": 0.8 },
+    { "action": "assert", "label": "CONTROL: p is in Blackrock Depths", "actor": "p", "metric": "map_id", "equals": 230,
+      "within_ms": 15000 },
+    { "action": "set_phase", "label": "Join world phase 1, where Blackrock Depths is spawned", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 2500 },
+    { "action": "set_health", "actor": "p", "value": 50000000, "maximum": 50000000 },
+    { "action": "assert", "label": "The Giant Doors are shut while Incendius lives", "actor": "p",
+      "metric": "nearby_gameobject_state", "entry": 157923, "equals": 1 },
+    { "action": "teleport", "actor": "p", "map": 230, "x": 888.0, "y": -262.0, "z": -71.9, "o": 0.8 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "attack_nearby", "actor": "p", "entry": 9017, "kill": true },
+    { "action": "teleport", "actor": "p", "map": 230, "x": 716.0, "y": -112.0, "z": -71.4, "o": 0.8 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "The Giant Doors open once Incendius is dead", "actor": "p",
+      "metric": "nearby_gameobject_state", "entry": 157923, "equals": 0, "within_ms": 3000 }
+  ]
+}

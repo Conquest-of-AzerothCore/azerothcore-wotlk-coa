@@ -32,6 +32,7 @@
 #include "ManastormAffixEngine.h"
 #include "ManastormGreedyDemon.h"
 #include "ManastormVoiceOfMillhouse.h"
+#include "ManastormSubstitutedObjectives.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -397,6 +398,9 @@ namespace
     // Meshlok is a native Maraudon rare. Both original Manastorm
     // segments must guarantee his DB spawn inside the disposable
     // private instance, without changing his public-dungeon rarity.
+    constexpr uint32 SEGMENT_LORGUS_JETT_NORMAL = 73;
+    constexpr uint32 SEGMENT_LORGUS_JETT_ENDGAME = 240;
+
     constexpr uint32 MANASTORM_MAP_MARAUDON = 349;
     constexpr uint32 NPC_MARAUDON_MESHLOK = 12237;
     constexpr uint32 SEGMENT_MESHLOK_NORMAL = 684;
@@ -459,6 +463,7 @@ namespace
     constexpr uint32 NPC_ATAL_ALARION = 8580;
     constexpr uint32 DATA_SUNKEN_TEMPLE_STATUES = 10;
     constexpr uint32 DATA_SUNKEN_TEMPLE_DEFENDER_KILLED = 11;
+    constexpr uint32 DATA_SUNKEN_TEMPLE_SANCTUM_DRAGONS = 14;
     constexpr uint32 SUNKEN_TEMPLE_STATUE_PHASES = 6;
     constexpr uint32 SUNKEN_TEMPLE_DEFENDERS_COUNT = 6;
     constexpr uint32 SEGMENT_ATAL_ALARION_NORMAL = 673;
@@ -1024,6 +1029,39 @@ namespace
 
         eranikus->RemoveUnitFlag(
             UNIT_FLAG_IMMUNE_TO_NPC);
+
+        //
+        // The Sanctum dragons (Weaver, Dreamscythe, Hazzas, Morphaz) stay
+        // hidden and unattackable until the Avatar of Hakkar and Jammal'an
+        // die. This stage skips both kills, yet its Chaotic Link adds are
+        // Sanctum dragons, so release them the way those kills would.
+        //
+        InstanceMap* instanceMap =
+            map->ToInstanceMap();
+
+        InstanceScript* instance =
+            instanceMap ?
+                instanceMap->GetInstanceScript() :
+                nullptr;
+
+        if (!instance)
+        {
+            error =
+                "Sunken Temple Eranikus bootstrap has no instance script.";
+            return false;
+        }
+
+        instance->SetData(
+            DATA_SUNKEN_TEMPLE_SANCTUM_DRAGONS,
+            1);
+
+        if (!instance->GetData(
+            DATA_SUNKEN_TEMPLE_SANCTUM_DRAGONS))
+        {
+            error =
+                "Sunken Temple Sanctum dragons were not released during Eranikus bootstrap.";
+            return false;
+        }
 
         LOG_INFO(
             LOG_FILTER,
@@ -1941,6 +1979,98 @@ namespace
         return true;
     }
 
+    bool BootstrapNativeObjectiveSpawn(Map* map, ManastormRun& run, std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map || map->GetId() != segment.MapId || !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId())
+        {
+            error = "Objective spawn bootstrap received a different map or instance.";
+            return false;
+        }
+
+        GameTele const* entrance = sObjectMgr->GetGameTele(segment.StartGameTeleId);
+        if (!entrance || entrance->mapId != segment.MapId)
+        {
+            error = "Objective spawn bootstrap is missing the stage arrival teleport.";
+            return false;
+        }
+
+        QueryResult result = WorldDatabase.Query(
+            "SELECT `guid` FROM `creature` "
+            "WHERE `map` = {} AND `id` = {} AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - {}, 2) + POW(`position_y` - {}, 2), `guid` LIMIT 1",
+            segment.MapId, segment.ObjectiveCreatureEntry, entrance->position_x, entrance->position_y);
+        if (!result)
+        {
+            error = "Objective " + std::to_string(segment.ObjectiveCreatureEntry) +
+                " has no native spawn on map " + std::to_string(segment.MapId) + ".";
+            return false;
+        }
+
+        ObjectGuid::LowType const spawnId = result->Fetch()[0].Get<uint32>();
+        CreatureData const* spawnData = sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData || spawnData->mapid != segment.MapId || spawnData->id != segment.ObjectiveCreatureEntry)
+        {
+            error = "Objective spawn " + std::to_string(spawnId) + " does not resolve to the stage objective.";
+            return false;
+        }
+
+        map->LoadGrid(spawnData->posX, spawnData->posY);
+
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* existing = spawn.second;
+            if (!existing || !existing->IsInWorld() || !existing->IsAlive() ||
+                existing->GetEntry() != segment.ObjectiveCreatureEntry)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Loaded objective spawn did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER, "Preloaded native objective: run={} segment={} instance={} spawn={} entry={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(), existing->GetSpawnId(),
+                segment.ObjectiveCreatureEntry);
+            return true;
+        }
+
+        map->RemoveCreatureRespawnTime(spawnId);
+
+        Creature* objective = new Creature();
+        if (!objective->LoadCreatureFromDB(spawnId, map, true, true))
+        {
+            delete objective;
+            error = "Could not load objective spawn " + std::to_string(spawnId) + ".";
+            return false;
+        }
+
+        if (!objective->IsInWorld() || !objective->IsAlive() ||
+            objective->GetEntry() != segment.ObjectiveCreatureEntry)
+        {
+            objective->AddObjectToRemoveList();
+            error = "Objective spawn " + std::to_string(spawnId) + " did not create a living objective.";
+            return false;
+        }
+
+        ManastormMgr::Instance().OnCreatureAddWorld(objective);
+        if (run.GetObjectiveCreatureGuid() != objective->GetGUID())
+        {
+            objective->AddObjectToRemoveList();
+            error = "Restored objective spawn did not register as the Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER, "Restored native objective: run={} segment={} instance={} spawn={} entry={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(), spawnId, segment.ObjectiveCreatureEntry);
+        return true;
+    }
+
     bool BootstrapRazorfenDownsRagglesnoutEncounter(
         Map* map,
         ManastormRun& run,
@@ -2673,6 +2803,10 @@ namespace
             return BootstrapMaraudonMeshlokEncounter(
                 map, run, error);
 
+        case SEGMENT_LORGUS_JETT_NORMAL:
+        case SEGMENT_LORGUS_JETT_ENDGAME:
+            return BootstrapNativeObjectiveSpawn(map, run, error);
+
         case SEGMENT_IRONAYA_NORMAL:
         case SEGMENT_IRONAYA_ENDGAME:
             return BootstrapUldamanIronayaEncounter(
@@ -3041,6 +3175,16 @@ namespace
         }
     }
 
+    void ClearRunUtilityAuras(Player* player)
+    {
+        for (auto const& gadget : Ascension::Manastorm::Gadgets)
+            if (!gadget.passive)
+                player->RemoveAurasDueToSpell(gadget.spell);
+
+        player->RemoveAurasDueToSpell(ManastormBaseline::SpellMagicalEscape);
+        player->RemoveAurasDueToSpell(ManastormBaseline::SpellPotionResourceRegen);
+    }
+
     void DespawnCogsleyCompanion(Player* player)
     {
         if (!player)
@@ -3070,6 +3214,54 @@ namespace
     // each Chaotic Link gives +25% boss HP and +10% boss damage.
     constexpr double CHAOTIC_LINK_HEALTH_PER_STACK = 0.25;
     constexpr double CHAOTIC_LINK_DAMAGE_PER_STACK = 0.10;
+
+    // Raid creatures are sized for forty players. Manastorm brings them to
+    // the level-60 dungeon scale using the median HealthModifier gaps in
+    // creature_template: bosses 292.03 (Molten Core) / 29.0 (dungeon),
+    // elite trash 41.25 / 4.0.
+    constexpr double RAID_BOSS_HEALTH_DIVISOR = 292.03 / 29.0;
+    constexpr double RAID_TRASH_HEALTH_DIVISOR = 41.25 / 4.0;
+
+    double GetRaidCreatureHealthRatio(
+        Creature const* creature)
+    {
+        CreatureTemplate const* creatureTemplate =
+            creature->GetCreatureTemplate();
+
+        double ratio =
+            1.0 /
+            (creatureTemplate->rank == CREATURE_ELITE_WORLDBOSS
+                ? RAID_BOSS_HEALTH_DIVISOR
+                : RAID_TRASH_HEALTH_DIVISOR);
+
+        //
+        // Onyxia's Lair uses expansion-2 templates. Below level 80 their base
+        // health falls back to the Burning Crusade column, so rebase them on
+        // the Classic column like every other Manastorm raid creature.
+        //
+        if (creatureTemplate->expansion > EXPANSION_CLASSIC &&
+            creatureTemplate->expansion < MAX_EXPANSIONS)
+        {
+            if (CreatureBaseStats const* stats =
+                sObjectMgr->GetCreatureBaseStats(
+                    creature->GetLevel(),
+                    creatureTemplate->unit_class))
+            {
+                uint32 const expansionBaseHealth =
+                    stats->BaseHealth[creatureTemplate->expansion];
+
+                if (expansionBaseHealth &&
+                    stats->BaseHealth[EXPANSION_CLASSIC])
+                {
+                    ratio *=
+                        double(stats->BaseHealth[EXPANSION_CLASSIC]) /
+                        double(expansionBaseHealth);
+                }
+            }
+        }
+
+        return ratio;
+    }
 
     // Recovered Ascension Heart Proc chance for ordinary monsters.
     // The roll is owned by OnUnitDeath(), matching the kill-associated
@@ -3157,6 +3349,83 @@ namespace
 
         return !objectiveGuid.IsEmpty() &&
             creature->GetGUID() == objectiveGuid;
+    }
+
+    ManastormSubstitutedObjectives::NativeTemplate const*
+    FindSubstitutedObjectiveTemplate(
+        Creature const* creature,
+        ManastormRun const& run)
+    {
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (!IsObjectiveBoss(
+                creature,
+                run) ||
+            creature->GetEntry() !=
+                segment.ObjectiveCreatureEntry ||
+            !creature->GetCreatureTemplate())
+        {
+            return nullptr;
+        }
+
+        return ManastormSubstitutedObjectives::Find(
+            segment.NativeObjectiveCreatureEntry,
+            segment.ObjectiveCreatureEntry);
+    }
+
+    void ApplySubstitutedObjectiveMana(
+        Creature* creature,
+        double manaRatio)
+    {
+        uint32 const createMana =
+            creature->GetCreateMana();
+
+        if (!createMana ||
+            manaRatio == 1.0)
+        {
+            return;
+        }
+
+        uint32 const oldMaxMana =
+            creature->GetMaxPower(
+                POWER_MANA);
+
+        double const manaPct =
+            oldMaxMana
+            ? double(creature->GetPower(POWER_MANA)) /
+                double(oldMaxMana)
+            : 1.0;
+
+        uint32 const nativeMana =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    createMana,
+                    manaRatio));
+
+        creature->SetCreateMana(
+            nativeMana);
+
+        creature->SetStatFlatModifier(
+            UNIT_MOD_MANA,
+            BASE_VALUE,
+            float(nativeMana));
+
+        creature->UpdateMaxPower(
+            POWER_MANA);
+
+        uint32 const newMaxMana =
+            creature->GetMaxPower(
+                POWER_MANA);
+
+        creature->SetPower(
+            POWER_MANA,
+            std::min<uint32>(
+                newMaxMana,
+                uint32(std::llround(
+                    double(newMaxMana) *
+                    std::clamp(manaPct, 0.0, 1.0)))));
     }
 
     double GetChaoticLinkHealthMultiplier(
@@ -4844,6 +5113,7 @@ void ManastormMgr::RemoveBaselineRunItems(
     {
         _manastormPotionCharges.erase(
             playerGuid);
+        ClearRunUtilityAuras(player);
     }
 }
 
@@ -5776,7 +6046,7 @@ ManastormRun* ManastormMgr::StartRun(
 
     //
     // First-time VO uses the existing authoritative progression snapshot.
-    // A character with no completed depth in the selected mode/track has not
+    // A character with no completed depth in the selected track has not
     // yet completed a Manastorm run in that progression lane.
     //
     ManastormVoiceOfMillhouse::RegisterRun(
@@ -6651,7 +6921,8 @@ void ManastormMgr::OnPlayerGiveXP(
 
     double xpMultiplier =
         GetEndlessExperienceMultiplier(
-            run->GetDepth());
+            run->GetDepth()) *
+        ManastormModuleConfig::ExperienceRate();
 
     // Match C_Manastorm.GetStageBonusExperience's first return:
     // ManastormModifiers word 11 * Manastorm word 6.
@@ -6761,11 +7032,47 @@ void ManastormMgr::ApplyCreatureHealthScaling(
     if (!creature)
         return;
 
-    uint32 const normalizedMaxHealth =
+    uint32 normalizedMaxHealth =
         creature->GetMaxHealth();
 
     if (!normalizedMaxHealth)
         return;
+
+    if (ManastormSubstitutedObjectives::NativeTemplate const* nativeTemplate =
+        FindSubstitutedObjectiveTemplate(
+            creature,
+            run))
+    {
+        CreatureTemplate const* runtimeTemplate =
+            creature->GetCreatureTemplate();
+
+        normalizedMaxHealth =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    normalizedMaxHealth,
+                    ManastormSubstitutedObjectives::Ratio(
+                        nativeTemplate->HealthModifier,
+                        runtimeTemplate->ModHealth)));
+
+        ApplySubstitutedObjectiveMana(
+            creature,
+            ManastormSubstitutedObjectives::Ratio(
+                nativeTemplate->ManaModifier,
+                runtimeTemplate->ModMana));
+    }
+
+    if (Map const* map = creature->FindMap();
+        map && map->IsRaid())
+    {
+        normalizedMaxHealth =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    normalizedMaxHealth,
+                    GetRaidCreatureHealthRatio(
+                        creature)));
+    }
 
     double endlessMultiplier =
         double(
@@ -6841,6 +7148,16 @@ void ManastormMgr::ApplyCreatureHealthScaling(
 
     creature->SetHealth(
         finalHealth);
+
+    //
+    // The player damage requirement was sized from the native health. A
+    // creature scaled below half of it could never be credited to a player,
+    // so its corpse got no loot owner.
+    //
+    if (!creature->IsInCombat())
+    {
+        creature->ResetPlayerDamageReq();
+    }
 }
 
 void ManastormMgr::ApplyChaoticLinkBossHealth(
@@ -9946,7 +10263,7 @@ bool ManastormMgr::LeaveRunMember(ManastormRun& run, Player* player, bool return
 
     ManastormRewards::Instance().SettlePendingCurrency(guid);
     ManastormAffixEngine::Instance().RemoveActivePlayerAffixes(player, run);
-    RemoveBaselineRunItems(player, true);
+    RemoveBaselineRunItems(player, false);
     DespawnCogsleyCompanion(player);
     RestoreOriginalDifficulties(player);
     player->ClearScriptedPrivateInstance();
@@ -9979,6 +10296,8 @@ bool ManastormMgr::LeaveRunMember(ManastormRun& run, Player* player, bool return
         }
     }
 
+    _manastormPotionCharges.erase(guid);
+    ClearRunUtilityAuras(player);
     run.RemoveMember(guid);
     _memberRunIds.erase(guid);
     std::set<ObjectGuid> members;

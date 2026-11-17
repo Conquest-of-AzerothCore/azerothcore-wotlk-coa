@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Bloodlord Mandokir engages the moment his ride down from the ledge ends",
+  "contract": [
+    "Round-9 tester (2026-11-15, Bronzebeard video of 2025-11-13 from 27:10): when the Vilebranch Speaker",
+    "dies, Mandokir (11382) rides down from his ledge and should start the fight as soon as he arrives; ours",
+    "waited about 5 seconds.",
+    "The script engaged on a fixed 6 s timer from the start of the ride instead of on arrival. The instance's",
+    "Mandokir state is set to SPECIAL (4), what the Speaker's death sets, so the ride starts on the next 1 s",
+    "check. Up on the ledge he cannot be attacked; once he reaches the arena floor (z 130.27) he must be in",
+    "the fight within a second, and the hero far away on the floor can attack him."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "label": "Onto Mandokir's ledge",
+      "actor": "tank",
+      "map": 309,
+      "x": -12167.8,
+      "y": -1927.25,
+      "z": 153.73,
+      "o": 3.76991,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "label": "Mandokir on his ledge spot",
+      "actor": "tank",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 0
+    },
+    {
+      "action": "teleport",
+      "label": "Down into the arena, about 50 yards from where his ride ends",
+      "actor": "tank",
+      "map": 309,
+      "x": -12246.7,
+      "y": -1924.7,
+      "z": 131.5,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir waits on the ledge",
+      "actor": "mandokir",
+      "metric": "position_z",
+      "min": 140
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and cannot be attacked there",
+      "actor": "tank",
+      "metric": "can_attack",
+      "target": "mandokir",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nor is he fighting",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The Speaker's death: Mandokir's state becomes SPECIAL",
+      "actor": "tank",
+      "command": ".instance setbossstate 6 4"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir rides down",
+      "actor": "mandokir",
+      "metric": "moving",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and reaches the arena floor",
+      "actor": "mandokir",
+      "metric": "position_z",
+      "max": 131.5,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he is in the fight within a second of arriving (the old 6 s timer kept him idle)",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and can be attacked",
+      "actor": "tank",
+      "metric": "can_attack",
+      "target": "mandokir",
+      "equals": 1
+    }
+  ]
+}

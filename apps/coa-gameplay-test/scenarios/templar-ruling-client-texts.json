@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "name": "Templar client texts restate the 2026-11-10 owner rulings",
+  "contract": [
+    "ADR 0104 D1 and ADR 0105: the server restates five client texts through coa_client_spell_description in",
+    "SMSG_PATCH_SPELL (opcode 2346). Force of Golganneth's buff (500694 ToolTip): Holy damage, AP x0.25 and Holy SP",
+    "x0.25. Scourgebane's strike (801832 Description): direct Holy damage, AP x0.25, no 'over $d'. Righteous Tempest's",
+    "tick spells (805410, 570200-570205 Description): $SP*0.3. Chakra of Light's heal (803160 Description): the known",
+    "talent rank's $m1 plus $SP*0.35, no attack power. Righteous Tempest ranks 1-7 (805409, 807269-807274 ToolTip):",
+    "the rank's tick base plus $SP*0.3. Each row keeps the client's other field."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and the login spell patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Untainted's buff text",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 705299,
+      "text": "${-$m1+$STA*0.1}",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Force of Golganneth's buff tooltip bills Holy damage with 25% AP and 25% Holy spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500694,
+      "text": "Dealing ${$803153m1+$803153ppl1+$AP*0.25+$sph*.25} Holy damage every $t3 sec",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Force of Golganneth's buff tooltip no longer bills Physical damage",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500694,
+      "text": "Physical damage",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Force of Golganneth keeps its spellbook Description",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500694,
+      "text": "dealing ${$803153m1+$803153ppl1+$AP*0.25+$sph*.25} Holy damage and triggering",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Scourgebane's strike bills direct Holy damage with 25% AP",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 801832,
+      "text": "${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} Holy Damage to up to $i nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Scourgebane's strike no longer bills damage over time",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 801832,
+      "text": "Holy Damage over $d",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Scourgebane's strike keeps its client ToolTip",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 801832,
+      "text": "Comber Breakers against this target",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 1 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805410,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 1 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805410,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 2 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570200,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 2 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570200,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 3 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570201,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 3 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570201,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 4 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570202,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 4 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570202,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 5 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570203,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 5 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570203,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 6 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570204,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 6 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570204,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 7 Damage bills 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570205,
+      "text": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 7 Damage no longer bills 15% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570205,
+      "text": "$SP*.15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Chakra of Light's heal bills the known talent rank's base plus 35% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803160,
+      "text": "for $?s803844[${$803844m1+$SP*0.35}][${$803159m1+$SP*0.35}].",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Chakra of Light's heal no longer bills attack power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803160,
+      "text": "$AP*0.08",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 1 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805409,
+      "text": "dealing Weapon Damage plus ${$805410m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 1 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805409,
+      "text": "plus $805410s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 2 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807269,
+      "text": "dealing Weapon Damage plus ${$570200m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 2 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807269,
+      "text": "plus $570200s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 3 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807270,
+      "text": "dealing Weapon Damage plus ${$570201m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 3 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807270,
+      "text": "plus $570201s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 4 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807271,
+      "text": "dealing Weapon Damage plus ${$570202m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 4 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807271,
+      "text": "plus $570202s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 5 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807272,
+      "text": "dealing Weapon Damage plus ${$570203m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 5 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807272,
+      "text": "plus $570203s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 6 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807273,
+      "text": "dealing Weapon Damage plus ${$570204m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 6 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807273,
+      "text": "plus $570204s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 7 buff tooltip bills its tick's base plus 30% spell power",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807274,
+      "text": "dealing Weapon Damage plus ${$570205m1+$SP*0.3} to nearby enemies.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest Rank 7 buff tooltip no longer bills the bare tick base",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 807274,
+      "text": "plus $570205s1 to",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest keeps its spellbook Description",
+      "actor": "templar",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805409,
+      "text": "Unleash a whirling |cffffffffOath Breaker|r",
+      "equals": 1
+    }
+  ]
+}

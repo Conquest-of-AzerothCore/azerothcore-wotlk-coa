@@ -4,6 +4,7 @@
  */
 
 #include "CoAGameplayIsolation.h"
+#include "SharedDefines.h"
 #include "Util.h"
 #include "utf8.h"
 #include <stdexcept>
@@ -141,5 +142,16 @@ namespace CoAGameplay
         }
         result.append(text.substr(copied));
         return result;
+    }
+
+    CharacterCreateOutcome CharacterCreateNext(std::optional<uint8> result, bool generatedName, uint32 retries)
+    {
+        if (!result || *result == CHAR_CREATE_IN_PROGRESS)
+            return CharacterCreateOutcome::Pending;
+        if (*result == CHAR_CREATE_SUCCESS)
+            return CharacterCreateOutcome::Created;
+        if (generatedName && retries < MaxGeneratedNameRetries)
+            return CharacterCreateOutcome::RetryWithNextName;
+        return CharacterCreateOutcome::Refused;
     }
 }

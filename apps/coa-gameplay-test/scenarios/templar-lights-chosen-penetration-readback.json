@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Light's Chosen lowers the target's effective resistance by 10% of Intellect",
+  "contract": "Light's Chosen 301310 reads '... and your spell penetration by $s3% of your Intellect.' ($s3 = 10, EffectBasePoints[2] 9). Its effect 2 triggers 301369 (aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, misc 126), whose amount AscensionTemplarAuras.cpp sets from $s3 and Intellect. A level 60 Templar with Greatness 60234 (Intellect 332) reads back, with no hit applied, the average resist Unit::GetEffectiveResistChance gives its Holy and Shadow spells on a level 60 dummy (entry 36): CoA.MonsterResistance gives the dummy 60 x PerLevel 1.0 = 60 resistance, 60 / PerPercent 5 = 12%. 33 penetration (int32(33.2)) leaves 27, 5.4%. A positive amount added 33 instead: 93, 18.6%. This is a readback; the behaviour proof (+7.5% Holy damage on that dummy) is separate.",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3.0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 60234,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Greatness gives the Templar 332 Intellect",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "min": 332,
+      "max": 332
+    },
+    {
+      "action": "assert",
+      "label": "Without Light's Chosen the level 60 dummy keeps 60 Holy resistance, 12%",
+      "actor": "caster",
+      "metric": "spell_resist_chance",
+      "school": 1,
+      "target": "target",
+      "min": 11.99,
+      "max": 12.01
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 301310,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 301369,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Light's Chosen's penetration aura is held",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 301369,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "33 penetration leaves the dummy 27 Holy resistance, 5.4%",
+      "actor": "caster",
+      "metric": "spell_resist_chance",
+      "school": 1,
+      "target": "target",
+      "min": 5.39,
+      "max": 5.41
+    },
+    {
+      "action": "assert",
+      "label": "The penetration covers every magic school: Shadow 27 as well",
+      "actor": "caster",
+      "metric": "spell_resist_chance",
+      "school": 5,
+      "target": "target",
+      "min": 5.39,
+      "max": 5.41
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 301369,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 301310,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without the aura the dummy is back at 60, 12%",
+      "actor": "caster",
+      "metric": "spell_resist_chance",
+      "school": 1,
+      "target": "target",
+      "min": 11.99,
+      "max": 12.01
+    }
+  ],
+  "timeout_ms": 20000
+}

@@ -23,6 +23,8 @@ constexpr uint32 Weaver = 804980;
 constexpr uint32 Skulk = 800843;
 constexpr uint32 SpiderLord = 704264;
 constexpr uint32 SpiderLordDisplay = 142811;
+constexpr uint32 EnvenomedWeapons = 300855;
+constexpr uint32 EnvenomedJet = 803178;
 struct VenomancerState
 {
     EventMap timers;

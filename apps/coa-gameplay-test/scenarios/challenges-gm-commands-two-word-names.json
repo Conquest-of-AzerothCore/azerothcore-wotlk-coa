@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Challenge GM commands reach a player with a two-word name",
+  "contract": [
+    "The .coa flag, reset and envtest commands read their player as one unquoted word and looked it up by that exact text, so a quoted two-word name was cut at the space and never found; envtest then fell back to the GM who typed it.",
+    "Expected: each command accepts the quoted two-word name in any letter case, as .coa trial check already does, and acts on that player. The GM actor has no target, so an envtest answer naming the two-word player proves the name was resolved instead of the fallback."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 20, "security": 3 },
+    { "id": "runner", "name": "Trialprobe Ashvale", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "The fixture carries the two-word name",
+      "actor": "runner", "metric": "player_name", "name": "Trialprobe Ashvale", "equals": 1
+    },
+    {
+      "action": "command", "label": "Set a condition flag by quoted two-word name in lower case",
+      "actor": "gm", "command": ".coa flag \"trialprobe ashvale\" OUTSIDE_BANK"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the flag is set on the two-word player",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Set condition flag 'OUTSIDE_BANK' for Trialprobe Ashvale.", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "command", "label": "Reset challenge state by quoted two-word name",
+      "actor": "gm", "command": ".coa reset \"Trialprobe Ashvale\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the reset reaches the two-word player",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Reset challenge state for Trialprobe Ashvale", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "command", "label": "Apply one point of fall damage by quoted two-word name",
+      "actor": "gm", "command": ".coa envtest 2 1 \"Trialprobe Ashvale\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the damage goes to the named player, not the GM",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Applied environmental type 2 (1 raw) to Trialprobe Ashvale:", "equals": 1, "within_ms": 5000
+    }
+  ]
+}

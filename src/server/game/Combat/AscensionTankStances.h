@@ -9,6 +9,7 @@ namespace Ascension
 {
     constexpr uint32 FIRST_TANK_STANCE_AURA = 807725;
     constexpr uint32 LAST_TANK_STANCE_AURA = 807736;
+    constexpr uint32 TANK_STANCE_CRIT_REDUCTION_AURA = 991293;
 
     constexpr bool IsTankStanceAura(uint32 spellId)
     {

@@ -17,7 +17,9 @@ namespace
 enum PrimalistAbilitySpells : uint32
 {
     SPELL_GEODE_BARRAGE_DAMAGE = 803138,
-    SPELL_GEODE_BARRAGE_RAGE = 802885
+    SPELL_GEODE_BARRAGE_RAGE = 802885,
+    SPELL_FOCUS_RANK_1 = 680936,
+    SPELL_FOCUS_RANK_2 = 681477
 };
 
 Player* Primalist(Unit* unit)
@@ -25,6 +27,32 @@ Player* Primalist(Unit* unit)
     Player* player = unit ? unit->ToPlayer() : nullptr;
     return player && player->getClass() == CLASS_WILDWALKER ? player : nullptr;
 }
+
+class primalist_focus_stats : public GlobalScript
+{
+public:
+    primalist_focus_stats() : GlobalScript("primalist_focus_stats", {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if ((info->Id != SPELL_FOCUS_RANK_1 && info->Id != SPELL_FOCUS_RANK_2) || info->SpellFamilyName != 37 ||
+            info->Effects[EFFECT_2].Effect)
+            return;
+        SpellEffectInfo const& stamina = info->Effects[EFFECT_0];
+        SpellEffectInfo const& intellect = info->Effects[EFFECT_1];
+        if (!stamina.IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) || stamina.MiscValue != STAT_STAMINA ||
+            !intellect.IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) || intellect.MiscValue != STAT_INTELLECT)
+            return;
+        SpellEffectInfo& strength = info->Effects[EFFECT_2];
+        strength.Effect = SPELL_EFFECT_APPLY_AURA;
+        strength.ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
+        strength.BasePoints = stamina.BasePoints;
+        strength.DieSides = stamina.DieSides;
+        strength.MiscValue = STAT_STRENGTH;
+        strength.TargetA = stamina.TargetA;
+        strength.TargetB = SpellImplicitTargetInfo();
+    }
+};
 
 class primalist_talent_events : public UnitScript
 {
@@ -245,6 +273,7 @@ public:
 
 void AddSC_AscensionPrimalistTalents()
 {
+    new primalist_focus_stats();
     new primalist_talent_events();
     new primalist_talent_casts();
     new primalist_primal_shred_bleed();

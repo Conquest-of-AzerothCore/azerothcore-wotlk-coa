@@ -2002,6 +2002,7 @@ public:
     float GetManaBonusFromIntellect();
 
     bool UpdateStats(Stats stat) override;
+    [[nodiscard]] float GetExactStatValue(Stats stat) const;
     bool UpdateAllStats() override;
     void ApplySpellPenetrationBonus(int32 amount, bool apply);
     void UpdateResistances(uint32 school) override;
@@ -2744,6 +2745,7 @@ public:
 
     [[nodiscard]] float GetRealParry() const { return m_realParry; }
     [[nodiscard]] float GetRealDodge() const { return m_realDodge; }
+    void SetRealDodgeParryForTest(float dodge, float parry) { m_realDodge = dodge; m_realParry = parry; }
     // mt maps
     [[nodiscard]] PlayerTalentMap const& GetTalentMap() const { return m_talents; }
     [[nodiscard]] uint32 GetNextSave() const { return m_nextSave; }

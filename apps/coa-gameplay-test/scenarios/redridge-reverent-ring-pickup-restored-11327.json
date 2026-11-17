@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "The Redridge Reverent Ring pickup spawns again (#11327)",
+  "contract": "rev_20261014_95_worldforged_lootcollector_alignment places Worldforged pickup 6940955 (gameobject 254506, Reverent Ring) in Redridge at the LootCollector find. rev_20261107_92_coa_worldforged_editor_batch_2 hid it with spawnMask 0; rev_20261111_63_redridge_reverent_ring_restore sets spawnMask 1 again, so the pickup is spawned once a player stands beside it.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9261.17,
+    "y": -2465.97,
+    "z": 49.573,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the Reverent Ring pickup is spawned",
+      "actor": "p",
+      "metric": "spawn_active",
+      "spawn": 6940955,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

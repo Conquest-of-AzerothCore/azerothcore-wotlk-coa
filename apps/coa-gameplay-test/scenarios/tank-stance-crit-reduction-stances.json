@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "CoA tank stance auras grant the 6% melee crit reduction 991293 once and drop it with the last stance",
+  "contract": "Every CoA tank stance aura (807725-807736) except Venomancer Beetle Form's 807726 grants spell 991293 (SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE -6). The aura is never stacked or reapplied while another stance still holds it, it disappears with the last stance, and it follows the stance through relog and death. The attacker carries QA aura 25848 (+10 crit) so the 0 clamp cannot hide the -6.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "tank", "race": 1, "class": 18, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tank",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "tank", "target": "dummy", "spell": 25848, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: no tank stance crit reduction before a stance", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 0 },
+    { "action": "snapshot", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "save_as": "plain" },
+    { "action": "set_aura", "actor": "tank", "spell": 807728, "stacks": 1 },
+    { "action": "assert", "label": "The Guardian tank stance grants 991293", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "The stance lowers the melee crit chance taken by 6 points", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "relative_to": "plain", "min": -6.01, "max": -5.99 },
+    { "action": "set_aura", "actor": "tank", "spell": 807736, "stacks": 1 },
+    { "action": "assert", "label": "A second stance source keeps one 991293", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "A second stance source does not reapply 991293", "actor": "tank", "metric": "aura_apply_count", "spell": 991293, "equals": 1 },
+    { "action": "assert", "label": "The crit reduction does not stack", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "relative_to": "plain", "min": -6.01, "max": -5.99 },
+    { "action": "set_aura", "actor": "tank", "spell": 807728, "stacks": 0 },
+    { "action": "assert", "label": "991293 stays while another stance remains", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "set_aura", "actor": "tank", "spell": 807736, "stacks": 0 },
+    { "action": "assert", "label": "Dropping the last stance removes 991293", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "Without a stance the crit chance taken returns to its plain value", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "relative_to": "plain", "min": -0.01, "max": 0.01 },
+    { "action": "set_aura", "actor": "tank", "spell": 807725, "stacks": 1 },
+    { "action": "assert", "label": "The first stance of the range grants 991293", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "relog", "actor": "tank" },
+    { "action": "assert", "label": "SETUP: the stance aura survives the relog", "actor": "tank", "metric": "aura", "spell": 807725, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "991293 follows the stance through the relog", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 3000 },
+    { "action": "set_aura", "actor": "tank", "spell": 807725, "stacks": 0 },
+    { "action": "assert", "label": "Removing the reloaded stance removes 991293", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "relog", "actor": "tank" },
+    { "action": "assert", "label": "No 991293 after a relog without a stance", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 3000 },
+    { "action": "set_aura", "actor": "tank", "spell": 807728, "stacks": 1 },
+    { "action": "assert", "label": "The stance grants 991293 again", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "die", "actor": "tank" },
+    { "action": "assert", "label": "SETUP: the stance aura survives death", "actor": "tank", "metric": "aura", "spell": 807728, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "991293 stays with the stance through death", "actor": "tank", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Death does not stack 991293", "actor": "tank", "metric": "melee_crit_taken_chance", "target": "dummy", "relative_to": "plain", "min": -6.01, "max": -5.99 }
+  ]
+}

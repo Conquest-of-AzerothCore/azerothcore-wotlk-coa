@@ -209,3 +209,27 @@ TEST(CoAGameplayIsolationTest, NonAsciiLettersAndMalformedBytesExtendLegacyNames
         "Harnessa\xCC\x81", "\xA9Harnessa", "Harnessa\xC3", "\xC3\xA9\xA9Harnessa", "Harnessa\xFF"})
         EXPECT_EQ(SubstituteLegacyNames(text, names), std::string(text)) << text;
 }
+
+TEST(CoAGameplayIsolationTest, CharacterCreateWaitsForTheResult)
+{
+    EXPECT_EQ(CharacterCreateNext(std::nullopt, true, 0), CharacterCreateOutcome::Pending);
+    EXPECT_EQ(CharacterCreateNext(uint8(CHAR_CREATE_IN_PROGRESS), true, 0), CharacterCreateOutcome::Pending);
+    EXPECT_EQ(CharacterCreateNext(uint8(CHAR_CREATE_SUCCESS), true, 0), CharacterCreateOutcome::Created);
+}
+
+TEST(CoAGameplayIsolationTest, RefusedGeneratedNameTakesTheNextName)
+{
+    for (ResponseCodes refusal : {CHAR_NAME_PROFANE, CHAR_NAME_RESERVED, CHAR_CREATE_NAME_IN_USE, CHAR_CREATE_FAILED})
+    {
+        EXPECT_EQ(CharacterCreateNext(uint8(refusal), true, 0), CharacterCreateOutcome::RetryWithNextName);
+        EXPECT_EQ(CharacterCreateNext(uint8(refusal), true, MaxGeneratedNameRetries - 1),
+            CharacterCreateOutcome::RetryWithNextName);
+    }
+}
+
+TEST(CoAGameplayIsolationTest, RefusalFailsFastAfterTheRetryCapOrForAFixedName)
+{
+    EXPECT_EQ(CharacterCreateNext(uint8(CHAR_NAME_PROFANE), true, MaxGeneratedNameRetries),
+        CharacterCreateOutcome::Refused);
+    EXPECT_EQ(CharacterCreateNext(uint8(CHAR_NAME_PROFANE), false, 0), CharacterCreateOutcome::Refused);
+}

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Body Builder adds 75% of Strength as melee attack power only while Strength is lower than unbuffed Agility",
+  "contract": "Body Builder (706481) effect 0 is SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT (268), amount 75, MiscValue 0 = Strength. Its periodic companion 706508 carries the condition in the client tooltip: 'when your Strength is lower than your Agility your melee attack power is further increased by $s1% of your Strength', matching the bindmysoul.com CoA talent snapshot of 2026-07-22. Maintainer decision 2026-11-16: the bonus applies only while Strength is lower than Agility, and the comparison uses Agility without buffs (create stat plus the BASE_VALUE layer that item stats use; aura buffs and enchants are excluded). A level 60 human Barbarian starts with Strength 86 and Agility 133 (player_class_stats class 12 level 60, race 1 adds 0). Low side: learning Body Builder raises melee attack power by 0.75 x 86 = 64.5. High side: Juju Power (16323, SPELL_AURA_MOD_STAT Strength) with amount 200 lifts Strength to 286, above Agility; learning Body Builder adds nothing. Buffed side: the Agility scroll aura (8115, SPELL_AURA_MOD_STAT Agility) with amount 200 lifts current Agility to 333, above Strength 286, while unbuffed Agility stays 133; Body Builder still adds nothing. Absence is checked after the aura is confirmed active and a further wait. Bands are the exact values widened for integer stat and attack power rounding.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "assert", "label": "Setup: Strength is the level 60 base 86", "actor": "b", "metric": "stat", "stat": 0, "min": 80, "max": 92 },
+    { "action": "assert", "label": "Setup: Agility is the level 60 base 133", "actor": "b", "metric": "stat", "stat": 1, "min": 127, "max": 139 },
+    { "action": "snapshot", "label": "Attack power without Body Builder, Strength below Agility", "actor": "b", "metric": "attack_power", "save_as": "ap_low" },
+    { "action": "learn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Body Builder (706481) is active", "actor": "b", "metric": "aura", "spell": 706481, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Strength below Agility: attack power rises by 75% of Strength (64.5)", "actor": "b", "metric": "attack_power", "relative_to": "ap_low", "min": 60, "max": 70, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Unlearning removes the bonus", "actor": "b", "metric": "attack_power", "relative_to": "ap_low", "equals": 0, "within_ms": 3000 },
+
+    { "action": "set_aura", "actor": "b", "spell": 16323, "stacks": 1, "amount": 200 },
+    { "action": "assert", "label": "Setup: Strength rises to 286, above Agility", "actor": "b", "metric": "stat", "stat": 0, "min": 280, "max": 292, "within_ms": 3000 },
+    { "action": "assert", "label": "Setup: Agility is unchanged at 133", "actor": "b", "metric": "stat", "stat": 1, "min": 127, "max": 139 },
+    { "action": "snapshot", "label": "Attack power without Body Builder, Strength above Agility", "actor": "b", "metric": "attack_power", "save_as": "ap_high" },
+    { "action": "learn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Body Builder (706481) is active again", "actor": "b", "metric": "aura", "spell": 706481, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Strength above Agility: attack power gains nothing", "actor": "b", "metric": "attack_power", "relative_to": "ap_high", "min": -1, "max": 1 },
+    { "action": "unlearn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Body Builder is gone before the buffed case", "actor": "b", "metric": "aura", "spell": 706481, "equals": 0, "within_ms": 3000 },
+
+    { "action": "set_aura", "actor": "b", "spell": 8115, "stacks": 1, "amount": 200 },
+    { "action": "assert", "label": "Setup: buffed Agility rises to 333, above Strength", "actor": "b", "metric": "stat", "stat": 1, "min": 327, "max": 339, "within_ms": 3000 },
+    { "action": "assert", "label": "Setup: Strength stays 286", "actor": "b", "metric": "stat", "stat": 0, "min": 280, "max": 292 },
+    { "action": "snapshot", "label": "Attack power without Body Builder, Agility above Strength only through a buff", "actor": "b", "metric": "attack_power", "save_as": "ap_buffed" },
+    { "action": "learn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Body Builder (706481) is active for the buffed case", "actor": "b", "metric": "aura", "spell": 706481, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "A buff that lifts Agility above Strength does not enable the bonus", "actor": "b", "metric": "attack_power", "relative_to": "ap_buffed", "min": -1, "max": 1 }
+  ]
+}

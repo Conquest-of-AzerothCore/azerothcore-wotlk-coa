@@ -1,0 +1,294 @@
+{
+  "schema": 1,
+  "name": "Distorted Time lengthens Decomposition exactly like Eternal (#11350)",
+  "contract": "Distorted Time 707553 reads \"Reduces the cooldown of Timerend by $/1000;s2 sec and increases the duration of Decomposition by $/1000;s1 sec\"; Eternal 706777 reads \"... and Decomposition by $/1000;s2 sec\". The Decomposition halves are identical in Spell.dbc: SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue 1 SPELLMOD_DURATION, EffectBasePoints 2999 + DieSides 1 = +3000 ms, EffectSpellClassMask [0,524288,0]. Neither talent has a SPELLMOD_ACTIVATION_TIME effect, so neither can change the tick rate. Decomposition 800856 is SPELL_AURA_PERIODIC_DAMAGE with Amplitude 4000 and DurationIndex 86 (21000 ms); Aura::CalcMaxDuration applies SPELLMOD_DURATION and AuraEffect::CalculatePeriodic keeps the 4000 ms amplitude. One talent gives 24000 ms, 6 ticks at 4 s; both give 27000 ms, still 6 ticks because a seventh would need 28000 ms. The report's 7-tick expectation is not in either tooltip. Regression guard for behaviour that already works (#11350).",
+  "timeout_ms": 75000,
+  "players": [
+    {
+      "id": "eternal",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "distorted",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "both",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "eternal_dummy",
+      "owner": "eternal",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "distorted_dummy",
+      "owner": "distorted",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "both_dummy",
+      "owner": "both",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 800856
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 706777
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: eternal carries talent 706777",
+      "actor": "eternal",
+      "metric": "aura",
+      "spell": 706777,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "distorted",
+      "spell": 800856
+    },
+    {
+      "action": "learn",
+      "actor": "distorted",
+      "spell": 707553
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: distorted carries talent 707553",
+      "actor": "distorted",
+      "metric": "aura",
+      "spell": 707553,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "both",
+      "spell": 800856
+    },
+    {
+      "action": "learn",
+      "actor": "both",
+      "spell": 706777
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both carries talent 706777",
+      "actor": "both",
+      "metric": "aura",
+      "spell": 706777,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "both",
+      "spell": 707553
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both carries talent 707553",
+      "actor": "both",
+      "metric": "aura",
+      "spell": 707553,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "eternal",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition with Eternal",
+      "actor": "eternal",
+      "spell": 800856,
+      "target": "eternal_dummy"
+    },
+    {
+      "action": "set_power",
+      "actor": "distorted",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition with Distorted Time",
+      "actor": "distorted",
+      "spell": 800856,
+      "target": "distorted_dummy"
+    },
+    {
+      "action": "set_power",
+      "actor": "both",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition with Eternal and Distorted Time",
+      "actor": "both",
+      "spell": 800856,
+      "target": "both_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Eternal: Decomposition lasts 24 sec",
+      "actor": "eternal_dummy",
+      "metric": "aura_duration_ms",
+      "spell": 800856,
+      "caster": "eternal",
+      "min": 22000,
+      "max": 24000,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Eternal: the tick rate stays the authored 4 sec",
+      "actor": "eternal_dummy",
+      "metric": "aura_amplitude_ms",
+      "spell": 800856,
+      "caster": "eternal",
+      "effect": 0,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Distorted Time: Decomposition lasts 24 sec",
+      "actor": "distorted_dummy",
+      "metric": "aura_duration_ms",
+      "spell": 800856,
+      "caster": "distorted",
+      "min": 22000,
+      "max": 24000,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Distorted Time: the tick rate stays the authored 4 sec",
+      "actor": "distorted_dummy",
+      "metric": "aura_amplitude_ms",
+      "spell": 800856,
+      "caster": "distorted",
+      "effect": 0,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Eternal and Distorted Time: Decomposition lasts 27 sec",
+      "actor": "both_dummy",
+      "metric": "aura_duration_ms",
+      "spell": 800856,
+      "caster": "both",
+      "min": 25000,
+      "max": 27000,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Eternal and Distorted Time: the tick rate stays the authored 4 sec",
+      "actor": "both_dummy",
+      "metric": "aura_amplitude_ms",
+      "spell": 800856,
+      "caster": "both",
+      "effect": 0,
+      "equals": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let every Decomposition run out",
+      "ms": 29000
+    },
+    {
+      "action": "assert",
+      "label": "Eternal: Decomposition has expired",
+      "actor": "eternal_dummy",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "eternal",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Eternal: six ticks landed",
+      "actor": "eternal",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "target": "eternal_dummy",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Distorted Time: Decomposition has expired",
+      "actor": "distorted_dummy",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "distorted",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Distorted Time: six ticks landed",
+      "actor": "distorted",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "target": "distorted_dummy",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Eternal and Distorted Time: Decomposition has expired",
+      "actor": "both_dummy",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "both",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Eternal and Distorted Time: six ticks landed",
+      "actor": "both",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "target": "both_dummy",
+      "equals": 6
+    }
+  ]
+}

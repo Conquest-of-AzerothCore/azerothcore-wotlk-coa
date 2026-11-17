@@ -1,26 +1,19 @@
 {
   "schema": 1,
-  "name": "Manastorm Shadowfang Keep: solo Archmage Arugal does not full-heal when his Curse charms the only attacker (#8345)",
+  "name": "Manastorm Shadowfang Keep: solo Archmage Arugal cannot charm the only attacker with his Curse and keeps fighting (#8345)",
   "contract": [
-    "#8345: in a solo Manastorm run of Shadowfang Keep, Archmage Arugal's Arugal's Curse charms the lone",
-    "player (spell 7621). With no other threat left in his list, generic evade logic used to reset him to",
-    "full health and drop combat the instant the charm landed, soft-locking a solo-advertised floor. The fix",
-    "suppresses that evade for the charm's duration so the fight continues once control returns; it never",
-    "changes the curse or the boss.",
-    "This scenario proves setup correctness (private run, phase match, combat engaged, Chaotic Link present,",
-    "player not pre-charmed), then forces the charm directly with '.cast back 7621 triggered' so Arugal",
-    "himself (the selected creature) casts it onto the invoking player, exactly as his own SmartAI In-Combat",
-    "timer eventually would, without waiting on that timer. Both '.cast back' and '.cast target' need a",
-    "native CMSG_SET_SELECTION first (ChatHandler::getSelectedCreature() reads Player::GetTarget());",
-    "attack_nearby only sends CMSG_ATTACKSWING and never selects. An earlier attempt at a forced cast skipped",
-    "that selection, failed with 'select character or creature', and was misread as an RBAC permission gap.",
-    "The new select_nearby harness action (apps/coa-gameplay-test) sends the missing selection. '.cast back'",
-    "(not '.cast target') is used because it targets the invoking player directly and does not depend on",
-    "Creature::GetVictim() already pointing at the player, which made an earlier attempt with '.cast target'",
-    "intermittently fail under batch load before the AuraScript's own gate (caster entry, instance, Solo",
-    "mode -- see ManastormShadowfangKeepCompat.cpp) ever got a say. The closing assertions confirm the",
-    "player is actually charmed and that Arugal neither evaded (his Chaotic Link encounter aura would be",
-    "stripped by Unit::RemoveEvadeAuras() on a real evade, and it survives here) nor dropped out of combat."
+    "#8345: in a solo Manastorm run of Shadowfang Keep, Arugal's Curse 7621 charmed the lone player and Arugal",
+    "evaded to full health, soft-locking the floor. Setup: a private run of segment 49, phase match, combat",
+    "engaged, Chaotic Link present, player not pre-charmed.",
+    "Rule (2026-11-14): Archmage Arugal 4275 never mind-controls a player who fights him alone, even inside a group.",
+    "BossControlTargeting.h lets his charms, Arugal's Curse 7621 and the Ascension kit's Curse of Arugal 2102679",
+    "(both SPELL_AURA_MOD_CHARM on effect 0), land only while at least two players are on his threat list; his",
+    "SmartAI finds no target otherwise, and AscensionBossControlGuard refuses any other cast, a forced triggered one",
+    "included, with SPELL_FAILED_BAD_TARGETS. The case selects Arugal and forces the charm with '.cast back <spell>",
+    "triggered' (select_nearby sends the CMSG_SET_SELECTION that ChatHandler::getSelectedCreature() needs) to probe",
+    "that guard. The closing assertions confirm the lone engaged player stays uncharmed and Arugal keeps fighting:",
+    "an evade would strip his Chaotic Link encounter aura 93459 (Unit::RemoveEvadeAuras()) and make him",
+    "unattackable."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -127,20 +120,25 @@
     {
       "action": "command",
       "actor": "n",
-      "command": ".cast back 7621 triggered"
+      "command": ".cast back 7621 triggered",
+      "rejected": true
+    },
+    {
+      "action": "wait",
+      "label": "Give the forced cast time to resolve",
+      "ms": 1500
     },
     {
       "action": "assert",
-      "label": "The player is charmed by Arugal's Curse",
+      "label": "Arugal cannot charm the only player fighting him: Arugal's Curse is refused",
       "actor": "n",
       "metric": "aura",
       "spell": 7621,
-      "within_ms": 2000,
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Arugal did not evade: his Chaotic Link encounter aura survives the charm",
+      "label": "Arugal did not evade: his Chaotic Link encounter aura survives the refused charm",
       "actor": "n",
       "metric": "nearby_creature_aura_count",
       "entry": 4275,

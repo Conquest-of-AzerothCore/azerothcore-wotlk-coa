@@ -1,0 +1,348 @@
+{
+  "schema": 1,
+  "name": "Custom single-target Intellect buffs are exclusive-highest with Arcane Intellect and each other (#10710)",
+  "contract": [
+    "Maintainer decision for #10710: Celestial Mind (Starcaller 300255 chain, Greater 680301), Nozdormu's Wisdom",
+    "(Chronomancer 572391 chain, Greater 572396), Call of the Storm (Stormbringer 578311 chain, Greater 578316) and",
+    "Seal of Alysrazor (Pyromancer 800196 chain, Greater 570170) join the vanilla Single Intellect Buffs group 1083",
+    "(SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST) as one subgroup per family. Spell.dbc SPELL_AURA_MOD_STAT Intellect",
+    "values (BasePoints + 1): Arcane Intellect rank 3 (1461) 15, Celestial Mind rank 5 (301225) 31, Nozdormu's",
+    "Wisdom rank 4 (572394) 25 and rank 5 (572395) 31. Native behaviour: a weaker buff is refused at cast",
+    "(Spell::CheckCast -> IsHighestExclusiveAuraEffect, SPELL_FAILED_AURA_BOUNCED); a stronger or equal one is",
+    "applied and Aura::CanStackWith removes the other. So Celestial Mind replaces Arcane Intellect (+31, not",
+    "+46), a later Arcane Intellect rank 3 and Nozdormu's Wisdom rank 4 bounce, and Nozdormu's Wisdom rank 5",
+    "replaces the equal Celestial Mind. Control: Chromie's Wisdom (801523, Spirit) is outside group 1083 and keeps",
+    "the self-scoped 'Only one Wisdom per Chronomancer' rule (group 1135): it replaces the same Chronomancer's",
+    "Nozdormu's Wisdom and then coexists with another class's Arcane Intellect."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    },
+    {
+      "id": "starcaller",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    },
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 1461
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 301225
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572394
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 801523
+    },
+    {
+      "action": "snapshot",
+      "label": "Ally Intellect without buffs",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "intellect_base"
+    },
+    {
+      "action": "set_power",
+      "actor": "mage",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Intellect rank 3 on the ally",
+      "actor": "mage",
+      "spell": 1461,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Intellect is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1461,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Intellect adds 15 Intellect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "intellect_base",
+      "min": 14.5,
+      "max": 15.5
+    },
+    {
+      "action": "set_power",
+      "actor": "starcaller",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Celestial Mind rank 5 on the same ally",
+      "actor": "starcaller",
+      "spell": 301225,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Celestial Mind is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 301225,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the stronger Celestial Mind removed Arcane Intellect",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1461,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Intellect is +31 from Celestial Mind alone, not +46 from both",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "intellect_base",
+      "min": 30.5,
+      "max": 31.5
+    },
+    {
+      "action": "wait",
+      "label": "Clear the mage's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "mage",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Intellect rank 3 again while the stronger Celestial Mind is active",
+      "actor": "mage",
+      "spell": 1461,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "Let a refused cast settle",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the weaker Arcane Intellect is refused",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1461,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Celestial Mind stays",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 301225,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Nozdormu's Wisdom rank 4 while the stronger Celestial Mind is active",
+      "actor": "chrono",
+      "spell": 572394,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "Let a refused cast settle",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the weaker Nozdormu's Wisdom is refused",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572394,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Intellect stays +31 from Celestial Mind",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "intellect_base",
+      "min": 30.5,
+      "max": 31.5
+    },
+    {
+      "action": "wait",
+      "label": "Clear the Chronomancer's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572395
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Nozdormu's Wisdom rank 5, equal to Celestial Mind",
+      "actor": "chrono",
+      "spell": 572395,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Nozdormu's Wisdom is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572395,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the equal Nozdormu's Wisdom replaced Celestial Mind",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 301225,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Intellect is +31 from one buff, not +62",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "intellect_base",
+      "min": 30.5,
+      "max": 31.5
+    },
+    {
+      "action": "wait",
+      "label": "Clear the Chronomancer's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Chromie's Wisdom from the same Chronomancer",
+      "actor": "chrono",
+      "spell": 801523,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Chromie's Wisdom is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801523,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: only one Wisdom per Chronomancer, so Nozdormu's Wisdom is gone",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572395,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "mage",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Arcane Intellect rank 3 next to the Spirit-only Chromie's Wisdom",
+      "actor": "mage",
+      "spell": 1461,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arcane Intellect applies with no Intellect buff left",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1461,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Chromie's Wisdom coexists with another class's Arcane Intellect",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801523,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Intellect is +15 from Arcane Intellect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "intellect_base",
+      "min": 14.5,
+      "max": 15.5
+    }
+  ]
+}

@@ -27,6 +27,8 @@ Unit* Ancestor(Player* player);
 bool Enraged(Unit const* unit);
 void Extend(Unit* owner, uint32 id, int32 amount, int32 cap = 0);
 void ReadyToKill(Player* player);
+float UnbuffedAgility(Player const* player);
+float BodyBuilderAttackPowerCorrection(Player* player);
 void ApplyContracts(SpellInfo* info);
 }
 

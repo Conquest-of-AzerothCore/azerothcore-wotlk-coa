@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "name": "The Spirit Warden Idol buff raises Spirit and Agility by the same percent",
+  "contract": "The Idol buff of Spirit Warden (CharacterAdvancement entry 7033, talent spell 503774, buff spell 503775) raised Spirit by 10 percent, which leaves the Agility specialization Shadowhunting with nothing to multiply. AscensionWitchDoctorCompletion.cpp gives the buff a second effect, aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) on Agility with the same base points. A level 80 Witch Doctor picks Shadowhunting (ChrSpecs 4) and receives the buff through set_aura, the fixture the other Witch Doctor scenarios use for Idol-granted auras; the summon itself casts the same spell and is covered by the existing Spirit Warden code path, which this scenario does not run. Both effect amounts are asserted exactly, Spirit and Agility must rise by 10 percent, Strength is the unchanged control. Character sheet stats are whole numbers, so the ratios use a band and a guard first asserts that Spirit and Agility are at least 50 (floor 1.10 - 1/50 stays above 1.08). The client tooltip is not observed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Shadowhunting",
+      "actor": "doctor",
+      "id": 4
+    },
+    {
+      "action": "wait",
+      "label": "Let the specialization settle",
+      "ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "label": "Start without the Idol buff",
+      "actor": "doctor",
+      "spell": 503775,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Spirit before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "base_4"
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "base_1"
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "base_0"
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Spirit is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Agility is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "min": 50
+    },
+    {
+      "action": "set_aura",
+      "label": "The Idol buff, as after an Idol summon with Spirit Warden",
+      "actor": "doctor",
+      "spell": 503775,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The buff is active",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 503775,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 resolves to 10",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503775,
+      "effect": 0,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 2 resolves to 10",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503775,
+      "effect": 1,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is up about 10 percent",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "base_4",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility is up about 10 percent",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength did not change",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "base_0",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "set_aura",
+      "label": "The buff ends",
+      "actor": "doctor",
+      "spell": 503775,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "The buff is gone",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 503775,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "base_4",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    }
+  ]
+}

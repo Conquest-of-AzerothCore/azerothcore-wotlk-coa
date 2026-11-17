@@ -9,12 +9,22 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
+#include "GameTime.h"
 #include "Log.h"
 #include "Map.h"
+#include "MapCollisionData.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "WorldPacket.h"
 #include "WorldScript.h"
+#include "WorldSession.h"
+#include <array>
+#include <cmath>
+#include <map>
+#include <mutex>
+#include <optional>
 #include <shared_mutex>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -25,12 +35,38 @@ namespace
     constexpr uint32 MarkerEntry = 1;
     constexpr uint32 MarkerMilliseconds = 60000;
     constexpr std::size_t MaximumPoints = 64;
+    constexpr uint32 RoomRays = 48;
+    constexpr uint32 RoomExitWindow = 4;
+    constexpr float RoomExitSlack = 1.15f;
+    constexpr float RoomPadding = 2.0f;
+    constexpr std::array<float, 2> RoomRayHeights = { 2.0f, 5.0f };
+    constexpr Milliseconds ResetHidden = 10s;
+    constexpr char const* ResetText = "%s has lost interest in fighting with you.";
 
     struct Leash
     {
         float radius = 0.0f;
         std::vector<Position> points;
     };
+
+    struct HiddenBoss
+    {
+        Milliseconds until = 0ms;
+        ReactStates react = REACT_AGGRESSIVE;
+        bool immuneToPC = false;
+        bool immuneToNPC = false;
+        bool selectable = true;
+    };
+
+    using HiddenKey = std::tuple<uint32, uint32, ObjectGuid>;
+
+    std::mutex HiddenLock;
+    std::map<HiddenKey, HiddenBoss> Hidden;
+
+    HiddenKey KeyOf(Creature const* creature)
+    {
+        return { creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() };
+    }
 
     std::shared_mutex LeashLock;
     std::unordered_map<uint32, Leash> Leashes;
@@ -95,6 +131,119 @@ namespace
         LOG_INFO("server.loading", ">> Loaded {} CoA boss leashes", count);
     }
 
+    float RayLength(Map const* map, uint32 phaseMask, Position const& from, float angle, float reach)
+    {
+        MapCollisionData const& collision = map->GetMapCollisionData();
+        float longest = 0.0f;
+        for (float height : RoomRayHeights)
+        {
+            float const z = from.GetPositionZ() + height;
+            float tx = from.GetPositionX() + std::cos(angle) * reach;
+            float ty = from.GetPositionY() + std::sin(angle) * reach;
+            float rx, ry, rz;
+            if (collision.GetStaticTree().GetObjectHitPos(from.GetPositionX(), from.GetPositionY(), z, tx, ty, z, rx, ry, rz,
+                -0.5f))
+            {
+                tx = rx;
+                ty = ry;
+            }
+            if (collision.GetDynamicTree().GetObjectHitPos(phaseMask, from.GetPositionX(), from.GetPositionY(), z, tx, ty,
+                z, rx, ry, rz, -0.5f))
+            {
+                tx = rx;
+                ty = ry;
+            }
+            longest = std::max(longest, from.GetExactDist2d(tx, ty));
+        }
+        return longest;
+    }
+
+    std::vector<Position> RoomOutline(Map const* map, uint32 phaseMask, Position const& from, float reach)
+    {
+        std::array<float, RoomRays> length;
+        for (uint32 i = 0; i < RoomRays; ++i)
+            length[i] = RayLength(map, phaseMask, from, 2.0f * float(M_PI) * i / RoomRays, reach);
+
+        std::vector<Position> outline;
+        for (uint32 i = 0; i < RoomRays; ++i)
+        {
+            float const left = length[(i + RoomRays - RoomExitWindow) % RoomRays];
+            float const right = length[(i + RoomExitWindow) % RoomRays];
+            float const distance = std::min(reach, std::min(length[i], std::max(left, right) * RoomExitSlack) + RoomPadding);
+            float const angle = 2.0f * float(M_PI) * i / RoomRays;
+            outline.emplace_back(from.GetPositionX() + std::cos(angle) * distance,
+                from.GetPositionY() + std::sin(angle) * distance, from.GetPositionZ());
+        }
+        return outline;
+    }
+
+    void AnnounceReset(Creature* creature)
+    {
+        creature->GetMap()->DoForAllPlayers([creature](Player* player)
+        {
+            WorldPacket data;
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, creature, player, ResetText, 0, "",
+                player->GetSession()->GetSessionDbLocaleIndex());
+            player->SendDirectMessage(&data);
+        });
+    }
+
+    void HideForReset(Creature* creature)
+    {
+        HiddenBoss boss;
+        boss.until = GameTime::GetGameTimeMS() + ResetHidden;
+        boss.react = creature->GetReactState();
+        boss.immuneToPC = creature->IsImmuneToPC();
+        boss.immuneToNPC = creature->IsImmuneToNPC();
+        boss.selectable = !creature->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+
+        float x, y, z, o;
+        creature->GetRespawnPosition(x, y, z, &o);
+        creature->SetHomePosition(x, y, z, o);
+        creature->NearTeleportTo(x, y, z, o);
+        creature->SetReactState(REACT_PASSIVE);
+        creature->SetImmuneToAll(true);
+        creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetVisible(false);
+
+        std::lock_guard lock(HiddenLock);
+        Hidden[KeyOf(creature)] = boss;
+    }
+
+    void ShowAfterReset(Creature* creature, HiddenBoss const& boss)
+    {
+        creature->SetImmuneToPC(boss.immuneToPC);
+        creature->SetImmuneToNPC(boss.immuneToNPC);
+        if (boss.selectable)
+            creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetFullHealth();
+        if (creature->getPowerType() == POWER_MANA)
+            creature->SetPower(POWER_MANA, creature->GetMaxPower(POWER_MANA));
+        creature->SetReactState(boss.react);
+        creature->SetVisible(true);
+    }
+
+    bool UpdateHidden(Creature* creature)
+    {
+        std::optional<HiddenBoss> back;
+        {
+            std::lock_guard lock(HiddenLock);
+            auto const itr = Hidden.find(KeyOf(creature));
+            if (itr == Hidden.end())
+                return false;
+            if (GameTime::GetGameTimeMS() >= itr->second.until)
+            {
+                back = itr->second;
+                Hidden.erase(itr);
+            }
+        }
+        if (back)
+            ShowAfterReset(creature, *back);
+        else if (creature->IsInCombat())
+            creature->CombatStop(true);
+        return true;
+    }
+
     bool LeashedOnMap(Map const* map)
     {
         return map && map->IsNonRaidDungeon() && map->GetSpawnMode() != DUNGEON_DIFFICULTY_NORMAL;
@@ -119,6 +268,9 @@ public:
 
     void OnAllCreatureUpdate(Creature* creature, uint32) override
     {
+        if (UpdateHidden(creature))
+            return;
+
         if (!creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive() || !LeashedOnMap(creature->GetMap()))
             return;
 
@@ -129,8 +281,20 @@ public:
                 return;
         }
 
-        if (CreatureAI* ai = creature->AI())
-            ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
+        CreatureAI* ai = creature->AI();
+        if (!ai)
+            return;
+
+        AnnounceReset(creature);
+        ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
+        if (creature->IsInWorld() && creature->IsAlive() && creature->IsVisible())
+            HideForReset(creature);
+    }
+
+    void OnCreatureRemoveWorld(Creature* creature) override
+    {
+        std::lock_guard lock(HiddenLock);
+        Hidden.erase(KeyOf(creature));
     }
 };
 
@@ -147,7 +311,8 @@ public:
             { "undo", HandleUndo, SEC_GAMEMASTER, Console::No },
             { "radius", HandleRadius, SEC_GAMEMASTER, Console::No },
             { "clear", HandleClear, SEC_GAMEMASTER, Console::No },
-            { "show", HandleShow, SEC_GAMEMASTER, Console::No }
+            { "show", HandleShow, SEC_GAMEMASTER, Console::No },
+            { "room", HandleRoom, SEC_GAMEMASTER, Console::No }
         };
         static ChatCommandTable commands =
         {
@@ -271,6 +436,42 @@ public:
         WorldDatabase.Execute("DELETE FROM `coa_boss_leash_point` WHERE `entry` = {}", *entry);
         WorldDatabase.Execute("DELETE FROM `coa_boss_leash` WHERE `entry` = {}", *entry);
         handler->PSendSysMessage("{} ({}): leash removed.", BossName(*entry), *entry);
+        return true;
+    }
+
+    static bool HandleRoom(ChatHandler* handler, Optional<float> reachArg, Optional<uint32> entryArg)
+    {
+        float const reach = reachArg.value_or(45.0f);
+        if (reach < 10.0f || reach > 150.0f)
+        {
+            handler->SendErrorMessage("The reach must be between 10 and 150 yards.");
+            return false;
+        }
+        Optional<uint32> const entry = ResolveEntry(handler, entryArg);
+        if (!entry)
+            return false;
+
+        Player* player = handler->GetPlayer();
+        Position from = player->GetPosition();
+        Creature* selected = handler->getSelectedCreature();
+        if (selected && selected->GetEntry() == *entry)
+            from = selected->GetHomePosition();
+
+        std::vector<Position> const outline = RoomOutline(player->GetMap(), player->GetPhaseMask(), from, reach);
+        {
+            std::unique_lock lock(LeashLock);
+            Leashes[*entry].points = outline;
+        }
+        WorldDatabase.Execute("INSERT IGNORE INTO `coa_boss_leash` (`entry`, `radius`) VALUES ({}, 0)", *entry);
+        WorldDatabaseTransaction trans = WorldDatabase.BeginTransaction();
+        trans->Append("DELETE FROM `coa_boss_leash_point` WHERE `entry` = {}", *entry);
+        for (std::size_t i = 0; i < outline.size(); ++i)
+            trans->Append("INSERT INTO `coa_boss_leash_point` (`entry`, `point`, `x`, `y`, `z`) VALUES ({}, {}, {}, {}, {})",
+                *entry, i, outline[i].GetPositionX(), outline[i].GetPositionY(), outline[i].GetPositionZ());
+        WorldDatabase.CommitTransaction(trans);
+        handler->PSendSysMessage("{} ({}): room leash with {} points around {:.1f} {:.1f}, cut at the exits. "
+            "Check it with .leash show and fix single points with .leash undo / .leash point.",
+            BossName(*entry), *entry, outline.size(), from.GetPositionX(), from.GetPositionY());
         return true;
     }
 

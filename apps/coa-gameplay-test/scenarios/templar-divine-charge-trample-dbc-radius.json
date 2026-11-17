@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Divine Charge tramples enemies within Divine Trample's 3 yd DBC radius only",
+  "contract": [
+    "Divine Charge 527023 reads 'causing them to trample nearby enemies'. Every 0.5 sec its aura 527270 searches enemies around each mounted member and casts Divine Trample 527269 on them; the owner ruled on 2026-11-10 that 'nearby' is 527269's own EffectRadiusIndex[0] 15 (SpellRadius RadiusMin = RadiusMax 3.0 yd in the server DBC set), not the earlier 5 yd literal.",
+    "The search is IsWithinDistInMap, which adds both combat reaches: the Templar (1.5) and each Harvest Golem (1.275) widen 3 yd to 5.775 yd between centres and the old 5 yd to 7.775 yd.",
+    "The near golem stands 4.0 yd away (1.225 yd past both reaches, inside 3 yd) and must be trampled; the far golem stands 6.75 yd away (3.975 yd past both reaches, between 3 and 5 yd) and must not be."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4.0,
+      "stationary": true
+    },
+    {
+      "id": "far",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 6.75,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the near golem's centre is 4.0 yd from the Templar",
+      "actor": "templar",
+      "metric": "distance_2d",
+      "target": "near",
+      "min": 3.95,
+      "max": 4.05
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the far golem's centre is 6.75 yd from the Templar",
+      "actor": "templar",
+      "metric": "distance_2d",
+      "target": "far",
+      "min": 6.7,
+      "max": 6.8
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the near golem's combat reach is 1.275",
+      "actor": "near",
+      "metric": "combat_reach",
+      "min": 1.27,
+      "max": 1.28
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the far golem's combat reach is 1.275",
+      "actor": "far",
+      "metric": "combat_reach",
+      "min": 1.27,
+      "max": 1.28
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 527023
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 527023
+    },
+    {
+      "action": "assert",
+      "label": "Divine Charge mounts the Templar on its steed",
+      "actor": "templar",
+      "metric": "mount_display_id",
+      "equals": 14584,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the mounted Templar's combat reach is 1.5",
+      "actor": "templar",
+      "metric": "combat_reach",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "The golem inside 3 yd is trampled",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 527269,
+      "target": "near",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the golem between 3 and 5 yd is not trampled",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 527269,
+      "target": "far",
+      "equals": 0
+    }
+  ]
+}

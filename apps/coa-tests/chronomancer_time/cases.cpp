@@ -189,6 +189,14 @@ int main()
     SpreadRecovery(&player, &target, KeepAcceleratingSpread);
     assert(!friendOne.HasAura(501778) && friendTwo.HasAura(501778));
     friendOne.accept = true;
+    friendOne.playerUnit = false;
+    for (uint32 helper : {KeepAcceleratingSpread, ResilienceSpread})
+    {
+        friendTwo.RemoveAurasDueToSpell(501778);
+        SpreadRecovery(&player, &target, helper);
+        assert(!friendOne.HasAura(501778) && friendTwo.HasAura(501778));
+    }
+    friendOne.playerUnit = true;
     player.Add(501778, &friendOne);
     player.Add(EpicRecovery, &player);
     player.known = {{Epoch, 1}, {501784, 1}, {Fortify, 1}, {807458, 1}};

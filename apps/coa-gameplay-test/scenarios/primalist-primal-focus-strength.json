@@ -1,0 +1,376 @@
+{
+  "schema": 1,
+  "name": "Focus raises Strength, Intellect and Stamina by the same percent",
+  "contract": "Focus (CharacterAdvancement entry 7844, rank 1 spell 680936, rank 2 spell 681477) raised Intellect and Stamina only, which leaves the Strength specialization Primal with almost nothing to multiply. AscensionPrimalistTalents.cpp gives both ranks a third effect, aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) on Strength with the same base points as the other two (5 percent, then 10 percent in total: rank 2 replaces rank 1 and does not add to it). A level 80 Primalist picks Primal (ChrSpecs 59), learns each rank as the existing Focus scenario does, and the three aura effect amounts are asserted exactly. Agility is the unchanged control. Character sheet stats are whole numbers, so the stat ratios use bands and a guard first asserts that each raised stat is at least 50, which keeps the rounding inside them (rank 1 floor 1.05 - 1/50 stays above 1.03; rank 2 floor 1.10 - 1/50 stays above 1.08, and the two bands do not overlap); 15 percent in total would fail the rank 2 band. The client tooltip is not observed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose the specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "wait",
+      "label": "Let the specialization settle",
+      "ms": 1500
+    },
+    {
+      "action": "unlearn",
+      "label": "Start without the talent",
+      "actor": "primalist",
+      "spell": 680936,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "label": "Start without the talent",
+      "actor": "primalist",
+      "spell": 681477,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength before",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "base_0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "base_3"
+    },
+    {
+      "action": "snapshot",
+      "label": "Stamina before",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "base_2"
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility before",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "base_1"
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Strength is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Intellect is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Stamina is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "min": 50
+    },
+    {
+      "action": "learn",
+      "label": "Learn rank 1",
+      "actor": "primalist",
+      "spell": 680936
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 passive 680936 is active",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 680936,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 1 resolves to 5",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 680936,
+      "effect": 0,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 2 resolves to 5",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 680936,
+      "effect": 1,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 3 resolves to 5",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 680936,
+      "effect": 2,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength is up about 5 percent",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "base_0",
+      "min": 1.03,
+      "max": 1.07,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is up about 5 percent",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 1.03,
+      "max": 1.07,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stamina is up about 5 percent",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "base_2",
+      "min": 1.03,
+      "max": 1.07,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility did not change",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "unlearn",
+      "label": "Forget rank 1",
+      "actor": "primalist",
+      "spell": 680936,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 passive 680936 is gone",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 680936,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength is back at its baseline",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "base_0",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is back at its baseline",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stamina is back at its baseline",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "base_2",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn rank 2",
+      "actor": "primalist",
+      "spell": 681477
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 passive 681477 is active",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 681477,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 1 resolves to 10",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 681477,
+      "effect": 0,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 2 resolves to 10",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 681477,
+      "effect": 1,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 3 resolves to 10",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 681477,
+      "effect": 2,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength is up about 10 percent in total, not 15",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "base_0",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is up about 10 percent in total, not 15",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stamina is up about 10 percent in total, not 15",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "base_2",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility did not change",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "unlearn",
+      "label": "Forget rank 2",
+      "actor": "primalist",
+      "spell": 681477,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 passive 681477 is gone",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 681477,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength is back at its baseline",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "base_0",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is back at its baseline",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stamina is back at its baseline",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "base_2",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    }
+  ]
+}

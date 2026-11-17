@@ -349,6 +349,13 @@ public:
                 case DATA_AWAKEN_SOULFLAYER:
                     AwakenSoulflayer();
                     return;
+                case DATA_SANCTUM_DRAGONS:
+                    if (!AreSanctumDragonsReleased())
+                    {
+                        _eranikusWardensKilled |= SanctumDragonsReleased;
+                        ReleaseSanctumDragons();
+                    }
+                    break;
                 case DATA_DEFENDER_KILLED:
                     ++_defendersKilled;
                     if (_defendersKilled == DEFENDERS_COUNT)
@@ -390,6 +397,8 @@ public:
                     return _statuePhase;
                 case DATA_DEFENDER_KILLED:
                     return DEFENDERS_COUNT;
+                case DATA_SANCTUM_DRAGONS:
+                    return AreSanctumDragonsReleased() ? 1 : 0;
                 case TYPE_ATAL_ALARION:
                 case TYPE_JAMMAL_AN:
                 case TYPE_HAKKAR_EVENT:

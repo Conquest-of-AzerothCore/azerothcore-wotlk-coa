@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jin'do the Hexxer resets after a wipe while his Powerful Healing Ward stands",
+  "contract": [
+    "Testers (2026-11-16) wiped on Jin'do (11380) while his Powerful Healing Ward (14987) and shades stood,",
+    "and he never reset. Jin'do now resets once no living player near him is in combat, whatever his ward,",
+    "totems or shades still do. The hero carries the Delusions vision (2118511), which Delusions of Jin'do",
+    "skips, so its phase aura cannot move the hero out of the lane's phase before the ward comes at 21 s.",
+    "The fight is in the Blood Pit, where the ward and totems stand, so the 60 yard count sees them before",
+    "the wipe and their despawn with the reset. Why the ward kept him in the fight on the PTR is not",
+    "reproduced; this case covers the reported state."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -11583.0,
+    "y": -1251.2,
+    "z": 77.63,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11380,
+      "level": 63,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Delusions passes over the hero",
+      "actor": "hero",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage Jin'do",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Powerful Healing Ward stands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14987,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do still fights",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "die",
+      "label": "The raid wipes",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "label": "Let Jin'do dance, walk home and leave evade",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Jin'do left the fight",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Jin'do walked back to his home position",
+      "actor": "boss",
+      "metric": "point_distance_2d",
+      "x": -11579.0,
+      "y": -1251.2,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "The ward despawned with the reset",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14987,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Brain Wash Totems despawned with the reset",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15112,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Waves of Time knocks back an enemy 30 degrees off the Chronomancer's facing (#12342)",
+  "contract": [
+    "Waves of Time 801277 blasts \"enemies in a frontal cone\"; its knockback 802600 (Effect 98, EffectBasePoints 69,",
+    "EffectMiscValue 150) targets TARGET_UNIT_CONE_ENEMY_24 with radius index 13 = 10 yd and is cast at cast time by",
+    "spell_ascension_waves_of_time. Without a spell_cone row the core read the enum suffix as a 24 degree arc (+/-12),",
+    "so enemies in front of the caster but slightly to the side were missed, as #12342 reports. The spell_cone rows",
+    "restore 90 degrees (+/-45), as for Flames of Xoroth, Dreadwake, Dawnbreak, Spirit Glaive and Crush. The harness",
+    "places the dummy along +x, so the Chronomancer turns in place. CONTROL: facing 70 degrees away the dummy stays",
+    "put through both knockbacks. DISCRIMINATING: facing 30 degrees away (outside 12, inside 45) the dummy, 4 yd",
+    "away, is pushed at least 2 yd within 900 ms, before the 2 s repeat."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 530, "x": 7633.86, "y": -6810.22, "z": 79.5987, "o": 0},
+  "players": [
+    {"id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 4}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "chronomancer", "spell": 801277},
+    {"action": "teleport", "label": "Turn: CONTROL 70 degrees away from the dummy", "actor": "chronomancer",
+      "map": 530, "x": 7633.86, "y": -6810.22, "z": 79.5987, "o": 1.2217},
+    {"action": "wait", "ms": 1000},
+    {"action": "snapshot", "label": "Separation before the control cast", "actor": "chronomancer",
+      "metric": "distance", "target": "dummy", "save_as": "control_before"},
+    {"action": "cast", "label": "Cast: CONTROL 70 degrees away", "actor": "chronomancer", "spell": 801277},
+    {"action": "wait", "label": "Cover the cast-time knockback and the 2 s repeat", "ms": 2800},
+    {"action": "assert", "label": "CONTROL: the dummy outside the 45 degree half-angle is not knocked back",
+      "actor": "chronomancer", "metric": "distance", "target": "dummy", "relative_to": "control_before",
+      "max": 0.5},
+    {"action": "reset_cooldown", "actor": "chronomancer", "spell": 801277},
+    {"action": "teleport", "label": "Turn: DISCRIMINATING 30 degrees away from the dummy", "actor": "chronomancer",
+      "map": 530, "x": 7633.86, "y": -6810.22, "z": 79.5987, "o": 0.5236},
+    {"action": "wait", "ms": 1000},
+    {"action": "snapshot", "label": "Separation before the discriminating cast", "actor": "chronomancer",
+      "metric": "distance", "target": "dummy", "save_as": "before_cast"},
+    {"action": "cast", "label": "Cast: DISCRIMINATING 30 degrees away", "actor": "chronomancer", "spell": 801277},
+    {"action": "assert", "label": "DISCRIMINATING: the dummy 30 degrees off the facing is knocked back at once",
+      "actor": "chronomancer", "metric": "distance", "target": "dummy", "relative_to": "before_cast", "min": 2,
+      "within_ms": 900}
+  ]
+}

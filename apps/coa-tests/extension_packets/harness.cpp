@@ -110,6 +110,8 @@ struct ObjectMgr
         return itr != Items.end() ? &itr->second : nullptr;
     }
 
+    uint32 GetScriptId(char const*) const { return 0; }
+
     ItemLocale const* GetItemLocale(uint32 entry) const
     {
         auto const itr = Locales.find(entry);
@@ -120,6 +122,20 @@ struct ObjectMgr
 } objectMgr;
 
 ObjectMgr* sObjectMgr = &objectMgr;
+
+enum ServerConfigs
+{
+    CONFIG_MAX_PLAYER_LEVEL
+};
+
+struct World
+{
+    uint32 MaxPlayerLevel = 80;
+    std::string GetRealmName() const { return "unset world realm name"; }
+    uint32 getIntConfig(ServerConfigs) const { return MaxPlayerLevel; }
+} world;
+
+World* sWorld = &world;
 
 struct SpellInfo
 {
@@ -339,20 +355,6 @@ struct
     std::string Name = "Conquest of Azeroth";
 } realm;
 
-enum ServerConfigs
-{
-    CONFIG_MAX_PLAYER_LEVEL
-};
-
-struct World
-{
-    uint32 MaxPlayerLevel = 80;
-    std::string GetRealmName() const { return "unset world realm name"; }
-    uint32 getIntConfig(ServerConfigs) const { return MaxPlayerLevel; }
-} world;
-
-World* sWorld = &world;
-
 struct PlayerCollectionState
 {
     std::unordered_set<uint32> OwnedVanityItems;
@@ -413,6 +415,9 @@ bool MysticAltars = false;
 bool RealmOffersMysticAltars() { return MysticAltars; }
 }
 
+void RefreshAscensionLfgObjectiveDungeon(Player*) { }
+void SendAscensionClientDbcStream(WorldSession*) { }
+
 class AscensionCollectionService
 {
 public:
@@ -437,6 +442,11 @@ public:
     std::shared_ptr<PlayerCollectionState> GetState(Player*) { return State; }
     void RefreshCosmetics(Player*, PlayerCollectionState&) { }
     void SendServerPetAppearances(Player*) { }
+    void RefreshIncarnationSpell(Player*) { }
+    void HandleCollectItemAppearance(Player*, WorldPacket&) { }
+    static void SendSpecializationEquipmentSets(Player*) { }
+    static void HandleSpecializationEquipmentSet(Player*, WorldPacket&) { }
+    bool RefuseWithoutVanityRealmLevel(Player*, ItemTemplate const*) const { return false; }
 
     // ACTUAL_SEND_REALM_INFO
     // ACTUAL_SEND_GAME_MODE_STATE
@@ -1033,7 +1043,7 @@ void TestVanityDelivery()
     objectMgr.Items[110000].Spells[0].SpellId = 200001;
     objectMgr.Items[134985].Spells[0].SpellId = 200002;
     AscensionCollectionService& service = AscensionCollectionService::Instance();
-    for (uint32 itemId : {1001u, 1002u, 1003u, 1004u, 56925u, 110000u, 134985u})
+    for (uint32 itemId : {1001u, 1002u, 1003u, 1004u, 56925u, 56926u, 110000u, 134985u})
         service._vanityItems[itemId] = {};
     service._vanityItems[1003].LearnedSpell = 133;
 
@@ -1073,12 +1083,19 @@ void TestVanityDelivery()
         "Mystic altars are delivered when the realm offers them");
 
     VanitySetup const locked{false, true, false};
-    Delivery const refused = Deliver(locked, {DonationPointsRequest(1002), DonationPointsRequest(56925),
+    Delivery const refused = Deliver(locked, {DonationPointsRequest(1002),
         DonationPointsRequest(110000), DonationPointsRequest(424242), DonationPointsRequest(1004)});
     Delivery const full = Deliver({true, true, true}, {DonationPointsRequest(1001)});
-    Check(refused.Stored.empty() && refused.Learned.empty() && refused.Messages.size() == 5 &&
+    Check(refused.Stored.empty() && refused.Learned.empty() && refused.Messages.size() == 4 &&
         full.Stored.empty() && full.EquipErrors == 1 && refused.Reported.empty() && full.Reported.empty(),
-        "locked, sigil, unowned bank, unknown and templateless items and full bags are refused");
+        "locked, unowned bank, unknown and templateless items and full bags are refused");
+
+    Delivery const ownedSigil = Deliver(locked, {DonationPointsRequest(56925)});
+    Delivery const unownedSigil = Deliver({true, true, false}, {DonationPointsRequest(56926)});
+    Check(ownedSigil.Stored == std::vector<uint32>{56925} && ownedSigil.Messages.empty() &&
+        unownedSigil.Stored.empty() && unownedSigil.Reported.empty() &&
+        unownedSigil.Messages == std::vector<std::string>{"That sigil companion is not unlocked on this account."},
+        "sigil companions are delivered only when the account owns them");
 
     WorldPacket shortRequest(0x0523, 4);
     shortRequest << uint32(1001);

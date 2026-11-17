@@ -99,7 +99,7 @@ def main():
     remove_member = remove_member.replace('_ownerGuid', 'ownerGuid')
     remove_member = remove_member.replace('_pendingStageTransferMembers', 'pendingTransfers')
     code = code.replace('// ACTUAL_REMOVE_MEMBER', remove_member)
-    for marker, signature in functions.items():
+    for marker, signature in sorted(functions.items(), key=lambda item: len(item[0]), reverse=True):
         code = code.replace('// ACTUAL_' + marker, method(source, signature))
     damage = re.sub(r'\s+', '', method(source, 'void ManastormMgr::OnDamage('))
     protection = ('if(IsProtectedStagePortal(victim->ToCreature())||'

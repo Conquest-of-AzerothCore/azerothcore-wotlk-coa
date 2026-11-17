@@ -364,6 +364,8 @@ public:
     bool AscensionTargetAuraStateOnlyPrimary = false;
     bool AscensionInheritsResolvedAmount = false;
     bool AscensionFlatAfterWeaponPercent = false;
+    // Every SpellCustomAttributes bit is taken; a stealth aura with this set is kept when a hostile spell hits.
+    bool StealthSurvivesSpellHits = false;
     // Runtime-only opt-in for explicitly authored coefficients. Rank base
     // growth still uses the original SpellLevel and MaxLevel metadata.
     bool IgnoreSpellLevelPenalty = false;

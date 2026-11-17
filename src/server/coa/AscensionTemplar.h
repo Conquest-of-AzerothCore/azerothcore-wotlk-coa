@@ -21,7 +21,6 @@ struct TemplarState
     uint32 argent = 0;
     bool event = false;
     bool oath = false;
-    bool retribution = false;
 };
 Player* Owner(Unit const* unit);
 TemplarState& State(Player* player);
@@ -39,6 +38,7 @@ bool HasLibram(Player* player);
 bool Ability(SpellInfo const* info);
 bool Derived(SpellInfo const* info);
 int32 Amount(uint32 spell, uint8 effect = 0, Unit* caster = nullptr);
+float Radius(uint32 spell, uint8 effect = 0, Unit* caster = nullptr);
 void Cast(Unit* caster, Unit* target, uint32 spell);
 void Copy(Unit* caster, Unit* target, uint32 spell, uint32 amount);
 std::list<Unit*> Nearby(Unit* center, float range);

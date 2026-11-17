@@ -1,0 +1,357 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Bloodlord Mandokir casts Level Up!, yells and grows 20% on every kill, and shrinks back on reset",
+  "contract": [
+    "Round-8 tester (2026-11-15): Mandokir (11382) neither yelled \"Ding!\" nor showed the Level Up visual when he",
+    "killed a player, and did not grow. The script added the Level Up! dose (2118416) without a cast, so its",
+    "visual never played, and yelled only on streak kills 1, 3, 5, 7 and 10. User decision 2026-11-15: every kill",
+    "yells \"Ding!\" and grows him by stock Level Up's (24312) +20% scale; 2118416 itself has no scale effect.",
+    "A Mythic Mandokir kills two heroes in turn while a third stays alive; each kill is one cast, one dose,",
+    "one yell and +20% size, and an evade takes the doses and the growth away. The harness cannot read the yell's",
+    "text or see the visual."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "first",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "witness",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "first",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "second",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "witness",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "first",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "first",
+      "target": "second"
+    },
+    {
+      "action": "group",
+      "label": "The witness joins them and keeps the raid alive",
+      "actor": "first",
+      "target": "witness"
+    },
+    {
+      "action": "teleport",
+      "actor": "first",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "second",
+      "map": 309,
+      "x": -12327.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "witness",
+      "map": 309,
+      "x": -12328.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first hero is in Zul'Gurub on Mythic",
+      "actor": "first",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second hero is in the same Mythic Zul'Gurub",
+      "actor": "second",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the witness is in the same Mythic Zul'Gurub",
+      "actor": "witness",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "first",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "mandokir",
+      "metric": "unit_scale",
+      "save_as": "scale0"
+    },
+    {
+      "action": "attack",
+      "label": "The first hero engages Mandokir",
+      "actor": "first",
+      "target": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir fights",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second hero is in the fight too",
+      "actor": "second",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the aggro yell arrive",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "witness",
+      "metric": "monster_chat_count",
+      "save_as": "chats"
+    },
+    {
+      "action": "set_health",
+      "actor": "first",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir kills the first hero",
+      "actor": "first",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mandokir casts Level Up! for the kill (the old script added the dose without a cast)",
+      "actor": "witness",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118416,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: one kill, one Level Up! dose",
+      "actor": "mandokir",
+      "metric": "aura_stacks",
+      "spell": 2118416,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the kill makes Mandokir 20% larger",
+      "actor": "mandokir",
+      "metric": "unit_scale",
+      "ratio_to": "scale0",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir yells for the first kill",
+      "actor": "witness",
+      "metric": "monster_chat_count",
+      "relative_to": "chats",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "second",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir kills the second hero",
+      "actor": "second",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: two kills, two Level Up! doses",
+      "actor": "mandokir",
+      "metric": "aura_stacks",
+      "spell": 2118416,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second kill makes him 40% larger than he began",
+      "actor": "mandokir",
+      "metric": "unit_scale",
+      "ratio_to": "scale0",
+      "min": 1.39,
+      "max": 1.41
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mandokir yells for the second kill too (the old script yelled only on kills 1, 3, 5, 7 and 10)",
+      "actor": "witness",
+      "metric": "monster_chat_count",
+      "relative_to": "chats",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "teleport",
+      "label": "Take the first hero far from the arena",
+      "actor": "first",
+      "map": 309,
+      "x": -11515.8,
+      "y": -1275.48,
+      "z": 79.6621,
+      "o": 3.15905,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "label": "Take the second hero far from the arena",
+      "actor": "second",
+      "map": 309,
+      "x": -11516.8,
+      "y": -1275.48,
+      "z": 79.6621,
+      "o": 3.15905,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "label": "Take the witness far from the arena",
+      "actor": "witness",
+      "map": 309,
+      "x": -11517.8,
+      "y": -1275.48,
+      "z": 79.6621,
+      "o": 3.15905,
+      "ignore_access": true
+    },
+    {
+      "action": "command",
+      "actor": "first",
+      "command": ".combatstop"
+    },
+    {
+      "action": "command",
+      "actor": "second",
+      "command": ".combatstop"
+    },
+    {
+      "action": "command",
+      "actor": "witness",
+      "command": ".combatstop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir leaves combat",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the reset takes the growth away",
+      "actor": "mandokir",
+      "metric": "unit_scale",
+      "ratio_to": "scale0",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the reset takes the Level Up! doses away",
+      "actor": "mandokir",
+      "metric": "aura_stacks",
+      "spell": 2118416,
+      "equals": 0
+    }
+  ]
+}

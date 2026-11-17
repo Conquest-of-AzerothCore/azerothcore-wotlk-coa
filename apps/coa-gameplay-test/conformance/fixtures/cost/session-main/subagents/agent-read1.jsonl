@@ -1,0 +1,2 @@
+{"type": "user", "timestamp": "2026-01-02T13:00:00Z", "message": {"role": "user", "content": "You are an independent reviewer of the diff"}}
+{"type": "assistant", "timestamp": "2026-01-02T13:06:00Z", "message": {"id": "r1", "model": "model-x", "role": "assistant", "content": [], "usage": {"input_tokens": 3, "cache_read_input_tokens": 40, "cache_creation_input_tokens": 0, "output_tokens": 5}}}

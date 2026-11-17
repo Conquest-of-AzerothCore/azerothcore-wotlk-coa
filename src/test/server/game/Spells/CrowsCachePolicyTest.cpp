@@ -1,13 +1,14 @@
 #include "AscensionCrowsCachePolicy.h"
 #include <gtest/gtest.h>
 
-TEST(CrowsCache, OnlyLivingHighRiskLevelSixtyPlayersCanClaim)
+TEST(CrowsCache, OnlyLivingHighRiskMercenariesAtLevelSixtyCanClaim)
 {
-    EXPECT_TRUE(CrowsCache::Eligible(60, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(59, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(61, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(60, false, true));
-    EXPECT_FALSE(CrowsCache::Eligible(60, true, false));
+    EXPECT_TRUE(CrowsCache::Eligible(60, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(59, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(61, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, false, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, true, false, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, true, true, false));
 }
 
 TEST(CrowsCache, OriginalChestRequiresCompletedCastButDeathDropIsInstant)

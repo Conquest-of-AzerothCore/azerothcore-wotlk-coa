@@ -1,0 +1,1244 @@
+{
+  "schema": 1,
+  "name": "Norgannon's Wrath counts its target among its ten enemies",
+  "contract": "Norgannon's Wrath 524739 leaps and, 1500 ms later, casts its blast 524740 at the target: 'to up to $524740i enemies within 5 yds' (MaxAffectedTargets 10, Effect[0] school damage and Effect[1] trigger of 520842 on TARGET_UNIT_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY, 5 yd). Owner ruling, status-5 Q-ext2-2 option (a): N in all, the target counts (ADR 0294). The level 60 Templar casts it at a primary dummy with 11 more level 60 dummies within 5 yd of it, 16 times: each blast strikes exactly 10 enemies, the primary among them (before the fix the area cap kept 10 of the 12 candidates and added the primary when it was left out, 10 or 11 per blast). The harness admits twelve creatures, so the below-cap control is conformance entry 524739 fixed_count cap_control (nine more dummies, all struck).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.0,
+      "stationary": true
+    },
+    {
+      "id": "extra1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.2,
+      "stationary": true
+    },
+    {
+      "id": "extra2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.4,
+      "stationary": true
+    },
+    {
+      "id": "extra3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.6,
+      "stationary": true
+    },
+    {
+      "id": "extra4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.8,
+      "stationary": true
+    },
+    {
+      "id": "extra5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.0,
+      "stationary": true
+    },
+    {
+      "id": "extra6",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.2,
+      "stationary": true
+    },
+    {
+      "id": "extra7",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.4,
+      "stationary": true
+    },
+    {
+      "id": "extra8",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.6,
+      "stationary": true
+    },
+    {
+      "id": "extra9",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.8,
+      "stationary": true
+    },
+    {
+      "id": "extra10",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5.0,
+      "stationary": true
+    },
+    {
+      "id": "extra11",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5.2,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "assert",
+      "label": "extra1 stands within 5 yd of the primary",
+      "actor": "extra1",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra2 stands within 5 yd of the primary",
+      "actor": "extra2",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra3 stands within 5 yd of the primary",
+      "actor": "extra3",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra4 stands within 5 yd of the primary",
+      "actor": "extra4",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra5 stands within 5 yd of the primary",
+      "actor": "extra5",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra6 stands within 5 yd of the primary",
+      "actor": "extra6",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra7 stands within 5 yd of the primary",
+      "actor": "extra7",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra8 stands within 5 yd of the primary",
+      "actor": "extra8",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra9 stands within 5 yd of the primary",
+      "actor": "extra9",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra10 stands within 5 yd of the primary",
+      "actor": "extra10",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra11 stands within 5 yd of the primary",
+      "actor": "extra11",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_1"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 1: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 1 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_1",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 1 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_1",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_2"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 2: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 2 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_2",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 2 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_2",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_3"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 3: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 3 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_3",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 3 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_3",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_4"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 4: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 4 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_4",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 4 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_4",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_5"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 5: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 5 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_5",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 5 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_5",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_6"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 6: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 6 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_6",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 6 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_6",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_7"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 7: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 7 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_7",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 7 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_7",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_8"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 8: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 8 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_8",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 8 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_8",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_9"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 9: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 9 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_9",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 9 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_9",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_10"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 10: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 10 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_10",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 10 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_10",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_11"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 11: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 11 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_11",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 11 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_11",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_12"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 12: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 12 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_12",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 12 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_12",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_13"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 13: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 13 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_13",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 13 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_13",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_14"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 14: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 14 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_14",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 14 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_14",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_15"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 15: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 15 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_15",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 15 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_15",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "save_as": "all_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "save_as": "primary_16"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 16: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "blast 16 strikes 10 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "relative_to": "all_16",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "blast 16 strikes the primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "relative_to": "primary_16",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "extra1 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra1",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra2 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra2",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra3 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra3",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra4 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra4",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra5 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra5",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra6 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra6",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra7 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra7",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra8 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra8",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra9 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra9",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra10 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra10",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "label": "extra11 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra11",
+      "min": 0,
+      "max": 16
+    }
+  ]
+}

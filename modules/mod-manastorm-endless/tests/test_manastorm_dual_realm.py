@@ -27,7 +27,7 @@ class DualRealmTests(unittest.TestCase):
 using uint8=std::uint8_t;
 using uint32=std::uint32_t;
 constexpr uint32 POST_BC_EXP_FLAG=1, REALM_TYPE_NORMAL=0, REALM_FLAG_OFFLINE=2;
-struct RealmCardStyle {uint32 Expansion,GameMode; std::string Image;};
+struct RealmCardStyle {uint32 Expansion,GameMode; std::string Image; uint32 DescriptionSpell;};
 struct Config {
     std::map<std::string,std::string> values;
     template<class T> T GetOption(std::string const& key,T fallback,bool=true) {

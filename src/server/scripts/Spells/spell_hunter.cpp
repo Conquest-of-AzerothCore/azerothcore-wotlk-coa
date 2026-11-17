@@ -143,7 +143,7 @@ class spell_hun_wyvern_sting : public AuraScript
     void HandleEffectRemove(AuraEffect const*  /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         if (Unit* caster = GetCaster())
-            caster->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRank(SPELL_HUNTER_WYVERN_STING_DOT, GetSpellInfo()->GetRank()), true);
+            caster->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRankFor(SPELL_HUNTER_WYVERN_STING_DOT, GetId()), true);
     }
 
     void Register() override

@@ -9,27 +9,82 @@
 #include "GridNotifiersImpl.h"
 #include <cmath>
 #include "MotionMaster.h"
+#include "MoveSplineInit.h"
+#include "ObjectAccessor.h"
+#include "WaypointMgr.h"
 #include "Opcodes.h"
-#include "WorldPacket.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
 #include "Log.h"
+#include "GameTime.h"
 #include "SpellAuras.h"
+#include "DBCStores.h"
+#include "DatabaseEnv.h"
 #include "SpellMgr.h"
 #include "Player.h"
 #include "UnitScript.h"
 #include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <unordered_map>
 
 namespace
 {
+    constexpr uint32 TorrentPath = 4200001;
+    constexpr uint32 NpcTorrentWalker = 21252;
+    constexpr float TorrentWalkerSpeed = 7.0f;
+    constexpr uint32 TorrentLaps = 3;
+
     class spell_coa_torrent_spin : public AuraScript
     {
         PrepareAuraScript(spell_coa_torrent_spin);
 
         ReactStates _react = REACT_AGGRESSIVE;
-        float _start = 0.0f;
-        uint32 _ticks = 0;
+        ObjectGuid _walker;
+
+        static G3D::Vector3 Ground(Creature* boss, WaypointNode const& node)
+        {
+            float const ground = boss->GetMapHeight(node.X, node.Y, node.Z + 2.0f);
+            return { node.X, node.Y, ground > INVALID_HEIGHT ? ground : node.Z };
+        }
+
+        Creature* SummonWalker(Creature* boss)
+        {
+            WaypointPath const* path = sWaypointMgr->GetPath(TorrentPath);
+            if (!path || path->Nodes.size() < 2)
+                return nullptr;
+            std::vector<WaypointNode> const& nodes = path->Nodes;
+            size_t const first = urand(0, nodes.size() - 1);
+            G3D::Vector3 const start = Ground(boss, nodes[first]);
+            Creature* walker = boss->SummonCreature(NpcTorrentWalker, start.x, start.y, start.z, 0.0f,
+                TEMPSUMMON_TIMED_DESPAWN, GetMaxDuration() + 2000);
+            if (!walker)
+                return nullptr;
+            walker->SetReactState(REACT_PASSIVE);
+            Movement::PointsArray points;
+            points.push_back(start);
+            for (size_t step = 1; step <= nodes.size() * TorrentLaps; ++step)
+            {
+                G3D::Vector3 const next = Ground(boss, nodes[(first + step) % nodes.size()]);
+                if ((next - points.back()).length() >= 0.5f)
+                    points.push_back(next);
+            }
+            Movement::MoveSplineInit init(walker);
+            init.MovebyPath(points);
+            init.SetVelocity(TorrentWalkerSpeed);
+            init.Launch();
+            return walker;
+        }
+
+        void Face(Creature* boss)
+        {
+            Creature* walker = ObjectAccessor::GetCreature(*boss, _walker);
+            if (!walker)
+                return;
+            boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+            boss->SetOrientation(boss->GetAngle(walker));
+        }
 
         void Start(AuraEffect const*, AuraEffectHandleModes)
         {
@@ -37,43 +92,41 @@ namespace
             if (!boss)
                 return;
             _react = boss->GetReactState();
-            _start = boss->GetOrientation();
-            _ticks = 0;
             boss->SetReactState(REACT_PASSIVE);
             boss->AttackStop();
-            boss->SetTarget();
             boss->SetUnitFlag(UNIT_FLAG_PACIFIED);
             boss->GetMotionMaster()->Clear();
             boss->StopMoving();
             boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
             boss->SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, ObjectGuid::Empty);
+            _walker.Clear();
+            if (Creature* walker = SummonWalker(boss))
+            {
+                _walker = walker->GetGUID();
+                boss->SetTarget(_walker);
+                boss->SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, _walker);
+                boss->SetFacingToObject(walker);
+                Face(boss);
+            }
+            else
+                boss->SetTarget();
         }
 
-        static void SendFacing(Creature* boss)
+        void Turn(AuraEffect const*)
         {
-            WorldPacket data(MSG_MOVE_SET_FACING, 64);
-            data << boss->GetPackGUID();
-            boss->BuildMovementPacket(&data);
-            boss->SendMessageToSet(&data, false);
-        }
-
-        void Turn(AuraEffect const* effect)
-        {
-            Creature* boss = GetTarget()->ToCreature();
-            if (!boss || !GetMaxDuration())
-                return;
-            ++_ticks;
-            float turned = float(_ticks * effect->GetAmplitude()) / float(GetMaxDuration()) * float(2 * M_PI);
-            float angle = Position::NormalizeOrientation(_start - turned);
-            boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
-            boss->SetOrientation(angle);
-            SendFacing(boss);
+            if (Creature* boss = GetTarget()->ToCreature())
+                Face(boss);
         }
 
         void Stop(AuraEffect const*, AuraEffectHandleModes)
         {
             Creature* boss = GetTarget()->ToCreature();
-            if (!boss || !boss->IsAlive())
+            if (!boss)
+                return;
+            if (Creature* walker = ObjectAccessor::GetCreature(*boss, _walker))
+                walker->DespawnOrUnsummon();
+            _walker.Clear();
+            if (!boss->IsAlive())
                 return;
             boss->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
             boss->SetReactState(_react);
@@ -90,6 +143,46 @@ namespace
                 SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             AfterEffectRemove += AuraEffectRemoveFn(spell_coa_torrent_spin::Stop, EFFECT_1,
                 SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    class spell_coa_torrent_knockback : public SpellScript
+    {
+        PrepareSpellScript(spell_coa_torrent_knockback);
+
+        static constexpr float SpeedXY = 10.0f;
+        static constexpr float SpeedZ = 5.0f;
+        static constexpr Milliseconds Shield = 500ms;
+
+        static bool Shielded(ObjectGuid guid)
+        {
+            static std::mutex lock;
+            static std::unordered_map<ObjectGuid, Milliseconds> last;
+            Milliseconds const now = GameTime::GetGameTimeMS();
+            std::lock_guard<std::mutex> guard(lock);
+            auto [it, fresh] = last.try_emplace(guid, now);
+            if (!fresh && now - it->second < Shield)
+                return true;
+            it->second = now;
+            return false;
+        }
+
+        void Knock(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target || !target->IsPlayer() || target->HasUnitState(UNIT_STATE_ROOT)
+                || Shielded(target->GetGUID()))
+                return;
+            if (target->IsNonMeleeSpellCast(true))
+                target->InterruptNonMeleeSpells(true);
+            target->KnockbackFrom(caster->GetPositionX(), caster->GetPositionY(), SpeedXY, SpeedZ);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_coa_torrent_knockback::Knock, EFFECT_1, SPELL_EFFECT_KNOCK_BACK);
         }
     };
 
@@ -416,6 +509,52 @@ namespace
     };
 }
 
+class CoADungeonBossSpellReach final : public GlobalScript
+{
+public:
+    CoADungeonBossSpellReach() : GlobalScript("CoADungeonBossSpellReach", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (!info)
+            return;
+        if (!_loaded)
+            Load();
+        auto const itr = _reach.find(info->Id);
+        if (itr == _reach.end())
+            return;
+        if (itr->second.rangeIndex)
+            if (SpellRangeEntry const* range = sSpellRangeStore.LookupEntry(itr->second.rangeIndex))
+                info->RangeEntry = range;
+        if (itr->second.lineOfSight)
+            info->AttributesEx2 &= ~SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    }
+
+private:
+    struct Reach
+    {
+        uint32 rangeIndex = 0;
+        bool lineOfSight = false;
+    };
+
+    void Load()
+    {
+        _loaded = true;
+        if (PreparedQueryResult result = WorldDatabase.Query(WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DUNGEON_SPELL_REACH)))
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                _reach[fields[0].Get<uint32>()] = { fields[1].Get<uint32>(), fields[2].Get<uint8>() != 0 };
+            } while (result->NextRow());
+        }
+        LOG_INFO("server.loading", ">> Loaded {} CoA dungeon spell reach corrections", _reach.size());
+    }
+
+    bool _loaded = false;
+    std::unordered_map<uint32, Reach> _reach;
+};
+
 class spell_coa_summon_hearty_heart : public SpellScript
 {
     PrepareSpellScript(spell_coa_summon_hearty_heart);
@@ -492,6 +631,7 @@ void AddSC_CoADungeonBossSpells()
     RegisterSpellScript(spell_coa_summon_hearty_heart);
     RegisterSpellScript(spell_coa_massive_fire_nova);
     RegisterSpellScript(spell_coa_torrent_spin);
+    RegisterSpellScript(spell_coa_torrent_knockback);
     RegisterSpellScript(spell_coa_bouncing_saw_blade);
     RegisterSpellScript(spell_coa_skum_overrun);
     RegisterSpellScript(spell_coa_divine_retribution);
@@ -501,4 +641,5 @@ void AddSC_CoADungeonBossSpells()
     new CoATargorrBerserkerLeapMarker();
     RegisterSpellScript(spell_coa_mothers_milk_spray);
     RegisterSpellScript(spell_coa_mothers_milk_debuff);
+    new CoADungeonBossSpellReach();
 }

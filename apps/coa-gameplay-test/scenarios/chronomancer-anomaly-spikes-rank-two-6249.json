@@ -3,8 +3,8 @@
   "name": "chronomancer-anomaly-spikes-rank-two-6249",
   "contract": [
     "CharacterAdvancement 6156 upgrades Anomaly Spikes from 503825 (8%) to 504886 (15%). The learned second rank",
-    "must launch real 503826 spikes from Unmake periodic damage at its authored chance. The bystander cannot be",
-    "hit by Unmake, so its health loss proves the spike splash. Eighty-four ticks make a missed proc probability",
+    "must launch real 503826 spikes from Unmake periodic damage at its authored chance; each spike's own",
+    "503826 hit on the primary dummy proves the launch. Eighty-four ticks make a missed proc probability",
     "below one in a million at 15%. Learning Chromatic Shard also requires a real triggered spike to grant its",
     "cast-time stack."
   ],
@@ -25,13 +25,6 @@
       "entry": 36,
       "health": 1000000,
       "distance": 3
-    },
-    {
-      "id": "bystander",
-      "owner": "chronomancer",
-      "entry": 36,
-      "health": 1000000,
-      "distance": 5
     }
   ],
   "steps": [
@@ -54,13 +47,6 @@
       "action": "learn",
       "actor": "chronomancer",
       "spell": 804418
-    },
-    {
-      "action": "snapshot",
-      "label": "Bystander health before any periodic damage",
-      "actor": "bystander",
-      "metric": "health",
-      "save_as": "bystander_start"
     },
     {
       "action": "set_power",
@@ -426,11 +412,12 @@
     },
     {
       "action": "assert",
-      "label": "Anomaly Spike's splash reached the bystander, so the periodic proc fired",
-      "actor": "bystander",
-      "metric": "health",
-      "relative_to": "bystander_start",
-      "max": -1
+      "label": "An Anomaly Spike struck the primary dummy, so the periodic proc fired",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "target": "primary",
+      "min": 1
     },
     {
       "action": "assert",

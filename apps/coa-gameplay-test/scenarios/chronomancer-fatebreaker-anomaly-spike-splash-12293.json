@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Fatebreaker splashes 15% of Anomaly Spike damage, and only with the talent (#12293, #12252)",
+  "contract": "Fatebreaker 503835 reads \"Damage dealt by Anomaly Spikes now deals an additional $s1% of its damage dealt to the target and up to $504725i enemies within $504725a1 yds of them as Chromatic Damage\", $s1 = EffectBasePoints 14 + DieSides 1 = 15. Its only effect is aura 354 (SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT) with EffectTriggerSpell 504725, and the core acts on aura 354 only for eight hard-coded ids, so the talent did nothing. Meanwhile Anomaly Spike 503826 effect 1 is SPELL_EFFECT_TRIGGER_SPELL 504725 for every caster, and 504725 is SPELL_EFFECT_SCHOOL_DAMAGE with EffectBasePoints 0 + DieSides 1 = 1 on TARGET_DEST_TARGET_ENEMY / TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 8 = 5 yd, MaxTargets 5, so every spike splashed a 1-damage Fatebreaker even without the talent. 504725 already carries SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS and SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS, i.e. a resolved-amount carrier. The golem stands 10 yd from the Chronomancer and the bystander 12 yd, inside the 5 yd area centred on the golem. Control: an untalented spike casts no 504725. With the talent, the next spike must hit the bystander with 504725 for 15% of the damage the spike dealt to the golem (0.14-0.16 for integer rounding), and the same area includes the golem. Before the fix the control sees one 504725 hit and the talented hit is 1 damage.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 10 },
+    { "id": "bystander", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Increased Spell Penetration 68 and 38 remove the level-80 targets' 80 monster resistance, so no hit is partially resisted", "actor": "chronomancer", "spell": 56399 },
+    { "action": "learn", "actor": "chronomancer", "spell": 26175 },
+    { "action": "learn", "actor": "chronomancer", "spell": 503826 },
+    {
+      "action": "cast", "label": "Control Anomaly Spike without Fatebreaker", "actor": "chronomancer",
+      "spell": 503826, "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the control spike landed", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 503826, "target": "golem", "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let any splash land", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING (#12252): an untalented Anomaly Spike casts no Fatebreaker",
+      "actor": "chronomancer", "metric": "spell_damage_count", "spell": 504725, "equals": 0
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 503835 },
+    {
+      "action": "assert", "label": "SETUP: Fatebreaker is active on the Chronomancer", "actor": "chronomancer",
+      "metric": "aura", "spell": 503835, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "chronomancer", "metric": "spell_damage_total", "spell": 503826, "target": "golem",
+      "save_as": "spike_total_before"
+    },
+    {
+      "action": "cast", "label": "Anomaly Spike with Fatebreaker", "actor": "chronomancer", "spell": 503826,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the second spike landed", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 503826, "target": "golem", "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "chronomancer", "metric": "spell_damage_total", "spell": 503826, "target": "golem",
+      "relative_to": "spike_total_before", "save_as": "spike_hit"
+    },
+    {
+      "action": "assert", "label": "Fatebreaker splashes the bystander within 5 yd of the struck golem",
+      "actor": "chronomancer", "metric": "spell_damage_count", "spell": 504725, "target": "bystander", "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING (#12293): the splash is 15% of the damage the spike dealt, not 1",
+      "actor": "chronomancer", "metric": "spell_damage_total", "spell": 504725, "target": "bystander",
+      "ratio_to": "spike_hit", "min": 0.14, "max": 0.16
+    },
+    {
+      "action": "assert", "label": "The area centred on the struck golem includes it", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 504725, "target": "golem", "equals": 1, "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Tinker: Blazewrought Titan at 15 stacks empowers the next direct hits (#12202)",
+  "contract": [
+    "Talent 681001: Living Flame (504521) damage inside the Mechsuit grants a 681306 stack. The stacks never",
+    "did anything at their maximum (the report). The user approved on 2026-11-14 keeping the stacks and",
+    "applying 681311 at 15 stacks; while it lasts, each direct damaging hit casts 681308 for its percentage of",
+    "the hit on the struck target and Sunder 681307, which chains to one more enemy through its DBC chain.",
+    "Periodic damage and the two helpers themselves do not trigger it. The Living Flame tick is supplied as",
+    "a DoT fixture owned by the Tinker; 14 stacks are a fixture so a single tick reaches the maximum."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 10
+    },
+    {
+      "id": "neighbor",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "add_item", "label": "Fixture: ranged gun", "actor": "tinker", "item": 450265},
+    {"action": "equip", "label": "Equip the gun", "actor": "tinker", "item": 450265, "slot": 17},
+    {"action": "assert", "actor": "tinker", "metric": "equipped_item", "slot": 17, "equals": 450265},
+    {"action": "learn", "actor": "tinker", "spell": 92141},
+    {"action": "learn", "actor": "tinker", "spell": 801384},
+    {"action": "learn", "actor": "tinker", "spell": 805372},
+    {"action": "learn", "label": "The Blazewrought Titan talent", "actor": "tinker", "spell": 681001},
+    {"action": "assert", "label": "SETUP: the talent aura is on", "actor": "tinker", "metric": "aura", "spell": 681001, "min": 1, "within_ms": 2000},
+    {"action": "set_aura", "actor": "tinker", "spell": 801816, "stacks": 100},
+    {"action": "cast", "actor": "tinker", "spell": 801384},
+    {"action": "assert", "label": "Mechsuit is on", "actor": "tinker", "metric": "aura", "spell": 803451, "equals": 1, "within_ms": 2000},
+    {"action": "set_aura", "label": "Fixture: 14 Blazewrought Titan stacks", "actor": "tinker", "spell": 681306, "stacks": 14},
+    {"action": "assert", "label": "SETUP: 14 stacks", "actor": "tinker", "metric": "aura_stacks", "spell": 681306, "equals": 14},
+    {"action": "set_aura", "label": "Fixture: the Tinker's Living Flame burns the target", "actor": "tinker", "target": "target", "caster": "tinker", "spell": 504521, "stacks": 1},
+    {"action": "assert", "label": "A Living Flame tick lands", "actor": "tinker", "metric": "spell_damage_total", "spell": 504521, "target": "target", "min": 1, "within_ms": 4000},
+    {"action": "assert", "label": "The tick reaches 15 stacks", "actor": "tinker", "metric": "aura_stacks", "spell": 681306, "equals": 15, "within_ms": 1000},
+    {"action": "assert", "label": "DISCRIMINATING: the maximum stacks empower the Tinker", "actor": "tinker", "metric": "aura", "spell": 681311, "min": 1, "within_ms": 1000},
+    {"action": "snapshot", "actor": "tinker", "metric": "spell_damage_count", "spell": 681308, "target": "target", "save_as": "empowered_before"},
+    {"action": "cast", "actor": "tinker", "spell": 805372, "target": "target"},
+    {"action": "assert", "label": "Laser Beam hits its target", "actor": "tinker", "metric": "spell_damage_total", "spell": 805372, "target": "target", "min": 1, "within_ms": 3000},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the direct hit deals the empowered extra damage to its target",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 681308,
+      "target": "target",
+      "relative_to": "empowered_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {"action": "assert", "label": "DISCRIMINATING: Sunder lands on the struck target", "actor": "target", "metric": "aura", "spell": 681307, "min": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Sunder chains to the nearby enemy", "actor": "neighbor", "metric": "aura", "spell": 681307, "min": 1, "within_ms": 2000}
+  ]
+}

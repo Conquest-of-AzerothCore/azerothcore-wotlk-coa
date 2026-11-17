@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Reaper Tormentor: spending Soul Infusion shortens Tormented Souls by 3 seconds (#12008)",
+  "contract": "Tormentor 92147: consuming Soul Infusion reduces the cooldown of Tormented Souls 500483 by $504558s1 (-3000 ms, ASCENSION_MODIFY_COOLDOWN on 500483). Without the talent the same spend leaves the cooldown running normally.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper", "race": 2, "class": 30, "level": 60,
+      "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "reaper", "entry": 36, "level": 2, "distance": 3, "health": 1000000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let actor state settle", "ms": 5000},
+    {"action": "learn", "actor": "reaper", "spell": 500483},
+    {"action": "learn", "actor": "reaper", "spell": 502668},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "cast", "label": "Cast Tormented Souls", "actor": "reaper", "spell": 500483},
+    {
+      "action": "assert", "label": "Tormented Souls is on cooldown", "actor": "reaper", "metric": "cooldown_ms",
+      "spell": 500483, "min": 10000, "within_ms": 1000
+    },
+    {"action": "snapshot", "actor": "reaper", "metric": "cooldown_ms", "spell": 500483, "save_as": "cd_control"},
+    {"action": "set_power", "actor": "reaper", "power": 6, "value": 1000},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "cast", "label": "Control: spend Soul Infusion without Tormentor", "actor": "reaper", "spell": 502668,
+      "target": "enemy"},
+    {
+      "action": "assert", "label": "Control spend consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Control: the cooldown is not shortened", "actor": "reaper", "metric": "cooldown_ms",
+      "spell": 500483, "relative_to": "cd_control", "min": -2000
+    },
+    {"action": "learn", "actor": "reaper", "spell": 92147},
+    {
+      "action": "assert", "label": "Tormentor is active", "actor": "reaper", "metric": "aura", "spell": 92147,
+      "equals": 1, "within_ms": 3000
+    },
+    {"action": "reset_cooldown", "actor": "reaper", "spell": 502668},
+    {"action": "wait", "ms": 1500},
+    {"action": "snapshot", "actor": "reaper", "metric": "cooldown_ms", "spell": 500483, "save_as": "cd_talent"},
+    {"action": "set_power", "actor": "reaper", "power": 6, "value": 1000},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "cast", "label": "Spend Soul Infusion with Tormentor", "actor": "reaper", "spell": 502668,
+      "target": "enemy"},
+    {
+      "action": "assert", "label": "Spend consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Tormentor takes 3 seconds off Tormented Souls", "actor": "reaper",
+      "metric": "cooldown_ms", "spell": 500483, "relative_to": "cd_talent", "min": -4000, "max": -3000
+    }
+  ]
+}
