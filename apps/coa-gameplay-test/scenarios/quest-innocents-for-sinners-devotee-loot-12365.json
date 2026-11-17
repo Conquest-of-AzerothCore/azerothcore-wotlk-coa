@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Voodoo Devotees in Innocents for Sinners drop loot (COA-12365)",
+  "contract": "Voodoo Devotee 161807, the kill target of Innocents for Sinners 1660023 in the Valley of Trials, had no loot table. It now rolls the loot of the Valley's Yarrog Baneshadow 3183 without his quest item: the level 1-5 food reference 20015 on 30% of kills, Tough Jerky 117 at 67% of those (about 20%), and Yarrog's quest item Burning Blade Medallion 4859 never. Before #12365 no fill held any item, so the Tough Jerky rate was 0.",
+  "players": [
+    { "id": "a", "race": 2, "class": 1, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: about 20% of Voodoo Devotee kills yield Tough Jerky, not none",
+      "actor": "a",
+      "metric": "creature_loot_item_rate",
+      "entry": 161807,
+      "item": 117,
+      "min": 15,
+      "max": 25
+    },
+    {
+      "action": "assert",
+      "label": "Yarrog's quest item does not drop from Voodoo Devotees",
+      "actor": "a",
+      "metric": "creature_loot_item_rate",
+      "entry": 161807,
+      "item": 4859,
+      "min": 0,
+      "max": 0
+    }
+  ]
+}

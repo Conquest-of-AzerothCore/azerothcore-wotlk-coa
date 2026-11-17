@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Seven Years of Bad Luck: the Spada majordomo Aldia Crayon wears a male display (#12324)",
+  "contract": "#12324 reported Aldia Crayon 162802, giver and ender of 1660057 'Seven Years of Bad Luck', drawn as a woman while the quest texts call him a man (questcache WDB: 'Return to the butler.', offer reward 'As he speaks...'). Display 8632 is a human female (CreatureDisplayInfoExtra 5905, sex 1; creature_model_info Gender 1). rev_20261117_12324 moves him to 11591, the human male servant display of Servant of Weldon Barov 11636 (model 49, extra 8185, sex 0; creature_model_info Gender 0). Expected: a spawned Aldia Crayon carries display 11591. Client rendering is not tested.",
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -9275.25, "y": 469.16, "z": 89.87, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 10}
+  ],
+  "creatures": [
+    {"id": "aldia", "owner": "hero", "entry": 162802, "distance": 3, "faction": 12}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "DISCRIMINATING: Aldia Crayon wears the male servant display 11591, not the female 8632",
+     "action": "assert", "actor": "aldia", "metric": "display_id", "equals": 11591, "within_ms": 3000}
+  ]
+}
