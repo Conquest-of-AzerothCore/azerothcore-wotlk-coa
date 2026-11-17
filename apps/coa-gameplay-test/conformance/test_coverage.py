@@ -16,7 +16,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         LEARNED_CONTRAST)
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
-from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
+from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, CONTRAST_PROOF, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
                       METRIC_EVIDENCE, NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption,
                       KIND_ROW_OVERRIDES, EvidenceError, acting, kind_row_overrides,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
@@ -390,6 +390,86 @@ class EvidenceStatusTest(unittest.TestCase):
             with self.subTest(message=message), self.assertRaisesRegex(EvidenceError, message):
                 clause_coverage([clause], [], BUILD)
 
+    def promised(self, **changes):
+        source = claim('and your critical strike chance against them by $s1%,', '1 behaviour_metric_delta crit',
+                       spell=1)
+        ramp = {**claim('increasing by $s1% every $t1 sec.', '1 behaviour_metric_delta ramp', spell=1), **changes}
+        verdicts = [judged(label, BEHAVIOUR_METRIC_DELTA, 'melee_crit_chance_against', contrast=LEARNED_CONTRAST)
+                    for label in ('1 behaviour_metric_delta crit', '1 behaviour_metric_delta ramp')]
+        return evidence_of([source, ramp], verdicts)[0]
+
+    def test_a_promise_source_lends_its_words_to_a_later_claim_of_the_spell(self):
+        self.assertEqual(self.promised(), [BEHAVIOUR, DATA])
+        named = 'and your critical strike chance against them by $s1%,'
+        self.assertEqual(self.promised(promise_of=named), [BEHAVIOUR, BEHAVIOUR])
+
+    def test_a_promise_source_without_the_promised_words_changes_nothing(self):
+        clauses = [claim('Mark an enemy for $d.', 'l0', spell=1),
+                   {**claim('increasing by $s1% every $t1 sec.', '1 behaviour_metric_delta ramp', spell=1),
+                    'promise_of': 'Mark an enemy for $d.'}]
+        verdicts = [judged('l0', BEHAVIOUR_METRIC_DELTA, 'melee_crit_chance_against', contrast=LEARNED_CONTRAST),
+                    judged('1 behaviour_metric_delta ramp', BEHAVIOUR_METRIC_DELTA, 'melee_crit_chance_against',
+                           contrast=LEARNED_CONTRAST)]
+        self.assertEqual(evidence_of(clauses, verdicts)[0][1], DATA)
+
+    def test_malformed_promise_sources_are_refused(self):
+        source = claim('and your critical strike chance against them by $s1%,', 'l0', spell=1)
+        cases = {'no earlier clause': [{**claim('increasing by $s1%.', 'l1', spell=1),
+                                        'promise_of': source['clause']}, source],
+                 'other spell': [source, {**claim('increasing by $s1%.', 'l1', spell=2),
+                                          'promise_of': source['clause']}],
+                 'not a claim entry': [source, {**claim('increasing by $s1%.', 'l1', spell=1), 'kind': 'no_claim',
+                                                'promise_of': source['clause']}],
+                 'not text': [source, {**claim('increasing by $s1%.', 'l1', spell=1), 'promise_of': 1}]}
+        for case, clauses in cases.items():
+            with self.subTest(case=case), self.assertRaises(EvidenceError):
+                clause_coverage(clauses, [], BUILD)
+
+    def test_a_displacement_from_a_point_is_a_state_that_a_range_or_leap_promises(self):
+        verdicts = [judged('1 behaviour_metric_delta vault', BEHAVIOUR_METRIC_DELTA, 'point_distance_2d',
+                           contrast=LEARNED_CONTRAST)]
+        self.assertEqual(METRIC_EVIDENCE['point_distance_2d'], STATE)
+        promised = claim('Increases the base range of Vault by $s1 yds.', '1 behaviour_metric_delta vault')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        unpromised = claim('Vault now also removes snares.', '1 behaviour_metric_delta vault')
+        self.assertEqual(evidence_of([unpromised], verdicts)[0], [DATA])
+
+    def test_a_detection_read_is_a_state_that_seen_or_stealth_promises(self):
+        label = '1 behaviour_metric_delta witchblood_seen'
+        self.assertEqual(METRIC_EVIDENCE['can_detect'], STATE)
+        promised = claim('Enemies affected by Witchblood Fever can be seen while stealthed.', label)
+        unpromised = claim('Witchblood Fever increases Magic damage taken.', label)
+        learned = [judged(label, BEHAVIOUR_METRIC_DELTA, 'can_detect', contrast=LEARNED_CONTRAST)]
+        self.assertEqual(evidence_of([promised], learned)[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([unpromised], learned)[0], [DATA])
+        self.assertEqual(evidence_of([promised], [judged(label, BEHAVIOUR_METRIC_DELTA, 'can_detect')])[0], [DATA])
+        self.assertEqual(evidence_of([promised], [judged(label, BEHAVIOUR_METRIC_DELTA, 'can_detect',
+                                                        contrast=LEARNED_CONTRAST, status='alert')])[0],
+                         [UNPROVEN])
+
+    def test_a_spell_replacement_read_is_a_state_that_the_last_tonic_promises(self):
+        label = '1 behaviour_metric_delta last_witchblood'
+        metric = 'temporary_spell_replacement'
+        self.assertEqual(METRIC_EVIDENCE[metric], STATE)
+        promised = claim('based on the last Tonic consumed', label)
+        unpromised = claim('and increase your haste by $s2% for $d.', label)
+        learned = [judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)]
+        self.assertEqual(evidence_of([promised], learned)[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Drinking a Tonic will transform your Dawn Blade', label)], learned)[0],
+                         [BEHAVIOUR])
+        self.assertEqual(evidence_of([unpromised], learned)[0], [DATA])
+        self.assertEqual(evidence_of([promised], [judged(label, BEHAVIOUR_METRIC_DELTA, metric)])[0], [DATA])
+        self.assertEqual(evidence_of([promised], [judged(label, BEHAVIOUR_METRIC_DELTA, metric,
+                                                        contrast=LEARNED_CONTRAST, status='alert')])[0],
+                         [UNPROVEN])
+        unclassed = {key: kind for key, kind in METRIC_EVIDENCE.items() if key != metric}
+        with mock.patch.dict(METRIC_EVIDENCE, unclassed, clear=True), self.assertRaises(EvidenceError):
+            evidence_of([promised], learned)
+
+    def test_the_point_distance_rows_leave_the_unit_distance_rows_alone(self):
+        self.assertEqual(STATE_PROMISES['distance_2d'], r'location|hook\w*|pull\w*')
+        self.assertEqual(METRIC_EVIDENCE['distance_2d'], STATE)
+
     def test_spell_damage_promises_the_spell_power_stat(self):
         verdicts = [judged('1 e2 spell_power 1', PASSIVE_DELTA, 'spell_power')]
         promised = claim('Increases your Holy spell damage by $s3% of your Agility.', '1 e2 spell_power 1')
@@ -737,6 +817,10 @@ class EvidenceTablesTest(unittest.TestCase):
     def test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class(self):
         self.assertEqual(self.unclassed_metrics(metric_evidence()), {})
 
+    def test_the_witch_hunter_taken_crit_read_without_its_evidence_row_is_found(self):
+        seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'spell_taken_crit_chance'}
+        self.assertEqual(self.unclassed_metrics(seeded), {'witch_hunter.json': ['spell_taken_crit_chance']})
+
     def test_cross_class_guard_a_metric_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'owned_creature_distance_2d'}
         self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d']})
@@ -755,8 +839,56 @@ class EvidenceTablesTest(unittest.TestCase):
 
     def test_every_state_metric_names_its_promise(self):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
-        self.assertEqual(states, set(STATE_PROMISES))
+        self.assertEqual(states, set(STATE_PROMISES) - {metric for metric in CONTRAST_PROOF if metric not in states})
+
+    def test_a_promise_beyond_the_state_metrics_gates_a_contrast_proof(self):
+        states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
+        self.assertEqual({metric for metric in STATE_PROMISES if metric not in states},
+                         {'spell_done_crit_chance', 'spell_taken_crit_chance'})
+        self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance'], READBACK)
+        self.assertEqual(METRIC_EVIDENCE['spell_taken_crit_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class WitchingBoltTakenCritTest(unittest.TestCase):
+    GAINS = {'undead': (201, 520217, 25), 'demon': (416, 520217, 25), 'humanoid': (6, 520217, 0),
+             'other_spell': (201, 802258, 0)}
+
+    def built(self, suffix: str):
+        from behaviours import behaviour_scenario
+        class_file = load_class_file(15)
+        [entry] = [entry for entry in class_file['behaviours']
+                   if entry['spell'] == 680322 and entry.get('label_suffix') == suffix]
+        scenario, [expectation] = behaviour_scenario(class_file, entry)
+        return scenario, expectation
+
+    def judged(self, expectation, before: float, after: float) -> str:
+        from test_behaviours import FakeRun, base_verdict
+        refreshed = dict.fromkeys(expectation.model['crit_field_refresh']['labels'], 5.0)
+        values = {expectation.model['before_label']: before, expectation.model['after_label']: after, **refreshed}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_each_arm_reads_the_taken_crit_of_its_spell_at_its_creature_around_the_learn(self):
+        for suffix, (entry, spell, gain) in self.GAINS.items():
+            with self.subTest(suffix=suffix):
+                scenario, expectation = self.built(suffix)
+                self.assertEqual(expectation.label, f'680322 behaviour_metric_delta {suffix}')
+                self.assertEqual(scenario['creatures'][0]['entry'], entry)
+                reads = [step for step in scenario['steps'] if step.get('metric') == 'spell_taken_crit_chance']
+                self.assertEqual([(read['spell'], read['target']) for read in reads], [(spell, 'dummy')] * 2)
+                learn = scenario['steps'].index({'action': 'learn', 'actor': 'caster', 'spell': 680322})
+                self.assertLess(scenario['steps'].index(reads[0]), learn)
+                self.assertLess(learn, scenario['steps'].index(reads[1]))
+                self.assertEqual(expectation.model['expected_gain'], gain)
+
+    def test_the_stated_gain_passes_and_a_rule_that_ignores_the_creature_type_or_the_class_mask_alerts(self):
+        for suffix, (_, _, gain) in self.GAINS.items():
+            with self.subTest(suffix=suffix):
+                _, expectation = self.built(suffix)
+                self.assertEqual(self.judged(expectation, 12.5, 12.5 + gain), 'ok')
+                self.assertEqual(self.judged(expectation, 12.5, 12.5 + 25 - gain), 'alert')
+                self.assertEqual(self.judged(expectation, 12.5, 12.5 + gain + 0.02), 'alert')
 
 
 class ContrastProofTest(unittest.TestCase):
@@ -789,6 +921,41 @@ class ContrastProofTest(unittest.TestCase):
         self.assertEqual(self.evidence(text, 'enemy_player_aura_duration_ms', contrast=LEARNED_CONTRAST), [BEHAVIOUR])
         self.assertEqual(self.evidence(text, 'enemy_player_aura_duration_ms', contrast=CONDITION_CONTRAST), [DATA])
         self.assertEqual(self.evidence(text, 'aura_duration_ms', contrast=LEARNED_CONTRAST), [DATA])
+
+    def test_a_spell_crit_read_proves_a_crit_chance_claim_only_with_the_learned_contrast(self):
+        crit = 'Increases the critical strike chance of Shadowblast by 25%.'
+        self.assertEqual(self.evidence(crit, 'spell_done_crit_chance', contrast=LEARNED_CONTRAST), [BEHAVIOUR])
+        self.assertEqual(self.evidence(crit, 'spell_done_crit_chance', contrast=CONDITION_CONTRAST), [DATA])
+        self.assertEqual(self.evidence(crit, 'spell_done_crit_chance'), [DATA])
+
+    def test_a_taken_crit_read_proves_a_crit_chance_claim_only_with_the_learned_contrast(self):
+        crit = 'Increases the critical strike chance of Damnation against Undead and Demons by $s1%.'
+        self.assertEqual(STATE_PROMISES['spell_taken_crit_chance'], STATE_PROMISES['spell_done_crit_chance'])
+        self.assertEqual(CONTRAST_PROOF['spell_taken_crit_chance'], LEARNED_CONTRAST)
+        self.assertEqual(self.evidence(crit, 'spell_taken_crit_chance', contrast=LEARNED_CONTRAST), [BEHAVIOUR])
+        self.assertEqual(self.evidence(crit, 'spell_taken_crit_chance', contrast=CONDITION_CONTRAST), [DATA])
+        self.assertEqual(self.evidence(crit, 'spell_taken_crit_chance'), [DATA])
+
+    def test_a_taken_crit_read_does_not_prove_a_claim_that_does_not_promise_crit(self):
+        damage = 'Increases the damage of Damnation against Undead and Demons by $s1%.'
+        self.assertEqual(self.evidence(damage, 'spell_taken_crit_chance', contrast=LEARNED_CONTRAST), [DATA])
+
+    def test_a_ranged_crit_read_is_a_state_that_proves_a_crit_chance_claim_only_with_the_learned_contrast(self):
+        crit = 'Increases your critical strike chance by $s2%.'
+        self.assertEqual(METRIC_EVIDENCE['ranged_taken_crit_chance'], STATE)
+        self.assertEqual(STATE_PROMISES['ranged_taken_crit_chance'], STATE_PROMISES['melee_crit_chance'])
+        self.assertEqual(CONTRAST_PROOF['ranged_taken_crit_chance'], LEARNED_CONTRAST)
+        self.assertEqual(self.evidence(crit, 'ranged_taken_crit_chance', contrast=LEARNED_CONTRAST), [BEHAVIOUR])
+        self.assertEqual(self.evidence(crit, 'ranged_taken_crit_chance', contrast=CONDITION_CONTRAST), [DATA])
+        self.assertEqual(self.evidence(crit, 'ranged_taken_crit_chance'), [DATA])
+
+    def test_a_ranged_crit_read_does_not_prove_a_claim_that_does_not_promise_crit(self):
+        damage = 'Increases the damage of Auto Shot by 25%.'
+        self.assertEqual(self.evidence(damage, 'ranged_taken_crit_chance', contrast=LEARNED_CONTRAST), [DATA])
+
+    def test_a_spell_crit_read_does_not_prove_a_claim_that_does_not_promise_crit(self):
+        damage = 'Increases the damage of Shadowblast by 25%.'
+        self.assertEqual(self.evidence(damage, 'spell_done_crit_chance', contrast=LEARNED_CONTRAST), [DATA])
 
     def test_a_failed_contrast_read_is_not_evidence(self):
         verdicts = [judged(self.LABEL, BEHAVIOUR_METRIC_DELTA, 'enemy_player_aura_duration_ms', status='alert',
@@ -1416,6 +1583,48 @@ class ServerPacketEvidenceTest(unittest.TestCase):
 
     def test_server_packet_reads_are_event_reads(self):
         self.assertEqual({METRIC_EVIDENCE[name] for name in ('server_packets', 'server_packet_u32')}, {EVENT})
+
+
+class BonusTermProofTest(unittest.TestCase):
+    VALUE = f'{ARGENT_BLADE} effect_value e0 #0'
+    HIT = f'{ARGENT_BLADE} hit_mean'
+    PULSE = f'{ARGENT_BLADE} behaviour_metric_delta pulse'
+
+    def bonus(self, direct_bonus):
+        return judged(self.VALUE, 'effect_value', bonus_data={'entry': ARGENT_BLADE, 'direct_bonus': direct_bonus,
+                                                              'ap_bonus': 0.55, 'ap_term': 155.0, 'sp_term': 0.0})
+
+    def evidence(self, labels, verdicts):
+        return evidence_of([claim('deals ${$m1+$AP*0.55} Fire damage', *labels)], verdicts)[0]
+
+    def test_a_modelled_bonus_read_alone_is_refused(self):
+        self.assertEqual(self.evidence([self.VALUE], [self.bonus(0.0)]), [UNPROVEN])
+        self.assertEqual(self.evidence([self.VALUE], [judged(self.VALUE, 'effect_value')]), [DATA])
+
+    def test_an_attack_power_row_counts_with_a_passing_hit_of_the_same_claim(self):
+        self.assertEqual(self.evidence([self.VALUE, self.HIT], [self.bonus(0.0), hit(ARGENT_BLADE)]), [BEHAVIOUR])
+        pulse = judged(self.PULSE, BEHAVIOUR_METRIC_DELTA, 'spell_damage_total', contrast=LEARNED_CONTRAST)
+        self.assertEqual(self.evidence([self.VALUE, self.PULSE], [self.bonus(0.0), pulse]), [BEHAVIOUR])
+
+    def test_a_hit_of_another_claim_or_a_non_hit_read_does_not_count(self):
+        clauses = [claim('deals ${$m1+$AP*0.55} Fire damage', self.VALUE), claim('to nearby enemies', self.HIT)]
+        self.assertEqual(evidence_of(clauses, [self.bonus(0.0), hit(ARGENT_BLADE)])[0], [UNPROVEN, BEHAVIOUR])
+        armor = judged(self.PULSE, BEHAVIOUR_METRIC_DELTA, 'armor', contrast=LEARNED_CONTRAST)
+        self.assertEqual(self.evidence([self.VALUE, self.PULSE], [self.bonus(0.0), armor]), [UNPROVEN])
+
+    def test_a_spell_power_row_counts_only_with_a_hit_at_non_zero_spell_power(self):
+        at_zero = replace(hit(ARGENT_BLADE), detail={'spell_power': 0})
+        at_power = replace(hit(ARGENT_BLADE), detail={'spell_power': 120})
+        for proof in (hit(ARGENT_BLADE), at_zero):
+            self.assertEqual(self.evidence([self.VALUE, self.HIT], [self.bonus(0.45), proof]), [UNPROVEN])
+        self.assertEqual(self.evidence([self.VALUE, self.HIT], [self.bonus(0.45), at_power]), [BEHAVIOUR])
+
+    def test_mutant_without_the_refusal_a_modelled_bonus_read_alone_would_count(self):
+        with mock.patch('coverage.bonus_terms_unproven', return_value=False):
+            self.assertEqual(self.evidence([self.VALUE], [self.bonus(0.0)]), [DATA])
+            self.assertEqual(self.evidence([self.VALUE, self.HIT], [self.bonus(0.45), hit(ARGENT_BLADE)]),
+                             [BEHAVIOUR])
+        self.assertEqual(self.evidence([self.VALUE], [self.bonus(0.0)]), [UNPROVEN])
 
 
 if __name__ == '__main__':

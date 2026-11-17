@@ -6,7 +6,9 @@
 #include <list>
 
 class Player;
+class Spell;
 class Unit;
+enum DamageEffectType : uint8;
 
 namespace AscensionWitchHunter
 {
@@ -14,6 +16,8 @@ enum WitchHunterSharedSpells : uint32
 {
     SPELL_BRAND_OF_THE_DAMNED_DAMAGE = 807683,
     SPELL_SILVER_BOLTS = 804026,
+    SPELL_SILVER_BULLETS_R1 = 574149,
+    SPELL_SILVER_BULLETS_R2 = 574163,
     SPELL_SHADOW_TRAPPED = 681177,
     SPELL_SHADOW_BRAND = 680517
 };
@@ -74,6 +78,14 @@ void ApplyContracts(SpellInfo* info);
 bool InSmoke(Unit const* attacker, Unit const* target);
 void CallHounds(Player* player, Unit* target);
 void SummonHounds(Player* player, uint32 count, uint32 duration, uint32 spellId, Unit* target = nullptr);
+constexpr uint32 WitchblightRanks[] = {680494, 681218, 681219, 681220, 681221, 681540};
+bool CarriesWitchblight(Unit const* unit);
+void StampWitchblightLaunch(Unit* holder, uint32 spellId);
+void ClearWitchblightLaunches(Unit* holder);
+bool PulseOfEffectNotLaunchedUnderWitchblight(Spell const* spell, SpellInfo const* info, Unit const* holder);
+uint32 VictimAttackerBonus(Unit const* victim, uint32 spellId, uint8 effect);
+int32 SpellDoneShare(Unit* caster, Unit* victim, SpellInfo const* info, uint32 raw, DamageEffectType type,
+                     uint8 effIndex, float pctMods);
 }
 
 #endif

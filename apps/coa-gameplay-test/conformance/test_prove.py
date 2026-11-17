@@ -573,10 +573,6 @@ class DeclaredClaimRowTests(unittest.TestCase):
                          [(1, 2), (1, 2)])
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 class HitRatioPilotTest(unittest.TestCase):
     def verdict(self, label, status='insufficient_trials', **detail):
         return Verdict(label, status, 19.0, 20.0, 18.0, 22.0, 'pilot', 'scenario', 1, 1, 'behaviour_hit_ratio',
@@ -618,3 +614,7 @@ class HitRatioPilotTest(unittest.TestCase):
         pilot = hit_ratio_pilot(['a'], make, make, pilot_trials=20)
         trials, _ = pilot.size([self.verdict('a', status='ok', sized_trials=5, trial_limit=111)])
         self.assertEqual(trials, {'a': 20})
+
+
+if __name__ == '__main__':
+    unittest.main()

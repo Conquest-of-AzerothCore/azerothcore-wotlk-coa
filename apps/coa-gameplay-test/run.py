@@ -63,7 +63,7 @@ CHAT_TYPES = {
 CHAT_LOG_FLAGS = ('chat_has_position', 'chat_has_group', 'chat_has_guild', 'chat_has_mail_id')
 MAX_SPELL_MOD_OP = 31
 MIN_MUTANT_PERCENT = -100
-MAX_MUTANT_PERCENT = 1000
+MAX_MUTANT_PERCENT = 10000
 METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
@@ -1133,7 +1133,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(False, f'{where}: spells only applies to carried_aura_count')
             if 'periodic' in step:
                 require(metric in {'spell_damage_done', 'spell_damage_taken', 'spell_healing_done',
-                                   'spell_healing_taken'}
+                                   'spell_healing_taken', 'spell_damage_total', 'spell_damage_count'}
                         and type(step['periodic']) is bool,
                         f'{where}: periodic requires a damage/healing calculation and a boolean')
             require(metric in METRICS, f'{where}: unknown metric')

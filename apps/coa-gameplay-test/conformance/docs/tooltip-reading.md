@@ -18,11 +18,15 @@ token as written in the DBC, `value` the number before any player modifier.
 | `${...}` | `+ - * /`, parentheses and the variables below | as `$sN` |
 | `$<name>` | a `SpellDescriptionVariables` formula of the spell it is scoped to (below) | as `$sN` |
 | `$pplN`, `$<id>pplN` (inside `${...}` only) | `EffectRealPointsPerLevel[N-1] × max(0, caster level − BaseLevel)` | as `$mN` |
+| `$xN`, `$<id>xN` (inside `${...}` only, ADR 0726) | `EffectChainTarget[N-1]` | as `$sN`, with no `effect_index` |
+| `$cond(a, b, c)`, `$gt(a, b)` (inside `${...}`, ADR 0727) | `b` when `a` is not 0, else `c`; 1 when `a > b`, else 0 | as `$sN` |
 
-Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, `$tN`/`$TN` the period in ms, each with
+Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, `$xN`, `$tN`/`$TN` the period in ms, each with
 an optional spell id; `$pplN`/`$<id>pplN` (below); `$AP`, `$RAP`, `$PL`; `$SP` is the lowest spell power of schools
 1 to 6, `$sph $spfi $spn $spfr $sps $spa` one school each; `$STR $AGI $STA $INT $SPI` the effective stats 0 to 4;
 `$<name>` a variable defined earlier.
+One unmatched `)` as the last character before the closing `}` is dropped (ADR 0994): Shadow Rage 680275 states
+`${$m3+$AP*0.15)}` and the running client renders it as a number. Any other unbalanced parenthesis is unreadable.
 `$<name>` resolves against the `SpellDescriptionVariables` formula of the spell most recently named by a `$mN`/
 `$MN`/`$sN`/`$SN`/`$aN`/`$tN`/`$TN`/`$<id>...` token earlier in the *same* `${...}` expression, or the described
 spell when the expression has not named one yet (`Tooltip.variable`'s `context_spell_id`, cached per spell id in

@@ -109,6 +109,14 @@ def item_candidate_sql(subclass: int) -> str:
             f"AND ItemLevel > 0 AND {stat_clause} AND {spell_clause} ORDER BY ItemLevel, entry LIMIT 1;")
 
 
+def login_path_options(mysql) -> list[str]:
+    try:
+        result = subprocess.run([str(mysql), '--help'], capture_output=True, text=True, errors='replace', timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return ['--no-login-paths']
+    return ['--no-login-paths'] if '--no-login-paths' in result.stdout else []
+
+
 def local_select(config: Path, mysql, sql: str) -> list:
     sys.path.insert(0, str(ROOT / 'apps/coa-gameplay-test'))
     import run
@@ -122,7 +130,7 @@ def local_select(config: Path, mysql, sql: str) -> list:
             stream.write('[client]\n' + '\n'.join(f'{key}={run.cnf_quote(str(value))}' for key, value in
                 [('host', connection.host), ('port', connection.port), ('user', connection.user),
                  ('password', connection.password)]))
-        command = [str(mysql), '--defaults-extra-file=' + str(defaults), '--no-login-paths',
+        command = [str(mysql), '--defaults-extra-file=' + str(defaults), *login_path_options(mysql),
                    '--batch', '--raw', '--skip-column-names', '--default-character-set=utf8mb4',
                    '--connect-timeout=10', '--database=' + connection.database]
         result = subprocess.run(command, input=sql, text=True, capture_output=True, timeout=30)

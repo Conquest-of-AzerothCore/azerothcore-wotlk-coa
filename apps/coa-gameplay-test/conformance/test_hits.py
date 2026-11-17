@@ -3,24 +3,29 @@ import json
 import math
 from pathlib import Path
 import sys
+import types
 import unittest
+from unittest import mock
 
 from classes import ClassSpell, class_spells
-from behaviours import STRIKER, behaviour_scenario
+from behaviours import STRIKER, NotModelled, behaviour_scenario
 from compare import PER_LEVEL_ROUNDING, Run, Verdict, judge_hit
 from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
                   casts_needed, dual_target_entry, effect_hit, expected_hit, floored_casts, hit_kind, hit_parts,
-                  hit_scenario,
+                  hit_location, hit_scenario,
                   learned_weapon_part,
-                  measured_hit_model, melee_scenario, records_of, periodic_tick_readout, reference_caster,
-                  reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
-                  self_stack_multiplier, weapon_profile)
-from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
-from profile import load_fixture_class_file
+                  measured_hit_model, melee_parts, melee_scenario, records_of, periodic_tick_readout, ranged_weapon_attack,
+                  rank_hit, reference_caster, reference_hit_model, reference_melee_model, reference_script_hit_model,
+                  rolled_values, script_hit_model, rank_hit_effect, hit_measurements,
+                  scheduled_casts, self_stack_multiplier, weapon_attacker, weapon_profile, base_mana_steps)
+from custom_attr import CustomAttributes
+from mitigation import (REFERENCE_TARGET, MitigationModel, TargetProfile, armor_reduction, average_resist,
+                        expected_mitigation, partial_resist_shares)
+from profile import load_class_file, load_fixture_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
-from values import (ALLY, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD, TARGET,
-                    UNREADABLE)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD,
+                    TARGET, UNREADABLE, armed_for, cast_distance, missile_wait_ms)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -29,6 +34,22 @@ DBC_DIR = Path('/srv/coa/server-data/dbc')
 HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 
 TEMPLAR_CLASS_ID = 19
+WITCH_HUNTER_CLASS_ID = 15
+STAKE_RANK = 681350
+DAMNATION = 520062
+DAMNATION_MAX_RANK = 520217
+SHADOWBLAST = 804191
+SMITE_EVIL = 803364
+TORMENTOR = 800162
+HUNTER_RANGE = 114
+HEAVY_CROSSBOW = 15809
+RANGED_SLOT = 17
+SCIMITAR = 2027
+MAIN_HAND_SLOT, OFF_HAND_SLOT = 15, 16
+CROSSBOWS_SKILL_LINE = 226
+HEAVY_CROSSBOW_WEAPON = {'item': HEAVY_CROSSBOW, 'slot': RANGED_SLOT, 'subclass': 18, 'min_damage': 49.0,
+                         'max_damage': 50.0, 'speed_ms': 2800, 'inventory_type': 26, 'normalized_speed': 2.8,
+                         'skill_line': CROSSBOWS_SKILL_LINE}
 WALKING_STICK = 2495
 WALKING_STICK_MIN = 6.5625
 WALKING_STICK_MAX = 10.9375
@@ -383,6 +404,87 @@ class SelfStackMultiplierTest(unittest.TestCase):
         seeded_defect = {'self_stack_bonus': [{'rank': 570233, 'percent_per_stack': 50.0}]}
         self.assertNotAlmostEqual(self_stack_multiplier(correct, 570233, 3),
                                   self_stack_multiplier(seeded_defect, 570233, 3))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class BaseManaStepsTest(unittest.TestCase):
+    BASE = {'base_mana': {'power': 0, 'value': 1720, 'source': 'seeded'}}
+
+    def facts(self, cost=0, percent=12, power=0):
+        return types.SimpleNamespace(mana_cost=cost, mana_cost_percentage=percent, power_type=power)
+
+    def test_a_percent_of_base_mana_cost_sets_the_recorded_base_mana(self):
+        self.assertEqual(base_mana_steps(self.BASE, self.facts()),
+                         [{'action': 'set_power', 'actor': 'caster', 'power': 0, 'value': 1720}])
+
+    def test_no_recorded_base_mana_a_flat_cost_or_another_power_adds_nothing(self):
+        self.assertEqual(base_mana_steps({}, self.facts()), [])
+        self.assertEqual(base_mana_steps(self.BASE, self.facts(cost=50, percent=0)), [])
+        self.assertEqual(base_mana_steps(self.BASE, self.facts(power=3)), [])
+
+    def test_a_cost_above_the_recorded_base_mana_is_refused(self):
+        with self.assertRaises(ValueError):
+            base_mana_steps(self.BASE, self.facts(cost=100, percent=95))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_every_stake_cast_is_preceded_by_the_base_mana_step(self):
+        witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        stake = next(spell for spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER)
+                     if STAKE_RANK in spell.ranks)
+        scenario, _ = hit_parts(witch_hunter, stake, 2, rank_id=STAKE_RANK)[0]
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        powered = [index for index, step in enumerate(steps)
+                   if step == {'action': 'set_power', 'actor': 'caster', 'power': 0, 'value': 1720}]
+        self.assertEqual(len(powered), len(casts))
+        self.assertTrue(all(before < cast for before, cast in zip(powered, casts)))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class IgnoredArmorTest(unittest.TestCase):
+    SEEDED_MEANS = (834.2, 830.4)
+    SEEDED_HITS = 333
+    TOOLTIP_MEAN = 829.85
+    ARMORED_MEAN = 757.3
+
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        stake = next(spell for spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER)
+                     if STAKE_RANK in spell.ranks)
+        cls.scenario, expectations = hit_parts(cls.witch_hunter, stake, cls.SEEDED_HITS, rank_id=STAKE_RANK)[0]
+        cls.hit = hit_expectation(expectations)
+
+    def judged(self, mean: float) -> Verdict:
+        measured = measured_reference(self.witch_hunter, self.hit)
+        labels = self.hit.model['measurements']
+        found = Run(key='seeded', status='ok', message='',
+                    values={**measured, labels['total']: mean * self.SEEDED_HITS, labels['count']: self.SEEDED_HITS},
+                    steps=[], max_step_ms=None)
+        base = Verdict(label=self.hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+        return judge_hit(base, self.witch_hunter, [(self.scenario, found, self.hit)], measured_hit_model)
+
+    def test_stake_ignores_the_reference_armor_through_its_custom_attribute(self):
+        model = reference_hit_model(self.witch_hunter, STAKE_RANK)
+        self.assertAlmostEqual(model.tooltip_mean, self.TOOLTIP_MEAN, places=2)
+        self.assertGreater(model.mean, self.TOOLTIP_MEAN - 1)
+        for mean in self.SEEDED_MEANS:
+            self.assertEqual(self.judged(mean).status, 'ok', mean)
+
+    def test_without_the_custom_attribute_the_same_reads_alert(self):
+        stripped = CustomAttributes({}, {})
+        with mock.patch('hits.custom_attributes', return_value=stripped):
+            armored = reference_hit_model(self.witch_hunter, STAKE_RANK)
+            self.assertAlmostEqual(armored.mean, self.ARMORED_MEAN, places=0)
+            for mean in self.SEEDED_MEANS:
+                self.assertEqual(self.judged(mean).status, 'alert', mean)
+
+    def test_an_unreadable_table_leaves_a_physical_hit_unmodelled(self):
+        with mock.patch('hits.custom_attributes', return_value=CustomAttributes({}, {}, 'seeded failure')):
+            with self.assertRaises(Unmodelled):
+                reference_hit_model(self.witch_hunter, STAKE_RANK)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -1148,6 +1250,594 @@ class HitCastsFloorTest(unittest.TestCase):
     def test_a_floor_below_one_cast_is_refused(self):
         with self.assertRaises(ValueError):
             floored_casts({'hit_casts': [{'spell': 572769, 'casts': 0}]}, 572769, 2)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class RangedWeaponPathTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        cls.records = records_of(cls.witch_hunter)
+        cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER)}
+
+    def test_a_ranged_range_places_the_dummy_midway_between_its_minimum_and_maximum(self):
+        self.assertEqual(self.records.field('Spell', SHADOWBLAST, 'RangeIndex'), HUNTER_RANGE)
+        low = self.records.field('SpellRange', HUNTER_RANGE, 'RangeMin[0]')
+        high = self.records.field('SpellRange', HUNTER_RANGE, 'RangeMax[0]')
+        distance = cast_distance(self.records, SHADOWBLAST)
+        self.assertEqual(distance, (low + high) / 2)
+        self.assertGreater(distance, low + NOMINAL_MELEE_RANGE_YD)
+        self.assertLess(distance, high)
+
+    def test_a_melee_range_keeps_the_melee_dummy_distance(self):
+        self.assertEqual(cast_distance(self.records, SMITE_EVIL), DUMMY_DISTANCE)
+
+    def test_a_missile_from_the_ranged_distance_is_waited_for_and_the_melee_distance_keeps_its_steps(self):
+        speed = self.records.field('Spell', TORMENTOR, 'Speed')
+        distance = cast_distance(self.records, TORMENTOR)
+        self.assertGreater(speed, 0)
+        self.assertEqual(missile_wait_ms(self.records, TORMENTOR, distance),
+                         math.ceil(distance / speed * 1000) + CAST_MARGIN_MS)
+        self.assertEqual(missile_wait_ms(self.records, TORMENTOR, DUMMY_DISTANCE), 0)
+        self.assertEqual(missile_wait_ms(self.records, SMITE_EVIL, distance), 0)
+
+    def test_only_a_ranged_weapon_attack_takes_ranged_attack_power(self):
+        self.assertTrue(ranged_weapon_attack(self.records, SHADOWBLAST))
+        self.assertTrue(ranged_weapon_attack(self.records, DAMNATION_MAX_RANK))
+        self.assertFalse(ranged_weapon_attack(self.records, SMITE_EVIL))
+        stats = caster(ap=900)
+        self.assertEqual(weapon_attacker(self.records, SHADOWBLAST, stats).ap, stats.rap)
+        self.assertEqual(weapon_attacker(self.records, SMITE_EVIL, stats), stats)
+
+    def test_a_ranged_weapon_hit_scales_with_ranged_attack_power_only(self):
+        armed = {**self.witch_hunter, 'weapon': HEAVY_CROSSBOW_WEAPON}
+        reference = rank_hit(armed, DAMNATION_MAX_RANK, caster(), REFERENCE_TARGET, []).model
+        more_ap = rank_hit(armed, DAMNATION_MAX_RANK, caster(ap=900), REFERENCE_TARGET, []).model
+        more_rap = rank_hit(armed, DAMNATION_MAX_RANK, replace(caster(), rap=caster().rap + 140), REFERENCE_TARGET,
+                            []).model
+        self.assertEqual(reference.kind, 'weapon')
+        self.assertEqual(more_ap.tooltip_mean, reference.tooltip_mean)
+        self.assertGreater(more_rap.tooltip_mean, reference.tooltip_mean)
+
+    def test_damnation_hit_scenario_equips_the_crossbow_and_stands_inside_the_shot_range(self):
+        scenario, expectations = hit_scenario(self.witch_hunter, self.spells[DAMNATION], 1)
+        run.validate(scenario)
+        self.assertEqual(steps_with(scenario, action='equip'),
+                         [{'action': 'equip', 'actor': 'caster', 'item': SCIMITAR, 'slot': MAIN_HAND_SLOT},
+                          {'action': 'equip', 'actor': 'caster', 'item': SCIMITAR, 'slot': OFF_HAND_SLOT},
+                          {'action': 'equip', 'actor': 'caster', 'item': HEAVY_CROSSBOW, 'slot': RANGED_SLOT}])
+        self.assertTrue(steps_with(scenario, action='set_skill', skill=CROSSBOWS_SKILL_LINE))
+        self.assertEqual([creature['distance'] for creature in scenario['creatures']],
+                         [cast_distance(self.records, DAMNATION_MAX_RANK)])
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.rank_id, hit.model['kind'], hit.model['weapon']['item']),
+                         (DAMNATION_MAX_RANK, 'weapon', HEAVY_CROSSBOW))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class MeleePartsTest(unittest.TestCase):
+    def test_a_melee_scenario_within_the_budget_stays_one_scenario(self):
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
+        swings = casts_needed(reference_melee_model(templar))
+        self.assertEqual(melee_parts(templar, swings), [melee_scenario(templar, swings)])
+
+    def test_a_longer_melee_mean_splits_its_swings_over_parts_under_one_label(self):
+        witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        self.assertIs(witch_hunter['melee_parts'], True)
+        swings = casts_needed(reference_melee_model(witch_hunter))
+        with self.assertRaisesRegex(ValueError, 'split its casts'):
+            melee_scenario(witch_hunter, swings)
+        unsplit = {key: value for key, value in witch_hunter.items() if key != 'melee_parts'}
+        with self.assertRaisesRegex(ValueError, 'split its casts'):
+            melee_parts(unsplit, swings)
+        parts = melee_parts(witch_hunter, swings)
+        self.assertGreater(len(parts), 1)
+        models = [expectations[0].model for _, expectations in parts]
+        self.assertEqual({expectations[0].label for _, expectations in parts}, {'melee melee_mean'})
+        self.assertEqual([model['part'] for model in models], list(range(len(parts))))
+        self.assertGreaterEqual(sum(model['part_swings'] for model in models), scheduled_casts(swings))
+        self.assertEqual({model['minimum_hits'] for model in models}, {swings})
+        for scenario, _ in parts:
+            self.assertIs(run.validate(scenario), scenario)
+            self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+
+
+class WeaponSchoolHitTests(unittest.TestCase):
+    QUICKDRAW = 806851
+
+    def class_file(self, listed: bool) -> dict:
+        witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        return {**{key: value for key, value in witch_hunter.items() if key != 'weapon_school_hits'},
+                **({'weapon_school_hits': [self.QUICKDRAW]} if listed else {})}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unlisted_weapon_and_school_hit_stays_unmodelled(self):
+        with self.assertRaises(Unmodelled) as raised:
+            reference_hit_model(self.class_file(False), self.QUICKDRAW)
+        self.assertIn('several hit models', raised.exception.reason)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_listed_hit_adds_the_weapon_percent_part_to_the_school_part(self):
+        model = reference_hit_model(self.class_file(True), self.QUICKDRAW)
+        self.assertEqual(model.kind, 'school')
+        self.assertEqual(set(model.displayed), {'$s1', '${$m2+0+$RAP*0.2}'})
+        self.assertGreater(model.tooltip_mean, 250.4 + 100)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_mutant_a_listed_hit_without_its_weapon_part_is_refused_not_judged_on_the_school_part(self):
+        dropped = lambda readout, effects, caster, weapon: (readout, None)
+        with mock.patch('hits.script_weapon_part', side_effect=dropped), self.assertRaises(Unmodelled):
+            reference_hit_model(self.class_file(True), self.QUICKDRAW)
+
+
+class WeaponSchoolPercentTests(unittest.TestCase):
+    HEARTSEEKING = 807284
+    QUICKDRAW = 806851
+    SOURCE = 'rev_20261115_02_witch_hunter_heartseeking_bolt_text.sql'
+
+    def class_file(self, percents: dict | None, listed: tuple[int, ...] = (HEARTSEEKING,)) -> dict:
+        witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        kept = {key: value for key, value in witch_hunter.items()
+                if key not in ('weapon_school_hits', 'weapon_school_percents')}
+        return {**kept, 'weapon_school_hits': list(listed),
+                **({'weapon_school_percents': percents} if percents is not None else {})}
+
+    def entry(self, percent=300, source=SOURCE) -> dict:
+        return {str(self.HEARTSEEKING): {'percent': percent, 'source': source}}
+
+    def refused(self, class_file: dict, rank: int = HEARTSEEKING) -> str:
+        with self.assertRaises(Unmodelled) as raised:
+            reference_hit_model(class_file, rank)
+        return raised.exception.reason
+
+    def test_the_committed_entry_names_the_streamed_text_row_and_its_literal_percent(self):
+        witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        self.assertIn(self.HEARTSEEKING, witch_hunter['weapon_school_hits'])
+        self.assertEqual(witch_hunter['weapon_school_percents'][str(self.HEARTSEEKING)]['source'], self.SOURCE)
+        self.assertEqual(witch_hunter['weapon_school_percents'][str(self.HEARTSEEKING)]['percent'], 300)
+
+    def test_the_finished_class_files_hold_no_weapon_school_percents(self):
+        for class_id in (TEMPLAR_CLASS_ID, 23):
+            self.assertNotIn('weapon_school_percents', load_class_file(class_id))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_literal_percent_adds_three_weapon_hits_to_the_school_part(self):
+        listed = self.class_file(self.entry())
+        model = reference_hit_model(listed, self.HEARTSEEKING)
+        self.assertEqual(model.kind, 'school')
+        self.assertIn('300%', model.displayed)
+        school = reference_hit_model(self.class_file(None, ()), self.HEARTSEEKING)
+        armed = armed_for(listed, records_of(listed), self.HEARTSEEKING)
+        weapon = weapon_profile(armed)
+        caster = reference_caster(armed)
+        weapon_mean = (weapon.min_damage + weapon.max_damage) / 2 + caster.rap / 14.0 * weapon.speed_ms / 1000
+        self.assertAlmostEqual(model.tooltip_mean - school.tooltip_mean, 3 * weapon_mean, delta=0.05)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_listed_hit_without_its_percent_stays_refused(self):
+        self.assertIn('shows no weapon value', self.refused(self.class_file(None)))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_percent_absent_from_the_text_is_refused(self):
+        self.assertIn('shows no literal 200%', self.refused(self.class_file(self.entry(percent=200))))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_source_that_is_not_the_streamed_row_is_refused(self):
+        reason = self.refused(self.class_file(self.entry(source='rev_20260908_07_witch_hunter_completion.sql')))
+        self.assertIn('is not the streamed text row', reason)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_percent_that_is_not_a_whole_number_is_refused(self):
+        for percent in ('300', 300.0, 0, True):
+            self.assertIn('positive whole percent', self.refused(self.class_file(self.entry(percent=percent))))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_rank_that_shows_its_percent_as_a_token_is_refused(self):
+        tokened = {str(self.QUICKDRAW): {'percent': 100, 'source': self.SOURCE}}
+        reason = self.refused(self.class_file(tokened, (self.QUICKDRAW,)), self.QUICKDRAW)
+        self.assertIn('as a token', reason)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_mutant_an_ignored_percent_is_refused_not_judged_on_the_school_part(self):
+        ignored = lambda class_file, records, rank_id, effects, readout: readout
+        with mock.patch('hits.with_literal_weapon_percent', side_effect=ignored):
+            self.assertIn('shows no weapon value', self.refused(self.class_file(self.entry())))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class UnresistedRankHitTests(unittest.TestCase):
+    DESECRATE_MAX_RANK = 681211
+    SHADOW_SCHOOL_MASK = 32
+    RESISTING_DUMMY = TargetProfile(entry=36, level=60, armor=528, resistances={32: 5000})
+
+    def class_file(self, listed: list[int]) -> dict:
+        witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        return {**{key: value for key, value in witch_hunter.items() if key != 'unresisted_rank_hits'},
+                **({'unresisted_rank_hits': listed} if listed else {})}
+
+    def model(self, listed: list[int], target: TargetProfile) -> HitModel:
+        class_file = armed_for(self.class_file(listed), records_of(self.class_file(listed)), self.DESECRATE_MAX_RANK)
+        return rank_hit(class_file, self.DESECRATE_MAX_RANK, reference_caster(class_file), target,
+                        class_file.get('known_auras', [])).model
+
+    def test_the_finished_class_files_hold_no_unresisted_rank_hits(self):
+        for class_id in (TEMPLAR_CLASS_ID, 23):
+            self.assertNotIn('unresisted_rank_hits', load_class_file(class_id))
+
+    def test_an_unlisted_shadow_rank_hit_subtracts_the_measured_resistance(self):
+        resisted = self.model([], self.RESISTING_DUMMY)
+        self.assertLess(resisted.mean, 0.5 * resisted.tooltip_mean)
+        self.assertLess(self.model([], REFERENCE_TARGET).mean, resisted.tooltip_mean)
+
+    def test_a_listed_rank_hit_ignores_any_measured_resistance(self):
+        listed = self.model([self.DESECRATE_MAX_RANK], self.RESISTING_DUMMY)
+        self.assertEqual(listed.mean, self.model([self.DESECRATE_MAX_RANK], REFERENCE_TARGET).mean)
+        self.assertAlmostEqual(listed.mean, listed.tooltip_mean, delta=1.0)
+        self.assertGreater(listed.mean, self.model([], REFERENCE_TARGET).mean + 40)
+
+    def test_a_listed_physical_rank_hit_is_refused(self):
+        class_file = self.class_file([STAKE_RANK])
+        with self.assertRaises(Unmodelled) as raised:
+            reference_hit_model(class_file, STAKE_RANK)
+        self.assertIn('physical', raised.exception.reason)
+
+    def test_the_listed_hit_rule_names_the_skipped_resistance(self):
+        spell = next(spell for spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER)
+                     if spell.max_rank == self.DESECRATE_MAX_RANK)
+        _, expectations = hit_parts(self.class_file([self.DESECRATE_MAX_RANK]), spell, 10)[0]
+        self.assertIn('measured target resistance is not subtracted', expectations[0].rule)
+        _, unlisted = hit_parts(self.class_file([]), spell, 10)[0]
+        self.assertNotIn('resistance is not subtracted', unlisted[0].rule)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitLocationTests(unittest.TestCase):
+    REPULSE_MAX_RANK = 680273
+    DESECRATE_MAX_RANK = 681211
+    WALL_START = {'map': 1, 'x': -6524.53, 'y': -3824.85, 'z': -63.3, 'o': 0}
+    CASTS = 30
+
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        cls.repulse = next(spell for spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER)
+                           if spell.max_rank == cls.REPULSE_MAX_RANK)
+
+    def without_location(self) -> dict:
+        return {key: value for key, value in self.witch_hunter.items() if key != 'hit_location'}
+
+    def test_a_listed_location_places_every_part_and_is_named_in_the_rule(self):
+        self.assertEqual(hit_location(self.witch_hunter, self.REPULSE_MAX_RANK), self.WALL_START)
+        parts = hit_parts(self.witch_hunter, self.repulse, 400)
+        self.assertGreater(len(parts), 1)
+        for scenario, expectations in parts:
+            self.assertIs(run.validate(scenario), scenario)
+            self.assertEqual(scenario['location'], self.WALL_START)
+            self.assertIn('listed in hit_location: cast at map 1 (-6524.53, -3824.85, -63.3)', expectations[0].rule)
+
+    def test_mutant_without_the_location_the_part_starts_where_the_character_is_created(self):
+        kept = self.without_location()
+        scenario, expectations = hit_parts(kept, self.repulse, self.CASTS)[0]
+        listed, _ = hit_parts(self.witch_hunter, self.repulse, self.CASTS)[0]
+        self.assertNotIn('location', scenario)
+        self.assertNotIn('hit_location', expectations[0].rule)
+        self.assertIsNone(hit_location(kept, self.REPULSE_MAX_RANK))
+        self.assertEqual({**scenario, 'location': listed['location']}, listed)
+
+    def test_an_unlisted_rank_is_left_alone(self):
+        self.assertIsNone(hit_location(self.witch_hunter, self.DESECRATE_MAX_RANK))
+        self.assertIsNone(hit_location({}, self.REPULSE_MAX_RANK))
+
+    def test_a_location_without_every_coordinate_or_a_reason_or_a_repeated_entry_is_refused(self):
+        whole = dict(self.WALL_START)
+        for entries in ([{'spell': self.REPULSE_MAX_RANK, 'location': {**whole, 'o': None}, 'reason': 'r'}],
+                        [{'spell': self.REPULSE_MAX_RANK, 'location': {k: v for k, v in whole.items() if k != 'z'},
+                          'reason': 'r'}],
+                        [{'spell': self.REPULSE_MAX_RANK, 'location': {**whole, 'w': 1}, 'reason': 'r'}],
+                        [{'spell': self.REPULSE_MAX_RANK, 'location': whole}],
+                        [{'spell': self.REPULSE_MAX_RANK, 'location': whole, 'reason': 'r'}] * 2):
+            with self.subTest(entries=entries), self.assertRaises(ValueError):
+                hit_location({'hit_location': entries}, self.REPULSE_MAX_RANK)
+
+    def test_the_finished_class_files_hold_no_hit_location(self):
+        for class_id in (TEMPLAR_CLASS_ID, 23):
+            self.assertNotIn('hit_location', load_class_file(class_id))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class NormalizedValueTest(unittest.TestCase):
+    PURIFIERS_EDGE = 802434
+    HANDS = {'main_hand': 803357, 'off_hand': 803517}
+    NORMALIZED_ONE_HAND = 2.4
+    OFF_HAND_FACTOR = 0.5
+    PASSED = 277
+    FIRE = 4
+
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+
+    def entry(self, hand: str, **changes) -> dict:
+        found = next(entry for entry in self.witch_hunter['behaviours'] if entry['spell'] == self.PURIFIERS_EDGE
+                     and entry['kind'] == 'script_hit' and entry.get('label_suffix') == hand)
+        return {**found, **changes}
+
+    def built(self, hand: str, **changes):
+        scenario, [expectation] = behaviour_scenario(self.witch_hunter, self.entry(hand, **changes))
+        return scenario, expectation
+
+    def judged(self, hand: str, mean: float, hits: int = 40, armor: int = 528) -> Verdict:
+        scenario, expectation = self.built(hand)
+        labels = expectation.model['measurements']
+        found = Run(key='seeded', status='ok', message='',
+                    values={**measured_reference(self.witch_hunter, expectation, armor), labels['total']: mean * hits,
+                            labels['count']: hits, expectation.model['control_label']: 0},
+                    steps=[], max_step_ms=None)
+        base = Verdict(label=expectation.label, status='unmeasured', measured=None, expected=None, low=None,
+                       high=None, explanation='')
+        return judge_hit(base, self.witch_hunter, [(scenario, found, expectation)], measured_hit_model)
+
+    def model(self, hand: str, target: TargetProfile = REFERENCE_TARGET, **flags) -> HitModel:
+        return script_hit_model(self.witch_hunter, self.PURIFIERS_EDGE, self.HANDS[hand], reference_caster(
+            self.witch_hunter), target, self.witch_hunter.get('known_auras', []), self.PURIFIERS_EDGE, 0,
+            normalized_value=True, **({'effective_school': True} | flags))
+
+    def weapon_mean(self) -> float:
+        weapon = self.witch_hunter['off_hand_weapons'][0]
+        bonus = self.witch_hunter['reference_stats']['attack_power'] / 14 * self.NORMALIZED_ONE_HAND
+        return (weapon['min_damage'] + weapon['max_damage']) / 2 + bonus
+
+    def roll(self) -> range:
+        weapon = self.witch_hunter['off_hand_weapons'][0]
+        bonus = self.witch_hunter['reference_stats']['attack_power'] / 14 * self.NORMALIZED_ONE_HAND
+        return range(int(weapon['min_damage'] + bonus) + self.PASSED, int(weapon['max_damage'] + bonus) + self.PASSED
+                     + 1)
+
+    def physical_records(self):
+        records = records_of(self.witch_hunter)
+        field = records.field
+
+        def physical(table, key, name):
+            if (table, name) == ('Spell', 'SchoolMask') and key in self.HANDS.values():
+                return 1
+            return field(table, key, name)
+        records.field = physical
+        return mock.patch('hits.records_of', return_value=records)
+
+    def test_both_hands_take_the_full_roll_and_points_of_the_loaded_fire_mask(self):
+        for hand in self.HANDS:
+            model = self.model(hand)
+            with self.subTest(hand=hand):
+                self.assertAlmostEqual(model.tooltip_mean, self.weapon_mean() + self.PASSED, places=6)
+                self.assertEqual(model.displayed[-2], f'{hand.replace("_", "-")} weapon 2027')
+                self.assertEqual(model.displayed[-1], 'school mask 5 loaded as 4, resistance within armor')
+                self.assertLess(model.mean, model.tooltip_mean)
+
+    def test_each_resisted_amount_is_capped_at_the_armor_reduction(self):
+        shares = partial_resist_shares(average_resist(self.FIRE, REFERENCE_TARGET, 0))
+        reduction = armor_reduction(REFERENCE_TARGET.armor, self.witch_hunter['level'], REFERENCE_TARGET.level)
+        values = self.roll()
+        expected = sum(share * (value - min(value * step // 10, value - math.ceil(value * (1 - reduction))))
+                       for value in values for step, share in enumerate(shares)) / len(values)
+        self.assertAlmostEqual(self.model('off_hand').mean, expected, places=6)
+        self.assertGreater(self.model('off_hand').mean, expected_mitigation(1, REFERENCE_TARGET, 60).mean
+                           * self.model('off_hand').tooltip_mean)
+
+    def test_without_armor_the_cap_removes_the_resistance(self):
+        bare = replace(REFERENCE_TARGET, armor=0)
+        values = self.roll()
+        for hand in self.HANDS:
+            with self.subTest(hand=hand):
+                self.assertAlmostEqual(self.model(hand, bare).mean, sum(values) / len(values), places=6)
+                self.assertEqual(self.judged(hand, sum(values) / len(values), armor=0).status, 'ok')
+                self.assertEqual(self.judged(hand, self.OFF_HAND_FACTOR * self.weapon_mean()
+                                             + int(self.PASSED * self.OFF_HAND_FACTOR), armor=0).status, 'alert')
+
+    def test_seeded_hits_at_the_model_pass(self):
+        for hand, hit in self.HANDS.items():
+            scenario, expectation = self.built(hand)
+            run.validate(scenario)
+            self.assertTrue(expectation.model['normalized_value'])
+            self.assertTrue(expectation.model['effective_school'])
+            self.assertEqual(expectation.rank_id, hit)
+            model = reference_script_hit_model(self.witch_hunter, self.PURIFIERS_EDGE, hit, self.PURIFIERS_EDGE, 0,
+                                               normalized_value=True, effective_school=True)
+            with self.subTest(hand=hand):
+                self.assertEqual(self.judged(hand, model.mean).status, 'ok')
+
+    def test_mutant_a_halved_off_hand_or_a_hit_without_the_points_alerts(self):
+        with self.physical_records():
+            halved = self.model('off_hand', effective_school=False)
+        self.assertAlmostEqual(halved.tooltip_mean, self.OFF_HAND_FACTOR * self.weapon_mean()
+                               + int(self.PASSED * self.OFF_HAND_FACTOR), places=6)
+        self.assertEqual(self.judged('off_hand', halved.mean).status, 'alert')
+        main = self.model('main_hand')
+        self.assertEqual(self.judged('main_hand', main.mean - self.PASSED).status, 'alert')
+
+    def test_a_physical_strike_keeps_the_off_hand_factor_and_armor(self):
+        with self.physical_records():
+            off = self.model('off_hand', effective_school=False)
+            main = self.model('main_hand', effective_school=False)
+            with self.assertRaises(Unmodelled) as raised:
+                self.model('off_hand')
+        self.assertIn('only for a mask that mixes', raised.exception.reason)
+        self.assertAlmostEqual(main.tooltip_mean, self.weapon_mean() + self.PASSED, places=6)
+        self.assertEqual(off.displayed[-1], 'off-hand weapon 2027')
+        weapon = self.witch_hunter['off_hand_weapons'][0]
+        bonus = self.witch_hunter['reference_stats']['attack_power'] / 14 * self.NORMALIZED_ONE_HAND
+        halved = int(self.PASSED * self.OFF_HAND_FACTOR)
+        values = range(int((weapon['min_damage'] + bonus) * self.OFF_HAND_FACTOR) + halved,
+                       int((weapon['max_damage'] + bonus) * self.OFF_HAND_FACTOR) + halved + 1)
+        armor = expected_mitigation(1, REFERENCE_TARGET, 60).mean
+        self.assertAlmostEqual(off.mean, sum(math.ceil(value * armor) for value in values) / len(values), places=6)
+
+    def test_a_mixed_mask_without_effective_school_is_unmodelled(self):
+        with self.assertRaises(NotModelled) as raised:
+            self.built('off_hand', effective_school=False)
+        self.assertIn('effective_school is required', str(raised.exception))
+        with self.assertRaises(ValueError):
+            self.built('off_hand', effective_school='yes')
+        with self.assertRaises(ValueError):
+            self.built('off_hand', normalized_value=False)
+
+    def test_without_the_part_or_for_a_non_physical_off_hand_the_hit_is_unmodelled(self):
+        with self.assertRaises(NotModelled) as raised:
+            self.built('off_hand', spell=802258, hit_spell=803502, value_spell=802258, value_effect=1,
+                       casts=[[802258, 'dummy']], quote='Strike an enemy with both weapons', effective_school=False)
+        self.assertIn('non-physical', str(raised.exception))
+        with self.assertRaises(ValueError):
+            self.built('off_hand', normalized_value='yes')
+
+
+TORMENTOR_TOP_RANK = 501349
+RANK_HIT_EFFECTS_FIELD = 'rank_hit_effects'
+SPLIT_SOURCE = 'Effect[2] school damage, Effect[0] periodic damage'
+
+
+def with_split(class_file: dict, entry: dict | None) -> dict:
+    split = {key: value for key, value in class_file.items() if key != RANK_HIT_EFFECTS_FIELD}
+    if entry is not None:
+        split[RANK_HIT_EFFECTS_FIELD] = {str(TORMENTOR_TOP_RANK): entry}
+    return split
+
+
+class RankHitEffectsFieldTest(unittest.TestCase):
+    ENTRY = {'hit_mean': 2, 'periodic_total': 0, 'source': SPLIT_SOURCE}
+
+    def test_an_absent_entry_names_no_effect(self):
+        self.assertIsNone(rank_hit_effect({}, TORMENTOR_TOP_RANK, 'hit_mean'))
+
+    def test_each_role_names_its_effect(self):
+        class_file = with_split({}, self.ENTRY)
+        self.assertEqual(rank_hit_effect(class_file, TORMENTOR_TOP_RANK, 'hit_mean'), 2)
+        self.assertEqual(rank_hit_effect(class_file, TORMENTOR_TOP_RANK, 'periodic_total'), 0)
+
+    def test_malformed_entries_are_refused(self):
+        for entry in ({'hit_mean': 2, 'periodic_total': 0},
+                      {**self.ENTRY, 'source': ' '},
+                      {**self.ENTRY, 'extra': 1},
+                      {'hit_mean': 2, 'source': SPLIT_SOURCE},
+                      {**self.ENTRY, 'periodic_total': 2},
+                      {**self.ENTRY, 'periodic_total': True},
+                      {**self.ENTRY, 'hit_mean': 3},
+                      {**self.ENTRY, 'hit_mean': '2'}):
+            with self.subTest(entry=entry), self.assertRaises(ValueError):
+                rank_hit_effect(with_split({}, entry), TORMENTOR_TOP_RANK, 'hit_mean')
+
+    def test_another_check_is_unmodelled(self):
+        with self.assertRaises(Unmodelled):
+            rank_hit_effect(with_split({}, self.ENTRY), TORMENTOR_TOP_RANK, 'melee_mean')
+
+    def test_measurements_carry_the_event_filter_only_when_asked(self):
+        labels = {'total': 'x total', 'count': 'x count'}
+        plain = hit_measurements(TORMENTOR_TOP_RANK, TORMENTOR_TOP_RANK, True, labels)
+        self.assertFalse(any('periodic' in step for step in plain))
+        for periodic in (False, True):
+            steps = hit_measurements(TORMENTOR_TOP_RANK, TORMENTOR_TOP_RANK, True, labels, periodic=periodic)
+            damage = [step for step in steps if str(step.get('metric', '')).startswith('spell_damage')]
+            self.assertEqual(len(damage), 4)
+            self.assertTrue(all(step['periodic'] is periodic for step in damage))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class RankHitEffectsDataTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        cls.tormentor = next(spell for spell in class_spells(DBC_DIR, WITCH_HUNTER_CLASS_ID, HEADER)
+                             if TORMENTOR_TOP_RANK in spell.ranks)
+
+    def test_without_the_field_both_hit_models_are_refused(self):
+        unsplit = with_split(self.witch_hunter, None)
+        for check in ('hit_mean', 'periodic_total'):
+            with self.subTest(check=check), self.assertRaises(Unmodelled) as raised:
+                reference_hit_model(unsplit, TORMENTOR_TOP_RANK, check)
+            self.assertEqual(str(raised.exception), "effects of several hit models: ['periodic_damage', 'school']")
+        scenario, _ = hit_parts(unsplit, self.tormentor, 1, rank_id=TORMENTOR_TOP_RANK)[0]
+        self.assertFalse(any('periodic' in step for step in scenario['steps']))
+
+    def test_the_direct_hit_models_effect_2_on_direct_events_only(self):
+        model = reference_hit_model(self.witch_hunter, TORMENTOR_TOP_RANK)
+        self.assertEqual(model.kind, 'school')
+        self.assertEqual(model.tooltip_mean, 66.5)
+        self.assertEqual(model.hits_per_cast, 1)
+        scenario, expectations = hit_parts(self.witch_hunter, self.tormentor, 1, rank_id=TORMENTOR_TOP_RANK)[0]
+        run.validate(scenario)
+        self.assertEqual(expectations[0].effect_index, 2)
+        damage = [step for step in scenario['steps'] if str(step.get('metric', '')).startswith('spell_damage')]
+        self.assertTrue(damage)
+        self.assertTrue(all(step['periodic'] is False for step in damage))
+
+    def test_the_periodic_effect_keeps_its_once_per_aura_roll_refusal(self):
+        with self.assertRaises(Unmodelled) as raised:
+            reference_hit_model(self.witch_hunter, TORMENTOR_TOP_RANK, 'periodic_total')
+        self.assertIn('rolled once per aura', str(raised.exception))
+
+    def test_the_swapped_effects_mutant_alerts(self):
+        mutant = with_split(self.witch_hunter, {'hit_mean': 0, 'periodic_total': 2, 'source': 'mutant: swapped'})
+        for check, effect in (('hit_mean', 0), ('periodic_total', 2)):
+            with self.subTest(check=check), self.assertRaises(Unmodelled) as raised:
+                reference_hit_model(mutant, TORMENTOR_TOP_RANK, check)
+            self.assertIn(f'names effect {effect} for {check}', str(raised.exception))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ValueSpellRollTest(unittest.TestCase):
+    SHADOW_RAGE, STRIKE, VALUE_EFFECT = 680275, 567570, 2
+    BASE_POINTS, DIE_SIDES = 56, 2
+
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_hunter = load_class_file(WITCH_HUNTER_CLASS_ID)
+        cls.bonus = 0.15 * reference_caster(cls.witch_hunter).rap
+
+    def model(self, **flags) -> HitModel:
+        return reference_script_hit_model(self.witch_hunter, self.SHADOW_RAGE, self.STRIKE, self.SHADOW_RAGE,
+                                          self.VALUE_EFFECT, unresisted=True, **flags)
+
+    def entry(self, **changes) -> dict:
+        return {'spell': self.SHADOW_RAGE, 'name': 'Shadow Rage (ranged auto attack strike)', 'kind': 'script_hit',
+                'label_suffix': 'ranged_auto_strike', 'quote': 'deal an additional ${$m3+$RAP*0.15} Shadow Damage',
+                'hit_spell': self.STRIKE, 'casts': [[75, 'dummy']], 'control_casts': [], 'trials': 12,
+                'minimum_hits': 8, 'unresisted': True, 'value_spell': self.SHADOW_RAGE,
+                'value_effect': self.VALUE_EFFECT, **changes}
+
+    def test_the_value_effect_carries_the_die_and_the_hit_spell_does_not(self):
+        records = records_of(self.witch_hunter)
+        self.assertEqual(records.field('Spell', self.SHADOW_RAGE, f'EffectBasePoints[{self.VALUE_EFFECT}]'),
+                         self.BASE_POINTS)
+        self.assertEqual(records.field('Spell', self.SHADOW_RAGE, f'EffectDieSides[{self.VALUE_EFFECT}]'),
+                         self.DIE_SIDES)
+
+    def test_value_rolls_spread_the_hit_over_every_roll_of_the_value_effect(self):
+        model = self.model(value_rolls=True)
+        rolls = [self.BASE_POINTS + roll + self.bonus for roll in range(1, self.DIE_SIDES + 1)]
+        self.assertAlmostEqual(model.tooltip_mean, sum(rolls) / len(rolls), places=6)
+        self.assertAlmostEqual(model.mean, sum(math.floor(value) for value in rolls) / len(rolls), places=6)
+        self.assertAlmostEqual(model.sigma, 0.5, places=6)
+
+    def test_mutant_rolling_the_hit_spell_keeps_one_value_and_misses_the_top_roll(self):
+        rolled, mutant = self.model(value_rolls=True), self.model()
+        self.assertAlmostEqual(mutant.tooltip_mean, self.BASE_POINTS + 1 + self.bonus, places=6)
+        self.assertEqual(mutant.sigma, 0.0)
+        self.assertNotAlmostEqual(mutant.tooltip_mean, rolled.tooltip_mean, places=3)
+        self.assertNotAlmostEqual(mutant.sigma, rolled.sigma, places=3)
+
+    def test_value_rolls_need_a_value_spell(self):
+        with self.assertRaises(Unmodelled):
+            reference_script_hit_model(self.witch_hunter, self.SHADOW_RAGE, self.STRIKE, unresisted=True,
+                                       value_rolls=True)
+
+    def test_the_option_is_recorded_only_when_set_and_is_a_boolean(self):
+        _, [rolled] = behaviour_scenario(self.witch_hunter, self.entry(value_rolls=True))
+        _, [plain] = behaviour_scenario(self.witch_hunter, self.entry())
+        self.assertTrue(rolled.model['value_rolls'])
+        self.assertNotIn('value_rolls', plain.model)
+        self.assertEqual(plain.model['reference']['sigma'], 0.0)
+        self.assertAlmostEqual(rolled.model['reference']['sigma'], 0.5, places=6)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(self.witch_hunter, self.entry(value_rolls='yes'))
 
 
 if __name__ == '__main__':

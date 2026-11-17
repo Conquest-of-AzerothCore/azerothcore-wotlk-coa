@@ -1,0 +1,4 @@
+-- Houndmaster (705450): owner ruling O-14 (2026-11-15), the client text states the server formula, two strikes of 0.3 x (Houndmaster's Call base x 315/225 + ranged attack power x 0.55 + 2 x level).
+DELETE FROM `coa_client_spell_description` WHERE `ID` = 705450;
+INSERT INTO `coa_client_spell_description` (`ID`, `Description`, `ToolTip`) VALUES
+(705450, 'Using |cffffffffHoundmaster''s Call|r summons $800768s1 |cffffffffLesser Shadow Hound|r for $803886d that leaps at the target and deals two strikes for ${0.3*($706332m2*315/225+$RAP*0.55+$pl*2)} Shadow damage each. ', 'Using |cffffffffHoundmaster''s Call|r summons $800768s1 lesser |cffffffffShadow Hound|r that leaps at the target and deals two strikes for ${0.3*($706332m2*315/225+$RAP*0.55+$pl*2)} Shadow damage each.\r\n\r\nThe lesser |cffffffffShadow Hound|r will persist for $800768d. ');

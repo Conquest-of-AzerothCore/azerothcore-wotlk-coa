@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Auto Shot's +15% ranged attack speed stacks multiplicatively with Hail of Gunfire (O-21)",
+  "contract": "Auto Shot 75 reads 'Increases your ranged Attack Speed by 15%.' for a holder of 552011, which the live baseline grants to the Witch Hunter (owner ruling O-21, mentor D-127). Witch Hunter code applies it through Unit::ApplyAttackTimePercentMod(RANGED_ATTACK, 15, apply), the call an aura 140 of amount 15 makes, so the ranged base attack time (UNIT_FIELD_BASEATTACKTIME + 2) is the weapon delay x 100 / 115. A CustomData flag makes the sync idempotent on login, learn and forget. Every assert window is the expected value +-1 ms; it excludes the lost bonus (the weapon delay) and a doubled bonus (delay x (100 / 115)^2 = delay / 1.3225). Weapon delays: Old Blunderbuss 2508 2300 ms, Light Crossbow 15807 2500 ms, Heavy Crossbow 15809 2800 ms (item_template delay). Hail of Gunfire 804187 is an aura 140 of 10% through the same engine call; each removal divides out its own percentage only.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Guns skill",
+      "actor": "wh",
+      "spell": 266
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill",
+      "actor": "wh",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 2508
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 2508,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Before Hail of Gunfire: 2300 x 100 / 115 = 2000.00 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Hail of Gunfire",
+      "actor": "wh",
+      "spell": 804187
+    },
+    {
+      "action": "assert",
+      "label": "Hail of Gunfire effect 0 is the authored 10%",
+      "actor": "wh",
+      "metric": "aura_amount",
+      "spell": 804187,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Auto Shot and Hail of Gunfire: 2300 / (1.15 x 1.10) = 2300 / 1.265 = 1818.18 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1817.18,
+      "max": 1819.18,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "label": "Forget Auto Shot",
+      "actor": "wh",
+      "spell": 75
+    },
+    {
+      "action": "assert",
+      "label": "Hail of Gunfire alone: 2300 / 1.10 = 2090.91 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2089.91,
+      "max": 2091.91,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Auto Shot again",
+      "actor": "wh",
+      "spell": 75
+    },
+    {
+      "action": "assert",
+      "label": "Both again: 2300 / 1.265 = 1818.18 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1817.18,
+      "max": 1819.18,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "label": "Drop Hail of Gunfire",
+      "actor": "wh",
+      "spell": 804187
+    },
+    {
+      "action": "assert",
+      "label": "Auto Shot alone: 2300 x 100 / 115 = 2000.00 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    }
+  ]
+}

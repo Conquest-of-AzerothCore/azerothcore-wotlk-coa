@@ -5,9 +5,9 @@ from pathlib import Path
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
                         STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, ally_group_steps, ally_players,
                         behaviour_entry, cast_applies_aura_player,
-                        cast_applies_aura_spec, cast_gate_power_step,
+                        cast_applies_aura_distance, cast_applies_aura_spec, cast_gate_power_step,
                         cast_applies_aura_steps, duration_refresh_spec, duration_spec, extra_cast_setup,
-                        extra_cast_steps, mechanic_duration_spec, prose_rule)
+                        extra_cast_steps, dummy_placement_text, mechanic_duration_spec, prose_rule)
 from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fixture, records_of, timed
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
@@ -19,6 +19,8 @@ EXPIRY_KIND = 'expiry'
 PRESENCE_METRIC = 'aura'
 CLOCK_STEP_MS = 25
 SHIFT_SHARE = 0.05
+TRAVEL_SHIFT_SHARE = 0.10
+TRAVEL_ANCHOR_ERROR_MS = CLOCK_STEP_MS
 SHIFT_FLOOR_MS = 2 * CLOCK_STEP_MS
 MARGIN_SHARE = 0.025
 BEFORE_SLACK_STEPS = 4
@@ -48,18 +50,22 @@ class ExpiryArm:
     after_margin_ms: int
     held_ms: int
     requires: tuple[tuple[str, float], ...] = ()
+    shift_share: float = SHIFT_SHARE
+    anchor_error_ms: int = 0
 
 
-def shift_of(expected_ms: float) -> float:
-    return max(SHIFT_SHARE * expected_ms, SHIFT_FLOOR_MS)
+def shift_of(expected_ms: float, share: float = SHIFT_SHARE) -> float:
+    return max(share * expected_ms, SHIFT_FLOOR_MS)
 
 
 def slack_steps(tail: list[dict]) -> int:
     return len(tail) + sum(step['action'] == 'wait' for step in tail)
 
 
-def margins_of(expected_ms: float, tail: list[dict]) -> tuple[int, int]:
-    shift, slack = shift_of(expected_ms), slack_steps(tail)
+def margins_of(expected_ms: float, tail: list[dict], share: float = SHIFT_SHARE,
+               anchor_error_ms: int = 0) -> tuple[int, int]:
+    shift = shift_of(expected_ms, share)
+    slack = slack_steps(tail) + math.ceil(anchor_error_ms / CLOCK_STEP_MS)
     before = max(math.ceil(MARGIN_SHARE * expected_ms), (slack + BEFORE_SLACK_STEPS) * CLOCK_STEP_MS + 1)
     after = min(before, math.ceil(shift) - (slack + AFTER_SLACK_STEPS) * CLOCK_STEP_MS - 1)
     if before > shift - CLOCK_STEP_MS or after < CLOCK_STEP_MS:
@@ -89,11 +95,12 @@ def lands_within_its_cast_step(records: Records, spell: int, aura: int) -> bool:
 
 
 def expiry_arm(prefix: str, name: str, expected_ms: float, tail: list[dict] = (), applied: bool = True,
-               requires: tuple[tuple[str, float], ...] = ()) -> ExpiryArm:
+               requires: tuple[tuple[str, float], ...] = (), share: float = SHIFT_SHARE,
+               anchor_error_ms: int = 0) -> ExpiryArm:
     return ExpiryArm(name, float(expected_ms), f'{prefix} {name} expiry act',
                      f'{prefix} {name} expiry applied' if applied else None, f'{prefix} {name} before_expiry',
-                     f'{prefix} {name} after_expiry', *margins_of(expected_ms, list(tail)), held_ms(list(tail)),
-                     requires)
+                     f'{prefix} {name} after_expiry', *margins_of(expected_ms, list(tail), share, anchor_error_ms),
+                     held_ms(list(tail)), requires, share, anchor_error_ms)
 
 
 def acted(step: dict, arm: ExpiryArm) -> dict:
@@ -104,9 +111,10 @@ def reading_fields(spell: int, caster: str | None) -> dict:
     return {'spell': spell, **({'caster': caster} if caster else {})}
 
 
-def applied_step(arm: ExpiryArm, actor: str, spell: int, caster: str | None = None) -> dict:
+def applied_step(arm: ExpiryArm, actor: str, spell: int, caster: str | None = None,
+                 within_ms: int = APPLY_WITHIN_MS) -> dict:
     return {'action': 'assert', 'label': arm.applied_label, 'actor': actor, 'metric': PRESENCE_METRIC,
-            **reading_fields(spell, caster), 'min': 1, 'within_ms': APPLY_WITHIN_MS}
+            **reading_fields(spell, caster), 'min': 1, 'within_ms': within_ms}
 
 
 def held_ms(steps: list[dict]) -> int:
@@ -128,16 +136,19 @@ def pair_steps(arm: ExpiryArm, actor: str, spell: int, caster: str | None = None
 
 
 def arm_model(arm: ExpiryArm) -> dict:
-    return {'name': arm.name, 'expected_ms': arm.expected_ms, 'act_label': arm.act_label,
-            'applied_label': arm.applied_label, 'before_label': arm.before_label, 'after_label': arm.after_label,
-            'before_margin_ms': arm.before_margin_ms, 'after_margin_ms': arm.after_margin_ms,
-            'shift_ms': shift_of(arm.expected_ms),
-            'requires': [[label, value] for label, value in arm.requires]}
+    model = {'name': arm.name, 'expected_ms': arm.expected_ms, 'act_label': arm.act_label,
+             'applied_label': arm.applied_label, 'before_label': arm.before_label, 'after_label': arm.after_label,
+             'before_margin_ms': arm.before_margin_ms, 'after_margin_ms': arm.after_margin_ms,
+             'shift_ms': shift_of(arm.expected_ms, arm.shift_share),
+             'requires': [[label, value] for label, value in arm.requires]}
+    return {**model, 'anchor_error_ms': arm.anchor_error_ms} if arm.anchor_error_ms else model
 
 
 def expiry_expectation(label: str, spell: int, rank_id: int, displayed: str, rule: str,
-                       arms: list[ExpiryArm], observe_metric: str = PRESENCE_METRIC) -> Expectation:
-    model = {'kind': EXPIRY_KIND, 'observe_metric': observe_metric, 'arms': [arm_model(arm) for arm in arms]}
+                       arms: list[ExpiryArm], observe_metric: str = PRESENCE_METRIC,
+                       fixtures: dict | None = None) -> Expectation:
+    model = {'kind': EXPIRY_KIND, 'observe_metric': observe_metric, 'arms': [arm_model(arm) for arm in arms],
+             **({'fixtures': fixtures} if fixtures else {})}
     return Expectation(label, BEHAVIOUR_EXPIRY, spell, rank_id, None, displayed, rule, model)
 
 
@@ -190,8 +201,11 @@ def arm_reading(values: dict, steps: list[dict], max_step: float | None, run_key
         slack = max_step
     else:
         slack = step_elapsed(steps[act]) + upper_ms(steps, act, applied, max_step)
-    before_low, before_high = lower_ms(steps, applied, before_at), upper_ms(steps, applied, before_at, max_step) + slack
-    after_low, after_high = lower_ms(steps, applied, after_at), upper_ms(steps, applied, after_at, max_step) + slack
+    error = float(arm.get('anchor_error_ms', 0))
+    before_low = lower_ms(steps, applied, before_at) - error
+    before_high = upper_ms(steps, applied, before_at, max_step) + slack + error
+    after_low = lower_ms(steps, applied, after_at) - error
+    after_high = upper_ms(steps, applied, after_at, max_step) + slack + error
     shift = arm['shift_ms']
     detail = {'name': name, 'expected_ms': expected, 'before': before, 'after': after,
               'before_ms': [before_low, before_high], 'after_ms': [after_low, after_high], 'shift_ms': shift}
@@ -248,10 +262,10 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
         arms = [single_cast_arm(records, spec, prefix, ((absent, 0.0),))]
         steps = (base_steps(class_file) + ally_group_steps({spec.cast_target}) + learn + learned
                  + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
-                 + cast_arm(cast, arms[0], actor, spec.applied_aura))
+                 + cast_arm(cast, arms[0], actor, spec.applied_aura, within_ms=applied_within_ms(records, spec)))
         contract = (f'{spec.applied_aura} is absent before {spec.spell} is cast, present {arms[0].before_margin_ms} '
                     f'ms before its stated {spec.expected_ms:g} ms end and absent {arms[0].after_margin_ms} ms after '
-                    f'it, timed from the cast.')
+                    f'it, ' + ('timed from the cast.' if spec.read_after_ms is None else travel_contract(arms[0])))
     else:
         extra = extra_cast_steps(records, spec.extra_cast) if spec.extra_cast else []
         arms = [expiry_arm(prefix, WITHOUT, spec.control_ms, requires=((absent, 0.0),)),
@@ -278,14 +292,31 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
         class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour expiry', contract, steps)
     scenario['players'] = [cast_applies_aura_player(class_file, spec)] + ally_players(class_file, {spec.cast_target})
     if TARGET in (spec.target, spec.cast_target, spec.extra_cast and spec.extra_cast.target):
-        scenario['creatures'] = [creature_fixture(class_file)]
+        distance = cast_applies_aura_distance(records, spec)
+        scenario['creatures'] = [creature_fixture(class_file, distance)]
+        scenario['contract'] += dummy_placement_text(distance)
     label = expiry_label(spec.spell) + (f' {spec.label_suffix}' if spec.label_suffix else '')
     return finished(scenario), [expiry_expectation(label, spec.spell, spec.applied_aura, str(spec.expected_ms),
                                                    prose_rule(spec.quote, spec.spell), arms)]
 
 
+def applied_within_ms(records: Records, spec: CastAppliesAuraSpec) -> int:
+    if spec.read_after_ms is None:
+        return APPLY_WITHIN_MS
+    return APPLY_WITHIN_MS + facts_of(records, spec.cast_spell or spec.spell).cast_time_ms
+
+
+def travel_contract(arm: ExpiryArm) -> str:
+    return (f'timed from the poll that first sees it on the target after it travels from the cast, with '
+            f'{arm.anchor_error_ms} ms of anchor error (one poll period) added to both sides, and '
+            f'a server {shift_of(arm.expected_ms, arm.shift_share):g} ms off the stated end fails.')
+
+
 def single_cast_arm(records: Records, spec: CastAppliesAuraSpec, prefix: str,
                     requires: tuple[tuple[str, float], ...]) -> ExpiryArm:
+    if spec.read_after_ms is not None:
+        return expiry_arm(prefix, 'cast', spec.expected_ms, requires=requires, share=TRAVEL_SHIFT_SHARE,
+                          anchor_error_ms=TRAVEL_ANCHOR_ERROR_MS)
     try:
         return expiry_arm(prefix, 'cast', spec.expected_ms, requires=requires)
     except NotModelled:
@@ -294,8 +325,9 @@ def single_cast_arm(records: Records, spec: CastAppliesAuraSpec, prefix: str,
         return act_anchored_arm(prefix, 'cast', spec.expected_ms, requires)
 
 
-def cast_arm(cast: list[dict], arm: ExpiryArm, actor: str, aura: int, tail: list[dict] = ()) -> list[dict]:
-    applied = [applied_step(arm, actor, aura)] if arm.applied_label else []
+def cast_arm(cast: list[dict], arm: ExpiryArm, actor: str, aura: int, tail: list[dict] = (),
+             within_ms: int = APPLY_WITHIN_MS) -> list[dict]:
+    applied = [applied_step(arm, actor, aura, within_ms=within_ms)] if arm.applied_label else []
     return cast[:-1] + [acted(cast[-1], arm)] + applied + list(tail) + pair_steps(arm, actor, aura)
 
 
@@ -477,11 +509,40 @@ class SchoolLockoutSpec:
     cast_spell: int
     channel_spell: int
     label_suffix: str = ''
+    target_auras: tuple[tuple[int, int], ...] = ()
 
 
 def school_lockout_spec(entry: dict) -> SchoolLockoutSpec:
     return SchoolLockoutSpec(entry['spell'], entry['name'], entry['quote'], entry['interrupt_spell'],
-                             entry['cast_spell'], entry['channel_spell'], entry.get('label_suffix', ''))
+                             entry['cast_spell'], entry['channel_spell'], entry.get('label_suffix', ''),
+                             tuple((int(spell), int(stacks)) for spell, stacks in entry.get('target_auras', ())))
+
+
+def lockout_fixture_steps(spec: SchoolLockoutSpec) -> list[dict]:
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks, 'target': TARGET,
+             'caster': CASTER} for spell, stacks in spec.target_auras]
+
+
+def lockout_fixture_reads(spec: SchoolLockoutSpec, prefix: str) -> tuple[list[dict], tuple[tuple[str, float], ...]]:
+    if not spec.target_auras:
+        return [], ()
+    reads = ((f'{prefix} stun after cast', 'stunned'), (f'{prefix} channel after cast', 'casting'))
+    return [measurement(label, TARGET, metric) for label, metric in reads], tuple((label, 0.0) for label, _ in reads)
+
+
+def lockout_fixtures(spec: SchoolLockoutSpec) -> dict | None:
+    if not spec.target_auras:
+        return None
+    return {'unit': TARGET, 'auras': [f'{spell} ({stacks} stack{"s" if stacks != 1 else ""})'
+                                      for spell, stacks in spec.target_auras]}
+
+
+def fixture_note(fixtures: dict | None) -> str:
+    if not fixtures:
+        return ''
+    auras = ', '.join(fixtures['auras'])
+    return (f'; fixture: aura {auras} set by harness set_aura on the {fixtures["unit"]} (a precondition, not the '
+            f'claim\'s subject)')
 
 
 def interruptible_channel_school(records: Records, spell: int) -> int:
@@ -503,30 +564,37 @@ def school_lockout_scenario(class_file: dict, entry: dict) -> tuple[dict, list[E
     if facts.cast_time_ms:
         raise NotModelled(f'{spec.cast_spell} has a cast time; the lockout would not begin within its cast step')
     prefix = f'{spec.spell} {spec.interrupt_spell}'
+    fixture_reads, fixture_requires = lockout_fixture_reads(spec, prefix)
     arm = act_anchored_arm(prefix, 'cast', expected_ms, ((f'{prefix} lockout before cast', 0.0),
-                                                         (f'{prefix} channel before cast', 1.0)))
+                                                         (f'{prefix} channel before cast', 1.0)) + fixture_requires)
     fields = {'school_mask': school}
     cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
                  (spec.spell, spec.cast_spell))]
+             + lockout_fixture_steps(spec)
              + [{'action': 'cast', 'actor': TARGET, 'spell': spec.channel_spell},
                 {'action': 'wait', 'label': f'{prefix} channel settle', 'ms': CHANNEL_SETTLE_MS},
                 measurement(f'{prefix} channel before cast', TARGET, 'casting'),
                 measurement(f'{prefix} lockout before cast', TARGET, LOCKOUT_METRIC, **fields)]
              + cast_gate_power_step(facts) + required_aura_steps(facts) + [acted(cast, arm)]
-             + pair_steps(arm, TARGET, spec.interrupt_spell, metric=LOCKOUT_METRIC, fields=fields))
+             + pair_steps(arm, TARGET, spec.interrupt_spell, metric=LOCKOUT_METRIC, fields=fields) + fixture_reads)
     contract = (f'The {TARGET} channels {spec.channel_spell} (school mask {school}); {spec.cast_spell} cast at it '
                 f'interrupts the channel through {spec.interrupt_spell}, whose duration locks that school: locked '
                 f'{arm.before_margin_ms} ms before the stated {expected_ms:g} ms end and free {arm.after_margin_ms} '
                 f'ms after it, timed from the cast; not locked while the channel runs before the cast.')
+    if spec.target_auras:
+        contract += (f' The fixture auras {[list(aura) for aura in spec.target_auras]} are set on the {TARGET} '
+                     f'before its channel; after the pair the {TARGET} reads not stunned and no longer channelling, '
+                     f'so the cast\'s own stun did not land and the interrupt stopped the channel.')
     scenario = expiry_scenario_shell(
         class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour school lockout', contract,
         steps)
     scenario['creatures'] = [creature_fixture(class_file)]
     label = expiry_label(spec.spell) + (f' {spec.label_suffix}' if spec.label_suffix else '')
     return finished(scenario), [expiry_expectation(label, spec.spell, spec.interrupt_spell, str(expected_ms),
-                                                   prose_rule(spec.quote, spec.spell), [arm], LOCKOUT_METRIC)]
+                                                   prose_rule(spec.quote, spec.spell), [arm], LOCKOUT_METRIC,
+                                                   lockout_fixtures(spec))]
 
 
 BEHAVIOUR_EXPIRIES = {'cast_applies_aura': cast_applies_aura_expiry, 'duration_refresh': duration_refresh_expiry,

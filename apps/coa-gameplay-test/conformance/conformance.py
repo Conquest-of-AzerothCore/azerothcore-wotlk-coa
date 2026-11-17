@@ -20,14 +20,14 @@ from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
 from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts, gate_stacks,
-                  MELEE_LABEL, hit_parts, melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model,
+                  MELEE_LABEL, hit_parts, melee_parts, rank_hit, records_of, reference_caster, reference_hit_model,
                   reference_melee_model)
 from ledger import ledger, parse_text_bases, write_ledger
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, modifier_key, proc_entries, proc_plan,
                    proc_scenario, proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell,
                    trigger_key)
-from profile import (DBC_DIR, DbcSetMismatch, control_entries, ledger_consumption_path, load_class_file,
-                     server_dbc_dir, spell_dbc_sha256)
+from profile import (DBC_DIR, DbcSetMismatch, control_entries, for_entry, ledger_consumption_path,
+                     load_class_file, server_dbc_dir, spell_dbc_sha256)
 from questions import QUESTIONS_FILE
 from sample import SampleError, load_buckets, parse_minimums, sample_document
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
@@ -96,7 +96,7 @@ def add_periodic_total(writer: ManifestWriter, spell: ClassSpell, rank_id: int, 
     class_file = writer.class_file
     key = scenario_key(class_file['name'], 'periodic-total', rank_id)
     try:
-        casts = casts_needed(reference_hit_model(class_file, rank_id))
+        casts = casts_needed(reference_hit_model(class_file, rank_id, 'periodic_total'))
     except Unmodelled as error:
         writer.add(key, 'periodic_total', spell, rank_id,
                   [Expectation(item['label'], 'unmodelled', spell.spell_id, rank_id, item['effect'], '',
@@ -174,7 +174,7 @@ def add_passive(writer: ManifestWriter, spell: ClassSpell):
 
 
 def add_behaviour(writer: ManifestWriter, entry: dict):
-    class_file = writer.class_file
+    class_file = for_entry(writer.class_file, entry['spell'])
     scenario, expectations = behaviour_scenario(class_file, entry)
     key = scenario_key(class_file['name'], 'behaviour', entry['spell'], entry.get('kind', ''),
                         entry.get('variant', ''))
@@ -222,7 +222,7 @@ def add_target_gate(writer: ManifestWriter, entry: dict):
 
 
 def add_target_gate_arm(writer: ManifestWriter, entry: dict, held: int, percent: float, arm: str):
-    class_file = writer.class_file
+    class_file = for_entry(writer.class_file, entry['spell'])
     records = records_of(class_file)
     rank_id = entry['rank']
     suffix = ' '.join(part for part in (entry.get('label_suffix', ''), arm) if part)
@@ -262,7 +262,7 @@ def learned_hit_entries(class_file: dict, spell_ids: list[int] | None) -> list[d
 
 
 def add_learned_hit(writer: ManifestWriter, entry: dict):
-    class_file = writer.class_file
+    class_file = for_entry(writer.class_file, entry['spell'])
     records = records_of(class_file)
     rank_id, learned = entry['rank'], entry['spell']
     test_spell = ClassSpell(rank_id, records.field('Spell', rank_id, 'SpellName[enUS]'), (rank_id,), rank_id, 0,
@@ -289,19 +289,21 @@ def add_melee(writer: ManifestWriter):
         swings = casts_needed(reference_melee_model(class_file))
     except Unmodelled:
         swings = 1
+    key = scenario_key(class_file['name'], 'melee')
     try:
-        scenario, expectations = melee_scenario(class_file, swings)
+        parts = melee_parts(class_file, swings)
     except ValueError as error:
-        writer.add(scenario_key(class_file['name'], 'melee'), 'melee', None, 0,
+        writer.add(key, 'melee', None, 0,
                    [Expectation(MELEE_LABEL, 'unmodelled', 0, 0, None, '', UNMODELLED + str(error))])
         return
-    if all(expectation.check == 'unmodelled' for expectation in expectations):
-        scenario = None
-    writer.add(scenario_key(class_file['name'], 'melee'), 'melee', None, 0, expectations, scenario)
+    for part, (scenario, expectations) in enumerate(parts, start=1):
+        if all(expectation.check == 'unmodelled' for expectation in expectations):
+            scenario = None
+        writer.add(key if len(parts) == 1 else f'{key}-part-{part}', 'melee', None, 0, expectations, scenario)
 
 
 def add_proc(writer: ManifestWriter, entry: dict):
-    class_file = writer.class_file
+    class_file = for_entry(writer.class_file, entry['aura'])
     aura, name = entry['aura'], entry['name']
     if shares_proc_spell(class_file, entry):
         key_parts = (aura, entry['proc_spell'], trigger_key(entry))
@@ -328,7 +330,7 @@ def add_proc(writer: ManifestWriter, entry: dict):
 
 
 def add_trigger(writer: ManifestWriter, entry: dict):
-    class_file = writer.class_file
+    class_file = for_entry(writer.class_file, entry['aura'])
     aura, name = entry['aura'], entry['name']
     if entry.get('effect') is not None:
         key_parts = (aura, entry['effect'])

@@ -12,7 +12,7 @@ from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_label, duration_label,
                       shares_cooldown_aura, trigger_label)
-from values import EFFECT_KINDS, EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
+from values import EFFECT_KINDS, EFFECTS, TARGET, Expectation, armed_for, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
 CLOSED = 'closed: '
@@ -71,7 +71,8 @@ LINKED_FAMILY = 'P5'
 BEHAVIOUR_LABELS = {
     'count': lambda entry: [f"{entry['spell']} behaviour_count"],
     'ally_heal_breadth': lambda entry: [f"{entry['spell']} behaviour_count"],
-    'party_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_party_stat_ratio"],
+    'party_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_party_stat_ratio"
+                                       + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
@@ -883,7 +884,25 @@ def effect_model(effect: PassiveEffect) -> dict:
     return {'family': effect.family, 'effect': effect.effect, 'aura': effect.aura, 'misc': effect.misc}
 
 
-def probe_model(effect: PassiveEffect, plan: MetricPlan, probe: Probe, aura_label: str) -> dict:
+RANGED_DAMAGE_CLASS = 3
+RANGED_HAND = 2
+CAST_TIME_METRIC = 'spell_cast_time_ms'
+
+
+def ranged_haste_model(armed: dict, records: Records, plan: MetricPlan, probe: Probe) -> dict | None:
+    if (plan.metric != CAST_TIME_METRIC or plan.relation != 'add' or probe.reason or not probe.target
+            or records.field('Spell', probe.target, 'DmgClass') != RANGED_DAMAGE_CLASS
+            or 'weapon_set' not in armed):
+        return None
+    ranged = armed['weapon_sets'][armed['weapon_set']].get('ranged')
+    if not ranged:
+        return None
+    return {moment: f'{probe.label} ranged attack_time_ms {moment}' for moment in (BEFORE, AFTER)} | {
+        'base_ms': ranged['speed_ms'], 'item': ranged['item']}
+
+
+def probe_model(effect: PassiveEffect, plan: MetricPlan, probe: Probe, aura_label: str,
+                ranged_haste: dict | None = None) -> dict:
     measured = not probe.reason
     exact = measured and plan.metric == STAT_METRIC
     versus_aura_state = measured and effect.aura == VERSUS_AURA_STATE
@@ -896,7 +915,7 @@ def probe_model(effect: PassiveEffect, plan: MetricPlan, probe: Probe, aura_labe
             'exact_after_label': f'{probe.label} exact {AFTER}' if exact else None,
             'aura_state_label': f'{probe.label} aura_state' if versus_aura_state else None,
             'target': probe.target, 'named': probe.named, 'in_mask': probe.in_mask, 'points': effect.points,
-            'judged': plan.judged, 'aura_label': aura_label}
+            'judged': plan.judged, 'aura_label': aura_label} | ({'ranged_haste': ranged_haste} if ranged_haste else {})
 
 
 def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, list[Expectation]]:
@@ -911,13 +930,19 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
                                         effect.token.text if effect.token else '', rule, model))
 
     aura_state_steps: list[dict] = []
+    haste_labels: dict[str, list[str]] = {BEFORE: [], AFTER: []}
+    armed = armed_for(class_file, records, rank_id)
     for effect in passive_effects(class_file, spell):
         if not effect.plans:
             expect(f'{rank_id} e{effect.effect}', 'unmodelled', effect, effect.reason, effect_model(effect))
             continue
         for plan in effect.plans:
             for probe in plan_probes(class_file, records, effect, plan):
-                model = probe_model(effect, plan, probe, aura_label)
+                haste = ranged_haste_model(armed, records, plan, probe)
+                model = probe_model(effect, plan, probe, aura_label, haste)
+                if haste:
+                    for moment in (BEFORE, AFTER):
+                        haste_labels[moment].append(haste[moment])
                 if probe.reason:
                     expect(probe.label, 'unmodelled', effect, probe.reason, model)
                     continue
@@ -937,6 +962,7 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         steps = [measurement(f'{probe.label} {moment}', CASTER, probe.metric, **probe.fields) for probe in probes]
         steps += [measurement(f'{probe.label} exact {moment}', CASTER, STAT_EXACT_METRIC, **probe.fields)
                  for probe in probes if probe.metric == STAT_METRIC]
+        steps += [measurement(label, CASTER, 'attack_time_ms', hand=RANGED_HAND) for label in haste_labels[moment]]
         return steps
 
     priming = []
@@ -957,7 +983,8 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         'contract': 'No-combat with/without check: the quantities a passive changes, measured before and after '
                     'it is learned.',
         'players': [caster],
-        'steps': base_steps(class_file) + priming + measured(BEFORE) + learning + measured(AFTER)}
+        'steps': base_steps(armed) + priming + measured(BEFORE) + learning
+                 + measured(AFTER)}
     if any(probe.fields.get('target') == TARGET for probe in probes):
         scenario['creatures'] = [creature_fixture(class_file)]
     return scenario, expectations

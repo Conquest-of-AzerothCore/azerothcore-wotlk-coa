@@ -233,7 +233,8 @@ class RunnerTests(unittest.TestCase):
         step = {'action': 'spell_mod_mutant', 'actor': 'caster', 'spell': 116, 'op': 12, 'percent': 100}
         self.assert_step_validates(step)
         self.assert_step_validates({**step, 'percent': -100})
-        for change in ({'percent': 0}, {'percent': -101}, {'percent': 1001}, {'percent': 99.5}, {'op': 32},
+        self.assert_step_validates({**step, 'percent': 10000})
+        for change in ({'percent': 0}, {'percent': -101}, {'percent': 10001}, {'percent': 99.5}, {'op': 32},
                        {'op': -1}, {'spell': 0}, {'actor': 'target'}, {'factor': 2.0}):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'percent'})
@@ -1337,11 +1338,23 @@ class RunnerTests(unittest.TestCase):
             scenario['steps'].append({'action': 'snapshot', 'actor': 'caster', 'metric': metric,
                                       'spell': 116, 'target': 'target', 'periodic': True, 'save_as': 'tick'})
             self.assertIs(run.validate(scenario), scenario)
-            for change in ({'periodic': 1}, {'metric': 'spell_damage_total'}):
+            for change in ({'periodic': 1}, {'metric': 'spell_log_count'}):
                 invalid = copy.deepcopy(scenario)
                 invalid['steps'][-1].update(change)
                 with self.assertRaises(ValueError):
                     run.validate(invalid)
+
+    def test_periodic_spell_damage_event_filter(self):
+        for metric in ('spell_damage_total', 'spell_damage_count'):
+            for periodic in (True, False):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                          'target': 'target', 'periodic': periodic, 'min': 0})
+                self.assertIs(run.validate(scenario), scenario)
+            invalid = copy.deepcopy(scenario)
+            invalid['steps'][-1]['periodic'] = 0
+            with self.assertRaises(ValueError):
+                run.validate(invalid)
 
     def test_spell_damage_taken_stacks(self):
         valid = {'action': 'snapshot', 'actor': 'caster', 'metric': 'spell_damage_taken', 'spell': 116,
