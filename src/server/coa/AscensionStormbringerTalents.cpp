@@ -64,7 +64,8 @@ enum StormbringerTalentSpells : uint32
     SPELL_UNBOUND_ELEMENTALIST = 705702,
     SPELL_CONDUCTIVE_PASSIVE = 92098,
     SPELL_CONDUCTIVE = 567559,
-    SPELL_CONDUCTION = 567560
+    SPELL_CONDUCTION = 567560,
+    SPELL_AEROBLAST_ECHO = 802750
 };
 
 constexpr int32 ASCENSION_SPELLMOD_BONUS_MULTIPLIER = 41;
@@ -327,6 +328,11 @@ public:
         }
         if (info->Id == SPELL_THORIMS_GIFT_PATCH)
             info->AscensionInheritsResolvedAmount = true;
+        if (info->Id == SPELL_AEROBLAST_ECHO)
+        {
+            info->AscensionInheritsResolvedAmount = true;
+            info->AscensionInheritsPowerScaling = true;
+        }
         if (info->Id == SPELL_PERPETUAL_SHOCK)
             info->Effects[EFFECT_1].Effect = 0;
         if (info->Id == SPELL_CHARGED_CONDUIT)
