@@ -3,7 +3,10 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellInfo.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
 #include "Unit.h"
+#include <cmath>
 
 namespace
 {
@@ -49,10 +52,47 @@ public:
             caster->CastSpell(caster, MagmaFissureInstantCast, true);
     }
 };
+
+class spell_primalist_magma_fissure_knockback : public SpellScript
+{
+    PrepareSpellScript(spell_primalist_magma_fissure_knockback);
+
+    void HandleKnockback(SpellEffIndex effIndex)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (!caster || !target || target == caster)
+            return;
+
+        float const facing = caster->GetOrientation();
+        float const alongX = std::cos(facing);
+        float const alongY = std::sin(facing);
+        float const along = (target->GetPositionX() - caster->GetPositionX()) * alongX +
+            (target->GetPositionY() - caster->GetPositionY()) * alongY;
+        float fromX = caster->GetPositionX() + along * alongX;
+        float fromY = caster->GetPositionY() + along * alongY;
+
+        if (target->GetExactDist2d(fromX, fromY) < 0.1f)
+        {
+            fromX = target->GetPositionX() - alongY;
+            fromY = target->GetPositionY() + alongX;
+        }
+
+        SpellEffectInfo const& effect = GetSpellInfo()->Effects[effIndex];
+        target->KnockbackFrom(fromX, fromY, float(effect.MiscValue), float(effect.MiscValueB));
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_primalist_magma_fissure_knockback::HandleKnockback, EFFECT_1,
+            SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
 }
 
 void AddSC_AscensionPrimalistMagmaFissure()
 {
+    RegisterSpellScript(spell_primalist_magma_fissure_knockback);
     new primalist_magma_fissure_metadata();
     new primalist_magma_fissure_instant_cast();
 }
