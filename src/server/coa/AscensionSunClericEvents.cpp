@@ -15,6 +15,15 @@
 namespace
 {
 using namespace AscensionSunCleric;
+void ResetJusticeAfterCast(Player* player)
+{
+    ObjectGuid const owner = player->GetGUID();
+    State(player).scheduler.Schedule(0ms, [owner](TaskContext)
+    {
+        if (Player* caster = ObjectAccessor::FindPlayer(owner))
+            Reduce(caster, 520359, INT32_MAX);
+    });
+}
 bool Vow(uint32 id)
 {
     return std::find(std::begin(SunClericVows), std::end(SunClericVows), id) != std::end(SunClericVows);
@@ -304,7 +313,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
                 break;
             }
             case 806024: Cast(player,target,806025); break;
-            case 806058: Reduce(player,520359,INT32_MAX); break;
+            case 806058: ResetJusticeAfterCast(player); break;
             case 804629: Cast(player,player,807299); break;
             case 707077: Cast(player,target,804405); break;
             case 802935: Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),Amount(504619))); break;
