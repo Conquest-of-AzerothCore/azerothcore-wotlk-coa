@@ -43,9 +43,10 @@ void SyncReplacements(Player* player)
         else if (Family(info, 1, 32768) && !IsArrow(info) && id != HexfireWrath)
         {
             selected = true;
-            if (player->HasAura(HexfireReady))
+            bool const top = id == KnownRank(player, id);
+            if (top && player->HasAura(HexfireReady))
                 child = HexfireWrath;
-            else if (player->HasAura(Shadowhunter) || player->HasAura(ArrowTalent))
+            else if (top && (player->HasAura(Shadowhunter) || player->HasAura(ArrowTalent)))
             {
                 child = Arrow;
                 for (uint32 next = sSpellMgr->GetNextSpellInChain(child); next;
