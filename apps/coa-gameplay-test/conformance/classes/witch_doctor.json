@@ -1920,12 +1920,20 @@
       },
       "gate_timing": "start",
       "trigger_only_after": true,
-      "before_expected": 0,
-      "expected": -61,
+      "before_expected": 130,
+      "expected": 69,
       "expected_gain": -61,
       "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "Spirit Glaive 562719 (2000 ms cast, DurationIndex 28 = 5000 ms, 20000 ms category cooldown, 10% mana, cone TARGET_UNIT_CONE_ENEMY_24, SpellFamilyFlags[0] 33554432): Effect[0] SCHOOL_DAMAGE, Effect[1] (periodic trigger of 806616) is dummied at load (AscensionWitchDoctorCompletion.cpp:328-331), Effect[2] aura 143 rewritten to SPELL_AURA_MOD_RESISTANCE (Completion.cpp:331-332) with the amount set to -(level + 1) = -61 at AscensionWitchDoctorAuras.cpp:164-165, Shadow school (misc 32). ${1*$PL+1} = 61 at level 60. The dummy's Shadow resistance (school 5, Unit::GetResistance) is read before (no cast: its own base, judged as the gain's base) and 2600 ms after one real cast at it (the 2000 ms cast ends, the aura is on): the gain is -61. Control: the uncast before phase."
+      "observe_source": "Spirit Glaive 562719 (2000 ms cast, DurationIndex 28 = 5000 ms, 20000 ms category cooldown, 10% mana, cone TARGET_UNIT_CONE_ENEMY_24, SpellFamilyFlags[0] 33554432): Effect[0] SCHOOL_DAMAGE, Effect[1] (periodic trigger of 806616) is dummied at load (AscensionWitchDoctorCompletion.cpp:328-331), Effect[2] aura 143 rewritten to SPELL_AURA_MOD_RESISTANCE (Completion.cpp:331-332) with the amount set to -(level + 1) = -61 at AscensionWitchDoctorAuras.cpp:164-165, Shadow school (misc 32). ${1*$PL+1} = 61 at level 60. The dummy's Shadow resistance (school 5, Unit::GetResistance) is read before (no cast: its own base, judged as the gain's base) and 2600 ms after one real cast at it (the 2000 ms cast ends, the aura is on): the gain is -61. Control: the uncast before phase. Cycle 5 (M-25, lead L): the resistance stat is clamped at 0 (Object.cpp:793, SetStatInt32Value) and the dummy base is 0, so a -61 debuff read 0. Precondition fixture: Shadow Protection 48169 on the dummy (aura 143, +130 Shadow Resistance; no real caster in the fixture can buff a hostile dummy). Before 130 (fixture, no cast: the control arm), after 130 - 61 = 69.",
+      "phase_auras": [
+        [
+          48169,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ]
     },
     {
       "spell": 562719,
@@ -2575,6 +2583,9 @@
       "target": "caster",
       "measure_actor": "caster",
       "gate_spell": 707335,
+      "learn": [
+        301175
+      ],
       "metric": "run_speed_rate",
       "fields": {},
       "before_expected": 1.0,
@@ -2583,7 +2594,7 @@
       "tolerance": 0.005,
       "wait_ms": 2200,
       "expire_ms": 14000,
-      "observe_source": "AscensionWitchDoctorCompletion.cpp:129-135 (SyncSpirits): while Pernicious 707335 (the $?s707335 condition, SpiritWalk) is known and the caster holds Spirits, Spirit speed 561071 (aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 3 + 1 = 4 = $561071s1, StackAmount 5) is added with one stack per Spirit. Both phases cast a real Spirit in a Bottle 801696 (301175 learned as the Spirit source): without 707335 (before phase, the control) the run speed rate reads 1.0; expire_ms 14000 lets the first Spirit (12000 ms) end; with 707335 learned between the phases one Spirit gives 1.04 within the 0.005 ratio tolerance (the float32 speed rate)."
+      "observe_source": "AscensionWitchDoctorCompletion.cpp:129-135 (SyncSpirits): while Pernicious 707335 (the $?s707335 condition, SpiritWalk) is known and the caster holds Spirits, Spirit speed 561071 (aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 3 + 1 = 4 = $561071s1, StackAmount 5) is added with one stack per Spirit. Both phases cast a real Spirit in a Bottle 801696 (301175 learned as the Spirit source): without 707335 (before phase, the control) the run speed rate reads 1.0; expire_ms 14000 lets the first Spirit (12000 ms) end; with 707335 learned between the phases one Spirit gives 1.04 within the 0.005 ratio tolerance (the float32 speed rate). Cycle 5 (M-25, lead L): the entry learns 301175 like its 503707 and 572383 siblings; without it neither phase held a Spirit (incorrect test)."
     },
     {
       "spell": 503707,
