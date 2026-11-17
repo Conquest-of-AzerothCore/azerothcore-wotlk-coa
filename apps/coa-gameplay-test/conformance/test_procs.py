@@ -1394,6 +1394,7 @@ class OffHandTrialTests(unittest.TestCase):
         entry = next(entry for entry in CLASS_FILE['procs'] if entry['aura'] == 560648)
         return {**entry, 'trial_hand': 1, **changes}
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_off_hand_trials_read_hand_one_at_the_off_hand_speed(self):
         class_file = self.dual_wielding()
         plan = proc_plan(class_file, self.entry())
@@ -1406,11 +1407,13 @@ class OffHandTrialTests(unittest.TestCase):
         self.assertEqual(reads[labels['attempts']]['hand'], 1)
         self.assertIn('off-hand melee hits', expectation.rule)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_main_hand_trials_stay_the_default(self):
         _, [expectation, *_] = proc_scenario(CLASS_FILE, next(entry for entry in CLASS_FILE['procs']
                                                               if entry['aura'] == 560648))
         self.assertIn('main-hand melee hits', expectation.rule)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_off_hand_trials_need_an_off_hand_weapon_and_a_plain_attack_trigger(self):
         with self.assertRaises(ValueError):
             proc_plan(CLASS_FILE, self.entry())

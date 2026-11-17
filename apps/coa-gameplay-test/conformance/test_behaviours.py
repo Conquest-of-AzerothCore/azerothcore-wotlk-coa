@@ -5617,6 +5617,7 @@ class CastGateScenarioTests(unittest.TestCase):
         self.assertEqual(statuses({**gated, blocked.label: float(NO_CAST_FAILURE)}), ['alert', 'ok'])
         self.assertEqual(statuses({**gated, allowed.label: float(SPELL_FAILED_TARGET_AURASTATE)}), ['ok', 'alert'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_stated_dummy_distance_places_the_dummy_and_names_it_in_the_contract(self):
         entry = {**titanstrike_cast_gate_entry(), 'dummy_distance': 20}
         scenario, _ = cast_gate_scenario(CLASS_FILE, cast_gate_spec(entry))
@@ -5624,10 +5625,12 @@ class CastGateScenarioTests(unittest.TestCase):
         self.assertEqual(scenario['creatures'][0]['distance'], 20.0)
         self.assertIn('The dummy stands 20 yd from the caster.', scenario['contract'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_without_a_dummy_distance_the_dummy_keeps_the_melee_placement(self):
         scenario, _ = cast_gate_scenario(CLASS_FILE, cast_gate_spec(titanstrike_cast_gate_entry()))
         self.assertEqual(scenario['creatures'], [creature_fixture(CLASS_FILE)])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_dummy_distance_outside_the_range_is_refused(self):
         entry = {**titanstrike_cast_gate_entry(), 'dummy_distance': 0}
         with self.assertRaises(ValueError):

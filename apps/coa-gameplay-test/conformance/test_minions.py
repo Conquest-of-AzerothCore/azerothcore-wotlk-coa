@@ -365,6 +365,7 @@ class MinionPlanTest(unittest.TestCase):
         chance = proc_plan(NECROMANCER, entry).chance_pct
         return {**entry, 'residual_target': 0.001, 'min_detectable': 2 * rate_band(chance / 100) * 100, **options}
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_residual_target_under_sized_plan_fails_with_its_attempt_count(self):
         entry = self.residual_force()
         chance = proc_plan(NECROMANCER, copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))).chance_pct
@@ -372,6 +373,7 @@ class MinionPlanTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, f'under-sized for residual_target 0.001: needs {needed} attempts'):
             proc_plan(NECROMANCER, entry)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_residual_target_sized_by_its_parts_plans_and_models_the_confidence(self):
         entry = self.residual_force()
         plain = proc_plan(NECROMANCER, copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE)))
@@ -390,6 +392,7 @@ class MinionPlanTest(unittest.TestCase):
         self.assertNotIn('residual', plain_expectations[0].model)
         self.assertNotIn('residual_target', plain_expectations[0].rule)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_residual_target_needs_a_band_and_a_shift_outside_it(self):
         entry = self.residual_force()
         for broken in ({'band': False}, {'residual_target': 0}, {'residual_target': 1.5}, {'residual_target': True},

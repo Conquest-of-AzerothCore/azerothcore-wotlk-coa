@@ -487,6 +487,7 @@ class IgnoredArmorTest(unittest.TestCase):
                 reference_hit_model(self.witch_hunter, STAKE_RANK)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitScenarioTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -1350,17 +1351,20 @@ class WeaponSchoolHitTests(unittest.TestCase):
         return {**{key: value for key, value in witch_hunter.items() if key != 'weapon_school_hits'},
                 **({'weapon_school_hits': [self.QUICKDRAW]} if listed else {})}
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_an_unlisted_weapon_and_school_hit_stays_unmodelled(self):
         with self.assertRaises(Unmodelled) as raised:
             reference_hit_model(self.class_file(False), self.QUICKDRAW)
         self.assertIn('several hit models', raised.exception.reason)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_listed_hit_adds_the_weapon_percent_part_to_the_school_part(self):
         model = reference_hit_model(self.class_file(True), self.QUICKDRAW)
         self.assertEqual(model.kind, 'school')
         self.assertEqual(set(model.displayed), {'$s1', '${$m2+0+$RAP*0.2}'})
         self.assertGreater(model.tooltip_mean, 250.4 + 100)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_mutant_a_listed_hit_without_its_weapon_part_is_refused_not_judged_on_the_school_part(self):
         dropped = lambda readout, effects, caster, weapon: (readout, None)
         with mock.patch('hits.script_weapon_part', side_effect=dropped), self.assertRaises(Unmodelled):
@@ -1397,6 +1401,7 @@ class WeaponSchoolPercentTests(unittest.TestCase):
         for class_id in (TEMPLAR_CLASS_ID, 23):
             self.assertNotIn('weapon_school_percents', load_class_file(class_id))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_literal_percent_adds_three_weapon_hits_to_the_school_part(self):
         listed = self.class_file(self.entry())
         model = reference_hit_model(listed, self.HEARTSEEKING)
@@ -1409,31 +1414,38 @@ class WeaponSchoolPercentTests(unittest.TestCase):
         weapon_mean = (weapon.min_damage + weapon.max_damage) / 2 + caster.rap / 14.0 * weapon.speed_ms / 1000
         self.assertAlmostEqual(model.tooltip_mean - school.tooltip_mean, 3 * weapon_mean, delta=0.05)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_listed_hit_without_its_percent_stays_refused(self):
         self.assertIn('shows no weapon value', self.refused(self.class_file(None)))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_percent_absent_from_the_text_is_refused(self):
         self.assertIn('shows no literal 200%', self.refused(self.class_file(self.entry(percent=200))))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_source_that_is_not_the_streamed_row_is_refused(self):
         reason = self.refused(self.class_file(self.entry(source='rev_20260908_07_witch_hunter_completion.sql')))
         self.assertIn('is not the streamed text row', reason)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_percent_that_is_not_a_whole_number_is_refused(self):
         for percent in ('300', 300.0, 0, True):
             self.assertIn('positive whole percent', self.refused(self.class_file(self.entry(percent=percent))))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_rank_that_shows_its_percent_as_a_token_is_refused(self):
         tokened = {str(self.QUICKDRAW): {'percent': 100, 'source': self.SOURCE}}
         reason = self.refused(self.class_file(tokened, (self.QUICKDRAW,)), self.QUICKDRAW)
         self.assertIn('as a token', reason)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_mutant_an_ignored_percent_is_refused_not_judged_on_the_school_part(self):
         ignored = lambda class_file, records, rank_id, effects, readout: readout
         with mock.patch('hits.with_literal_weapon_percent', side_effect=ignored):
             self.assertIn('shows no weapon value', self.refused(self.class_file(self.entry())))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class UnresistedRankHitTests(unittest.TestCase):
     DESECRATE_MAX_RANK = 681211
     SHADOW_SCHOOL_MASK = 32
