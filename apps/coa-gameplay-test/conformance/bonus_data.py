@@ -422,4 +422,3 @@ def coefficient_modifiers(records, family_spells: dict[int, tuple[str, tuple[int
                 found.append((candidate, SP_TERM if misc in SPELL_POWER_MODIFIERS else AP_TERM))
                 break
     return found
-
