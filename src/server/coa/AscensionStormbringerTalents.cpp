@@ -23,6 +23,8 @@ enum StormbringerTalentSpells : uint32
 {
     SPELL_CLOUDBURST = 801838,
     SPELL_CLOUDBURST_KNOCKBACK = 802385,
+    SPELL_RIDE_THE_LIGHTNING = 800099,
+    SPELL_RIDE_THE_LIGHTNING_LEAP = 800139,
     SPELL_SHOCK = 804020,
     SPELL_SHOCK_DOT = 560336,
     SPELL_SHOCK_HIDDEN_PASSIVE = 707058,
@@ -199,6 +201,10 @@ public:
         if (player && player->getClass() == CLASS_STORMBRINGER && info->SpellFamilyName == 22 &&
             info->Id == SPELL_CLOUDBURST && !spell->IsTriggered())
             player->CastSpell(player, SPELL_CLOUDBURST_KNOCKBACK, true);
+
+        if (player && player->getClass() == CLASS_STORMBRINGER && info->Id == SPELL_RIDE_THE_LIGHTNING &&
+            !spell->IsTriggered())
+            player->CastSpell(player, SPELL_RIDE_THE_LIGHTNING_LEAP, true);
 
         if (player && player->getClass() == CLASS_STORMBRINGER && IsConjureStorm(info) &&
             !spell->IsTriggered() && player->HasSpell(SPELL_CONJURATION_MASTERY))
