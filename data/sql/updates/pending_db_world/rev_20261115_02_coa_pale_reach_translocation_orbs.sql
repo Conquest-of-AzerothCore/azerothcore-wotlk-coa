@@ -4,11 +4,12 @@ UPDATE `gameobject_template` SET `data2` = 3000 WHERE `entry` IN (2310418, 23104
 
 -- Namarien Sanctuary had two orbs at the foot of Lady Amaranthe's stairs (VGzezmaiv8A 20:24-20:30, V10AMkhYl6c
 -- 9:12): the left one goes up to the Tilted Cliffs gazebo, the right one to Stormwind's Park (RIEMlZSgbQw
--- 1:49:36-1:49:56), whose orb in the high-elf gazebo leads back (VGzezmaiv8A 21:04-21:14).
+-- 1:49:36-1:49:56), whose orb in the high-elf gazebo leads back (VGzezmaiv8A 21:04-21:14). Each Namarien orb
+-- stands on the centre of its floor rosette (placed in game by the user).
 DELETE FROM `gameobject` WHERE `guid` IN (9995010, 9995011, 9995012);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `Comment`) VALUES
-(9995010, 2310419, 0, 0, 0, 1, 1, -7547.78, 110.13, 268.642, 4.9, 0, 0, 0.637765, -0.770231, 300, 0, 1, 'Orb of Translocation, Namarien Sanctuary, left of the hall entrance below Lady Amaranthe'),
-(9995011, 2310420, 0, 0, 0, 1, 1, -7544.65, 137.22, 268.641, 1.15, 0, 0, 0.543833, 0.839194, 300, 0, 1, 'Orb of Translocation, Namarien Sanctuary, right of the hall entrance below Lady Amaranthe'),
+(9995010, 2310419, 0, 0, 0, 1, 1, -7551.868, 107.819, 268.635, 4.9, 0, 0, 0.637765, -0.770231, 300, 0, 1, 'Orb of Translocation, Namarien Sanctuary, left of the hall entrance below Lady Amaranthe'),
+(9995011, 2310420, 0, 0, 0, 1, 1, -7547.772, 140.907, 268.636, 1.15, 0, 0, 0.543833, 0.839194, 300, 0, 1, 'Orb of Translocation, Namarien Sanctuary, right of the hall entrance below Lady Amaranthe'),
 (9995012, 2310421, 0, 0, 0, 1, 1, -8681.78, 1103.44, 96.073, 1.5708, 0, 0, 0.707107, 0.707107, 300, 0, 1, 'Orb of Translocation, Stormwind City, The Park, in the high-elf gazebo');
 
 DELETE FROM `gameobject_template_addon` WHERE `entry` = 2310420;
