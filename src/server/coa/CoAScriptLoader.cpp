@@ -326,6 +326,7 @@ void AddSC_AscensionPrimalistBarrier();
 void AddSC_AscensionPrimalistGrove();
 void AddSC_AscensionPrimalistMountainFury();
 void AddSC_AscensionPrimalistBoulder();
+void AddSC_AscensionPrimalistMagmaFissure();
 void AddSC_AscensionPrimalistUrsoc();
 void AddSC_AscensionPrimalistTorn();
 void AddSC_AscensionPrimalistRexxarMight();
@@ -635,6 +636,7 @@ void AddCoAScripts()
     AddSC_AscensionPrimalistGrove();
     AddSC_AscensionPrimalistMountainFury();
     AddSC_AscensionPrimalistBoulder();
+    AddSC_AscensionPrimalistMagmaFissure();
     AddSC_AscensionPrimalistUrsoc();
     AddSC_AscensionPrimalistTorn();
     AddSC_AscensionPrimalistRexxarMight();
