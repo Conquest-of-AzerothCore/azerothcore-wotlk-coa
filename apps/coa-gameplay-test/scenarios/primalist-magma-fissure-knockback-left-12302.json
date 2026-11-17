@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Primalist Magma Fissure knocks an enemy on the left of the line further left (#12302)",
+  "contract": [
+    "#12302 Magma Fissure: the tooltip says the wave 'knocks all enemies to the side'. Effect 1 of every rank is",
+    "SPELL_EFFECT_SCRIPT_EFFECT with MiscValue 15 and MiscValueB 5 and had no script. Maintainer decision: each",
+    "enemy is knocked away from the fissure's centre line, the caster's facing, towards the side it stands on,",
+    "using the effect's values as horizontal speed 15 and vertical speed 5 (about 7.8 yards); an enemy exactly on",
+    "the line goes to the caster's right. Here the caster faces +x (orientation 0) and the target stands 8 yards",
+    "ahead and 1 yard to the caster's left, so it must move +y by several yards while staying near its x.",
+    "TARGET_UNIT_CONE_ENEMY_24 selects a 24 degree cone, so the target has to stay within 12 degrees of the",
+    "caster's facing to be hit. The case uses the flat ground and training dummy entry 36 of chronomancer-waves-of-",
+    "time-immediate-knockback, because MotionMaster::MoveKnockbackFrom shortens the hop against rising terrain."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 36,
+      "health": 1000000,
+      "level": 60,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803829
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 530,
+      "x": 7633.86,
+      "y": -6811.22,
+      "z": 79.5987,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "let the teleport settle",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "position_y",
+      "save_as": "y0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "position_x",
+      "save_as": "x0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_log_count",
+      "save_as": "logs",
+      "spell": 803829,
+      "caster": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803829
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Magma Fissure hit the target",
+      "actor": "primalist",
+      "metric": "spell_log_count",
+      "spell": 803829,
+      "caster": "primalist",
+      "target": "target",
+      "relative_to": "logs",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "let the knockback land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the target was knocked to the left",
+      "actor": "target",
+      "metric": "position_y",
+      "relative_to": "y0",
+      "min": 5.0,
+      "max": 10.0
+    },
+    {
+      "action": "assert",
+      "label": "the knockback is sideways, not away from the caster",
+      "actor": "target",
+      "metric": "position_x",
+      "relative_to": "x0",
+      "min": -1.5,
+      "max": 1.5
+    }
+  ]
+}
