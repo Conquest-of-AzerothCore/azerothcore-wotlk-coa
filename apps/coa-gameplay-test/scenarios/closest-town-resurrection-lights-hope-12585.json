@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Resurrect at Closest Town near Light's Hope Chapel lands on the ground (#12585)",
+  "contract": [
+    "#12585: 'resurrect at closest town' near Light's Hope Chapel put the player under the map; the report's own",
+    "location is 2253.4, -5344.9 at z -12269. Resurrect at Closest Town 84423 (AscensionClosestResurrection.cpp)",
+    "teleports to the nearest taxi node of the player's team. For the Horde near Light's Hope that is TaxiNodes.dbc",
+    "node 15 'Eastern Plaguelands' at 2253.4, -5344.9, z 83.38, whose z lies below the terrain there, so the player",
+    "falls through the world. Expected: the player is resurrected at node 15's x and y on the surface (no lower",
+    "than the map's terrain height there) and is still alive and standing there 5 seconds later. A Horde warrior",
+    "dies at the Alliance flight point 67, about 18 yards from node 15 and 78 yards from Horde node 68."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 2271.09,
+    "y": -5340.8,
+    "z": 87.11,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 4000
+    },
+    {
+      "action": "die",
+      "actor": "horde"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player is dead",
+      "actor": "horde",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "horde",
+      "spell": 84423,
+      "label": "resurrect at the closest town"
+    },
+    {
+      "action": "assert",
+      "label": "the player is resurrected",
+      "actor": "horde",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the destination is Horde taxi node 15",
+      "actor": "horde",
+      "metric": "position_x",
+      "min": 2252.4,
+      "max": 2254.4,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "give a fall through the world time to show",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player stands on the surface, not under the map",
+      "actor": "horde",
+      "metric": "position_z",
+      "min": 70,
+      "max": 130
+    },
+    {
+      "action": "assert",
+      "label": "the player is still alive",
+      "actor": "horde",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}
