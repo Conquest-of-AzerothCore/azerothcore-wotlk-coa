@@ -260,6 +260,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].Effect = info->Effects[EFFECT_1].Effect = 0;
     if (id == Spirit)
         periodic(EFFECT_2, 500);
+    if (id == ThistleField)
+        info->PreventionType = SPELL_PREVENTION_TYPE_NONE;
+    if ((id == PotentMixes || id == PotentMixesGreater) &&
+        info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_TOTAL_THREAT)
+    {
+        info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_THREAT;
+        info->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    }
     if (id == SpiritCast || id == SpiritChance || id == SpiritVisual)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             dummy(i);

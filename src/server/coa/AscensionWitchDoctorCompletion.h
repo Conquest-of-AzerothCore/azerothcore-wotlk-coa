@@ -174,6 +174,8 @@ enum DoctorSpells : uint32
     FishField = 803269,
     BonesField = 803697,
     ThistleField = 802771,
+    PotentMixes = 503748,
+    PotentMixesGreater = 504888,
     PotionShrooms = 802973,
     PotionFish = 802969,
     PotionBones = 802971,
