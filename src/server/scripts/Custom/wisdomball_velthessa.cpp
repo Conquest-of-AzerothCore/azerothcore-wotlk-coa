@@ -201,6 +201,12 @@ enum class VelthessaState : uint8
 
 void FrostHit(Creature* source, Player* target, float pct, bool chill)
 {
+    if (target->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_FROST))
+    {
+        source->SendSpellMiss(target, SPELL_CHILLED, SPELL_MISS_IMMUNE);
+        return;
+    }
+
     SpellInfo const* chillInfo = sSpellMgr->GetSpellInfo(SPELL_CHILLED);
     uint32 const damage = uint32(target->GetMaxHealth() * pct / 100.0f);
     SpellNonMeleeDamage log(source, target, chillInfo, SPELL_SCHOOL_MASK_FROST);

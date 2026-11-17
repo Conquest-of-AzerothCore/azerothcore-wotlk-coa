@@ -1,36 +1,35 @@
 DELETE FROM `map_dbc` WHERE `ID` IN (933, 4417, 4418);
-REPLACE INTO `map_dbc` (`ID`, `Directory`, `InstanceType`, `Flags`, `PVP`, `MapName_Lang_enUS`, `MapName_Lang_enGB`, `MapName_Lang_koKR`, `MapName_Lang_frFR`, `MapName_Lang_deDE`, `MapName_Lang_enCN`, `MapName_Lang_zhCN`, `MapName_Lang_enTW`, `MapName_Lang_zhTW`, `MapName_Lang_esES`, `MapName_Lang_esMX`, `MapName_Lang_ruRU`, `MapName_Lang_ptPT`, `MapName_Lang_ptBR`, `MapName_Lang_itIT`, `MapName_Lang_Unk`, `MapName_Lang_Mask`, `AreaTableID`, `MapDescription0_Lang_enUS`, `MapDescription0_Lang_enGB`, `MapDescription0_Lang_koKR`, `MapDescription0_Lang_frFR`, `MapDescription0_Lang_deDE`, `MapDescription0_Lang_enCN`, `MapDescription0_Lang_zhCN`, `MapDescription0_Lang_enTW`, `MapDescription0_Lang_zhTW`, `MapDescription0_Lang_esES`, `MapDescription0_Lang_esMX`, `MapDescription0_Lang_ruRU`, `MapDescription0_Lang_ptPT`, `MapDescription0_Lang_ptBR`, `MapDescription0_Lang_itIT`, `MapDescription0_Lang_Unk`, `MapDescription0_Lang_Mask`, `MapDescription1_Lang_enUS`, `MapDescription1_Lang_enGB`, `MapDescription1_Lang_koKR`, `MapDescription1_Lang_frFR`, `MapDescription1_Lang_deDE`, `MapDescription1_Lang_enCN`, `MapDescription1_Lang_zhCN`, `MapDescription1_Lang_enTW`, `MapDescription1_Lang_zhTW`, `MapDescription1_Lang_esES`, `MapDescription1_Lang_esMX`, `MapDescription1_Lang_ruRU`, `MapDescription1_Lang_ptPT`, `MapDescription1_Lang_ptBR`, `MapDescription1_Lang_itIT`, `MapDescription1_Lang_Unk`, `MapDescription1_Lang_Mask`, `LoadingScreenID`, `MinimapIconScale`, `CorpseMapID`, `CorpseX`, `CorpseY`, `TimeOfDayOverride`, `ExpansionID`, `RaidOffset`, `MaxPlayers`) VALUES
+INSERT INTO `map_dbc` (`ID`, `Directory`, `InstanceType`, `Flags`, `PVP`, `MapName_Lang_enUS`, `MapName_Lang_enGB`, `MapName_Lang_koKR`, `MapName_Lang_frFR`, `MapName_Lang_deDE`, `MapName_Lang_enCN`, `MapName_Lang_zhCN`, `MapName_Lang_enTW`, `MapName_Lang_zhTW`, `MapName_Lang_esES`, `MapName_Lang_esMX`, `MapName_Lang_ruRU`, `MapName_Lang_ptPT`, `MapName_Lang_ptBR`, `MapName_Lang_itIT`, `MapName_Lang_Unk`, `MapName_Lang_Mask`, `AreaTableID`, `MapDescription0_Lang_enUS`, `MapDescription0_Lang_enGB`, `MapDescription0_Lang_koKR`, `MapDescription0_Lang_frFR`, `MapDescription0_Lang_deDE`, `MapDescription0_Lang_enCN`, `MapDescription0_Lang_zhCN`, `MapDescription0_Lang_enTW`, `MapDescription0_Lang_zhTW`, `MapDescription0_Lang_esES`, `MapDescription0_Lang_esMX`, `MapDescription0_Lang_ruRU`, `MapDescription0_Lang_ptPT`, `MapDescription0_Lang_ptBR`, `MapDescription0_Lang_itIT`, `MapDescription0_Lang_Unk`, `MapDescription0_Lang_Mask`, `MapDescription1_Lang_enUS`, `MapDescription1_Lang_enGB`, `MapDescription1_Lang_koKR`, `MapDescription1_Lang_frFR`, `MapDescription1_Lang_deDE`, `MapDescription1_Lang_enCN`, `MapDescription1_Lang_zhCN`, `MapDescription1_Lang_enTW`, `MapDescription1_Lang_zhTW`, `MapDescription1_Lang_esES`, `MapDescription1_Lang_esMX`, `MapDescription1_Lang_ruRU`, `MapDescription1_Lang_ptPT`, `MapDescription1_Lang_ptBR`, `MapDescription1_Lang_itIT`, `MapDescription1_Lang_Unk`, `MapDescription1_Lang_Mask`, `LoadingScreenID`, `MinimapIconScale`, `CorpseMapID`, `CorpseX`, `CorpseY`, `TimeOfDayOverride`, `ExpansionID`, `RaidOffset`, `MaxPlayers`) VALUES
 (933, 'dreamlikedungeon', 1, 0, 0, 'Regret''s Chasm', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712190, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, 1032, 1, 933, -11359, -3072.89, -1, 0, 0, 5),
 (4417, 'Karazahn', 1, 1, 0, 'The Guardian''s Library', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712190, 3457, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, 200, 1, 4417, -11173.841, -1900.9021, -1, 0, 0, 5),
-(4418, 'Azeroth', 1, 0, 0, 'Dalaran Crater', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712190, 36, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, 4, 1, 4418, 322, 2.6e+02, -1, 0, 0, 5);
+(4418, 'Azeroth', 1, 0, 0, 'Dalaran Crater', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712190, 36, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, 4, 1, 4418, 322, 260, -1, 0, 0, 5);
 DELETE FROM `mapdifficulty_dbc` WHERE `ID` IN (4417, 4418);
-REPLACE INTO `mapdifficulty_dbc` (`ID`, `MapID`, `Difficulty`, `Message_Lang_enUS`, `Message_Lang_enGB`, `Message_Lang_koKR`, `Message_Lang_frFR`, `Message_Lang_deDE`, `Message_Lang_enCN`, `Message_Lang_zhCN`, `Message_Lang_enTW`, `Message_Lang_zhTW`, `Message_Lang_esES`, `Message_Lang_esMX`, `Message_Lang_ruRU`, `Message_Lang_ptPT`, `Message_Lang_ptBR`, `Message_Lang_itIT`, `Message_Lang_Unk`, `Message_Lang_Mask`, `RaidDuration`, `MaxPlayers`, `Difficultystring`) VALUES
+INSERT INTO `mapdifficulty_dbc` (`ID`, `MapID`, `Difficulty`, `Message_Lang_enUS`, `Message_Lang_enGB`, `Message_Lang_koKR`, `Message_Lang_frFR`, `Message_Lang_deDE`, `Message_Lang_enCN`, `Message_Lang_zhCN`, `Message_Lang_enTW`, `Message_Lang_zhTW`, `Message_Lang_esES`, `Message_Lang_esMX`, `Message_Lang_ruRU`, `Message_Lang_ptPT`, `Message_Lang_ptBR`, `Message_Lang_itIT`, `Message_Lang_Unk`, `Message_Lang_Mask`, `RaidDuration`, `MaxPlayers`, `Difficultystring`) VALUES
 (4417, 4417, 0, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, 0, 5, 'DUNGEON_DIFFICULTY_5PLAYER'),
 (4418, 4418, 0, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712188, 0, 5, 'DUNGEON_DIFFICULTY_5PLAYER');
 DELETE FROM `instance_template` WHERE `map` IN (933, 4417, 4418);
-REPLACE INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES
+INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES
 (933, 0, 'instance_wisdomball_regrets_chasm', 1),
 (4417, 0, 'instance_guardians_library', 0),
 (4418, 0, 'instance_wisdomball_dalaran_crater', 1);
-DELETE FROM `dungeon_access_template` WHERE `map_id` IN (933, 4417, 4418);
-INSERT IGNORE INTO `dungeon_access_template` (`map_id`, `difficulty`, `min_level`, `max_level`, `min_avg_item_level`, `comment`) VALUES
+DELETE FROM `dungeon_access_template` WHERE (`map_id`, `difficulty`) IN ((933, 0), (4417, 0), (4418, 0));
+INSERT INTO `dungeon_access_template` (`map_id`, `difficulty`, `min_level`, `max_level`, `min_avg_item_level`, `comment`) VALUES
 (933, 0, 30, 0, 0, 'Regret''s Chasm (Wisdomball questline Act III) - 5man'),
 (4417, 0, 30, 0, 0, 'The Guardian''s Library (Wisdomball questline) - 5man'),
 (4418, 0, 30, 0, 0, 'Dalaran Crater (Wisdomball questline Act II) - 5man');
 DELETE FROM `game_graveyard` WHERE `ID` IN (9417001, 9417002);
-REPLACE INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
+INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
 (9417001, 933, -11359, -3072.89, 4.55, 'Regret''s Chasm - Pools of the Eidola (Wisdomball questline)'),
 (9417002, 4418, 215.21832, 166.23674, 45.269577, 'Dalaran Crater (Wisdomball questline copy, map 4418)');
-DELETE FROM `graveyard_zone` WHERE `ID` IN (9417001, 9417002);
-REPLACE INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
+DELETE FROM `graveyard_zone` WHERE (`ID`, `GhostZone`) IN ((9417001, 10060), (9417002, 36));
+INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 (9417001, 10060, 0, 'Regret''s Chasm - Pools of the Eidola'),
 (9417002, 36, 0, 'Dalaran Crater (Wisdomball questline copy, map 4418) - only wins on map 4418');
-DELETE FROM `creaturedisplayinfo_dbc` WHERE `ID` = 999417;
-REPLACE INTO `creaturedisplayinfo_dbc` (`ID`, `ModelID`, `SoundID`, `ExtendedDisplayInfoID`, `CreatureModelScale`, `CreatureModelAlpha`, `TextureVariation_1`, `TextureVariation_2`, `TextureVariation_3`, `PortraitTextureName`, `BloodLevel`, `BloodID`, `NPCSoundID`, `ParticleColorID`, `CreatureGeosetData`, `ObjectEffectPackageID`) VALUES
+DELETE FROM `creaturedisplayinfo_dbc` WHERE `ID` IN (999417);
+INSERT INTO `creaturedisplayinfo_dbc` (`ID`, `ModelID`, `SoundID`, `ExtendedDisplayInfoID`, `CreatureModelScale`, `CreatureModelAlpha`, `TextureVariation_1`, `TextureVariation_2`, `TextureVariation_3`, `PortraitTextureName`, `BloodLevel`, `BloodID`, `NPCSoundID`, `ParticleColorID`, `CreatureGeosetData`, `ObjectEffectPackageID`) VALUES
 (999417, 111156, 0, 0, 1, 128, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0);
-DELETE FROM `gameobjectdisplayinfo_dbc` WHERE `ID` BETWEEN 9417001 AND 9419999;
-DELETE FROM `item_dbc` WHERE `ID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `item_dbc` (`ID`, `ClassID`, `SubclassID`, `Sound_Override_Subclassid`, `Material`, `DisplayInfoID`, `InventoryType`, `SheatheType`) VALUES
+DELETE FROM `item_dbc` WHERE `ID` IN (9417301, 9417303, 9417307, 9417310, 9417311, 9417312, 9417313, 9417314, 9417315, 9417316, 9417317, 9417318, 9417319, 9417320, 9417321, 9417322, 9417323, 9417324, 9417325, 9417326, 9417328, 9418001, 9418002, 9418003, 9418004, 9418005, 9418006, 9418011, 9418012, 9418013, 9418014, 9418015, 9418016, 9418021, 9418022, 9418023, 9418024, 9418025, 9418026, 9418031, 9418032, 9418033, 9418034, 9418035, 9418036, 9418041, 9418042, 9418043, 9418044, 9418045, 9418046, 9418051, 9418052, 9418053, 9418054, 9418055, 9418056, 9418061, 9418062, 9418063, 9418064, 9418065, 9418066, 9418071, 9418072, 9418073, 9418074, 9418075, 9418076, 9418081, 9418082, 9418083, 9418084, 9418085, 9418086, 9418091, 9418092, 9418093, 9418094, 9418095, 9418096, 9418101, 9418102, 9418103, 9418104, 9418105, 9418106, 9418111, 9418112, 9418113, 9418114, 9418115, 9418116, 9418121, 9418122, 9418123, 9418124, 9418125, 9418126, 9418131, 9418132, 9418133, 9418134, 9418135, 9418136, 9418141, 9418142, 9418143, 9418144, 9418145, 9418146, 9418151, 9418152, 9418153, 9418154, 9418155, 9418156, 9418161, 9418162, 9418163, 9418164, 9418165, 9418166);
+INSERT INTO `item_dbc` (`ID`, `ClassID`, `SubclassID`, `Sound_Override_Subclassid`, `Material`, `DisplayInfoID`, `InventoryType`, `SheatheType`) VALUES
 (9417301, 12, 0, -1, 7, 277, 0, 0),
 (9417303, 12, 0, -1, 0, 4592, 0, 0),
 (9417307, 12, 0, -1, 7, 139375, 0, 0),
@@ -154,19 +153,28 @@ REPLACE INTO `item_dbc` (`ID`, `ClassID`, `SubclassID`, `Sound_Override_Subclass
 (9418164, 4, 0, -1, 4, 138645, 2, 0),
 (9418165, 4, 0, -1, 4, 138645, 2, 0),
 (9418166, 4, 0, -1, 4, 138645, 2, 0);
-DELETE FROM `creature_model_info` WHERE `DisplayID` = 999417;
-REPLACE INTO `creature_model_info` (`DisplayID`, `BoundingRadius`, `CombatReach`, `Gender`, `DisplayID_Other_Gender`, `VerifiedBuild`) VALUES
+DELETE FROM `creature_model_info` WHERE `DisplayID` IN (80262, 97052, 98487, 130725, 130739, 131195, 132556, 139999, 141109, 142373, 999417);
+INSERT INTO `creature_model_info` (`DisplayID`, `BoundingRadius`, `CombatReach`, `Gender`, `DisplayID_Other_Gender`, `VerifiedBuild`) VALUES
+(80262, 0.6, 2, 2, 0, 0),
+(97052, 1, 2, 2, 0, 0),
+(98487, 1, 2.5, 0, 0, 0),
+(130725, 1, 1.5, 2, 0, NULL),
+(130739, 1, 1.5, 2, 0, NULL),
+(131195, 1, 1.5, 2, 0, NULL),
+(132556, 1, 1.5, 2, 0, NULL),
+(139999, 1, 1.5, 1, 0, NULL),
+(141109, 0.306, 1.5, 0, 0, 0),
+(142373, 0.6111, 2.0313, 2, 0, 0),
 (999417, 1, 1.5, 1, 0, 0);
-DELETE FROM `creature_template` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(9417001, 0, 0, 0, 0, 0, 'Khadgar''s Wisdomball', 'Last Apprentice of Medivh', NULL, 9417001, 30, 30, 0, 35, 3, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417002, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417002, 60, 60, 0, 35, 3, 1, 1.14286, 1, 1, 2e+01, 1, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1e+01, 1e+01, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417003, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417003, 60, 60, 0, 35, 3, 1, 1.14286, 1, 1, 2e+01, 1, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1e+01, 1e+01, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417004, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417006, 60, 60, 0, 35, 1, 1, 1.14286, 1, 1, 2e+01, 1, 0, 1, 2000, 2000, 1, 1, 8, 256, 0, 0, 0, 7, 4096, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1e+01, 1e+01, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417005, 0, 0, 0, 0, 0, 'Echo of Apprentice Delwyn', NULL, NULL, 0, 30, 30, 0, 35, 2, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417006, 0, 0, 0, 0, 0, 'Apprentice Delwyn', 'Kirin Tor', NULL, 0, 30, 30, 0, 35, 2, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417008, 0, 0, 0, 0, 0, 'Echo of Medivh', NULL, NULL, 0, 60, 60, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417009, 0, 0, 0, 0, 0, 'Echo of Young Khadgar', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
+(9417001, 0, 0, 0, 0, 0, 'Khadgar''s Wisdomball', 'Last Apprentice of Medivh', NULL, 9417001, 30, 30, 0, 35, 3, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417002, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417002, 60, 60, 0, 35, 3, 1, 1.14286, 1, 1, 20, 1, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 10, 10, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417003, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417003, 60, 60, 0, 35, 3, 1, 1.14286, 1, 1, 20, 1, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 10, 10, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417004, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417006, 60, 60, 0, 35, 1, 1, 1.14286, 1, 1, 20, 1, 0, 1, 2000, 2000, 1, 1, 8, 256, 0, 0, 0, 7, 4096, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 10, 10, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417005, 0, 0, 0, 0, 0, 'Echo of Apprentice Delwyn', NULL, NULL, 0, 30, 30, 0, 35, 2, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417006, 0, 0, 0, 0, 0, 'Apprentice Delwyn', 'Kirin Tor', NULL, 0, 30, 30, 0, 35, 2, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417008, 0, 0, 0, 0, 0, 'Echo of Medivh', NULL, NULL, 0, 60, 60, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417009, 0, 0, 0, 0, 0, 'Echo of Young Khadgar', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417010, 0, 0, 0, 0, 0, 'Restless Spirit of Karazhan', NULL, NULL, 0, 29, 30, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 1, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 6, 0, 9417010, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417020, 0, 0, 0, 0, 0, 'Eidolon of the Unwaking', NULL, NULL, 0, 32, 32, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7245, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 4.2, 3, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417021, 0, 0, 0, 0, 0, 'Gloomhorn Prowler', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.44625, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
@@ -175,53 +183,53 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 (9417024, 0, 0, 0, 0, 0, 'Chain-Gnawer', NULL, NULL, 0, 31, 32, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417025, 0, 0, 0, 0, 0, 'Memory of Kel''Thuzad', NULL, NULL, 0, 33, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 1, 0, 0.68, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 2.65, 3, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417026, 0, 0, 0, 0, 0, 'Memory of Archmage Arugal', NULL, NULL, 0, 33, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 1, 0, 0.61, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 2.65, 3, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417027, 0, 0, 0, 0, 0, 'Memory of the Council', NULL, NULL, 0, 33, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 1, 0, 0.63, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 2.915, 3, 1, 1, 0, 0, 1, -9417027, 0, '', NULL),
+(9417027, 0, 0, 0, 0, 0, 'Memory of the Council', NULL, NULL, 0, 33, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 1, 0, 0.63, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 2.915, 3, 1, 1, 0, 0, 1, 9417027, 0, '', NULL),
 (9417028, 0, 0, 0, 0, 0, 'Nightmare Husk', NULL, NULL, 0, 32, 33, 0, 14, 0, 1, 0.64, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 0.7, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417029, 0, 0, 0, 0, 0, 'Herald of Vel''thessa', NULL, NULL, 0, 34, 34, 0, 14, 0, 1, 1.14286, 1, 1, 14, 1, 0, 1.225, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 5.2, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_herald', NULL),
-(9417030, 0, 0, 0, 0, 0, 'Vel''thessa the Dream-Eater', NULL, NULL, 0, 63, 63, 0, 14, 0, 1, 1.14286, 1, 1, 2e+01, 3, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 'npc_wisdomball_velthessa', NULL),
-(9417032, 0, 0, 0, 0, 0, 'Medivh''s Floating Tome', NULL, NULL, 9417004, 30, 30, 0, 35, 1, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 0, 0, 0, 10, 1645215744, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417034, 0, 0, 0, 0, 0, 'Echo Trigger (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417035, 0, 0, 0, 0, 0, 'Spectral Archivist', NULL, NULL, 0, 30, 30, 0, 35, 0, 0.8, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417036, 0, 0, 0, 0, 0, 'Archive Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417030, 0, 0, 0, 0, 0, 'Vel''thessa the Dream-Eater', NULL, NULL, 0, 63, 63, 0, 14, 0, 1, 1.14286, 1, 1, 20, 3, 0, 1, 2000, 2000, 1, 1, 8, 768, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 'npc_wisdomball_velthessa', NULL),
+(9417032, 0, 0, 0, 0, 0, 'Medivh''s Floating Tome', NULL, NULL, 9417004, 30, 30, 0, 35, 1, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 0, 0, 0, 10, 1645215744, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417034, 0, 0, 0, 0, 0, 'Echo Trigger (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417035, 0, 0, 0, 0, 0, 'Spectral Archivist', NULL, NULL, 0, 30, 30, 0, 35, 0, 0.8, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417036, 0, 0, 0, 0, 0, 'Archive Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
 (9417037, 0, 0, 0, 0, 0, 'Awakened Spirit', NULL, NULL, 0, 29, 30, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417038, 0, 0, 0, 0, 0, 'Spectral Scribe', NULL, NULL, 0, 30, 30, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417039, 0, 0, 0, 0, 0, 'Keeper of the Archive', NULL, NULL, 0, 31, 31, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.91, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 4, 2, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417040, 0, 0, 0, 0, 0, 'Anchor Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417041, 0, 0, 0, 0, 0, 'Seal Focus (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417042, 0, 0, 0, 0, 0, 'Khadgar''s Wisdomball', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417040, 0, 0, 0, 0, 0, 'Anchor Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417041, 0, 0, 0, 0, 0, 'Seal Focus (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417042, 0, 0, 0, 0, 0, 'Khadgar''s Wisdomball', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417043, 0, 0, 0, 0, 0, 'Renegade Ward-Siphoner', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 7, 0, 9417011, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 100663296, '', NULL),
 (9417044, 0, 0, 0, 0, 0, 'Gloomhorn Prowler', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 11, 0, 0, 0.7, 1500, 2000, 1, 1, 1, 0, 0, 0, 0, 1, 0, 9417011, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 0.9, 1, 1, 1, 0, 0, 1, 0, 100663296, '', NULL),
 (9417045, 0, 0, 0, 0, 0, 'Thornwoken Devourer', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 11, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 4, 0, 9417011, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.3, 1, 1, 1, 0, 0, 1, 0, 100663296, '', NULL),
 (9417046, 0, 0, 0, 0, 0, 'Ley Fiend', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 11, 0, 0, 0.875, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 1, 0, 9417011, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 100663296, '', NULL),
 (9417047, 0, 0, 0, 0, 0, 'Skullbeak Hexer', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 11, 0, 0, 0.7, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 4, 0, 9417011, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 100663296, '', NULL),
-(9417048, 0, 0, 0, 0, 0, 'Northern Wardstone Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417049, 0, 0, 0, 0, 0, 'Western Wardstone Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417050, 0, 0, 0, 0, 0, 'Eastern Wardstone Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417051, 0, 0, 0, 0, 0, '', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 1653604352, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417052, 0, 0, 0, 0, 0, '', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 1653604352, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417048, 0, 0, 0, 0, 0, 'Northern Wardstone Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417049, 0, 0, 0, 0, 0, 'Western Wardstone Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417050, 0, 0, 0, 0, 0, 'Eastern Wardstone Controller (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417051, 0, 0, 0, 0, 0, '', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 1653604352, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417052, 0, 0, 0, 0, 0, '', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 1653604352, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417053, 0, 0, 0, 9417023, 0, 'Nightmare Tormentor', NULL, NULL, 0, 30, 31, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 8, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417054, 0, 0, 0, 0, 0, 'Eidolon', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417055, 0, 0, 0, 0, 0, 'Anchor Focus (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
-(9417056, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417007, 60, 60, 0, 35, 1, 1, 1.02857, 1, 1, 2e+01, 1, 0, 1, 2000, 2000, 1, 1, 8, 256, 0, 0, 0, 7, 4096, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1e+01, 1e+01, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417054, 0, 0, 0, 0, 0, 'Eidolon', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417055, 0, 0, 0, 0, 0, 'Anchor Focus (Wisdomball)', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555200, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 130, '', NULL),
+(9417056, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417007, 60, 60, 0, 35, 1, 1, 1.02857, 1, 1, 20, 1, 0, 1, 2000, 2000, 1, 1, 8, 256, 0, 0, 0, 7, 4096, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 10, 10, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417057, 0, 0, 0, 0, 0, 'Risen Memory', NULL, NULL, 0, 32, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 0.7, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417058, 0, 0, 0, 0, 0, 'Bloodfang Memory', NULL, NULL, 0, 32, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 0.7, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
 (9417059, 0, 0, 0, 0, 0, 'Memory of a Magister', NULL, NULL, 0, 32, 33, 0, 14, 0, 1, 1.14286, 1, 1, 14, 0, 0, 0.7, 2000, 2000, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 0.7, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417060, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417008, 60, 60, 0, 35, 1, 1, 1.02857, 1, 1, 2e+01, 1, 0, 1, 2000, 2000, 1, 1, 8, 256, 0, 0, 0, 7, 4096, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1e+01, 1e+01, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417061, 0, 0, 0, 0, 0, 'Ice Prison', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417062, 0, 0, 0, 0, 0, 'Flame Prison', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417063, 0, 0, 0, 0, 0, 'Blistering Tornado', '', NULL, 0, 30, 30, 0, 14, 0, 1, 0.4675, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_blistering_tornado', NULL),
-(9417064, 0, 0, 0, 0, 0, 'Frost Zone', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417065, 0, 0, 0, 0, 0, 'Vel''thessa', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417066, 0, 0, 0, 0, 0, 'Frozen Ground', '', NULL, 0, 30, 30, 0, 14, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_frozen_ground', NULL),
-(9417067, 0, 0, 0, 0, 0, 'Frost Nova', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417068, 0, 0, 0, 0, 0, 'Glacial Ray', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417069, 0, 0, 0, 0, 0, 'Glacial Ray', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417070, 0, 0, 0, 0, 0, 'Frost Orb', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417071, 0, 0, 0, 0, 0, 'Frost Orb', '', NULL, 0, 30, 30, 0, 14, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_frost_orb', NULL),
-(9417072, 0, 0, 0, 0, 0, 'Vel''thessa', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
-(9417073, 0, 0, 0, 0, 0, 'Delwyn''s Scattered Notes (credit)', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 2e+01, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL);
-DELETE FROM `creature_template_model` WHERE `CreatureID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
+(9417060, 0, 0, 0, 0, 0, 'Khadgar', 'Last Apprentice of Medivh', NULL, 9417008, 60, 60, 0, 35, 1, 1, 1.02857, 1, 1, 20, 1, 0, 1, 2000, 2000, 1, 1, 8, 256, 0, 0, 0, 7, 4096, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 10, 10, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417061, 0, 0, 0, 0, 0, 'Ice Prison', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417062, 0, 0, 0, 0, 0, 'Flame Prison', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417063, 0, 0, 0, 0, 0, 'Blistering Tornado', '', NULL, 0, 30, 30, 0, 14, 0, 1, 0.4675, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_blistering_tornado', NULL),
+(9417064, 0, 0, 0, 0, 0, 'Frost Zone', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417065, 0, 0, 0, 0, 0, 'Vel''thessa', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417066, 0, 0, 0, 0, 0, 'Frozen Ground', '', NULL, 0, 30, 30, 0, 14, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_frozen_ground', NULL),
+(9417067, 0, 0, 0, 0, 0, 'Frost Nova', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417068, 0, 0, 0, 0, 0, 'Glacial Ray', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417069, 0, 0, 0, 0, 0, 'Glacial Ray', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417070, 0, 0, 0, 0, 0, 'Frost Orb', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417071, 0, 0, 0, 0, 0, 'Frost Orb', '', NULL, 0, 30, 30, 0, 14, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 'npc_wisdomball_frost_orb', NULL),
+(9417072, 0, 0, 0, 0, 0, 'Vel''thessa', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL),
+(9417073, 0, 0, 0, 0, 0, 'Delwyn''s Scattered Notes (credit)', '', NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 8, 33555202, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', NULL) ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`), `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `IconName` = VALUES(`IconName`), `gossip_menu_id` = VALUES(`gossip_menu_id`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `exp` = VALUES(`exp`), `faction` = VALUES(`faction`), `npcflag` = VALUES(`npcflag`), `speed_walk` = VALUES(`speed_walk`), `speed_run` = VALUES(`speed_run`), `speed_swim` = VALUES(`speed_swim`), `speed_flight` = VALUES(`speed_flight`), `detection_range` = VALUES(`detection_range`), `rank` = VALUES(`rank`), `dmgschool` = VALUES(`dmgschool`), `DamageModifier` = VALUES(`DamageModifier`), `BaseAttackTime` = VALUES(`BaseAttackTime`), `RangeAttackTime` = VALUES(`RangeAttackTime`), `BaseVariance` = VALUES(`BaseVariance`), `RangeVariance` = VALUES(`RangeVariance`), `unit_class` = VALUES(`unit_class`), `unit_flags` = VALUES(`unit_flags`), `unit_flags2` = VALUES(`unit_flags2`), `dynamicflags` = VALUES(`dynamicflags`), `family` = VALUES(`family`), `type` = VALUES(`type`), `type_flags` = VALUES(`type_flags`), `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `skinloot` = VALUES(`skinloot`), `PetSpellDataId` = VALUES(`PetSpellDataId`), `VehicleId` = VALUES(`VehicleId`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`), `AIName` = VALUES(`AIName`), `MovementType` = VALUES(`MovementType`), `HoverHeight` = VALUES(`HoverHeight`), `HealthModifier` = VALUES(`HealthModifier`), `ManaModifier` = VALUES(`ManaModifier`), `ArmorModifier` = VALUES(`ArmorModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `RacialLeader` = VALUES(`RacialLeader`), `movementId` = VALUES(`movementId`), `RegenHealth` = VALUES(`RegenHealth`), `CreatureImmunitiesId` = VALUES(`CreatureImmunitiesId`), `flags_extra` = VALUES(`flags_extra`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` IN (9417001, 9417002, 9417003, 9417004, 9417005, 9417006, 9417008, 9417009, 9417010, 9417020, 9417021, 9417022, 9417023, 9417024, 9417025, 9417026, 9417027, 9417028, 9417029, 9417030, 9417032, 9417034, 9417035, 9417036, 9417037, 9417038, 9417039, 9417040, 9417041, 9417042, 9417043, 9417044, 9417045, 9417046, 9417047, 9417048, 9417049, 9417050, 9417051, 9417052, 9417053, 9417054, 9417055, 9417056, 9417057, 9417058, 9417059, 9417060, 9417061, 9417062, 9417063, 9417064, 9417065, 9417066, 9417067, 9417068, 9417069, 9417070, 9417071, 9417072, 9417073);
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
 (9417001, 0, 49183, 1, 1, 0),
 (9417002, 0, 18921, 1, 1, 0),
 (9417003, 0, 18921, 1, 1, 0),
@@ -285,15 +293,15 @@ REPLACE INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`
 (9417071, 0, 460931, 1, 1, 0),
 (9417072, 0, 999417, 2, 1, 0),
 (9417073, 0, 11686, 1, 1, 0);
-DELETE FROM `creature_template_addon` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+DELETE FROM `creature_template_addon` WHERE `entry` IN (9417005, 9417008, 9417009, 9417023, 9417051);
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9417005, 0, 0, 0, 0, 0, 0, '37800'),
 (9417008, 0, 0, 0, 0, 0, 0, '37800 47840'),
 (9417009, 0, 0, 0, 0, 0, 0, '37800 47840'),
 (9417023, 0, 0, 0, 1, 0, 0, '49774 32566'),
 (9417051, 0, 0, 0, 0, 0, 0, '354393');
-DELETE FROM `creature_template_movement` WHERE `CreatureId` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`, `Chase`, `Random`, `InteractionPauseTimer`) VALUES
+DELETE FROM `creature_template_movement` WHERE `CreatureId` IN (9417030, 9417032, 9417034, 9417036, 9417040, 9417041, 9417042, 9417048, 9417049, 9417050, 9417051, 9417052, 9417062, 9417063, 9417064, 9417066, 9417067, 9417068, 9417069, 9417070, 9417071, 9417072);
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`, `Chase`, `Random`, `InteractionPauseTimer`) VALUES
 (9417030, 1, 0, 1, 0, 0, 0, NULL),
 (9417032, 0, 0, 0, 1, 0, 0, 0),
 (9417034, 0, 0, 1, 1, 0, 0, NULL),
@@ -316,8 +324,8 @@ REPLACE INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flig
 (9417070, 0, 0, 1, 1, 0, 0, NULL),
 (9417071, 0, 0, 1, 0, 0, 0, NULL),
 (9417072, 0, 0, 1, 1, 0, 0, NULL);
-DELETE FROM `creature_equip_template` WHERE `CreatureID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (9417002, 9417003, 9417004, 9417005, 9417006, 9417008, 9417029, 9417056, 9417060);
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
 (9417002, 1, 22589, 0, 0, 0),
 (9417003, 1, 22589, 0, 0, 0),
 (9417004, 1, 22589, 0, 0, 0),
@@ -327,132 +335,132 @@ REPLACE INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`
 (9417029, 1, 574486, 0, 0, 0),
 (9417056, 1, 22589, 0, 0, 0),
 (9417060, 1, 22589, 0, 0, 0);
-DELETE FROM `creature_immunities` WHERE `ID` BETWEEN -9419999 AND -9417001;
-REPLACE INTO `creature_immunities` (`ID`, `SchoolMask`, `DispelTypeMask`, `MechanicsMask`, `Effects`, `Auras`, `ImmuneAoE`, `ImmuneChain`, `Comment`) VALUES
-(-9417027, 0, 0, 1158051366, '', '', 0, 0, 'Wisdomball Q13 - Memory of the Council: no charm/fear/silence/sleep/stun/freeze/knockout/polymorph/banish/horror/interrupt/sap');
-DELETE FROM `creature_display_preset` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`, `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`, `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES
+DELETE FROM `creature_immunities` WHERE `ID` IN (9417027);
+INSERT INTO `creature_immunities` (`ID`, `SchoolMask`, `DispelTypeMask`, `MechanicsMask`, `Effects`, `Auras`, `ImmuneAoE`, `ImmuneChain`, `Comment`) VALUES
+(9417027, 0, 0, 1158051366, '', '', 0, 0, 'Wisdomball Q13 - Memory of the Council: no charm/fear/silence/sleep/stun/freeze/knockout/polymorph/banish/horror/interrupt/sap');
+DELETE FROM `creature_display_preset` WHERE `entry` IN (9417005, 9417006);
+INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`, `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`, `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES
 (9417005, 141109, 33, 0, 8, 2, 0, 1, 0, 4, 0, 0, 144660, 0, 166038, 166044, 82169, 64863, 0, 138434, 0, 0),
 (9417006, 141109, 33, 0, 8, 2, 0, 1, 0, 4, 0, 0, 144660, 0, 166038, 166044, 82169, 64863, 0, 138434, 0, 0);
-DELETE FROM `creature_text` WHERE `CreatureID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(9417001, 0, 0, 'There - the way is open. Step through, $N. I will meet you in the library.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar''s Wisdomball - quest 9417101 accepted'),
-(9417002, 0, 0, 'There. "She wakes beneath the crater." You saw it too. So I am not going mad - or we both are.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Khadgar (Library) - the tome answered'),
-(9417002, 1, 0, 'The crater it is. I will go ahead - follow me through, $N, and stay close once we are there.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar (Library) - opens the portal to Dalaran Crater'),
-(9417003, 1, 0, 'Then we go down together. Meet me here when you are ready.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Khadgar (Field) - Q10 event starts'),
-(9417003, 2, 0, 'It is done. The way into the dream is open - and I will hold it open. Speak with me when you are ready, $N.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar (Rift) - Q10 complete'),
-(9417003, 3, 0, 'Go on, $N - jump into the rift. I will hold it open and follow right behind you.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Khadgar (Rift) - Q11 accepted: jump into the rift'),
-(9417003, 4, 0, 'The Flame Prison is failing!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q15 prelude 1'),
-(9417003, 5, 0, 'Our wards hold her... for now. Well fought. Come - we do not have much time.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q15: the Herald is dead'),
-(9417003, 6, 0, 'It''s too late, we have to get out now!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q15: the ice walls close'),
-(9417003, 7, 0, 'Make no mistake - she let us go.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q15 done: arrival at the rift 1'),
-(9417003, 8, 0, 'She is awake now, and her dream is her fortress. In there, she is stronger than any of us.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q15 done: arrival at the rift 2'),
-(9417003, 9, 0, 'Hold it shut, Delwyn. $N, stay close - if she pushes back, it will be now.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q16: Delwyn locks the rift'),
-(9417003, 10, 0, '$N, hold off her minion while we keep her bound!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar - Q15 prelude 3'),
-(9417004, 0, 0, 'The anchors are answering! Keep them off me while I hold the seal!', 14, 0, 1e+02, 0, 0, 0, 0, 3, 'Khadgar (Event) - channel starts'),
-(9417004, 1, 0, 'Something is pushing back from the other side - the rift is tearing open!', 14, 0, 1e+02, 0, 0, 0, 0, 3, 'Khadgar (Event) - wave 3'),
-(9417004, 2, 0, 'It is done. The way into the dream is open. Come back to the camp - we have work to do.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Khadgar (Event) - victory'),
-(9417004, 3, 0, 'Stay close, $N. The crater does not like visitors.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Khadgar (Escort) - escort starts'),
-(9417004, 4, 0, 'Here they come - keep them off me!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar (Escort) - ambush'),
-(9417004, 5, 0, 'Wait. This entrance... the seal''s magic is pouring out of it. Let me take a look.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Khadgar (Escort) - stops at the entrance'),
-(9417004, 6, 0, 'That was the last of them. On we go.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Khadgar (Escort) - continues'),
-(9417006, 0, 0, 'Master Khadgar...? How long... how long have I been asleep?', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q14 - freed'),
-(9417006, 1, 0, 'Something is coming through! We cannot let go of her - it is up to you!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Apprentice Delwyn - Q15: the Herald comes through'),
-(9417006, 2, 0, 'I could feel her pulling at us... She is so strong.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Apprentice Delwyn - Q15: after the Herald'),
-(9417006, 3, 0, 'Then we keep her in it. I can hold the rift shut from this side - not forever, but long enough for you to prepare.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Delwyn - Q15 done: arrival at the rift'),
-(9417006, 4, 0, 'It holds. I will not let it open - not until you are ready.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Delwyn - Q16: the rift is locked'),
-(9417006, 5, 0, 'I can see that! We have to hold her together!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Delwyn - Q15 prelude 2'),
-(9417008, 0, 0, 'Because they are ashamed of it.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 3'),
-(9417008, 1, 0, 'They found a sleeper - a creature that feeds on dreams...', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 4'),
-(9417008, 2, 0, '...and they were too proud to kill it.', 12, 0, 1e+02, 5, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 5'),
-(9417008, 3, 0, 'Killing it would mean admitting they could not contain it.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 7'),
-(9417008, 4, 0, 'So they locked it in a dream and built a city on top.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 8'),
-(9417008, 5, 0, 'One day the city will move... and the dream will end.', 12, 0, 1e+02, 5, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 9'),
-(9417008, 6, 0, 'Then someone will have to finish what they would not.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 11'),
-(9417008, 7, 0, 'Remember that, when I am not here to remind you.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 12'),
-(9417009, 0, 0, 'Master, the Kirin Tor''s records speak of a seal beneath the city.', 12, 0, 1e+02, 25, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 1'),
-(9417009, 1, 0, 'They will not tell me what it holds.', 12, 0, 1e+02, 1, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 2'),
-(9417009, 2, 0, 'Too proud?', 12, 0, 1e+02, 6, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 6'),
-(9417009, 3, 0, 'And then?', 12, 0, 1e+02, 6, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 10'),
-(9417020, 0, 0, 'You woke me... I will return the favour.', 14, 0, 1e+02, 0, 0, 0, 0, 3, 'Eidolon of the Unwaking - aggro'),
-(9417020, 1, 0, 'The sleeper... dreams... of you...', 14, 0, 1e+02, 0, 0, 0, 0, 3, 'Eidolon of the Unwaking - death'),
-(9417023, 0, 0, 'I can see again... no. No! It followed me out of the dream!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - freed'),
-(9417023, 0, 1, 'It never let me go... it is here, behind you!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - freed'),
-(9417023, 0, 2, 'The thing that held me - it is waking!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - freed'),
-(9417023, 1, 0, 'The chains... I can hear them gnawing at the chains...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - fading'),
-(9417023, 1, 1, 'Someone still sleeps in the gold. Can you hear the breathing?', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - fading'),
-(9417023, 1, 2, 'Follow the chains... every one of them leads to her...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - fading'),
-(9417023, 2, 0, 'Enough... I yield. Please - pull me out of the dream!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - gives up at 50 %'),
-(9417023, 2, 1, 'Stop... I remember now. Free me, before it wakes!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Trapped Eidolon - gives up at 50 %'),
-(9417025, 0, 0, 'The Kirin Tor called it necromancy. I called it progress.', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - aggro'),
-(9417025, 1, 0, 'You cannot cast out... what you never understood...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - death'),
-(9417026, 0, 0, 'I saved your city, and you locked me in a keep full of wolves!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - aggro'),
-(9417026, 1, 0, 'The wolves... remember...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - death'),
-(9417027, 0, 0, 'We chose a prison over a grave. We would choose it again.', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - aggro'),
-(9417027, 1, 0, 'Bury it... bury it deeper...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - death'),
-(9417029, 0, 0, '%s charges a Glacial Ray - get out of its path!', 41, 0, 1e+02, 0, 0, 8959, 0, 3, 'Herald of Vel''thessa - Glacial Ray warning'),
-(9417029, 1, 0, '%s freezes the ground beneath you - move out of the ice!', 42, 0, 1e+02, 0, 0, 8959, 0, 0, 'Herald of Vel''thessa - Frozen Ground warning (to the player)'),
-(9417029, 2, 0, '%s gathers the cold around itself - run away from it!', 41, 0, 1e+02, 0, 0, 8959, 0, 3, 'Herald of Vel''thessa - Frost Nova Pulse warning'),
-(9417030, 0, 0, 'This sleep is not forever, little Guardian-child. When I wake, I will remember your face.', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thuzar - sealed'),
-(9417030, 1, 0, 'Well done.', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: the Herald falls'),
-(9417030, 2, 0, 'Free... At long last, I am free!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: the prison bursts'),
-(9417030, 3, 0, 'You came all this way to stop me, $N? Then let my Herald entertain you!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: she sends her Herald'),
-(9417030, 4, 0, 'Leaving so soon? No... you will stay in my dream forever!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: the ice walls rise'),
+DELETE FROM `creature_text` WHERE `CreatureID` IN (9417001, 9417002, 9417003, 9417004, 9417006, 9417008, 9417009, 9417020, 9417023, 9417025, 9417026, 9417027, 9417029, 9417030, 9417037, 9417038, 9417039, 9417042, 9417048, 9417049, 9417050, 9417054, 9417056, 9417060, 9417072);
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(9417001, 0, 0, 'There - the way is open. Step through, $N. I will meet you in the library.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar''s Wisdomball - quest 9417101 accepted'),
+(9417002, 0, 0, 'There. "She wakes beneath the crater." You saw it too. So I am not going mad - or we both are.', 12, 0, 100, 1, 0, 0, 0, 0, 'Khadgar (Library) - the tome answered'),
+(9417002, 1, 0, 'The crater it is. I will go ahead - follow me through, $N, and stay close once we are there.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar (Library) - opens the portal to Dalaran Crater'),
+(9417003, 1, 0, 'Then we go down together. Meet me here when you are ready.', 12, 0, 100, 1, 0, 0, 0, 0, 'Khadgar (Field) - Q10 event starts'),
+(9417003, 2, 0, 'It is done. The way into the dream is open - and I will hold it open. Speak with me when you are ready, $N.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar (Rift) - Q10 complete'),
+(9417003, 3, 0, 'Go on, $N - jump into the rift. I will hold it open and follow right behind you.', 12, 0, 100, 1, 0, 0, 0, 0, 'Khadgar (Rift) - Q11 accepted: jump into the rift'),
+(9417003, 4, 0, 'The Flame Prison is failing!', 14, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q15 prelude 1'),
+(9417003, 5, 0, 'Our wards hold her... for now. Well fought. Come - we do not have much time.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q15: the Herald is dead'),
+(9417003, 6, 0, 'It''s too late, we have to get out now!', 14, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q15: the ice walls close'),
+(9417003, 7, 0, 'Make no mistake - she let us go.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q15 done: arrival at the rift 1'),
+(9417003, 8, 0, 'She is awake now, and her dream is her fortress. In there, she is stronger than any of us.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q15 done: arrival at the rift 2'),
+(9417003, 9, 0, 'Hold it shut, Delwyn. $N, stay close - if she pushes back, it will be now.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q16: Delwyn locks the rift'),
+(9417003, 10, 0, '$N, hold off her minion while we keep her bound!', 14, 0, 100, 0, 0, 0, 0, 0, 'Khadgar - Q15 prelude 3'),
+(9417004, 0, 0, 'The anchors are answering! Keep them off me while I hold the seal!', 14, 0, 100, 0, 0, 0, 0, 3, 'Khadgar (Event) - channel starts'),
+(9417004, 1, 0, 'Something is pushing back from the other side - the rift is tearing open!', 14, 0, 100, 0, 0, 0, 0, 3, 'Khadgar (Event) - wave 3'),
+(9417004, 2, 0, 'It is done. The way into the dream is open. Come back to the camp - we have work to do.', 12, 0, 100, 1, 0, 0, 0, 3, 'Khadgar (Event) - victory'),
+(9417004, 3, 0, 'Stay close, $N. The crater does not like visitors.', 12, 0, 100, 1, 0, 0, 0, 0, 'Khadgar (Escort) - escort starts'),
+(9417004, 4, 0, 'Here they come - keep them off me!', 14, 0, 100, 0, 0, 0, 0, 0, 'Khadgar (Escort) - ambush'),
+(9417004, 5, 0, 'Wait. This entrance... the seal''s magic is pouring out of it. Let me take a look.', 12, 0, 100, 1, 0, 0, 0, 0, 'Khadgar (Escort) - stops at the entrance'),
+(9417004, 6, 0, 'That was the last of them. On we go.', 12, 0, 100, 1, 0, 0, 0, 0, 'Khadgar (Escort) - continues'),
+(9417006, 0, 0, 'Master Khadgar...? How long... how long have I been asleep?', 12, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q14 - freed'),
+(9417006, 1, 0, 'Something is coming through! We cannot let go of her - it is up to you!', 14, 0, 100, 0, 0, 0, 0, 0, 'Apprentice Delwyn - Q15: the Herald comes through'),
+(9417006, 2, 0, 'I could feel her pulling at us... She is so strong.', 12, 0, 100, 0, 0, 0, 0, 0, 'Apprentice Delwyn - Q15: after the Herald'),
+(9417006, 3, 0, 'Then we keep her in it. I can hold the rift shut from this side - not forever, but long enough for you to prepare.', 12, 0, 100, 0, 0, 0, 0, 0, 'Delwyn - Q15 done: arrival at the rift'),
+(9417006, 4, 0, 'It holds. I will not let it open - not until you are ready.', 12, 0, 100, 0, 0, 0, 0, 0, 'Delwyn - Q16: the rift is locked'),
+(9417006, 5, 0, 'I can see that! We have to hold her together!', 14, 0, 100, 0, 0, 0, 0, 0, 'Delwyn - Q15 prelude 2'),
+(9417008, 0, 0, 'Because they are ashamed of it.', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 3'),
+(9417008, 1, 0, 'They found a sleeper - a creature that feeds on dreams...', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 4'),
+(9417008, 2, 0, '...and they were too proud to kill it.', 12, 0, 100, 5, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 5'),
+(9417008, 3, 0, 'Killing it would mean admitting they could not contain it.', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 7'),
+(9417008, 4, 0, 'So they locked it in a dream and built a city on top.', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 8'),
+(9417008, 5, 0, 'One day the city will move... and the dream will end.', 12, 0, 100, 5, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 9'),
+(9417008, 6, 0, 'Then someone will have to finish what they would not.', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 11'),
+(9417008, 7, 0, 'Remember that, when I am not here to remind you.', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Medivh - echo scene bubble 12'),
+(9417009, 0, 0, 'Master, the Kirin Tor''s records speak of a seal beneath the city.', 12, 0, 100, 25, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 1'),
+(9417009, 1, 0, 'They will not tell me what it holds.', 12, 0, 100, 1, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 2'),
+(9417009, 2, 0, 'Too proud?', 12, 0, 100, 6, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 6'),
+(9417009, 3, 0, 'And then?', 12, 0, 100, 6, 0, 0, 0, 3, 'Echo of Young Khadgar - echo scene bubble 10'),
+(9417020, 0, 0, 'You woke me... I will return the favour.', 14, 0, 100, 0, 0, 0, 0, 3, 'Eidolon of the Unwaking - aggro'),
+(9417020, 1, 0, 'The sleeper... dreams... of you...', 14, 0, 100, 0, 0, 0, 0, 3, 'Eidolon of the Unwaking - death'),
+(9417023, 0, 0, 'I can see again... no. No! It followed me out of the dream!', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - freed'),
+(9417023, 0, 1, 'It never let me go... it is here, behind you!', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - freed'),
+(9417023, 0, 2, 'The thing that held me - it is waking!', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - freed'),
+(9417023, 1, 0, 'The chains... I can hear them gnawing at the chains...', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - fading'),
+(9417023, 1, 1, 'Someone still sleeps in the gold. Can you hear the breathing?', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - fading'),
+(9417023, 1, 2, 'Follow the chains... every one of them leads to her...', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - fading'),
+(9417023, 2, 0, 'Enough... I yield. Please - pull me out of the dream!', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - gives up at 50 %'),
+(9417023, 2, 1, 'Stop... I remember now. Free me, before it wakes!', 12, 0, 100, 0, 0, 0, 0, 0, 'Trapped Eidolon - gives up at 50 %'),
+(9417025, 0, 0, 'The Kirin Tor called it necromancy. I called it progress.', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - aggro'),
+(9417025, 1, 0, 'You cannot cast out... what you never understood...', 12, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - death'),
+(9417026, 0, 0, 'I saved your city, and you locked me in a keep full of wolves!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - aggro'),
+(9417026, 1, 0, 'The wolves... remember...', 12, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - death'),
+(9417027, 0, 0, 'We chose a prison over a grave. We would choose it again.', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - aggro'),
+(9417027, 1, 0, 'Bury it... bury it deeper...', 12, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - death'),
+(9417029, 0, 0, '%s charges a Glacial Ray - get out of its path!', 41, 0, 100, 0, 0, 8959, 0, 3, 'Herald of Vel''thessa - Glacial Ray warning'),
+(9417029, 1, 0, '%s freezes the ground beneath you - move out of the ice!', 42, 0, 100, 0, 0, 8959, 0, 0, 'Herald of Vel''thessa - Frozen Ground warning (to the player)'),
+(9417029, 2, 0, '%s gathers the cold around itself - run away from it!', 41, 0, 100, 0, 0, 8959, 0, 3, 'Herald of Vel''thessa - Frost Nova Pulse warning'),
+(9417030, 0, 0, 'This sleep is not forever, little Guardian-child. When I wake, I will remember your face.', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thuzar - sealed'),
+(9417030, 1, 0, 'Well done.', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: the Herald falls'),
+(9417030, 2, 0, 'Free... At long last, I am free!', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: the prison bursts'),
+(9417030, 3, 0, 'You came all this way to stop me, $N? Then let my Herald entertain you!', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: she sends her Herald'),
+(9417030, 4, 0, 'Leaving so soon? No... you will stay in my dream forever!', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thessa - Q15: the ice walls rise'),
 (9417037, 0, 0, 'Thief! Return the master''s words!', 12, 0, 25, 0, 0, 0, 0, 0, 'Awakened Spirit - aggro'),
 (9417037, 0, 1, 'The archive... must be... kept...', 12, 0, 25, 0, 0, 0, 0, 0, 'Awakened Spirit - aggro'),
 (9417037, 0, 2, 'You do not belong among the pages!', 12, 0, 25, 0, 0, 0, 0, 0, 'Awakened Spirit - aggro'),
 (9417037, 0, 3, 'Put. It. Back.', 12, 0, 25, 0, 0, 0, 0, 0, 'Awakened Spirit - aggro'),
-(9417038, 0, 0, 'Unauthorized withdrawal! Your library privileges are revoked!', 12, 0, 5e+01, 0, 0, 0, 0, 0, 'Spectral Scribe - aggro'),
-(9417038, 0, 1, 'That volume does not leave the archive!', 12, 0, 5e+01, 0, 0, 0, 0, 0, 'Spectral Scribe - aggro'),
-(9417039, 0, 0, 'Who dares remove the master''s words from his archive?', 14, 0, 1e+02, 0, 0, 0, 0, 3, 'Keeper of the Archive - aggro'),
-(9417039, 2, 0, 'The master... will know...', 14, 0, 1e+02, 0, 0, 0, 0, 3, 'Keeper of the Archive - death'),
-(9417042, 0, 0, 'Well done, $N - the ward is free of them. Hold still... let me look through it.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar through the Wisdomball (Q6) - looks through the crystal'),
-(9417042, 1, 0, 'Light shifts inside the cracked crystal as Khadgar looks through it.', 16, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar through the Wisdomball (Q6) - the crystal'),
-(9417042, 2, 0, 'Worse than I feared. The seal below is leaking, and things are crawling out of the ley lines to feed on it. Come back to the camp.', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Khadgar through the Wisdomball (Q6) - the seal is leaking, back to the camp'),
-(9417048, 0, 0, 'The Northern Wardstone awakens!', 41, 0, 1e+02, 0, 0, 0, 0, 3, 'Northern Wardstone Controller - awakened'),
-(9417049, 0, 0, 'The Western Wardstone awakens!', 41, 0, 1e+02, 0, 0, 0, 0, 3, 'Western Wardstone Controller - awakened'),
-(9417050, 0, 0, 'The Eastern Wardstone awakens!', 41, 0, 1e+02, 0, 0, 0, 0, 3, 'Eastern Wardstone Controller - awakened'),
-(9417054, 0, 0, 'I can see again... no. No! It followed me out of the dream!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - freed'),
-(9417054, 0, 1, 'It never let me go... it is here, behind you!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - freed'),
-(9417054, 0, 2, 'The thing that held me - it is waking!', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - freed'),
-(9417054, 1, 0, 'The chains... I can hear them gnawing at the chains...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - fading'),
-(9417054, 1, 1, 'Someone still sleeps in the gold. Can you hear the breathing?', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - fading'),
-(9417054, 1, 2, 'Follow the chains... every one of them leads to her...', 12, 0, 1e+02, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - fading'),
-(9417056, 0, 0, 'Stay close, $N. Everything Dalaran wanted to forget is waiting on this path.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q13 - escort starts'),
-(9417056, 1, 0, 'Kel''Thuzad... The Kirin Tor cast him out and called it the end of it. Be ready!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - stop 1'),
-(9417056, 2, 0, 'Arugal. He called the worgen to save Dalaran - and Dalaran pretended he never had. Here he comes!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - stop 2'),
-(9417056, 3, 0, 'The Council itself - the memory they buried deepest. When I call, come to me. Their magic tears through anything but my barrier!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - stop 3'),
-(9417056, 4, 0, 'It fades. On we go.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q13 - stop done'),
-(9417056, 5, 0, 'To me, quickly!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q13 - explosion: to me'),
-(9417056, 6, 0, 'Arcane Explosion! Get inside Khadgar''s barrier!', 41, 0, 1e+02, 0, 0, 12197, 0, 3, 'Wisdomball Q13 - explosion: boss emote'),
-(9417056, 7, 0, 'This is where the path goes down. Delwyn is below - I can feel him. Catch your breath, $N.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q13 - arrival'),
-(9417056, 8, 0, 'Careful, $N. Past this point the path is woven from memory, not stone - it shifts under hurried feet. We walk from here, and we watch where we step.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q13 - after the first Memory: walk'),
-(9417056, 9, 0, 'The Council''s memory is gone - and that took more out of me than I would like to admit. We rest here a moment, $N. Mend your wounds, gather your strength, and tell me when you are ready to go on.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q13 - rest after the Council'),
-(9417056, 10, 0, 'Good. The way down is just ahead - stay close.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q13 - after the rest'),
-(9417060, 0, 0, 'Delwyn is down there, frozen in the dream''s ice. Come, $N - and keep up.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q14 - walk down'),
-(9417060, 1, 0, 'There he is. That ice is the dream''s own - I will have to tear it open. Tell me when you are ready, $N.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q14 - arrival'),
-(9417060, 2, 0, 'Hold them off me, $N - I need every ounce of focus for this ice!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q14 - event start'),
-(9417060, 3, 0, 'It cracks! Keep them away from me!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q14 - crack 1'),
-(9417060, 4, 0, 'Almost... the ice is giving way!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q14 - crack 2'),
-(9417060, 5, 0, 'It is on me - get it off!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q14 - a Husk reached him'),
-(9417060, 6, 0, 'Now!', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Wisdomball Q14 - break'),
-(9417060, 7, 0, 'Long enough, my friend. Long enough.', 12, 0, 1e+02, 1, 0, 0, 0, 0, 'Wisdomball Q14 - after Delwyn wakes'),
-(9417072, 0, 0, 'You cannot hold a dream shut, child.', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thessa (ghost over the rift) - Q16 1'),
-(9417072, 1, 0, 'I will be waiting.', 14, 0, 1e+02, 0, 0, 0, 0, 0, 'Vel''thessa (ghost over the rift) - Q16 2');
-DELETE FROM `creature_loot_template` WHERE `Entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
-(9417010, 9417301, 0, 1e+02, 1, 1, 0, 1, 1, 'Restless Spirit of Karazhan - Torn Page of Medivh (quest 9417103)'),
-(9417011, 9417303, 0, 8e+01, 1, 1, 0, 1, 1, 'Renegade Dalaran Summoner - Sigil Shard (quest 9417107)');
-DELETE FROM `creature_questitem` WHERE `CreatureEntry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_questitem` (`CreatureEntry`, `Idx`, `ItemId`, `VerifiedBuild`) VALUES
+(9417038, 0, 0, 'Unauthorized withdrawal! Your library privileges are revoked!', 12, 0, 50, 0, 0, 0, 0, 0, 'Spectral Scribe - aggro'),
+(9417038, 0, 1, 'That volume does not leave the archive!', 12, 0, 50, 0, 0, 0, 0, 0, 'Spectral Scribe - aggro'),
+(9417039, 0, 0, 'Who dares remove the master''s words from his archive?', 14, 0, 100, 0, 0, 0, 0, 3, 'Keeper of the Archive - aggro'),
+(9417039, 2, 0, 'The master... will know...', 14, 0, 100, 0, 0, 0, 0, 3, 'Keeper of the Archive - death'),
+(9417042, 0, 0, 'Well done, $N - the ward is free of them. Hold still... let me look through it.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar through the Wisdomball (Q6) - looks through the crystal'),
+(9417042, 1, 0, 'Light shifts inside the cracked crystal as Khadgar looks through it.', 16, 0, 100, 0, 0, 0, 0, 0, 'Khadgar through the Wisdomball (Q6) - the crystal'),
+(9417042, 2, 0, 'Worse than I feared. The seal below is leaking, and things are crawling out of the ley lines to feed on it. Come back to the camp.', 12, 0, 100, 0, 0, 0, 0, 0, 'Khadgar through the Wisdomball (Q6) - the seal is leaking, back to the camp'),
+(9417048, 0, 0, 'The Northern Wardstone awakens!', 41, 0, 100, 0, 0, 0, 0, 3, 'Northern Wardstone Controller - awakened'),
+(9417049, 0, 0, 'The Western Wardstone awakens!', 41, 0, 100, 0, 0, 0, 0, 3, 'Western Wardstone Controller - awakened'),
+(9417050, 0, 0, 'The Eastern Wardstone awakens!', 41, 0, 100, 0, 0, 0, 0, 3, 'Eastern Wardstone Controller - awakened'),
+(9417054, 0, 0, 'I can see again... no. No! It followed me out of the dream!', 12, 0, 100, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - freed'),
+(9417054, 0, 1, 'It never let me go... it is here, behind you!', 12, 0, 100, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - freed'),
+(9417054, 0, 2, 'The thing that held me - it is waking!', 12, 0, 100, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - freed'),
+(9417054, 1, 0, 'The chains... I can hear them gnawing at the chains...', 12, 0, 100, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - fading'),
+(9417054, 1, 1, 'Someone still sleeps in the gold. Can you hear the breathing?', 12, 0, 100, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - fading'),
+(9417054, 1, 2, 'Follow the chains... every one of them leads to her...', 12, 0, 100, 0, 0, 0, 0, 0, 'Eidolon (freed) - Trapped Eidolon - fading'),
+(9417056, 0, 0, 'Stay close, $N. Everything Dalaran wanted to forget is waiting on this path.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q13 - escort starts'),
+(9417056, 1, 0, 'Kel''Thuzad... The Kirin Tor cast him out and called it the end of it. Be ready!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - stop 1'),
+(9417056, 2, 0, 'Arugal. He called the worgen to save Dalaran - and Dalaran pretended he never had. Here he comes!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - stop 2'),
+(9417056, 3, 0, 'The Council itself - the memory they buried deepest. When I call, come to me. Their magic tears through anything but my barrier!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - stop 3'),
+(9417056, 4, 0, 'It fades. On we go.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q13 - stop done'),
+(9417056, 5, 0, 'To me, quickly!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q13 - explosion: to me'),
+(9417056, 6, 0, 'Arcane Explosion! Get inside Khadgar''s barrier!', 41, 0, 100, 0, 0, 12197, 0, 3, 'Wisdomball Q13 - explosion: boss emote'),
+(9417056, 7, 0, 'This is where the path goes down. Delwyn is below - I can feel him. Catch your breath, $N.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q13 - arrival'),
+(9417056, 8, 0, 'Careful, $N. Past this point the path is woven from memory, not stone - it shifts under hurried feet. We walk from here, and we watch where we step.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q13 - after the first Memory: walk'),
+(9417056, 9, 0, 'The Council''s memory is gone - and that took more out of me than I would like to admit. We rest here a moment, $N. Mend your wounds, gather your strength, and tell me when you are ready to go on.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q13 - rest after the Council'),
+(9417056, 10, 0, 'Good. The way down is just ahead - stay close.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q13 - after the rest'),
+(9417060, 0, 0, 'Delwyn is down there, frozen in the dream''s ice. Come, $N - and keep up.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q14 - walk down'),
+(9417060, 1, 0, 'There he is. That ice is the dream''s own - I will have to tear it open. Tell me when you are ready, $N.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q14 - arrival'),
+(9417060, 2, 0, 'Hold them off me, $N - I need every ounce of focus for this ice!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q14 - event start'),
+(9417060, 3, 0, 'It cracks! Keep them away from me!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q14 - crack 1'),
+(9417060, 4, 0, 'Almost... the ice is giving way!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q14 - crack 2'),
+(9417060, 5, 0, 'It is on me - get it off!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q14 - a Husk reached him'),
+(9417060, 6, 0, 'Now!', 14, 0, 100, 0, 0, 0, 0, 0, 'Wisdomball Q14 - break'),
+(9417060, 7, 0, 'Long enough, my friend. Long enough.', 12, 0, 100, 1, 0, 0, 0, 0, 'Wisdomball Q14 - after Delwyn wakes'),
+(9417072, 0, 0, 'You cannot hold a dream shut, child.', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thessa (ghost over the rift) - Q16 1'),
+(9417072, 1, 0, 'I will be waiting.', 14, 0, 100, 0, 0, 0, 0, 0, 'Vel''thessa (ghost over the rift) - Q16 2');
+DELETE FROM `creature_loot_template` WHERE `Entry` IN (9417010, 9417011);
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(9417010, 9417301, 0, 100, 1, 1, 0, 1, 1, 'Restless Spirit of Karazhan - Torn Page of Medivh (quest 9417103)'),
+(9417011, 9417303, 0, 80, 1, 1, 0, 1, 1, 'Renegade Dalaran Summoner - Sigil Shard (quest 9417107)');
+DELETE FROM `creature_questitem` WHERE `CreatureEntry` IN (9417010, 9417043, 9417044, 9417045, 9417046, 9417047);
+INSERT INTO `creature_questitem` (`CreatureEntry`, `Idx`, `ItemId`, `VerifiedBuild`) VALUES
 (9417010, 0, 9417301, NULL),
 (9417043, 0, 9417303, NULL),
 (9417044, 0, 9417303, NULL),
 (9417045, 0, 9417303, NULL),
 (9417046, 0, 9417303, NULL),
 (9417047, 0, 9417303, NULL);
-DELETE FROM `creature_queststarter` WHERE `quest` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `creature_queststarter` (`id`, `quest`) VALUES
+DELETE FROM `creature_queststarter` WHERE (`id`, `quest`) IN ((9417001, 9417101), (9417002, 9417102), (9417002, 9417103), (9417002, 9417104), (9417002, 9417105), (9417003, 9417106), (9417003, 9417107), (9417003, 9417108), (9417003, 9417110), (9417003, 9417111), (9417003, 9417112), (9417003, 9417113), (9417003, 9417114), (9417003, 9417116), (9417003, 9417117), (9417005, 9417109), (9417006, 9417115));
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (9417001, 9417101),
 (9417002, 9417102),
 (9417002, 9417103),
@@ -470,8 +478,8 @@ REPLACE INTO `creature_queststarter` (`id`, `quest`) VALUES
 (9417003, 9417117),
 (9417005, 9417109),
 (9417006, 9417115);
-DELETE FROM `creature_questender` WHERE `quest` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `creature_questender` (`id`, `quest`) VALUES
+DELETE FROM `creature_questender` WHERE (`id`, `quest`) IN ((9417002, 9417101), (9417002, 9417102), (9417002, 9417103), (9417002, 9417104), (9417002, 9417117), (9417003, 9417105), (9417003, 9417106), (9417003, 9417107), (9417003, 9417109), (9417003, 9417110), (9417003, 9417111), (9417003, 9417112), (9417003, 9417113), (9417003, 9417115), (9417003, 9417116), (9417005, 9417108), (9417006, 9417114));
+INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (9417002, 9417101),
 (9417002, 9417102),
 (9417002, 9417103),
@@ -489,8 +497,8 @@ REPLACE INTO `creature_questender` (`id`, `quest`) VALUES
 (9417003, 9417116),
 (9417005, 9417108),
 (9417006, 9417114);
-DELETE FROM `creature` WHERE `guid` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
+DELETE FROM `creature` WHERE `guid` IN (9417001, 9417002, 9417003, 9417004, 9417005, 9417010, 9417011, 9417012, 9417013, 9417014, 9417015, 9417016, 9417017, 9417020, 9417021, 9417040, 9417041, 9417042, 9417043, 9417044, 9417045, 9417046, 9417047, 9417048, 9417049, 9417050, 9417051, 9417052, 9417053, 9417054, 9417055, 9417059, 9417066, 9417067, 9417068, 9417070, 9417071, 9417072, 9417073, 9417074, 9417075, 9417076, 9417077, 9417078, 9417079, 9417080, 9417081, 9417082, 9417083, 9417084, 9417085, 9417086, 9417087, 9417088, 9417089, 9417090, 9417091, 9417092, 9417093, 9417094, 9417095, 9417096, 9417097, 9417098, 9417099, 9417100, 9417101, 9417102, 9417103, 9417104, 9417105, 9417106, 9417107, 9417108, 9417109, 9417120, 9417122, 9417123, 9417124, 9417125, 9417126, 9417127, 9417128, 9417129, 9417130, 9417131, 9417132, 9417133, 9417134, 9417135, 9417136, 9417137, 9417138, 9417139, 9417140, 9417141, 9417142, 9417143, 9417144, 9417145, 9417146, 9417147, 9417148, 9417149, 9417150, 9417151, 9417152, 9417153, 9417154, 9417155, 9417156, 9417157, 9417158, 9417159, 9417160, 9417190, 9417191, 9417192, 9417194, 9417195, 9417196);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
 (9417001, 9417001, 0, 0, 0, 1, 1, 0, -8998.494, 851.60986, 29.620779, 0.7239447, 300, 0, 0, 737, 2175, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Wisdomball, Stormwind Wizard''s Sanctum (placed in-game by the user)'),
 (9417002, 9417001, 1, 0, 0, 1, 1, 0, 1456.21, -4217.81, 43.1863, 6.06766, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Wisdomball, Orgrimmar Darkbriar Lodge (placed in-game by the user 2026-11-11)'),
 (9417003, 9417002, 4417, 0, 0, 1, 1, 1, -11165.5, -1911.7, 232, 2.29, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar (Library) at the Shade of Aran spot VERIFY'),
@@ -506,7 +514,7 @@ REPLACE INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `
 (9417017, 9417010, 4417, 0, 0, 1, 1, 0, -11268.6, -1937.7, 240.6, 2.37, 180, 5, 0, 1, 0, 1, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Restless Spirit'),
 (9417020, 9417003, 4418, 0, 0, 1, 2, 1, 319.135, 263.953, 53.27, 1.55, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar (Field) crater camp, game_tele DalaranCrater'),
 (9417021, 9417005, 4418, 0, 0, 1, 14, 1, 101.5, 254.6, 43.4, 3.25, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Echo of Apprentice Delwyn VERIFY'),
-(9417040, 9417003, 933, 0, 0, 1, 128, 1, -11363, -3.07e+03, 4.6, 0.2, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar (Field) at the rift entrance, stage A VERIFY'),
+(9417040, 9417003, 933, 0, 0, 1, 128, 1, -11363, -3070, 4.6, 0.2, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar (Field) at the rift entrance, stage A VERIFY'),
 (9417041, 6491, 933, 0, 0, 1, 2061, 0, -11355, -3076, 4.6, 3.4, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Spirit Healer, graveyard 9417001, all quest phases VERIFY'),
 (9417042, 9417023, 933, 0, 0, 1, 12, 0, -11608.837, -3081.7424, 7.63454, 2.8260531, 60, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Trapped Eidolon VERIFY'),
 (9417043, 9417023, 933, 0, 0, 1, 12, 0, -11558.9375, -3085.3103, 5.111623, 4.9780507, 60, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Trapped Eidolon VERIFY'),
@@ -514,7 +522,7 @@ REPLACE INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `
 (9417045, 9417023, 933, 0, 0, 1, 12, 0, -11507.882, -3162.1165, 5.076296, 5.1508327, 60, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Trapped Eidolon VERIFY'),
 (9417046, 9417023, 933, 0, 0, 1, 12, 0, -11519.283, -3073.0146, 4.0452104, 6.128664, 60, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Trapped Eidolon VERIFY'),
 (9417047, 9417023, 933, 0, 0, 1, 12, 0, -11565.42, -3134.6523, 5.0900826, 1.6754441, 60, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Trapped Eidolon VERIFY'),
-(9417048, 9417024, 933, 0, 0, 1, 12, 0, -1.15e+04, -3.09e+03, 5.6, 0, 180, 5, 0, 1, 0, 1, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Chain-Gnawer VERIFY'),
+(9417048, 9417024, 933, 0, 0, 1, 12, 0, -11500, -3090, 5.6, 0, 180, 5, 0, 1, 0, 1, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Chain-Gnawer VERIFY'),
 (9417049, 9417024, 933, 0, 0, 1, 12, 0, -11482.116, -3143.1943, 5.353622, 0.89006495, 180, 5, 0, 1, 0, 1, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Chain-Gnawer VERIFY'),
 (9417050, 9417024, 933, 0, 0, 1, 12, 0, -11535.364, -3067.0547, 5.2546644, 5.1469254, 180, 5, 0, 1, 0, 1, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Chain-Gnawer VERIFY'),
 (9417051, 9417024, 933, 0, 0, 1, 12, 0, -11512.606, -3156.235, 5.169086, 1.6008503, 180, 5, 0, 1, 0, 1, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Chain-Gnawer VERIFY'),
@@ -598,11 +606,11 @@ REPLACE INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `
 (9417150, 9417047, 4418, 0, 0, 1, 14, 0, 162.5102, 239.59482, 43.28771, 6.195516, 300, 0, 0, 1150, 2175, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Q7 creature variant (placed in-game by the user, temp guid renumbered 2026-11-11)'),
 (9417151, 9417047, 4418, 0, 0, 1, 14, 0, 178.02116, 200.1727, 43.263847, 6.2819066, 300, 0, 0, 1211, 2253, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Q7 creature variant (placed in-game by the user, temp guid renumbered 2026-11-11)'),
 (9417152, 6491, 4418, 0, 0, 1, 15, 0, 215.21832, 166.23674, 45.269577, 1.0197548, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Spirit Healer, Dalaran Crater copy graveyard 9417002 (user .gps 2026-11-11)'),
-(9417153, 9417055, 933, 0, 0, 1, 12, 0, -11505, -3.1e+03, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417013'),
-(9417154, 9417055, 933, 0, 0, 1, 12, 0, -1.153e+04, -3125, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417014'),
-(9417155, 9417055, 933, 0, 0, 1, 12, 0, -11555, -3.08e+03, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417015'),
-(9417156, 9417055, 933, 0, 0, 1, 12, 0, -1.158e+04, -3.11e+03, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417016'),
-(9417157, 9417056, 933, 0, 0, 1, 64, 1, -11363, -3.07e+03, 4.6, 0.2, 30, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar, Q13 escort start at the landing (phase 64, Q13 in progress)'),
+(9417153, 9417055, 933, 0, 0, 1, 12, 0, -11505, -3100, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417013'),
+(9417154, 9417055, 933, 0, 0, 1, 12, 0, -11530, -3125, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417014'),
+(9417155, 9417055, 933, 0, 0, 1, 12, 0, -11555, -3080, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417015'),
+(9417156, 9417055, 933, 0, 0, 1, 12, 0, -11580, -3110, 6.6, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball Q12 - Anchor Focus of Chain Anchor GO 9417016'),
+(9417157, 9417056, 933, 0, 0, 1, 64, 1, -11363, -3070, 4.6, 0.2, 30, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar, Q13 escort start at the landing (phase 64, Q13 in progress)'),
 (9417158, 9417003, 933, 0, 0, 1, 256, 1, -11656, -3111.63, 1.872, 3.1351, 30, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar at the top of the descent (phase 256): Q13 turn-in, Q14 giver'),
 (9417159, 9417060, 933, 0, 0, 1, 16, 1, -11656, -3111.63, 1.872, 3.1351, 30, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Khadgar, Q14 escort start at the descent (phase 16)'),
 (9417160, 9417061, 933, 0, 0, 1, 32, 0, -11829.5, -3110.5, -11.4, 2.65, 30, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Wisdomball questline - Ice Prison around Delwyn (phase 32, until Q14 complete)'),
@@ -612,8 +620,8 @@ REPLACE INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `
 (9417194, 9417006, 4418, 0, 0, 1, 16, 1, 309.3, 364.5, -62.26, 2.05, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Delwyn - crater rift after the escape (stands)'),
 (9417195, 9417006, 4418, 0, 0, 1, 32, 1, 308.18362, 365.62338, -62.056114, 2.0403032, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Delwyn - crater rift after Q16 (channels)'),
 (9417196, 9417065, 4418, 0, 0, 1, 16, 0, 306.3, 370.3, -59, 0, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Voice of Vel''thessa - 3 yd above the crater rift (Q16)');
-DELETE FROM `creature_addon` WHERE `guid` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+DELETE FROM `creature_addon` WHERE `guid` IN (9417059, 9417067, 9417094, 9417095, 9417098, 9417099, 9417109, 9417120, 9417160);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9417059, 0, 0, 0, 1, 0, 0, NULL),
 (9417067, 0, 0, 0, 1, 437, 0, ''),
 (9417094, 94170940, 0, 0, 0, 0, 0, ''),
@@ -623,8 +631,7 @@ REPLACE INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `
 (9417109, 0, 0, 0, 1, 468, 0, NULL),
 (9417120, 0, 0, 0, 1, 437, 0, ''),
 (9417160, 0, 0, 0, 0, 422, 0, NULL);
-DELETE FROM `gameobject_template` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
 (9417203, 10, 1667, 'Fractured Kirin Tor Ward', '', 'Scrying', '', 1, 0, 0, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartGameObjectAI', '', NULL),
 (9417204, 10, 210, 'Delwyn''s Scattered Notes', '', 'Gathering', '', 1, 0, 9417108, 0, 0, 0, 0, 0, 0, 0, 0, 256702, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartGameObjectAI', '', NULL),
 (9417205, 10, 7017, 'Ancient Wardstone', '', 'Awakening', '', 0.6, 0, 0, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartGameObjectAI', '', NULL),
@@ -637,26 +644,26 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (9417217, 10, 107, 'Weathered Tome', '', '', '', 1, 0, 9417104, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartGameObjectAI', '', NULL),
 (9417226, 0, 1054790, 'Ice Wall', '', '', '', 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (9417227, 0, 1054790, 'Ice Wall', '', '', '', 0.25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
-(9417228, 10, 1055649, 'Portal to Dalaran Crater', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartGameObjectAI', '', NULL);
-DELETE FROM `gameobject_template_addon` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `gameobject_template_addon` (`entry`, `faction`, `flags`, `mingold`, `maxgold`, `artkit0`, `artkit1`, `artkit2`, `artkit3`) VALUES
+(9417228, 10, 1055649, 'Portal to Dalaran Crater', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartGameObjectAI', '', NULL) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+DELETE FROM `gameobject_template_addon` WHERE `entry` IN (9417226, 9417227);
+INSERT INTO `gameobject_template_addon` (`entry`, `faction`, `flags`, `mingold`, `maxgold`, `artkit0`, `artkit1`, `artkit2`, `artkit3`) VALUES
 (9417226, 0, 16, 0, 0, 0, 0, 0, 0),
 (9417227, 0, 16, 0, 0, 0, 0, 0, 0);
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
+DELETE FROM `gameobject` WHERE `guid` IN (9417003, 9417004, 9417005, 9417006, 9417007, 9417008, 9417009, 9417010, 9417011, 9417013, 9417014, 9417015, 9417016, 9417030, 9417031, 9417032, 9417033, 9417034, 9417035, 9417036, 9417037, 9417038, 9417039, 9417040, 9417041, 9417042, 9417043, 9417044, 9417045, 9417046, 9417047, 9417048, 9417049, 9417050, 9417051);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
 (9417003, 9417203, 4418, 0, 0, 1, 14, 401.53326, 182.91823, 41.917606, 3.957185, 0, 0, 0.917997, -0.396587, 60, 100, 1, '', NULL, 'Wisdomball questline - Fractured Kirin Tor Ward = siphoned Dalaran crystal (Q6, user point)'),
 (9417004, 9417204, 4418, 0, 0, 1, 14, 84.5, 459.5, 43.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Delwyn''s Scattered Notes'),
 (9417005, 9417204, 4418, 0, 0, 1, 14, 77.5, 422.1, 43.2, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Delwyn''s Scattered Notes'),
-(9417006, 9417204, 4418, 0, 0, 1, 14, 75.6, 3.6e+02, 45.59, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Delwyn''s Scattered Notes'),
+(9417006, 9417204, 4418, 0, 0, 1, 14, 75.6, 360, 45.59, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Delwyn''s Scattered Notes'),
 (9417007, 9417204, 4418, 0, 0, 1, 14, 94.6, 233, 43.3, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Delwyn''s Scattered Notes'),
 (9417008, 9417204, 4418, 0, 0, 1, 14, 62.4, 257.3, 43.7, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Delwyn''s Scattered Notes'),
 (9417009, 9417205, 4418, 0, 0, 1, 14, 426.21695, 281.38483, 43.315376, 6.1209254, 0, 0, 0.081041, -0.996711, 60, 100, 1, '', NULL, 'Wisdomball questline - Northern Ancient Wardstone (Q9, user .gps)'),
 (9417010, 9417206, 4418, 0, 0, 1, 14, 131.99786, 473.1222, 44.209156, 5.1784387, 0, 0, 0.524709, -0.851282, 60, 100, 1, '', NULL, 'Wisdomball questline - Western Ancient Wardstone (Q9, user .gps)'),
 (9417011, 9417207, 4418, 0, 0, 1, 14, 493.62878, 203.69641, 43.097656, 0.15579909, 0, 0, 0.077821, 0.996967, 60, 100, 1, '', NULL, 'Wisdomball questline - Eastern Ancient Wardstone (Q9, user .gps)'),
-(9417013, 9417209, 933, 0, 0, 1, 12, -11505, -3.1e+03, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
-(9417014, 9417209, 933, 0, 0, 1, 12, -1.153e+04, -3125, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
-(9417015, 9417209, 933, 0, 0, 1, 12, -11555, -3.08e+03, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
-(9417016, 9417209, 933, 0, 0, 1, 12, -1.158e+04, -3.11e+03, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
+(9417013, 9417209, 933, 0, 0, 1, 12, -11505, -3100, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
+(9417014, 9417209, 933, 0, 0, 1, 12, -11530, -3125, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
+(9417015, 9417209, 933, 0, 0, 1, 12, -11555, -3080, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
+(9417016, 9417209, 933, 0, 0, 1, 12, -11580, -3110, 5.6, 0, 0, 0, 0, 1, 60, 100, 1, '', NULL, 'Wisdomball questline - Chain Anchor VERIFY'),
 (9417030, 9417217, 4417, 0, 0, 1, 1, -11217.207, -1725.1226, 136.0217, 2.03048, 0, 0, 0.849607, 0.527416, 300, 0, 1, '', NULL, 'Wisdomball questline - Weathered Tome (Q4, wrong book), user placement'),
 (9417031, 9417217, 4417, 0, 0, 1, 1, -11195.956, -1717.4135, 136.0245, 0.176939, 0, 0, 0.0883543, 0.996089, 300, 0, 1, '', NULL, 'Wisdomball questline - Weathered Tome (Q4, wrong book), user placement'),
 (9417032, 9417217, 4417, 0, 0, 1, 1, -11179.029, -1737.082, 137.393, 0.196567, 0, 0, 0.0981256, 0.995174, 300, 0, 1, '', NULL, 'Wisdomball questline - Weathered Tome (Q4, wrong book), user placement'),
@@ -679,8 +686,7 @@ REPLACE INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`,
 (9417049, 9417217, 4417, 0, 0, 1, 1, -11207.282, -1759.3927, 136.0168, 6.220511, 0, 0, 0.031332, -0.999509, 300, 0, 1, '', NULL, 'Wisdomball questline - Weathered Tome (Q4, wrong book), user placement'),
 (9417050, 9417217, 4417, 0, 0, 1, 1, -11285.534, -1842.535, 135.6359, 3.212431, 0, 0, 0.999373, -0.0354116, 300, 0, 1, '', NULL, 'Wisdomball questline - Weathered Tome (Q4, wrong book), user placement'),
 (9417051, 9417217, 4417, 0, 0, 1, 1, -11237.24, -1745.4788, 137.3471, 5.686399, 0, 0, 0.293985, -0.95581, 300, 0, 1, '', NULL, 'Wisdomball questline - Weathered Tome (Q4, wrong book), user placement');
-DELETE FROM `item_template` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `FlagsExtra`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `AllowableClass`, `AllowableRace`, `ItemLevel`, `RequiredLevel`, `RequiredSkill`, `RequiredSkillRank`, `requiredspell`, `requiredhonorrank`, `RequiredCityRank`, `RequiredReputationFaction`, `RequiredReputationRank`, `maxcount`, `stackable`, `ContainerSlots`, `stat_type1`, `stat_value1`, `stat_type2`, `stat_value2`, `stat_type3`, `stat_value3`, `stat_type4`, `stat_value4`, `stat_type5`, `stat_value5`, `stat_type6`, `stat_value6`, `stat_type7`, `stat_value7`, `stat_type8`, `stat_value8`, `stat_type9`, `stat_value9`, `stat_type10`, `stat_value10`, `ScalingStatDistribution`, `ScalingStatValue`, `dmg_min1`, `dmg_max1`, `dmg_type1`, `dmg_min2`, `dmg_max2`, `dmg_type2`, `armor`, `holy_res`, `fire_res`, `nature_res`, `frost_res`, `shadow_res`, `arcane_res`, `delay`, `ammo_type`, `RangedModRange`, `spellid_1`, `spelltrigger_1`, `spellcharges_1`, `spellppmRate_1`, `spellcooldown_1`, `spellcategory_1`, `spellcategorycooldown_1`, `spellid_2`, `spelltrigger_2`, `spellcharges_2`, `spellppmRate_2`, `spellcooldown_2`, `spellcategory_2`, `spellcategorycooldown_2`, `spellid_3`, `spelltrigger_3`, `spellcharges_3`, `spellppmRate_3`, `spellcooldown_3`, `spellcategory_3`, `spellcategorycooldown_3`, `spellid_4`, `spelltrigger_4`, `spellcharges_4`, `spellppmRate_4`, `spellcooldown_4`, `spellcategory_4`, `spellcategorycooldown_4`, `spellid_5`, `spelltrigger_5`, `spellcharges_5`, `spellppmRate_5`, `spellcooldown_5`, `spellcategory_5`, `spellcategorycooldown_5`, `bonding`, `description`, `PageText`, `LanguageID`, `PageMaterial`, `startquest`, `lockid`, `Material`, `sheath`, `RandomProperty`, `RandomSuffix`, `block`, `itemset`, `MaxDurability`, `area`, `Map`, `BagFamily`, `TotemCategory`, `socketColor_1`, `socketContent_1`, `socketColor_2`, `socketContent_2`, `socketColor_3`, `socketContent_3`, `socketBonus`, `GemProperties`, `RequiredDisenchantSkill`, `ArmorDamageModifier`, `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`, `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`, `flagsCustom`, `VerifiedBuild`) VALUES
+INSERT INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `FlagsExtra`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `AllowableClass`, `AllowableRace`, `ItemLevel`, `RequiredLevel`, `RequiredSkill`, `RequiredSkillRank`, `requiredspell`, `requiredhonorrank`, `RequiredCityRank`, `RequiredReputationFaction`, `RequiredReputationRank`, `maxcount`, `stackable`, `ContainerSlots`, `stat_type1`, `stat_value1`, `stat_type2`, `stat_value2`, `stat_type3`, `stat_value3`, `stat_type4`, `stat_value4`, `stat_type5`, `stat_value5`, `stat_type6`, `stat_value6`, `stat_type7`, `stat_value7`, `stat_type8`, `stat_value8`, `stat_type9`, `stat_value9`, `stat_type10`, `stat_value10`, `ScalingStatDistribution`, `ScalingStatValue`, `dmg_min1`, `dmg_max1`, `dmg_type1`, `dmg_min2`, `dmg_max2`, `dmg_type2`, `armor`, `holy_res`, `fire_res`, `nature_res`, `frost_res`, `shadow_res`, `arcane_res`, `delay`, `ammo_type`, `RangedModRange`, `spellid_1`, `spelltrigger_1`, `spellcharges_1`, `spellppmRate_1`, `spellcooldown_1`, `spellcategory_1`, `spellcategorycooldown_1`, `spellid_2`, `spelltrigger_2`, `spellcharges_2`, `spellppmRate_2`, `spellcooldown_2`, `spellcategory_2`, `spellcategorycooldown_2`, `spellid_3`, `spelltrigger_3`, `spellcharges_3`, `spellppmRate_3`, `spellcooldown_3`, `spellcategory_3`, `spellcategorycooldown_3`, `spellid_4`, `spelltrigger_4`, `spellcharges_4`, `spellppmRate_4`, `spellcooldown_4`, `spellcategory_4`, `spellcategorycooldown_4`, `spellid_5`, `spelltrigger_5`, `spellcharges_5`, `spellppmRate_5`, `spellcooldown_5`, `spellcategory_5`, `spellcategorycooldown_5`, `bonding`, `description`, `PageText`, `LanguageID`, `PageMaterial`, `startquest`, `lockid`, `Material`, `sheath`, `RandomProperty`, `RandomSuffix`, `block`, `itemset`, `MaxDurability`, `area`, `Map`, `BagFamily`, `TotemCategory`, `socketColor_1`, `socketContent_1`, `socketColor_2`, `socketContent_2`, `socketColor_3`, `socketContent_3`, `socketBonus`, `GemProperties`, `RequiredDisenchantSkill`, `ArmorDamageModifier`, `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`, `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`, `flagsCustom`, `VerifiedBuild`) VALUES
 (9417301, 12, 0, -1, 'Torn Page of Medivh', 277, 1, 0, 0, 1, 0, 0, 0, -1, -1, 30, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 1000, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 4, 'Spidery handwriting crowds the margins: "...the sleeper beneath the city..."', 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, NULL),
 (9417303, 12, 0, -1, 'Sigil Shard', 4592, 1, 0, 0, 1, 0, 0, 0, -1, -1, 30, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 1000, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 4, 'Still warm with stolen power from the seal.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, NULL),
 (9417307, 12, 0, -1, 'Medivh''s Hidden Journal', 139375, 1, 0, 0, 1, 0, 0, 0, -1, -1, 30, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 1000, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 4, 'Most of it is unreadable. One line repeats on every page: "She wakes beneath the crater."', 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, NULL),
@@ -803,9 +809,8 @@ REPLACE INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubcla
 (9418163, 4, 0, -1, 'Delwyn''s Locket', 138645, 3, 0, 139264, 1, 0, 1800, 2, -1, -1, 50, 45, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 3, 7, 3, 32, 3, 45, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Inside: a pressed flower and a name.', 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0),
 (9418164, 4, 0, -1, 'Delwyn''s Locket', 138645, 3, 0, 139264, 1, 0, 2000, 2, -1, -1, 55, 50, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 3, 7, 3, 32, 3, 45, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Inside: a pressed flower and a name.', 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0),
 (9418165, 4, 0, -1, 'Delwyn''s Locket', 138645, 3, 0, 139264, 1, 0, 2200, 2, -1, -1, 60, 55, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 4, 7, 4, 32, 3, 45, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Inside: a pressed flower and a name.', 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0),
-(9418166, 4, 0, -1, 'Delwyn''s Locket', 138645, 3, 0, 139264, 1, 0, 2400, 2, -1, -1, 65, 60, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 4, 7, 4, 32, 3, 45, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Inside: a pressed flower and a name.', 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0);
-DELETE FROM `quest_template` WHERE `ID` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `QuestInfoID`, `SuggestedGroupNum`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RewardNextQuest`, `RewardXPDifficulty`, `RewardMoney`, `RewardMoneyDifficulty`, `RewardDisplaySpell`, `RewardSpell`, `RewardHonor`, `RewardKillHonor`, `StartItem`, `Flags`, `RequiredPlayerKills`, `RewardItem1`, `RewardAmount1`, `RewardItem2`, `RewardAmount2`, `RewardItem3`, `RewardAmount3`, `RewardItem4`, `RewardAmount4`, `ItemDrop1`, `ItemDropQuantity1`, `ItemDrop2`, `ItemDropQuantity2`, `ItemDrop3`, `ItemDropQuantity3`, `ItemDrop4`, `ItemDropQuantity4`, `RewardChoiceItemID1`, `RewardChoiceItemQuantity1`, `RewardChoiceItemID2`, `RewardChoiceItemQuantity2`, `RewardChoiceItemID3`, `RewardChoiceItemQuantity3`, `RewardChoiceItemID4`, `RewardChoiceItemQuantity4`, `RewardChoiceItemID5`, `RewardChoiceItemQuantity5`, `RewardChoiceItemID6`, `RewardChoiceItemQuantity6`, `POIContinent`, `POIx`, `POIy`, `POIPriority`, `RewardTitle`, `RewardTalents`, `RewardArenaPoints`, `RewardFactionID1`, `RewardFactionValue1`, `RewardFactionOverride1`, `RewardFactionID2`, `RewardFactionValue2`, `RewardFactionOverride2`, `RewardFactionID3`, `RewardFactionValue3`, `RewardFactionOverride3`, `RewardFactionID4`, `RewardFactionValue4`, `RewardFactionOverride4`, `RewardFactionID5`, `RewardFactionValue5`, `RewardFactionOverride5`, `TimeAllowed`, `AllowableRaces`, `LogTitle`, `LogDescription`, `QuestDescription`, `AreaDescription`, `QuestCompletionLog`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `VerifiedBuild`) VALUES
+(9418166, 4, 0, -1, 'Delwyn''s Locket', 138645, 3, 0, 139264, 1, 0, 2400, 2, -1, -1, 65, 60, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 4, 7, 4, 32, 3, 45, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Inside: a pressed flower and a name.', 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0) ON DUPLICATE KEY UPDATE `class` = VALUES(`class`), `subclass` = VALUES(`subclass`), `SoundOverrideSubclass` = VALUES(`SoundOverrideSubclass`), `name` = VALUES(`name`), `displayid` = VALUES(`displayid`), `Quality` = VALUES(`Quality`), `Flags` = VALUES(`Flags`), `FlagsExtra` = VALUES(`FlagsExtra`), `BuyCount` = VALUES(`BuyCount`), `BuyPrice` = VALUES(`BuyPrice`), `SellPrice` = VALUES(`SellPrice`), `InventoryType` = VALUES(`InventoryType`), `AllowableClass` = VALUES(`AllowableClass`), `AllowableRace` = VALUES(`AllowableRace`), `ItemLevel` = VALUES(`ItemLevel`), `RequiredLevel` = VALUES(`RequiredLevel`), `RequiredSkill` = VALUES(`RequiredSkill`), `RequiredSkillRank` = VALUES(`RequiredSkillRank`), `requiredspell` = VALUES(`requiredspell`), `requiredhonorrank` = VALUES(`requiredhonorrank`), `RequiredCityRank` = VALUES(`RequiredCityRank`), `RequiredReputationFaction` = VALUES(`RequiredReputationFaction`), `RequiredReputationRank` = VALUES(`RequiredReputationRank`), `maxcount` = VALUES(`maxcount`), `stackable` = VALUES(`stackable`), `ContainerSlots` = VALUES(`ContainerSlots`), `stat_type1` = VALUES(`stat_type1`), `stat_value1` = VALUES(`stat_value1`), `stat_type2` = VALUES(`stat_type2`), `stat_value2` = VALUES(`stat_value2`), `stat_type3` = VALUES(`stat_type3`), `stat_value3` = VALUES(`stat_value3`), `stat_type4` = VALUES(`stat_type4`), `stat_value4` = VALUES(`stat_value4`), `stat_type5` = VALUES(`stat_type5`), `stat_value5` = VALUES(`stat_value5`), `stat_type6` = VALUES(`stat_type6`), `stat_value6` = VALUES(`stat_value6`), `stat_type7` = VALUES(`stat_type7`), `stat_value7` = VALUES(`stat_value7`), `stat_type8` = VALUES(`stat_type8`), `stat_value8` = VALUES(`stat_value8`), `stat_type9` = VALUES(`stat_type9`), `stat_value9` = VALUES(`stat_value9`), `stat_type10` = VALUES(`stat_type10`), `stat_value10` = VALUES(`stat_value10`), `ScalingStatDistribution` = VALUES(`ScalingStatDistribution`), `ScalingStatValue` = VALUES(`ScalingStatValue`), `dmg_min1` = VALUES(`dmg_min1`), `dmg_max1` = VALUES(`dmg_max1`), `dmg_type1` = VALUES(`dmg_type1`), `dmg_min2` = VALUES(`dmg_min2`), `dmg_max2` = VALUES(`dmg_max2`), `dmg_type2` = VALUES(`dmg_type2`), `armor` = VALUES(`armor`), `holy_res` = VALUES(`holy_res`), `fire_res` = VALUES(`fire_res`), `nature_res` = VALUES(`nature_res`), `frost_res` = VALUES(`frost_res`), `shadow_res` = VALUES(`shadow_res`), `arcane_res` = VALUES(`arcane_res`), `delay` = VALUES(`delay`), `ammo_type` = VALUES(`ammo_type`), `RangedModRange` = VALUES(`RangedModRange`), `spellid_1` = VALUES(`spellid_1`), `spelltrigger_1` = VALUES(`spelltrigger_1`), `spellcharges_1` = VALUES(`spellcharges_1`), `spellppmRate_1` = VALUES(`spellppmRate_1`), `spellcooldown_1` = VALUES(`spellcooldown_1`), `spellcategory_1` = VALUES(`spellcategory_1`), `spellcategorycooldown_1` = VALUES(`spellcategorycooldown_1`), `spellid_2` = VALUES(`spellid_2`), `spelltrigger_2` = VALUES(`spelltrigger_2`), `spellcharges_2` = VALUES(`spellcharges_2`), `spellppmRate_2` = VALUES(`spellppmRate_2`), `spellcooldown_2` = VALUES(`spellcooldown_2`), `spellcategory_2` = VALUES(`spellcategory_2`), `spellcategorycooldown_2` = VALUES(`spellcategorycooldown_2`), `spellid_3` = VALUES(`spellid_3`), `spelltrigger_3` = VALUES(`spelltrigger_3`), `spellcharges_3` = VALUES(`spellcharges_3`), `spellppmRate_3` = VALUES(`spellppmRate_3`), `spellcooldown_3` = VALUES(`spellcooldown_3`), `spellcategory_3` = VALUES(`spellcategory_3`), `spellcategorycooldown_3` = VALUES(`spellcategorycooldown_3`), `spellid_4` = VALUES(`spellid_4`), `spelltrigger_4` = VALUES(`spelltrigger_4`), `spellcharges_4` = VALUES(`spellcharges_4`), `spellppmRate_4` = VALUES(`spellppmRate_4`), `spellcooldown_4` = VALUES(`spellcooldown_4`), `spellcategory_4` = VALUES(`spellcategory_4`), `spellcategorycooldown_4` = VALUES(`spellcategorycooldown_4`), `spellid_5` = VALUES(`spellid_5`), `spelltrigger_5` = VALUES(`spelltrigger_5`), `spellcharges_5` = VALUES(`spellcharges_5`), `spellppmRate_5` = VALUES(`spellppmRate_5`), `spellcooldown_5` = VALUES(`spellcooldown_5`), `spellcategory_5` = VALUES(`spellcategory_5`), `spellcategorycooldown_5` = VALUES(`spellcategorycooldown_5`), `bonding` = VALUES(`bonding`), `description` = VALUES(`description`), `PageText` = VALUES(`PageText`), `LanguageID` = VALUES(`LanguageID`), `PageMaterial` = VALUES(`PageMaterial`), `startquest` = VALUES(`startquest`), `lockid` = VALUES(`lockid`), `Material` = VALUES(`Material`), `sheath` = VALUES(`sheath`), `RandomProperty` = VALUES(`RandomProperty`), `RandomSuffix` = VALUES(`RandomSuffix`), `block` = VALUES(`block`), `itemset` = VALUES(`itemset`), `MaxDurability` = VALUES(`MaxDurability`), `area` = VALUES(`area`), `Map` = VALUES(`Map`), `BagFamily` = VALUES(`BagFamily`), `TotemCategory` = VALUES(`TotemCategory`), `socketColor_1` = VALUES(`socketColor_1`), `socketContent_1` = VALUES(`socketContent_1`), `socketColor_2` = VALUES(`socketColor_2`), `socketContent_2` = VALUES(`socketContent_2`), `socketColor_3` = VALUES(`socketColor_3`), `socketContent_3` = VALUES(`socketContent_3`), `socketBonus` = VALUES(`socketBonus`), `GemProperties` = VALUES(`GemProperties`), `RequiredDisenchantSkill` = VALUES(`RequiredDisenchantSkill`), `ArmorDamageModifier` = VALUES(`ArmorDamageModifier`), `duration` = VALUES(`duration`), `ItemLimitCategory` = VALUES(`ItemLimitCategory`), `HolidayId` = VALUES(`HolidayId`), `ScriptName` = VALUES(`ScriptName`), `DisenchantID` = VALUES(`DisenchantID`), `FoodType` = VALUES(`FoodType`), `minMoneyLoot` = VALUES(`minMoneyLoot`), `maxMoneyLoot` = VALUES(`maxMoneyLoot`), `flagsCustom` = VALUES(`flagsCustom`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `QuestInfoID`, `SuggestedGroupNum`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RewardNextQuest`, `RewardXPDifficulty`, `RewardMoney`, `RewardMoneyDifficulty`, `RewardDisplaySpell`, `RewardSpell`, `RewardHonor`, `RewardKillHonor`, `StartItem`, `Flags`, `RequiredPlayerKills`, `RewardItem1`, `RewardAmount1`, `RewardItem2`, `RewardAmount2`, `RewardItem3`, `RewardAmount3`, `RewardItem4`, `RewardAmount4`, `ItemDrop1`, `ItemDropQuantity1`, `ItemDrop2`, `ItemDropQuantity2`, `ItemDrop3`, `ItemDropQuantity3`, `ItemDrop4`, `ItemDropQuantity4`, `RewardChoiceItemID1`, `RewardChoiceItemQuantity1`, `RewardChoiceItemID2`, `RewardChoiceItemQuantity2`, `RewardChoiceItemID3`, `RewardChoiceItemQuantity3`, `RewardChoiceItemID4`, `RewardChoiceItemQuantity4`, `RewardChoiceItemID5`, `RewardChoiceItemQuantity5`, `RewardChoiceItemID6`, `RewardChoiceItemQuantity6`, `POIContinent`, `POIx`, `POIy`, `POIPriority`, `RewardTitle`, `RewardTalents`, `RewardArenaPoints`, `RewardFactionID1`, `RewardFactionValue1`, `RewardFactionOverride1`, `RewardFactionID2`, `RewardFactionValue2`, `RewardFactionOverride2`, `RewardFactionID3`, `RewardFactionValue3`, `RewardFactionOverride3`, `RewardFactionID4`, `RewardFactionValue4`, `RewardFactionOverride4`, `RewardFactionID5`, `RewardFactionValue5`, `RewardFactionOverride5`, `TimeAllowed`, `AllowableRaces`, `LogTitle`, `LogDescription`, `QuestDescription`, `AreaDescription`, `QuestCompletionLog`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `VerifiedBuild`) VALUES
 (9417101, 2, -1, 30, 3457, 0, 0, 0, 0, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'A Summons from the Guardian', 'Step through the portal of Khadgar''s Wisdomball and speak with Khadgar in the Guardian''s Library.', 'Adventurer! Yes, you - the one staring at the talking crystal ball. Don''t be alarmed; it is only me. Khadgar.$B$BI need help, $N, and I would much rather not explain it through a fortune-teller''s trinket. I have returned to my master''s tower, Karazhan, and something there has... answered me.$B$BTouch the orb when you are ready. I will open the way - no need to brave Deadwind Pass on foot.', NULL, 'Speak with Khadgar in the Guardian''s Library.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL),
 (9417102, 2, -1, 30, 3457, 0, 0, 0, 0, 0, 0, 0, 3, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'A Question Unanswered', 'Ask Medivh''s Floating Tome a question.', 'This orb was a gift from the Dalaran academy, back when I was an apprentice who asked far too many questions. It answers anything. Badly, usually - "outlook hazy", "ask again later".$B$BI rest it on my master''s old tome when I consult it; the answers write themselves on the pages. For weeks now the ink has spelled the same words, no matter what I ask.$B$BI want you to see it for yourself, so you know I am not going mad. Go on - ask it anything.', NULL, 'Return to Khadgar.', 9417032, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Medivh''s Floating Tome asked', NULL, NULL, NULL, NULL),
 (9417103, 2, -1, 30, 3457, 0, 0, 0, 0, 0, 0, 0, 5, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Margins of the Guardian', 'Recover 6 Torn Pages of Medivh from the Restless Spirits of Karazhan.', '"She wakes beneath the crater." I have heard those words before - in Medivh''s hand, scribbled in the margins of his books. My master wrote about a Dream-Eater sleeping beneath Dalaran long before anyone believed him.$B$BThose pages were torn out years ago, and the restless spirits haunting these halls have been hoarding them ever since. Bring them back to me.', NULL, 'Return to Khadgar.', 0, 0, 0, 0, 0, 0, 0, 0, 9417301, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL),
@@ -822,9 +827,9 @@ REPLACE INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `Que
 (9417114, 2, -1, 30, 10060, 0, 0, 0, 0, 0, 0, 0, 5, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'The Dreamer in Ice', 'Go down to Delwyn with Khadgar and keep the Nightmare Husks off him while he breaks the Ice Prison.', 'Delwyn is down there, $N - not dead, and not quite alive. The dream caught him when he came to mend the seal and froze him where he stood, an Ice Prison of its own making.$B$BI can break it, but it will take everything I have, and the nightmare will not let him go quietly. Its husks will come for me while I work. Keep them off me, and we bring him back.', NULL, 'Speak with Apprentice Delwyn.', 9417061, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Delwyn freed from the Ice Prison', NULL, NULL, NULL, NULL),
 (9417115, 2, -1, 30, 10060, 0, 0, 0, 0, 0, 0, 0, 5, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Nightmare''s Herald', 'Slay the Herald of Vel''thessa while Khadgar and Delwyn hold her, then speak with Khadgar.', 'Thank you... I came down here to mend the seal, and the dream simply... kept me. Vel''thessa. That is her name. I heard it every night for thirty years.$B$BThe flame prison will not hold her much longer, and she will not come out alone - her Herald will come for you. Master Khadgar and I will hold her as long as we can. Deal with whatever she sends. Go!', NULL, 'Speak with Khadgar.', 9417029, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL),
 (9417116, 2, -1, 30, 10060, 0, 0, 0, 0, 0, 0, 0, 6, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9417322, 1, 9417323, 1, 9417324, 1, 9417325, 1, 9417326, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Hold the Rift', 'Stay with Khadgar at the Dream Rift in Dalaran Crater while Delwyn locks it.', 'We are not going back in - not like this. In there she shapes the world around her; we would be fighting the dream itself.$B$BDelwyn knows that rift better than any of us - it held him for thirty years. He can hold it shut from this side. Stay with us while he does. If she pushes back, I want you here.', NULL, 'Return to Khadgar at the Dream Rift.', 9417065, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Delwyn locks the rift', '', '', NULL, NULL),
-(9417117, 2, -1, 30, 3457, 0, 0, 0, 0, 0, 0, 0, 6, 0, 7, 0, 0, 0, 0, 0, 0, 0, 101169, 1, 9417328, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'The Answer Is No', 'Return through Khadgar''s portal and speak with him in the Guardian''s Library.', 'It is done. For now. Delwyn will keep the rift shut - thirty years in her dream taught him every crack in it.$B$BI''ll open the way back to the library. There is one more question I want to ask that orb, and I want you there when I do.', NULL, 'Speak with Khadgar in the Guardian''s Library.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL);
-DELETE FROM `quest_template_addon` WHERE `ID` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `SourceSpellID`, `PrevQuestID`, `NextQuestID`, `ExclusiveGroup`, `BreadcrumbForQuestId`, `RewardMailTemplateID`, `RewardMailDelay`, `RequiredSkillID`, `RequiredSkillPoints`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `ProvidedItemCount`, `SpecialFlags`) VALUES
+(9417117, 2, -1, 30, 3457, 0, 0, 0, 0, 0, 0, 0, 6, 0, 7, 0, 0, 0, 0, 0, 0, 0, 101169, 1, 9417328, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'The Answer Is No', 'Return through Khadgar''s portal and speak with him in the Guardian''s Library.', 'It is done. For now. Delwyn will keep the rift shut - thirty years in her dream taught him every crack in it.$B$BI''ll open the way back to the library. There is one more question I want to ask that orb, and I want you there when I do.', NULL, 'Speak with Khadgar in the Guardian''s Library.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL) ON DUPLICATE KEY UPDATE `QuestType` = VALUES(`QuestType`), `QuestLevel` = VALUES(`QuestLevel`), `MinLevel` = VALUES(`MinLevel`), `QuestSortID` = VALUES(`QuestSortID`), `QuestInfoID` = VALUES(`QuestInfoID`), `SuggestedGroupNum` = VALUES(`SuggestedGroupNum`), `RequiredFactionId1` = VALUES(`RequiredFactionId1`), `RequiredFactionId2` = VALUES(`RequiredFactionId2`), `RequiredFactionValue1` = VALUES(`RequiredFactionValue1`), `RequiredFactionValue2` = VALUES(`RequiredFactionValue2`), `RewardNextQuest` = VALUES(`RewardNextQuest`), `RewardXPDifficulty` = VALUES(`RewardXPDifficulty`), `RewardMoney` = VALUES(`RewardMoney`), `RewardMoneyDifficulty` = VALUES(`RewardMoneyDifficulty`), `RewardDisplaySpell` = VALUES(`RewardDisplaySpell`), `RewardSpell` = VALUES(`RewardSpell`), `RewardHonor` = VALUES(`RewardHonor`), `RewardKillHonor` = VALUES(`RewardKillHonor`), `StartItem` = VALUES(`StartItem`), `Flags` = VALUES(`Flags`), `RequiredPlayerKills` = VALUES(`RequiredPlayerKills`), `RewardItem1` = VALUES(`RewardItem1`), `RewardAmount1` = VALUES(`RewardAmount1`), `RewardItem2` = VALUES(`RewardItem2`), `RewardAmount2` = VALUES(`RewardAmount2`), `RewardItem3` = VALUES(`RewardItem3`), `RewardAmount3` = VALUES(`RewardAmount3`), `RewardItem4` = VALUES(`RewardItem4`), `RewardAmount4` = VALUES(`RewardAmount4`), `ItemDrop1` = VALUES(`ItemDrop1`), `ItemDropQuantity1` = VALUES(`ItemDropQuantity1`), `ItemDrop2` = VALUES(`ItemDrop2`), `ItemDropQuantity2` = VALUES(`ItemDropQuantity2`), `ItemDrop3` = VALUES(`ItemDrop3`), `ItemDropQuantity3` = VALUES(`ItemDropQuantity3`), `ItemDrop4` = VALUES(`ItemDrop4`), `ItemDropQuantity4` = VALUES(`ItemDropQuantity4`), `RewardChoiceItemID1` = VALUES(`RewardChoiceItemID1`), `RewardChoiceItemQuantity1` = VALUES(`RewardChoiceItemQuantity1`), `RewardChoiceItemID2` = VALUES(`RewardChoiceItemID2`), `RewardChoiceItemQuantity2` = VALUES(`RewardChoiceItemQuantity2`), `RewardChoiceItemID3` = VALUES(`RewardChoiceItemID3`), `RewardChoiceItemQuantity3` = VALUES(`RewardChoiceItemQuantity3`), `RewardChoiceItemID4` = VALUES(`RewardChoiceItemID4`), `RewardChoiceItemQuantity4` = VALUES(`RewardChoiceItemQuantity4`), `RewardChoiceItemID5` = VALUES(`RewardChoiceItemID5`), `RewardChoiceItemQuantity5` = VALUES(`RewardChoiceItemQuantity5`), `RewardChoiceItemID6` = VALUES(`RewardChoiceItemID6`), `RewardChoiceItemQuantity6` = VALUES(`RewardChoiceItemQuantity6`), `POIContinent` = VALUES(`POIContinent`), `POIx` = VALUES(`POIx`), `POIy` = VALUES(`POIy`), `POIPriority` = VALUES(`POIPriority`), `RewardTitle` = VALUES(`RewardTitle`), `RewardTalents` = VALUES(`RewardTalents`), `RewardArenaPoints` = VALUES(`RewardArenaPoints`), `RewardFactionID1` = VALUES(`RewardFactionID1`), `RewardFactionValue1` = VALUES(`RewardFactionValue1`), `RewardFactionOverride1` = VALUES(`RewardFactionOverride1`), `RewardFactionID2` = VALUES(`RewardFactionID2`), `RewardFactionValue2` = VALUES(`RewardFactionValue2`), `RewardFactionOverride2` = VALUES(`RewardFactionOverride2`), `RewardFactionID3` = VALUES(`RewardFactionID3`), `RewardFactionValue3` = VALUES(`RewardFactionValue3`), `RewardFactionOverride3` = VALUES(`RewardFactionOverride3`), `RewardFactionID4` = VALUES(`RewardFactionID4`), `RewardFactionValue4` = VALUES(`RewardFactionValue4`), `RewardFactionOverride4` = VALUES(`RewardFactionOverride4`), `RewardFactionID5` = VALUES(`RewardFactionID5`), `RewardFactionValue5` = VALUES(`RewardFactionValue5`), `RewardFactionOverride5` = VALUES(`RewardFactionOverride5`), `TimeAllowed` = VALUES(`TimeAllowed`), `AllowableRaces` = VALUES(`AllowableRaces`), `LogTitle` = VALUES(`LogTitle`), `LogDescription` = VALUES(`LogDescription`), `QuestDescription` = VALUES(`QuestDescription`), `AreaDescription` = VALUES(`AreaDescription`), `QuestCompletionLog` = VALUES(`QuestCompletionLog`), `RequiredNpcOrGo1` = VALUES(`RequiredNpcOrGo1`), `RequiredNpcOrGo2` = VALUES(`RequiredNpcOrGo2`), `RequiredNpcOrGo3` = VALUES(`RequiredNpcOrGo3`), `RequiredNpcOrGo4` = VALUES(`RequiredNpcOrGo4`), `RequiredNpcOrGoCount1` = VALUES(`RequiredNpcOrGoCount1`), `RequiredNpcOrGoCount2` = VALUES(`RequiredNpcOrGoCount2`), `RequiredNpcOrGoCount3` = VALUES(`RequiredNpcOrGoCount3`), `RequiredNpcOrGoCount4` = VALUES(`RequiredNpcOrGoCount4`), `RequiredItemId1` = VALUES(`RequiredItemId1`), `RequiredItemId2` = VALUES(`RequiredItemId2`), `RequiredItemId3` = VALUES(`RequiredItemId3`), `RequiredItemId4` = VALUES(`RequiredItemId4`), `RequiredItemId5` = VALUES(`RequiredItemId5`), `RequiredItemId6` = VALUES(`RequiredItemId6`), `RequiredItemCount1` = VALUES(`RequiredItemCount1`), `RequiredItemCount2` = VALUES(`RequiredItemCount2`), `RequiredItemCount3` = VALUES(`RequiredItemCount3`), `RequiredItemCount4` = VALUES(`RequiredItemCount4`), `RequiredItemCount5` = VALUES(`RequiredItemCount5`), `RequiredItemCount6` = VALUES(`RequiredItemCount6`), `Unknown0` = VALUES(`Unknown0`), `ObjectiveText1` = VALUES(`ObjectiveText1`), `ObjectiveText2` = VALUES(`ObjectiveText2`), `ObjectiveText3` = VALUES(`ObjectiveText3`), `ObjectiveText4` = VALUES(`ObjectiveText4`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+DELETE FROM `quest_template_addon` WHERE `ID` IN (9417101, 9417102, 9417103, 9417104, 9417105, 9417106, 9417107, 9417108, 9417109, 9417110, 9417111, 9417112, 9417113, 9417114, 9417115, 9417116, 9417117);
+INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `SourceSpellID`, `PrevQuestID`, `NextQuestID`, `ExclusiveGroup`, `BreadcrumbForQuestId`, `RewardMailTemplateID`, `RewardMailDelay`, `RequiredSkillID`, `RequiredSkillPoints`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `ProvidedItemCount`, `SpecialFlags`) VALUES
 (9417101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (9417102, 0, 0, 0, 9417101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (9417103, 0, 0, 0, 9417102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -842,8 +847,8 @@ REPLACE INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `Sour
 (9417115, 0, 0, 0, 9417114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (9417116, 0, 0, 0, 9417115, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (9417117, 0, 0, 0, 9417116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-DELETE FROM `quest_offer_reward` WHERE `ID` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
+DELETE FROM `quest_offer_reward` WHERE `ID` IN (9417101, 9417102, 9417103, 9417104, 9417105, 9417106, 9417107, 9417108, 9417109, 9417110, 9417111, 9417112, 9417113, 9417114, 9417115, 9417116, 9417117);
+INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
 (9417101, 1, 0, 0, 0, 0, 0, 0, 0, 'You came. Good. Forgive the theatrics with the orb - the Kirin Tor never did approve of my methods.$B$BWelcome to Karazhan, $N. Mind the books; some of them bite.', NULL),
 (9417102, 1, 0, 0, 0, 0, 0, 0, 0, '"She wakes beneath the crater." You heard it too. So I am not going mad - or we both are.', NULL),
 (9417103, 1, 0, 0, 0, 0, 0, 0, 0, 'Medivh''s handwriting... I would know it anywhere. "The sleeper beneath the city." He knew, all those years ago.', NULL),
@@ -861,8 +866,8 @@ REPLACE INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`,
 (9417115, 1, 0, 0, 0, 0, 0, 0, 0, 'We are out. All of us - barely. Whatever she is now, she is no longer asleep, and her dream is hers to shape.$B$BCatch your breath, $N. Then listen.', NULL),
 (9417116, 1, 0, 0, 0, 0, 0, 0, 0, 'It holds. Delwyn will keep it shut until we are ready to open it on our terms - and when we do, it will be to end her. Well done, $N. Truly.', NULL),
 (9417117, 1, 0, 0, 0, 0, 0, 0, 0, 'One last question, then. "Will Vel''thessa escape?"$B$B...$B$B"Reply hazy, try again later." Of course it does.$B$BKeep it, $N. You have earned it - and I suspect we will both want an answer before long.$B$BRest while you can. When the preparations are made and we are ready to go through that rift again, I will send for you.', NULL);
-DELETE FROM `quest_request_items` WHERE `ID` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`, `CompletionText`, `VerifiedBuild`) VALUES
+DELETE FROM `quest_request_items` WHERE `ID` IN (9417102, 9417103, 9417104, 9417106, 9417107, 9417108, 9417109, 9417110, 9417111, 9417112, 9417113, 9417114, 9417115, 9417116);
+INSERT INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`, `CompletionText`, `VerifiedBuild`) VALUES
 (9417102, 1, 1, 'Well? What did it say?', NULL),
 (9417103, 1, 1, 'The pages, $N. Every one of them matters.', NULL),
 (9417104, 1, 1, 'Did you find it? My master''s handwriting is hard to mistake.', NULL),
@@ -877,8 +882,8 @@ REPLACE INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`
 (9417114, 1, 1, 'Is... is someone there?', NULL),
 (9417115, 1, 1, 'The Hand first, $N. Then we get out of her dream.', NULL),
 (9417116, 1, 1, 'Is it holding?', NULL);
-DELETE FROM `quest_poi` WHERE `QuestID` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAreaId`, `Floor`, `Priority`, `Flags`, `VerifiedBuild`) VALUES
+DELETE FROM `quest_poi` WHERE `QuestID` IN (9417105, 9417106, 9417107, 9417108, 9417109, 9417110, 9417111, 9417112, 9417113, 9417114, 9417115, 9417116);
+INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAreaId`, `Floor`, `Priority`, `Flags`, `VerifiedBuild`) VALUES
 (9417105, 0, -1, 4418, 3044, 0, 0, 1, NULL),
 (9417106, 0, 0, 4418, 3044, 0, 0, 3, NULL),
 (9417106, 1, -1, 4418, 3044, 0, 0, 1, NULL),
@@ -908,8 +913,8 @@ REPLACE INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapA
 (9417115, 1, -1, 4418, 3044, 0, 0, 1, NULL),
 (9417116, 0, 0, 4418, 3044, 0, 0, 3, NULL),
 (9417116, 1, -1, 4418, 3044, 0, 0, 1, NULL);
-DELETE FROM `quest_poi_points` WHERE `QuestID` BETWEEN 9417101 AND 9417117;
-REPLACE INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`, `VerifiedBuild`) VALUES
+DELETE FROM `quest_poi_points` WHERE `QuestID` IN (9417105, 9417106, 9417107, 9417108, 9417109, 9417110, 9417111, 9417112, 9417113, 9417114, 9417115, 9417116);
+INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`, `VerifiedBuild`) VALUES
 (9417105, 0, 0, 319, 264, NULL),
 (9417106, 0, 0, 352, 183, NULL),
 (9417106, 0, 1, 356, 172, NULL),
@@ -1096,8 +1101,8 @@ REPLACE INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`, `VerifiedB
 (9417116, 0, 6, 309, 380, NULL),
 (9417116, 0, 7, 299, 375, NULL),
 (9417116, 1, 0, 307, 364, NULL);
-DELETE FROM `gossip_menu` WHERE `MenuID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
+DELETE FROM `gossip_menu` WHERE `MenuID` IN (9417001, 9417002, 9417003, 9417004, 9417005, 9417006, 9417007, 9417008);
+INSERT INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
 (9417001, 9417001),
 (9417002, 9417002),
 (9417003, 9417003),
@@ -1106,8 +1111,8 @@ REPLACE INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
 (9417006, 9417006),
 (9417007, 9417007),
 (9417008, 9417008);
-DELETE FROM `gossip_menu_option` WHERE `MenuID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionText`, `OptionBroadcastTextID`, `OptionType`, `OptionNpcFlag`, `ActionMenuID`, `ActionPoiID`, `BoxCoded`, `BoxMoney`, `BoxText`, `BoxBroadcastTextID`, `VerifiedBuild`) VALUES
+DELETE FROM `gossip_menu_option` WHERE `MenuID` IN (9417001, 9417002, 9417003, 9417004, 9417006, 9417007, 9417008);
+INSERT INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionText`, `OptionBroadcastTextID`, `OptionType`, `OptionNpcFlag`, `ActionMenuID`, `ActionPoiID`, `BoxCoded`, `BoxMoney`, `BoxText`, `BoxBroadcastTextID`, `VerifiedBuild`) VALUES
 (9417001, 0, 0, 'Open the portal to Karazhan.', 0, 1, 1, 0, 0, 0, 0, NULL, 0, NULL),
 (9417002, 0, 0, 'Open the portal to Dalaran Crater.', 0, 1, 1, 0, 0, 0, 0, NULL, 0, NULL),
 (9417002, 1, 0, 'Send me home to Stormwind.', 0, 1, 1, 0, 0, 0, 0, NULL, 0, NULL),
@@ -1119,8 +1124,8 @@ REPLACE INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionTe
 (9417007, 1, 0, 'I am ready - let us go on.', 0, 1, 1, 0, 0, 0, 0, NULL, 0, NULL),
 (9417008, 0, 0, 'I am ready - lead the way.', 0, 1, 1, 0, 0, 0, 0, NULL, 0, NULL),
 (9417008, 1, 0, 'I am ready - break the ice.', 0, 1, 1, 0, 0, 0, 0, NULL, 0, NULL);
-DELETE FROM `npc_text` WHERE `ID` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `BroadcastTextID0`, `lang0`, `Probability0`, `em0_0`, `em0_1`, `em0_2`, `em0_3`, `em0_4`, `em0_5`, `text1_0`, `text1_1`, `BroadcastTextID1`, `lang1`, `Probability1`, `em1_0`, `em1_1`, `em1_2`, `em1_3`, `em1_4`, `em1_5`, `text2_0`, `text2_1`, `BroadcastTextID2`, `lang2`, `Probability2`, `em2_0`, `em2_1`, `em2_2`, `em2_3`, `em2_4`, `em2_5`, `text3_0`, `text3_1`, `BroadcastTextID3`, `lang3`, `Probability3`, `em3_0`, `em3_1`, `em3_2`, `em3_3`, `em3_4`, `em3_5`, `text4_0`, `text4_1`, `BroadcastTextID4`, `lang4`, `Probability4`, `em4_0`, `em4_1`, `em4_2`, `em4_3`, `em4_4`, `em4_5`, `text5_0`, `text5_1`, `BroadcastTextID5`, `lang5`, `Probability5`, `em5_0`, `em5_1`, `em5_2`, `em5_3`, `em5_4`, `em5_5`, `text6_0`, `text6_1`, `BroadcastTextID6`, `lang6`, `Probability6`, `em6_0`, `em6_1`, `em6_2`, `em6_3`, `em6_4`, `em6_5`, `text7_0`, `text7_1`, `BroadcastTextID7`, `lang7`, `Probability7`, `em7_0`, `em7_1`, `em7_2`, `em7_3`, `em7_4`, `em7_5`, `VerifiedBuild`) VALUES
+DELETE FROM `npc_text` WHERE `ID` IN (9417001, 9417002, 9417003, 9417004, 9417005, 9417006, 9417007, 9417008);
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `BroadcastTextID0`, `lang0`, `Probability0`, `em0_0`, `em0_1`, `em0_2`, `em0_3`, `em0_4`, `em0_5`, `text1_0`, `text1_1`, `BroadcastTextID1`, `lang1`, `Probability1`, `em1_0`, `em1_1`, `em1_2`, `em1_3`, `em1_4`, `em1_5`, `text2_0`, `text2_1`, `BroadcastTextID2`, `lang2`, `Probability2`, `em2_0`, `em2_1`, `em2_2`, `em2_3`, `em2_4`, `em2_5`, `text3_0`, `text3_1`, `BroadcastTextID3`, `lang3`, `Probability3`, `em3_0`, `em3_1`, `em3_2`, `em3_3`, `em3_4`, `em3_5`, `text4_0`, `text4_1`, `BroadcastTextID4`, `lang4`, `Probability4`, `em4_0`, `em4_1`, `em4_2`, `em4_3`, `em4_4`, `em4_5`, `text5_0`, `text5_1`, `BroadcastTextID5`, `lang5`, `Probability5`, `em5_0`, `em5_1`, `em5_2`, `em5_3`, `em5_4`, `em5_5`, `text6_0`, `text6_1`, `BroadcastTextID6`, `lang6`, `Probability6`, `em6_0`, `em6_1`, `em6_2`, `em6_3`, `em6_4`, `em6_5`, `text7_0`, `text7_1`, `BroadcastTextID7`, `lang7`, `Probability7`, `em7_0`, `em7_1`, `em7_2`, `em7_3`, `em7_4`, `em7_5`, `VerifiedBuild`) VALUES
 (9417001, 'The orb flickers with violet light. Inside, a familiar bearded face leans closer to the glass.$B$B"Ah, $N. Ready when you are. Just try not to drop me."', 'The orb flickers with violet light. Inside, a familiar bearded face leans closer to the glass.$B$B"Ah, $N. Ready when you are. Just try not to drop me."', 0, 0, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (9417002, 'Medivh used to say the library was the only room in Karazhan that never lied to him. I am beginning to understand what he meant.', 'Medivh used to say the library was the only room in Karazhan that never lied to him. I am beginning to understand what he meant.', 0, 0, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (9417003, 'Stay close, $N. Dreams have a way of rearranging themselves when you are not looking.', 'Stay close, $N. Dreams have a way of rearranging themselves when you are not looking.', 0, 0, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
@@ -1129,8 +1134,8 @@ REPLACE INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `BroadcastTextID0`, `lang0`
 (9417006, 'The way down is not safe, and whatever is waking down there knows we are coming. Stay close - when we reach the bottom, I will begin the channel, and from then on nothing must reach me.', 'The way down is not safe, and whatever is waking down there knows we are coming. Stay close - when we reach the bottom, I will begin the channel, and from then on nothing must reach me.', 0, 0, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (9417007, 'The path down to Delwyn runs through everything Dalaran tried to forget. Stay close - and when I call for you, come to me at once.', 'The path down to Delwyn runs through everything Dalaran tried to forget. Stay close - and when I call for you, come to me at once.', 0, 0, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 (9417008, 'Delwyn is below us, sealed in the dream''s ice. I can break it - but not while the nightmare is clawing at my back.', 'Delwyn is below us, sealed in the dream''s ice. I can break it - but not while the nightmare is clawing at my back.', 0, 0, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
-DELETE FROM `acore_string` WHERE `entry` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_frFR`, `locale_deDE`, `locale_zhCN`, `locale_zhTW`, `locale_esES`, `locale_esMX`, `locale_ruRU`) VALUES
+DELETE FROM `acore_string` WHERE `entry` IN (9417001, 9417002, 9417003, 9417004, 9417005, 9417006, 9417007, 9417008, 9417009, 9417010, 9417011, 9417012, 9417013, 9417014, 9417015, 9417016, 9417017, 9417018, 9417019, 9417020, 9417021, 9417022, 9417023, 9417024, 9417025);
+INSERT INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_frFR`, `locale_deDE`, `locale_zhCN`, `locale_zhTW`, `locale_esES`, `locale_esMX`, `locale_ruRU`) VALUES
 (9417001, 'This doesn''t seem right, better keep looking. Also, it bit me.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9417002, 'Four hundred pages on ley lines, and the conclusion is "it depends".', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9417003, 'Empty pages... no, invisible ink. It says "Nice try."', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -1156,8 +1161,8 @@ REPLACE INTO `acore_string` (`entry`, `content_default`, `locale_koKR`, `locale_
 (9417023, 'Their spell still holds the crystal. I have to stop the siphoners first.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9417024, 'The wardstone stirs... and something is coming to stop it!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9417025, 'This wardstone is already awake.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-DELETE FROM `waypoints` WHERE `entry` BETWEEN 94170000 AND 94199999;
-REPLACE INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `point_comment`) VALUES
+DELETE FROM `waypoints` WHERE `entry` IN (94171000, 94171300, 94171400);
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `point_comment`) VALUES
 (94171000, 1, 319.108, 264.057, 53.3016, 0, 0, 'Wisdomball Q10 escort - Khadgar into the crater'),
 (94171000, 2, 319.296, 259.061, 51.117, 0, 0, 'Wisdomball Q10 escort - Khadgar into the crater'),
 (94171000, 3, 319.433, 254.063, 48.4683, 0, 0, 'Wisdomball Q10 escort - Khadgar into the crater'),
@@ -1407,12 +1412,11 @@ REPLACE INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `posit
 (94171300, 100, -11653.1, -3111.16, 2.54751, 0, 0, 'Wisdomball Q13 escort - the Path of Shame'),
 (94171300, 101, -11656, -3111.63, 1.87223, 0, 0, 'Wisdomball Q13 escort - the Path of Shame'),
 (94171400, 1, -11656.1, -3111.63, 1.75118, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
-(94171400, 2, -11659.6, -3111.85, 0.690519, 0, 0, 'Wisdomball Q14 escort - down to Delwyn');
-REPLACE INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `point_comment`) VALUES
+(94171400, 2, -11659.6, -3111.85, 0.690519, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 3, -11662.4, -3112.21, -0.078999, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 4, -11665.3, -3112.81, -1.01129, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 5, -11666.6, -3113.13, -1.49595, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
-(94171400, 6, -1.167e+04, -3114.06, -2.57233, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
+(94171400, 6, -11670, -3114.06, -2.57233, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 7, -11673.3, -3115.01, -3.76587, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 8, -11675.8, -3115.7, -4.73314, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 9, -11679.2, -3116.46, -6.17802, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
@@ -1458,8 +1462,8 @@ REPLACE INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `posit
 (94171400, 49, -11815.6, -3110.43, -11.4719, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 50, -11819.1, -3110.19, -11.4719, 0, 0, 'Wisdomball Q14 escort - down to Delwyn'),
 (94171400, 51, -11821, -3110.06, -11.4719, 0, 0, 'Wisdomball Q14 escort - down to Delwyn');
-DELETE FROM `waypoint_data` WHERE `id` BETWEEN 94170000 AND 94199999;
-REPLACE INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
+DELETE FROM `waypoint_data` WHERE `id` IN (94170940, 94170950, 94170980, 94170990, 94171000, 94171300, 94171400);
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
 (94170940, 1, -11283.453, -1841.7565, 135.633, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94170940, 2, -11276.883, -1841.1545, 135.656, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94170940, 3, -11273.399, -1848.6652, 135.7116, NULL, 0, 0, 0, 0, 0, 100, 0),
@@ -1709,8 +1713,7 @@ REPLACE INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positi
 (94171300, 36, -11454.772, -3101.5881, 3.9582505, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171300, 37, -11457.003, -3101.4167, 3.3324993, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171300, 38, -11460.485, -3101.163, 3.900651, NULL, 0, 0, 0, 0, 0, 100, 0),
-(94171300, 39, -11460.485, -3101.163, 3.900651, NULL, 0, 0, 0, 0, 0, 100, 0);
-REPLACE INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
+(94171300, 39, -11460.485, -3101.163, 3.900651, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171300, 40, -11463.98, -3101.0422, 4.422243, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171300, 41, -11467.48, -3100.98, 3.7803805, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171300, 42, -11470.979, -3101.0452, 3.5614183, NULL, 0, 0, 0, 0, 0, 100, 0),
@@ -1830,8 +1833,8 @@ REPLACE INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positi
 (94171400, 55, -11815.585, -3110.4275, -11.471928, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171400, 56, -11819.076, -3110.1865, -11.471928, NULL, 0, 0, 0, 0, 0, 100, 0),
 (94171400, 57, -11820.955, -3110.0566, -11.471928, NULL, 0, 0, 0, 0, 0, 100, 0);
-DELETE FROM `spell_area` WHERE `area` = 10060 AND (`quest_start` BETWEEN 9417101 AND 9417117 OR `quest_end` BETWEEN 9417101 AND 9417117);
-REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+DELETE FROM `spell_area` WHERE (`spell`, `area`, `quest_start`) IN ((54341, 10060, 9417114), (59062, 10060, 9417113), (59073, 10060, 9417114), (59074, 10060, 9417110), (59087, 10060, 9417115), (60815, 10060, 9417110), (70105, 10060, 9417116), (70979, 10060, 9417113), (2116015, 10060, 9417110));
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (54341, 10060, 9417114, 9417115, 0, 0, 2, 1, 8, 1),
 (59062, 10060, 9417113, 0, 0, 0, 2, 1, 8, 0),
 (59073, 10060, 9417114, 9417115, 0, 0, 2, 1, 66, 1),
@@ -1841,13 +1844,13 @@ REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_sp
 (70105, 10060, 9417116, 9417117, 0, 0, 2, 1, 66, 11),
 (70979, 10060, 9417113, 9417114, 0, 0, 2, 1, 66, 1),
 (2116015, 10060, 9417110, 9417114, 0, 0, 2, 1, 64, 9);
-DELETE FROM `spell_script_names` WHERE `ScriptName` LIKE 'spell\_wisdomball\_%';
-REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+DELETE FROM `spell_script_names` WHERE (`spell_id`, `ScriptName`) IN ((38197, 'spell_wisdomball_council_arcane_explosion'), (40425, 'spell_wisdomball_council_arcane_explosion'), (58693, 'spell_wisdomball_memory_blizzard'));
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (38197, 'spell_wisdomball_council_arcane_explosion'),
 (40425, 'spell_wisdomball_council_arcane_explosion'),
 (58693, 'spell_wisdomball_memory_blizzard');
-DELETE FROM `smart_scripts` WHERE (`entryorguid` BETWEEN 9417001 AND 9419999 AND `source_type` IN (0, 1)) OR (`entryorguid` BETWEEN -9419999 AND -9417001 AND `source_type` IN (0, 1)) OR (`entryorguid` BETWEEN 941700000 AND 941999999 AND `source_type` = 9);
-REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+DELETE FROM `smart_scripts` WHERE (`entryorguid`, `source_type`) IN ((-9417196, 0), (-9417195, 0), (-9417194, 0), (-9417109, 0), (-9417051, 1), (-9417050, 1), (-9417049, 1), (-9417048, 1), (-9417047, 1), (-9417046, 1), (-9417045, 1), (-9417044, 1), (-9417043, 1), (-9417042, 1), (-9417041, 1), (-9417040, 1), (-9417039, 1), (-9417038, 1), (-9417037, 1), (-9417036, 1), (-9417035, 1), (-9417034, 1), (-9417033, 1), (-9417032, 1), (-9417031, 1), (-9417030, 1), (9417001, 0), (9417002, 0), (9417003, 0), (9417004, 0), (9417006, 0), (9417020, 0), (9417021, 0), (9417022, 0), (9417023, 0), (9417025, 0), (9417026, 0), (9417027, 0), (9417028, 0), (9417032, 0), (9417034, 0), (9417036, 0), (9417037, 0), (9417038, 0), (9417039, 0), (9417040, 0), (9417042, 0), (9417043, 0), (9417044, 0), (9417045, 0), (9417046, 0), (9417047, 0), (9417048, 0), (9417049, 0), (9417050, 0), (9417052, 0), (9417053, 0), (9417055, 0), (9417056, 0), (9417057, 0), (9417058, 0), (9417059, 0), (9417060, 0), (9417061, 0), (9417062, 0), (9417072, 0), (9417203, 1), (9417204, 1), (9417205, 1), (9417206, 1), (9417207, 1), (9417208, 1), (9417209, 1), (9417215, 1), (9417216, 1), (9417217, 1), (9417228, 1), (941700401, 9), (941700411, 9), (941700421, 9), (941700431, 9), (941700432, 9), (941700441, 9), (941700442, 9), (941703300, 9), (941703400, 9), (941703601, 9), (941703602, 9), (941703603, 9), (941703901, 9), (941704001, 9), (941704002, 9), (941704003, 9), (941704004, 9), (941704201, 9), (941704801, 9), (941704802, 9), (941704809, 9), (941704901, 9), (941704902, 9), (941704909, 9), (941705001, 9), (941705002, 9), (941705009, 9), (941705601, 9), (941705602, 9), (941705603, 9), (941706001, 9), (941706002, 9), (941706003, 9), (941721701, 9), (941721702, 9), (941721703, 9), (941721704, 9), (941721705, 9), (941721706, 9), (941721707, 9), (941721708, 9), (941721709, 9));
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (-9417196, 0, 0, 0, 38, 0, 100, 0, 3, 1, 0, 0, 0, 0, 12, 9417072, 3, 15000, 0, 0, 0, 8, 0, 0, 0, 0, 306.3, 370.3, -59, 5.09, 'Voice of Vel''thessa - Data 3 1 - Her ghost appears 3 yd over the rift (it yells: you cannot hold a dream shut)'),
 (-9417196, 0, 1, 0, 38, 0, 100, 0, 3, 2, 0, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 11, 9417072, 40, 1, 0, 0, 0, 0, 0, 'Voice of Vel''thessa - Data 3 2 - Her ghost: I will be waiting'),
 (-9417195, 0, 0, 0, 1, 0, 100, 0, 1000, 1000, 3000, 3000, 0, 0, 11, 23017, 34, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Delwyn (Rift, locked) - OOC - Channel 23017 on the rift (if not up)'),
@@ -1920,7 +1923,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (9417002, 0, 0, 1, 62, 0, 100, 0, 9417002, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Library) - On Gossip Select 0 - Close Gossip'),
 (9417002, 0, 1, 6, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 50, 9417216, 120, 0, 0, 0, 0, 8, 0, 0, 0, 0, -11156.466, -1922.7008, 232.0085, 2.238487, 'Khadgar (Library) - Linked - Summon Portal to Dalaran Crater (120 s)'),
 (9417002, 0, 2, 3, 62, 0, 100, 0, 9417002, 1, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Library) - On Gossip Select 1 - Close Gossip'),
-(9417002, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, -8.99e+03, 848, 29.62, 3.6, 'Khadgar (Library) - Linked - Teleport to Stormwind Wizard''s Sanctum'),
+(9417002, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, -8990, 848, 29.62, 3.6, 'Khadgar (Library) - Linked - Teleport to Stormwind Wizard''s Sanctum'),
 (9417002, 0, 4, 5, 62, 0, 100, 0, 9417002, 2, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Library) - On Gossip Select 2 - Close Gossip'),
 (9417002, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 1, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 1458.65, -4218.35, 43.19, 2.92607, 'Khadgar (Library) - Linked - Teleport to Orgrimmar Darkbriar Lodge'),
 (9417002, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 41232, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Library) - Linked - Cast Teleport Visual Only'),
@@ -1931,6 +1934,10 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (9417003, 0, 0, 1, 62, 0, 100, 0, 9417003, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Field) - On Gossip Select - Close Gossip'),
 (9417003, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 4417, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, -11173.841, -1900.9021, 232.00911, 5.3293033, 'Khadgar (Field) - Linked - Teleport to the Guardian''s Library'),
 (9417003, 0, 2, 0, 19, 0, 100, 0, 9417110, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Field) - On Q10 Accepted - Say: meet me at the rift'),
+(9417003, 0, 3, 4, 19, 0, 100, 0, 9417112, 0, 0, 0, 0, 0, 106, 16, 0, 0, 0, 0, 0, 14, 9417013, 9417209, 0, 0, 0, 0, 0, 0, 'Khadgar (Field) - On Q12 accepted - Chain Anchor guid 9417013 usable again (a run abandoned after reinforcing it)'),
+(9417003, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 106, 16, 0, 0, 0, 0, 0, 14, 9417014, 9417209, 0, 0, 0, 0, 0, 0, 'Khadgar (Field) - Linked - Chain Anchor guid 9417014 usable again (a run abandoned after reinforcing it)'),
+(9417003, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 106, 16, 0, 0, 0, 0, 0, 14, 9417015, 9417209, 0, 0, 0, 0, 0, 0, 'Khadgar (Field) - Linked - Chain Anchor guid 9417015 usable again (a run abandoned after reinforcing it)'),
+(9417003, 0, 6, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 106, 16, 0, 0, 0, 0, 0, 14, 9417016, 9417209, 0, 0, 0, 0, 0, 0, 'Khadgar (Field) - Linked - Chain Anchor guid 9417016 usable again (a run abandoned after reinforcing it)'),
 (9417004, 0, 0, 1, 62, 0, 100, 0, 9417006, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Escort) - On Gossip Select - Close Gossip'),
 (9417004, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 3, 0, 1, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Escort) - Linked - Say: stay close'),
 (9417004, 0, 2, 15, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 53, 1, 94171000, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Khadgar (Escort) - Linked - Start escort (walk, defensive; target self: no player stored, so it never ends on distance - C++ wisdomball_escort_wait stops him when no player is within 25 yd)'),
@@ -2007,7 +2014,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (9417023, 0, 18, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 12, 9417053, 4, 20000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Linked - Summon Nightmare Tormentor'),
 (9417023, 0, 19, 20, 82, 2, 100, 0, 9417053, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Tormentor dies - Whispers'),
 (9417023, 0, 20, 26, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 22, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Linked - Phase 3 (done, stays a friendly spirit)'),
-(9417023, 0, 21, 0, 35, 2, 100, 0, 9417053, 0, 0, 0, 0, 0, 41, 0, 5, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Tormentor gone without dying - Despawn, respawns neutral in 5 s'),
+(9417023, 0, 21, 0, 35, 2, 100, 0, 0, 0, 0, 0, 0, 0, 41, 0, 5, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Tormentor gone without dying - Despawn, respawns neutral in 5 s'),
 (9417023, 0, 22, 23, 7, 0, 100, 0, 0, 0, 0, 0, 0, 0, 8, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Evade - Fights again'),
 (9417023, 0, 23, 24, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Linked - Attacks again'),
 (9417023, 0, 24, 25, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Trapped Eidolon - Linked - Chases again'),
@@ -2097,8 +2104,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (9417044, 0, 1, 0, 21, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 45491, 0, 0, 0, 0, 0, 19, 9417041, 150, 0, 0, 0, 0, 0, 0, 'Gloomhorn Prowler - Back home - Siphon again'),
 (9417044, 0, 2, 0, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 92, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gloomhorn Prowler - Aggro - Stop siphoning'),
 (9417044, 0, 3, 0, 0, 0, 100, 0, 3000, 5000, 12000, 16000, 0, 0, 218, 13443, 0, 17, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Gloomhorn Prowler - IC - Rend (small bleed, custom base points 17 = 18 per tick)'),
-(9417044, 0, 4, 0, 0, 0, 100, 0, 6000, 9500, 6000, 9500, 0, 0, 218, 975011, 0, 251, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Gloomhorn Prowler - IC - Fierce Blow (own copy, custom base points 251 = 252 % weapon damage)');
-REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(9417044, 0, 4, 0, 0, 0, 100, 0, 6000, 9500, 6000, 9500, 0, 0, 218, 975011, 0, 251, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Gloomhorn Prowler - IC - Fierce Blow (own copy, custom base points 251 = 252 % weapon damage)'),
 (9417044, 0, 9, 0, 54, 0, 100, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 21, 80, 0, 0, 0, 0, 0, 0, 0, 'Gloomhorn Prowler - Just Summoned (wardstone wave) - Attack closest player'),
 (9417045, 0, 0, 0, 1, 0, 100, 0, 1000, 3000, 0, 0, 0, 0, 11, 45491, 0, 0, 0, 0, 0, 19, 9417041, 150, 0, 0, 0, 0, 0, 0, 'Seal Devourer - OOC (once) - Siphon the seal crystal if within 150 yd'),
 (9417045, 0, 1, 0, 21, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 45491, 0, 0, 0, 0, 0, 19, 9417041, 150, 0, 0, 0, 0, 0, 0, 'Seal Devourer - Back home - Siphon again'),
@@ -2282,7 +2288,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (9417208, 1, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 933, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, -11359, -3072.89, 4.55, 3.38, 'Dream Rift - On Use - Teleport to Regret''s Chasm'),
 (9417209, 1, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 134, 59069, 0, 0, 0, 0, 0, 19, 9417055, 5, 0, 0, 0, 0, 0, 0, 'Chain Anchor - On Use (Q12 incomplete) - Player channels Azure Manashaper Channel into its Anchor Focus'),
 (9417215, 1, 1, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 4417, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, -11173.841, -1900.9021, 232.00911, 5.3293033, 'Portal to Karazhan - On Use - Teleport to the Guardian''s Library'),
-(9417216, 1, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 4418, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 322, 2.6e+02, 53.3, 2.3, 'Portal to Dalaran Crater - On Use - Teleport to the crater camp (instance map 4418)'),
+(9417216, 1, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 4418, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 322, 260, 53.3, 2.3, 'Portal to Dalaran Crater - On Use - Teleport to the crater camp (instance map 4418)'),
 (9417216, 1, 1, 0, 60, 0, 100, 0, 1500, 1500, 0, 0, 0, 0, 118, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Portal to Dalaran Crater - 1.5 s after spawn (open animation) - GO state Active (stand loop)'),
 (9417217, 1, 0, 0, 64, 0, 100, 0, 1, 0, 0, 0, 0, 0, 88, 941721701, 941721709, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Weathered Tome - On Use - Random wrong-book line (lists 1-9)'),
 (9417228, 1, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 4418, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 293.71, 377.26, -64.09, 5.5, 'Khadgar''s portal - On Use - Teleport to the crater rift (map 4418)'),
@@ -2348,8 +2354,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (941704201, 9, 5, 0, 0, 0, 100, 0, 12500, 12500, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Wisdomball scene - fade'),
 (941704801, 9, 0, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 0, 12, 9417044, 4, 20000, 0, 0, 0, 8, 0, 0, 0, 0, 416.6638, 281.27515, 43.314342, 0.0115, 'Northern Wardstone wave 1 - Seal-Leech Wyrm (user point 1)'),
 (941704801, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 12, 9417044, 4, 20000, 0, 0, 0, 8, 0, 0, 0, 0, 431.7483, 273.41483, 43.378136, 2.1775, 'Northern Wardstone wave 1 - Seal-Leech Wyrm (user point 2)'),
-(941704802, 9, 0, 0, 0, 0, 100, 0, 4000, 4000, 0, 0, 0, 0, 12, 9417047, 4, 20000, 0, 0, 0, 8, 0, 0, 0, 0, 416.6638, 281.27515, 43.314342, 0.0115, 'Northern Wardstone wave 2 - Ley Wraith (user point 1)');
-REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(941704802, 9, 0, 0, 0, 0, 100, 0, 4000, 4000, 0, 0, 0, 0, 12, 9417047, 4, 20000, 0, 0, 0, 8, 0, 0, 0, 0, 416.6638, 281.27515, 43.314342, 0.0115, 'Northern Wardstone wave 2 - Ley Wraith (user point 1)'),
 (941704802, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 12, 9417047, 4, 20000, 0, 0, 0, 8, 0, 0, 0, 0, 431.7483, 273.41483, 43.378136, 2.1775, 'Northern Wardstone wave 2 - Ley Wraith (user point 2)'),
 (941704809, 9, 0, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 0, 11, 41232, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Northern Wardstone awakened - flash'),
 (941704809, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Northern Wardstone awakened - emote'),
@@ -2401,8 +2406,8 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (941721707, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 220, 9417008, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Weathered Tome - player says wrong-book line 7'),
 (941721708, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 220, 9417009, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Weathered Tome - player says wrong-book line 8'),
 (941721709, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 220, 9417010, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Weathered Tome - player says wrong-book line 9');
-DELETE FROM `conditions` WHERE `SourceEntry` BETWEEN 9417001 AND 9419999 OR `SourceEntry` BETWEEN -9419999 AND -9417001 OR `SourceEntry` BETWEEN 941700000 AND 941999999 OR `SourceGroup` BETWEEN 9417001 AND 9419999;
-REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`) IN ((15, 9417001, 0, 0), (15, 9417002, 0, 0), (15, 9417002, 1, 0), (15, 9417002, 2, 0), (15, 9417006, 0, 0), (15, 9417007, 0, 0), (15, 9417007, 1, 0), (15, 9417008, 0, 0), (15, 9417008, 1, 0), (19, 0, 9417112, 0), (19, 0, 9417116, 0), (22, 1, -9417048, 1), (22, 1, 9417032, 0), (22, 1, 9417034, 0), (22, 1, 9417052, 0), (22, 1, 9417203, 1), (22, 1, 9417204, 1), (22, 1, 9417205, 1), (22, 1, 9417206, 1), (22, 1, 9417207, 1), (22, 1, 9417208, 1), (22, 1, 9417209, 1), (22, 1, 9417216, 1), (22, 2, 9417055, 0), (22, 2, 9417204, 1), (22, 2, 9417215, 1), (22, 3, 9417203, 1), (22, 3, 9417205, 1), (22, 3, 9417206, 1), (22, 3, 9417207, 1), (22, 5, -9417109, 0), (22, 7, 9417056, 0), (22, 8, 9417056, 0), (22, 9, 9417056, 0), (22, 10, -9417109, 0), (22, 10, 9417023, 0), (22, 10, 9417027, 0), (22, 12, 9417023, 0), (22, 22, -9417109, 0), (22, 25, -9417109, 0), (22, 45, 9417060, 0), (22, 49, 9417060, 0), (22, 51, 9417060, 0));
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (15, 9417001, 0, 0, 0, 47, 0, 9417101, 74, 0, 0, 0, 0, '', 'Wisdomball - portal option - Q1 taken, complete or rewarded'),
 (15, 9417002, 0, 0, 0, 8, 0, 9417117, 0, 0, 1, 0, 0, '', 'Khadgar - portal to crater - and Q17 not rewarded'),
 (15, 9417002, 0, 0, 0, 47, 0, 9417105, 74, 0, 0, 0, 0, '', 'Khadgar - portal to crater - Q5 taken, complete or rewarded'),
@@ -2472,14 +2477,3 @@ REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntr
 (22, 45, 9417060, 0, 0, 29, 1, 9417028, 6, 0, 1, 0, 0, '', 'Q14 event - channel again: no living Nightmare Husk within 6 yd'),
 (22, 49, 9417060, 0, 0, 29, 1, 9417028, 100, 0, 1, 0, 0, '', 'Q14 event - break (a Husk died): no living Nightmare Husk within 100 yd'),
 (22, 51, 9417060, 0, 0, 29, 1, 9417028, 100, 0, 1, 0, 0, '', 'Q14 event - break (poll): no living Nightmare Husk within 100 yd');
-INSERT IGNORE INTO `creature_model_info` (`DisplayID`, `BoundingRadius`, `CombatReach`, `Gender`, `DisplayID_Other_Gender`, `VerifiedBuild`) VALUES
-(80262, 0.6, 2, 2, 0, 0),
-(97052, 1, 2, 2, 0, 0),
-(98487, 1, 2.5, 0, 0, 0),
-(130725, 1, 1.5, 2, 0, NULL),
-(130739, 1, 1.5, 2, 0, NULL),
-(131195, 1, 1.5, 2, 0, NULL),
-(132556, 1, 1.5, 2, 0, NULL),
-(139999, 1, 1.5, 1, 0, NULL),
-(141109, 0.306, 1.5, 0, 0, 0),
-(142373, 0.6111, 2.0313, 2, 0, 0);
