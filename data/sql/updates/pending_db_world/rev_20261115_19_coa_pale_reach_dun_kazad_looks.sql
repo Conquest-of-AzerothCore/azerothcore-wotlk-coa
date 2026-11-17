@@ -1,5 +1,6 @@
 -- Dun Kazad vendors from realm footage (RIEMlZSgbQw 8:09-9:10, AscenSS 071326-051951); closest client items.
--- Kardu replaces the placeholder kit, Ellerdin gets a dark-haired olive-vest look, Ginnad black side pigtails (outfit set in game).
+-- Kardu replaces the placeholder kit, Ellerdin gets a dark-haired olive-vest look, Ginnad black side pigtails;
+-- her outfit was set in game.
 DELETE FROM `creature_display_preset` WHERE `entry` IN (164410, 164411, 164417);
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
