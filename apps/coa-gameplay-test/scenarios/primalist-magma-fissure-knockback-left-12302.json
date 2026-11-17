@@ -9,7 +9,8 @@
     "the line goes to the caster's right. Here the caster faces +x (orientation 0) and the target stands 8 yards",
     "ahead and 1 yard to the caster's left, so it must move +y by several yards while staying near its x.",
     "TARGET_UNIT_CONE_ENEMY_24 selects a 24 degree cone, so the target has to stay within 12 degrees of the",
-    "caster's facing to be hit."
+    "caster's facing to be hit. The case uses the flat ground and training dummy entry 36 of chronomancer-waves-of-",
+    "time-immediate-knockback, because MotionMaster::MoveKnockbackFrom shortens the hop against rising terrain."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -27,17 +28,17 @@
     {
       "id": "target",
       "owner": "primalist",
-      "entry": 28168,
-      "health": 500000,
+      "entry": 36,
+      "health": 1000000,
       "level": 60,
       "distance": 8
     }
   ],
   "location": {
-    "map": 0,
-    "x": -9617.06,
-    "y": -288.949,
-    "z": 57.3053,
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987,
     "o": 0
   },
   "steps": [
@@ -54,10 +55,10 @@
     {
       "action": "teleport",
       "actor": "primalist",
-      "map": 0,
-      "x": -9617.06,
-      "y": -289.949,
-      "z": 57.3053,
+      "map": 530,
+      "x": 7633.86,
+      "y": -6811.22,
+      "z": 79.5987,
       "o": 0
     },
     {
