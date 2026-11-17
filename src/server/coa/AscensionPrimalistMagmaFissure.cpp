@@ -90,15 +90,18 @@ class spell_primalist_magma_fissure_knockback : public SpellScript
         float const facing = caster->GetOrientation();
         float const alongX = std::cos(facing);
         float const alongY = std::sin(facing);
-        float const along = (target->GetPositionX() - caster->GetPositionX()) * alongX +
-            (target->GetPositionY() - caster->GetPositionY()) * alongY;
+        float const offsetX = target->GetPositionX() - caster->GetPositionX();
+        float const offsetY = target->GetPositionY() - caster->GetPositionY();
+        float const along = offsetX * alongX + offsetY * alongY;
+        float const towardsLeft = offsetY * alongX - offsetX * alongY;
         float fromX = caster->GetPositionX() + along * alongX;
         float fromY = caster->GetPositionY() + along * alongY;
 
-        if (target->GetExactDist2d(fromX, fromY) < 0.1f)
+        if (std::fabs(towardsLeft) < 0.1f)
         {
-            fromX = target->GetPositionX() - alongY;
-            fromY = target->GetPositionY() + alongX;
+            float const side = towardsLeft > 0.0f ? 1.0f : -1.0f;
+            fromX = target->GetPositionX() + side * alongY;
+            fromY = target->GetPositionY() - side * alongX;
         }
 
         SpellEffectInfo const& effect = GetSpellInfo()->Effects[effIndex];
