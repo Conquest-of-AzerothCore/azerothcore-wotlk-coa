@@ -6919,6 +6919,16 @@ private:
                             Require(found != nullptr, "Packet mail field requires a mail carrying the item");
                             request << (kind == "mail_id" ? found->messageID : uint32(foundItem->item_guid));
                         }
+                        else if (kind == "money_mail_id")
+                        {
+                            uint32 const wanted = value.get_value<uint32>();
+                            Mail const* found = nullptr;
+                            for (Mail const* mail : player->GetMails())
+                                if (!found && mail->items.empty() && mail->money == wanted)
+                                    found = mail;
+                            Require(found != nullptr, "Packet money mail id requires a mail with that money and no items");
+                            request << found->messageID;
+                        }
                         else if (kind == "auction_id")
                         {
                             uint32 const wanted = value.get_value<uint32>();
@@ -8120,13 +8130,14 @@ private:
         else if (action == "system_mail")
         {
             std::string const kind = step.get<std::string>("kind");
-            Require(kind == "postmaster" || kind == "reward" || kind == "server",
-                    "system_mail kind must be postmaster, reward or server");
+            Require(kind == "postmaster" || kind == "reward" || kind == "server" || kind == "self",
+                    "system_mail kind must be postmaster, reward, server or self");
             Item* item = Item::CreateItem(step.get<uint32>("item"), 1, player);
             Require(item != nullptr, "system_mail could not create the item");
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
             item->SaveToDB(trans);
             MailSender const sender = kind == "postmaster" ? MailSender(MAIL_CREATURE, 34337)
+                                    : kind == "self"       ? MailSender(player)
                                                            : MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
             std::string const subject = kind == "reward" ? RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT : "System mail";
             MailDraft(subject, "Sent by the gameplay test.").AddItem(item)

@@ -710,6 +710,18 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(scenario)
 
+    def test_money_mail_id_is_a_packet_field_naming_a_copper_amount(self):
+        packet = {'action': 'client_packet', 'actor': 'caster', 'opcode': 581,
+                  'fields': [{'gameobject_guid': 142119}, {'money_mail_id': 50}]}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, packet)
+        self.assertIs(run.validate(scenario), scenario)
+        for value in (0, 2**32, '50'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**packet, 'fields': [{'money_mail_id': value}]})
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_quest_log_size_accepts_the_native_and_extended_range(self):
         for value in (25, 40, 64):
             scenario = copy.deepcopy(self.scenario)
@@ -798,7 +810,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(scenario)
 
     def test_system_mail_needs_a_known_kind_and_an_item(self):
-        for kind in ('postmaster', 'reward', 'server'):
+        for kind in ('postmaster', 'reward', 'server', 'self'):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].insert(0, {'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': kind})
             self.assertIs(run.validate(scenario), scenario)

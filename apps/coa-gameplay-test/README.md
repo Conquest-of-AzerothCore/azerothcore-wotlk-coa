@@ -456,8 +456,10 @@ checks through separate socketless character sessions and does not test simultan
 item entry (its u8 bag and slot), or `gameobject_guid` with an entry of
 exactly one owned fixture gameobject. Both write the native raw GUID and require the referenced object to exist.
 `mail_id` and `mail_item_guid` take an item entry and write the u32 id of the first held mail carrying it and that
-item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them. `auction_id` takes an item entry and writes the u32 id of the
-newest auction in any auction house carrying it, as `CMSG_AUCTION_PLACE_BID` and `CMSG_AUCTION_REMOVE_ITEM` send it.
+item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them. `money_mail_id` takes an amount of copper and writes the u32 id
+of the first held mail without items carrying exactly that money, as `CMSG_MAIL_TAKE_MONEY` sends it. `auction_id`
+takes an item entry and writes the u32 id of the newest auction in any auction house carrying it, as
+`CMSG_AUCTION_PLACE_BID` and `CMSG_AUCTION_REMOVE_ITEM` send it.
 Optional `location` supplies `map`, `x`, `y`, `z`, `o` for a fixture
 teleport. `location.ignore_access` optionally bypasses entry requirements for a fixture (for example a solo
 raid test), without enabling GM mode during combat. Actors share their lane's phase (`1 << 30` with one lane) to
@@ -548,7 +550,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `binder_activate` | `actor`, innkeeper `target` (or `owner` + `entry` for a creature that actor has out): native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
 | `destroy_item` | `actor`, `item`: native `CMSG_DESTROYITEM` of the first carried item of that entry, as the player deleting it. |
 | `economy_log_cleanup` | `actor`, `days_ahead` (0-36500): runs the economy log's daily cleanup as if the realm clock were `days_ahead` days later, waiting for it: every `coa_economy_log` row older than `CoA.EconomyLog.KeepDays` days at that time is deleted. |
-| `system_mail` | `actor`, `item`, `kind` `postmaster` (a mail from the Postmaster creature, as `Player::SendItemRetrievalMail` sends), `reward` (a Recruit-A-Friend reward mail: no sender, GM stationery and the reward subject) or `server` (the same sender-less GM-stationery mail with another subject, as boss loot and item recovery mail): post one such mail carrying one `item` to the actor. |
+| `system_mail` | `actor`, `item`, `kind` `postmaster` (a mail from the Postmaster creature, as `Player::SendItemRetrievalMail` sends), `reward` (a Recruit-A-Friend reward mail: no sender, GM stationery and the reward subject), `server` (the same sender-less GM-stationery mail with another subject, as boss loot and item recovery mail) or `self` (a mail with the actor as its own sender, as the Welcome Warchest and the Call Board cache send): post one such mail carrying one `item` to the actor. |
 | `area_trigger` | `actor`, `id`: native area-trigger packet, as the client sends on walking into one; inn triggers are what set the rested flag. |
 | `gossip_select` | `actor`, zero-based `option`: select from the current menu through the session handler. |
 | `who` | `actor`, optional name-filter `target`, `class_mask`, `race_mask`: submit a native Who query. |

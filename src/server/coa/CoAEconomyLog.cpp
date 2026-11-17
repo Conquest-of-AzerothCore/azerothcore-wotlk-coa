@@ -112,7 +112,7 @@ namespace
         CoAEconomyRow row;
         row.event = CoAEconomyEvent::MailTake;
         row.source = mail->messageID;
-        if (mail->messageType == MAIL_NORMAL && mail->sender)
+        if (mail->messageType == MAIL_NORMAL && mail->sender && mail->sender != mail->receiver)
         {
             row.otherGuid = mail->sender;
             row.otherAccount = AccountOf(mail->sender);

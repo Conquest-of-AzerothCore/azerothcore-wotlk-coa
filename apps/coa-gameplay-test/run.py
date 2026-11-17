@@ -46,7 +46,7 @@ ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 MAX_NEAREST_CREATURE_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
-SYSTEM_MAIL_KINDS = {'postmaster', 'reward', 'server'}
+SYSTEM_MAIL_KINDS = {'postmaster', 'reward', 'server', 'self'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
                             'spawn_stand_state', 'spawn_clearance', 'spawn_headroom', 'spawn_distance'}
@@ -1033,7 +1033,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
                 require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'item_guid', 'item_bag', 'item_slot', 'gameobject_guid',
-                                 'vendor_slot', 'mail_id', 'mail_item_guid', 'auction_id', 'equipment_set_guid',
+                                 'vendor_slot', 'mail_id', 'mail_item_guid', 'money_mail_id', 'auction_id', 'equipment_set_guid',
                                  'packed_equipment_set_guid',
                                  'actor_guid', 'packed_actor_guid', 'nearest_creature_guid',
                                  'pet_guid', 'stabled_pet', 'duel_arbiter', 'invited_battleground_type',
@@ -1045,6 +1045,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(value in actor_ids, f'{where}.fields[{index}]: expected a player or creature id')
                 elif kind in {'pet_guid', 'duel_arbiter', 'invited_battleground_type'}:
                     require(value in player_ids, f'{where}.fields[{index}]: expected a player id')
+                elif kind == 'money_mail_id':
+                    number(value, f'{where}.fields[{index}]', 1, 2**32 - 1, True)
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
                                'item_guid': 2**32 - 1, 'item_bag': 2**32 - 1, 'item_slot': 2**32 - 1, 'gameobject_guid': 2**32 - 1,
