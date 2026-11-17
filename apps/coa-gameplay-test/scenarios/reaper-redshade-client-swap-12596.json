@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Redshade swaps Reap for Thresh and Bloodshatter on the client, silently (#12596)",
+  "contract": [
+    "Redshade 524735 reads 'Using Reap now transforms your Reap into Thresh for 10 sec.' Its step auras Thresh",
+    "(Dummy) 525058 and Bloodshatter (Dummy) 525299 used to rewrite the action bar with SMSG_ACTION_BUTTONS to",
+    "point at Thresh 505170, a temporary spell the client was never told about, so the Reap button went blank",
+    "and Thresh was missing from the spellbook. The steps now swap every known Reap rank (except the Reap heal",
+    "801327) through Player::SetTemporarySpellReplacement, the SMSG_SUPERCEDED_SPELL swap Decimation already",
+    "uses. Bloodshatter takes priority while both steps exist, and each swap is undone when its step ends.",
+    "Expected: the client's spellbook gains Thresh, then Bloodshatter, then gets Reap back, with no chat line",
+    "for Thresh, Bloodshatter or Reap. The level 80 reaper-redshade-thresh keeps covering cast forwarding."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "reaper", "spell": 500357 },
+    { "action": "learn", "actor": "reaper", "spell": 524735 },
+    {
+      "action": "assert", "label": "SETUP: the talent owns Thresh on the server", "actor": "reaper",
+      "metric": "knows_spell", "spell": 505170, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the client does not list Thresh before the transform", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 505170, "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "client_chat_lines_for", "spell": 500357,
+      "save_as": "reap_lines"
+    },
+    { "action": "set_aura", "label": "The Thresh step", "actor": "reaper", "spell": 525058, "stacks": 1 },
+    {
+      "action": "assert", "label": "Reap is replaced by Thresh", "actor": "reaper",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 505170, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the swap to Thresh reaches the client", "actor": "reaper",
+      "metric": "spellbook_superseded_for", "spell": 505170, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the client's spellbook lists Thresh", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 505170, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The client no longer lists Reap while Thresh stands in", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 500357, "equals": 0
+    },
+    { "action": "set_aura", "label": "The Bloodshatter step", "actor": "reaper", "spell": 525299, "stacks": 1 },
+    {
+      "action": "assert", "label": "Bloodshatter takes priority over Thresh", "actor": "reaper",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 505326, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The client's spellbook lists Bloodshatter", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 505326, "equals": 1
+    },
+    { "action": "set_aura", "label": "The Bloodshatter step ends", "actor": "reaper", "spell": 525299, "stacks": 0 },
+    {
+      "action": "assert", "label": "Thresh stands in again while its step remains", "actor": "reaper",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 505170, "within_ms": 1000
+    },
+    { "action": "set_aura", "label": "The Thresh step ends", "actor": "reaper", "spell": 525058, "stacks": 0 },
+    {
+      "action": "assert", "label": "Reap is itself again", "actor": "reaper",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 500357, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The client lists Reap again", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 500357, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The client no longer lists Thresh", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 505170, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The client no longer lists Bloodshatter", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 505326, "equals": 0
+    },
+    {
+      "action": "assert", "label": "No chat line for Thresh", "actor": "reaper",
+      "metric": "client_chat_lines_for", "spell": 505170, "equals": 0
+    },
+    {
+      "action": "assert", "label": "No chat line for Bloodshatter", "actor": "reaper",
+      "metric": "client_chat_lines_for", "spell": 505326, "equals": 0
+    },
+    {
+      "action": "assert", "label": "No chat line for Reap coming back", "actor": "reaper",
+      "metric": "client_chat_lines_for", "spell": 500357, "relative_to": "reap_lines", "equals": 0
+    }
+  ]
+}
