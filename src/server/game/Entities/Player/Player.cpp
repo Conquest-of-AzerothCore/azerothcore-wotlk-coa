@@ -10097,6 +10097,7 @@ void Player::Say(std::string_view text, Language language, WorldObject const* /*
     // Special handling for messages, do not use visibility map for stealthed units
     Acore::MessageDistDeliverer notifier(this, &data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), Acore::TeamFilter::All, nullptr, true);
     Cell::VisitObjects(this, notifier, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+    sScriptMgr->OnPlayerAfterChat(this, CHAT_MSG_SAY, language, _text);
 }
 
 void Player::Say(uint32 textId, WorldObject const* target /*= nullptr*/)
@@ -10125,6 +10126,7 @@ void Player::Yell(std::string_view text, Language language, WorldObject const* /
     // Special handling for messages, do not use visibility map for stealthed units
     Acore::MessageDistDeliverer notifier(this, &data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), Acore::TeamFilter::All, nullptr, true);
     Cell::VisitObjects(this, notifier, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
+    sScriptMgr->OnPlayerAfterChat(this, CHAT_MSG_YELL, language, _text);
 }
 
 void Player::Yell(uint32 textId, WorldObject const* target /*= nullptr*/)
@@ -10172,6 +10174,7 @@ void Player::TextEmote(std::string_view text, WorldObject const* /*= nullptr*/, 
             Cell::VisitObjects(this, notifier, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
         }
     }
+    sScriptMgr->OnPlayerAfterChat(this, CHAT_MSG_EMOTE, LANG_UNIVERSAL, _text);
 }
 
 void Player::TextEmote(uint32 textId, WorldObject const* target /*= nullptr*/, bool /*isBossEmote = false*/)
@@ -10200,6 +10203,7 @@ void Player::Whisper(std::string_view text, Language language, Player* target, b
     {
         ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, language, this, this, _text);
         target->SendDirectMessage(&data);
+        sScriptMgr->OnPlayerAfterChat(this, CHAT_MSG_WHISPER, language, _text, target);
     }
 
     // rest stuff shouldn't happen in case of addon message

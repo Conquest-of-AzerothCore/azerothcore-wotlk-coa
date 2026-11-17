@@ -1129,3 +1129,6 @@ XPHotspots.ActiveCount = 3
 XPHotspots.BuffSpell = 993945
 # Brand: a short label (32 characters at most, no "|") the client shows with the hotspots; empty = none.
 XPHotspots.Brand = ""
+
+CoA.ChatLog.Enable = 0
+CoA.ChatLog.KeepDays = 30

@@ -604,6 +604,68 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
+    def test_guild_fixture_and_raid_group_take_players(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['players'].append({'id': 'mate', 'race': 1, 'class': 1, 'level': 20})
+        scenario['steps'][:0] = [{'action': 'group', 'actor': 'caster', 'target': 'mate', 'raid': True},
+                                 {'action': 'guild', 'actor': 'caster', 'members': ['mate'], 'name': 'Testguild'}]
+        self.assertIs(run.validate(scenario), scenario)
+        for index, change, error in ((0, {'raid': 'yes'}, 'raid must be boolean'),
+                                     (1, {'actor': 'target'}, 'guild needs a player leader'),
+                                     (1, {'members': []}, 'guild members must be other players'),
+                                     (1, {'members': ['caster']}, 'guild members must be other players'),
+                                     (1, {'members': ['target']}, 'guild members must be other players'),
+                                     (1, {'name': 'Bad1'}, 'guild name must be 1 to 24 letters')):
+            bad = copy.deepcopy(scenario)
+            bad['steps'][index].update(change)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(bad)
+
+    def test_chat_log_cleanup_takes_a_day_count(self):
+        step = {'action': 'chat_log_cleanup', 'actor': 'caster', 'days_ahead': 3650}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, step)
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'days_ahead': -1}, {'days_ahead': 3651}, {'days_ahead': '31'}, {'days_ahead': 1.5}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**step, **change})
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'days_ahead'):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'chat_log_cleanup', 'actor': 'caster'})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_chat_log_rows_takes_a_type_and_filters(self):
+        rows = {'action': 'assert', 'actor': 'caster', 'metric': 'chat_log_rows', 'chat_type': 'whisper',
+                'chat_text': "it's me", 'chat_target': 'caster', 'chat_channel': 'World', 'chat_subject': 'Hello',
+                'chat_has_position': True, 'chat_has_group': False, 'chat_has_guild': False, 'chat_has_mail_id': False,
+                'chat_emote': 77, 'chat_name': 'Caster', 'chat_target_name': 'Abcdefghijkl Mnopqrstuvwx', 'equals': 1}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['chat_log'] = True
+        scenario['steps'].insert(0, rows)
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'chat_type': 'gossip'}, 'unknown chat_type'),
+                              ({'chat_type': None}, 'chat_type belongs to chat_log_rows'),
+                              ({'metric': 'item_count'}, 'chat_type belongs to chat_log_rows'),
+                              ({'actor': 'target'}, 'chat_log_rows needs a player'),
+                              ({'chat_target': 'target'}, 'chat_target must name a player'),
+                              ({'chat_text': 5}, 'chat_text must be a string'),
+                              ({'chat_name': 5}, 'chat_name must be a string'),
+                              ({'chat_target_name': ['x']}, 'chat_target_name must be a string'),
+                              ({'chat_has_position': 1}, 'chat_has_position must be boolean'),
+                              ({'chat_emote': -1}, 'chat_emote')):
+            step = {key: value for key, value in {**rows, **change}.items() if value is not None}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+        for value in ('yes', 1):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['chat_log'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'chat_log must be boolean'):
+                run.validate(scenario)
+
     def test_quest_log_size_accepts_the_native_and_extended_range(self):
         for value in (25, 40, 64):
             scenario = copy.deepcopy(self.scenario)

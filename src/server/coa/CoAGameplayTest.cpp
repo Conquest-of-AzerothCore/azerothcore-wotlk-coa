@@ -25,6 +25,7 @@
 #include "CharmInfo.h"
 #include "Chat.h"
 #include "ClientDBC.h"
+#include "CoAChatLog.h"
 #include "CoACreatureScaling.h"
 #include "CoAPtrCharacterCopy.h"
 #include "Config.h"
@@ -44,6 +45,7 @@
 #include "Group.h"
 #include "GroupMgr.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "InstanceScript.h"
 #include "Item.h"
 #include "LFGMgr.h"
@@ -634,6 +636,24 @@ private:
     }
 
     std::map<ServerConfigs, bool> _original;
+};
+
+class ChatLogConfig
+{
+public:
+    ChatLogConfig() : _original(CoAChatLog::SetEnabled(true)) { }
+
+    ChatLogConfig(ChatLogConfig const&) = delete;
+    ChatLogConfig& operator=(ChatLogConfig const&) = delete;
+
+    ~ChatLogConfig()
+    {
+        CoAChatLog::Flush(true);
+        CoAChatLog::SetEnabled(_original);
+    }
+
+private:
+    bool _original;
 };
 
 class QuestLogSizeConfig
@@ -2101,6 +2121,8 @@ public:
         }
         if (auto twoSide = _scenario.get_child_optional("two_side"))
             _twoSide.emplace(*twoSide);
+        if (_scenario.get<bool>("chat_log", false))
+            _chatLog.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
         {
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
@@ -5850,6 +5872,48 @@ private:
             return std::any_of(lines.begin(), lines.end(), [&needle](std::string const& line)
                 { return line.find(needle) != std::string::npos; }) ? 1.0 : 0.0;
         }
+        if (metric == "chat_log_rows")
+        {
+            std::optional<uint8> const type = CoAChatLog::TypeByName(step.get<std::string>("chat_type"));
+            Require(type.has_value(), "Unknown chat_log_rows type");
+            Require(CoAChatLog::Flush(true), "chat_log_rows could not write the pending rows");
+            Player* const sender = GetPlayer(step.get<std::string>("actor"));
+            auto const text = step.get_optional<std::string>("chat_text");
+            auto const channel = step.get_optional<std::string>("chat_channel");
+            auto const subject = step.get_optional<std::string>("chat_subject");
+            auto const emote = step.get_optional<uint32>("chat_emote");
+            auto const name = step.get_optional<std::string>("chat_name");
+            auto const targetName = step.get_optional<std::string>("chat_target_name");
+            std::optional<uint32> target;
+            if (auto const id = step.get_optional<std::string>("chat_target"))
+                target = GetPlayer(*id)->GetGUID().GetCounter();
+            auto const flag = [&step](char const* field) { return step.get_optional<bool>(field); };
+            auto const hasPosition = flag("chat_has_position");
+            auto const hasGroup = flag("chat_has_group");
+            auto const hasGuild = flag("chat_has_guild");
+            auto const hasMailId = flag("chat_has_mail_id");
+            QueryResult result = CharacterDatabase.Query("SELECT message, subject, channel, target_guid, x, y, z, group_id, "
+                "guild_id, mail_id, emote, name, target_name FROM coa_chat_log WHERE guid = {} AND type = {}", sender->GetGUID().GetCounter(), *type);
+            uint32 count = 0;
+            if (result)
+            {
+                do
+                {
+                    Field const* row = result->Fetch();
+                    bool const positioned = row[4].Get<float>() != 0.0f || row[5].Get<float>() != 0.0f || row[6].Get<float>() != 0.0f;
+                    if ((text && row[0].Get<std::string>() != *text) || (subject && row[1].Get<std::string>() != *subject)
+                        || (channel && row[2].Get<std::string>() != *channel) || (target && row[3].Get<uint32>() != *target)
+                        || (hasPosition && positioned != *hasPosition) || (hasGroup && (row[7].Get<uint32>() != 0) != *hasGroup)
+                        || (hasGuild && (row[8].Get<uint32>() != 0) != *hasGuild)
+                        || (hasMailId && (row[9].Get<uint32>() != 0) != *hasMailId) || (emote && row[10].Get<uint16>() != *emote)
+                        || (name && row[11].Get<std::string>() != *name)
+                        || (targetName && row[12].Get<std::string>() != *targetName))
+                        continue;
+                    ++count;
+                } while (result->NextRow());
+            }
+            return double(count);
+        }
         if (metric == "whispers_received")
         {
             ObjectGuid const from = GetPlayer(step.get<std::string>("from"))->GetGUID();
@@ -7515,6 +7579,8 @@ private:
             if (group->IsFull() && !group->isRaidGroup())
                 group->ConvertToRaid();
             Require(group->AddMember(member), "Could not join fixture group");
+            if (step.get<bool>("raid", false) && !group->isRaidGroup())
+                group->ConvertToRaid();
             if (auto method = step.get_optional<uint32>("loot_method"))
             {
                 group->SetLootMethod(LootMethod(*method));
@@ -7522,6 +7588,22 @@ private:
                     group->SetMasterLooterGuid(GetPlayer(*looter)->GetGUID());
                 group->SendUpdate();
             }
+        }
+        else if (action == "guild")
+        {
+            std::string const name = step.get<std::string>("name", "Chatlogguild");
+            Require(!player->GetGuildId(), "Guild fixture needs a leader without a guild");
+            Guild* guild = new Guild();
+            if (!guild->Create(player, name))
+            {
+                delete guild;
+                throw std::runtime_error("Could not create fixture guild");
+            }
+            sGuildMgr->AddGuild(guild);
+            _consoleRestores.Add("guild delete \"" + name + "\"");
+            for (auto const& member : step.get_child("members"))
+                Require(guild->AddMember(GetPlayer(member.second.get_value<std::string>())->GetGUID()),
+                    "Could not add a fixture guild member");
         }
         else if (action == "lfg_dungeon")
         {
@@ -7649,6 +7731,11 @@ private:
                 << step.get<std::string>("to") << step.get<std::string>("text");
             player->GetSession()->HandleMessagechatOpcode(packet);
             record.put("result", "whisper sent; verify delivery with assertions");
+        }
+        else if (action == "chat_log_cleanup")
+        {
+            Require(CoAChatLog::Flush(true), "chat_log_cleanup could not write the pending rows");
+            CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY, true);
         }
         else if (action == "addon_message")
         {
@@ -8887,6 +8974,7 @@ private:
     std::optional<PtrCharacterCopy::TestOverride> _ptrCharacterCopy;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
+    std::optional<ChatLogConfig> _chatLog;
     std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;

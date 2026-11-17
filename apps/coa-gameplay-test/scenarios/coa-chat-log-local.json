@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Chat log: say, yell, emote and text emotes at a player are logged with the sender's position",
+  "contract": [
+    "With CoA.ChatLog.Enable on, a say, a yell and an /e emote each write one coa_chat_log row with the text as delivered and the sender's position.",
+    "A text emote aimed at a player (SPIT, EmotesText 89, from the server's EmotesText.dbc) writes one text_emote row with that player as target, the emote id and no text; the same emote at nobody writes no row."
+  ],
+  "timeout_ms": 60000,
+  "chat_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "talker", "name": "Chatlogtalk", "race": 1, "class": 1, "level": 20},
+    {"id": "target", "name": "Chatlogtrgt", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "client_packet", "label": "Say", "actor": "talker", "opcode": 149, "consumed": false, "fields": [{"u32": 1}, {"u32": 7}, {"string": "hello there"}]},
+    {"action": "assert", "label": "One say row with the text and a position", "actor": "talker", "metric": "chat_log_rows", "chat_type": "say", "chat_text": "hello there", "chat_has_position": true, "equals": 1},
+    {"action": "client_packet", "label": "Yell", "actor": "talker", "opcode": 149, "consumed": false, "fields": [{"u32": 6}, {"u32": 7}, {"string": "HELLO THERE"}]},
+    {"action": "assert", "label": "One yell row", "actor": "talker", "metric": "chat_log_rows", "chat_type": "yell", "chat_text": "HELLO THERE", "chat_has_position": true, "equals": 1},
+    {"action": "client_packet", "label": "Emote", "actor": "talker", "opcode": 149, "consumed": false, "fields": [{"u32": 10}, {"u32": 7}, {"string": "waves hello"}]},
+    {"action": "assert", "label": "One emote row", "actor": "talker", "metric": "chat_log_rows", "chat_type": "emote", "chat_text": "waves hello", "chat_has_position": true, "equals": 1},
+    {"action": "client_packet", "label": "SPIT at the target", "actor": "talker", "opcode": 260, "consumed": false, "fields": [{"u32": 89}, {"u32": 0}, {"actor_guid": "target"}]},
+    {"action": "assert", "label": "One text_emote row aimed at the target", "actor": "talker", "metric": "chat_log_rows", "chat_type": "text_emote", "chat_target": "target", "chat_emote": 89, "chat_text": "", "chat_has_position": true, "equals": 1},
+    {"action": "client_packet", "label": "SPIT at nobody", "actor": "talker", "opcode": 260, "consumed": false, "fields": [{"u32": 89}, {"u32": 0}, {"u64": 0}]},
+    {"action": "assert", "label": "No row for an emote without a player target", "actor": "talker", "metric": "chat_log_rows", "chat_type": "text_emote", "equals": 1}
+  ]
+}
