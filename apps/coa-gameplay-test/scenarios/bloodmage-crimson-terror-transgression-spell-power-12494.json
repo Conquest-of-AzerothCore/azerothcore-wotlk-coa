@@ -8,8 +8,8 @@
     "whose effect 0 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT against Spirit (MiscValueB 4), and nothing",
     "applied 801102, so the talent never added spell power (bloodmage-crimson-terror-transgression checks only the",
     "modified value of 801102). Expected: with Crimson Terror, casting Transgression applies 801102 at 50 for the",
-    "same duration, raising Shadow spell power; ending Transgression removes it. Without the talent nothing is",
-    "added."
+    "same duration, raising Shadow spell power; it ends when Transgression",
+    "runs out. Without the talent nothing is added."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -148,19 +148,22 @@
       "equals": 0
     },
     {
-      "action": "cancel_aura",
+      "action": "assert",
+      "label": "SETUP: Transgression runs out (15 s, it cannot be cancelled)",
       "actor": "talented",
+      "metric": "aura",
       "spell": 801076,
-      "label": "leave Transgression"
+      "equals": 0,
+      "within_ms": 17000
     },
     {
       "action": "assert",
-      "label": "ending Transgression removes the buff",
+      "label": "the buff ends with Transgression",
       "actor": "talented",
       "metric": "aura",
       "spell": 801102,
       "equals": 0,
-      "within_ms": 2000
+      "within_ms": 500
     },
     {
       "action": "assert",
