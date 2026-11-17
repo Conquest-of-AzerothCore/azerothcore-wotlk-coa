@@ -1,5 +1,6 @@
 from dataclasses import dataclass, replace
 from pathlib import Path
+import math
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, FORCED_CHANCE_OP, FORCED_CHANCE_OWNER_AURA, FORCED_CHANCE_PERCENT,
                         behaviour_entry, prose_rule, waited_ms)
@@ -86,7 +87,8 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
         if not spec.baseline_count:
             return []
         return [{'action': 'wait', 'label': 'let the control baseline expire',
-                 'ms': spec.baseline_ms - spec.stop_ms - GCD_WAIT_MS + SUMMON_LIFETIME_BASELINE_MARGIN_MS},
+                 'ms': max(0, spec.baseline_ms - spec.stop_ms - GCD_WAIT_MS
+                           + SUMMON_LIFETIME_BASELINE_MARGIN_MS)},
                 measurement(summon_lifetime_mark(spec, 'control', 'expired count'), CASTER, 'owned_creature_count',
                             **count)]
 
@@ -202,9 +204,9 @@ def baseline_edges(run: Run, model: dict, start: float):
     first, last = run.values[marks[0][0]] - start, run.values[marks[-1][0]] - start
     readings = {run.values[count_label] for _, count_label in marks}
     if readings == {count + 1}:
-        return spawn, (last, last, 1.0)
+        return spawn, (last, math.inf, 1.0)
     if readings == {count}:
-        return spawn, (first, first, 1.0)
+        return spawn, (0.0, first, 1.0)
     return spawn, end
 
 
@@ -217,8 +219,14 @@ def baseline_failure(run: Run, model: dict) -> str | None:
     if expired != 0:
         return f'{expired:g} baseline creatures left {baseline["ms"]} ms after the control cast'
     pre = run.values.get(model['polls']['spawn'][0][1])
+    if pre is None:
+        return missing_measurement(run, model['polls']['spawn'][0][1])
     if pre != 0:
         return f'{pre:g} creatures right before the treatment cast'
+    for time_label, count_label in model['polls']['end']:
+        for label in (time_label, count_label):
+            if run.values.get(label) is None:
+                return missing_measurement(run, label)
     stray = sorted({run.values[count_label] for _, count_label in model['polls']['end']} - {count, count + 1})
     if stray:
         return f'the end window reads {stray}, neither the baseline {count:g} nor one more'
@@ -249,7 +257,7 @@ def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> V
         return replace(base, status='unmeasured', explanation=f'{spawn[2]:g} and {end[2]:g} creatures at most in the '
                                                               f'windows, not one')
     lowest, highest = end[0] - spawn[1], end[1] - spawn[0]
-    measured = (lowest + highest) / 2
+    measured = (lowest + highest) / 2 if math.isfinite(highest) else None
     expected, band = float(model['expected_ms']), float(model['band'])
     low, high = expected - band, expected + band
     if control != expected_control or released != 0:
@@ -282,6 +290,9 @@ def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], mod
             if control != baseline or released != 0:
                 return replace(base, status='alert', explanation=f'{run.key}: the control summoned {control} and '
                                                                  f'{released} forcing modifiers remain')
+            failure = baseline_failure(run, model) if model.get('baseline') else None
+            if failure is not None:
+                return replace(base, status='unmeasured', explanation=f'{run.key}: {failure}')
             empty += 1
             continue
         judged.append(behaviour_summon_lifetime_verdict(base, run, model))

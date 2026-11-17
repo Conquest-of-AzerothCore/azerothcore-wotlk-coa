@@ -8060,6 +8060,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertTrue(casts[0] < strikes[0] and casts[1] > strikes[3] and casts[1] < strikes[4])
         removed = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 1714]
         self.assertEqual([step['stacks'] for step in removed], [0, 0])
+        self.assertTrue(all(step['target'] == CASTER for step in removed))
         striker = next(creature for creature in scenario['creatures'] if creature['id'] == STRIKER)
         self.assertEqual(striker['spell_hit_bonus'], 100)
         self.assertIn(TARGET, [creature['id'] for creature in scenario['creatures']])

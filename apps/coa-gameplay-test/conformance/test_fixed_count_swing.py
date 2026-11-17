@@ -62,7 +62,8 @@ class FixedCountSwingTests(unittest.TestCase):
         self.assertFalse(any(step['action'] == 'cast' and step.get('spell') == FLAMES_DAMAGE for step in steps))
         start = next(index for index, step in enumerate(steps) if step['action'] == 'attack')
         self.assertEqual([step['action'] for step in steps[start:start + 3]], ['attack', 'wait', 'stop_attack'])
-        self.assertEqual((steps[start]['target'], steps[start + 1]['ms']), ('primary', SWING_MS))
+        self.assertEqual((steps[start]['target'], steps[start + 1]['ms']), ('primary', 50))
+        self.assertEqual(steps[start + 3]['ms'], SWING_MS - 50)
         self.assertLess(max(index for index, step in enumerate(steps) if step.get('spell') == FLOURISH
                             and step['action'] == 'cast'), start)
         self.assertIn('Swing route', scenario['contract'])

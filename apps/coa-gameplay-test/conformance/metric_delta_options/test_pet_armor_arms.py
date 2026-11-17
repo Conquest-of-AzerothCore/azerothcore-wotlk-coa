@@ -82,5 +82,38 @@ class PetArmorArmsTests(unittest.TestCase):
                 behaviour_scenario(load_class_file(15), {**entry, **changes})
 
 
+class PetArmorWindowRegressionTests(unittest.TestCase):
+    def spec(self):
+        from types import SimpleNamespace
+        return SimpleNamespace(spell=1, label_suffix='', trigger_spell=2, cast_power=None)
+
+    def test_each_baseline_follows_trigger_settle_and_fixture_reset(self):
+        from metric_delta_options.pet_armor_arms import PetArmorArms, arm_steps, model
+        spec, arms = self.spec(), PetArmorArms(3, 4, 5, 6, 2, 1000)
+        steps = arm_steps(spec, arms, 'with', 'dummy')
+        reads = model(spec, arms)['pet_armor_arms']['reads']['with']['dummy']
+        for trial in range(2):
+            index = next(i for i, step in enumerate(steps) if step.get('label') == reads[trial * 2][0])
+            self.assertEqual([step['action'] for step in steps[index - 5:index]],
+                             ['wait', 'set_aura', 'set_aura', 'set_aura', 'set_aura'])
+            self.assertEqual(steps[index + 2]['ms'], arms.window_ms)
+            self.assertEqual(steps[index + 3]['label'], reads[trial * 2 + 1][0])
+
+    def test_gap_swings_are_excluded_and_zero_window_counts_are_unmeasured(self):
+        from metric_delta_options.pet_armor_arms import DUMMIES, ratio_bonus
+        reads = {dummy: [[f'{dummy} {i} total', f'{dummy} {i} count'] for i in range(4)]
+                 for dummy in DUMMIES}
+        values = {}
+        for dummy in DUMMIES:
+            for (total, count), damage, hits in zip(reads[dummy], (0, 100, 10000, 10100), (0, 1, 50, 51)):
+                values[total], values[count] = damage, hits
+        bonus, _ = ratio_bonus(FakeRun(values), reads, 1)
+        self.assertEqual(bonus.measured, 0)
+        for dummy in DUMMIES:
+            for _, count in reads[dummy]:
+                values[count] = 0
+        self.assertIsInstance(ratio_bonus(FakeRun(values), reads, 1), str)
+
+
 if __name__ == '__main__':
     unittest.main()

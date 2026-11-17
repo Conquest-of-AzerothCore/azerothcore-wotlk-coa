@@ -24,6 +24,8 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     FIXTURE_MAX_HEALTH, cast_aura_steps, fixture_health_step, required_aura_steps,
                     required_target_health_steps)
 
+FIXED_COUNT_SWING_WINDOW_MS = 50
+
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
 BEHAVIOUR_DURATION = 'behaviour_duration'
@@ -492,8 +494,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
             if spec.select_primary:
                 steps.append({'action': 'select', 'actor': CASTER, 'target': dummy_id(0)})
             steps += ([{'action': 'attack', 'actor': CASTER, 'target': cast_target},
-                       {'action': 'wait', 'label': f'cast {cast} swings', 'ms': spec.swing_ms},
-                       {'action': 'stop_attack', 'actor': CASTER}] if spec.swing_ms else
+                       {'action': 'wait', 'label': f'cast {cast} swings', 'ms': min(spec.swing_ms, FIXED_COUNT_SWING_WINDOW_MS)},
+                       {'action': 'stop_attack', 'actor': CASTER},
+                       {'action': 'wait', 'label': f'cast {cast} swing timer',
+                        'ms': max(0, spec.swing_ms - FIXED_COUNT_SWING_WINDOW_MS)}] if spec.swing_ms else
                       [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': cast_target}])
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
                       for aura, stacks in spec.post_cast_auras]
@@ -579,7 +583,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         model['behind_label'] = hit_label(spec, last_index, AFTER)
     if spec.swing_ms:
         scenario['contract'] += (f' Swing route: each cast is the caster\'s own auto attack on the primary for '
-                                 f'{spec.swing_ms} ms, then a stop; every {spec.target_rank} that a landed swing '
+                                 f'{min(spec.swing_ms, FIXED_COUNT_SWING_WINDOW_MS)} ms, then a stop and the rest of the '
+                                 f'{spec.swing_ms} ms timer; every {spec.target_rank} that a landed swing '
                                  f'triggers belongs to that cast.')
     if spec.swing_cleave:
         entry_id, aura, arm_wait_ms, control_ms, spells = spec.swing_cleave
@@ -7214,7 +7219,8 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
         if spec.health_loss:
             steps.append(measurement(taken_hit_mark(spec, arm.name, trial, 'health'), CASTER, 'health'))
     steps += removals
-    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell in arm.striker_casts]
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0, 'target': spec.struck}
+              for spell in arm.striker_casts]
     return steps
 
 

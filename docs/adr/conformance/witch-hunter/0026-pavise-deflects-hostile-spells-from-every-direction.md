@@ -40,10 +40,15 @@ target, the roll happens only when all of these hold:
   is not the attacker;
 - the target's miss condition is still SPELL_MISS_NONE (immune, evade, reflect, miss, resist and a front deflect are
   already decided);
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:8bde9e1c835dea5c746f9a984d53d5c3f3fb97a2551440768db0378cebe773f4 -->
+
 - the attacker is outside the target's front 180 degrees (`HasInArc(M_PI, attacker)` false) and the target holds no
-  IGNORE_HIT_DIRECTION aura: in every other case the engine's front path already rolled the deflect, so a cast gets one
-  outcome and never two rolls;
-- the target is not stunned: the engine's stunned exclusion is kept. O-47 ruled the direction only, and a stunned
+  IGNORE_HIT_DIRECTION aura: in every other case the engine's front path already rolled the deflect, so each unique target gets one
+  outcome and never two deflect rolls; a cast with multiple eligible targets rolls separately for each;
+
+<!-- /coderabbit-ai-generated:v1 -->- the target is not stunned: the engine's stunned exclusion is kept. O-47 ruled the direction only, and a stunned
   holder is not protected from the front either;
 - the spell is in the engine's deflect set (`DeflectRolledFromFront`): not SPELL_ATTR3_ALWAYS_HIT, not a positive or
   dispel spell from a non-hostile attacker (`Unit.cpp:4180-4184`); DmgClass RANGED without

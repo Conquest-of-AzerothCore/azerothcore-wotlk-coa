@@ -81,11 +81,12 @@ def arm_steps(spec, arms: PetArmorArms, phase: str, dummy: str) -> list[dict]:
     steps = fixture_auras(arms) + [
              {'action': 'attack', 'actor': CASTER, 'target': dummy, 'pet': True},
              {'action': 'wait', 'label': f'pet switches to the {dummy}', 'ms': SWITCH_SETTLE_MS}]
-    steps += swing_reads(spec, phase, dummy, 0)
     for trial in range(1, arms.trials + 1):
         if phase == 'with':
             steps += trigger_steps(spec)
-        steps += fixture_auras(arms) + [
+        steps += fixture_auras(arms)
+        steps += swing_reads(spec, phase, dummy, f'{trial} start')
+        steps += [
                   {'action': 'wait', 'label': f'{phase} {dummy} swings {trial}', 'ms': arms.window_ms}]
         steps += swing_reads(spec, phase, dummy, trial)
         steps += [measurement(label(spec, phase, dummy, str(trial), 'armor', unit), unit, 'armor') for unit in DUMMIES]
@@ -134,7 +135,8 @@ def fixtures(class_file: dict, spec, arms: PetArmorArms, scenario: dict):
 
 def model(spec, arms: PetArmorArms) -> dict:
     reads = {phase: {dummy: [[label(spec, phase, dummy, str(mark), 'total'),
-                              label(spec, phase, dummy, str(mark), 'count')] for mark in range(arms.trials + 1)]
+                              label(spec, phase, dummy, str(mark), 'count')] for trial in range(1, arms.trials + 1)
+                              for mark in (f'{trial} start', trial)]
                      for dummy in DUMMIES} for phase in PHASES}
     return {NAME: {'entry': arms.entry, 'pet_entry': label(spec, 'pet entry'), 'reads': reads,
                    'armor': {dummy: label(spec, dummy, 'armor') for dummy in DUMMIES},
@@ -153,7 +155,10 @@ def ratio_bonus(run, reads: dict, expected_ratio: float):
         found = hit_ratio_series(run, reads[dummy])
         if isinstance(found, str):
             return found
-        samples[dummy] = per_event_sample(*found)
+        totals, counts = (series[::2] for series in found)
+        if sum(counts) == 0:
+            return f'{dummy} has no measured swings'
+        samples[dummy] = per_event_sample(totals, counts)
     bonus = replace(bonus_of(samples['dummy'], samples[BARE], (expected_ratio - 1) * 100),
                     fixed_band=RELATIVE_BAND * expected_ratio * 100)
     return bonus, bonus_status(bonus)

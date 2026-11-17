@@ -168,3 +168,46 @@ class SummonLifetimeBaselineTests(unittest.TestCase):
             behaviour_scenario(load_fixture_class_file(23), {**entry, 'roll_source': 'Example.cpp:1'})
         _, [plain] = behaviour_scenario(load_fixture_class_file(23), entry)
         self.assertNotIn('baseline', plain.model)
+class LifetimeBoundaryRegressionTests(unittest.TestCase):
+    def model(self):
+        return {'control': 'control', 'released': 'released', 'starts': {'treatment': 'start'},
+                'baseline': {'count': 2, 'expired': 'expired', 'ms': 20000},
+                'polls': {'spawn': [('s0', 'c0'), ('s1', 'c1')],
+                          'end': [('e0', 'd0'), ('e1', 'd1')]},
+                'expected_ms': 100, 'band': 20}
+
+    def values(self):
+        return {'control': 2, 'released': 0, 'start': 0, 'expired': 0,
+                's0': 0, 'c0': 0, 's1': 10, 'c1': 3,
+                'e0': 100, 'd0': 3, 'e1': 110, 'd1': 3}
+
+    def base(self):
+        from compare import Verdict
+        return Verdict('seed', 'unmeasured', None, None, None, None, '', 'seed', 1, 1, 'seed')
+
+    def test_unobserved_end_cannot_pass_an_in_band_boundary(self):
+        from kinds.summon_lifetime import behaviour_summon_lifetime_verdict
+        verdict = behaviour_summon_lifetime_verdict(self.base(), FakeRun(self.values()), self.model())
+        self.assertEqual(verdict.status, 'measured')
+        self.assertEqual(verdict.detail['end_ms'], (110, float('inf')))
+        self.assertIsNone(verdict.measured)
+
+    def test_first_poll_fallback_keeps_the_unobserved_early_interval(self):
+        from kinds.summon_lifetime import behaviour_summon_lifetime_verdict
+        values = {**self.values(), 'd0': 2, 'd1': 2}
+        verdict = behaviour_summon_lifetime_verdict(self.base(), FakeRun(values), self.model())
+        self.assertEqual(verdict.status, 'measured')
+        self.assertEqual(verdict.detail['end_ms'], (0, 100))
+
+    def test_empty_parts_validate_the_baseline_and_missing_end_reads(self):
+        from kinds.summon_lifetime import behaviour_summon_lifetime_pooled_verdict
+        model = self.model()
+        good = FakeRun({**self.values(), 'd0': 3, 'd1': 2})
+        empty = {**self.values(), 'c1': 2, 'd0': 2, 'd1': 2}
+        for changes in ({'expired': 1}, {'c0': 1}, {'d1': 5}, {'d1': None}, {'e1': None}):
+            with self.subTest(changes=changes):
+                verdict = behaviour_summon_lifetime_pooled_verdict(
+                    self.base(), [good, FakeRun({**empty, **changes})], model)
+                self.assertEqual(verdict.status, 'unmeasured')
+        verdict = behaviour_summon_lifetime_pooled_verdict(self.base(), [good, FakeRun(empty)], model)
+        self.assertEqual(verdict.status, 'ok')
