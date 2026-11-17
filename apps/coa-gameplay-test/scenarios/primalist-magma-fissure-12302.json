@@ -52,10 +52,10 @@
       "spell": 803829
     },
     {
-      "action": "set_aura",
+      "action": "cast",
       "actor": "target",
       "spell": 71586,
-      "stacks": 1
+      "label": "fixture: the target shields itself with Hardened Skin"
     },
     {
       "action": "assert",
