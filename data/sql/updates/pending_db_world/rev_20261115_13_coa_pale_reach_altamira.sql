@@ -4,7 +4,7 @@
 -- other three yells heard away from her fights (on a player kill here).
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 1479 WHERE `CreatureID` = 164432 AND `Idx` = 0;
 
-DELETE FROM `creature_display_preset` WHERE `entry` = 164432;
+DELETE FROM `creature_display_preset` WHERE (`entry`, `display_id`) IN ((164432, 1479));
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
     `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES

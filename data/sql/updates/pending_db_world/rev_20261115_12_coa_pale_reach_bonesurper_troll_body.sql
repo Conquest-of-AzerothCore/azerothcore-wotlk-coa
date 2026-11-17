@@ -2,7 +2,7 @@
 -- black. The same mask, tunic and skirt (MD0GT_RsHQs night fight) now go on a blue troll, as Frostmane Reaper does.
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 1478 WHERE `CreatureID` = 164431 AND `Idx` = 0;
 
-DELETE FROM `creature_display_preset` WHERE `entry` = 164431;
+DELETE FROM `creature_display_preset` WHERE (`entry`, `display_id`) IN ((164431, 26873), (164431, 1478));
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
     `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES

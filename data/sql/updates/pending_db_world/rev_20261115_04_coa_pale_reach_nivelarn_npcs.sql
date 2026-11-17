@@ -6,7 +6,7 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 
 -- His look from Redthedeer's dialogue view (RIEMlZSgbQw 7:43:05-7:50:10): bald, white braided beard, navy vest
 -- with arm bands, dark trousers. Closest client items; his light-blue cape has no match yet.
-DELETE FROM `creature_display_preset` WHERE `entry` = 164379;
+DELETE FROM `creature_display_preset` WHERE (`entry`, `display_id`) IN ((164379, 53));
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
     `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES

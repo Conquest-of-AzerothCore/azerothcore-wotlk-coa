@@ -1,7 +1,8 @@
 -- Stay a While (1660080): Gravedigger Nonuid credited the listener from his first option without a word. On the
 -- realm (Redthedeer Day 1, YEYz6HGpq4k 4:27:50-4:31:30) he tells it in three parts, each started from his menu, at
 -- the pacing recorded there. As in the other Stay a While quests, "heard enough" credits at once; it appears after
--- his first two lines. Finishing the third part also credits (inferred: the realm footage skips before the end).
+-- his first two lines and ends any part still running. After the third part he waits for that choice, so the credit
+-- always goes to the player who makes it.
 DELETE FROM `creature_text` WHERE `CreatureID` = 162901;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (162901, 0, 0, 'A mountaineer. Died in a frost troll ambush. I''ve heard it said the trolls see us as foreigners, invaders. That these lands were theirs before we drove them back.', 12, 0, 100, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Stay a While, part 1'),
@@ -56,21 +57,21 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (162901, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 80, 16290100, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Start part 1'),
 (162901, 0, 3, 4, 62, 0, 100, 0, 932246, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - On heard enough - Close Gossip'),
 (162901, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 162921, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Quest Credit Listen to Gravedigger Nonuid'),
-(162901, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932241, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Restore the greeting menu'),
+(162901, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 80, 16290103, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - End the story and restore the greeting menu'),
 (162901, 0, 6, 7, 62, 0, 100, 0, 932247, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - On ask about the war - Close Gossip'),
 (162901, 0, 7, 8, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932246, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Offer heard enough'),
 (162901, 0, 8, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 80, 16290101, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Start part 2'),
 (162901, 0, 9, 10, 62, 0, 100, 0, 932247, 1, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - On heard enough - Close Gossip'),
 (162901, 0, 10, 11, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 162921, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Quest Credit Listen to Gravedigger Nonuid'),
-(162901, 0, 11, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932241, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Restore the greeting menu'),
+(162901, 0, 11, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 80, 16290103, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - End the story and restore the greeting menu'),
 (162901, 0, 12, 13, 62, 0, 100, 0, 932248, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - On ask what set it off - Close Gossip'),
 (162901, 0, 13, 14, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932246, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Offer heard enough'),
 (162901, 0, 14, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 80, 16290102, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Start part 3'),
 (162901, 0, 15, 16, 62, 0, 100, 0, 932248, 1, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - On heard enough - Close Gossip'),
 (162901, 0, 16, 17, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 162921, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Quest Credit Listen to Gravedigger Nonuid'),
-(162901, 0, 17, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932241, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - Restore the greeting menu');
+(162901, 0, 17, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 80, 16290103, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid - Linked - End the story and restore the greeting menu');
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (16290100, 16290101, 16290102) AND `source_type` = 9;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (16290100, 16290101, 16290102, 16290103) AND `source_type` = 9;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (16290100, 9, 0, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 1 - Say 0'),
 (16290100, 9, 1, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 1 - Say 1'),
@@ -87,5 +88,5 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (16290102, 9, 2, 0, 0, 0, 100, 0, 11000, 11000, 0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 3 - Say 7'),
 (16290102, 9, 3, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 8, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 3 - Say 8'),
 (16290102, 9, 4, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 9, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 3 - Say 9'),
-(16290102, 9, 5, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 0, 33, 162921, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 3 - Quest Credit Listen to Gravedigger Nonuid'),
-(16290102, 9, 6, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932241, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 3 - Restore the greeting menu');
+(16290102, 9, 5, 0, 0, 0, 100, 0, 60000, 60000, 0, 0, 0, 0, 240, 932241, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid part 3 - Restore the greeting menu if nobody has heard enough'),
+(16290103, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 240, 932241, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravedigger Nonuid story ended - Restore the greeting menu');

@@ -3,7 +3,8 @@
 -- Kardu's, Ellerdin's and Ginnad's looks were finished in game.
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 54 WHERE `CreatureID` = 164411 AND `Idx` = 0;
 
-DELETE FROM `creature_display_preset` WHERE `entry` IN (164410, 164411, 164417);
+DELETE FROM `creature_display_preset` WHERE (`entry`, `display_id`) IN ((164410, 54), (164411, 15476), (164411, 54),
+    (164417, 53));
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
     `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES

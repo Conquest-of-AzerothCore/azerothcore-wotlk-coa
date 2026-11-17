@@ -1,7 +1,7 @@
 -- Ambassador Thargas Anvilmar from his quest-window view (RIEMlZSgbQw 8:06:04-8:07:00): top-knot, long brown beard,
 -- Soulbreaker's Court tunic (133640); trousers and boots are close, the small shoulder piece is unidentified.
 -- His spawn stood 0.12 below the throne hall floor.
-DELETE FROM `creature_display_preset` WHERE `entry` = 164389;
+DELETE FROM `creature_display_preset` WHERE (`entry`, `display_id`) IN ((164389, 53));
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
     `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES

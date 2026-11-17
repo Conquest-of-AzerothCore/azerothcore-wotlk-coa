@@ -2,7 +2,7 @@
 -- library in a navy full-length robe with a gold hip band, holding a silver staff with a white crystal head.
 -- Closest client items: Robe of the Archmage (Robe_C_01Blue) and Guiding Stave of Wisdom, worn on his back; blond
 -- hair as set by the user.
-DELETE FROM `creature_display_preset` WHERE `entry` = 164289;
+DELETE FROM `creature_display_preset` WHERE (`entry`, `display_id`) IN ((164289, 15476));
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
     `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
     `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES
