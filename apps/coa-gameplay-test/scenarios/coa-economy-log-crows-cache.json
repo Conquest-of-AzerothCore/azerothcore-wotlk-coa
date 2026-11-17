@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Economy log: claiming and opening a Crow's Cache",
   "contract": [
-    "With the economy log on, claiming the Crow's Cache chest (gameobject 994311) writes one reward row for the Crow's Cache item 1615010 with source 1 (Crow's Cache).",
+    "With the economy log on, a level-60 High-Risk Mercenary claiming the Crow's Cache chest (gameobject 994311) writes one reward row for the Crow's Cache item 1615010 with source 1 (Crow's Cache).",
     "Opening the cache in Gadgetzan writes one cache_open row per item with the cache as source: three Heroic Bloodforged items, three High-Risk materials (20 each of 967008, 967014, 967017), Golden Marks of War 1201003 (10) and Silver Marks of War 1201002 (5 to 10) and 400 Bazaar Tokens 975001: nine rows.",
     "Its 400 Bazaar Tokens are counted once, in the tokens_earned row with source 5 (cache)."
   ],
@@ -34,6 +34,12 @@
       "action": "set_aura",
       "actor": "owner",
       "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "owner",
+      "spell": 9930874,
       "stacks": 1
     },
     {
