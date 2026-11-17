@@ -620,6 +620,7 @@ public: /* UnitScript */
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo);
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage);
     void ModifyMeleeDamageRange(Unit* target, Unit* attacker, float& minDamage, float& maxDamage);
+    void OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus);
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo);
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* spellInfo,
         uint8 effectIndex, float& value);
