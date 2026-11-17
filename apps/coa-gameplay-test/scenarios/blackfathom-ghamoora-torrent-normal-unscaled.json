@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "name": "Ghamoo-ra's Normal Torrent receives the requested triple damage",
+  "name": "Ghamoo-ra's Normal Torrent keeps its Normal damage",
   "contract": [
-    "Normal Torrent (2102688) uses the x3 dungeon spell damage row; other Normal spells retain their existing scaling."
+    "On Normal the Torrent cone (2102688) keeps its Normal scaling and is not tripled; the x3 rows apply from Heroic up."
   ],
   "timeout_ms": 30000,
   "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
@@ -20,10 +20,10 @@
     { "action": "summon", "actor": "p", "as": "ghamoora", "entry": 4887, "distance": 3 },
     { "action": "snapshot", "actor": "p", "metric": "script_spell_damage_taken", "target": "ghamoora", "spell": 5568,
       "save_as": "trample" },
-    { "action": "assert", "label": "Normal Torrent receives x3 through the damage hooks", "actor": "p",
+    { "action": "assert", "label": "Normal Torrent keeps its Normal scaling (x0.652 of Trample), not x3", "actor": "p",
       "metric": "script_spell_damage_taken", "target": "ghamoora", "spell": 2102688, "ratio_to": "trample",
-      "min": 2.99, "max": 3.01 },
-    { "action": "assert", "label": "Other spell rows still do not scale Normal damage", "actor": "p",
+      "min": 0.64, "max": 0.66 },
+    { "action": "assert", "label": "The Heroic cone row does not scale Normal damage either", "actor": "p",
       "metric": "script_spell_damage_taken", "target": "ghamoora", "spell": 2102689, "ratio_to": "trample",
       "equals": 1 }
   ]
