@@ -217,6 +217,8 @@ class aura_ascension_barbarian_volley : public AuraScript
 
     void LeapBack(Player* player)
     {
+        if (!player->IsAlive() || player->GetVehicle() || player->IsInFlight())
+            return;
         SpellEffectInfo const& leap = GetSpellInfo()->Effects[EFFECT_0];
         player->JumpTo(leap.MiscValue / 10.0f, leap.CalcValue(player) / 10.0f, false);
         sScriptMgr->AnticheatSetUnderACKmount(player);
