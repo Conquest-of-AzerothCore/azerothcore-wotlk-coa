@@ -9,6 +9,7 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "World.h"
+#include <algorithm>
 #include <array>
 #include <optional>
 
@@ -67,7 +68,11 @@ std::optional<Destination> FindClosestTown(Player* player)
     if (!entry)
         return std::nullopt;
 
-    return Destination{ entry->map_id, entry->x, entry->y, entry->z, player->GetOrientation() };
+    float z = entry->z;
+    if (entry->map_id == player->GetMapId())
+        z = std::max(z, player->GetMap()->GetGridHeight(entry->x, entry->y));
+
+    return Destination{ entry->map_id, entry->x, entry->y, z, player->GetOrientation() };
 }
 
 std::optional<Destination> FindClosestCity(Player* player)

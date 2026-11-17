@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Delirium Cache hands out the Tailored Purple Tabard, Plum Scarf and Plum Cloak (#12515)",
+  "contract": "Delirium Cache 421527, the reward of trials 613 and 614, used spell 60034 without a ScriptName or contents, so opening it only started its cooldown. Expected: opening it hands out the Tailored Purple Tabard 460464, the Wanderer's Plum Scarf 509167 and the Wanderer's Plum Cloak 509168 and consumes the cache.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 421527
+    },
+    {
+      "action": "add_item",
+      "label": "A bag for the three pieces",
+      "actor": "p",
+      "item": 14156
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 14156,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: at least three slots are free",
+      "actor": "p",
+      "metric": "free_inventory_slots",
+      "min": 3
+    },
+    {
+      "action": "use_item",
+      "label": "Open the cache",
+      "actor": "p",
+      "item": 421527,
+      "spell": 60034
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the cache opens without being refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 60034,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Tailored Purple Tabard is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 460464,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Wanderer's Plum Scarf is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 509167,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Wanderer's Plum Cloak is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 509168,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the cache itself is consumed",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 421527,
+      "equals": 0
+    }
+  ]
+}
