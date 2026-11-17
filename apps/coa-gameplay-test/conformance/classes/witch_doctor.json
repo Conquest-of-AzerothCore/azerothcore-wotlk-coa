@@ -63,7 +63,193 @@
   "off_hand_weapons": [],
   "known_auras": [],
   "probe_auras": [],
-  "extra_spells": [],
+  "extra_spells": [
+    {
+      "spell": 500960,
+      "name": "Serpent Ward",
+      "citation": "2026-05-16 19:56:00.745, spell 500960 Serpent Ward, Ascension combat log, private archive"
+    },
+    {
+      "spell": 500961,
+      "name": "Spirit Idol",
+      "citation": "2026-05-16 19:57:10.265, spell 500961 Spirit Idol, Ascension combat log, private archive"
+    },
+    {
+      "spell": 504759,
+      "name": "Serene Idol",
+      "citation": "2026-08-31 04:12:47.548, spell 504759 Serene Idol, Ascension combat log, private archive"
+    },
+    {
+      "spell": 505339,
+      "name": "Shadow Effigy",
+      "citation": "2026-05-16 20:11:26.063, spell 505339 Shadow Effigy, Ascension combat log, private archive"
+    },
+    {
+      "spell": 506634,
+      "name": "Hexing Effigy",
+      "citation": "2026-08-11 17:55:21.514, spell 506634 Hexing Effigy, Ascension combat log, private archive"
+    },
+    {
+      "spell": 506635,
+      "name": "Graven Effigy",
+      "citation": "ascensionsidekick data.js coaKits Witch Doctor Shadowhunting kit, fetched 2026-11-16"
+    },
+    {
+      "spell": 507082,
+      "name": "Dark Idol",
+      "citation": "ascensionsidekick data.js coaKits Witch Doctor Voodoo kit, fetched 2026-11-16"
+    },
+    {
+      "spell": 507084,
+      "name": "Jungle Idol",
+      "citation": "ascensionsidekick data.js coaKits Witch Doctor Shadowhunting kit, fetched 2026-11-16"
+    },
+    {
+      "spell": 536213,
+      "name": "Natural Alchemist",
+      "citation": "ascensionsidekick data.js coaKits Witch Doctor Brewing kit, fetched 2026-11-16"
+    },
+    {
+      "spell": 560294,
+      "name": "Spirit Wuju",
+      "citation": "2026-05-16 20:07:09.293, spell 560294 Spirit Wuju, Ascension combat log, private archive"
+    },
+    {
+      "spell": 572747,
+      "name": "Concoct Rejuvenating Mojo",
+      "citation": "2026-05-16 20:22:12.307, spell 572747 Concoct Rejuvenating Mojo, Ascension combat log, private archive"
+    },
+    {
+      "spell": 575025,
+      "name": "Rite of the Loa",
+      "citation": "2026-08-01 16:55:55.638, spell 575025 Rite of the Loa, Ascension combat log, private archive"
+    },
+    {
+      "spell": 578344,
+      "name": "Resourceful Wuju",
+      "citation": "2026-08-01 16:36:39.703, spell 578344 Resourceful Wuju, Ascension combat log, private archive"
+    },
+    {
+      "spell": 583092,
+      "name": "Spiritual Recall",
+      "citation": "2026-08-02 18:54:00.186, spell 583092 Spiritual Recall, Ascension combat log, private archive"
+    },
+    {
+      "spell": 674303,
+      "name": "Sentry Ward",
+      "citation": "2026-08-11 18:01:27.856, spell 674303 Sentry Ward, Ascension combat log, private archive"
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju",
+      "citation": "2026-08-02 18:33:38.285, spell 680872 Greater Spirit Wuju, Ascension combat log, private archive"
+    },
+    {
+      "spell": 705943,
+      "name": "Shadow Avatar",
+      "citation": "2026-05-17 10:20:28.694, spell 705943 Shadow Avatar, Ascension combat log, private archive"
+    },
+    {
+      "spell": 707671,
+      "name": "Power Wuju",
+      "citation": "2026-05-16 20:07:11.104, spell 707671 Power Wuju, Ascension combat log, private archive"
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju",
+      "citation": "2026-08-01 16:36:37.046, spell 712458 Greater Power Wuju, Ascension combat log, private archive"
+    },
+    {
+      "spell": 800195,
+      "name": "Greater Resourceful Wuju",
+      "citation": "2026-06-06 22:22:01.681, spell 800195 Greater Resourceful Wuju, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801669,
+      "name": "Shadowflare",
+      "citation": "2026-05-16 20:13:04.768, spell 801669 Shadowflare, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801670,
+      "name": "Loa's Brew",
+      "citation": "2026-05-16 20:30:51.251, spell 501198 Loa's Brew, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801678,
+      "name": "Stasis Ward",
+      "citation": "2026-05-16 19:56:59.024, spell 801678 Stasis Ward, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801693,
+      "name": "Hex of Malice",
+      "citation": "2026-05-16 19:56:02.098, spell 501153 Hex of Malice, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801696,
+      "name": "Spirit in a Bottle",
+      "citation": "2026-05-16 20:14:36.941, spell 801696 Spirit in a Bottle, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801796,
+      "name": "Reclaim Soul",
+      "citation": "2026-08-23 22:37:02.607, spell 803623 Reclaim Soul, Ascension combat log, private archive"
+    },
+    {
+      "spell": 801925,
+      "name": "Mana Jinx",
+      "citation": "2026-06-06 03:52:29.040, spell 801925 Mana Jinx, Ascension combat log, private archive"
+    },
+    {
+      "spell": 802065,
+      "name": "Lethargy Jinx",
+      "citation": "2026-07-19 23:50:47.501, spell 802065 Lethargy Jinx, Ascension combat log, private archive"
+    },
+    {
+      "spell": 802719,
+      "name": "Big Bad Voodoo",
+      "citation": "2026-08-02 18:39:22.074, spell 802719 Big Bad Voodoo, Ascension combat log, private archive"
+    },
+    {
+      "spell": 803325,
+      "name": "Hir'eek's Jinx",
+      "citation": "ascensionsidekick data.js coaKits Witch Doctor Voodoo kit, fetched 2026-11-16"
+    },
+    {
+      "spell": 804049,
+      "name": "Allcure Elixir",
+      "citation": "2026-08-02 20:27:39.734, spell 804049 Allcure Elixir, Ascension combat log, private archive"
+    },
+    {
+      "spell": 806240,
+      "name": "Hexbreak",
+      "citation": "2026-06-06 03:55:07.148, spell 806240 Hexbreak, Ascension combat log, private archive"
+    },
+    {
+      "spell": 806285,
+      "name": "Shrinking Jinx",
+      "citation": "2026-05-17 10:22:01.337, spell 807829 Shrinking Jinx, Ascension combat log, private archive"
+    },
+    {
+      "spell": 807037,
+      "name": "Malefic Wrath",
+      "citation": "2026-05-16 19:55:57.904, spell 807477 Malefic Wrath, Ascension combat log, private archive"
+    },
+    {
+      "spell": 807050,
+      "name": "Brew Stew",
+      "citation": "2026-05-16 20:21:26.638, spell 807051 Brew Stew, Ascension combat log, private archive"
+    },
+    {
+      "spell": 807070,
+      "name": "Brew Cocktail",
+      "citation": "2026-05-16 20:10:00.400, spell 807071 Brew Cocktail, Ascension combat log, private archive"
+    },
+    {
+      "spell": 807908,
+      "name": "Mojo Cauldron",
+      "citation": "2026-08-30 18:34:42.078, spell 807908 Mojo Cauldron, Ascension combat log, private archive"
+    }
+  ],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
   "effect_overrides": [
@@ -2500,6 +2686,965 @@
         "dummy2",
         "dummy3"
       ]
+    },
+    {
+      "spell": 801662,
+      "name": "Cauldron Brewer (Fish Oil: an ally inside 40 yd is buffed)",
+      "kind": "aura_presence",
+      "variant": "cauldron_inside",
+      "label_suffix": "cauldron_inside",
+      "quote": "Cauldron: Increases the movement speed and swim speed of allies within",
+      "metric": "aura",
+      "fields": {
+        "spell": 803269
+      },
+      "target": "ally",
+      "target_distance": 35,
+      "wait_ms": 4500,
+      "reason": "Ingredient: Fish Oil 801662 (instant, TARGET_UNIT_CASTER, SpellFamilyName 19, 500 ms category) has Effect[1] SPELL_AURA_PERIODIC_TRIGGER_SPELL of 803269 every 1500 ms on the caster (Spell.dbc); 803269 (DurationIndex 39 = 2000 ms) has two SPELL_EFFECT_APPLY_AREA_AURA_RAID effects (aura 31 and aura 58, +10%, EffectRadiusIndex 23 = 40 yd), so the caster's own area-aura update puts 803269 on a grouped ally in range. The Ingredient is the active brew of 92085's 'Nearby allies are buffed based on the active brew' (the Brewer only gates the potion marker, AscensionWitchDoctorBrewing.cpp:38-45, so no Brewer learn is needed for the area part). The Ingredient is cast for real at the caster, the ally is grouped (kind aura_presence) and read 4500 ms after the cast. Inside arm: the ally stands 35 yd away and must gain the aura (it reads 0 before the cast). Control arm: the ally stands 45 yd away, beyond the 40 yd radius, and must stay without it while the caster carries it (the 'caster' expectation). Player report #11066 (the cosmetic cauldron on the back) is a visual and is outside this clause. Scope of the proof: these entries do not learn the Brewer 92085 (aura_presence learns only the Ingredient it casts, behaviours.py:2349, and has no learn field), and no Brewer gate sits on the area fields, so they prove the Ingredient's own Cauldron area aura (803269 / 803697) and would also pass without 92085; the radius control arm is what they show. A learn field on aura_presence is tool note T6."
+    },
+    {
+      "spell": 801662,
+      "name": "Cauldron Brewer (Fish Oil: an ally beyond 40 yd is not buffed)",
+      "kind": "aura_presence",
+      "variant": "cauldron_outside",
+      "label_suffix": "cauldron_outside",
+      "quote": "Cauldron: Increases the movement speed and swim speed of allies within",
+      "metric": "aura",
+      "fields": {
+        "spell": 803269
+      },
+      "target": "ally",
+      "target_distance": 45,
+      "wait_ms": 4500,
+      "present": false,
+      "reason": "Ingredient: Fish Oil 801662 (instant, TARGET_UNIT_CASTER, SpellFamilyName 19, 500 ms category) has Effect[1] SPELL_AURA_PERIODIC_TRIGGER_SPELL of 803269 every 1500 ms on the caster (Spell.dbc); 803269 (DurationIndex 39 = 2000 ms) has two SPELL_EFFECT_APPLY_AREA_AURA_RAID effects (aura 31 and aura 58, +10%, EffectRadiusIndex 23 = 40 yd), so the caster's own area-aura update puts 803269 on a grouped ally in range. The Ingredient is the active brew of 92085's 'Nearby allies are buffed based on the active brew' (the Brewer only gates the potion marker, AscensionWitchDoctorBrewing.cpp:38-45, so no Brewer learn is needed for the area part). The Ingredient is cast for real at the caster, the ally is grouped (kind aura_presence) and read 4500 ms after the cast. Inside arm: the ally stands 35 yd away and must gain the aura (it reads 0 before the cast). Control arm: the ally stands 45 yd away, beyond the 40 yd radius, and must stay without it while the caster carries it (the 'caster' expectation). Player report #11066 (the cosmetic cauldron on the back) is a visual and is outside this clause. Scope of the proof: these entries do not learn the Brewer 92085 (aura_presence learns only the Ingredient it casts, behaviours.py:2349, and has no learn field), and no Brewer gate sits on the area fields, so they prove the Ingredient's own Cauldron area aura (803269 / 803697) and would also pass without 92085; the radius control arm is what they show. A learn field on aura_presence is tool note T6."
+    },
+    {
+      "spell": 801663,
+      "name": "Cauldron Brewer (Frog Bones: an ally inside 40 yd is buffed)",
+      "kind": "aura_presence",
+      "variant": "cauldron_inside",
+      "label_suffix": "cauldron_inside",
+      "quote": "Cauldron: Grants allies within",
+      "metric": "aura",
+      "fields": {
+        "spell": 803697
+      },
+      "target": "ally",
+      "target_distance": 35,
+      "wait_ms": 4500,
+      "reason": "Ingredient: Frog Bones 801663 (instant, TARGET_UNIT_CASTER, 500 ms category) has Effect[1] SPELL_AURA_PERIODIC_TRIGGER_SPELL of 803697 every 1500 ms on the caster (Spell.dbc); 803697 (DurationIndex 39 = 2000 ms) is one SPELL_EFFECT_APPLY_AREA_AURA_RAID effect (aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, EffectRadiusIndex 23 = 40 yd), so the area-aura update puts 803697 on a grouped ally in range. The Ingredient is the active brew of 92085's 'Nearby allies are buffed based on the active brew'. The Ingredient is cast for real at the caster, the ally is grouped (kind aura_presence) and read 4500 ms after the cast. Inside arm: the ally stands 35 yd away and must gain the aura (it reads 0 before the cast). Control arm: the ally stands 45 yd away, beyond the 40 yd radius, and must stay without it while the caster carries it (the 'caster' expectation). Player report #11066 (the cosmetic cauldron on the back) is a visual and is outside this clause. Scope of the proof: these entries do not learn the Brewer 92085 (aura_presence learns only the Ingredient it casts, behaviours.py:2349, and has no learn field), and no Brewer gate sits on the area fields, so they prove the Ingredient's own Cauldron area aura (803269 / 803697) and would also pass without 92085; the radius control arm is what they show. A learn field on aura_presence is tool note T6."
+    },
+    {
+      "spell": 801663,
+      "name": "Cauldron Brewer (Frog Bones: an ally beyond 40 yd is not buffed)",
+      "kind": "aura_presence",
+      "variant": "cauldron_outside",
+      "label_suffix": "cauldron_outside",
+      "quote": "Cauldron: Grants allies within",
+      "metric": "aura",
+      "fields": {
+        "spell": 803697
+      },
+      "target": "ally",
+      "target_distance": 45,
+      "wait_ms": 4500,
+      "present": false,
+      "reason": "Ingredient: Frog Bones 801663 (instant, TARGET_UNIT_CASTER, 500 ms category) has Effect[1] SPELL_AURA_PERIODIC_TRIGGER_SPELL of 803697 every 1500 ms on the caster (Spell.dbc); 803697 (DurationIndex 39 = 2000 ms) is one SPELL_EFFECT_APPLY_AREA_AURA_RAID effect (aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, EffectRadiusIndex 23 = 40 yd), so the area-aura update puts 803697 on a grouped ally in range. The Ingredient is the active brew of 92085's 'Nearby allies are buffed based on the active brew'. The Ingredient is cast for real at the caster, the ally is grouped (kind aura_presence) and read 4500 ms after the cast. Inside arm: the ally stands 35 yd away and must gain the aura (it reads 0 before the cast). Control arm: the ally stands 45 yd away, beyond the 40 yd radius, and must stay without it while the caster carries it (the 'caster' expectation). Player report #11066 (the cosmetic cauldron on the back) is a visual and is outside this clause. Scope of the proof: these entries do not learn the Brewer 92085 (aura_presence learns only the Ingredient it casts, behaviours.py:2349, and has no learn field), and no Brewer gate sits on the area fields, so they prove the Ingredient's own Cauldron area aura (803269 / 803697) and would also pass without 92085; the radius control arm is what they show. A learn field on aura_presence is tool note T6."
+    },
+    {
+      "spell": 504888,
+      "name": "Potent Mixes (healing done +8%)",
+      "kind": "hit_ratio",
+      "variant": "heal",
+      "label_suffix": "heal",
+      "quote": "Increases your healing done by",
+      "expected": 1.08,
+      "metric": "spell_heal_total",
+      "observe_spell": 801670,
+      "caster": "caster",
+      "target": "ally",
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          504888
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "observe_source": "Potent Mixes 504888 (passive, Effect[0] SPELL_AURA_MOD_HEALING_DONE_PERCENT 136, EffectMiscValue 127, EffectBasePoints 7 + DieSides 1 = 8 = $s1; Effect[1] aura 103 MOD_TOTAL_THREAT -30): native, no script (class map risk stock); Unit::SpellHealingBonusDone multiplies by GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_DONE_PERCENT) (Unit.cpp:10684). Loa's Brew 801670 (2000 ms cast, 33% mana, TARGET_UNIT_TARGET_ALLY direct heal) is cast for real at the second scenario player (ally, standing next to the caster, not grouped), 20 trials per arm with the caster's mana set before each cast (cast_power) and 20000 spell power so the stat part dominates the die; non-critical heals only. Control arm: 504888 not learned; treatment arm: 504888 learned (a real learn). The per-heal mean of the treatment over the control must be 1.08 inside the G-19 band (2 points). Player report #6371 (the build validator rejects the tree row) is about talent-tree state, not this effect, and no entry here can show it."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 25307,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "tolerance": 0.002,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "spell": 504888,
+      "name": "Potent Mixes (threat generated -30%, predicted candidate defect)",
+      "variant": "threat_generated",
+      "label_suffix": "threat_generated",
+      "quote": "reduces the threat generated by your spells by",
+      "expected": 0.7,
+      "observe_source": "Potent Mixes 504888 Effect[1] SPELL_AURA_MOD_TOTAL_THREAT 103, EffectBasePoints -31 + DieSides 1 = -30 ($s2): native, no script; the clause is a native aura 103 with no script. Same route as Necromancer Putrid Summoner protect_threat_generated: a Shadow Bolt 25307 hit (damage only, stock spell, SpellFamilyName 5, no Witch Doctor script reaches it) lands on the dummy, which held no threat and took no damage before (0, the control reading); the dummy's threat on the caster over the health it lost (threat_per_damage) is read after the hit. 504888 known from the start (a real learn): 0.7 threat per damage. CORRECTION (review fix round): ThreatManager::CalculateModifiedThreat (ThreatManager.cpp:703) applies only SPELLMOD_THREAT and the SPELL_AURA_MOD_THREAT school multipliers (aura 3, the Necromancer Undead: Protect route); it never reads aura 103. Aura 103 reaches threat only through ThreatManager::UpdateMyTempModifiers (ThreatManager.cpp:809-829), a flat _tempModifier per existing reference (the sum of the aura amounts, -30, converted by LocalLevelScaling::PoolThreatFor), run only when the aura is applied or removed (SpellAuraEffects.cpp:3764-3777), and a new ThreatReference starts at _tempModifier 0 (ThreatManager.h:297). 504888 is learned at the start, so the dummy's reference made by the Shadow Bolt gets no modifier. The tooltip's 0.7 (-30% of the threat generated) is the expectation (G-1); the code predicts about 1.0, so this entry is expected to alert. It is reported as a predicted candidate defect lead (tooltip -30% of threat generated against a flat temporary modifier that new references never receive), not as native conformance, and it is not fixed here."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 25307,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "tolerance": 0.002,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "spell": 504888,
+      "gate_spell": 25307,
+      "name": "Potent Mixes (threat generated without the talent)",
+      "variant": "threat_generated_control",
+      "label_suffix": "threat_generated_control",
+      "quote": "reduces the threat generated by your spells by",
+      "expected": 1.0,
+      "observe_source": "Potent Mixes 504888 Effect[1] SPELL_AURA_MOD_TOTAL_THREAT 103, EffectBasePoints -31 + DieSides 1 = -30 ($s2): native, no script; the clause is a native aura 103 with no script. Same route as Necromancer Putrid Summoner protect_threat_generated: a Shadow Bolt 25307 hit (damage only, stock spell, SpellFamilyName 5, no Witch Doctor script reaches it) lands on the dummy, which held no threat and took no damage before (0, the control reading); the dummy's threat on the caster over the health it lost (threat_per_damage) is read after the hit. 504888 never learned (the gate is the trigger spell itself, already learned: a no-op): 1.0 threat per damage. CORRECTION (review fix round): ThreatManager::CalculateModifiedThreat (ThreatManager.cpp:703) applies only SPELLMOD_THREAT and the SPELL_AURA_MOD_THREAT school multipliers (aura 3, the Necromancer Undead: Protect route); it never reads aura 103. Aura 103 reaches threat only through ThreatManager::UpdateMyTempModifiers (ThreatManager.cpp:809-829), a flat _tempModifier per existing reference (the sum of the aura amounts, -30, converted by LocalLevelScaling::PoolThreatFor), run only when the aura is applied or removed (SpellAuraEffects.cpp:3764-3777), and a new ThreatReference starts at _tempModifier 0 (ThreatManager.h:297). 504888 is learned at the start, so the dummy's reference made by the Shadow Bolt gets no modifier. The tooltip's 0.7 (-30% of the threat generated) is the expectation (G-1); the code predicts about 1.0, so this entry is expected to alert. It is reported as a predicted candidate defect lead (tooltip -30% of threat generated against a flat temporary modifier that new references never receive), not as native conformance, and it is not fixed here."
+    },
+    {
+      "spell": 573026,
+      "name": "Hexfire (snaps Puppeteer's Threads: the aura is gone)",
+      "kind": "metric_delta",
+      "variant": "snap_gone",
+      "label_suffix": "snap_gone",
+      "quote": "snapping your Puppeteer's Threads, unleashing its damage instantly",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 573026,
+      "gate_spell": 704511,
+      "learn": [
+        92084
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        807037
+      ],
+      "setup_wait_ms": 2500,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 572836,
+        "caster": "caster"
+      },
+      "observe_source": "Hexfire 573026 (instant, 17% mana, 10000 ms category, SpellFamilyFlags[1] 262144) hits the dummy: AscensionWitchDoctorAbilities.cpp:259-266 (OnSpellHitResult): with Voodoo Spirits 704511 known ($?s704511) a Hexfire hit that finds Puppeteer's Threads 572836 of the caster on the target casts Threads damage 572837 with the stored amount, zeroes the amount and removes the aura (and grants a Spirit). Puppeteer 92084 (learned from the start, a real learn) is the Threads source: AscensionWitchDoctorEvents.cpp:77-79 (Check) and :132-141 (Proc) put 572836 on the target after the first non-periodic damage and add 15% of each later hit to it (DurationIndex 1 = 10000 ms). Both phases cast Malefic Wrath 807037 for real at the dummy (the setup cast, 2000 ms, direct non-periodic damage that puts the Threads on; Hexfire has a 10000 ms category cooldown, so it cannot be its own setup cast), wait 2500 ms, cast Hexfire for real and read 1000 ms after it. Control (before phase): 704511 not known, the Hexfire leaves the Threads on the dummy and no Threads damage has landed; after phase: 704511 learned between the phases. The whole scenario stays under the 10000 ms of the first Threads. The damage formula of the clause is a separate token (573026 effect_value, unreadable by tooltip.py: $cond/$gt/$spfi/$spn). This entry reads Puppeteer's Threads 572836 on the dummy: 1 without 704511 (control), 0 with it (snapped). A Hexfire that never snaps leaves the Threads, so it reads 1 and fails."
+    },
+    {
+      "spell": 573026,
+      "name": "Hexfire (snaps Puppeteer's Threads: its damage lands instantly)",
+      "kind": "metric_delta",
+      "variant": "snap_damage",
+      "label_suffix": "snap_damage",
+      "quote": "snapping your Puppeteer's Threads, unleashing its damage instantly",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 573026,
+      "gate_spell": 704511,
+      "learn": [
+        92084
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        807037
+      ],
+      "setup_wait_ms": 2500,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572837,
+        "target": "dummy"
+      },
+      "observe_source": "Hexfire 573026 (instant, 17% mana, 10000 ms category, SpellFamilyFlags[1] 262144) hits the dummy: AscensionWitchDoctorAbilities.cpp:259-266 (OnSpellHitResult): with Voodoo Spirits 704511 known ($?s704511) a Hexfire hit that finds Puppeteer's Threads 572836 of the caster on the target casts Threads damage 572837 with the stored amount, zeroes the amount and removes the aura (and grants a Spirit). Puppeteer 92084 (learned from the start, a real learn) is the Threads source: AscensionWitchDoctorEvents.cpp:77-79 (Check) and :132-141 (Proc) put 572836 on the target after the first non-periodic damage and add 15% of each later hit to it (DurationIndex 1 = 10000 ms). Both phases cast Malefic Wrath 807037 for real at the dummy (the setup cast, 2000 ms, direct non-periodic damage that puts the Threads on; Hexfire has a 10000 ms category cooldown, so it cannot be its own setup cast), wait 2500 ms, cast Hexfire for real and read 1000 ms after it. Control (before phase): 704511 not known, the Hexfire leaves the Threads on the dummy and no Threads damage has landed; after phase: 704511 learned between the phases. The whole scenario stays under the 10000 ms of the first Threads. The damage formula of the clause is a separate token (573026 effect_value, unreadable by tooltip.py: $cond/$gt/$spfi/$spn). This entry counts the Threads damage hits 572837 on the dummy: 0 without 704511 (control: Threads damage lands only when the aura ends, 10000 ms after the first hit), 1 with it (after_at_least 1).",
+      "after_at_least": 1
+    },
+    {
+      "spell": 501134,
+      "name": "Umbral Glaive (curses up to 2 nearby enemies besides the target)",
+      "kind": "fixed_count",
+      "variant": "two_nearby",
+      "label_suffix": "two_nearby",
+      "quote": "curses an enemy and up to 2 nearby enemies",
+      "expected": 3,
+      "count_primary": true,
+      "radius": 8,
+      "metric": "aura",
+      "target_rank": 501134,
+      "repeats": 1,
+      "learn": [
+        501134
+      ],
+      "auras": [
+        [
+          504588,
+          1
+        ]
+      ],
+      "radius_reason": "the tooltip gives no radius for 'nearby'; the extra dummies stand within 8 yd of the primary, inside the 10 yd the script searches (AscensionWitchDoctorAbilities.cpp:116-128), and the far dummy 5 yd beyond that",
+      "observe_source": "Umbral Glaive 501134 (instant, 9% mana, DmgClass ranged, Effect[0] SPELL_AURA_PERIODIC_LEECH on the target; Effect[1] zeroed at load, AscensionWitchDoctorCompletion.cpp:447-453): AscensionWitchDoctorAbilities.cpp:116-128 (OnSpellBeforeEffects) adds the first two valid attackable enemies in line of sight within 10 yd of the target to Effect[0] (MaxAffectedTargets 3). The cast is gated by the ready buff 504588 (OnSpellCheckCast), which the scenario sets before the cast (named precondition fixture: the buff is the product of a ranged-hit roll, proven by the ready entry; a real proc would force the roll in this scenario). One cast at the primary dummy 3 yd out, four more dummies inside 8 yd of it (two more than the stated 2) and one beyond: the aura 501134 of the caster is read on every dummy 500 ms after the cast; the primary and exactly two of the four extra dummies carry it (3 in all, count_primary) and the far one does not. Player report #1506 does not name this part."
+    },
+    {
+      "spell": 501134,
+      "name": "Umbral Glaive (scales with modifiers to Hex of Malice: Prolonged Malice doubles its duration)",
+      "kind": "metric_delta",
+      "variant": "scales",
+      "label_suffix": "scales",
+      "quote": "Scales with modifiers to Hex of Malice.",
+      "expected": 11000,
+      "before_expected": 5000,
+      "tolerance": 300,
+      "trigger_spell": 501134,
+      "gate_spell": 704505,
+      "setup_actor_aura": 504588,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 501134,
+        "caster": "caster"
+      },
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Prolonged Malice 704505 (passive, Effect[0] SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_DURATION +6000 ms, EffectBasePoints 5999 + DieSides 1) is a native modifier of the Hex of Malice family (SpellFamilyFlags[1] 33554432); AscensionWitchDoctorCompletion.cpp:447-450 gives Umbral Glaive 501134 that family flag, so the modifier reaches it. Each phase sets the ready buff 504588 (named precondition fixture) and casts Umbral Glaive (instant, Speed 30, the dummy 3 yd out: the projectile lands about 100 ms after the cast) at the dummy, then reads the remaining duration of 501134 500 ms after the cast, 400 ms after the aura has landed; 704505 is learned between the phases (control: the before phase, DurationIndex 32 = 6000 ms, about 5500 left). With it the duration is 6000 + 6000 = 12000 (about 11500 left). Judged as the gain, after minus before, which does not depend on the elapsed time: 6000 within 300 (the G-19 band of 5% of 6000 ms); the before reading must reach 5000 so a missing aura (0) cannot pass. A missing modifier gains 0. Readback entry (M-11): it reports data conformant, not behaviour.",
+      "expected_gain": 6000
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 100,
+      "cast_power": 2000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Mojo Beam (Potion Toss costs 20% more while channeling)",
+      "variant": "cost_potion",
+      "label_suffix": "cost_potion",
+      "quote": "$573288s1% increased cost",
+      "expected": 120,
+      "expected_ratio": 1.2,
+      "tolerance": 0.02,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 801661
+      },
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:113-127 (aura_ascension_witch_doctor_beam::Apply) casts Mojo Beam 573288 on the caster at the apply of the Beam aura and gives it the Beam's remaining duration; Completion.cpp:347-354 gives 573288 Effect[0] the class mask (0, 2048, 536870913) that Potion Toss 801661 (SpellFamilyFlags[1] 526336), Splash Potion 802710 (SpellFamilyFlags[2] 536870912) and Spirit in a Bottle 801696 (SpellFamilyFlags[2] 1) carry: Effect[0] aura 108 SPELLMOD_COST BasePoints 19 + 1 = +20% ($573288s1), Effect[1] SPELLMOD_CASTING_TIME -10001; Unit.cpp:5096-5121 (CanCastDuringChannel) lets the three be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and Unit::ModSpellCastTime (Unit.cpp:13040-13043) sets their cast time to 0. Mojo Beam 501117: CastingTimeIndex 1 (instant), RecoveryTime 14000 reset by the scenario, GCD 1500, ManaCostPercentage 15 (about 224 of about 1490 base mana), DurationIndex 31 (8000 ms channel). cast_power 2000 is set before the cast (below the 2567 maximum); the caster is the target, so no dummy stands in the scenario. The read is taken 1000 ms after the cast, two heals into the channel (the cost drain ends it near 5500 ms, AscensionWitchDoctorBrewing.cpp:186-196, well after the read). Control: the before phase casts nothing, with the channel absent. before_expected 100 is only the floor of the before reading (ManaCostPercentage x about 1490 base mana is at least 223 for every spell here), so a zero cost cannot hide the ratio. Potion Toss 801661 costs 18% of the base mana; spell_power_cost reads SpellInfo::CalcPowerCost for the caster, which applies the SPELLMOD_COST modifiers of the auras on it, so the ratio of the cost during the channel to the uncast cost is 1.20, judged inside the G-19 band (the larger of 5% and 2 points of +20% is 2 points). Same subject as the data label 573288e0 #3. Player reports #11216 and #10994 (the mana cost of Mojo Beam and its branches) concern the per-tick drain of clause 42, not this 20% (see the author report)."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 100,
+      "cast_power": 2000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Mojo Beam (Splash Potion costs 20% more while channeling)",
+      "variant": "cost_splash",
+      "label_suffix": "cost_splash",
+      "quote": "$573288s1% increased cost",
+      "expected": 120,
+      "expected_ratio": 1.2,
+      "tolerance": 0.02,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 802710
+      },
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:113-127 (aura_ascension_witch_doctor_beam::Apply) casts Mojo Beam 573288 on the caster at the apply of the Beam aura and gives it the Beam's remaining duration; Completion.cpp:347-354 gives 573288 Effect[0] the class mask (0, 2048, 536870913) that Potion Toss 801661 (SpellFamilyFlags[1] 526336), Splash Potion 802710 (SpellFamilyFlags[2] 536870912) and Spirit in a Bottle 801696 (SpellFamilyFlags[2] 1) carry: Effect[0] aura 108 SPELLMOD_COST BasePoints 19 + 1 = +20% ($573288s1), Effect[1] SPELLMOD_CASTING_TIME -10001; Unit.cpp:5096-5121 (CanCastDuringChannel) lets the three be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and Unit::ModSpellCastTime (Unit.cpp:13040-13043) sets their cast time to 0. Mojo Beam 501117: CastingTimeIndex 1 (instant), RecoveryTime 14000 reset by the scenario, GCD 1500, ManaCostPercentage 15 (about 224 of about 1490 base mana), DurationIndex 31 (8000 ms channel). cast_power 2000 is set before the cast (below the 2567 maximum); the caster is the target, so no dummy stands in the scenario. The read is taken 1000 ms after the cast, two heals into the channel (the cost drain ends it near 5500 ms, AscensionWitchDoctorBrewing.cpp:186-196, well after the read). Control: the before phase casts nothing, with the channel absent. before_expected 100 is only the floor of the before reading (ManaCostPercentage x about 1490 base mana is at least 223 for every spell here), so a zero cost cannot hide the ratio. Splash Potion 802710 costs 20% of the base mana; spell_power_cost reads SpellInfo::CalcPowerCost for the caster, which applies the SPELLMOD_COST modifiers of the auras on it, so the ratio of the cost during the channel to the uncast cost is 1.20, judged inside the G-19 band (the larger of 5% and 2 points of +20% is 2 points). Same subject as the data label 573288e0 #3. Player reports #11216 and #10994 (the mana cost of Mojo Beam and its branches) concern the per-tick drain of clause 42, not this 20% (see the author report)."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 100,
+      "cast_power": 2000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Mojo Beam (Spirit in a Bottle costs 20% more while channeling)",
+      "variant": "cost_bottle",
+      "label_suffix": "cost_bottle",
+      "quote": "$573288s1% increased cost",
+      "expected": 120,
+      "expected_ratio": 1.2,
+      "tolerance": 0.02,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 801696
+      },
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:113-127 (aura_ascension_witch_doctor_beam::Apply) casts Mojo Beam 573288 on the caster at the apply of the Beam aura and gives it the Beam's remaining duration; Completion.cpp:347-354 gives 573288 Effect[0] the class mask (0, 2048, 536870913) that Potion Toss 801661 (SpellFamilyFlags[1] 526336), Splash Potion 802710 (SpellFamilyFlags[2] 536870912) and Spirit in a Bottle 801696 (SpellFamilyFlags[2] 1) carry: Effect[0] aura 108 SPELLMOD_COST BasePoints 19 + 1 = +20% ($573288s1), Effect[1] SPELLMOD_CASTING_TIME -10001; Unit.cpp:5096-5121 (CanCastDuringChannel) lets the three be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and Unit::ModSpellCastTime (Unit.cpp:13040-13043) sets their cast time to 0. Mojo Beam 501117: CastingTimeIndex 1 (instant), RecoveryTime 14000 reset by the scenario, GCD 1500, ManaCostPercentage 15 (about 224 of about 1490 base mana), DurationIndex 31 (8000 ms channel). cast_power 2000 is set before the cast (below the 2567 maximum); the caster is the target, so no dummy stands in the scenario. The read is taken 1000 ms after the cast, two heals into the channel (the cost drain ends it near 5500 ms, AscensionWitchDoctorBrewing.cpp:186-196, well after the read). Control: the before phase casts nothing, with the channel absent. before_expected 100 is only the floor of the before reading (ManaCostPercentage x about 1490 base mana is at least 223 for every spell here), so a zero cost cannot hide the ratio. Spirit in a Bottle 801696 costs 15% of the base mana; spell_power_cost reads SpellInfo::CalcPowerCost for the caster, which applies the SPELLMOD_COST modifiers of the auras on it, so the ratio of the cost during the channel to the uncast cost is 1.20, judged inside the G-19 band (the larger of 5% and 2 points of +20% is 2 points). Same subject as the data label 573288e0 #3. Player reports #11216 and #10994 (the mana cost of Mojo Beam and its branches) concern the per-tick drain of clause 42, not this 20% (see the author report)."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 1500,
+      "cast_power": 2000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Mojo Beam (Spirit in a Bottle is instant cast while channeling)",
+      "variant": "bottle_instant",
+      "label_suffix": "bottle_instant",
+      "quote": "you can instantly cast",
+      "expected": 0,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801696
+      },
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:113-127 (aura_ascension_witch_doctor_beam::Apply) casts Mojo Beam 573288 on the caster at the apply of the Beam aura and gives it the Beam's remaining duration; Completion.cpp:347-354 gives 573288 Effect[0] the class mask (0, 2048, 536870913) that Potion Toss 801661 (SpellFamilyFlags[1] 526336), Splash Potion 802710 (SpellFamilyFlags[2] 536870912) and Spirit in a Bottle 801696 (SpellFamilyFlags[2] 1) carry: Effect[0] aura 108 SPELLMOD_COST BasePoints 19 + 1 = +20% ($573288s1), Effect[1] SPELLMOD_CASTING_TIME -10001; Unit.cpp:5096-5121 (CanCastDuringChannel) lets the three be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and Unit::ModSpellCastTime (Unit.cpp:13040-13043) sets their cast time to 0. Mojo Beam 501117: CastingTimeIndex 1 (instant), RecoveryTime 14000 reset by the scenario, GCD 1500, ManaCostPercentage 15 (about 224 of about 1490 base mana), DurationIndex 31 (8000 ms channel). cast_power 2000 is set before the cast (below the 2567 maximum); the caster is the target, so no dummy stands in the scenario. The read is taken 1000 ms after the cast, two heals into the channel (the cost drain ends it near 5500 ms, AscensionWitchDoctorBrewing.cpp:186-196, well after the read). Control: the before phase casts nothing, with the channel absent. Spirit in a Bottle 801696 has CastingTimeIndex 16 (1500 ms); spell_cast_time_ms reads SpellInfo::CalcCastTime for the caster, which Unit::ModSpellCastTime reduces to 0 while the Beam channel is active. Potion Toss and Splash Potion already have CastingTimeIndex 1 (instant), so Spirit in a Bottle is the one spell whose cast time the channel changes: before phase 1500, during the channel 0. Whether the three can be CAST while the Beam channels without breaking it is the core allowance named above; no entry casts a potion into a running channel (no existing kind casts after the trigger), see the author report."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 0,
+      "cast_power": 2000,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 501117,
+        "target": "caster"
+      },
+      "expected": 1662,
+      "tolerance": 2,
+      "name": "Mojo Beam (heals 277 every 0.5 sec)",
+      "variant": "heal_ticks",
+      "label_suffix": "heal_ticks",
+      "quote": "healing for ${$m1+0+$SP*0.1073} every $T1 sec",
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:167-213 (Tick): one heal of effect 0 amount per branch every 500 ms (Completion.cpp:339-343 makes Effect[0] a 500 ms periodic dummy, AttributesEx5 loses SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC), Heal (Brewing.cpp:129-165) calls SpellHealingBonusDone with the coefficient row 501117 0.1073 x spell power (AscensionWitchDoctorCoefficients.h:34) and HealBySpell, which the harness records in spell_heal_total {spell 501117, target caster}. The reference caster has 0 spell power, so the amount is 276 + 1 = 277 (tooltip $m1+0+$SP*0.1073 reads [=277] with the reference stats, packet token list). No ally stands in the scenario: the only branch is the caster, who is the Beam target. Heal critical hits are random, so Reg's Test Aura 984954 (spell crit -1000, the Necromancer's no-crit precondition fixture) is set on the caster in both phases: a crit is a different amount, not a different period. The first tick lands 500 ms after the apply (no start-at-apply flag), so 3200 ms of cast-start game time hold ticks at 500, 1000, 1500, 2000, 2500 and 3000: six heals, 6 x 277 = 1662 (five would read 1385, seven 1939). cast_power 2000 before the cast covers the opening 15% (about 224) and the drain of six ticks (about 1190, Brewing.cpp:191-196). Control: the before phase casts nothing and reads 0. This entry is the unhasted baseline of the haste entry (same scenario with Bloodlust set on the caster). Period bound (G-19, reviewer M-4): six heals by the 3200 ms read bound the period to (457, 533] ms (3200 / 7 and 3200 / 6). The excluded periods are 457 ms or less (seven or more heals) and above 533 ms (five or fewer); this interval is wider than the G-19 band of 5% of 500 ms (475 to 525 ms). The exact period is carried by the data label 501117 aura_amplitude_ms #1 (500 ms); this entry proves the heals really come at that cadence within those bounds."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 0,
+      "cast_power": 2000,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          2825,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 501117,
+        "target": "caster"
+      },
+      "expected": 1662,
+      "tolerance": 2,
+      "name": "Mojo Beam (unaffected by haste: still six heals in 3200 ms)",
+      "variant": "heal_ticks_haste",
+      "label_suffix": "heal_ticks_haste",
+      "quote": "This spell is unaffected by haste modifiers.",
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:167-213 (Tick): one heal of effect 0 amount per branch every 500 ms (Completion.cpp:339-343 makes Effect[0] a 500 ms periodic dummy, AttributesEx5 loses SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC), Heal (Brewing.cpp:129-165) calls SpellHealingBonusDone with the coefficient row 501117 0.1073 x spell power (AscensionWitchDoctorCoefficients.h:34) and HealBySpell, which the harness records in spell_heal_total {spell 501117, target caster}. The reference caster has 0 spell power, so the amount is 276 + 1 = 277 (tooltip $m1+0+$SP*0.1073 reads [=277] with the reference stats, packet token list). No ally stands in the scenario: the only branch is the caster, who is the Beam target. Heal critical hits are random, so Reg's Test Aura 984954 (spell crit -1000, the Necromancer's no-crit precondition fixture) is set on the caster in both phases: a crit is a different amount, not a different period. The first tick lands 500 ms after the apply (no start-at-apply flag), so 3200 ms of cast-start game time hold ticks at 500, 1000, 1500, 2000, 2500 and 3000: six heals, 6 x 277 = 1662 (five would read 1385, seven 1939). cast_power 2000 before the cast covers the opening 15% (about 224) and the drain of six ticks (about 1190, Brewing.cpp:191-196). Control: the before phase casts nothing and reads 0. Bloodlust 2825 (Effect[0] aura 65 casting speed, base 19 + 1 = +20%; harness set_aura on the caster, a precondition fixture: the subject is the Beam's period, haste is only present, and a real cast of 2825 is a Shaman spell the class cannot cast) would leave 7 periods (3200 / 416) if the period followed the haste, so the same 1662 read as heal_ticks proves the period is not shortened. The control arm of this clause is heal_ticks (identical scenario without the haste aura, same reading); a hasted period would read 1939 and alert. Limits (reviewer M-3): nothing in this scenario reads that the Bloodlust fixture took effect, and the expected reading equals the unhasted one, so a fixture that failed would also pass; the entry shows the period is not shortened only when the fixture works, and heal_ticks is the identical run without it. The core flag removal (Completion.cpp:342) is a no-op for the DBC, since 501117 AttributesEx5 is 0 (the haste flag is absent from the start); the claim is therefore met by the DBC, and what the entry guards is a script or aura that shortens the period under haste. Tool note: a haste readback (spell_cast_time_ms of a hasted cast) in the same scenario, which metric_delta cannot take beside its one metric."
+    },
+    {
+      "spell": 503712,
+      "name": "Spirit Volley (the transform lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "ready_lasts",
+      "label_suffix": "ready_lasts",
+      "quote": "for $505158d",
+      "trigger_spell": 505158,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 505158
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 5700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5400,
+          6000
+        ],
+        "expired": [
+          6000,
+          6600
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorAuras.cpp:30-36 and :82 (SyncReplacements): while Spirit Volley Ready 505158 is on the caster, the highest known Reclamation rank (id == KnownRank) gets SetTemporarySpellReplacement(rank, Volley 504582), the client-visible transform; SyncReplacements runs after every script cast (AscensionWitchDoctorAbilities.cpp:384) and every 500 ms (AscensionWitchDoctorAuras.cpp:463). AscensionWitchDoctorAbilities.cpp:315-317 casts 505158 on the caster with the 30% roll of the chance clause, which has its own claim; here the ready aura is made by a real cast of 505158 at the caster (the spell the roll would cast, not a harness set_aura), so the transform and its duration are read without the roll. Spirit Volley Ready 505158 has DurationIndex 32 = 6000 ms ($505158d). It is on the caster 5700 ms after the cast and gone 6300 ms after it, so the end lies inside the G-19 band (5% of 6000 ms = 300 ms) on both sides, with the reads stamped in game time. Control: the uncast before phase reads absent."
+    },
+    {
+      "spell": 503712,
+      "name": "Spirit Volley (one Spirit Volley cast uses up the transform)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "transform your next Reclamation into Spirit Volley",
+      "trigger_spell": 504582,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "measure_actor": "caster",
+      "setup_casts": [
+        505158
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 300,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 505158
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1900,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:377 (OnSpellCast, a non-triggered cast): consume(VolleyReady, id == Volley) removes 505158 when the Volley cast completes, not when its projectile lands, so the next Reclamation is the only one transformed (report #7393: old CoA allowed a second Spirit Volley per proc while the first was in flight). The ready aura is made by a real cast of 505158 at the caster in both phases (setup cast, setup_in_before). Spirit Volley 504582: CastingTimeIndex 23 = 1800 ms, ranged slot (dummy at 15 yd, past the minimum range), no mana cost; the aura is read 1900 ms after the cast start, 100 ms after the cast ends, while the projectile is still flying toward a dummy 15 yd away (Spirit Volley 504582 has Speed 25, so the bolt lands about 600 ms after the cast end, and the 1900 ms read falls in flight). Control: the before phase makes the ready aura without casting the Volley and reads 1, so a second cast would be possible; the after phase reads 0 after one cast. Because the read falls while the bolt is in flight, the entry separates removal at the cast end (Abilities.cpp:377) from removal at the hit, which is the state report #7393 describes (a second Spirit Volley per proc while the first is flying): the reported failure would read 1 here."
+    },
+    {
+      "spell": 503712,
+      "name": "Spirit Volley (reduces the cooldown of Spirit Glaive by 3 sec)",
+      "kind": "metric_delta",
+      "variant": "volley_cdr",
+      "label_suffix": "volley_cdr",
+      "quote": "transform your next",
+      "trigger_spell": 504582,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          505158,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        562719
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 562719
+      },
+      "before_expected": 12000,
+      "expected_gain": -5800,
+      "expected": 6200,
+      "tolerance": 200,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:305-311 (OnSpellCast, non-triggered): id == Volley -> Reduce(player, Glaive, abs(Amount(VolleyCooldown))), ModifySpellCooldown(-3000) on every known rank of Spirit Glaive (Completion.cpp:161-174); 504584 Effect[0] BasePoints -3001 + 1 = -3000 ($/1000;504584s1 = 3). The ready aura 505158 is set by harness set_aura in both phases (precondition fixture, guide 3.4; the subject is the cooldown cut, the 30% roll that makes the aura has its own claim). A real setup cast of 505158, as the consumed entry makes, is not used for two reasons: setup_target is one value for every setup cast of an entry and the Glaive setup needs the dummy while 505158 needs the caster; and a real 505158 listed before the Glaive would sit through the Glaive's 2000 ms cast and the 2500 ms setup waits (about 7000 ms) and expire (6000 ms) before the Volley starts. Setup cast in both phases: a real Spirit Glaive 562719 at the dummy (CastingTimeIndex 5 = 2000 ms, CategoryRecoveryTime 20000, GCD 1500) and 2500 ms of wait. Before phase: that setup only, read at about 20000 - 2500 = 17500 ms remaining minus clock overhead (before_expected 12000 is only the floor that no clamp hides the cut). After phase: the setup repeated (Glaive cooldown reset and recast), then one real Volley (1800 ms cast, 15 yd dummy) and 2800 ms of wait: 2800 ms later than the before reading, so the reading falls by 2800 plus the 3000 cut = -5800 (without the cut -2800, 3000 away). tolerance 200 covers the step overheads of the simulated clock (10 to 17 ms of game time per cast and wait step). Control: the before phase casts no Volley. Spirit Glaive has RangeIndex 1 (0 yd) as a cone; a cast at a dummy 15 yd away is not rangechecked by the existing reset entry's pattern (dummy at 3 yd) and the first run confirms it. Quote (reviewer M-7): the clause this entry proves is 'Reduces the cooldown of Spirit Glaive by $/1000;504584s1 sec', which is not in the DBC description of 503712 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 503712,
+      "name": "Spirit Volley (scales with modifiers to Reclamation: Village Wisdom +20% damage)",
+      "kind": "metric_delta",
+      "variant": "scales",
+      "label_suffix": "scales",
+      "quote": "transform your next",
+      "trigger_spell": 505158,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_spell": 680882,
+      "metric": "spell_modifier",
+      "fields": {
+        "spell": 504582,
+        "op": 0,
+        "base": 100
+      },
+      "before_expected": 100,
+      "expected": 120,
+      "tolerance": 0.5,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "Village Wisdom 680882 (tooltip: 'Increases your hit chance by $s2% and the damage of Reclamation by $s1%.'; Effect[0] aura 108 SPELLMOD_PCT op 0 damage, BasePoints 19 + 1 = +20%, EffectSpellClassMask[1] 268435460, the SpellFamilyFlags[1] of Reclamation 572383) is a native modifier of the Reclamation family. Spirit Volley 504582 carries SpellFamilyFlags[1] 268435456 in the DBC and gets bit 4 in Completion.cpp:442-446, so the modifier reaches it: the modifier engine, not a script, scales Volley with Reclamation's modifiers. The harness spell_modifier metric applies Player::ApplySpellMod for 504582 with op 0 (SPELLMOD_DAMAGE) to base 100 (CoAGameplayTest.cpp:5360-5366): 100 without the talent (control: the before phase), 120 with 680882 learned between the phases (gate_spell). trigger_spell 505158 is a real instant cast at the caster, made in both phases so that metric_delta has its cast; it takes no part in the read. A readback of the modifier engine on the spell (data conformant), not a hit: the damage of a hit is not read. The tooltip's own +20% is the expected increase, tolerance 0.5 of a point. Quote (reviewer M-7): the clause this entry proves is 'Scales with modifiers to Reclamation', which is not in the DBC description of 503712 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (Hexfire Wrath Ready lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "ready_lasts",
+      "label_suffix": "ready_lasts",
+      "quote": "within $503626d",
+      "trigger_spell": 573026,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 503626
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7400,
+          8000
+        ],
+        "expired": [
+          8000,
+          8600
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:318-319 (OnSpellCast, non-triggered): a cast with SpellFamilyFlags[1] 262144 (Hexfire 573026, rank 7, instant, 10000 ms category cooldown, 17% mana) while Hexfire Adept 704500 is known casts Hexfire Wrath Ready 503626 (DurationIndex 31 = 8000 ms, $503626d) on the caster; AscensionWitchDoctorAuras.cpp:43-47 and :82 (SyncReplacements) then replaces every known Malefic Wrath rank (SpellFamilyFlags[1] 32768, not an Arrow) by Hexfire Wrath 807480 while 503626 is on the caster, and Abilities.cpp:88-90 refuses the plain Wrath in that state. Malefic Wrath 807037 (rank 1) is the only Wrath learned; Hexfire Wrath 807480 is learned by the sync. The aura 503626 is on the caster 7700 ms after the Hexfire cast and gone 8300 ms after it, so its end lies inside the G-19 band (5% of 8000 ms = 400 ms) on both sides, with the reads stamped in game time. Control: the uncast before phase reads absent."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (Hexfire Wrath spawns a Serpent Ward)",
+      "kind": "metric_delta",
+      "variant": "ward",
+      "label_suffix": "ward",
+      "quote": "transforms your next Malefic Wrath",
+      "trigger_spell": 807480,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        573026
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50587
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:318-319 (OnSpellCast, non-triggered): a cast with SpellFamilyFlags[1] 262144 (Hexfire 573026, rank 7, instant, 10000 ms category cooldown, 17% mana) while Hexfire Adept 704500 is known casts Hexfire Wrath Ready 503626 (DurationIndex 31 = 8000 ms, $503626d) on the caster; AscensionWitchDoctorAuras.cpp:43-47 and :82 (SyncReplacements) then replaces every known Malefic Wrath rank (SpellFamilyFlags[1] 32768, not an Arrow) by Hexfire Wrath 807480 while 503626 is on the caster, and Abilities.cpp:88-90 refuses the plain Wrath in that state. Malefic Wrath 807037 (rank 1) is the only Wrath learned; Hexfire Wrath 807480 is learned by the sync. AscensionWitchDoctorAbilities.cpp:358-359 (OnSpellCast): id == HexfireWrath && target -> Summon(player, WrathWard 808004, target, position of the target); AscensionWitchDoctorSummons.cpp:171-215 summons creature 50587 (808004 Effect[0] MiscValue) with SetOwnerGUID(player) for its DurationIndex 1 = 10000 ms ($808004d). Setup in the treatment phase: a real Hexfire 573026 at the dummy (the ready aura 503626), 1600 ms later (past the 1500 ms global cooldown) the transformed Hexfire Wrath 807480 at the dummy (CastingTimeIndex 16 = 1500 ms, 8% mana, range index 5). The ready aura lasts 8000 ms, so the Wrath cast starts well inside it and ends at 1500 ms; its effects run at the cast end. Both phases run the same Hexfire and Hexfire Wrath casts; the count of creature 50587 owned by the caster is read 2200 ms after the Wrath cast start (700 ms after the cast end). Control: the before phase has no 704500, so Hexfire casts no ready aura and the Wrath cast is refused (Abilities.cpp:77): 0; with 704500 learned between the phases: 1. Quote (reviewer M-7): the clause this entry proves is 'Spawns a Serpent Ward', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (the Serpent Ward lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "ward_lasts",
+      "label_suffix": "ward_lasts",
+      "quote": "transforms your next Malefic Wrath",
+      "trigger_spell": 807480,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        573026
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50587
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 11200,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10900,
+          11500
+        ],
+        "expired": [
+          11500,
+          12100
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:318-319 (OnSpellCast, non-triggered): a cast with SpellFamilyFlags[1] 262144 (Hexfire 573026, rank 7, instant, 10000 ms category cooldown, 17% mana) while Hexfire Adept 704500 is known casts Hexfire Wrath Ready 503626 (DurationIndex 31 = 8000 ms, $503626d) on the caster; AscensionWitchDoctorAuras.cpp:43-47 and :82 (SyncReplacements) then replaces every known Malefic Wrath rank (SpellFamilyFlags[1] 32768, not an Arrow) by Hexfire Wrath 807480 while 503626 is on the caster, and Abilities.cpp:88-90 refuses the plain Wrath in that state. Malefic Wrath 807037 (rank 1) is the only Wrath learned; Hexfire Wrath 807480 is learned by the sync. The ward is summoned at the end of the 1500 ms Hexfire Wrath cast (Abilities.cpp:358-359, Summons.cpp:171-215, TEMPSUMMON_TIMED_DESPAWN for 10000 ms), so it lives until 11500 ms after the Wrath cast start. Setup in the treatment phase: a real Hexfire 573026 at the dummy (the ready aura 503626), 1600 ms later (past the 1500 ms global cooldown) the transformed Hexfire Wrath 807480 at the dummy (CastingTimeIndex 16 = 1500 ms, 8% mana, range index 5). The ready aura lasts 8000 ms, so the Wrath cast starts well inside it and ends at 1500 ms; its effects run at the cast end. One ward is owned 11200 ms after the cast start and none 11800 ms after it, so the end lies inside the G-19 band (5% of 10000 ms = 500 ms) on both sides, with the reads stamped in game time. Control: the uncast before phase reads 0 (704500 known). Quote (reviewer M-7): the clause this entry proves is 'Spawns a Serpent Ward for $808004d', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (Hexfire Wrath curses up to 2 nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "chain",
+      "label_suffix": "chain",
+      "quote": "transforms your next Malefic Wrath",
+      "expected": 2,
+      "radius": 10,
+      "metric": "aura",
+      "cast_spell": 807480,
+      "target_rank": 807480,
+      "repeats": 1,
+      "learn": [
+        704500,
+        807480
+      ],
+      "auras": [
+        [
+          503626,
+          1
+        ]
+      ],
+      "radius_reason": "AscensionWitchDoctorAbilities.cpp:116-130 (OnSpellBeforeEffects): for Hexfire Wrath 807480 up to two enemies from Nearby(target, 10.0f) that the caster can attack and see are added to effects 0 and 1 by the script, so the curse 807480 lands on the primary and two of the dummies within 10 yd of it. Completion.cpp:455-462 sets ChainTarget 1 and MaxAffectedTargets 3 for Hexfire Wrath (the target and two more in all); the two extras come from the script, not from an EffectChainTarget of 3 in the DBC. The three candidate dummies stand within 10 yd of the primary, the far one 5 yd beyond that radius",
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:318-319 (OnSpellCast, non-triggered): a cast with SpellFamilyFlags[1] 262144 (Hexfire 573026, rank 7, instant, 10000 ms category cooldown, 17% mana) while Hexfire Adept 704500 is known casts Hexfire Wrath Ready 503626 (DurationIndex 31 = 8000 ms, $503626d) on the caster; AscensionWitchDoctorAuras.cpp:43-47 and :82 (SyncReplacements) then replaces every known Malefic Wrath rank (SpellFamilyFlags[1] 32768, not an Arrow) by Hexfire Wrath 807480 while 503626 is on the caster, and Abilities.cpp:88-90 refuses the plain Wrath in that state. Malefic Wrath 807037 (rank 1) is the only Wrath learned; Hexfire Wrath 807480 is learned by the sync. The ready aura 503626 is set by the entry (harness set_aura on the caster, a precondition fixture: fixed_count has no setup cast that keeps its result, and the subject is the breadth of the cast, not the transform; a real Hexfire costs about 253 mana and a 1500 ms global cooldown). One real Hexfire Wrath at the primary, the curse aura read on every dummy 1500 ms plus margin later (it lasts 9000 ms): exactly 2 of the 3 extra dummies carry it and the far one does not (headroom 1 shows a third strike would be seen). repeats 1, as Dark Loa's Incantation, because the script picks the two extras from an unordered Nearby list. Control: the far dummy and the third extra carry no curse. Quote (reviewer M-7): the clause this entry proves is 'Hurl hexfire energy at an enemy and up to 2 nearby enemies', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (the curse lasts 9 sec)",
+      "kind": "metric_delta",
+      "variant": "curse_lasts",
+      "label_suffix": "curse_lasts",
+      "quote": "transforms your next Malefic Wrath",
+      "trigger_spell": 807480,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        573026
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 807480,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 10200,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9900,
+          10500
+        ],
+        "expired": [
+          10500,
+          11100
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:318-319 (OnSpellCast, non-triggered): a cast with SpellFamilyFlags[1] 262144 (Hexfire 573026, rank 7, instant, 10000 ms category cooldown, 17% mana) while Hexfire Adept 704500 is known casts Hexfire Wrath Ready 503626 (DurationIndex 31 = 8000 ms, $503626d) on the caster; AscensionWitchDoctorAuras.cpp:43-47 and :82 (SyncReplacements) then replaces every known Malefic Wrath rank (SpellFamilyFlags[1] 32768, not an Arrow) by Hexfire Wrath 807480 while 503626 is on the caster, and Abilities.cpp:88-90 refuses the plain Wrath in that state. Malefic Wrath 807037 (rank 1) is the only Wrath learned; Hexfire Wrath 807480 is learned by the sync. Setup in the treatment phase: a real Hexfire 573026 at the dummy (the ready aura 503626), 1600 ms later (past the 1500 ms global cooldown) the transformed Hexfire Wrath 807480 at the dummy (CastingTimeIndex 16 = 1500 ms, 8% mana, range index 5). The ready aura lasts 8000 ms, so the Wrath cast starts well inside it and ends at 1500 ms; its effects run at the cast end. Hexfire Wrath 807480 Effect[1] aura 3 periodic damage on the target, DurationIndex 105 = 9000 ms ($d), applied at the cast end (1500 ms): it ends 10500 ms after the Wrath cast start. The caster's curse is on the dummy 10200 ms after the cast start and gone 10800 ms after it, inside the G-19 band (5% of 9000 ms = 450 ms) on both sides, with the reads stamped in game time. Control: the uncast before phase reads absent. Travel (reviewer M-5): Hexfire Wrath has Speed 35, so at 3 yd the bolt adds about 86 ms and the curse lands near 1586 ms and ends near 10586 ms; the 10200 ms (present) and 10800 ms (gone) reads keep their margins (386 ms and 214 ms). Quote (reviewer M-7): the clause this entry proves is 'and cursing them for $d', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (the curse deals damage every 3 sec)",
+      "kind": "hit_period",
+      "variant": "curse_period",
+      "label_suffix": "curse_period",
+      "quote": "transforms your next Malefic Wrath",
+      "trigger_spell": 807480,
+      "hit_spell": 807480,
+      "expected_ms": 3000,
+      "window": [
+        1250,
+        8000
+      ],
+      "fixtures": [
+        [
+          503626,
+          "caster"
+        ]
+      ],
+      "poll_ms": 1,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:318-319 (OnSpellCast, non-triggered): a cast with SpellFamilyFlags[1] 262144 (Hexfire 573026, rank 7, instant, 10000 ms category cooldown, 17% mana) while Hexfire Adept 704500 is known casts Hexfire Wrath Ready 503626 (DurationIndex 31 = 8000 ms, $503626d) on the caster; AscensionWitchDoctorAuras.cpp:43-47 and :82 (SyncReplacements) then replaces every known Malefic Wrath rank (SpellFamilyFlags[1] 32768, not an Arrow) by Hexfire Wrath 807480 while 503626 is on the caster, and Abilities.cpp:88-90 refuses the plain Wrath in that state. Malefic Wrath 807037 (rank 1) is the only Wrath learned; Hexfire Wrath 807480 is learned by the sync. Hexfire Wrath 807480 Effect[1] aura 3, EffectAmplitude 3000 ($t2), no SPELL_ATTR5_START_PERIODIC_AT_APPLY (AttributesEx5 0): ticks 3000 ms after the apply. The cast (1500 ms) hits at once and the curse ticks at 4500 and 7500 ms, so three stamped 807480 hits fall in the window 1250 to 8000 ms after the cast and (last - first) / (hits - 1) is 3000 ms inside the G-19 band (5% = 150 ms). The ready aura 503626 is set on the caster by the kind's fixture list (hit_period has no setup cast; named precondition fixture, the subject is the curse period, not the transform). Control: the kind reads no 807480 hit on the dummy before the cast. Travel and the first hit (reviewer M-5): Speed 35 adds about 86 ms, so the apply is near 1586 ms and the ticks near 4586 and 7586 ms, still inside the window 1250 to 8000 ms. The three stamped hits are the direct hit at the cast end followed by two ticks; the direct hit counts as the first stamped hit, and the 3000 ms spacing to the next one is right only because the first tick comes 3000 ms after the apply (no START_PERIODIC_AT_APPLY), so (last - first) / (hits - 1) = 3000 ms is the amplitude. Quote (reviewer M-7): the clause this entry proves is 'The curse deals ... Fire damage every $t2 sec', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Adept (the curse can critically strike)",
+      "kind": "metric_delta",
+      "variant": "curse_crit",
+      "label_suffix": "curse_crit",
+      "quote": "transforms your next Malefic Wrath",
+      "trigger_spell": 807480,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          503626,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807480,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 1,
+      "expected_gain": 3,
+      "expected": 4,
+      "tolerance": 0.5,
+      "wait_ms": 8000,
+      "expire_ms": 9500,
+      "observe_source": "Hexfire Adept 704500 Effect[1] is SPELL_AURA_ABILITY_PERIODIC_CRIT (286), the stock aura that lets the periodic damage of the spells in its class mask critically strike. The spell crit rating is forced (force_crit spell, the Necromancer pattern) so every crit-eligible hit crits; spell_damage_count with critical true counts only critical 807480 hits on the dummy. The ready aura 503626 is set on the caster by harness set_aura in both phases (precondition fixture: the contrast is the passive, and a real Hexfire only makes the ready aura while 704500 is known, so the control phase could not cast Hexfire Wrath at all). One real Hexfire Wrath 807480 (1500 ms cast) per phase, read 8000 ms after the cast start: the direct hit crits in both phases (first read 1, cumulative), with 704500 the curse ticks at 4500 and 7500 ms also crit, so the second read is 1 + 1 + 2 = 4 (gain 3). Without 704500 the ticks are not critical and the gain would be 1. expire_ms 9500 lets the curse of the first phase (9000 ms, last tick at 10500 ms) run out before the second cast, so a control tick that crits would show as a larger gain. Control: the before phase, 704500 unknown. Travel (reviewer M-5): the bolt adds about 86 ms, so the ticks are near 4586 and 7586 ms, both before the 8000 ms read. Quote (reviewer M-7): the clause this entry proves is 'Periodic damage dealt by this effect can critically strike', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 704500,
+      "name": "Hexfire Wrath (scales with modifiers to Malefic Wrath: Dark Magic -0.5 sec cast time)",
+      "kind": "metric_delta",
+      "variant": "scales",
+      "label_suffix": "scales",
+      "quote": "transforms your next Malefic Wrath",
+      "trigger_spell": 573026,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "gate_spell": 705922,
+      "cast_power": 2000,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807480
+      },
+      "before_expected": 1500,
+      "expected": 1000,
+      "tolerance": 1,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "Dark Magic 705922 (tooltip: 'Reduces the cast time of Malefic Wrath and Bad Juju by $/1000;S1 sec'; Effect[0] aura 107 SPELLMOD_FLAT op 10 casting time, BasePoints -501 + 1 = -500 ms, EffectSpellClassMask[1] 33792 = 32768 | 1024) is a native modifier of the Malefic Wrath family (SpellFamilyFlags[1] 32768). Hexfire Wrath 807480 carries SpellFamilyFlags[1] 32768 in the DBC (and [2] 262144), so the modifier reaches it. spell_cast_time_ms reads SpellInfo::CalcCastTime for the caster (CoAGameplayTest.cpp:5393-5394): 807480 has CastingTimeIndex 16 = 1500 ms, so 1500 without the passive (control: the before phase) and 1000 with 705922 learned between the phases (gate_spell). trigger_spell 573026 is a real instant Hexfire at the dummy (17% mana, 10000 ms category cooldown reset by the scenario), made in both phases so that metric_delta has its cast; it takes no part in the read. A readback of the modifier engine on the spell (data conformant), not a Hexfire Wrath hit. Quote (reviewer M-7): the clause this entry proves is 'Scales with modifiers to Malefic Wrath', which is not in the DBC description of 704500 (the clause text is streamed); behaviours.behaviour_entry requires the quote to be a substring of that DBC description (behaviours.py:131-134), so the quote is the transform sentence the description holds. The ledger claim labels tie this entry to its clause."
+    },
+    {
+      "spell": 503748,
+      "name": "Potent Mixes (healing done +4%)",
+      "kind": "ratio",
+      "quote": "Increases your healing done by",
+      "expected": 1.04,
+      "targets": [
+        [
+          501117,
+          "Mojo Beam"
+        ]
+      ],
+      "observe_source": "Potent Mixes 503748 Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, misc 127 (all schools), BasePoints 3 + 1 = +4% ($s1); native, no script (class map risk stock). spell_healing_done on Mojo Beam 501117 calls Unit::SpellHealingBonusDone, the caster-side multiplier, before and after the passive is learned; the judge takes the delta against 4% of the before reading on the metric scale. Control: the before phase has no 503748. The threat half of the tooltip has no entry (see the author report: threat_slope never learns the passive)."
+    },
+    {
+      "spell": 801664,
+      "name": "Ingredient: Bloodthistle (Potion leech once every 0.5 sec)",
+      "kind": "proc_gate_interval",
+      "variant": "gate",
+      "label_suffix": "gate",
+      "quote": "Can only occur once every 0.5 sec.",
+      "gate_ms": 500,
+      "learn": [
+        92085,
+        801664,
+        801661
+      ],
+      "setup_casts": [
+        [
+          801664,
+          "caster"
+        ],
+        [
+          801661,
+          "caster"
+        ]
+      ],
+      "trigger_casts": [
+        [
+          811117,
+          "dummy2"
+        ]
+      ],
+      "cast_auras": [
+        [
+          561136,
+          3
+        ]
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1600,
+      "control_ms": 1400,
+      "windows": 21,
+      "window_ms": 100,
+      "since_spell": 811117,
+      "trigger": {
+        "stream": "spell_damage",
+        "spell": 802717,
+        "target": "dummy2"
+      },
+      "output": {
+        "stream": "spell_heal",
+        "spell": 803287,
+        "target": "caster"
+      },
+      "amount_pct": 5,
+      "cause_auras": [
+        [
+          802975,
+          801661
+        ]
+      ],
+      "cause_every": 7,
+      "dummies": 2,
+      "dummy_step_yd": 2.0,
+      "edge_streams": [
+        {
+          "stream": "spell_damage",
+          "spell": 802712,
+          "target": "dummy"
+        },
+        {
+          "stream": "spell_damage",
+          "spell": 802717,
+          "target": "dummy2"
+        }
+      ],
+      "edge_hits": 3,
+      "relocate_yd": [
+        -6.6,
+        -0.18
+      ],
+      "fixture": {
+        "spell_power": 2000,
+        "ranged_hit_rating": 10000,
+        "spell_hit_rating": 10000
+      },
+      "observe_source": "Bloodthistle potion 802975 (server DBC set: aura 354, $s1 = 4 + 1 = 5%, DurationIndex 8 = 15000 ms; spell_proc row ProcFlags 332116 incl. DONE_SPELL_MAGIC_DMG_CLASS_NEG and DONE_SPELL_RANGED_DMG_CLASS, AttributesMask 2 (triggered spells proc), Cooldown 500, rev_20260909_00_witch_doctor_completion.sql:25) on the caster: AscensionWitchDoctorEvents.cpp:68-69 Check (outgoing damage, not Derived) and :199-205 Proc, Copy(caster, owner, ThistleHeal 803287, damage x 5 / 100), a HEAL at TARGET_UNIT_CASTER (Completion.cpp:365-371). The cause is real: Brewer 92085 learned, Ingredient: Bloodthistle 801664 cast, then Potion Toss 801661 at the caster (PotionEffects casts 802975, Brewing.cpp:86-107); the 801702 CasterAuraSpell is set by required_aura_steps (precondition fixture). Potion Toss is cast again before windows 8 and 15 (cause_every 7: instant, StartRecoveryTime 1500, CategoryRecoveryTime 15000 reset by the harness, 18% mana), so every window reads 13500 ms or less after the latest potion, inside 15000 less 1000. Triggers: Spirit Eclipse rank 7 811117 (instant, StartRecoveryTime 1500, CategoryRecoveryTime 10000 reset before each cast, 12% mana: cast_wait_ms 1600, cast_power 2000) at dummy2 with 3 Spirits 561136 set by harness set_aura before every cast (precondition fixture for the trigger, Witch Doctor ADR 0001): duration 250 x Spirits, and each of the three lifecycle ticks (AscensionWitchDoctorAuras.cpp:285-302) casts Spirit Eclipse 802717 at dummy2 (Speed 25, a missile: it lands floor(distance / 25 s) later, Spell.cpp:2468-2476) and the Spirit Eclipse Explosion splash 802712 (Speed 0, lands at the tick) at every other hostile within 10 yd of dummy2, here dummy at 3 yd. Per window the first splash S1 is the first trigger and the first output; the first Eclipse hit A1 lands one flight time later and the third splash S3 500 ms after S1. The caster is relocated -6.6 yd before window 1 and -0.18 yd before each later window (harness relocate, a positioning fixture: the dummies are stationary), so the distance to dummy2 runs 11.6 to 15.2 yd and the flight time (that distance less the caster's combat reach, never under the 5 yd floor of Spell.cpp:2474-2475, over 25 yd/s) sweeps about 404 to 548 ms for a 1.5 yd reach, 7.2 ms per window, so A1 sweeps across the gate. The probes are A1, the first event of its stream, and S3, the last of its stream: both are placed exactly, so no middle-hit placement enters the bound. Reads per window since the 811117 cast: for 802712 on dummy and 802717 on dummy2 the count, first event and shortest and longest interval (three hits each, so the first and last are exact and the middle one lies between two stamps), and for 803287 the count, first event and intervals. The event stamps (GameTime::Now) and the proc cooldown (GameTime::SteadyNow, SpellAuras.cpp:2172-2189, Unit.cpp:14301) read the same simulated point inside one world update (GameTime.cpp:125-136 and 206-212; TakeStep runs before World::Update, Main.cpp:614), so a trigger t ms after an output is answered exactly when t >= 500. On a regular 25 ms grid every offset after S1 is a multiple of 25 ms: S3 is answered at 500 ms and the windows whose flight is 451 to 475 ms (476 to 500 ms when the hit fires from the update before) refuse A1 at exactly 475 ms, so the bracket (475, 500] is deterministic. On irregular grids the close is statistical: the kind test asserts ok in 1000 seeds of the lanes step model (3 to 25 ms) per update order (0 failures bound the miss rate below 3/1000 per run, rule of three, so the flip risk per pair below 6/1000), and timing-only arithmetic over 10000 seeds per combat reach (0.389, 1.5, 2.0 yd) and update order of the lanes model and of a model holding a random 1 to 25 ms step for up to 80 updates placed the refused exact probe at 484 to 499 ms and the answered output at 500 to 509 ms in all 120000 runs (rule of three: below 3/120000 per run under those models). A miss reads unmeasured, never a false ok: the bounds are exact or conservative. ranged_hit_rating and spell_hit_rating 10000: the Eclipse hit is ranged and the splash is magic, and one missed hit among the 126 would leave a window unpaired (unmeasured). Control: one Eclipse before the potion, no 803287 heal. spell_power 2000 player fixture."
+    },
+    {
+      "spell": 801664,
+      "kind": "metric_delta",
+      "name": "Ingredient: Bloodthistle (Cauldron buff while silenced)",
+      "variant": "cauldron_silenced",
+      "label_suffix": "cauldron_silenced",
+      "quote": "Cauldron: Allies within $802771a1 yds receive $802771s1% increased healing.",
+      "trigger_spell": 801664,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 802771
+      },
+      "evidence_metric": "aura_amount",
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1000,
+      "learn": [
+        561069
+      ],
+      "setup_casts": [
+        801662
+      ],
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 24259,
+        "health": 10000,
+        "max_health": 10000,
+        "after_trigger_ms": 1700,
+        "count": 1,
+        "wait_ms": 2500,
+        "reaction": 0
+      },
+      "after_auras_present": [
+        {
+          "aura": 24259,
+          "source": "Spell Lock from the striker, the silence under test"
+        },
+        {
+          "aura": 803269,
+          "source": "the Fish Oil Cauldron buff, the control arm: Ingredient: Fish Oil 801662 brewed beside Bloodthistle, PreventionType 0, refreshed every 1500 ms while silenced"
+        }
+      ],
+      "wait_ms": 100,
+      "expire_ms": 14000,
+      "observe_source": "Player report #10643: the Bloodthistle buff falls off while Jungle Shrooms and Fish Oil stay. Ingredient: Bloodthistle 801664 is an infinite aura (DurationIndex 21, forced by AscensionWitchDoctorCompletion.cpp:384-388) whose only effect is a periodic trigger every 1500 ms (EffectAmplitude[0], no SPELL_ATTR5_EXTRA_INITIAL_PERIOD) of the Cauldron buff 802771 (APPLY_AREA_AURA_RAID, aura 118 +8% healing taken, DurationIndex 39 = 2000 ms). 802771 has PreventionType 1 (silence); the Fish Oil and Frog Bones fields 803269 and 803697 and the Jungle Shrooms pulse 802703 have 0. Spell.cpp:6240-6243 runs CheckCasterAuras(preventionOnly) for a triggered spell with a prevention type whose triggering aura is positive, and Spell.cpp:7157-7160 refuses it while the caster has UNIT_FLAG_SILENCED. So while the Witch Doctor is silenced the refresh fails and 802771 lapses within 2000 ms; the other Cauldron effects keep refreshing. The tooltip states no exception (G-1), so the expected reading is 1. Before phase (no Ingredient cast, the control for the read): 802771 absent (0); the Spell Lock of the striker lands there too. expire_ms 14000: that first silence ends 3000 ms after it lands and the second lands about 19800 ms after the first, more than 15000 ms after the first ended, so the diminishing return of DIMINISHING_SILENCE (Spell Lock Mechanic 9, DRTYPE_PLAYER: SpellMgr.cpp:287-288, Unit.cpp:13087-13096, Spell.cpp:3181-3188) has reset and the second silence lasts the full 3000 ms. After phase: Mixologist 561069 is learned from the start (capacity 2, AscensionWitchDoctorBrewing.cpp:31, as in the 92085 max_two entry), Ingredient: Fish Oil 801662 is cast for real (setup cast: instant, 5% mana, StartRecoveryTime 1500 in category 130 shared with Bloodthistle, CategoryRecoveryTime 500: setup_wait_ms 1600), then Ingredient: Bloodthistle 801664 for real (instant, 5% mana), its first refresh 1500 ms later, then a passive striker (react state 0, spell_hit_bonus 100) casts the stock silence Spell Lock 24259 at the caster 1700 ms after the cast (aura 27, DurationIndex 27 = 3000 ms, DmgClass 0); the read comes 2600 ms into the silence, after the 802771 from the 1500 ms refresh has expired (3500 ms after the cast) and before the silence ends (4700 ms). Guards (after_auras_present), read on the caster right before the after reading: Spell Lock 24259 must be present (the silence landed and still holds), and the Fish Oil Cauldron buff 803269 must be present (the control arm: Fish Oil ticks about 1400 and 2900 ms after the Bloodthistle cast, the second inside the silence, so 803269 holds at the read only if a PreventionType 0 refresh survives the silence; without that refresh it would have lapsed about 3400 ms after the cast). A missing guard reads unmeasured. With both guards present, a silence-gated Bloodthistle refresh reads 0 (alert, the candidate defect lead #10643 describes) and 1 means the buff survives a silence. Evidence class: the read is aura presence, a readback for this healing claim (G-21 amendment point 1), so evidence_metric aura_amount (a coverage.METRIC_EVIDENCE readback) stamps it: an ok adds a data label and cannot lift the Cauldron claim to status 1; only an applied heal could."
+    },
+    {
+      "spell": 801664,
+      "kind": "metric_delta",
+      "name": "Ingredient: Bloodthistle (stays brewed)",
+      "variant": "brewed_holds",
+      "label_suffix": "brewed_holds",
+      "quote": "Brew Bloodthistle into your Cauldron.",
+      "trigger_spell": 801664,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 801664
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1000,
+      "wait_ms": 30000,
+      "expire_ms": 500,
+      "observe_source": "Player report #10643 (the Bloodthistle buff falls off with no apparent reason). Removal paths of the Ingredient aura 801664 in the code: SyncIngredients (AscensionWitchDoctorBrewing.cpp:18-46, every 500 ms from witch_doctor_update, AscensionWitchDoctorAuras.cpp:451-462) removes the oldest Ingredient only past the capacity (1, or 2 with Mixologist 561069 or a Mojo pair); Mix (Brewing.cpp:62-77) replaces the set; nothing else names 801664 (grep). Its duration is infinite (DurationIndex 21, forced by Completion.cpp:384-388), like 801660 and 801662, so with one Ingredient and no other cast it must still be brewed after 30 s. Before phase (no cast, the control): 0. After phase: one real cast (instant, 5% mana, 500 ms category, 1500 ms GCD), a 30000 ms wait (twenty 1500 ms refreshes of 802771), then 1; an early removal reads 0."
     }
   ],
   "player_observations": [],

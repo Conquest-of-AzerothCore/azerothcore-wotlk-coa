@@ -51,7 +51,14 @@
   {
     "spell": 92085,
     "clause": "Nearby allies are buffed based on the active brew.",
-    "labels": [],
+    "labels": [
+      "801662 behaviour_aura_presence cauldron_inside",
+      "801662 behaviour_aura_presence cauldron_outside",
+      "801662 behaviour_aura_presence cauldron_outside caster",
+      "801663 behaviour_aura_presence cauldron_inside",
+      "801663 behaviour_aura_presence cauldron_outside",
+      "801663 behaviour_aura_presence cauldron_outside caster"
+    ],
     "kind": "claim"
   },
   {
@@ -395,45 +402,138 @@
   {
     "spell": 501117,
     "clause": "Bring mojo to an ally, healing for ${$m1+0+$SP*0.1073} every $T1 sec for $d.",
-    "labels": [
-      "501117 effect_value e0 #0",
-      "501117 aura_amount e0 #0",
-      "501117 aura_amplitude_ms #1",
-      "501117 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Bring mojo to an ally, healing for ${$m1+0+$SP*0.1073}",
+        "labels": [
+          "501117 effect_value e0 #0",
+          "501117 aura_amount e0 #0",
+          "501117 behaviour_metric_delta heal_ticks"
+        ]
+      },
+      {
+        "claim": "every $T1 sec",
+        "labels": [
+          "501117 aura_amplitude_ms #1",
+          "501117 behaviour_metric_delta heal_ticks"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "501117 aura_duration_ms #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 501117,
     "clause": "Each time Mojo Beam heals a target it will grow a new branch.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Mojo Beam branches only to allies the caster is grouped with (Allies() keeps units with Friendly(), which needs IsInRaidWith, Completion.cpp:57-62; the branch search is 15 yd around the target, Brewing.cpp:203-212), and metric_delta has no ally or group fixture and no per-ally heal read. Tool: grouped ally players at a distance in metric_delta and a read of the heals per ally (spell_heal_count with a target).",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 501117,
     "clause": "Each new branch immediately heals and continues healing.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Mojo Beam branches only to allies the caster is grouped with (Allies() keeps units with Friendly(), which needs IsInRaidWith, Completion.cpp:57-62; the branch search is 15 yd around the target, Brewing.cpp:203-212), and metric_delta has no ally or group fixture and no per-ally heal read. The same tool covers this clause: the heals of a branch ally at the first tick and later.",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 501117,
     "clause": "For every sprouted the branch, you consume more and more mana.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Mojo Beam branches only to allies the caster is grouped with (Allies() keeps units with Friendly(), which needs IsInRaidWith, Completion.cpp:57-62; the branch search is 15 yd around the target, Brewing.cpp:203-212), and metric_delta has no ally or group fixture and no per-ally heal read. The tooltip gives no mana number, so any expected drain per tick or per branch would come from the code, not from the tooltip (G-1); the growth with more branches also needs the ally fixture.",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 501117,
     "clause": "While channeling, you can instantly cast Potion Toss, Splash Potion and Spirit in a Bottle at a $573288s1% increased cost.",
-    "labels": [
-      "501117 effect_value 573288e0 #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While channeling, you can instantly cast Potion Toss,",
+        "labels": []
+      },
+      {
+        "claim": "Splash Potion",
+        "labels": []
+      },
+      {
+        "claim": "and Spirit in a Bottle",
+        "labels": [
+          "501117 behaviour_metric_delta bottle_instant"
+        ]
+      },
+      {
+        "claim": "at a $573288s1% increased cost.",
+        "labels": [
+          "501117 effect_value 573288e0 #3",
+          "501117 behaviour_metric_delta cost_potion",
+          "501117 behaviour_metric_delta cost_splash",
+          "501117 behaviour_metric_delta cost_bottle"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "Splash Potion 802710 is a ground-targeted spell (Targets 64, destination target 87) and the metric_delta cast step sends a unit target only; the harness cast action accepts a destination (README, cast) but metric_delta emits none, so a real cast of Splash Potion during the channel cannot be made. Potion Toss and Spirit in a Bottle are cast for real (potion_cast, bottle_cast).",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 501117,
     "clause": "@ext:This spell is unaffected by haste modifiers.:ext@",
     "labels": [
-      "501117 effect_value #4"
+      "501117 behaviour_metric_delta heal_ticks_haste"
     ],
     "kind": "claim"
   },
@@ -715,11 +815,42 @@
   {
     "spell": 503712,
     "clause": "Casting Reclamation and Malefic Arrow now has a $h% chance to transform your next Reclamation into Spirit Volley for $505158d.",
-    "labels": [
-      "503712 effect_value #0",
-      "503712 spell_duration 505158 #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Reclamation and Malefic Arrow now has a $h% chance",
+        "labels": [
+          "503712 effect_value #0"
+        ]
+      },
+      {
+        "claim": "to transform your next Reclamation into Spirit Volley",
+        "labels": [
+          "503712 behaviour_metric_delta consumed"
+        ]
+      },
+      {
+        "claim": "for $505158d.",
+        "labels": [
+          "503712 spell_duration 505158 #1",
+          "503712 behaviour_metric_delta ready_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The 30% chance is rolled by roll_chance_i(30) in a script (Abilities.cpp:315-317), which the forced_roll fixture does not reach. stack_chance_rate needs a stack aura and a control at 0 stacks that must show no event, which a flat 30% breaks; a flat arm needs about 20,800 casts per arm for the G-19 band (0.30 x 0.70 x ((2.576 + 3.719) / 0.02)^2), above G-20 step 3 (90 minutes). Tool: stack_chance_rate without stack_aura (control = talent unlearned).",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 503712,
@@ -757,14 +888,17 @@
     "spell": 503712,
     "clause": "Reduces the cooldown of Spirit Glaive by $/1000;504584s1 sec.",
     "labels": [
-      "503712 effect_value 504584e0 #5"
+      "503712 effect_value 504584e0 #5",
+      "503712 behaviour_metric_delta volley_cdr"
     ],
     "kind": "claim"
   },
   {
     "spell": 503712,
     "clause": "Scales with modifiers to Reclamation.",
-    "labels": [],
+    "labels": [
+      "503712 behaviour_metric_delta scales"
+    ],
     "kind": "claim"
   },
   {
@@ -817,7 +951,8 @@
     "spell": 503748,
     "clause": "Increases your healing done by $s1%",
     "labels": [
-      "503748 effect_value e0 #0"
+      "503748 effect_value e0 #0",
+      "503748 501117 behaviour_ratio"
     ],
     "kind": "claim"
   },
@@ -827,7 +962,20 @@
     "labels": [
       "503748 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The passive is a native aura 103 (threat modifier, -16 + 1 = -15%). threat_slope learns only its hit_spell and never the passive, and has no control arm without it; no kind compares threat with and without a passive. Tool: a with/without-the-passive threat ratio.",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 503750,
@@ -975,7 +1123,8 @@
     "spell": 504888,
     "clause": "Increases your healing done by $s1%",
     "labels": [
-      "504888 effect_value e0 #0"
+      "504888 effect_value e0 #0",
+      "504888 behaviour_hit_ratio heal"
     ],
     "kind": "claim"
   },
@@ -983,7 +1132,9 @@
     "spell": 504888,
     "clause": "and reduces the threat generated by your spells by $s2%.",
     "labels": [
-      "504888 effect_value e1 #1"
+      "504888 effect_value e1 #1",
+      "504888 behaviour_metric_delta threat_generated",
+      "504888 behaviour_metric_delta threat_generated_control"
     ],
     "kind": "claim"
   },
@@ -1305,7 +1456,9 @@
   {
     "spell": 681242,
     "clause": "Throw a glaive that curses an enemy and up to 2 nearby enemies,",
-    "labels": [],
+    "labels": [
+      "501134 two_nearby behaviour_fixed_count"
+    ],
     "kind": "claim"
   },
   {
@@ -1334,7 +1487,9 @@
   {
     "spell": 681242,
     "clause": "Scales with modifiers to Hex of Malice.",
-    "labels": [],
+    "labels": [
+      "501134 behaviour_metric_delta scales"
+    ],
     "kind": "claim"
   },
   {
@@ -1445,16 +1600,45 @@
   {
     "spell": 704500,
     "clause": "Casting Hexfire transforms your next Malefic Wrath within $503626d into Hexfire Wrath.",
-    "labels": [
-      "704500 spell_duration 503626 #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Hexfire transforms your next Malefic Wrath",
+        "labels": []
+      },
+      {
+        "claim": "within $503626d",
+        "labels": [
+          "704500 spell_duration 503626 #0",
+          "704500 behaviour_metric_delta ready_lasts"
+        ]
+      },
+      {
+        "claim": "into Hexfire Wrath.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 704500,
     "clause": "Hurl hexfire energy at an enemy and up to 2 nearby enemies,",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Hurl hexfire energy at an enemy",
+        "labels": [
+          "704500 behaviour_metric_delta curse_lasts"
+        ]
+      },
+      {
+        "claim": "and up to 2 nearby enemies,",
+        "labels": [
+          "704500 chain behaviour_fixed_count"
+        ]
+      }
+    ]
   },
   {
     "spell": 704500,
@@ -1462,44 +1646,127 @@
     "labels": [
       "704500 effect_value #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The value reader leaves the token unreadable (${$cond($gt($spfi, $spn), ...)}, tooltip-reading.md, unhandled operator), so no expected amount exists for a hit of Hexfire Wrath to be judged against; the final02 verdict of 704500 effect_value #4 is unreadable. Tool: the reader evaluating $cond($gt($spfi, $spn), a, b).",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 704500,
     "clause": "and cursing them for $d.",
-    "labels": [
-      "704500 spell_duration 807480 #1"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and cursing them",
+        "labels": [
+          "704500 behaviour_metric_delta curse_lasts"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "704500 spell_duration 807480 #1",
+          "704500 behaviour_metric_delta curse_lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 704500,
     "clause": "The curse deals ${$cond($gt($spfi, $spn), $m2+0+$spfi*.1, $m2+0+$spn*.1)} Fire damage every $t2 sec.",
-    "labels": [
-      "704500 aura_amplitude_ms #2",
-      "704500 effect_value #5"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "The curse deals ${$cond($gt($spfi, $spn), $m2+0+$spfi*.1, $m2+0+$spn*.1)} Fire damage",
+        "labels": [
+          "704500 effect_value #5"
+        ]
+      },
+      {
+        "claim": "every $t2 sec.",
+        "labels": [
+          "704500 aura_amplitude_ms #2",
+          "704500 behaviour_metric_delta curse_period"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The amount token ${$cond($gt($spfi, $spn), $m2+0+$spfi*.1, $m2+0+$spn*.1)} is unreadable for the same reason as clause 152 (final02 verdict of 704500 effect_value #5 is unreadable); the period claim has curse_period.",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 704500,
     "clause": "Spawns a Serpent Ward for $808004d beneath your target.",
-    "labels": [
-      "704500 spell_duration 808004 #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Spawns a Serpent Ward",
+        "labels": [
+          "704500 behaviour_metric_delta ward"
+        ]
+      },
+      {
+        "claim": "for $808004d",
+        "labels": [
+          "704500 spell_duration 808004 #3",
+          "704500 behaviour_metric_delta ward_lasts"
+        ]
+      },
+      {
+        "claim": "beneath your target.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "\"beneath your target\": the ward is summoned at the position of the target (Abilities.cpp:358-359, Summons.cpp:171-215), but owned_creature_distance_2d needs a present summon and the control (before) phase has none, so metric_delta cannot read a distance in both phases. Tool: an absent-creature read or a distance read with an optional control.",
+      "attempts": [
+        {
+          "agent": "cycle5/author-B2",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
+        },
+        {
+          "agent": "cycle5/author-B2-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 704500,
     "clause": "Scales with modifiers to Malefic Wrath.",
-    "labels": [],
+    "labels": [
+      "704500 behaviour_metric_delta scales"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704500,
     "clause": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
     "labels": [
-      "704500 effect_value #6"
+      "704500 behaviour_metric_delta curse_crit"
     ],
     "kind": "claim"
   },
@@ -2756,7 +3023,9 @@
   {
     "spell": 801664,
     "clause": "Brew Bloodthistle into your Cauldron.",
-    "labels": [],
+    "labels": [
+      "801664 behaviour_metric_delta brewed_holds"
+    ],
     "kind": "claim"
   },
   {
@@ -2764,7 +3033,8 @@
     "clause": "Cauldron: Allies within $802771a1 yds receive $802771s1% increased healing.",
     "labels": [
       "801664 effect_radius 802771e0 #0",
-      "801664 effect_value 802771e0 #1"
+      "801664 effect_value 802771e0 #1",
+      "801664 behaviour_metric_delta cauldron_silenced"
     ],
     "kind": "claim"
   },
@@ -2780,7 +3050,9 @@
   {
     "spell": 801664,
     "clause": "Can only occur once every 0.5 sec.",
-    "labels": [],
+    "labels": [
+      "801664 behaviour_metric_delta gate"
+    ],
     "kind": "claim"
   },
   {
@@ -3362,10 +3634,23 @@
   {
     "spell": 573026,
     "clause": "Blast an enemy with hexfire, dealing ${$cond($gt($spfi, $spn), $m1+0+$spfi*.55, $m1+0+$spn*.55+$SPI*.5)} Fire damage, scaling with your Spirit$?s704511[ and snapping your Puppeteer's Threads, unleashing its damage instantly][].",
-    "labels": [
-      "573026 effect_value #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Blast an enemy with hexfire, dealing ${$cond($gt($spfi, $spn), $m1+0+$spfi*.55, $m1+0+$spn*.55+$SPI*.5)} Fire damage, scaling with your Spirit",
+        "labels": [
+          "573026 effect_value #0"
+        ]
+      },
+      {
+        "claim": "and snapping your Puppeteer's Threads, unleashing its damage instantly",
+        "labels": [
+          "573026 behaviour_metric_delta snap_gone",
+          "573026 behaviour_metric_delta snap_damage"
+        ]
+      }
+    ]
   },
   {
     "spell": 807296,
@@ -3501,6 +3786,798 @@
     "clause": "and your hit chance by $s2%.",
     "labels": [
       "807915 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500960,
+    "clause": "Drop a Serpent Ward near you for $d.",
+    "labels": [
+      "500960 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500960,
+    "clause": "The ward spits fire at nearby enemies, attempting to focus on your primary target.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500960,
+    "clause": "@ext:Can only have 1 Ward active at a time.:ext@",
+    "labels": [
+      "500960 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500961,
+    "clause": "Drop a Spirit Idol near you for $d.",
+    "labels": [
+      "500961 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500961,
+    "clause": "Allies within $500958A1 yds regenerate $805282s1% maximum mana every $500958t2 sec.",
+    "labels": [
+      "500961 effect_radius 500958e0 #1",
+      "500961 effect_value 805282e0 #2",
+      "500961 aura_amplitude_ms #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504759,
+    "clause": "Drop a Serene Idol near you for $d.",
+    "labels": [
+      "504759 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504759,
+    "clause": "Allies within $500958A1 yds gain $504760s3% reduced spell pushback suffered from damaging attacks.",
+    "labels": [
+      "504759 effect_radius 500958e0 #1",
+      "504759 effect_value 504760e2 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 505339,
+    "clause": "Drop a Shadow Effigy near you for $d.",
+    "labels": [
+      "505339 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 505339,
+    "clause": "Enemies within $504761a1 yds have their casting speed reduced by $504761s1%",
+    "labels": [
+      "505339 effect_radius 504761e0 #1",
+      "505339 effect_value 504761e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 505339,
+    "clause": "and movement speed by $504761s2%.",
+    "labels": [
+      "505339 effect_value 504761e1 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 505339,
+    "clause": "@ext:Can only have 1 Effigy active at a time.:ext@",
+    "labels": [
+      "505339 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 506634,
+    "clause": "Drop a Hexing Effigy near you for $d.",
+    "labels": [
+      "506634 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 506634,
+    "clause": "The next enemy that casts a spell on you is transformed into a frog for $504762d.",
+    "labels": [
+      "506634 spell_duration 504762 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 506634,
+    "clause": "While transformed, they are unable to move, attack or cast spells.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 506634,
+    "clause": "Damage dealt may interrupt this effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 506634,
+    "clause": "@ext:Can only have 1 Effigy active at a time.:ext@",
+    "labels": [
+      "506634 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 506635,
+    "clause": "Drop a Graven Effigy near you for $d.",
+    "labels": [
+      "506635 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 506635,
+    "clause": "Enemies within $504761s1 yds have the duration of crowd control effects on them increased by $504767s1%.",
+    "labels": [
+      "506635 effect_value 504761e0 #1",
+      "506635 effect_value 504767e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 506635,
+    "clause": "@ext:Can only have 1 Effigy active at a time.:ext@",
+    "labels": [
+      "506635 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 507082,
+    "clause": "Drop a Dark Idol near you for $d.",
+    "labels": [
+      "507082 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 507082,
+    "clause": "Allies within $505195A1 yds gain $505195s1 increased Shadow Resistance.",
+    "labels": [
+      "507082 effect_radius 505195e0 #1",
+      "507082 effect_value 505195e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 507084,
+    "clause": "Drop a Jungle Idol near you for $d.",
+    "labels": [
+      "507084 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 507084,
+    "clause": "Allies within $505195A1 yds gain $505195s1 increased Nature Resistance.",
+    "labels": [
+      "507084 effect_radius 505195e0 #1",
+      "507084 effect_value 505195e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 536213,
+    "clause": "Alchemy skill increased by $s1.",
+    "labels": [
+      "536213 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561142,
+    "clause": "Imbue an ally with the spirit of Sen'jin for $d,",
+    "labels": [
+      "561142 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561142,
+    "clause": "increasing their Spirit by $s1",
+    "labels": [
+      "561142 effect_value e0 #1",
+      "561142 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561142,
+    "clause": "and their magic resistances by $s2.",
+    "labels": [
+      "561142 effect_value e1 #2",
+      "561142 aura_amount e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561142,
+    "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
+    "labels": [
+      "561142 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572415,
+    "clause": "Concoct a major rejuvenating mojo that can be used to instantly restore $572414s1 health.",
+    "labels": [
+      "572415 effect_value 572414e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 575025,
+    "clause": "Simultaneously places each selected Ward, Effigy, and Idol all at once.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 578344,
+    "clause": "Empowers an ally with da voodoo, reducing their resource costs by $s1%.",
+    "labels": [
+      "578344 effect_value e0 #0",
+      "578344 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578344,
+    "clause": "Lasts $d.",
+    "labels": [
+      "578344 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 583092,
+    "clause": "Destroy your active Wards, Idols, and Effigies, restoring $s1% of the mana required to cast each destroyed by Spiritual Recall.",
+    "labels": [
+      "583092 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 674303,
+    "clause": "Drop a Sentry Ward near you for $d that reveals all stealthed and invisible enemies near it.",
+    "labels": [
+      "674303 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680872,
+    "clause": "Imbue all party and raid members with the spirit of Sen'jin for $d,",
+    "labels": [
+      "680872 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680872,
+    "clause": "increasing their Spirit by $s1",
+    "labels": [
+      "680872 effect_value e0 #1",
+      "680872 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680872,
+    "clause": "and their magic resistances by $s2.",
+    "labels": [
+      "680872 effect_value e1 #2",
+      "680872 aura_amount e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680872,
+    "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
+    "labels": [
+      "680872 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705943,
+    "clause": "Become empowered by shadow magic for $d,",
+    "labels": [
+      "705943 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705943,
+    "clause": "increasing your haste and reducing your Shadow damage taken by $s2%$?s706577[ and reducing the cooldown of Spirit Glaive by $706803s1% every $706489t1 sec][].",
+    "labels": [
+      "705943 effect_value e1 #1",
+      "705943 aura_amount e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707676,
+    "clause": "Give an ally some wuju mon, increasing their melee and ranged attack power by $s1.",
+    "labels": [
+      "707676 effect_value e0 #0",
+      "707676 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707676,
+    "clause": "Lasts $d.",
+    "labels": [
+      "707676 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707676,
+    "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
+    "labels": [
+      "707676 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712458,
+    "clause": "Give all party and raid members some wuju mon, increasing their melee and ranged attack power by $s1.",
+    "labels": [
+      "712458 effect_value e0 #0",
+      "712458 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712458,
+    "clause": "Lasts $d.",
+    "labels": [
+      "712458 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712458,
+    "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
+    "labels": [
+      "712458 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800195,
+    "clause": "Empowers nearby party and raid members with da voodoo, reducing their resource costs by $s1%.",
+    "labels": [
+      "800195 effect_value e0 #0",
+      "800195 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800195,
+    "clause": "Lasts $d.",
+    "labels": [
+      "800195 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800195,
+    "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
+    "labels": [
+      "800195 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501146,
+    "clause": "Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.",
+    "labels": [
+      "501146 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501146,
+    "clause": "Killing an enemy with this spell grants you a Spirit.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 501146,
+    "clause": "Regenerates ${$m2+$ppl2} health",
+    "labels": [
+      "501146 effect_value 561136e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501146,
+    "clause": "and mana, repeating every $T2 sec$?s707335[and increases your movement speed by $561071s1%][] for $d,",
+    "labels": [
+      "501146 aura_amplitude_ms #2",
+      "501146 spell_duration 561136 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501146,
+    "clause": "stacking $u times.",
+    "labels": [
+      "501146 max_stacks 561136 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501205,
+    "clause": "Brew a potion and then throw it to an ally target, restoring ${$m1+0+$SP*0.84} health$?s705848[ and empowering them with a random effect for $802207d][].",
+    "labels": [
+      "501205 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501205,
+    "clause": "$?s705848[\r\n@ext::ext@\r\n@ext::ext@\r\n@ext::ext@\r\n@ext::ext@][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 501205,
+    "clause": "Healing a different target with Loa's Brew also heals your previous Loa's Brew target for $899904s1% of the amount healed.",
+    "labels": [
+      "501205 effect_value 899904e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801678,
+    "clause": "Drop a Stasis Ward near you.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801678,
+    "clause": "After $/1000;801677t2 sec,",
+    "labels": [
+      "801678 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801678,
+    "clause": "the ward will burst with lightning, stunning nearby enemies for $801677d",
+    "labels": [
+      "801678 spell_duration 801677 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801678,
+    "clause": "and dealing ${$801677m3+$801677ppl3+$spn*.25} Nature damage.",
+    "labels": [
+      "801678 effect_value 801677e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801678,
+    "clause": "@ext:Can only have 1 Ward active at a time.:ext@",
+    "labels": [
+      "801678 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504608,
+    "clause": "Curse an enemy, dealing ${$m2+$sps*0.08+$RAP*.1} Shadow damage",
+    "labels": [
+      "504608 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504608,
+    "clause": "and an additional $o1 Shadow damage over $d.",
+    "labels": [
+      "504608 effect_value #1",
+      "504608 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504608,
+    "clause": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+    "labels": [
+      "504608 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501212,
+    "clause": "Send a spirit to an ally, healing them for ${$m1+0+$SP*.45}",
+    "labels": [
+      "501212 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501212,
+    "clause": "and dealing damage to up to $504606i enemies within 5 yds of them equal to $707172s1% of the healing done.",
+    "labels": [
+      "501212 effect_value #1",
+      "501212 effect_value 707172e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803624,
+    "clause": "Brings a dead ally back to life with $s1 health",
+    "labels": [
+      "803624 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803624,
+    "clause": "and $q1 mana.",
+    "labels": [
+      "803624 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803624,
+    "clause": "Cannot be cast when in combat.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801925,
+    "clause": "Curse an enemy for $d,",
+    "labels": [
+      "801925 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801925,
+    "clause": "leeching ${$630879m1} mana every $t1 sec and preventing mana regeneration.",
+    "labels": [
+      "801925 effect_value 630879e0 #1",
+      "801925 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801925,
+    "clause": "Can only have 1 Jinx active on a target at a time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 802065,
+    "clause": "Curse an enemy for $d,",
+    "labels": [
+      "802065 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802065,
+    "clause": "slowing their movement speed by $s1%$?s681465[ and reducing their periodic healing received by $681465s1%][].",
+    "labels": [
+      "802065 effect_value e0 #1",
+      "802065 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802065,
+    "clause": "Can only have 1 Jinx active on a target at a time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 802719,
+    "clause": "Summon the spirit of Bwonsamdi for $d.",
+    "labels": [
+      "802719 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802719,
+    "clause": "While within $802718a1 yds,",
+    "labels": [
+      "802719 effect_radius 802718e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802719,
+    "clause": "you are immune to all harmful spells and effects, but deal $802718s2% reduced damage and healing.",
+    "labels": [
+      "802719 effect_value 802718e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802719,
+    "clause": "While allies are within $a2 yds,",
+    "labels": [
+      "802719 effect_radius e1 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802719,
+    "clause": "their damage taken is reduced by $s2%.",
+    "labels": [
+      "802719 effect_value e1 #4",
+      "802719 aura_amount e1 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802719,
+    "clause": "Cannot be used within $803495d of benefitting from Big Bad Voodoo.",
+    "labels": [
+      "802719 spell_duration 803495 #5"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803325,
+    "clause": "Curse a Beast, fearing them and increasing their movement speed by $s2% for $d (8 sec vs players).",
+    "labels": [
+      "803325 effect_value e1 #0",
+      "803325 aura_amount e1 #0",
+      "803325 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803325,
+    "clause": "Can only have 1 Jinx active on a target at a time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804049,
+    "clause": "Removes all poison, disease and curse effects from an ally, and grants immunity to such effects for $d.",
+    "labels": [
+      "804049 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806240,
+    "clause": "Break an ally's curse, dispelling $s1 curse effect$?s572870[s][] from them.",
+    "labels": [
+      "806240 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807833,
+    "clause": "Curse an enemy for $d,",
+    "labels": [
+      "807833 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807833,
+    "clause": "reducing their size and their attack power by ${($m1+0)*-1}",
+    "labels": [
+      "807833 effect_value e0 #1",
+      "807833 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807833,
+    "clause": "and spell power by ${-($m3+0)}.",
+    "labels": [
+      "807833 effect_value e2 #2",
+      "807833 aura_amount e2 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807833,
+    "clause": "$?s806283[\r\n\r\nIf this effect is dispelled, apply Misery to the dispeller.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807833,
+    "clause": "Can only have 1 Jinx active on a target at a time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572336,
+    "clause": "Hurl voodoo energy at an enemy, dealing ${$m1+0+$spn*.625+$RAP*0.11} Nature damage.",
+    "labels": [
+      "572336 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807056,
+    "clause": "Brews $s1 Black Lotus Bisque providing the Witch Doctor and their allies with something to eat.",
+    "labels": [
+      "807056 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807056,
+    "clause": "Brewed items disappear if logged out for more than 15 minutes.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807076,
+    "clause": "Brews $s1 Primal Loa Cocktail,",
+    "labels": [
+      "807076 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807076,
+    "clause": "providing the Witch Doctor and $ghis:her; allies with something to drink.",
+    "labels": [
+      "807076 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807076,
+    "clause": "Conjured items disappear if logged out for more than 15 minutes.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807908,
+    "clause": "Create a Cauldron of Rejuvenating Mojo.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807908,
+    "clause": "Raid members may interact with the Cauldron to acquire a Major Rejuvenating Mojo.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807908,
+    "clause": "The cauldron lasts for $d or 25 charges.",
+    "labels": [
+      "807908 aura_duration_ms #0"
     ],
     "kind": "claim"
   }

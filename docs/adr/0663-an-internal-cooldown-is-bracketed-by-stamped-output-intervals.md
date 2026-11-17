@@ -89,6 +89,41 @@ sides of the gate after every output. Spirit Eclipse gives one 250 ms stream at 
 of the edge its own lateness decides; option (2) would close it. Such an entry is scheduled so that it cannot read
 `ok` by chance either, since an `ok` in one run and `unmeasured` in the other is a flip.
 
+## Revision (cycle 5): exact edges
+
+Context: the three-Spirit 801664 entry failed as a scenario in final02 (a window that refused hit 3 had one output,
+and its output interval read `nan`), so it was taken out of the pair (Witch Doctor mentor ruling M-21). The cycle 4
+limit was also stated too strongly. Lateness decides on which side of the edge a trigger lands, but not what the stamps
+show: the proc cooldown (`GameTime::SteadyNow`) and the event stamps (`GameTime::Now`) read the same simulated point
+inside one world update, because `TakeStep` advances the clock only before `World::Update`. A trigger t ms after an
+output is therefore answered exactly when t >= the gate, whatever its lateness. What the interval reads lacked was the
+stamp of the refused trigger: with one stream, its offset after the output is not readable.
+
+Options: (1) the harness read of each stamp or of the cooldown left (option 2 above, owner-owned C++); (2) many
+windows of one stream with jittered edges, closing with a sized probability: on a regular step grid the edge hit lands
+exactly on the gate every time and never closes; (3) exact edges from existing reads, chosen.
+
+Decision: `edge_streams` with `edge_hits` 2 or 3 read, per window, each stream's count, first event and shortest and
+longest interval since the window's single cast, and the output's first event and intervals. With three hits the first
+and last are exact and the middle one lies between two stamps. The first output must be the earliest trigger; the
+second output's offset is the upper bound; every trigger placed wholly between the two outputs (and after the second)
+is a refused offset, so the lower bound. A middle hit is placed at first + shortest interval, below its true offset
+whenever the later interval is the shorter, so the probe must be an exactly placed event: the first or last event of
+its stream. Two streams with a fixed offset per tick (a splash at the tick and a missile hit a flight time later) put
+such a probe near the gate: the first missile hit, one flight time after the first splash; `relocate_yd` moves the
+caster between windows to sweep the flight time across the gate (above the 5 yd floor of the missile distance), and
+`cause_every` renews a short cause aura. All reads are defined while every stream draws its hits and the output fires
+twice, so the scenario cannot fail on a `nan` read under the stated gate.
+
+Consequences: on a regular 25 ms grid every offset after the first output is a multiple of 25 ms, so the swept probe
+is refused at gate - 25 and the tick-timed trigger answered at the gate, the band's edge: a deterministic close. On an
+irregular grid (lanes take the smallest step need, 3 to 25 ms) the close is statistical, and an entry states its
+residual miss probability from a sized seed count (0 failures in N seeds bound it below 3/N per run, rule of three,
+and the flip risk per pair below 6/N); a miss reads `unmeasured`, never a false `ok`, since every bound is exact or
+conservative. A gate 10% off never reads `ok` (refused offsets lie below the gate, answered ones at
+or above it), and crossing bounds are `unmeasured`. It needs two trigger streams from one cast with different arrival
+times; a single-stream gate still needs option (1).
+
 ## Consequences
 
 - Gates on periodic or owner-damage triggers are measured in game time without harness C++.

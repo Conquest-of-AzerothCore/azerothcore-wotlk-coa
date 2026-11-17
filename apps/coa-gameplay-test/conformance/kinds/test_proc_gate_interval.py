@@ -5,6 +5,7 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
+from kinds.proc_gate_interval import edge_reading
 from profile import DBC_DIR
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -50,6 +51,27 @@ INGREDIENT_WAIT_MS = 1600
 POTION_WAIT_MS = 1600
 DB_WORK = 0.2
 STEP_MODELS = ({}, {'db_work': DB_WORK}, {'lanes': True}, {'lanes': True, 'db_work': DB_WORK})
+SPLASH = 802712
+SPIRIT = 561136
+MISSILE_YD_PER_S = 25.0
+MISSILE_MIN_YD = 5.0
+POTION_MS = 15000
+REACHES = (0.389, 1.5, 2.0)
+EDGE_SEEDS = range(60)
+LANE_SEEDS = range(1000)
+EDGE_GATE = {'spell': INGREDIENT, 'name': 'Ingredient: Bloodthistle (Potion leech once every 0.5 sec)',
+             'kind': 'proc_gate_interval', 'variant': 'gate', 'label_suffix': 'gate',
+             'quote': 'Can only occur once every 0.5 sec.', 'gate_ms': 500, 'learn': [92085, INGREDIENT, POTION],
+             'setup_casts': [[INGREDIENT, 'caster'], [POTION, 'caster']], 'trigger_casts': [[ECLIPSE, 'dummy2']],
+             'cast_auras': [[SPIRIT, 3]], 'cast_power': 2000, 'cast_wait_ms': 1600, 'control_ms': 1400,
+             'windows': 21, 'window_ms': 100, 'since_spell': ECLIPSE,
+             'trigger': {'stream': 'spell_damage', 'spell': ECLIPSE_HIT, 'target': 'dummy2'},
+             'output': {'stream': 'spell_heal', 'spell': LEECH, 'target': 'caster'}, 'amount_pct': 5,
+             'cause_auras': [[802975, POTION]], 'cause_every': 7, 'dummies': 2, 'dummy_step_yd': 2.0,
+             'edge_streams': [{'stream': 'spell_damage', 'spell': SPLASH, 'target': 'dummy'},
+                              {'stream': 'spell_damage', 'spell': ECLIPSE_HIT, 'target': 'dummy2'}],
+             'edge_hits': 3, 'relocate_yd': [-6.6, -0.18],
+             'fixture': {'spell_power': 2000, 'ranged_hit_rating': 10000, 'spell_hit_rating': 10000}}
 
 
 def gate_values(expectation, windows, control=(5, 0), amount=75.0, released=None) -> dict:
@@ -191,6 +213,67 @@ def leech_values(expectation, seed, gate, per_hit=False) -> dict:
         _, values[labels['output gap min']], values[labels['output gap max']] = interval_reads(
             [stamp for stamp in heals if stamp <= end], cast)
         start = end
+    return values
+
+
+def previous_update(updates, moment) -> int:
+    return updates[max(bisect_left(updates, moment) - 1, 0)]
+
+
+def edge_run(scenario, gate, seed=0, reach=1.5, late_order=False, **model) -> dict:
+    steps = scenario['steps']
+    rng = random.Random(seed)
+    times, updates = step_times(steps, rng if model else None, **model)
+    distance = {creature['id']: creature['distance'] for creature in scenario['creatures']}
+    shift, splashes, hits, casts, potions = 0.0, [], [], [], []
+    for index, step in enumerate(steps):
+        if step['action'] == 'relocate':
+            shift += step['dx']
+        if step['action'] != 'cast':
+            continue
+        if step['spell'] == POTION:
+            potions.append(times[index])
+        if step['spell'] != ECLIPSE:
+            continue
+        cast = times[index]
+        casts.append(cast)
+        flight = math.floor(max(distance[step['target']] - shift - reach, MISSILE_MIN_YD) / MISSILE_YD_PER_S * 1000)
+        origin = previous_update(updates, cast) if late_order else cast
+        for tick in range(1, 4):
+            stamp = stamped(updates, origin + tick * ECLIPSE_PERIOD)
+            splashes.append(stamp)
+            hits.append(stamped(updates, (previous_update(updates, stamp) if late_order else stamp) + flight))
+    heals, opened = [], potions[0]
+    for stamp, _ in sorted([(stamp, 0) for stamp in splashes] + [(stamp, 1) for stamp in hits]):
+        active = any(potion <= stamp < potion + POTION_MS for potion in potions)
+        if active and stamp > opened and (not heals or stamp - heals[-1] >= gate):
+            heals.append(stamp)
+    reads = {step['label']: times[index] for index, step in enumerate(steps) if step['action'] == 'assert'}
+    return {'splashes': splashes, 'hits': hits, 'heals': heals, 'casts': casts, 'potions': potions, 'reads': reads}
+
+
+def edge_values(expectation, scenario, gate, seed=0, **model) -> dict:
+    simulated = edge_run(scenario, gate, seed, **model)
+    streams = {'edge 0': simulated['splashes'], 'edge 1': simulated['hits'], 'output': simulated['heals']}
+    values = {}
+    for labels in [expectation.model['control']] + expectation.model['windows']:
+        for read, label in labels.items():
+            moment = simulated['reads'][label]
+            if read.endswith('triggers'):
+                values[label] = counted(simulated['hits'], moment)
+            elif read.endswith('outputs'):
+                values[label] = counted(simulated['heals'], moment)
+            elif read.endswith('amount'):
+                values[label] = counted(simulated['hits'], moment) * ECLIPSE_HIT_AMOUNT
+            elif read.endswith(('start', 'end')):
+                values[label] = counted(streams[read.rsplit(' ', 1)[0]], moment)
+            else:
+                parts = read.split(' ')
+                cut = 2 if parts[0] == 'edge' else 1
+                since = max(cast for cast in simulated['casts'] if cast <= moment)
+                kept = [stamp for stamp in streams[' '.join(parts[:cut])] if stamp <= moment]
+                position = ('first', 'gap min', 'gap max').index(' '.join(parts[cut:]))
+                values[label] = interval_reads(kept, since)[position]
     return values
 
 
@@ -397,3 +480,178 @@ class ProcGateIntervalTests(unittest.TestCase):
                 for verdict in self.leech_verdicts(gate, per_hit=per_hit):
                     self.assertNotEqual(verdict.status, 'ok', (gate, per_hit, verdict.explanation))
         self.assertEqual({verdict.status for verdict in self.leech_verdicts(1)}, {'alert'})
+
+    def edge_verdicts(self, gate, seeds=None, reach=1.5, late_order=False, **model) -> list:
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, EDGE_GATE)
+        chosen = seeds if seeds is not None else (EDGE_SEEDS if model else [0])
+        return [judge_behaviour(base_verdict(expectation),
+                                FakeRun(edge_values(expectation, scenario, gate, seed, reach=reach,
+                                                    late_order=late_order, **model)), expectation)
+                for seed in chosen]
+
+    def test_the_edge_schedule_renews_the_potion_and_sweeps_the_caster_back(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, EDGE_GATE)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [step['spell'] for step in steps if step['action'] == 'cast']
+        self.assertEqual(casts[:4], [ECLIPSE, INGREDIENT, POTION, ECLIPSE])
+        self.assertEqual(casts.count(POTION), 3)
+        self.assertEqual(casts.count(ECLIPSE), 22)
+        self.assertEqual([creature['distance'] for creature in scenario['creatures']], [3.0, 5.0])
+        relocations = [step['dx'] for step in steps if step['action'] == 'relocate']
+        self.assertEqual(len(relocations), 21)
+        self.assertAlmostEqual(sum(relocations), -10.2)
+        self.assertEqual(scenario['players'][0]['spell_hit_rating'], 10000)
+        times, _ = step_times(steps)
+        potions = [times[index] for index, step in enumerate(steps)
+                   if step['action'] == 'cast' and step['spell'] == POTION]
+        reads = {step['label']: times[index] for index, step in enumerate(steps) if step['action'] == 'assert'}
+        for window in expectation.model['windows']:
+            moment = reads[window['end outputs']]
+            latest = max(potion for potion in potions if potion <= moment)
+            self.assertLess(moment - latest, POTION_MS)
+        self.assertEqual(expectation.model['edges'], {'streams': 2, 'hits': 3})
+        self.assertTrue(set(expectation.model['windows'][0].values()) <= set(reads))
+
+    def test_the_stated_leech_gate_closes_on_exact_edges_in_every_step_model(self):
+        for model in STEP_MODELS:
+            for late_order in (False, True):
+                for verdict in self.edge_verdicts(500, late_order=late_order, **model):
+                    self.assertEqual(verdict.status, 'ok', (model, late_order, verdict.explanation))
+                    self.assertGreaterEqual(verdict.detail['reopened_by_ms'], 475.0)
+                    self.assertLessEqual(verdict.measured, 525.0)
+
+    def test_the_stated_leech_gate_closes_for_any_caster_combat_reach(self):
+        for reach in REACHES:
+            for model in ({}, {'lanes': True}):
+                for verdict in self.edge_verdicts(500, seeds=range(20) if model else None, reach=reach, **model):
+                    self.assertEqual(verdict.status, 'ok', (reach, model, verdict.explanation))
+
+    def test_exact_edges_on_a_regular_grid_refuse_at_475_and_answer_at_500(self):
+        [verdict] = self.edge_verdicts(500, seeds=[0])
+        self.assertEqual((verdict.detail['reopened_by_ms'], verdict.measured), (475.0, 500.0))
+        self.assertIn('the bracket 475 to 500 ms lies inside 475 to 525 ms', verdict.explanation)
+
+    def test_the_stated_leech_gate_closes_in_a_thousand_lane_seeds_per_update_order(self):
+        for late_order in (False, True):
+            for seed, verdict in zip(LANE_SEEDS, self.edge_verdicts(500, seeds=LANE_SEEDS, late_order=late_order,
+                                                                    lanes=True)):
+                self.assertEqual(verdict.status, 'ok', (seed, late_order, verdict.explanation))
+                self.assertGreaterEqual(verdict.detail['reopened_by_ms'], 475.0)
+                self.assertLessEqual(verdict.measured, 525.0)
+
+    def test_the_refused_probe_is_the_exact_first_missile_hit(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, EDGE_GATE)
+        values = edge_values(expectation, scenario, 500)
+        probes = []
+        for window in expectation.model['windows']:
+            read = {name: values.get(label) for name, label in window.items()}
+            reading = edge_reading(read, expectation.model)
+            if reading.get('lower') == 475.0:
+                probes.append(read['edge 1 first'] - read['output first'])
+        self.assertTrue(probes)
+        self.assertEqual(set(probes), {475.0})
+
+    def test_a_missile_flies_at_least_five_yards(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, {**EDGE_GATE, 'relocate_yd': [3.0, 0.0]})
+        simulated = edge_run(scenario, 500)
+        flights = {hit - splash for splash, hit in zip(simulated['splashes'], simulated['hits'])}
+        self.assertEqual(flights, {200})
+
+    def test_an_unpaired_edge_window_names_the_read_that_failed(self):
+        model = {'edges': {'streams': 1, 'hits': 2}}
+        paired = {'start triggers': 0.0, 'end triggers': 2.0, 'start outputs': 0.0, 'end outputs': 2.0,
+                  'edge 0 start': 0.0, 'edge 0 end': 2.0, 'edge 0 first': 10.0, 'edge 0 gap min': 500.0,
+                  'edge 0 gap max': 500.0, 'output first': 10.0, 'output gap min': 500.0, 'output gap max': 500.0}
+        self.assertNotIn('why', edge_reading(paired, model))
+        for change, why in (({'edge 0 gap max': 510.0}, 'shortest and longest intervals differ (500 and 510 ms)'),
+                            ({'edge 0 gap min': math.nan}, 'first event and intervals are not all finite'),
+                            ({'edge 0 end': 1.0}, 'drew 1 events, not 2'),
+                            ({'end outputs': 1.0}, '1 outputs, fewer than two'),
+                            ({'output gap min': math.nan}, 'output intervals are not all finite'),
+                            ({'output gap max': 510.0}, 'output intervals differ (500 and 510 ms)')):
+            self.assertIn(why, edge_reading({**paired, **change}, model).get('why', ''), change)
+
+    def test_seeded_edge_gates_ten_percent_off_never_read_ok(self):
+        for gate in (450, 550):
+            for model in STEP_MODELS:
+                for late_order in (False, True):
+                    for verdict in self.edge_verdicts(gate, seeds=range(20) if model else None,
+                                                      late_order=late_order, **model):
+                        self.assertNotEqual(verdict.status, 'ok', (gate, model, late_order, verdict.explanation))
+
+    def test_a_missing_or_short_leech_gate_alerts_on_exact_edges(self):
+        for gate in (1, 400, 450):
+            [verdict] = self.edge_verdicts(gate)
+            self.assertEqual(verdict.status, 'alert', (gate, verdict.explanation))
+            self.assertLess(verdict.measured, 475.0)
+
+    def test_jittered_steps_never_make_the_stated_leech_gate_alert_on_exact_edges(self):
+        for model in STEP_MODELS[2:]:
+            for late_order in (False, True):
+                statuses = {verdict.status for verdict in self.edge_verdicts(500, reach=0.389, late_order=late_order,
+                                                                             **model)}
+                self.assertLessEqual(statuses, {'ok', 'unmeasured'}, (model, late_order))
+
+    def edge_window_verdict(self, change) -> object:
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, EDGE_GATE)
+        values = edge_values(expectation, scenario, 500)
+        change(values, expectation.model['windows'][4])
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_a_first_output_that_is_not_the_first_trigger_is_unmeasured(self):
+        def shift(values, window):
+            values[window['output first']] += 1.0
+        verdict = self.edge_window_verdict(shift)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('is not the first trigger', verdict.explanation)
+
+    def test_a_lost_edge_hit_is_unmeasured(self):
+        def lose(values, window):
+            values[window['edge 1 end']] -= 1.0
+        verdict = self.edge_window_verdict(lose)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('edge stream 1 drew 2 events, not 3', verdict.explanation)
+
+    def test_crossing_edge_bounds_are_unmeasured(self):
+        def cross(values, window):
+            values[window['output gap min']] = values[window['output gap max']] = \
+                values[window['edge 1 first']] + values[window['edge 1 gap min']] + values[window['edge 1 gap max']] \
+                - values[window['output first']]
+        verdict = self.edge_window_verdict(cross)
+        self.assertNotEqual(verdict.status, 'ok', verdict.explanation)
+
+    def test_a_middle_hit_that_may_be_the_second_output_bounds_nothing(self):
+        def straddle(values, window):
+            opened = values[window['output first']]
+            closed = opened + values[window['output gap min']]
+            values[window['edge 1 gap max']] = closed - values[window['edge 1 first']]
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, EDGE_GATE)
+        values = edge_values(expectation, scenario, 500)
+        straddle(values, expectation.model['windows'][0])
+        window = {read: values.get(label) for read, label in expectation.model['windows'][0].items()}
+        reading = edge_reading(window, expectation.model)
+        opened, closed = window['output first'], window['output first'] + window['output gap min']
+        middle = window['edge 1 first'] + window['edge 1 gap min']
+        self.assertNotIn('why', reading)
+        self.assertNotEqual(reading['lower'], middle - opened)
+        self.assertLess(reading['lower'], closed - opened)
+
+    def test_edge_streams_need_hits_one_cast_per_window_and_an_event_output(self):
+        for change in ({'edge_hits': 4}, {'edge_hits': 0}, {'trigger_casts': [[ECLIPSE, 'dummy2'], [ECLIPSE, 'dummy']]},
+                       {'output': {'event': 'spawn', 'source_entry': 50587}, 'windows': 1},
+                       {'edge_streams': [{'stream': 'spell_damage', 'spell': SPLASH}]}):
+            with self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, {**EDGE_GATE, **change})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**LEECH_GATE, 'relocate_yd': [-0.5, -0.1]})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**LEECH_GATE, 'edge_hits': 3})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**EDGE_GATE, 'cause_every': 0})
+
+    def test_a_potion_renewed_too_late_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**EDGE_GATE, 'cause_every': 8})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {key: value for key, value in EDGE_GATE.items() if key != 'cause_every'})

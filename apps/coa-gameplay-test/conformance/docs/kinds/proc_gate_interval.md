@@ -14,8 +14,10 @@ Order of one scenario:
 - control: one round of `trigger_casts` (`[spell, target]`, `cast_wait_ms` apart), `control_ms`, and the trigger
   and output counts at its start and end;
 - the cause: `talent` learned, then the real `setup_casts`. With setup casts, `cause_auras` (`[aura, cast]`, `[]` for
-  a cause that does not lapse) is required: generation refuses a last window read later than the aura's DBC duration
-  less 1000 ms after that cast;
+  a cause that does not lapse) is required: generation refuses a window read later than the aura's DBC duration less
+  1000 ms after the latest cast of that spell. `cause_every` n (optional) casts the `cause_auras` spells again, with
+  the same fixtures as the first cast, before windows n + 1, 2n + 1, ..., so a long series of windows stays inside a
+  short cause aura;
 - `windows` windows, each with its own round when `window_casts` (default true), `window_ms`, then the counts and
   three game-time reads since the latest cast of `since_spell`: the longest trigger gap, the shortest and the longest
   output interval (`event_interval_min_ms` / `max`, or `timeline_interval_min_ms` / `max` for one window only).
@@ -73,17 +75,62 @@ refused one bracket the gate, and `ok` needs both inside `gate_ms` +- b:
   answered while its stamp lateness does not drop between two outputs (constant within one wait on one lane); when it
   drops, the next output comes from another dummy, the shortest interval leaves the band and the entry reads
   `unmeasured`, never a false `ok`.
-- When the band b is no wider than one simulated step, triggers would have to land at most b apart on both sides of
-  the gate after every output. A trigger nominally on the gate edge is answered or refused by its lateness, and a
-  second stream placed near the edge (for example Hex ticks next to Spirit Eclipse hits) only adds another trigger
-  whose side lateness decides. Such an entry cannot close by design and should be scheduled so that it cannot close by
-  chance either: a flip between `ok` and `unmeasured` across runs is the coin flip that verification.md forbids. The
-  reading it can give is an alert for a gate that is missing or far off; otherwise it is `unmeasured`, data conformant
-  (G-19, ADR 0135). A harness read of each event's stamp, or of the proc cooldown left, would close it (tool note).
+- With interval reads only, when the band b is no wider than one simulated step, triggers would have to land at most
+  b apart on both sides of the gate after every output, and a trigger on the gate edge is answered or refused by its
+  lateness. Such an entry cannot close by design; schedule it so that it cannot close by chance either (a flip between
+  `ok` and `unmeasured` across runs is the coin flip that verification.md forbids). Use exact edges instead.
 
-Witch Doctor: Ingredient: Bloodthistle 801664 (Potion leech 803287 on Spirit Eclipse hits, 500 ms, b 25 ms: three
-Spirits give three hits 250 ms apart, so a window answers hit 3 and reads 250 to about 500 ms, or refuses it and reads
-one output; it is `unmeasured` in every run, and a gate of 250 ms or less alerts), Hexfire Mass 807450 (Serpent
+## Exact edges
+
+`edge_streams` (event streams on named units) with `edge_hits` (2 or 3) switch a window to exact reads. The entry
+needs an event output on a named unit, one `since_spell` cast per window and no `lead_targets`. At each window end,
+for every edge stream: its count at the window start and end, and its first event (`event_first_ms`) and shortest and
+longest interval since the window's cast; for the output: its first event and shortest and longest interval. Every
+read is defined while each stream draws its hits and the output fires twice, so no read is `nan` under the stated
+gate. `relocate_yd` `[first, step]` (optional) relocates the caster along x by `first` before the first window cast and
+by `step` before each later one: for a missile trigger it sweeps the flight time, and so the trigger offsets, across
+the gate (a positioning fixture; the dummies are stationary). A missile flies floor(d / speed) after its launch, where d
+is the distance less the caster's combat reach but at least 5 yd (`Spell.cpp:2468-2476`), so a sweep below that floor
+moves nothing.
+
+Placement: with three hits the first and the last are exact (first, first + shortest + longest) and the middle one
+lies between first + shortest and first + longest; with two hits both are exact. The proc cooldown and the stamps read
+the same simulated point inside one world update (`GameTime::SteadyNow` and `GameTime::Now`; `TakeStep` runs before
+`World::Update`), so a trigger t ms after an output is answered exactly when t >= the gate.
+
+The judge (after the control checks above), per window:
+- every edge stream must draw `edge_hits` events, the output at least two; the first output must be the earliest
+  placed trigger (an exact one at the same stamp, none earlier); with two outputs both intervals must agree and the
+  second output must fall inside a placed trigger. Otherwise the window does not pair and the entry is `unmeasured`;
+- upper bound: the second output's offset (the shortest output interval with more outputs);
+- lower bound: with two outputs, the offset after the first output of every trigger placed wholly between the two
+  outputs (its earliest stamp), and the offset after the second output of every trigger placed wholly after it.
+
+Over the windows, the gate lies in (largest lower bound, smallest upper bound]. An upper bound below `gate_ms - b` or a
+lower bound above `gate_ms + b` alerts; bounds that cross (a contradiction of the shared clock) are `unmeasured`; `ok`
+needs the whole bracket inside `gate_ms` +- b, else `unmeasured`. A gate 10% off can never read `ok`: refused offsets
+lie below it and answered ones at or above it.
+
+Resolution. A middle hit is placed at first + shortest, which is earlier than its true offset whenever the later
+interval is the shorter one, so a probe that is a middle hit gives a lower bound that depends on its neighbours.
+Schedule the probe as an exactly placed event (a first or last event of its stream). On a regular 25 ms grid the
+offsets relative to the first output are multiples of 25 ms, so a swept exact probe is refused at `gate_ms - 25` and the
+edge trigger answered at `gate_ms`: the close is deterministic. On an irregular grid (lanes take the smallest step
+need, 3 to 25 ms) it is statistical: the probe lands closer below the gate when it closes, and the entry states its
+residual miss probability from a sized seed count of the step models (0 failures in N seeds bound it below 3/N per
+run, rule of three, so the flip risk per pair below 6/N). A miss reads `unmeasured`, never a false `ok`: every bound is
+exact or conservative.
+
+## Witch Doctor entries
+
+Ingredient: Bloodthistle 801664 (Potion leech 803287, 500 ms, b 25 ms; exact edges: three-Spirit Spirit
+Eclipse 811117 at `dummy2`, whose splash 802712 on `dummy` lands at each tick, so the first splash is the first output
+and the third splash, the last event of its stream, comes 500 ms later; the first missile hit 802717, the first event
+of its stream, lands one flight time after the first splash and is the probe. The caster steps back 6.6 then 0.18 yd
+per window over 21 windows, so `dummy2` is 11.6 to 15.2 yd away and the flight time sweeps about 404 to 548 ms for a
+1.5 yd combat reach, 7.2 ms per window, above the 5 yd floor. On the regular grid the bracket is (475, 500]; the
+kind test asserts `ok` in 1000 lanes-model seeds per update order (miss rate below 3/1000 per run, flip risk per pair
+below 6/1000); Potion Toss is renewed every 7 windows), Hexfire Mass 807450 (Serpent
 Ward 50587 spawns on Hex of Malice ticks, 3000 ms, b 150 ms: four dummies hexed 2029 ms apart, so `dummy` ticks
 87 ms before `dummy4`, the dummy of the latest cast; 807450 is learned in that gap and the `dummy` tick about 2900 ms
 after the first spawn is the lead tick).
