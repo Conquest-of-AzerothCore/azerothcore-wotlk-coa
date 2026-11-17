@@ -19,6 +19,7 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include <algorithm>
+#include <cstdlib>
 #include <list>
 #include <utility>
 #include <limits>
@@ -724,8 +725,9 @@ class aura_ascension_bloodmage_thick_pelt : public AuraScript
 
     void Calculate(AuraEffect const*, int32& amount, bool&)
     {
-        Unit* caster = GetCaster();
-        amount = caster ? std::min(0, 15 - int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f)) : 0;
+        if (Unit* caster = GetCaster())
+            amount = -(std::abs(GetSpellInfo()->Effects[EFFECT_0].CalcValue()) +
+                int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f));
     }
 
     void Register() override
