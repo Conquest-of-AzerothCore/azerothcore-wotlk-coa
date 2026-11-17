@@ -737,7 +737,7 @@ def validate(scenario, clock=REAL_CLOCK):
             require(isinstance(step['prefix'], str) and step['prefix'].strip() and '\t' not in step['prefix']
                     and isinstance(step['text'], str), f'{where}: addon_message needs a prefix without tabs and text')
         if action == 'economy_log_cleanup':
-            number(step['days_ahead'], f'{where}.days_ahead', 0, 36500, True)
+            number(step['days_ahead'], f'{where}.days_ahead', 0, 3650, True)
         if action == 'system_mail':
             require(step['kind'] in SYSTEM_MAIL_KINDS,
                     f'{where}: system_mail kind must be one of {sorted(SYSTEM_MAIL_KINDS)}')

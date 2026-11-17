@@ -685,10 +685,11 @@ class RunnerTests(unittest.TestCase):
 
     def test_economy_log_cleanup_takes_a_day_count(self):
         step = {'action': 'economy_log_cleanup', 'actor': 'caster', 'days_ahead': 91}
-        scenario = copy.deepcopy(self.scenario)
-        scenario['steps'].insert(0, step)
-        self.assertIs(run.validate(scenario), scenario)
-        for change, error in (({'days_ahead': -1}, 'days_ahead'), ({'days_ahead': 36501}, 'days_ahead'),
+        for days in (91, 3650):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**step, 'days_ahead': days})
+            self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'days_ahead': -1}, 'days_ahead'), ({'days_ahead': 3651}, 'days_ahead'),
                               ({'days_ahead': '91'}, 'days_ahead')):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].insert(0, {**step, **change})
