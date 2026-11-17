@@ -522,7 +522,11 @@ class npc_ascension_witch_doctor : public ScriptedAI
             for (Unit* enemy : Nearby(me, 30.0f))
                 if (player->IsHostileTo(enemy) && me->IsWithinLOSInMap(enemy))
                     if (Aura* reveal = player->AddAura(SentryRevealSpell, enemy))
+                    {
                         reveal->SetDuration(2200);
+                        enemy->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        enemy->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+                    }
         if (entry == NpcShadow || entry == NpcGraven || entry == NpcCursed)
             for (Unit* enemy : Nearby(me, 10.0f))
                 if (player->IsValidAttackTarget(enemy))
