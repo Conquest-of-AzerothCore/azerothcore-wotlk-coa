@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Ride the Lightning blinks the caster forward (#12462)",
+  "contract": "Ride the Lightning 800099 (client and server Spell.dbc identical): tooltip 'Depletes 40 Static. Infuse yourself with lightning and blink forward a long distance, dealing Nature damage to all enemies in your path.' 800099 itself carries only a dest-only periodic visual, an energize and a 20 yd cone of damage, no movement effect. Its blink lives in 800139 'Ride the Lightning' (same Category 668, CasterAuraSpell 573249 and SpellVisual), whose Effect1 is SPELL_EFFECT_LEAP on TARGET_DEST_CASTER_FRONT_LEAP with radius index 9 (20 yd), the same shape as stock Blink. An older CoA Tavern snapshot of 800099 still carried that LEAP effect itself. Nothing cast 800139, so the report saw Static spent and the caster left in place. SPELL_EFFECT_LEAP relocates the caster server-side (NearTeleportTo), so the distance to a dummy straight ahead must shrink by a blink, and the cast must still spend exactly its 40 Static once.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ahead",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 800099
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the native resource update grants the 40 Static threshold aura",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 573249,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "distance",
+      "target": "ahead",
+      "save_as": "distance_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 800139,
+      "save_as": "leaps_before"
+    },
+    {
+      "action": "cast",
+      "label": "Ride the Lightning facing the dummy",
+      "actor": "s",
+      "spell": 800099
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the cast reaches SPELL_GO",
+      "actor": "s",
+      "metric": "spell_go_count",
+      "spell": 800099,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast triggers its blink 800139 once",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 800139,
+      "relative_to": "leaps_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the caster blinks forward toward the dummy",
+      "actor": "s",
+      "metric": "distance",
+      "target": "ahead",
+      "relative_to": "distance_before",
+      "max": -10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The blink spends the 40 Static once, not again for the triggered leap",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60
+    }
+  ]
+}
