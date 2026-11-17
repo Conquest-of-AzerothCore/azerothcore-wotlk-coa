@@ -6,8 +6,10 @@
     "SPELL_EFFECT_SCRIPT_EFFECT with MiscValue 15 and MiscValueB 5 and had no script. Maintainer decision: each",
     "enemy is knocked away from the fissure's centre line, the caster's facing, towards the side it stands on,",
     "using the effect's values as horizontal speed 15 and vertical speed 5 (about 7.8 yards); an enemy exactly on",
-    "the line goes to the caster's right. Here the caster faces +x (orientation 0) and the target stands 2 yards to",
-    "the caster's left, so it must move +y by several yards while staying near its x."
+    "the line goes to the caster's right. Here the caster faces +x (orientation 0) and the target stands 8 yards",
+    "ahead and 1 yard to the caster's left, so it must move +y by several yards while staying near its x.",
+    "TARGET_UNIT_CONE_ENEMY_24 selects a 24 degree cone, so the target has to stay within 12 degrees of the",
+    "caster's facing to be hit."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -28,7 +30,7 @@
       "entry": 28168,
       "health": 500000,
       "level": 60,
-      "distance": 5
+      "distance": 8
     }
   ],
   "location": {
@@ -54,7 +56,7 @@
       "actor": "primalist",
       "map": 0,
       "x": -9617.06,
-      "y": -290.949,
+      "y": -289.949,
       "z": 57.3053,
       "o": 0
     },
