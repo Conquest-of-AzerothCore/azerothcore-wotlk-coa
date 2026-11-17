@@ -64,7 +64,6 @@ enum StormbringerTalentSpells : uint32
     SPELL_UNBOUND_ELEMENTALIST = 705702,
     SPELL_CONDUCTIVE_PASSIVE = 92098,
     SPELL_CONDUCTIVE = 567559,
-    SPELL_CONDUCTIVE_STACKS = 567573,
     SPELL_CONDUCTION = 567560
 };
 
@@ -256,11 +255,7 @@ public:
 
         if (damage && !spell->IsTriggered() && (info->SpellFamilyFlags[1] & TORRENTIAL_WRATH_FAMILY_FLAG_ONE) &&
             (info->SpellFamilyFlags[2] & TORRENTIAL_WRATH_FAMILY_FLAG_TWO) && player->HasAura(SPELL_CONDUCTIVE))
-        {
             player->CastSpell(target, SPELL_CONDUCTION, true);
-            player->RemoveAurasDueToSpell(SPELL_CONDUCTIVE);
-            player->RemoveAurasDueToSpell(SPELL_CONDUCTIVE_STACKS);
-        }
 
         if (damage && !spell->IsTriggered() &&
             ((info->SpellFamilyFlags[0] & SHOCK_FAMILY_FLAG_ZERO) || (info->SpellFamilyFlags[1] & BRINE_FAMILY_FLAG_ONE)) &&
