@@ -107,7 +107,7 @@ namespace
     void LoadLeashes()
     {
         std::unordered_map<uint32, Leash> leashes;
-        if (QueryResult result = WorldDatabase.Query("SELECT `entry`, `radius`, `target` FROM `coa_boss_leash`"))
+        if (PreparedQueryResult result = WorldDatabase.Query(WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_BOSS_LEASH)))
         {
             do
             {
@@ -117,7 +117,7 @@ namespace
                 leash.target = fields[2].Get<uint8>() != 0;
             } while (result->NextRow());
         }
-        if (QueryResult result = WorldDatabase.Query("SELECT `entry`, `x`, `y`, `z` FROM `coa_boss_leash_point` ORDER BY `entry`, `point`"))
+        if (PreparedQueryResult result = WorldDatabase.Query(WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_BOSS_LEASH_POINTS)))
         {
             do
             {
@@ -428,8 +428,10 @@ public:
             std::unique_lock lock(LeashLock);
             Leashes[*entry].radius = radius;
         }
-        WorldDatabase.Execute("INSERT INTO `coa_boss_leash` (`entry`, `radius`) VALUES ({}, {}) ON DUPLICATE KEY UPDATE `radius` = VALUES(`radius`)",
-            *entry, radius);
+        WorldDatabasePreparedStatement* statement = WorldDatabase.GetPreparedStatement(WORLD_INS_COA_BOSS_LEASH_RADIUS);
+        statement->SetData(0, *entry);
+        statement->SetData(1, radius);
+        WorldDatabase.Execute(statement);
         handler->PSendSysMessage("{} ({}): leash radius {} yards around the spawn point; leash points, when 3 or more, take precedence.",
             BossName(*entry), *entry, radius);
         return true;

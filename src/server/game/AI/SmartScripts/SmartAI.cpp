@@ -1229,7 +1229,8 @@ void SmartAI::SetCurrentRangeMode(bool on, float range)
 
     if (Unit* victim = me->GetVictim())
     {
-        me->GetMotionMaster()->MoveChase(victim, _attackDistance);
+        if (!me->HasUnitState(UNIT_STATE_NO_COMBAT_MOVEMENT))
+            me->GetMotionMaster()->MoveChase(victim, _attackDistance);
 
         if (!on && mCanAutoAttack && !me->HasUnitState(UNIT_STATE_MELEE_ATTACKING))
             me->Attack(victim, true);
