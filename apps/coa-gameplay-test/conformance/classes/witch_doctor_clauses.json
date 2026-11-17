@@ -135,7 +135,29 @@
     "spell": 300660,
     "clause": "In addition, your Hexbreak now affects an additional nearby ally, and has a 0.5s reduced global cooldown.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "In addition, your Hexbreak now affects an additional nearby ally,",
+        "labels": []
+      },
+      {
+        "claim": "and has a 0.5s reduced global cooldown.",
+        "labels": [
+          "300660 behaviour_metric_delta gcd",
+          "300660 behaviour_metric_delta gcd_floor"
+        ]
+      }
+    ],
+    "tool_gap": {
+      "reason": "\"affects an additional nearby ally\": Hexbreak dispels from its target and one chain jump (SPELLMOD_JUMP_TARGETS +1 of Effect[1], native). A proof needs two allies carrying a curse, the talent learned between the arms and the dispel read on both. dispel_removal arms cast and learn the entry's own spell (Hexbreak, whose tooltip has no such quote) and set the debuff on the caster and one target only; metric_delta has no ally fixture. Tool: a dispel_removal arm with a gate spell learned between arms and a second ally.",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B4",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#no-behaviour-route"
+        }
+      ]
+    }
   },
   {
     "spell": 300662,
@@ -178,7 +200,9 @@
   {
     "spell": 300871,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "300871 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -928,7 +952,10 @@
   {
     "spell": 503714,
     "clause": "While affected, enemies cannot stealth or turn invisible.",
-    "labels": [],
+    "labels": [
+      "503714 behaviour_metric_delta no_stealth",
+      "503714 behaviour_metric_delta no_invisibility"
+    ],
     "kind": "claim"
   },
   {
@@ -1395,10 +1422,33 @@
   {
     "spell": 681007,
     "clause": "Target an enemy and summon a copy of them for $d that attacks them and replicates their spells back on them.",
-    "labels": [
-      "681007 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Target an enemy and summon a copy of them",
+        "labels": [
+          "681007 behaviour_metric_delta copy"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "681007 aura_duration_ms #0",
+          "681007 behaviour_metric_delta copy_lasts"
+        ]
+      },
+      {
+        "claim": "that attacks them",
+        "labels": [
+          "681007 behaviour_metric_delta attacks"
+        ]
+      },
+      {
+        "claim": "and replicates their spells back on them",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 681199,
@@ -2809,11 +2859,37 @@
   {
     "spell": 707617,
     "clause": "Healing with Mojo Beam now heals up to $712453i of the lowest health nearby allies for $s1% of the healing done and casting it grants allies Replenishment.",
-    "labels": [
-      "707617 effect_value #0",
-      "707617 effect_value e0 #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Healing with Mojo Beam now heals up to $712453i of the lowest health nearby allies",
+        "labels": [
+          "707617 effect_value #0"
+        ]
+      },
+      {
+        "claim": "for $s1% of the healing done",
+        "labels": [
+          "707617 effect_value e0 #1"
+        ]
+      },
+      {
+        "claim": "and casting it grants allies Replenishment.",
+        "labels": [
+          "707617 behaviour_cast_applies_aura replenish"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The two heal claims need a Mojo Beam channel cast at a grouped ally with two more grouped allies at different health, and a read of each ally's heal of Mojo Wave 712453 against the heal of the channel (Brewing.cpp:153-162: allies within 15 yd of the target, at most 2, half of the effective healing). metric_delta has no ally fixtures; the kinds that have allies (cast_applies_aura, aura_presence, ally_heal_breadth) read an aura or cast the trigger at the dummy. The effect_value #0 label reads the count 2 of $712453i and is unmodelled. Tool: ally fixtures with a per-ally `spell_heal_total` read inside metric_delta (the cycle 5 note for Mojo Beam branches).",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B4",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#no-behaviour-route"
+        }
+      ]
+    }
   },
   {
     "spell": 707617,
@@ -2939,12 +3015,29 @@
   {
     "spell": 811117,
     "clause": "Unleash your Spirits on an enemy, dealing ${$m1+0+$RAP*.07+$sps*.15} Shadow damage every $t1 sec for each active Spirit.",
-    "labels": [
-      "811117 effect_value e0 #0",
-      "811117 aura_amount e0 #0",
-      "811117 aura_amplitude_ms #1"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$RAP*.07+$sps*.15} Shadow damage",
+        "labels": [
+          "811117 effect_value e0 #0",
+          "811117 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "811117 aura_amplitude_ms #1"
+        ]
+      },
+      {
+        "claim": "for each active Spirit",
+        "labels": [
+          "811117 behaviour_metric_delta spirit_hits"
+        ]
+      }
+    ]
   },
   {
     "spell": 811117,
@@ -3233,11 +3326,39 @@
   {
     "spell": 802487,
     "clause": "Using Loa's Brew or Spirit in a Bottle on the target will trigger an explosion of mojo around the target, healing nearby allies within $802489a1 yds for ${$802489m1+$802489ppl1+$BH*0.4}.",
-    "labels": [
-      "802487 effect_radius 802489e0 #1",
-      "802487 effect_value #2"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Using Loa's Brew or Spirit in a Bottle on the target will trigger an explosion of mojo around the target,",
+        "labels": [
+          "802487 behaviour_metric_delta bottle",
+          "802487 behaviour_metric_delta brew",
+          "802487 behaviour_metric_delta needs_debuff"
+        ]
+      },
+      {
+        "claim": "healing nearby allies within $802489a1 yds",
+        "labels": [
+          "802487 effect_radius 802489e0 #1"
+        ]
+      },
+      {
+        "claim": "for ${$802489m1+$802489ppl1+$BH*0.4}.",
+        "labels": [
+          "802487 effect_value #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The radius claim needs allies at known distances from the target (the code searches 10 yd, at most 5 allies, Abilities.cpp:232; the tooltip and the DBC say 20 yd) and the amount claim reads the unreadable token ${$802489m1+$802489ppl1+$BH*0.4}. metric_delta has no ally fixture; the tooltip reader does not evaluate $BH. The explosion itself is read on the caster as its own ally (bottle, brew). Tool: ally fixtures with per-ally heal reads in metric_delta, and the $BH token in the reader.",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B4",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#no-behaviour-route"
+        }
+      ]
+    }
   },
   {
     "spell": 567736,
@@ -3570,19 +3691,67 @@
     "spell": 562719,
     "clause": "$?s802714[ \r\n\r\nAt the end of the duration, deal ${$806616m1+$806616ppl1+$RAP*0.35+$sps*0.75} Shadow damage to the enemy and all enemies within $806616a1 yds.][]",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "At the end of the duration, deal",
+        "labels": [
+          "562719 behaviour_metric_delta godslayer_hit",
+          "562719 behaviour_metric_delta godslayer_timing"
+        ]
+      },
+      {
+        "claim": "deal ${$806616m1+$806616ppl1+$RAP*0.35+$sps*0.75} Shadow damage",
+        "labels": []
+      },
+      {
+        "claim": "to the enemy and all enemies within $806616a1 yds",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "The damage amount and the splash have no route. The amount: the generated hit_mean check does not exist for the explosion 806616 (it is not a learnable hit spell), and the explosion lands on the afflicted enemy only at the end of the debuff. The splash \"all enemies within $806616a1 yds\": the 30 yd cone of Spirit Glaive strikes every dummy on the line, so each dummy carries its own explosion and one count cannot tell whose it is; a dummy outside the cone and within 8 yd of the primary needs a layout metric_delta cannot place (tool note T-f: a dummy behind the caster, read for 806616 hits, with fixed_count behind_yd expecting it unhit). The tooltip radius is SpellRadius 14 = 8 yd while the code searches 10 yd (AscensionWitchDoctorAuras.cpp:413), see lead L1.",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B3",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B3.md#decisions-per-sampled-clause"
+        }
+      ]
+    }
   },
   {
     "spell": 562719,
     "clause": "Usable while moving.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The harness fixtures the movement flag (step set_moving) and the server refuses or allows the cast by it (CanCastWhileMoving, Unit.cpp:4992-5015), but no kind consumes it: cast_condition models only \"outdoors\" and \"mounted\", and metric_delta has no moving state. Tool: a cast_while_moving condition (set_moving, cast, read the cast result; control: Malefic Wrath 807037 under the same flag, which a movement-bound spell refuses).",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B3",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B3.md#decisions-per-sampled-clause"
+        },
+        {
+          "agent": "cycle6/author-B3-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B3.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 562719,
     "clause": "Cast time scales with your Agility.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The tooltip states neither a direction nor a formula; the code divides the cast time by 1 + Agility / 1000 (Unit.cpp:13045-13047), so every expected value would come from the code, not the tooltip (G-1). The cast time is readable (spell_cast_time_ms) and an Agility fixture exists (set_aura 58451, +30), but it moves the 2000 ms cast by about 50 ms. Owner question: is a direction-only check (cast time falls as Agility rises, read under an Agility aura) proof of \"scales with your Agility\"?",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B3",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B3.md#decisions-per-sampled-clause"
+        }
+      ]
+    }
   },
   {
     "spell": 806469,
@@ -3792,24 +3961,59 @@
   {
     "spell": 500960,
     "clause": "Drop a Serpent Ward near you for $d.",
-    "labels": [
-      "500960 aura_duration_ms #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Drop a Serpent Ward near you",
+        "labels": [
+          "500960 behaviour_metric_delta ward_lasts"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "500960 behaviour_metric_delta ward_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label `500960 aura_duration_ms #0` (unmodelled: the spell is passive or applies no aura, a summon has no aura) is dropped; the stated value \"$d\" is the lifetime of the summon, measured by `500960 behaviour_metric_delta ward_lasts` (guide 9.4, M-19). The link holds once that label has run and passed."
   },
   {
     "spell": 500960,
     "clause": "The ward spits fire at nearby enemies, attempting to focus on your primary target.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "The ward spits fire at nearby enemies,",
+        "labels": [
+          "500960 behaviour_metric_delta spits_fire"
+        ]
+      },
+      {
+        "claim": "attempting to focus on your primary target.",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "\"attempting to focus on your primary target\": the ward takes the selected unit before any other enemy in combat (Summons.cpp:420-433), so a proof needs two enemies in combat with the owner and a read of which one the ward strikes. metric_delta has one dummy (spell_damage_count and owned_creature_spell_cast_count read one target), and the harness has no second creature fixture in that kind. Tool: a second dummy and a per-target read of the ward's casts.",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B4",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#no-behaviour-route"
+        }
+      ]
+    }
   },
   {
     "spell": 500960,
     "clause": "@ext:Can only have 1 Ward active at a time.:ext@",
     "labels": [
-      "500960 effect_value #1"
+      "500960 behaviour_metric_delta one_ward"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `500960 effect_value #1` (unmodelled: the literal \"1\" of \"Can only have 1 ...\") is dropped; the sentence is measured by `500960 behaviour_metric_delta one_ward`, which reads that one unit of the kind is left after a second is cast (guide 9.4, M-19). The link holds once that label has run and passed."
   },
   {
     "spell": 500961,
@@ -3849,10 +4053,23 @@
   {
     "spell": 505339,
     "clause": "Drop a Shadow Effigy near you for $d.",
-    "labels": [
-      "505339 aura_duration_ms #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Drop a Shadow Effigy near you",
+        "labels": [
+          "505339 behaviour_metric_delta effigy_lasts"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "505339 behaviour_metric_delta effigy_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label `505339 aura_duration_ms #0` (unmodelled: the spell is passive or applies no aura, a summon has no aura) is dropped; the stated value \"$d\" is the lifetime of the summon, measured by `505339 behaviour_metric_delta effigy_lasts` (guide 9.4, M-19). The link holds once that label has run and passed."
   },
   {
     "spell": 505339,
@@ -3875,9 +4092,10 @@
     "spell": 505339,
     "clause": "@ext:Can only have 1 Effigy active at a time.:ext@",
     "labels": [
-      "505339 effect_value #4"
+      "505339 behaviour_metric_delta one_effigy"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `505339 effect_value #4` (unmodelled: the literal \"1\" of \"Can only have 1 ...\") is dropped; the sentence is measured by `505339 behaviour_metric_delta one_effigy`, which reads that one unit of the kind is left after a second is cast (guide 9.4, M-19). The link holds once that label has run and passed."
   },
   {
     "spell": 506634,
@@ -3943,19 +4161,47 @@
   {
     "spell": 507082,
     "clause": "Drop a Dark Idol near you for $d.",
-    "labels": [
-      "507082 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Drop a Dark Idol near you",
+        "labels": [
+          "507082 behaviour_metric_delta idol"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "507082 aura_duration_ms #0",
+          "507082 behaviour_metric_delta idol_lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 507082,
     "clause": "Allies within $505195A1 yds gain $505195s1 increased Shadow Resistance.",
-    "labels": [
-      "507082 effect_radius 505195e0 #1",
-      "507082 effect_value 505195e0 #2"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Allies within $505195A1 yds",
+        "labels": [
+          "507082 effect_radius 505195e0 #1",
+          "507082 behaviour_aura_presence ally_inside",
+          "507082 behaviour_aura_presence ally_outside",
+          "507082 behaviour_aura_presence ally_outside caster"
+        ]
+      },
+      {
+        "claim": "gain $505195s1 increased Shadow Resistance",
+        "labels": [
+          "507082 effect_value 505195e0 #2",
+          "507082 behaviour_metric_delta resist"
+        ]
+      }
+    ]
   },
   {
     "spell": 507084,
@@ -3986,7 +4232,8 @@
     "spell": 561142,
     "clause": "Imbue an ally with the spirit of Sen'jin for $d,",
     "labels": [
-      "561142 aura_duration_ms #0"
+      "561142 aura_duration_ms #0",
+      "561142 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
@@ -3995,7 +4242,8 @@
     "clause": "increasing their Spirit by $s1",
     "labels": [
       "561142 effect_value e0 #1",
-      "561142 aura_amount e0 #1"
+      "561142 aura_amount e0 #1",
+      "561142 behaviour_metric_delta spirit"
     ],
     "kind": "claim"
   },
@@ -4004,17 +4252,32 @@
     "clause": "and their magic resistances by $s2.",
     "labels": [
       "561142 effect_value e1 #2",
-      "561142 aura_amount e1 #2"
+      "561142 aura_amount e1 #2",
+      "561142 behaviour_metric_delta resist_shadow",
+      "561142 behaviour_metric_delta resist_fire"
     ],
     "kind": "claim"
   },
   {
     "spell": 561142,
     "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
-    "labels": [
-      "561142 effect_value #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Can only have 1 Wuju active, the older one is removed",
+        "labels": [
+          "561142 behaviour_metric_delta swap"
+        ]
+      },
+      {
+        "claim": "on a target at a time, the new one stays",
+        "labels": [
+          "561142 behaviour_metric_delta active"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label \"561142 effect_value #3\" read the literal sentence against the effect value (the Wuju aura amount) and measured no stated value; the swap and active labels measure the sentence (guide 9.4, M-19)."
   },
   {
     "spell": 572415,
@@ -4028,14 +4291,24 @@
     "spell": 575025,
     "clause": "Simultaneously places each selected Ward, Effigy, and Idol all at once.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Rite of the Loa is the stock SPELL_EFFECT_CAST_BUTTON (97), MiscValue 0 and MiscValueB 4: Spell::EffectCastButtons (SpellEffects.cpp:7325-7364) casts, for action buttons 132 to 135 that hold a spell the player knows, that is off cooldown, carries SPELL_ATTR7_CAN_BE_MULTI_CAST (AttributesEx7 bit 5, value 32, which the Ward, Effigy and Idol spells carry) and is affordable, with TRIGGERED_IGNORE_GCD, IGNORE_CAST_IN_PROGRESS and CAST_DIRECTLY. No Witch Doctor code touches 575025, so the route is native and a proof sets buttons 132 to 134 to a Ward, an Effigy and an Idol, casts 575025 and reads the owned creature count of each. The harness has the step (run.py set_action_button: actor, button, spell) but behaviours.py has no option that sets action buttons before a cast, and metric_delta has no free step list. Tool: an action-button option (`action_buttons: [[button, spell], ...]`) in metric_delta, or a free setup_steps list. Report #12431 (drops nothing) fits empty buttons 132 to 135, which the harness cannot tell from a defect until the buttons are set (author-B4.md, lead 4).",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B4",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 578344,
     "clause": "Empowers an ally with da voodoo, reducing their resource costs by $s1%.",
     "labels": [
       "578344 effect_value e0 #0",
-      "578344 aura_amount e0 #0"
+      "578344 aura_amount e0 #0",
+      "578344 behaviour_metric_delta cost"
     ],
     "kind": "claim"
   },
@@ -4043,7 +4316,8 @@
     "spell": 578344,
     "clause": "Lasts $d.",
     "labels": [
-      "578344 aura_duration_ms #1"
+      "578344 aura_duration_ms #1",
+      "578344 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
@@ -4058,44 +4332,83 @@
   {
     "spell": 674303,
     "clause": "Drop a Sentry Ward near you for $d that reveals all stealthed and invisible enemies near it.",
-    "labels": [
-      "674303 aura_duration_ms #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Drop a Sentry Ward near you",
+        "labels": [
+          "674303 behaviour_metric_delta ward_lasts"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "674303 behaviour_metric_delta ward_lasts"
+        ]
+      },
+      {
+        "claim": "that reveals all stealthed and invisible enemies near it.",
+        "labels": [
+          "674303 behaviour_metric_delta reveal_aura",
+          "674303 behaviour_metric_delta reveal_aura_far",
+          "674303 behaviour_metric_delta reveal_stealth",
+          "674303 behaviour_metric_delta reveal_invisible"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label `674303 aura_duration_ms #0` (unmodelled: the spell is passive or applies no aura, a summon has no aura) is dropped; the stated value \"$d\" is the lifetime of the summon, measured by `674303 behaviour_metric_delta ward_lasts` (guide 9.4, M-19). The link holds once that label has run and passed."
   },
   {
     "spell": 680872,
     "clause": "Imbue all party and raid members with the spirit of Sen'jin for $d,",
-    "labels": [
-      "680872 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Imbue all party and raid members with the spirit of Sen'jin",
+        "labels": [
+          "680872 behaviour_aura_presence party"
+        ]
+      },
+      {
+        "claim": "for $d,",
+        "labels": [
+          "680872 aura_duration_ms #0",
+          "680872 behaviour_metric_delta lasts"
+        ]
+      }
+    ]
   },
   {
     "spell": 680872,
     "clause": "increasing their Spirit by $s1",
     "labels": [
-      "680872 effect_value e0 #1",
-      "680872 aura_amount e0 #1"
+      "680872 aura_amount e0 #1",
+      "680872 behaviour_metric_delta spirit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The not_measured label `680872 effect_value e0 #1` (an aura script hook sets that effect's amount after CalcValue) is dropped; the same value is read by `680872 aura_amount e0 #1`, which stays in the claim and reads the amount of the present aura (guide 9.4, M-19)."
   },
   {
     "spell": 680872,
     "clause": "and their magic resistances by $s2.",
     "labels": [
-      "680872 effect_value e1 #2",
-      "680872 aura_amount e1 #2"
+      "680872 aura_amount e1 #2",
+      "680872 behaviour_metric_delta resist_holy",
+      "680872 behaviour_metric_delta resist_arcane"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The not_measured label `680872 effect_value e1 #2` (an aura script hook sets that effect's amount after CalcValue) is dropped; the same value is read by `680872 aura_amount e1 #2`, which stays in the claim and reads the amount of the present aura (guide 9.4, M-19)."
   },
   {
     "spell": 680872,
     "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
     "labels": [
-      "680872 effect_value #3"
+      "680872 behaviour_metric_delta one_wuju"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `680872 effect_value #3` (unmodelled: the literal \"1\" of \"Can only have 1 ...\") is dropped; the sentence is measured by `680872 behaviour_metric_delta one_wuju`, which reads that one unit of the kind is left after a second is cast (guide 9.4, M-19). The link holds once that label has run and passed. The tooltip governs (G-1): the entry reads the literal sentence, one Wuju of any caster per target; report #12499 expects the opposite and stays an owner question."
   },
   {
     "spell": 705943,
@@ -4108,76 +4421,170 @@
   {
     "spell": 705943,
     "clause": "increasing your haste and reducing your Shadow damage taken by $s2%$?s706577[ and reducing the cooldown of Spirit Glaive by $706803s1% every $706489t1 sec][].",
-    "labels": [
-      "705943 effect_value e1 #1",
-      "705943 aura_amount e1 #1"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your haste",
+        "labels": [
+          "705943 behaviour_metric_delta cast_haste",
+          "705943 behaviour_metric_delta melee_haste"
+        ]
+      },
+      {
+        "claim": "and reducing your Shadow damage taken by $s2%",
+        "labels": [
+          "705943 effect_value e1 #1",
+          "705943 aura_amount e1 #1",
+          "705943 behaviour_hit_ratio shadow_taken"
+        ]
+      },
+      {
+        "claim": "and reducing the cooldown of Spirit Glaive by $706803s1% every $706489t1 sec",
+        "labels": [
+          "705943 behaviour_metric_delta glaive_cd"
+        ]
+      }
+    ]
   },
   {
     "spell": 707676,
     "clause": "Give an ally some wuju mon, increasing their melee and ranged attack power by $s1.",
-    "labels": [
-      "707676 effect_value e0 #0",
-      "707676 aura_amount e0 #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing their melee attack power by $s1",
+        "labels": [
+          "707676 effect_value e0 #0",
+          "707676 aura_amount e0 #0",
+          "707676 behaviour_metric_delta ap"
+        ]
+      },
+      {
+        "claim": "and ranged attack power by $s1",
+        "labels": [
+          "707676 behaviour_metric_delta ranged_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 707676,
     "clause": "Lasts $d.",
     "labels": [
-      "707676 aura_duration_ms #1"
+      "707676 aura_duration_ms #1",
+      "707676 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
   {
     "spell": 707676,
     "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
-    "labels": [
-      "707676 effect_value #2"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Can only have 1 Wuju active, the older one is removed",
+        "labels": [
+          "707676 behaviour_metric_delta swap"
+        ]
+      },
+      {
+        "claim": "on a target at a time, the new one stays",
+        "labels": [
+          "707676 behaviour_metric_delta active"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label \"707676 effect_value #2\" read the literal sentence against the effect value (the Wuju aura amount) and measured no stated value; the swap and active labels measure the sentence (guide 9.4, M-19)."
   },
   {
     "spell": 712458,
     "clause": "Give all party and raid members some wuju mon, increasing their melee and ranged attack power by $s1.",
-    "labels": [
-      "712458 effect_value e0 #0",
-      "712458 aura_amount e0 #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Give all party and raid members some wuju mon",
+        "labels": [
+          "712458 behaviour_aura_presence ally"
+        ]
+      },
+      {
+        "claim": "increasing their melee attack power by $s1",
+        "labels": [
+          "712458 effect_value e0 #0",
+          "712458 aura_amount e0 #0",
+          "712458 behaviour_metric_delta ap"
+        ]
+      },
+      {
+        "claim": "and ranged attack power by $s1",
+        "labels": [
+          "712458 behaviour_metric_delta ranged_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 712458,
     "clause": "Lasts $d.",
     "labels": [
-      "712458 aura_duration_ms #1"
+      "712458 aura_duration_ms #1",
+      "712458 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
   {
     "spell": 712458,
     "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
-    "labels": [
-      "712458 effect_value #2"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Can only have 1 Wuju active, the older one is removed",
+        "labels": [
+          "712458 behaviour_metric_delta swap"
+        ]
+      },
+      {
+        "claim": "on a target at a time, the new one stays",
+        "labels": [
+          "712458 behaviour_metric_delta active"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label \"712458 effect_value #2\" read the literal sentence against the effect value (the Wuju aura amount) and measured no stated value; the swap and active labels measure the sentence (guide 9.4, M-19)."
   },
   {
     "spell": 800195,
     "clause": "Empowers nearby party and raid members with da voodoo, reducing their resource costs by $s1%.",
-    "labels": [
-      "800195 effect_value e0 #0",
-      "800195 aura_amount e0 #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Empowers nearby party and raid members with da voodoo,",
+        "labels": [
+          "800195 behaviour_aura_presence party"
+        ]
+      },
+      {
+        "claim": "reducing their resource costs by $s1%.",
+        "labels": [
+          "800195 aura_amount e0 #0",
+          "800195 behaviour_metric_delta cost"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The not_measured label `800195 effect_value e0 #0` (an aura script hook sets that effect's amount after CalcValue) is dropped; the same value is read by `800195 aura_amount e0 #0`, which stays in the claim and reads the amount of the present aura (guide 9.4, M-19)."
   },
   {
     "spell": 800195,
     "clause": "Lasts $d.",
     "labels": [
-      "800195 aura_duration_ms #1"
+      "800195 aura_duration_ms #1",
+      "800195 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
@@ -4185,9 +4592,10 @@
     "spell": 800195,
     "clause": "@ext:Can only have 1 Wuju active on a target at a time.:ext@",
     "labels": [
-      "800195 effect_value #2"
+      "800195 behaviour_metric_delta one_wuju"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `800195 effect_value #2` (unmodelled: the literal \"1\" of \"Can only have 1 ...\") is dropped; the sentence is measured by `800195 behaviour_metric_delta one_wuju`, which reads that one unit of the kind is left after a second is cast (guide 9.4, M-19). The link holds once that label has run and passed. The tooltip governs (G-1): the entry reads the literal sentence, one Wuju of any caster per target; report #12499 expects the opposite and stays an owner question."
   },
   {
     "spell": 501146,
@@ -4523,7 +4931,16 @@
     "labels": [
       "572336 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The damage is judged by the generated hit_mean check, which loses most of its casts: the hit scenario sets no power for a cost that is a percentage of base mana (hit-scenarios.md, not modelled), so in both final03 runs 720 casts fail with SPELL_FAILED_NO_POWER and 183 and 187 of the 608 hits needed remain (insufficient_trials). The partial means, 503.6 and 493.7, sit about 10% below the computed 560.3, too few trials to call a defect. A single-hit metric_delta read is no route: the reference caster's spell crit chance is not zero, so one hit is a coin flip. Tool: the hit scenarios refilling percent mana before each cast (owner item since cycle 1). Player report #10554 (Malefic Wrath not learnable) lies outside every tooltip clause: lead L2.",
+      "attempts": [
+        {
+          "agent": "cycle6/author-B3-fix",
+          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B3.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 807056,

@@ -3177,9 +3177,9 @@
       },
       "before_expected": 1,
       "expected": 0,
-      "wait_ms": 1900,
+      "wait_ms": 2550,
       "expire_ms": 500,
-      "observe_source": "AscensionWitchDoctorAbilities.cpp:377 (OnSpellCast, a non-triggered cast): consume(VolleyReady, id == Volley) removes 505158 when the Volley cast completes, not when its projectile lands, so the next Reclamation is the only one transformed (report #7393: old CoA allowed a second Spirit Volley per proc while the first was in flight). The ready aura is made by a real cast of 505158 at the caster in both phases (setup cast, setup_in_before). Spirit Volley 504582: CastingTimeIndex 23 = 1800 ms, ranged slot (dummy at 15 yd, past the minimum range), no mana cost; the aura is read 1900 ms after the cast start, 100 ms after the cast ends, while the projectile is still flying toward a dummy 15 yd away (Spirit Volley 504582 has Speed 25, so the bolt lands about 600 ms after the cast end, and the 1900 ms read falls in flight). Control: the before phase makes the ready aura without casting the Volley and reads 1, so a second cast would be possible; the after phase reads 0 after one cast. Because the read falls while the bolt is in flight, the entry separates removal at the cast end (Abilities.cpp:377) from removal at the hit, which is the state report #7393 describes (a second Spirit Volley per proc while the first is flying): the reported failure would read 1 here."
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:377 (OnSpellCast, a non-triggered cast): consume(VolleyReady, id == Volley) removes 505158 when the Volley cast completes, not when its projectile lands, so the next Reclamation is the only one transformed (report #7393: old CoA allowed a second Spirit Volley per proc while the first was in flight). The ready aura is made by a real cast of 505158 at the caster in both phases (setup cast, setup_in_before). Spirit Volley 504582: CastingTimeIndex 23 = 1800 ms, ranged slot (dummy at 15 yd, past the minimum range), no mana cost; the aura is read 1900 ms after the cast start, 100 ms after the cast ends, while the projectile is still flying toward a dummy 15 yd away (Spirit Volley 504582 has Speed 25, so the bolt lands about 600 ms after the cast end, and the 1900 ms read falls in flight). Control: the before phase makes the ready aura without casting the Volley and reads 1, so a second cast would be possible; the after phase reads 0 after one cast. Because the read falls while the bolt is in flight, the entry separates removal at the cast end (Abilities.cpp:377) from removal at the hit, which is the state report #7393 describes (a second Spirit Volley per proc while the first is flying): the reported failure would read 1 here. Cycle 6 (M-33, D2): Volley 504582 uses the ranged slot, so its 1800 ms cast is 2300 ms (SpellInfo.cpp:3108-3111); the read at 2550 ms falls after the cast ends (removal at cast completion, Abilities.cpp:377) and before the bolt lands (about 2870 ms)."
     },
     {
       "spell": 503712,
@@ -3656,6 +3656,1737 @@
       "wait_ms": 30000,
       "expire_ms": 500,
       "observe_source": "Player report #10643 (the Bloodthistle buff falls off with no apparent reason). Removal paths of the Ingredient aura 801664 in the code: SyncIngredients (AscensionWitchDoctorBrewing.cpp:18-46, every 500 ms from witch_doctor_update, AscensionWitchDoctorAuras.cpp:451-462) removes the oldest Ingredient only past the capacity (1, or 2 with Mixologist 561069 or a Mojo pair); Mix (Brewing.cpp:62-77) replaces the set; nothing else names 801664 (grep). Its duration is infinite (DurationIndex 21, forced by Completion.cpp:384-388), like 801660 and 801662, so with one Ingredient and no other cast it must still be brewed after 30 s. Before phase (no cast, the control): 0. After phase: one real cast (instant, 5% mana, 500 ms category, 1500 ms GCD), a 30000 ms wait (twenty 1500 ms refreshes of 802771), then 1; an early removal reads 0."
+    },
+    {
+      "spell": 300871,
+      "name": "Strength of Da Loa group stack cap",
+      "kind": "group_stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "effect": 0,
+      "partner": 30802,
+      "partner_effect": 1,
+      "metric": "attack_power",
+      "fields": {},
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql spell_group 2000180 (stack rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) lists 300871 beside 30802 Unleashed Rage, 560550 and the other aura 166 raid area effects (line 296). 300871 Effect[0] is SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 166 SPELL_AURA_MOD_ATTACK_POWER_PCT, EffectBasePoints 4 + 1 = 5% ($s1), EffectRadiusIndex 287 = 100 yd; Effect[2] (aura 108, a spell modifier) is not an area aura and not in the group. 30802 Effect[1] is the matching area effect at 4% (BasePoints 3), strictly weaker. Stock Unit::GetHighestExclusiveSameEffectSpellGroupValue keeps the single highest value, so the caster's attack power must read the stronger 5% with both, not 5% + 4%. The Templar Call of the Monastery 560550 group_stack_cap entry is the model (same metric, same partner, same group). The kind reads the metric with neither passive, with 300871 alone and with both (the control readings), after real learns; no player report names this clause."
+    },
+    {
+      "spell": 562719,
+      "name": "Spirit Glaive (Godslayer: the explosion hits the afflicted enemy)",
+      "kind": "metric_delta",
+      "variant": "godslayer_hit",
+      "label_suffix": "godslayer_hit",
+      "quote": "At the end of the duration, deal",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 562719,
+      "gate_spell": 802714,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806616,
+        "target": "dummy"
+      },
+      "wait_ms": 8500,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:408-415 (aura script Remove): when the Spirit Glaive debuff (SpellFamilyFlags[0] 33554432) ends by expiry (AURA_REMOVE_BY_EXPIRE) and Godslayer 802714 is on the caster, Cast(player, target, GlaiveExplosion 806616) hits the afflicted enemy. Spirit Glaive 562719: CastingTimeIndex 5 = 2000 ms, DurationIndex 28 = 5000 ms ($d), CategoryRecoveryTime 20000 reset by the scenario, 10% mana, GCD 1500; the debuff therefore ends about 7000 ms after the cast starts and the read is taken 8500 ms after the cast. 806616 (RangeIndex 4, instant, SPELL_EFFECT_SCHOOL_DAMAGE, Shadow) damage events of the caster on the dummy are counted. Both phases cast a real Glaive at the dummy; 802714 is learned between them (a real learn). Control: the before phase has no Godslayer and reads 0 hits of 806616 although the debuff expired inside the wait; the after phase reads 1. This entry proves that Godslayer produces the explosion on the afflicted enemy (the control without Godslayer reads 0); the timing, no explosion while the debuff is on and one when it ends, is the godslayer_timing entry; the damage amount and the \"all enemies within $806616a1 yds\" splash keep their own claims (no route for the splash: the 30 yd cone strikes every dummy on the line, so each carries its own explosion). Lead L1 (Godslayer radius): the tooltip radius is SpellRadius 14 = 8 yd, the code searches Nearby(target, 10.0f) at :413. No player report names this clause."
+    },
+    {
+      "spell": 562719,
+      "name": "Spirit Glaive (Godslayer: no explosion while the debuff is on, one when it ends)",
+      "kind": "metric_delta",
+      "variant": "godslayer_timing",
+      "label_suffix": "godslayer_timing",
+      "quote": "At the end of the duration, deal",
+      "expected": 0,
+      "before_expected": 0,
+      "after_expiry_expected": 1,
+      "trigger_spell": 562719,
+      "gate_spell": 802714,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806616,
+        "target": "dummy"
+      },
+      "wait_ms": 5000,
+      "expiry_wait_ms": 3500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4000,
+          6500
+        ],
+        "expired": [
+          8000,
+          9500
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorAuras.cpp:408-415 (aura script Remove): when the Spirit Glaive debuff (SpellFamilyFlags[0] 33554432) ends by expiry (AURA_REMOVE_BY_EXPIRE) and Godslayer 802714 is on the caster, Cast(player, target, GlaiveExplosion 806616) hits the afflicted enemy; the DBC periodic trigger that would fire 806616 on its own is removed by dummy(EFFECT_1) at AscensionWitchDoctorCompletion.cpp:328-330, so the only source of the hit is the end of the aura. Spirit Glaive 562719: CastingTimeIndex 5 = 2000 ms, DurationIndex 28 = 5000 ms ($d), CategoryRecoveryTime 20000 reset by the scenario, 10% mana, GCD 1500; the debuff lands about 2000 ms after the cast starts and ends about 7000 ms after it. Godslayer 802714 is learned at the start (gate_timing start). One real Glaive is cast at the dummy; the damage events of the caster on the dummy from 806616 (Shadow, instant) are counted three times: before the cast (0), 5000 ms after the cast starts, 3000 ms after the debuff landed and 2000 ms before it ends (expected 0: an explosion fired when the debuff lands, or on any early removal, reads 1 here and alerts), and 3500 ms later, 8500 ms after the cast starts and about 1500 ms after the debuff ended (expected 1). The reads are stamped in game time (windows 4000 to 6500 ms and 8000 to 9500 ms after the cast), so the mid read lies inside the debuff (2000 to 7000 ms) and the last read after its end. Control: the mid read of the same cast, and the godslayer_hit entry, whose arm without Godslayer reads 0 hits. Cast timing checked: Glaive 2000 ms cast, power set to 2000 before the cast."
+    },
+    {
+      "spell": 707676,
+      "name": "Power Wuju (the buff lasts 30 min)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Lasts $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 707676,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 707676
+      },
+      "after_expiry_expected": 0,
+      "wait_ms": 1725000,
+      "expiry_wait_ms": 120000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1890000
+        ],
+        "expired": [
+          1710000,
+          1890000
+        ]
+      },
+      "observe_source": "Power Wuju 707676 (DurationIndex 30 = 1800000 ms, $d, instant cast, no cooldown, global cooldown 1500 ms) is cast for real at the caster (an ally-target spell, Effect[0] SPELL_EFFECT_APPLY_AURA at TARGET_UNIT_TARGET_ALLY, cast at the caster itself). The aura is read 1725000 ms after the cast (present) and 120000 ms later (gone), so the end lies inside the G-19 band (5% of 1800000 ms = 90000 ms) on both sides, with both reads stamped in game time (windows 1710000 to 1890000 ms); the scenario runs only on the accelerated clock, whose timeout cap of one hour of game time admits it (ADR 0139, the Templar 300923 duration entry is the precedent). Control: the uncast before phase reads the aura absent. No script shortens or refreshes a Wuju beyond AscensionWitchDoctorAuras.cpp:198-210 (exclusivity), which this scenario never triggers (one Wuju). Cast timing checked: instant, power set to 2000 before the cast (percent mana cost)."
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju (the buff lasts 30 min)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Lasts $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 712458,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 712458
+      },
+      "after_expiry_expected": 0,
+      "wait_ms": 1725000,
+      "expiry_wait_ms": 120000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1890000
+        ],
+        "expired": [
+          1710000,
+          1890000
+        ]
+      },
+      "observe_source": "Greater Power Wuju 712458 (DurationIndex 30 = 1800000 ms, $d, instant cast, no cooldown, global cooldown 1500 ms) is cast for real at the caster (Effect[0] and Effect[1] SPELL_EFFECT_APPLY_AURA at TARGET_UNIT_CASTER_AREA_RAID (56), EffectRadiusIndex 23: the targets, the caster and its raid members, are picked once at the cast and each receives the aura; the caster is a raid member of itself). The aura is read 1725000 ms after the cast (present) and 120000 ms later (gone), so the end lies inside the G-19 band (5% of 1800000 ms = 90000 ms) on both sides, with both reads stamped in game time (windows 1710000 to 1890000 ms); the scenario runs only on the accelerated clock, whose timeout cap of one hour of game time admits it (ADR 0139, the Templar 300923 duration entry is the precedent). Control: the uncast before phase reads the aura absent. No script shortens or refreshes a Wuju beyond AscensionWitchDoctorAuras.cpp:198-210 (exclusivity), which this scenario never triggers (one Wuju). Cast timing checked: instant, power set to 2000 before the cast (percent mana cost)."
+    },
+    {
+      "spell": 561142,
+      "name": "Spirit Wuju (the buff lasts 30 min)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "for $d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 561142,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 561142
+      },
+      "after_expiry_expected": 0,
+      "wait_ms": 1725000,
+      "expiry_wait_ms": 120000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1890000
+        ],
+        "expired": [
+          1710000,
+          1890000
+        ]
+      },
+      "observe_source": "Spirit Wuju 561142 (DurationIndex 30 = 1800000 ms, $d, instant cast, no cooldown, global cooldown 1500 ms) is cast for real at the caster (an ally-target spell, Effect[0] SPELL_EFFECT_APPLY_AURA at TARGET_UNIT_TARGET_ALLY, cast at the caster itself). The aura is read 1725000 ms after the cast (present) and 120000 ms later (gone), so the end lies inside the G-19 band (5% of 1800000 ms = 90000 ms) on both sides, with both reads stamped in game time (windows 1710000 to 1890000 ms); the scenario runs only on the accelerated clock, whose timeout cap of one hour of game time admits it (ADR 0139, the Templar 300923 duration entry is the precedent). Control: the uncast before phase reads the aura absent. No script shortens or refreshes a Wuju beyond AscensionWitchDoctorAuras.cpp:198-210 (exclusivity), which this scenario never triggers (one Wuju). Cast timing checked: instant, power set to 2000 before the cast (percent mana cost)."
+    },
+    {
+      "spell": 578344,
+      "name": "Resourceful Wuju (the buff lasts 30 min)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Lasts $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 578344,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 578344
+      },
+      "after_expiry_expected": 0,
+      "wait_ms": 1725000,
+      "expiry_wait_ms": 120000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1890000
+        ],
+        "expired": [
+          1710000,
+          1890000
+        ]
+      },
+      "observe_source": "Resourceful Wuju 578344 (DurationIndex 30 = 1800000 ms, $d, instant cast, no cooldown, global cooldown 1000 ms) is cast for real at the caster (an ally-target spell, Effect[0] SPELL_EFFECT_APPLY_AURA at TARGET_UNIT_TARGET_ALLY, cast at the caster itself). The aura is read 1725000 ms after the cast (present) and 120000 ms later (gone), so the end lies inside the G-19 band (5% of 1800000 ms = 90000 ms) on both sides, with both reads stamped in game time (windows 1710000 to 1890000 ms); the scenario runs only on the accelerated clock, whose timeout cap of one hour of game time admits it (ADR 0139, the Templar 300923 duration entry is the precedent). Control: the uncast before phase reads the aura absent. No script shortens or refreshes a Wuju beyond AscensionWitchDoctorAuras.cpp:198-210 (exclusivity), which this scenario never triggers (one Wuju). Cast timing checked: instant, power set to 2000 before the cast (percent mana cost)."
+    },
+    {
+      "spell": 578344,
+      "name": "Resourceful Wuju (resource costs -5%)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "reducing their resource costs by $s1%.",
+      "expected": 380,
+      "before_expected": 400,
+      "expected_ratio": 0.95,
+      "tolerance": 0.005,
+      "trigger_spell": 578344,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 501136
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Resourceful Wuju 578344 Effect[0] SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT (aura 72), EffectMiscValue 127 (every school), EffectBasePoints -6 + 1 = -5 ($s1; DieSides 1); the aura writes UNIT_FIELD_POWER_COST_MULTIPLIER (HandleModPowerCostPCT, SpellAuraEffects.cpp:5371), which SpellInfo::CalcPowerCost multiplies into every cost (SpellInfo.cpp:3265, int32(powerCost * (1 + multiplier))). That function is the one a cast charges: the caster reads the live cost of Mirage 501136 (29% of the base mana, 434 mana on the reference caster; the final03 power_cost readback of 501136) before the Wuju (the uncast before phase, the control) and 1700 ms after a real Resourceful Wuju cast at itself (instant, 10% mana, global cooldown 1000 ms, power set to 2000 before the cast). The tooltip says \"resource costs\" without a spell, so the cost of any one spell shows it; the most expensive spell in the class keeps the rounding of int32() small (434 x 0.95 = 412.3, ratio 0.9493). The ratio after/before is judged as 0.95 within 0.005: no reduction (1.0) and a 10% reduction (0.9) fall outside. before_expected 400 is the floor of the before reading and expected 380 the floor of the after reading. Spell: Mirage is only the probe, it is not cast. Cast timing checked: instant."
+    },
+    {
+      "spell": 707676,
+      "name": "Power Wuju (melee attack power +232)",
+      "kind": "metric_delta",
+      "variant": "ap",
+      "label_suffix": "ap",
+      "quote": "increasing their melee and ranged attack power by $s1.",
+      "expected": 432,
+      "before_expected": 200,
+      "expected_gain": 232,
+      "tolerance": 1,
+      "trigger_spell": 707676,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "attack_power",
+      "fields": {},
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Power Wuju 707676 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 231 + 1 = 232 ($s1; no per-level term), Effect[1] aura 124 SPELL_AURA_MOD_RANGED_ATTACK_POWER 232. A real cast at the caster (instant, global cooldown 1500 ms, 8% mana); the caster's melee attack power (Unit::GetTotalAttackPowerValue(BASE_ATTACK), a live unit read) is read before the cast (the uncast before phase is the control; the class file reference is 236) and 1700 ms after it, and the gain is judged as +232 within 1: it excludes +231 (a base value without the roll) and +116 (a half). before_expected 200 is only the floor of the before reading (guide 3.1: stat claim, real cast, contrast on one build, the read named here). No script touches Power Wuju beyond the exclusivity at AscensionWitchDoctorAuras.cpp:198-210. Cast timing checked: instant."
+    },
+    {
+      "spell": 707676,
+      "name": "Power Wuju (ranged attack power +232)",
+      "kind": "metric_delta",
+      "variant": "ranged_ap",
+      "label_suffix": "ranged_ap",
+      "quote": "increasing their melee and ranged attack power by $s1.",
+      "expected": 272,
+      "before_expected": 40,
+      "expected_gain": 232,
+      "tolerance": 1,
+      "trigger_spell": 707676,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "ranged_attack_power",
+      "fields": {},
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Power Wuju 707676 Effect[1] aura 124 SPELL_AURA_MOD_RANGED_ATTACK_POWER, EffectBasePoints 231 + 1 = 232 ($s1). The same cast as the ap entry; the caster's ranged attack power (Unit::GetTotalAttackPowerValue(RANGED_ATTACK), class file reference 47) is read before and after it, the gain judged as +232 within 1. before_expected 40 is only the floor of the before reading. Control: the uncast before phase. Cast timing checked: instant."
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju (melee attack power +232)",
+      "kind": "metric_delta",
+      "variant": "ap",
+      "label_suffix": "ap",
+      "quote": "increasing their melee and ranged attack power by $s1.",
+      "expected": 432,
+      "before_expected": 200,
+      "expected_gain": 232,
+      "tolerance": 1,
+      "trigger_spell": 712458,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "attack_power",
+      "fields": {},
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Greater Power Wuju 712458 Effect[0] aura 99 and Effect[1] aura 124, EffectBasePoints 231 + 1 = 232, both at TARGET_UNIT_CASTER_AREA_RAID (56), EffectRadiusIndex 23. A real cast at the caster (instant, 16% mana, global cooldown 1500 ms); the caster is a raid member of itself, so its own melee attack power (live unit read) rises by 232: read before the cast (the uncast before phase, the control) and 2500 ms after it (the aura is applied once at the cast to the caster and its raid members; 2500 ms is a settle wait), the gain judged as +232 within 1. before_expected 200 is the floor of the before reading. The reach to another party member has its own entry (ally). No script beyond the Wuju exclusivity at AscensionWitchDoctorAuras.cpp:198-210. Cast timing checked: instant."
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju (ranged attack power +232)",
+      "kind": "metric_delta",
+      "variant": "ranged_ap",
+      "label_suffix": "ranged_ap",
+      "quote": "increasing their melee and ranged attack power by $s1.",
+      "expected": 272,
+      "before_expected": 40,
+      "expected_gain": 232,
+      "tolerance": 1,
+      "trigger_spell": 712458,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "ranged_attack_power",
+      "fields": {},
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Greater Power Wuju 712458 Effect[1] aura 124 SPELL_AURA_MOD_RANGED_ATTACK_POWER, EffectBasePoints 231 + 1 = 232 ($s1), at TARGET_UNIT_CASTER_AREA_RAID (56), EffectRadiusIndex 23. The same cast as the ap entry (instant, 16% mana, global cooldown 1500 ms); the caster is a raid member of itself and the aura is applied once at the cast, so its own ranged attack power (Unit::GetTotalAttackPowerValue(RANGED_ATTACK), class file reference 47) is read before the cast (the uncast before phase, the control) and 2500 ms after it (a settle wait), the gain judged as +232 within 1. before_expected 40 is only the floor of the before reading. Cast timing checked: instant."
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju (a grouped ally receives the buff)",
+      "kind": "aura_presence",
+      "variant": "ally",
+      "label_suffix": "ally",
+      "quote": "Give all party and raid members some wuju mon",
+      "metric": "aura",
+      "fields": {
+        "spell": 712458
+      },
+      "target": "ally",
+      "wait_ms": 2500,
+      "reason": "Greater Power Wuju 712458 (instant, 16% mana, GCD 1500 ms) has two TARGET_UNIT_CASTER_AREA_RAID effects (EffectRadiusIndex 23): the cast picks the caster's raid members once (Effect 6 SPELL_EFFECT_APPLY_AURA at target 56) and applies 712458 to each. The ally is grouped with the Witch Doctor (kind aura_presence), reads the aura 0 before the cast (the control) and 1 after a real cast at the caster 2500 ms later. The tooltip states no radius, so none is tested. Entry kind note: aura_presence learns only the spell it casts, which is the subject here. Player report #12499 names Greater Power Wuju: its reach to party members is not the reported failure (see the exclusivity entries). Cast timing checked: instant."
+    },
+    {
+      "spell": 561142,
+      "name": "Spirit Wuju (Spirit +40)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "increasing their Spirit by $s1",
+      "expected": 140,
+      "before_expected": 100,
+      "expected_gain": 40,
+      "tolerance": 1,
+      "trigger_spell": 561142,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "stat",
+      "fields": {
+        "stat": 4
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Spirit Wuju 561142 Effect[0] aura 29 SPELL_AURA_MOD_STAT, EffectMiscValue 4 (Spirit), EffectBasePoints 39 + 1 = 40 ($s1). A real cast at the caster (instant, 8% mana, GCD 1500 ms); the caster's Spirit (Unit::GetStat(STAT_SPIRIT), the live read; reference 109 in the class file) is read before the cast (the uncast before phase is the control) and 1700 ms after it, the gain judged as +40 within 1. before_expected 100 is the floor of the before reading. No script beyond the Wuju exclusivity at AscensionWitchDoctorAuras.cpp:198-210. Cast timing checked: instant."
+    },
+    {
+      "spell": 561142,
+      "name": "Spirit Wuju (Shadow resistance +20)",
+      "kind": "metric_delta",
+      "variant": "resist_shadow",
+      "label_suffix": "resist_shadow",
+      "quote": "and their magic resistances by $s2.",
+      "expected": 20,
+      "before_expected": 0,
+      "expected_gain": 20,
+      "tolerance": 1,
+      "trigger_spell": 561142,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Spirit Wuju 561142 Effect[1] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, EffectMiscValue 126 (the six magic schools Holy, Fire, Nature, Frost, Shadow, Arcane), EffectBasePoints 19 + 1 = 20 ($s2). The same real cast as the spirit entry; the caster's Shadow resistance (Unit::GetResistance, school 5) is read before the cast (the uncast before phase, the control) and 1700 ms after it, judged as +20 within 1. Two of the six schools are read (Shadow and Fire): one effect with one misc mask covers them all (G-23). before_expected 0 is the floor of the before reading. Cast timing checked: instant."
+    },
+    {
+      "spell": 561142,
+      "name": "Spirit Wuju (Fire resistance +20)",
+      "kind": "metric_delta",
+      "variant": "resist_fire",
+      "label_suffix": "resist_fire",
+      "quote": "and their magic resistances by $s2.",
+      "expected": 20,
+      "before_expected": 0,
+      "expected_gain": 20,
+      "tolerance": 1,
+      "trigger_spell": 561142,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "resistance",
+      "fields": {
+        "school": 2
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Spirit Wuju 561142 Effect[1] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, EffectMiscValue 126 (the six magic schools Holy, Fire, Nature, Frost, Shadow, Arcane), EffectBasePoints 19 + 1 = 20 ($s2). The same real cast as the spirit entry; the caster's Fire resistance (Unit::GetResistance, school 2) is read before the cast (the uncast before phase, the control) and 1700 ms after it, judged as +20 within 1. Two of the six schools are read (Shadow and Fire): one effect with one misc mask covers them all (G-23). before_expected 0 is the floor of the before reading. Cast timing checked: instant."
+    },
+    {
+      "spell": 707676,
+      "name": "Power Wuju (one Wuju at a time: the Spirit Wuju cast first is removed)",
+      "kind": "metric_delta",
+      "variant": "swap",
+      "label_suffix": "swap",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 707676,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        561142
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1700,
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 561142
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:90-93 (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216) and :198-210 (aura script Apply, first effect): when a Wuju applies it removes every other Wuju aura on the target whatever its caster (RemoveAurasDueToSpell(spell, guid)), so one Wuju is active on a target at a time, the tooltip sentence \"Can only have 1 Wuju active on a target at a time.\" (G-1: the tooltip governs). Both phases cast Spirit Wuju 561142 for real at the caster (the setup cast, power set to 2000, 1700 ms of wait). The uncast before phase reads the aura 561142 present (1, the control: without a second Wuju the first stays); the after phase casts Power Wuju 707676 at the caster and reads it gone (0): a second Wuju replaces the first. Every Wuju here is an instant cast (CastingTimeIndex 1) with a 1500 ms global cooldown (StartRecoveryTime 1500 for Spirit Wuju 561142, Power Wuju 707676 and Greater Power Wuju 712458; Resourceful Wuju 578344 has 1000 ms) and no cooldown; the scenario waits 1700 ms after the setup cast, past the global cooldown, and sets power 2000 before the casts (8% to 16% of the base mana each, so two casts never run dry). Player report #12499 (Greater Power Wuju 712458, buffs of several Witch Doctors cancelling each other): the report asks for different Wuju buffs from different casters to coexist, which the tooltip sentence contradicts; this entry proves the tooltip sentence (one Wuju per target, here from one caster) and cannot show the cross-caster failure, because the scenario has one Witch Doctor caster (guide section 8: owner question, see the report)."
+    },
+    {
+      "spell": 707676,
+      "name": "Power Wuju (one Wuju at a time: the new Power Wuju is active)",
+      "kind": "metric_delta",
+      "variant": "active",
+      "label_suffix": "active",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 707676,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        561142
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1700,
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 707676
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:90-93 (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216) and :198-210 (aura script Apply, first effect): when a Wuju applies it removes every other Wuju aura on the target whatever its caster (RemoveAurasDueToSpell(spell, guid)), so one Wuju is active on a target at a time, the tooltip sentence \"Can only have 1 Wuju active on a target at a time.\" (G-1: the tooltip governs). Both phases cast Spirit Wuju 561142 for real at the caster (the setup cast, power set to 2000, 1700 ms of wait). The uncast before phase reads the aura 707676 absent (0, the control: it has not been cast); the after phase casts Power Wuju 707676 at the caster and reads it present (1): the second Wuju is the one that stays, so the cast does not simply remove both. Every Wuju here is an instant cast (CastingTimeIndex 1) with a 1500 ms global cooldown (StartRecoveryTime 1500 for Spirit Wuju 561142, Power Wuju 707676 and Greater Power Wuju 712458; Resourceful Wuju 578344 has 1000 ms) and no cooldown; the scenario waits 1700 ms after the setup cast, past the global cooldown, and sets power 2000 before the casts (8% to 16% of the base mana each, so two casts never run dry). Player report #12499 (Greater Power Wuju 712458, buffs of several Witch Doctors cancelling each other): the report asks for different Wuju buffs from different casters to coexist, which the tooltip sentence contradicts; this entry proves the tooltip sentence (one Wuju per target, here from one caster) and cannot show the cross-caster failure, because the scenario has one Witch Doctor caster (guide section 8: owner question, see the report)."
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju (one Wuju at a time: the Resourceful Wuju cast first is removed)",
+      "kind": "metric_delta",
+      "variant": "swap",
+      "label_suffix": "swap",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 712458,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        578344
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1700,
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 578344
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:90-93 (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216) and :198-210 (aura script Apply, first effect): when a Wuju applies it removes every other Wuju aura on the target whatever its caster (RemoveAurasDueToSpell(spell, guid)), so one Wuju is active on a target at a time, the tooltip sentence \"Can only have 1 Wuju active on a target at a time.\" (G-1: the tooltip governs). Both phases cast Resourceful Wuju 578344 for real at the caster (the setup cast, power set to 2000, 1700 ms of wait). The uncast before phase reads the aura 578344 present (1, the control: without a second Wuju the first stays); the after phase casts Greater Power Wuju 712458 at the caster and reads it gone (0): a second Wuju replaces the first. Every Wuju here is an instant cast (CastingTimeIndex 1) with a 1500 ms global cooldown (StartRecoveryTime 1500 for Spirit Wuju 561142, Power Wuju 707676 and Greater Power Wuju 712458; Resourceful Wuju 578344 has 1000 ms) and no cooldown; the scenario waits 1700 ms after the setup cast, past the global cooldown, and sets power 2000 before the casts (8% to 16% of the base mana each, so two casts never run dry). Player report #12499 (Greater Power Wuju 712458, buffs of several Witch Doctors cancelling each other): the report asks for different Wuju buffs from different casters to coexist, which the tooltip sentence contradicts; this entry proves the tooltip sentence (one Wuju per target, here from one caster) and cannot show the cross-caster failure, because the scenario has one Witch Doctor caster (guide section 8: owner question, see the report)."
+    },
+    {
+      "spell": 712458,
+      "name": "Greater Power Wuju (one Wuju at a time: the new Greater Power Wuju is active)",
+      "kind": "metric_delta",
+      "variant": "active",
+      "label_suffix": "active",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 712458,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        578344
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1700,
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 712458
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:90-93 (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216) and :198-210 (aura script Apply, first effect): when a Wuju applies it removes every other Wuju aura on the target whatever its caster (RemoveAurasDueToSpell(spell, guid)), so one Wuju is active on a target at a time, the tooltip sentence \"Can only have 1 Wuju active on a target at a time.\" (G-1: the tooltip governs). Both phases cast Resourceful Wuju 578344 for real at the caster (the setup cast, power set to 2000, 1700 ms of wait). The uncast before phase reads the aura 712458 absent (0, the control: it has not been cast); the after phase casts Greater Power Wuju 712458 at the caster and reads it present (1): the second Wuju is the one that stays, so the cast does not simply remove both. Every Wuju here is an instant cast (CastingTimeIndex 1) with a 1500 ms global cooldown (StartRecoveryTime 1500 for Spirit Wuju 561142, Power Wuju 707676 and Greater Power Wuju 712458; Resourceful Wuju 578344 has 1000 ms) and no cooldown; the scenario waits 1700 ms after the setup cast, past the global cooldown, and sets power 2000 before the casts (8% to 16% of the base mana each, so two casts never run dry). Player report #12499 (Greater Power Wuju 712458, buffs of several Witch Doctors cancelling each other): the report asks for different Wuju buffs from different casters to coexist, which the tooltip sentence contradicts; this entry proves the tooltip sentence (one Wuju per target, here from one caster) and cannot show the cross-caster failure, because the scenario has one Witch Doctor caster (guide section 8: owner question, see the report)."
+    },
+    {
+      "spell": 561142,
+      "name": "Spirit Wuju (one Wuju at a time: the Power Wuju cast first is removed)",
+      "kind": "metric_delta",
+      "variant": "swap",
+      "label_suffix": "swap",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 561142,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        707676
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1700,
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 707676
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:90-93 (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216) and :198-210 (aura script Apply, first effect): when a Wuju applies it removes every other Wuju aura on the target whatever its caster (RemoveAurasDueToSpell(spell, guid)), so one Wuju is active on a target at a time, the tooltip sentence \"Can only have 1 Wuju active on a target at a time.\" (G-1: the tooltip governs). Both phases cast Power Wuju 707676 for real at the caster (the setup cast, power set to 2000, 1700 ms of wait). The uncast before phase reads the aura 707676 present (1, the control: without a second Wuju the first stays); the after phase casts Spirit Wuju 561142 at the caster and reads it gone (0): a second Wuju replaces the first. Every Wuju here is an instant cast (CastingTimeIndex 1) with a 1500 ms global cooldown (StartRecoveryTime 1500 for Spirit Wuju 561142, Power Wuju 707676 and Greater Power Wuju 712458; Resourceful Wuju 578344 has 1000 ms) and no cooldown; the scenario waits 1700 ms after the setup cast, past the global cooldown, and sets power 2000 before the casts (8% to 16% of the base mana each, so two casts never run dry). Player report #12499 (Greater Power Wuju 712458, buffs of several Witch Doctors cancelling each other): the report asks for different Wuju buffs from different casters to coexist, which the tooltip sentence contradicts; this entry proves the tooltip sentence (one Wuju per target, here from one caster) and cannot show the cross-caster failure, because the scenario has one Witch Doctor caster (guide section 8: owner question, see the report)."
+    },
+    {
+      "spell": 561142,
+      "name": "Spirit Wuju (one Wuju at a time: the new Spirit Wuju is active)",
+      "kind": "metric_delta",
+      "variant": "active",
+      "label_suffix": "active",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 561142,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        707676
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1700,
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 561142
+      },
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:90-93 (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216) and :198-210 (aura script Apply, first effect): when a Wuju applies it removes every other Wuju aura on the target whatever its caster (RemoveAurasDueToSpell(spell, guid)), so one Wuju is active on a target at a time, the tooltip sentence \"Can only have 1 Wuju active on a target at a time.\" (G-1: the tooltip governs). Both phases cast Power Wuju 707676 for real at the caster (the setup cast, power set to 2000, 1700 ms of wait). The uncast before phase reads the aura 561142 absent (0, the control: it has not been cast); the after phase casts Spirit Wuju 561142 at the caster and reads it present (1): the second Wuju is the one that stays, so the cast does not simply remove both. Every Wuju here is an instant cast (CastingTimeIndex 1) with a 1500 ms global cooldown (StartRecoveryTime 1500 for Spirit Wuju 561142, Power Wuju 707676 and Greater Power Wuju 712458; Resourceful Wuju 578344 has 1000 ms) and no cooldown; the scenario waits 1700 ms after the setup cast, past the global cooldown, and sets power 2000 before the casts (8% to 16% of the base mana each, so two casts never run dry). Player report #12499 (Greater Power Wuju 712458, buffs of several Witch Doctors cancelling each other): the report asks for different Wuju buffs from different casters to coexist, which the tooltip sentence contradicts; this entry proves the tooltip sentence (one Wuju per target, here from one caster) and cannot show the cross-caster failure, because the scenario has one Witch Doctor caster (guide section 8: owner question, see the report)."
+    },
+    {
+      "spell": 507082,
+      "name": "Dark Idol (an idol is summoned)",
+      "kind": "metric_delta",
+      "variant": "idol",
+      "label_suffix": "idol",
+      "quote": "near you for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 507082,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50117
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:571-606 (spell script on every summon-effect spell: PreventHitDefaultEffect, then Summon(player, spell, target, position)), :171-215 (Summon: entry 50117 from Effect[0] MiscValue, SummonCreature TEMPSUMMON_TIMED_DESPAWN for the spell duration, owner set to the caster) and :515-519 (the idol AI applies Dark Idol 505195 to its allies). Dark Idol 507082: CastingTimeIndex 1 (instant), DurationIndex 3 = 60000 ms ($d), ManaCostPercentage 12, StartRecoveryTime 1000, TARGET_DEST_CASTER_BACK_LEFT; creature 50117 exists (rev_20260909_00_witch_doctor_completion.sql:506-509). A real cast at the caster; the creatures of entry 50117 near the caster are counted 1500 ms after it. Control: the uncast before phase reads 0. Player report #11995 (Dark Idol \"does not summon a totem\"): this entry would read 0 owned idols if the cast did not summon the creature, so it can show the reported failure; the code path reads as working. Cast timing checked: instant, power set to 2000 before the cast."
+    },
+    {
+      "spell": 507082,
+      "name": "Dark Idol (the idol lasts 60 sec)",
+      "kind": "metric_delta",
+      "variant": "idol_lasts",
+      "label_suffix": "idol_lasts",
+      "quote": "near you for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 507082,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50117
+      },
+      "after_expiry_expected": 0,
+      "wait_ms": 58500,
+      "expiry_wait_ms": 3000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          57000,
+          60000
+        ],
+        "expired": [
+          60000,
+          63000
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:571-606 (spell script on every summon-effect spell: PreventHitDefaultEffect, then Summon(player, spell, target, position)), :171-215 (Summon: entry 50117 from Effect[0] MiscValue, SummonCreature TEMPSUMMON_TIMED_DESPAWN for the spell duration, owner set to the caster) and :515-519 (the idol AI applies Dark Idol 505195 to its allies). Dark Idol 507082: CastingTimeIndex 1 (instant), DurationIndex 3 = 60000 ms ($d), ManaCostPercentage 12, StartRecoveryTime 1000, TARGET_DEST_CASTER_BACK_LEFT; creature 50117 exists (rev_20260909_00_witch_doctor_completion.sql:506-509). The idol lives for its DurationIndex 3 = 60000 ms ($d), summoned at the instant cast. It is counted 58500 ms after the cast (present) and 3000 ms later (gone), so the end lies inside the G-19 band (5% of 60000 ms = 3000 ms) on both sides, with the reads stamped in game time (windows 57000 to 60000 and 60000 to 63000 ms). Control: the uncast before phase reads 0. Player report #11995 (Dark Idol \"does not summon a totem\"): this entry would read 0 owned idols if the cast did not summon the creature, so it can show the reported failure; the code path reads as working. Cast timing checked: instant."
+    },
+    {
+      "spell": 507082,
+      "name": "Dark Idol (Shadow Resistance +60 for the caster)",
+      "kind": "metric_delta",
+      "variant": "resist",
+      "label_suffix": "resist",
+      "quote": "increased Shadow Resistance.",
+      "expected": 60,
+      "before_expected": 0,
+      "expected_gain": 60,
+      "tolerance": 1,
+      "trigger_spell": 507082,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:571-606 (spell script on every summon-effect spell: PreventHitDefaultEffect, then Summon(player, spell, target, position)), :171-215 (Summon: entry 50117 from Effect[0] MiscValue, SummonCreature TEMPSUMMON_TIMED_DESPAWN for the spell duration, owner set to the caster) and :515-519 (the idol AI applies Dark Idol 505195 to its allies). Dark Idol 507082: CastingTimeIndex 1 (instant), DurationIndex 3 = 60000 ms ($d), ManaCostPercentage 12, StartRecoveryTime 1000, TARGET_DEST_CASTER_BACK_LEFT; creature 50117 exists (rev_20260909_00_witch_doctor_completion.sql:506-509). 505195 Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, EffectMiscValue 32 (Shadow), EffectBasePoints 59 + 1 = 60 ($505195s1), SPELL_EFFECT_APPLY_AREA_AURA_RAID with EffectRadiusIndex 10 = 30 yd (AscensionWitchDoctorSummons.cpp:378-383, Field(): cast by the idol with its owner as original caster, duration set to 2200 ms and renewed each second). A real Dark Idol cast at the caster; the caster's Shadow resistance (Unit::GetResistance, school 5, a live read) is read before the cast (the uncast before phase, the control) and 3500 ms after it, the gain judged as +60 within 1. Player report #11995 (Dark Idol \"does not summon a totem\"): this entry would read 0 owned idols if the cast did not summon the creature, so it can show the reported failure; the code path reads as working. Cast timing checked: instant; the idol applies the aura within its first one or two updates, well inside the 3500 ms wait."
+    },
+    {
+      "spell": 507082,
+      "name": "Dark Idol (a grouped ally inside 30 yd gains the aura)",
+      "kind": "aura_presence",
+      "variant": "ally_inside",
+      "label_suffix": "ally_inside",
+      "quote": "Allies within $505195A1 yds",
+      "metric": "aura",
+      "fields": {
+        "spell": 505195
+      },
+      "target": "ally",
+      "target_distance": 20,
+      "wait_ms": 4500,
+      "reason": "AscensionWitchDoctorSummons.cpp:571-606 (spell script on every summon-effect spell: PreventHitDefaultEffect, then Summon(player, spell, target, position)), :171-215 (Summon: entry 50117 from Effect[0] MiscValue, SummonCreature TEMPSUMMON_TIMED_DESPAWN for the spell duration, owner set to the caster) and :515-519 (the idol AI applies Dark Idol 505195 to its allies). Dark Idol 507082: CastingTimeIndex 1 (instant), DurationIndex 3 = 60000 ms ($d), ManaCostPercentage 12, StartRecoveryTime 1000, TARGET_DEST_CASTER_BACK_LEFT; creature 50117 exists (rev_20260909_00_witch_doctor_completion.sql:506-509). The ally is grouped with the caster and stands 20 yd away, inside the 30 yd ($505195A1) of the idol that stands about 3 yd from the caster (EffectRadiusIndex 15 = 3 yd at TARGET_DEST_CASTER_BACK_LEFT); it reads 505195 absent before the cast (the control) and present 4500 ms after a real cast at the caster. Player report #11995 (Dark Idol \"does not summon a totem\"): this entry would read 0 owned idols if the cast did not summon the creature, so it can show the reported failure; the code path reads as working. Cast timing checked: instant."
+    },
+    {
+      "spell": 507082,
+      "name": "Dark Idol (a grouped ally beyond 30 yd does not gain the aura)",
+      "kind": "aura_presence",
+      "variant": "ally_outside",
+      "label_suffix": "ally_outside",
+      "quote": "Allies within $505195A1 yds",
+      "metric": "aura",
+      "fields": {
+        "spell": 505195
+      },
+      "target": "ally",
+      "target_distance": 45,
+      "present": false,
+      "wait_ms": 4500,
+      "reason": "AscensionWitchDoctorSummons.cpp:571-606 (spell script on every summon-effect spell: PreventHitDefaultEffect, then Summon(player, spell, target, position)), :171-215 (Summon: entry 50117 from Effect[0] MiscValue, SummonCreature TEMPSUMMON_TIMED_DESPAWN for the spell duration, owner set to the caster) and :515-519 (the idol AI applies Dark Idol 505195 to its allies). Dark Idol 507082: CastingTimeIndex 1 (instant), DurationIndex 3 = 60000 ms ($d), ManaCostPercentage 12, StartRecoveryTime 1000, TARGET_DEST_CASTER_BACK_LEFT; creature 50117 exists (rev_20260909_00_witch_doctor_completion.sql:506-509). The control arm of the inside entry: the same cast with the grouped ally 45 yd away, 15 yd beyond the 30 yd radius, must leave the ally without 505195 while the caster carries it (the \"caster\" expectation), so the radius limit and not only the reach is shown. Cast timing checked: instant."
+    },
+    {
+      "spell": 681007,
+      "name": "Fool's Play (a copy of the target is summoned)",
+      "kind": "metric_delta",
+      "variant": "copy",
+      "label_suffix": "copy",
+      "quote": "summon a copy of them for $d",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 681007,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 300660
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:181-183 (Summon(): entry NpcFool 300660 for Fool's Play 681007), :342-352 (SetGUID(DataTarget): the clone takes the target's display and damage range, REACT_AGGRESSIVE, AttackStart(target)) and :446-454 (the clone despawns when its target is gone, otherwise melee-attacks). Fool's Play 681007: CastingTimeIndex 1 (instant), RecoveryTime 120000 (reset by the scenario), DurationIndex 18 = 20000 ms ($d), ManaCostPercentage 17, Effect[0] SPELL_EFFECT_SCRIPT_EFFECT at TARGET_UNIT_TARGET_ENEMY handled by the summon spell script (AscensionWitchDoctorSummons.cpp:604-605). A real cast at the dummy; the creatures of entry 300660 near the caster are counted 1500 ms after it. Control: the uncast before phase reads 0. No player report names this clause. Cast timing checked: instant."
+    },
+    {
+      "spell": 681007,
+      "name": "Fool's Play (the copy attacks its target)",
+      "kind": "metric_delta",
+      "variant": "attacks",
+      "label_suffix": "attacks",
+      "quote": "that attacks them",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 681007,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 300660,
+        "target": "dummy"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:181-183 (Summon(): entry NpcFool 300660 for Fool's Play 681007), :342-352 (SetGUID(DataTarget): the clone takes the target's display and damage range, REACT_AGGRESSIVE, AttackStart(target)) and :446-454 (the clone despawns when its target is gone, otherwise melee-attacks). Fool's Play 681007: CastingTimeIndex 1 (instant), RecoveryTime 120000 (reset by the scenario), DurationIndex 18 = 20000 ms ($d), ManaCostPercentage 17, Effect[0] SPELL_EFFECT_SCRIPT_EFFECT at TARGET_UNIT_TARGET_ENEMY handled by the summon spell script (AscensionWitchDoctorSummons.cpp:604-605). The owned_creature_count read with a target counts only the creatures of the entry whose victim is that unit (CoAGameplayTest.cpp, metric owned_creature_count, the victim filter), so 1 means the copy is fighting the dummy. Control: the uncast before phase reads 0. Cast timing checked: instant; read 2000 ms after the cast."
+    },
+    {
+      "spell": 681007,
+      "name": "Fool's Play (the copy lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "copy_lasts",
+      "label_suffix": "copy_lasts",
+      "quote": "summon a copy of them for $d",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 681007,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 300660
+      },
+      "after_expiry_expected": 0,
+      "wait_ms": 19400,
+      "expiry_wait_ms": 1200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19000,
+          20000
+        ],
+        "expired": [
+          20000,
+          21000
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:181-183 (Summon(): entry NpcFool 300660 for Fool's Play 681007), :342-352 (SetGUID(DataTarget): the clone takes the target's display and damage range, REACT_AGGRESSIVE, AttackStart(target)) and :446-454 (the clone despawns when its target is gone, otherwise melee-attacks). Fool's Play 681007: CastingTimeIndex 1 (instant), RecoveryTime 120000 (reset by the scenario), DurationIndex 18 = 20000 ms ($d), ManaCostPercentage 17, Effect[0] SPELL_EFFECT_SCRIPT_EFFECT at TARGET_UNIT_TARGET_ENEMY handled by the summon spell script (AscensionWitchDoctorSummons.cpp:604-605). The copy is a TEMPSUMMON_TIMED_DESPAWN summon of the spell duration (Summon(), AscensionWitchDoctorSummons.cpp:207), 20000 ms. It is counted 19400 ms after the cast (present) and 1200 ms later (gone), the end inside the G-19 band (5% of 20000 ms = 1000 ms) on both sides, with the reads stamped in game time (windows 19000 to 20000 and 20000 to 21000 ms). Control: the uncast before phase reads 0. Cast timing checked: instant."
+    },
+    {
+      "spell": 705943,
+      "name": "Shadow Avatar (spell haste +20%)",
+      "kind": "metric_delta",
+      "variant": "cast_haste",
+      "label_suffix": "cast_haste",
+      "quote": "increasing your haste and reducing your Shadow damage taken by $s2%",
+      "expected": 0.83333,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "trigger_spell": 705943,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Shadow Avatar 705943: instant (CastingTimeIndex 1), RecoveryTime 90000 reset by the scenario, DurationIndex 8 = 15000 ms, 15% mana, no global cooldown; Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (Shadow, misc 32), BasePoints -21 + 1 = -20; Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS, 19 + 1 = 20; Effect[2] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, 19 + 1 = 20. The aura script makes the first effect periodic every 1000 ms (AscensionWitchDoctorAuras.cpp:167-173). A real cast at the caster; the caster's cast speed multiplier (UNIT_MOD_CAST_SPEED, a live read; the Necromancer Frost Runes cast_haste entry is the model) reads 1 before the cast (the uncast before phase, the control) and 1 / 1.20 = 0.83333 500 ms after it. Cast timing checked: instant. The tooltip states no haste magnitude: the figure 20% is read from the DBC (Effect[1] 19 + 1 and Effect[2] 19 + 1) and is the same value the tooltip token $s2 gives for the Shadow damage taken claim, so this entry proves that the buff hastes at the DBC figure, not a tooltip number."
+    },
+    {
+      "spell": 705943,
+      "name": "Shadow Avatar (melee haste +20%)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "increasing your haste and reducing your Shadow damage taken by $s2%",
+      "expected": 2166.6667,
+      "before_expected": 2600,
+      "tolerance": 0.05,
+      "trigger_spell": 705943,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Shadow Avatar 705943: instant (CastingTimeIndex 1), RecoveryTime 90000 reset by the scenario, DurationIndex 8 = 15000 ms, 15% mana, no global cooldown; Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (Shadow, misc 32), BasePoints -21 + 1 = -20; Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS, 19 + 1 = 20; Effect[2] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, 19 + 1 = 20. The aura script makes the first effect periodic every 1000 ms (AscensionWitchDoctorAuras.cpp:167-173). A real cast at the caster; the main-hand attack time (a live read) is the reference weapon's 2600 ms (item 72038, speed_ms 2600 in the class file) before the cast (the uncast before phase, the control) and 2600 / 1.20 = 2166.6667 ms 500 ms after it (the Necromancer Frost Runes melee_haste entry is the model). Cast timing checked: instant. The tooltip states no haste magnitude: the figure 20% is read from the DBC (Effect[1] 19 + 1 and Effect[2] 19 + 1) and is the same value the tooltip token $s2 gives for the Shadow damage taken claim, so this entry proves that the buff hastes at the DBC figure, not a tooltip number."
+    },
+    {
+      "spell": 705943,
+      "name": "Shadow Avatar (Shadow damage taken -20%)",
+      "kind": "taken_hit",
+      "variant": "shadow_taken",
+      "label_suffix": "shadow_taken",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "increasing your haste and reducing your Shadow damage taken by $s2%",
+      "strike_spell": 530295,
+      "trials": 20,
+      "caster_health_pct": 90,
+      "caster_max_health": 100000,
+      "cast_power": 2000,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              705943,
+              0
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              705943,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              705943,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Shadow Avatar 705943: instant (CastingTimeIndex 1), RecoveryTime 90000 reset by the scenario, DurationIndex 8 = 15000 ms, 15% mana, no global cooldown; Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (Shadow, misc 32), BasePoints -21 + 1 = -20; Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS, 19 + 1 = 20; Effect[2] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, 19 + 1 = 20. The aura script makes the first effect periodic every 1000 ms (AscensionWitchDoctorAuras.cpp:167-173). A level 60 striker (entry 36, passive, 3 yd away) casts Blood Frenzy 530295 (Shadow, SPELL_EFFECT_SCHOOL_DAMAGE, DmgClass 1 magic, instant, EffectBasePoints 164 + 4 per level above level 59, RangeIndex 13, no cost) at the caster, held at 90% of 100000 health, 20 trials per arm; the control arm takes the strikes with no Avatar, the treatment arm casts Avatar 705943 before every strike (any earlier Avatar removed first). Non-critical logged hits are compared as a hit ratio: expected 0.8 (the stated 20%), judged in the G-19 band. The strike spell is an assumption of this entry (the class files use only Holy and Physical strikes): its cost-free instant cast by the striker, its school Shadow (SchoolMask 32) and a single damage effect are read from the DBC; it has no player or caster script in src/server/coa. Cast timing checked: instant."
+    },
+    {
+      "spell": 705943,
+      "name": "Shadow Avatar (Vol'jin's Blessing cuts the Spirit Glaive cooldown by 20% a second)",
+      "kind": "metric_delta",
+      "variant": "glaive_cd",
+      "label_suffix": "glaive_cd",
+      "quote": "every $706489t1 sec",
+      "expected": 3581,
+      "before_expected": 12000,
+      "expected_gain": -8419,
+      "tolerance": 400,
+      "trigger_spell": 705943,
+      "gate_spell": 706577,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        562719
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2500,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 562719
+      },
+      "wait_ms": 3500,
+      "expire_ms": 15500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:342-349 (aura script Tick, Avatar first effect, every 1000 ms): with Vol'jin's Blessing 706577 on the caster, Reduce(player, Glaive, GetSpellCooldownDelay(glaive) / 5) cuts the remaining Spirit Glaive cooldown by 20% ($706803s1 = 19 + 1) each second ($706489t1 = 1 sec). Shadow Avatar 705943: instant (CastingTimeIndex 1), RecoveryTime 90000 reset by the scenario, DurationIndex 8 = 15000 ms, 15% mana, no global cooldown; Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (Shadow, misc 32), BasePoints -21 + 1 = -20; Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS, 19 + 1 = 20; Effect[2] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, 19 + 1 = 20. The aura script makes the first effect periodic every 1000 ms (AscensionWitchDoctorAuras.cpp:167-173). Each phase casts a real Spirit Glaive 562719 at the dummy (2000 ms cast, CategoryRecoveryTime 20000 counted from the cast end, GCD 1500), waits 2500 ms (about 19400 ms of cooldown remain, R0: the 503712 behaviour_metric_delta volley_cdr entry read 19389 after the same wait in final03), casts Avatar and waits 3500 ms; 706577 is learned between the phases and expire_ms 15500 lets the first Avatar (15000 ms) end before the second phase. Control: the before phase (talent unknown) reads R0 - 3500, about 15900 ms. With the talent three ticks fall inside the wait (1000, 2000, 3000 ms): R = 0.512 x R0 - 2452, about 7481 ms. The judge takes after minus before = -0.488 x R0 + 1048, about -8419 for R0 = 19400 (R0 from 19300 to 19500 gives -8370 to -8468, inside the 400 tolerance); before_expected 12000 is the floor of the before reading. A cut other than 20% a second moves the reading outside the tolerance (5% a second would read about -2500, 50% about -14850). Cast timing checked: Glaive 2000 ms cast, Avatar instant, ticks at 1000 ms intervals."
+    },
+    {
+      "spell": 811117,
+      "name": "Spirit Eclipse (one hit for each active Spirit)",
+      "kind": "metric_delta",
+      "variant": "spirit_hits",
+      "label_suffix": "spirit_hits",
+      "quote": "for each active Spirit.",
+      "expected": 6,
+      "before_expected": 1,
+      "trigger_spell": 811117,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802717,
+        "target": "dummy"
+      },
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:149 (OnCalcMaxDuration: the Eclipse aura lasts 250 ms x the Spirits the caster has) and AscensionWitchDoctorAuras.cpp:285-296 (aura script Tick: at most one 802717 hit per tick, _ticks < _spirits, then Remove()). Spirit Eclipse 811117 (rank 7): instant, CategoryRecoveryTime 10000 reset by the scenario, GCD 1500, 12% mana, CasterAuraSpell 561136 (Spirit, set to one stack by the harness before every cast), Effect[0] aura 227 every 250 ms ($t1). The treatment phase makes Spirits by a real Mirage 501136 (instant, 29% mana, cooldown 180000 reset; AscensionWitchDoctorAbilities.cpp:345-346: id == Mirage gives GainSpirit(player, 5), five stacks of 561136), so the Eclipse that follows after 1700 ms strikes five times; the control phase makes none (setup_only_after) and keeps the single Spirit of the required aura, one hit. The caster's 802717 damage events on the dummy are counted cumulatively across the phases: 1 after the first phase (before_expected 1) and 1 + 5 = 6 after the second. Spirits are not set by set_aura here: the required-aura fixture would reset them to one before the cast. Cast timing checked: Eclipse instant, 1250 ms for five ticks, read 3500 ms after the cast; Mirage GCD respected by 1700 ms of wait. Tool note: the damage amount (\"dealing ${...}\") and the 250 ms period have no behaviour route (hit_mean is unmodelled for 811117, hit_period needs two Spirits and its fixture sets one)."
+    },
+    {
+      "spell": 500960,
+      "name": "Serpent Ward (lasts 60 sec)",
+      "kind": "metric_delta",
+      "variant": "ward_lasts",
+      "label_suffix": "ward_lasts",
+      "quote": "near you for $d",
+      "trigger_spell": 500960,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50105
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 59700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          57000,
+          63000
+        ],
+        "expired": [
+          57000,
+          63000
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:171-224 (Summon): the summon effect of the spell (SPELL_EFFECT_SUMMON, spell_ascension_witch_doctor_summon, SQL rev_20260909_00_witch_doctor_completion.sql:40-41) makes one TEMPSUMMON_TIMED_DESPAWN creature owned by the caster for the spell duration, and the slot rule at :216-220 despawns every earlier summon of the same slot (Slot(), :40-70). Serpent Ward 500960: instant (CastingTimeIndex 1), no cooldown, GCD 1000 (StartRecoveryTime 1000), 5% mana, DurationIndex 3 = 60000 ms, summon creature 50105 (SPELL_EFFECT_SUMMON MiscValue 50105). A real cast at the caster (cast_power 2000, below the 2567 maximum mana) summons one creature 50105: owned_creature_count reads 1 at 59700 ms and 0 at 60300 ms after the cast, so the despawn lies inside the G-19 band (5% of 60000 ms = 3000 ms) on both sides, with both reads stamped in game time. Control: the uncast before phase reads 0 (with 500960 learned), so a cast that summons nothing reads 0 after and alerts. Clause 392 \"Drop a Serpent Ward near you for $d\". Player reports: none on this spell."
+    },
+    {
+      "spell": 500960,
+      "name": "Serpent Ward (the ward spits fire only while its owner is in combat)",
+      "kind": "metric_delta",
+      "variant": "spits_fire",
+      "label_suffix": "spits_fire",
+      "quote": "The ward spits fire at nearby enemies",
+      "trigger_spell": 573026,
+      "target": "dummy",
+      "select_dummy": true,
+      "setup_casts": [
+        500960
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 4300,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "owned_creature_spell_cast_count",
+      "fields": {
+        "entry": 50105,
+        "spell": 573055
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 2,
+      "after_at_most": 3,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:466-468 and :490: every WardAttackInterval() (2000 ms at no spell haste, :312) the Serpent Ward 50105 (npc_ascension_witch_doctor) takes Enemy(player) (:420-433: the owner must be in combat; the selected target within 30 yd and in line of sight, else any enemy the owner is in combat with) and casts Serpent Ward Attack 573055 at it. Ward 500960 is cast for real as the setup cast in both phases (at the caster, instant, GCD 1000, 5% mana) and read for owned_creature_spell_cast_count of 573055 (ProcCounter::CastCount of the creature, triggered casts included). The setup wait is 4300 ms in both phases, so the ward has run its 2000 and 4000 ms updates before the first read. Before phase: the ward stands, the owner never enters combat and the read finds 0 casts (the control: the ward does not spit without an engaged owner, although two update ticks have passed). After phase: the ward is cast again (the earlier ward despawns, Summons.cpp:216-220), 4300 ms later a real Hexfire 573026 (instant, 17% mana, 10000 ms category cooldown reset by the scenario, GCD 1500) at the selected dummy 3 yd away puts the owner in combat, and 4000 ms later (age 8300 ms) the ward has cast 573055 at its 6000 and 8000 ms updates: 2 casts, 3 allowed for step overhead (a third at 10000 ms is beyond the read). The second part of clause 393, \"attempting to focus on your primary target\", needs a second enemy in combat with the owner so that the ward chooses between two (Enemy() prefers the selected unit, :422-424); metric_delta has one dummy (tool note T-B4-2). Player reports: none on this spell."
+    },
+    {
+      "spell": 500960,
+      "name": "Serpent Ward (only 1 Ward at a time: Healing Ward is replaced)",
+      "kind": "metric_delta",
+      "variant": "one_ward",
+      "label_suffix": "one_ward",
+      "quote": "Can only have 1 Ward active at a time.",
+      "trigger_spell": 500960,
+      "target": "caster",
+      "setup_casts": [
+        500957
+      ],
+      "setup_wait_ms": 1100,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50104
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:171-224 (Summon): the summon effect of the spell (SPELL_EFFECT_SUMMON, spell_ascension_witch_doctor_summon, SQL rev_20260909_00_witch_doctor_completion.sql:40-41) makes one TEMPSUMMON_TIMED_DESPAWN creature owned by the caster for the spell duration, and the slot rule at :216-220 despawns every earlier summon of the same slot (Slot(), :40-70). The slot rule is Slot(): Healing Ward 50104 (NpcHealing), Serpent Ward 50105, Stasis 50108 and Sentry Ward 51104 all return WardSlot, so a Ward of any of these despawns the owner's earlier Ward. Healing Ward 500957: instant, GCD 1000, 18% mana, no cooldown, summon creature 50104; Serpent Ward 500960 as above. Both phases cast Healing Ward first (setup, 1100 ms past the GCD). Before phase: the setup alone, owned_creature_count of 50104 reads 1 (control: a Healing Ward stands). After phase: the Healing Ward is cast again and then Serpent Ward 500960; 1500 ms later no Healing Ward remains, so the owner holds one Ward. A second Ward that did not replace the first would read 1. Clause 394 \"Can only have 1 Ward active at a time.\" Player reports: none on this spell."
+    },
+    {
+      "spell": 505339,
+      "name": "Shadow Effigy (lasts 60 sec)",
+      "kind": "metric_delta",
+      "variant": "effigy_lasts",
+      "label_suffix": "effigy_lasts",
+      "quote": "near you for $d",
+      "trigger_spell": 505339,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50119
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 59700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          57000,
+          63000
+        ],
+        "expired": [
+          57000,
+          63000
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:171-224 (Summon): the summon effect of the spell (SPELL_EFFECT_SUMMON, spell_ascension_witch_doctor_summon, SQL rev_20260909_00_witch_doctor_completion.sql:40-41) makes one TEMPSUMMON_TIMED_DESPAWN creature owned by the caster for the spell duration, and the slot rule at :216-220 despawns every earlier summon of the same slot (Slot(), :40-70). Shadow Effigy 505339: instant, RecoveryTime 12000 (reset by the scenario), GCD 1000, 15% mana, DurationIndex 3 = 60000 ms, summon creature 50119 (TARGET_DEST_CASTER_BACK_RIGHT). A real cast at the caster (cast_power 2000) summons one creature 50119: owned_creature_count reads 1 at 59700 ms and 0 at 60300 ms after the cast, inside the G-19 band (3000 ms) on both sides, both reads stamped in game time. Control: the uncast before phase reads 0. Clause 399 \"Drop a Shadow Effigy near you for $d\". Player reports: none on this spell."
+    },
+    {
+      "spell": 505339,
+      "name": "Shadow Effigy (only 1 Effigy at a time: Graven Effigy is replaced)",
+      "kind": "metric_delta",
+      "variant": "one_effigy",
+      "label_suffix": "one_effigy",
+      "quote": "Can only have 1 Effigy active at a time.",
+      "trigger_spell": 505339,
+      "target": "caster",
+      "setup_casts": [
+        506635
+      ],
+      "setup_wait_ms": 1100,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50122
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:171-224 (Summon): the summon effect of the spell (SPELL_EFFECT_SUMMON, spell_ascension_witch_doctor_summon, SQL rev_20260909_00_witch_doctor_completion.sql:40-41) makes one TEMPSUMMON_TIMED_DESPAWN creature owned by the caster for the spell duration, and the slot rule at :216-220 despawns every earlier summon of the same slot (Slot(), :40-70). Slot() returns EffigySlot for Shadow 50119, Hexing 50120, Cursed 50121 and Graven 50122. Graven Effigy 506635: instant, GCD 1000, 20% mana plus 12, no cooldown, summon creature 50122 (SQL :110-111 binds the summon script). Both phases cast Graven Effigy first (setup, 1100 ms past the GCD). Before phase: the setup alone, owned_creature_count of 50122 reads 1 (control). After phase: Graven Effigy again, then Shadow Effigy 505339 (cooldown reset by the scenario); 1500 ms later no Graven Effigy remains. Clause 402 \"Can only have 1 Effigy active at a time.\" Player reports: none on this spell."
+    },
+    {
+      "spell": 674303,
+      "name": "Sentry Ward (lasts 60 sec)",
+      "kind": "metric_delta",
+      "variant": "ward_lasts",
+      "label_suffix": "ward_lasts",
+      "quote": "near you for $d",
+      "trigger_spell": 674303,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51104
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 59700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          57000,
+          63000
+        ],
+        "expired": [
+          57000,
+          63000
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:171-224 (Summon): the summon effect of the spell (SPELL_EFFECT_SUMMON, spell_ascension_witch_doctor_summon, SQL rev_20260909_00_witch_doctor_completion.sql:40-41) makes one TEMPSUMMON_TIMED_DESPAWN creature owned by the caster for the spell duration, and the slot rule at :216-220 despawns every earlier summon of the same slot (Slot(), :40-70). Sentry Ward 674303 (#12534, \"doesnt work at all\"): instant, GCD 1000, 15% mana plus 25, DurationIndex 3 = 60000 ms, summon creature 51104 (SQL :166-167 binds the summon script, :551-554 the creature). AscensionWitchDoctorSummons.cpp:521-525: every second the ward takes Nearby(me, 30 yd) and, for each unit the owner is hostile to and the ward sees, player->AddAura(SentryReveal 505173, enemy) with duration 2200 ms; Completion.cpp:526-530 rewrites 505173 to one SPELL_AURA_MOD_STALKED effect (aura 68), and Unit::IsAlwaysDetectableFor (Unit.cpp:12368) makes a unit carrying it always detectable by the aura caster, ahead of every stealth and invisibility check (Object.cpp:1975). A real cast at the caster (cast_power 2000) summons creature 51104: owned_creature_count reads 1 at 59700 ms and 0 at 60300 ms after the cast, inside the G-19 band (3000 ms) on both sides, both reads stamped in game time. Control: the uncast before phase reads 0, so a cast that summons nothing (the report) alerts. Clause 425 \"Drop a Sentry Ward near you for $d\"."
+    },
+    {
+      "spell": 674303,
+      "name": "Sentry Ward (reveals an enemy 3 yd away: the reveal aura lands)",
+      "kind": "metric_delta",
+      "variant": "reveal_aura",
+      "label_suffix": "reveal_aura",
+      "quote": "reveals all stealthed and invisible enemies near it",
+      "trigger_spell": 674303,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 505173,
+        "caster": "caster"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Sentry Ward 674303 (#12534, \"doesnt work at all\"): instant, GCD 1000, 15% mana plus 25, DurationIndex 3 = 60000 ms, summon creature 51104 (SQL :166-167 binds the summon script, :551-554 the creature). AscensionWitchDoctorSummons.cpp:521-525: every second the ward takes Nearby(me, 30 yd) and, for each unit the owner is hostile to and the ward sees, player->AddAura(SentryReveal 505173, enemy) with duration 2200 ms; Completion.cpp:526-530 rewrites 505173 to one SPELL_AURA_MOD_STALKED effect (aura 68), and Unit::IsAlwaysDetectableFor (Unit.cpp:12368) makes a unit carrying it always detectable by the aura caster, ahead of every stealth and invisibility check (Object.cpp:1975). The dummy stands 3 yd from the caster (inside the 30 yd search and the 10 yd radius of 505173 in the DBC). The aura read is an event read (aura on the unit, caster the player). Control: the uncast before phase reads 0 on the same dummy; after one real Sentry Ward cast and 2500 ms (the first ward update runs at once, then every 1000 ms, the aura lasts 2200 ms and is refreshed) it must read 1. The paired reveal reads are reveal_stealth and reveal_invisible. Clause 425 \"that reveals all stealthed and invisible enemies near it\"."
+    },
+    {
+      "spell": 674303,
+      "name": "Sentry Ward (does not mark an enemy 45 yd away)",
+      "kind": "metric_delta",
+      "variant": "reveal_aura_far",
+      "label_suffix": "reveal_aura_far",
+      "quote": "reveals all stealthed and invisible enemies near it",
+      "trigger_spell": 674303,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 505173,
+        "caster": "caster"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 0,
+      "dummy_distance": 45,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Sentry Ward 674303 (#12534, \"doesnt work at all\"): instant, GCD 1000, 15% mana plus 25, DurationIndex 3 = 60000 ms, summon creature 51104 (SQL :166-167 binds the summon script, :551-554 the creature). AscensionWitchDoctorSummons.cpp:521-525: every second the ward takes Nearby(me, 30 yd) and, for each unit the owner is hostile to and the ward sees, player->AddAura(SentryReveal 505173, enemy) with duration 2200 ms; Completion.cpp:526-530 rewrites 505173 to one SPELL_AURA_MOD_STALKED effect (aura 68), and Unit::IsAlwaysDetectableFor (Unit.cpp:12368) makes a unit carrying it always detectable by the aura caster, ahead of every stealth and invisibility check (Object.cpp:1975). Control arm of reveal_aura for \"near it\": the dummy stands 45 yd from the caster, beyond the ward's 30 yd search (Summons.cpp:522) and the 10 yd radius of 505173 in the DBC, so the same cast must leave it unmarked (0 and 0). The tooltip gives no distance; the arm only shows that the reveal is local, and it would pass vacuously if the ward did nothing, so it is read with reveal_aura, whose arm at 3 yd fails then."
+    },
+    {
+      "spell": 674303,
+      "name": "Sentry Ward (a stealthed enemy 3 yd away becomes detectable)",
+      "kind": "metric_delta",
+      "variant": "reveal_stealth",
+      "label_suffix": "reveal_stealth",
+      "quote": "reveals all stealthed and invisible enemies near it",
+      "trigger_spell": 674303,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          2144558,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Sentry Ward 674303 (#12534, \"doesnt work at all\"): instant, GCD 1000, 15% mana plus 25, DurationIndex 3 = 60000 ms, summon creature 51104 (SQL :166-167 binds the summon script, :551-554 the creature). AscensionWitchDoctorSummons.cpp:521-525: every second the ward takes Nearby(me, 30 yd) and, for each unit the owner is hostile to and the ward sees, player->AddAura(SentryReveal 505173, enemy) with duration 2200 ms; Completion.cpp:526-530 rewrites 505173 to one SPELL_AURA_MOD_STALKED effect (aura 68), and Unit::IsAlwaysDetectableFor (Unit.cpp:12368) makes a unit carrying it always detectable by the aura caster, ahead of every stealth and invisibility check (Object.cpp:1975). The dummy 3 yd away is hidden by Stealth Dummy 2144558 (aura 16, stealth 1000000), set by the harness in both phases (a precondition fixture: the subject of the claim is the ward, the hiding aura is only the state to reveal; a real Stealth cast would add a combat restriction), as the Templar Crusader Brand detection entry does. can_detect is Unit::CanSeeOrDetect of the caster for the dummy, the predicate every visibility update applies. Control: the uncast before phase reads 0 (hidden, no ward); after one real Sentry Ward cast and 2500 ms it must read 1. can_detect is a readback class metric (coverage.METRIC_EVIDENCE), so this entry alone reads as data; the reveal_aura entry carries the event read of the same cast. A read of the client visible set needs the caster to move (ADR 0222) and metric_delta has no relocate step (tool note T-B4-3)."
+    },
+    {
+      "spell": 674303,
+      "name": "Sentry Ward (a invisible enemy 3 yd away becomes detectable)",
+      "kind": "metric_delta",
+      "variant": "reveal_invisible",
+      "label_suffix": "reveal_invisible",
+      "quote": "reveals all stealthed and invisible enemies near it",
+      "trigger_spell": 674303,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          8149,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Sentry Ward 674303 (#12534, \"doesnt work at all\"): instant, GCD 1000, 15% mana plus 25, DurationIndex 3 = 60000 ms, summon creature 51104 (SQL :166-167 binds the summon script, :551-554 the creature). AscensionWitchDoctorSummons.cpp:521-525: every second the ward takes Nearby(me, 30 yd) and, for each unit the owner is hostile to and the ward sees, player->AddAura(SentryReveal 505173, enemy) with duration 2200 ms; Completion.cpp:526-530 rewrites 505173 to one SPELL_AURA_MOD_STALKED effect (aura 68), and Unit::IsAlwaysDetectableFor (Unit.cpp:12368) makes a unit carrying it always detectable by the aura caster, ahead of every stealth and invisibility check (Object.cpp:1975). The dummy 3 yd away is hidden by Super Invis 8149 (aura 18, invisibility type 0, 10000), set by the harness in both phases (a precondition fixture: the subject of the claim is the ward, the hiding aura is only the state to reveal; a real Stealth cast would add a combat restriction), as the Templar Crusader Brand detection entry does. can_detect is Unit::CanSeeOrDetect of the caster for the dummy, the predicate every visibility update applies. Control: the uncast before phase reads 0 (hidden, no ward); after one real Sentry Ward cast and 2500 ms it must read 1. can_detect is a readback class metric (coverage.METRIC_EVIDENCE), so this entry alone reads as data; the reveal_aura entry carries the event read of the same cast. A read of the client visible set needs the caster to move (ADR 0222) and metric_delta has no relocate step (tool note T-B4-3)."
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju (lasts 30 min)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "with the spirit of Sen'jin for $d",
+      "trigger_spell": 680872,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 680872,
+        "caster": "caster"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 1799500,
+      "expiry_wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1890000
+        ],
+        "expired": [
+          1710000,
+          1890000
+        ]
+      },
+      "observe_source": "Greater Spirit Wuju 680872: instant, GCD 1500, 16% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 29 MOD_STAT Spirit +40 and Effect[1] aura 143 MOD_RESISTANCE_EXCLUSIVE misc 126 +20, both TARGET_UNIT_CASTER_AREA_RAID radius index 10 (30 yd); the caster is a raid member of itself. A real cast at the caster: the aura 680872 is present 1799500 ms after the cast and gone 1000 ms later, so it ends in (1799500, 1800500] ms, inside 5% of the stated 30 min (90000 ms), with both reads stamped in game time (the pattern of the Necromancer Chill of the Tomb and Grim Mandate entries). Control: the uncast before phase reads no aura. Clause 426 \"Imbue all party and raid members with the spirit of Sen'jin for $d\". Player reports: #12499 names the Wujus but not their duration."
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju (Spirit +40)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "increasing their Spirit by $s1",
+      "trigger_spell": 680872,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 4
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 109,
+      "expected": 150,
+      "expected_gain": 41,
+      "tolerance": 1.0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Greater Spirit Wuju 680872: instant, GCD 1500, 16% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 29 MOD_STAT Spirit +40 and Effect[1] aura 143 MOD_RESISTANCE_EXCLUSIVE misc 126 +20, both TARGET_UNIT_CASTER_AREA_RAID radius index 10 (30 yd); the caster is a raid member of itself. Spirit before the cast is the reference 109 (class file reference_stats stat 4); Effect[0] BasePoints 39 + DieSides 1 = +40 ($s1), a flat aura on the Spirit stat (TOTAL_VALUE). The reference character is a Human (race 1) of class 13, and AscensionLiveBaselineData.h:47 grants class 13 Humans The Human Spirit 20598 (aura 137 MOD_TOTAL_STAT_PERCENTAGE misc 4, +3%), which scales a flat total value, so with it known the gain is 40 x 1.03 = 41.2 (stored stats are truncated, a gain of 41 or 42) and without it exactly 40. Presence was not probed, so the entry accepts 40 to 42 (expected gain 41, tolerance 1.0); a wrong amount such as 35 or 45 still alerts. The aura script (Auras.cpp:117-168, Calculate) does not change this amount: none of its branches matches 680872, which is why effect_value reads not_measured (one CalcAmount hook) while aura_amount reads ok. Control: the uncast before phase reads the plain stat. Clause 427 \"increasing their Spirit by $s1\". Player reports: none on the amount."
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju (Holy resistance +20)",
+      "kind": "metric_delta",
+      "variant": "resist_holy",
+      "label_suffix": "resist_holy",
+      "quote": "and their magic resistances by $s2",
+      "trigger_spell": 680872,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 1
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Greater Spirit Wuju 680872: instant, GCD 1500, 16% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 29 MOD_STAT Spirit +40 and Effect[1] aura 143 MOD_RESISTANCE_EXCLUSIVE misc 126 +20, both TARGET_UNIT_CASTER_AREA_RAID radius index 10 (30 yd); the caster is a raid member of itself. Effect[1] BasePoints 19 + DieSides 1 = +20 ($s2) on EffectMiscValue 126 (schools 1 to 6 as a mask), a flat base-value resistance. School 1 (Holy) is read on the caster before and after one real cast and must gain exactly 20 (before_expected 0 is only the least baseline, so any gear resistance cannot hide the gain). Two schools are read, the first and the last bit of the mask (one effect, one mask, G-23). Control: the uncast before phase. Clause 428 \"and their magic resistances by $s2\"."
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju (Arcane resistance +20)",
+      "kind": "metric_delta",
+      "variant": "resist_arcane",
+      "label_suffix": "resist_arcane",
+      "quote": "and their magic resistances by $s2",
+      "trigger_spell": 680872,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 6
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Greater Spirit Wuju 680872: instant, GCD 1500, 16% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 29 MOD_STAT Spirit +40 and Effect[1] aura 143 MOD_RESISTANCE_EXCLUSIVE misc 126 +20, both TARGET_UNIT_CASTER_AREA_RAID radius index 10 (30 yd); the caster is a raid member of itself. Effect[1] BasePoints 19 + DieSides 1 = +20 ($s2) on EffectMiscValue 126 (schools 1 to 6 as a mask), a flat base-value resistance. School 6 (Arcane) is read on the caster before and after one real cast and must gain exactly 20 (before_expected 0 is only the least baseline, so any gear resistance cannot hide the gain). Two schools are read, the first and the last bit of the mask (one effect, one mask, G-23). Control: the uncast before phase. Clause 428 \"and their magic resistances by $s2\"."
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju (a grouped ally in range is buffed)",
+      "kind": "aura_presence",
+      "variant": "party",
+      "label_suffix": "party",
+      "quote": "Imbue all party and raid members",
+      "metric": "aura",
+      "fields": {
+        "spell": 680872
+      },
+      "target": "ally",
+      "target_distance": 20,
+      "wait_ms": 1500,
+      "observe_source": "Greater Spirit Wuju 680872: instant, GCD 1500, 16% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 29 MOD_STAT Spirit +40 and Effect[1] aura 143 MOD_RESISTANCE_EXCLUSIVE misc 126 +20, both TARGET_UNIT_CASTER_AREA_RAID radius index 10 (30 yd); the caster is a raid member of itself. The ally is grouped with the caster (aura_presence groups it) and stands 20 yd away, inside the 30 yd radius of the DBC (the tooltip states no distance). Real cast at the caster, read of aura 680872 on the ally 1500 ms later; the ally reads 0 before the cast (the control). No far arm: the tooltip says \"all party and raid members\" and gives no radius, so a 30 yd edge in the data is a lead, not a clause (see the report). Clause 426 \"Imbue all party and raid members\"."
+    },
+    {
+      "spell": 680872,
+      "name": "Greater Spirit Wuju (replaces the Resourceful Wuju already on the caster)",
+      "kind": "metric_delta",
+      "variant": "one_wuju",
+      "label_suffix": "one_wuju",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 680872,
+      "target": "caster",
+      "setup_casts": [
+        578344
+      ],
+      "setup_wait_ms": 1600,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 578344,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:198-209 (aura_ascension_witch_doctor_lifecycle::Apply): when a Wuju applies (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216, Auras.cpp:90-93) it removes every other Wuju aura of any caster on that target. Greater Spirit Wuju 680872: instant, GCD 1500, 16% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 29 MOD_STAT Spirit +40 and Effect[1] aura 143 MOD_RESISTANCE_EXCLUSIVE misc 126 +20, both TARGET_UNIT_CASTER_AREA_RAID radius index 10 (30 yd); the caster is a raid member of itself. Resourceful Wuju 578344 (SpellFamilyFlags[0] 256, instant, GCD 1000, 10% mana, DurationIndex 30) is cast first in both phases (setup, 1600 ms later so the 1500 ms GCD of the Greater Spirit Wuju is clear). Before phase: Resourceful Wuju alone, its aura reads 1 on the caster (control). After phase: Resourceful Wuju again, then Greater Spirit Wuju 680872; 1500 ms later 578344 is gone. This reads the tooltip literally (one Wuju on a target at a time, whoever cast them). Player report #12499 (Greater Resourceful and Greater Power Wuju from two Witch Doctors, the earlier one drops) states the opposite expectation: the entry shows the server drops it, and whether the tooltip means one per caster is an owner question (see the report). The two-caster arm needs a second Witch Doctor casting; metric_delta has no ally caster (tool note T-B4-1). Clause 429 \"Can only have 1 Wuju active on a target at a time.\""
+    },
+    {
+      "spell": 800195,
+      "name": "Greater Resourceful Wuju (lasts 30 min)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Lasts $d.",
+      "trigger_spell": 800195,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800195,
+        "caster": "caster"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 1799500,
+      "expiry_wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1890000
+        ],
+        "expired": [
+          1710000,
+          1890000
+        ]
+      },
+      "observe_source": "Greater Resourceful Wuju 800195: instant, GCD 1000, 20% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 72 MOD_POWER_COST_SCHOOL_PCT misc 127 BasePoints -6 + DieSides 1 = -5% ($s1), TARGET_UNIT_CASTER_AREA_RAID radius index 12 (100 yd). A real cast at the caster: the aura 800195 is present 1799500 ms after the cast and gone 1000 ms later, inside 5% of the stated 30 min (90000 ms), both reads stamped in game time. Control: the uncast before phase reads no aura. Clause 439 \"Lasts $d.\""
+    },
+    {
+      "spell": 800195,
+      "name": "Greater Resourceful Wuju (resource costs 5% lower)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "reducing their resource costs by $s1%",
+      "trigger_spell": 800195,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 801661
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 100,
+      "expected": 95,
+      "expected_ratio": 0.95,
+      "tolerance": 0.005,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Greater Resourceful Wuju 800195: instant, GCD 1000, 20% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 72 MOD_POWER_COST_SCHOOL_PCT misc 127 BasePoints -6 + DieSides 1 = -5% ($s1), TARGET_UNIT_CASTER_AREA_RAID radius index 12 (100 yd). spell_power_cost reads SpellInfo::CalcPowerCost of Potion Toss 801661 (18% of base mana, about 268, a plain percent cost) for the caster, which applies the school cost multiplier the aura sets (AuraEffect::HandleModPowerCostPCT) before and after one real cast of the Wuju: the ratio must be 0.95, within the rounding of a deterministic readback (G-19: a cost of about 268 is stored as an integer, one point is 0.4%, tolerance 0.005 accepts 0.945 to 0.955 and excludes a 4% or 6% cut); a Wuju that does nothing reads 1.0. before_expected 100 is only the floor of the before reading. Control: the uncast before phase. The mana actually spent is not read: the Wuju's own cost is spent before the measured cast and would have to be subtracted from an inexact base mana; this is a readback (coverage class data). Clause 438 \"reducing their resource costs by $s1%\"."
+    },
+    {
+      "spell": 800195,
+      "name": "Greater Resourceful Wuju (a grouped ally in range is buffed)",
+      "kind": "aura_presence",
+      "variant": "party",
+      "label_suffix": "party",
+      "quote": "Empowers nearby party and raid members",
+      "metric": "aura",
+      "fields": {
+        "spell": 800195
+      },
+      "target": "ally",
+      "target_distance": 20,
+      "wait_ms": 1500,
+      "observe_source": "Greater Resourceful Wuju 800195: instant, GCD 1000, 20% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 72 MOD_POWER_COST_SCHOOL_PCT misc 127 BasePoints -6 + DieSides 1 = -5% ($s1), TARGET_UNIT_CASTER_AREA_RAID radius index 12 (100 yd). The ally is grouped with the caster and stands 20 yd away, inside the 100 yd radius of the DBC (\"nearby\" has no stated distance). Real cast at the caster, read of aura 800195 on the ally 1500 ms later; it reads 0 before the cast (control). Clause 438 \"Empowers nearby party and raid members\". Player report #12499 names this spell."
+    },
+    {
+      "spell": 800195,
+      "name": "Greater Resourceful Wuju (replaces the Greater Power Wuju already on the caster)",
+      "kind": "metric_delta",
+      "variant": "one_wuju",
+      "label_suffix": "one_wuju",
+      "quote": "Can only have 1 Wuju active on a target at a time.",
+      "trigger_spell": 800195,
+      "target": "caster",
+      "setup_casts": [
+        712458
+      ],
+      "setup_wait_ms": 1600,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 712458,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:198-209 (aura_ascension_witch_doctor_lifecycle::Apply): when a Wuju applies (Wuju(): SpellFamilyFlags[0] 256 or [2] 16777216, Auras.cpp:90-93) it removes every other Wuju aura of any caster on that target. Greater Resourceful Wuju 800195: instant, GCD 1000, 20% mana, DurationIndex 30 = 1800000 ms, Effect[0] aura 72 MOD_POWER_COST_SCHOOL_PCT misc 127 BasePoints -6 + DieSides 1 = -5% ($s1), TARGET_UNIT_CASTER_AREA_RAID radius index 12 (100 yd). Greater Power Wuju 712458 (SpellFamilyFlags[2] 16777216, the other family word of Wuju(), instant, GCD 1500, 16% mana, DurationIndex 30) is cast first in both phases (setup, 1600 ms before the Resourceful Wuju). Before phase: Greater Power Wuju alone reads 1 on the caster (control). After phase: Greater Power Wuju again, then Greater Resourceful Wuju 800195; 1500 ms later 712458 is gone. This is the exact report #12499 sequence (Greater Resourceful, then Greater Power Wuju) on one caster, in the opposite order. The tooltip says one Wuju on a target at a time; the report expects both to stay when two Witch Doctors cast them. The entry reads the literal tooltip; the two-caster arm is tool note T-B4-1 and the meaning of \"on a target\" an owner question (see the report). Clause 440 \"Can only have 1 Wuju active on a target at a time.\""
+    },
+    {
+      "spell": 503714,
+      "name": "Eye of Kimbul (a marked enemy cannot use stealth)",
+      "kind": "metric_delta",
+      "variant": "no_stealth",
+      "label_suffix": "no_stealth",
+      "quote": "Critical strikes now apply Eye of Kimbul to enemies",
+      "trigger_spell": 801669,
+      "target": "dummy",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          2144558,
+          0,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "target_casts": [
+        2144558
+      ],
+      "enemy_cast_wait_ms": 500,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 2144558
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "Eye of Kimbul 503714: AscensionWitchDoctorEvents.cpp:88 and :151-152 (aura_ascension_witch_doctor_event, SQL :94-95): a non-derived critical damage hit by the owner casts Eye of Kimbul 802707 (DurationIndex 8 = 15000 ms) on the target. 802707 has only two aura effects (271 MOD_DAMAGE_FROM_CASTER, 308 MOD_CRIT_CHANCE_FOR_CASTER) and no class code stops a unit carrying it from stealthing or turning invisible; this entry is built to show that, a read contradicting the tooltip is a candidate defect lead, not fixed here. The marked unit is the dummy: a forced spell crit rating (the curse_crit pattern of Hexfire Adept) makes a real Shadowflare 801669 (2000 ms cast, 31% mana, cast_power 2000) at the dummy critical, so the Eye lands through its own proc. After each Shadowflare the dummy casts Stealth Dummy 2144558 (aura 16, a real spell of the dummy) on itself (the target_casts step, a real triggered cast by the creature, 500 ms wait) and the aura is read on the dummy; the aura is removed at the start of each phase so the before phase aura cannot leak. Before phase (503714 not learned, no Eye): the dummy takes the aura, 1 (the control: the cast works). After phase (503714 learned between the phases): the crit puts the Eye on the dummy 2000 ms after the cast start, and the tooltip promises the same self cast now fails to apply, 0. With the code as it stands the entry is expected to read 1 and alert; if a fix refuses the cast itself instead of the aura, the creature cast step requires a successful cast and the scenario errors (unmeasured), which a reviewer must read as the fix working. The quote is the 503714 sentence because behaviour_entry (behaviours.py:131-133) requires the quote inside the cleaned Description of the entry's own spell, and the clause 74 words stand only in the embedded 802707 description (the @s:802707:0 token of the 503714 tooltip, not expanded); the ledger row ties both labels to clause 74 and the read is the clause 74 claim (T-B4-8). Clause 74 \"While affected, enemies cannot stealth or turn invisible.\" Player reports: none on this talent."
+    },
+    {
+      "spell": 503714,
+      "name": "Eye of Kimbul (a marked enemy cannot use invisibility)",
+      "kind": "metric_delta",
+      "variant": "no_invisibility",
+      "label_suffix": "no_invisibility",
+      "quote": "Critical strikes now apply Eye of Kimbul to enemies",
+      "trigger_spell": 801669,
+      "target": "dummy",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          8149,
+          0,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "target_casts": [
+        8149
+      ],
+      "enemy_cast_wait_ms": 500,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 8149
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "Eye of Kimbul 503714: AscensionWitchDoctorEvents.cpp:88 and :151-152 (aura_ascension_witch_doctor_event, SQL :94-95): a non-derived critical damage hit by the owner casts Eye of Kimbul 802707 (DurationIndex 8 = 15000 ms) on the target. 802707 has only two aura effects (271 MOD_DAMAGE_FROM_CASTER, 308 MOD_CRIT_CHANCE_FOR_CASTER) and no class code stops a unit carrying it from stealthing or turning invisible; this entry is built to show that, a read contradicting the tooltip is a candidate defect lead, not fixed here. The marked unit is the dummy: a forced spell crit rating (the curse_crit pattern of Hexfire Adept) makes a real Shadowflare 801669 (2000 ms cast, 31% mana, cast_power 2000) at the dummy critical, so the Eye lands through its own proc. After each Shadowflare the dummy casts Super Invis 8149 (aura 18) on itself (the target_casts step, a real triggered cast by the creature, 500 ms wait) and the aura is read on the dummy; the aura is removed at the start of each phase so the before phase aura cannot leak. Before phase (503714 not learned, no Eye): the dummy takes the aura, 1 (the control: the cast works). After phase (503714 learned between the phases): the crit puts the Eye on the dummy 2000 ms after the cast start, and the tooltip promises the same self cast now fails to apply, 0. With the code as it stands the entry is expected to read 1 and alert; if a fix refuses the cast itself instead of the aura, the creature cast step requires a successful cast and the scenario errors (unmeasured), which a reviewer must read as the fix working. The quote is the 503714 sentence because behaviour_entry (behaviours.py:131-133) requires the quote inside the cleaned Description of the entry's own spell, and the clause 74 words stand only in the embedded 802707 description (the @s:802707:0 token of the 503714 tooltip, not expanded); the ledger row ties both labels to clause 74 and the read is the clause 74 claim (T-B4-8). Clause 74 \"While affected, enemies cannot stealth or turn invisible.\" Player reports: none on this talent."
+    },
+    {
+      "spell": 707617,
+      "name": "Mojo Wave (casting Mojo Beam grants a grouped ally Replenishment)",
+      "kind": "cast_applies_aura",
+      "variant": "replenish",
+      "label_suffix": "replenish",
+      "quote": "casting it grants allies Replenishment",
+      "expected_ms": 15000,
+      "applied_aura": 1257670,
+      "target": "ally",
+      "cast_spell": 501117,
+      "cast_target": "ally",
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:362-364 (OnSpellCast): a cast of a Beam (IsBeam, Completion.h:364) while Mojo Wave 707617 is known casts Replenishment 1257670 on every ally Allies(player, player, 40 yd, 10) returns (Friendly(): grouped, Completion.cpp:57-62). Replenishment 1257670 DurationIndex 8 = 15000 ms ($1257669d), Effect[0] aura 24 PERIODIC_ENERGIZE every 5000 ms. Mojo Beam 501117 is cast for real at the grouped ally (instant, 14000 ms cooldown, GCD 1500, 15% mana, 8000 ms channel); the aura 1257670 is read on the ally before the cast (0, the control: it is learned but nothing has cast Beam) and right after it (about 15000 ms left). The kind is a remaining-time readback (coverage class data). The first part of clause 281, \"heals up to $712453i of the lowest health nearby allies for $s1% of the healing done\", needs per-ally heal reads of a channel with ally fixtures: no route (see the report). Clause 281 \"and casting it grants allies Replenishment.\""
+    },
+    {
+      "spell": 300660,
+      "name": "Disciple of Sseratus (Hexbreak global cooldown 0.5 s shorter: a cast at 1200 ms goes through)",
+      "kind": "metric_delta",
+      "variant": "gcd",
+      "label_suffix": "gcd",
+      "quote": "has a 0.5s reduced global cooldown",
+      "trigger_spell": 801661,
+      "target": "caster",
+      "setup_casts": [
+        801663,
+        806240
+      ],
+      "setup_wait_ms": 1200,
+      "phase_auras": [
+        [
+          702,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 2000,
+      "measure_actor": "caster",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801661
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 2500,
+      "observe_source": "Disciple of Sseratus 300660 Effect[2]: aura 107 ADD_FLAT_MODIFIER op 21 SPELLMOD_GLOBAL_COOLDOWN BasePoints -501 + 1 = -500 ms on class mask [1] 8388608, which Hexbreak 806240 carries (Effect[0] DISPEL misc 2 curse, TARGET_UNIT_TARGET_ALLY, StartRecoveryCategory 133, StartRecoveryTime 1500, instant, 25% mana); native, no class code (Spell.cpp:9224 applies SPELLMOD_GLOBAL_COOLDOWN in TriggerGlobalCooldown). Potion Toss 801661 is a potion (IsPotion): AscensionWitchDoctorAbilities.cpp:74-75 refuses it with SPELL_FAILED_CASTER_AURASTATE while the caster has no active Ingredient (State(player).ingredients empty), and its CasterAuraSpell 801702 (Has Ingredient Marker) is removed by SyncIngredients (Brewing.cpp:38-45) unless Cauldron Brewer 92085 is known. So both phases learn Cauldron Brewer 92085 (a passive; precondition fixture, not the subject of the claim, the same in both phases) and make a real Ingredient: Frog Bones 801663 (instant, 5% mana, StartRecoveryCategory 130 against Potion Toss and Hexbreak category 133, so it does not take their global cooldown, CategoryRecoveryTime 500, infinite aura) as the first setup cast, which gives the marker natively. Order in both phases: Frog Bones, a wait of 1200 ms, Hexbreak, a wait of 1200 ms, then the measured Potion Toss (the same wait after each setup cast). Hexbreak is cast for real at the caster with Curse of Weakness 702 (Dispel 2, aura 344 auto-attack damage, no spell haste; Curse of Tongues 1714 would slow casting and stretch the GCD, so it is not used; set by the harness in both phases as the curse to dispel, a precondition fixture) and Potion Toss 801661 (instant, same GCD category 133, 18% mana, 15000 ms category cooldown reset by the scenario) is cast at the caster after a set wait. Mana: Frog Bones 5% + Hexbreak 25% + Potion Toss 18% of about 1490 base mana is below cast_power 2000. Before phase (300660 not learned): Hexbreak's GCD is 1500 ms, the Potion Toss 1200 ms after it is refused (SPELL_FAILED_NOT_READY), spell_cast_count 0 (the control; the refusal is the global cooldown because the Ingredient, the marker and the mana are all in place, and the after phase accepts the same cast). After phase (300660 learned between the phases, 2500 ms apart so the first GCD is clear): the GCD is 1000 ms, the same cast 1200 ms after Hexbreak completes, 1. The margins are 200 ms on the talent side and 300 ms on the control side, wider than the 10 to 17 ms step overhead. The global cooldown itself is not read: global_cooldown_ms has no coverage evidence class, and an accepted or refused cast is the behaviour. The second half of the clause, \"now affects an additional nearby ally\", needs two allies carrying a curse and the talent learned between arms (dispel_removal arms learn the entry's own spell and cast it, and its quote must lie in that spell's tooltip): no route (see the report). Clause 11 \"In addition, your Hexbreak now affects an additional nearby ally, and has a 0.5s reduced global cooldown.\"",
+      "learn": [
+        92085
+      ]
+    },
+    {
+      "spell": 300660,
+      "name": "Disciple of Sseratus (Hexbreak global cooldown not shorter than 1 s: a cast at 850 ms is refused)",
+      "kind": "metric_delta",
+      "variant": "gcd_floor",
+      "label_suffix": "gcd_floor",
+      "quote": "has a 0.5s reduced global cooldown",
+      "trigger_spell": 801661,
+      "target": "caster",
+      "setup_casts": [
+        801663,
+        806240
+      ],
+      "setup_wait_ms": 850,
+      "phase_auras": [
+        [
+          702,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 2000,
+      "measure_actor": "caster",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801661
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 2500,
+      "observe_source": "Disciple of Sseratus 300660 Effect[2]: aura 107 ADD_FLAT_MODIFIER op 21 SPELLMOD_GLOBAL_COOLDOWN BasePoints -501 + 1 = -500 ms on class mask [1] 8388608, which Hexbreak 806240 carries (Effect[0] DISPEL misc 2 curse, TARGET_UNIT_TARGET_ALLY, StartRecoveryCategory 133, StartRecoveryTime 1500, instant, 25% mana); native, no class code (Spell.cpp:9224 applies SPELLMOD_GLOBAL_COOLDOWN in TriggerGlobalCooldown). Potion Toss 801661 is a potion (IsPotion): AscensionWitchDoctorAbilities.cpp:74-75 refuses it with SPELL_FAILED_CASTER_AURASTATE while the caster has no active Ingredient (State(player).ingredients empty), and its CasterAuraSpell 801702 (Has Ingredient Marker) is removed by SyncIngredients (Brewing.cpp:38-45) unless Cauldron Brewer 92085 is known. So both phases learn Cauldron Brewer 92085 (a passive; precondition fixture, not the subject of the claim, the same in both phases) and make a real Ingredient: Frog Bones 801663 (instant, 5% mana, StartRecoveryCategory 130 against Potion Toss and Hexbreak category 133, so it does not take their global cooldown, CategoryRecoveryTime 500, infinite aura) as the first setup cast, which gives the marker natively. Order in both phases: Frog Bones, a wait of 850 ms, Hexbreak, a wait of 850 ms, then the measured Potion Toss (the same wait after each setup cast). Hexbreak is cast for real at the caster with Curse of Weakness 702 (Dispel 2, aura 344 auto-attack damage, no spell haste; Curse of Tongues 1714 would slow casting and stretch the GCD, so it is not used; set by the harness in both phases as the curse to dispel, a precondition fixture) and Potion Toss 801661 (instant, same GCD category 133, 18% mana, 15000 ms category cooldown reset by the scenario) is cast at the caster after a set wait. The upper arm of gcd: the Potion Toss 850 ms after Hexbreak is refused with and without the talent (0 and 0), 150 ms inside the reduced 1000 ms GCD, so the cut is no larger than 0.5 s. It is a control that cannot fail by itself: it proves the reduction is not to zero, and it would catch a talent that removed the GCD (the Potion Toss would go through, 1). Clause 11 as gcd.",
+      "learn": [
+        92085
+      ]
+    },
+    {
+      "spell": 802487,
+      "name": "Unstable Concoction (Spirit in a Bottle on the marked target explodes into a heal)",
+      "kind": "metric_delta",
+      "variant": "bottle",
+      "label_suffix": "bottle",
+      "quote": "Using Loa's Brew or Spirit in a Bottle on the target will trigger an explosion of mojo around the target",
+      "trigger_spell": 801696,
+      "target": "caster",
+      "setup_casts": [
+        801663,
+        801661
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "measure_actor": "caster",
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 802489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 1000,
+      "observe_source": "Unstable Concoction 802487: AscensionWitchDoctorAbilities.cpp:242-243 (OnSpellHitResult): a Potion Toss (IsPotion) hit on a living target while 802487 is known casts Unstable Concoction 802488 (DurationIndex 18 = 20000 ms) on it; :228-233: a Loa's Brew (SpellFamilyFlags[1] 131072) or Spirit in a Bottle (IsBottle) hit on a target carrying the caster's 802488 removes it and casts the heal 802489 on every ally Allies(player, target, 10 yd, 5) returns (the caster counts as its own ally). Potion Toss 801661 is a potion (IsPotion): AscensionWitchDoctorAbilities.cpp:74-75 refuses it with SPELL_FAILED_CASTER_AURASTATE while the caster has no active Ingredient (State(player).ingredients empty), and its CasterAuraSpell 801702 (Has Ingredient Marker) is removed by SyncIngredients (Brewing.cpp:38-45) unless Cauldron Brewer 92085 is known. So both phases learn Cauldron Brewer 92085 (a passive; precondition fixture, not the subject of the claim, the same in both phases) and make a real Ingredient: Frog Bones 801663 (instant, 5% mana, StartRecoveryCategory 130 against Potion Toss and Hexbreak category 133, so it does not take their global cooldown, CategoryRecoveryTime 500, infinite aura) as the first setup cast, which gives the marker natively. Order in both phases: Frog Bones, a wait of 1600 ms, Potion Toss, a wait of 1600 ms, then the Bottle or Brew. The target is the caster: Potion Toss 801661 (instant, GCD 1500, 18% mana, 15000 ms category cooldown reset by the scenario, target ally 21) is the setup cast that marks the target, 1600 ms before the Bottle or Brew (the Potion Toss hit with an Ingredient also casts the Frog Bones potion on the caster, which does not touch the heals of 802489 that are read). spell_heal_count reads the heals of 802489 on the caster (caster is the actor, the heal event spell 802489). Spirit in a Bottle 801696: 1500 ms cast (CastingTimeIndex 16), GCD 1500, 15% mana, so the hit and the explosion land at about 3100 ms after the Potion Toss and are read 2500 ms after the Bottle cast start. Before phase (802487 not learned): Potion Toss and Bottle make no debuff and no explosion, 0 (the control). After phase (learned between the phases, 1000 ms apart): exactly one heal of 802489 on the caster. The tooltip radius (20 yd) and the heal amount need allies at distances: see the report (the code searches 10 yd, cap 5). Clause 331 \"Using Loa's Brew or Spirit in a Bottle on the target will trigger an explosion of mojo around the target\".",
+      "learn": [
+        92085
+      ]
+    },
+    {
+      "spell": 802487,
+      "name": "Unstable Concoction (Loa's Brew on the marked target explodes into a heal)",
+      "kind": "metric_delta",
+      "variant": "brew",
+      "label_suffix": "brew",
+      "quote": "Using Loa's Brew or Spirit in a Bottle on the target will trigger an explosion of mojo around the target",
+      "trigger_spell": 801670,
+      "target": "caster",
+      "setup_casts": [
+        801663,
+        801661
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "measure_actor": "caster",
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 802489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 1000,
+      "observe_source": "Unstable Concoction 802487: AscensionWitchDoctorAbilities.cpp:242-243 (OnSpellHitResult): a Potion Toss (IsPotion) hit on a living target while 802487 is known casts Unstable Concoction 802488 (DurationIndex 18 = 20000 ms) on it; :228-233: a Loa's Brew (SpellFamilyFlags[1] 131072) or Spirit in a Bottle (IsBottle) hit on a target carrying the caster's 802488 removes it and casts the heal 802489 on every ally Allies(player, target, 10 yd, 5) returns (the caster counts as its own ally). Potion Toss 801661 is a potion (IsPotion): AscensionWitchDoctorAbilities.cpp:74-75 refuses it with SPELL_FAILED_CASTER_AURASTATE while the caster has no active Ingredient (State(player).ingredients empty), and its CasterAuraSpell 801702 (Has Ingredient Marker) is removed by SyncIngredients (Brewing.cpp:38-45) unless Cauldron Brewer 92085 is known. So both phases learn Cauldron Brewer 92085 (a passive; precondition fixture, not the subject of the claim, the same in both phases) and make a real Ingredient: Frog Bones 801663 (instant, 5% mana, StartRecoveryCategory 130 against Potion Toss and Hexbreak category 133, so it does not take their global cooldown, CategoryRecoveryTime 500, infinite aura) as the first setup cast, which gives the marker natively. Order in both phases: Frog Bones, a wait of 1600 ms, Potion Toss, a wait of 1600 ms, then the Bottle or Brew. The target is the caster: Potion Toss 801661 (instant, GCD 1500, 18% mana, 15000 ms category cooldown reset by the scenario, target ally 21) is the setup cast that marks the target, 1600 ms before the Bottle or Brew (the Potion Toss hit with an Ingredient also casts the Frog Bones potion on the caster, which does not touch the heals of 802489 that are read). spell_heal_count reads the heals of 802489 on the caster (caster is the actor, the heal event spell 802489). Loa's Brew 801670: CastingTimeIndex 5 (2000 ms), GCD 1500, 33% mana (Frog Bones 5% + Potion Toss 18% + Brew 33% = 56% of about 1490 base mana, below cast_power 2000), read 3000 ms after the Brew cast start. Brew and Bottle differ in shape (a family flag against IsBottle), so both are read (G-23). Before phase: no 802487, 0 (control). After phase: one heal of 802489 on the caster. Clause 331 as bottle.",
+      "learn": [
+        92085
+      ]
+    },
+    {
+      "spell": 802487,
+      "name": "Unstable Concoction (no explosion without the Potion Toss mark)",
+      "kind": "metric_delta",
+      "variant": "needs_debuff",
+      "label_suffix": "needs_debuff",
+      "quote": "Using Loa's Brew or Spirit in a Bottle on the target will trigger an explosion of mojo around the target",
+      "trigger_spell": 801696,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "measure_actor": "caster",
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 802489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Unstable Concoction 802487: AscensionWitchDoctorAbilities.cpp:242-243 (OnSpellHitResult): a Potion Toss (IsPotion) hit on a living target while 802487 is known casts Unstable Concoction 802488 (DurationIndex 18 = 20000 ms) on it; :228-233: a Loa's Brew (SpellFamilyFlags[1] 131072) or Spirit in a Bottle (IsBottle) hit on a target carrying the caster's 802488 removes it and casts the heal 802489 on every ally Allies(player, target, 10 yd, 5) returns (the caster counts as its own ally). The target is the caster: Potion Toss 801661 (instant, GCD 1500, 18% mana, 15000 ms category cooldown reset by the scenario, target ally 21) is the setup cast, 1600 ms before the Bottle or Brew. spell_heal_count reads the heals of 802489 on the caster (caster is the actor, the heal event spell 802489). Control arm of bottle and brew (those now cast a real Ingredient and a real Potion Toss before the Bottle or Brew, so their after read is the mark at work; this arm leaves the Potion Toss out on purpose and needs no Ingredient): 802487 is known throughout (gate_timing start) but no Potion Toss is cast, so the target carries no 802488 and the Spirit in a Bottle at the caster (1500 ms cast, read 2500 ms later) makes no explosion: 0 and 0. It shows the explosion needs the Potion Toss mark and not only the talent. Clause 331 as bottle."
     }
   ],
   "player_observations": [],
