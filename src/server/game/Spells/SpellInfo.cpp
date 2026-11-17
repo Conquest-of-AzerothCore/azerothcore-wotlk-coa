@@ -3106,7 +3106,13 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
         uint32 const firstRank = GetFirstRankSpell()->Id;
         tinkerShot = firstRank == 500549 || firstRank == 500235;
     }
-    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot &&
+    bool witchHunterShot = false;
+    if (SpellFamilyName == 21)
+    {
+        uint32 const firstRank = GetFirstRankSpell()->Id;
+        witchHunterShot = firstRank == 804179 || firstRank == 805754;
+    }
+    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot && !witchHunterShot &&
         (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
         castTime += 500;
 

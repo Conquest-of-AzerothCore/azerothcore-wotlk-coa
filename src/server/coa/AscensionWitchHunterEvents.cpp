@@ -400,9 +400,14 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 }
                 break;
             case 681329:
+                Cast(owner, other, 681392);
+                Cast(owner, other, 681392);
+                self(1257670);
+                break;
             case 681488:
-                Cast(owner, other, 681392);
-                Cast(owner, other, 681392);
+                Cast(owner, other, 681489);
+                Cast(owner, other, 681489);
+                Cast(owner, other, 681489);
                 self(1257670);
                 break;
             case 806195:

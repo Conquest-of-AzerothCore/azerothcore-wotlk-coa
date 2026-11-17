@@ -16,6 +16,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <iterator>
+#include <unordered_set>
 
 namespace AscensionWitchHunter
 {
@@ -42,6 +44,39 @@ std::list<Unit*> Nearby(Unit* center, float range)
     Cell::VisitObjects(center, search, range);
     units.remove_if([center](Unit* unit) { return !unit->IsAlive() || !center->InSamePhase(unit); });
     return units;
+}
+
+constexpr uint32 RapRowsWithoutTooltipRapTerm[] = {500181, 800697};
+constexpr uint32 ApRowsWithoutAnAttackOnTheMarkedTarget[] = {680519, 681099, 802138};
+
+template <std::size_t N>
+uint32 AttackerBonusTerm(Unit const* victim, AuraType bonusAura, float coefficient, uint32 const (&leftOut)[N],
+                         uint32 spellId)
+{
+    if (coefficient <= 0.0f || std::find(std::begin(leftOut), std::end(leftOut), spellId) != std::end(leftOut))
+        return 0;
+    int32 const bonus = victim->GetTotalAuraModifier(bonusAura);
+    return bonus > 0 ? uint32(bonus * coefficient) : 0;
+}
+
+uint32 VictimAttackerBonus(Unit const* victim, uint32 spellId, uint8 effect)
+{
+    if (!victim)
+        return 0;
+    for (WitchCoefficient const& c : WitchCoefficients)
+        if (c.id == spellId && c.effect == effect)
+            return AttackerBonusTerm(victim, SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS, c.rap,
+                                     RapRowsWithoutTooltipRapTerm, spellId) +
+                   AttackerBonusTerm(victim, SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS, c.ap,
+                                     ApRowsWithoutAnAttackOnTheMarkedTarget, spellId);
+    return 0;
+}
+
+int32 SpellDoneShare(Unit* caster, Unit* victim, SpellInfo const* info, uint32 raw, DamageEffectType type,
+                     uint8 effIndex, float pctMods)
+{
+    return int32(caster->SpellDamageBonusDone(victim, info, raw, type, effIndex, pctMods)) -
+           int32(caster->SpellDamageBonusDone(victim, info, 0, type, effIndex, pctMods));
 }
 
 void Cast(Unit* caster, Unit* target, uint32 id)
@@ -86,23 +121,66 @@ void ClearReplacement(Player* player, uint32 word, uint32 mask)
             player->SetTemporarySpellReplacement(id, 0);
 }
 
-void ConvertCreatureTypeDamage(SpellInfo* info, uint8 index)
+bool CreatureTypeDamageRecord(SpellInfo const* info, uint8 index)
 {
-    SpellEffectInfo& effect = info->Effects[index];
-    if (effect.Effect != SPELL_EFFECT_APPLY_AURA || effect.ApplyAuraName != SPELL_AURA_OVERRIDE_CLASS_SCRIPTS ||
-        effect.MiscValue != ASCENSION_CLASSMASK_CREATURE_DAMAGE || effect.MiscValueB <= 0 || !effect.SpellClassMask)
+    SpellEffectInfo const& effect = info->Effects[index];
+    if (effect.Effect == SPELL_EFFECT_APPLY_AURA && effect.ApplyAuraName == SPELL_AURA_OVERRIDE_CLASS_SCRIPTS &&
+        effect.MiscValue == ASCENSION_CLASSMASK_CREATURE_DAMAGE && effect.MiscValueB > 0 && effect.SpellClassMask)
+        return true;
+    LOG_ERROR("coa", "Skipped unexpected Witch Hunter creature damage record {}", info->Id);
+    return false;
+}
+
+void KeepCreatureTypeDamageForScript(SpellInfo* info, uint8 index)
+{
+    if (CreatureTypeDamageRecord(info, index))
+        info->Effects[index].ApplyAuraName = SPELL_AURA_DUMMY;
+}
+
+struct WitchUnscaledByLevel
+{
+    uint32 id;
+    uint8 effect;
+    uint32 type;
+    int32 basePoints;
+    int32 dieSides;
+    float perLevel;
+};
+
+constexpr WitchUnscaledByLevel WitchUnscaledByLevelEffects[] =
+{
+    { 680519, EFFECT_1, SPELL_EFFECT_HEAL, 9, 1, 1.1f },
+    { 802280, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE, 25, 3, 0.95f },
+    { 680612, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE, 44, 8, 1.9f },
+    { 680613, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE, 78, 8, 2.1f },
+    { 680614, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE, 173, 15, 4.1f },
+    { 680615, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE, 252, 25, 4.0f },
+};
+
+void CancelLevelScaling(SpellInfo* info)
+{
+    for (WitchUnscaledByLevel const& row : WitchUnscaledByLevelEffects)
     {
-        LOG_ERROR("coa", "Skipped unexpected Witch Hunter creature damage record {}", info->Id);
-        return;
+        if (row.id != info->Id)
+            continue;
+        SpellEffectInfo& effect = info->Effects[row.effect];
+        if (!effect.RealPointsPerLevel)
+            continue;
+        if (effect.Effect != row.type || effect.BasePoints != row.basePoints || effect.DieSides != row.dieSides ||
+            effect.RealPointsPerLevel != row.perLevel)
+        {
+            LOG_ERROR("coa", "Skipped unexpected Witch Hunter per-level record {} effect {}", info->Id, row.effect);
+            continue;
+        }
+        effect.RealPointsPerLevel = 0.0f;
     }
-    effect.ApplyAuraName = SPELL_AURA_MOD_DAMAGE_DONE_VERSUS;
-    std::swap(effect.MiscValue, effect.MiscValueB);
 }
 
 void ApplyContracts(SpellInfo* info)
 {
     if (!info || info->SpellFamilyName != 21)
         return;
+    CancelLevelScaling(info);
     uint32 id = info->Id;
     if (id == 500351 || id == 680517)
         info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
@@ -126,6 +204,16 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_2].MiscValue = SPELLMOD_DAMAGE;
         info->Effects[EFFECT_2].SpellClassMask = flag96(1024, 0, 0);
     }
+    if (id == 681493 && info->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+        info->Effects[EFFECT_2].MiscValue == SPELLMOD_DAMAGE && !info->Effects[EFFECT_2].SpellClassMask)
+        info->Effects[EFFECT_2].SpellClassMask = info->Effects[EFFECT_0].SpellClassMask;
+    if (id == 705524 && info->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
+        info->Effects[EFFECT_2].MiscValue == SPELLMOD_COOLDOWN &&
+        info->Effects[EFFECT_2].SpellClassMask == flag96(16777216, 1073741824, 0))
+        info->Effects[EFFECT_2].SpellClassMask = flag96(0, 1073741824, 0);
+    if (id == 803333 && info->DurationEntry && info->DurationEntry->ID == 31 && info->GetDuration() == 8000 &&
+        info->GetMaxDuration() == 8000)
+        info->DurationEntry = sSpellDurationStore.LookupEntry(1);
     if (Family(info, 1, 4194304))
     {
         info->InterruptFlags |= SPELL_INTERRUPT_FLAG_MOVEMENT;
@@ -133,10 +221,16 @@ void ApplyContracts(SpellInfo* info)
     }
     if ((id == 807364 || id == 805751) && info->IsChanneled())
         info->AttributesEx5 &= ~SPELL_ATTR5_ALLOW_ACTION_DURING_CHANNEL;
-    if (id == 574149 || id == 574163)
-        ConvertCreatureTypeDamage(info, EFFECT_1);
-    if (id == 804026)
-        ConvertCreatureTypeDamage(info, EFFECT_0);
+    if (id == SPELL_SILVER_BULLETS_R1 || id == SPELL_SILVER_BULLETS_R2)
+        KeepCreatureTypeDamageForScript(info, EFFECT_1);
+    if (id == SPELL_SILVER_BOLTS)
+    {
+        KeepCreatureTypeDamageForScript(info, EFFECT_0);
+        if (info->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+            info->Effects[EFFECT_2].MiscValue == SPELLMOD_DAMAGE &&
+            info->Effects[EFFECT_2].SpellClassMask == flag96(65536, 2048, 0))
+            info->Effects[EFFECT_2].SpellClassMask[2] |= 16;
+    }
     if (id == 800697)
         info->Effects[EFFECT_1].ChainTarget = info->Effects[EFFECT_0].ChainTarget;
     if (id == 804194 && info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_ARMOR_PENETRATION_PCT)
@@ -285,7 +379,10 @@ void ApplyContracts(SpellInfo* info)
     {
         info->CasterAuraState = 0;
         info->CasterAuraSpell = 803166;
+        info->AttributesEx4 |= SPELL_ATTR4_NO_CAST_LOG;
     }
+    if (Dusk(info) || id == 803502)
+        info->AttributesEx4 |= SPELL_ATTR4_NO_CAST_LOG;
     if (id == 681485)
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
     if (Family(info, 0, 65536))
@@ -357,11 +454,99 @@ void ApplyContracts(SpellInfo* info)
         if (id == talent)
             info->ProcFlags = 0;
 }
+
+bool CarriesWitchblight(Unit const* unit)
+{
+    return std::any_of(std::begin(WitchblightRanks), std::end(WitchblightRanks),
+                       [unit](uint32 rank) { return unit->HasAura(rank); });
+}
+
+namespace
+{
+bool TriggeredByPeriodicAura(Spell const* spell, SpellInfo const* info)
+{
+    SpellInfo const* source = spell->GetTriggeredByAuraSpellInfo();
+    if (!source)
+        return false;
+    return spell->GetTriggeredByAuraTickNumber() ||
+           std::any_of(std::begin(source->Effects), std::end(source->Effects), [info](SpellEffectInfo const& effect)
+           {
+               return (effect.IsAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL) ||
+                       effect.IsAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE) ||
+                       effect.IsAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL_FROM_CLIENT)) &&
+                      effect.TriggerSpell == info->Id;
+           });
+}
+
+constexpr char const* WitchblightLaunchesKey = "witch_hunter_witchblight_launches";
+
+struct WitchblightLaunches final : DataMap::Base
+{
+    std::unordered_set<uint32> spells;
+};
+}
+
+void StampWitchblightLaunch(Unit* holder, uint32 spellId)
+{
+    holder->CustomData.GetDefault<WitchblightLaunches>(WitchblightLaunchesKey)->spells.insert(spellId);
+}
+
+void ClearWitchblightLaunches(Unit* holder)
+{
+    holder->CustomData.Erase(WitchblightLaunchesKey);
+}
+
+bool PulseOfEffectNotLaunchedUnderWitchblight(Spell const* spell, SpellInfo const* info, Unit const* holder)
+{
+    if (!TriggeredByPeriodicAura(spell, info))
+        return false;
+    WitchblightLaunches const* launches = holder->CustomData.Get<WitchblightLaunches>(WitchblightLaunchesKey);
+    return !launches || !launches->spells.count(spell->GetTriggeredByAuraSpellInfo()->Id);
+}
 }
 
 namespace
 {
 using namespace AscensionWitchHunter;
+
+constexpr uint32 SPELL_AUTO_SHOT = 75;
+constexpr float AUTO_SHOT_TOOLTIP_RANGED_HASTE_PCT = 15.0f;
+constexpr char const* AutoShotHasteKey = "witch_hunter_auto_shot_haste";
+constexpr int32 GUARANTEED_MELEE_MISS = 10001;
+
+struct AutoShotHasteApplied final : DataMap::Base
+{
+};
+
+void SyncAutoShotHaste(Player* player)
+{
+    bool const applied = player->CustomData.Get<AutoShotHasteApplied>(AutoShotHasteKey) != nullptr;
+    bool const wanted = player->getClass() == CLASS_WITCH_HUNTER && player->HasSpell(SPELL_AUTO_SHOT);
+    if (applied == wanted)
+        return;
+
+    player->ApplyAttackTimePercentMod(RANGED_ATTACK, AUTO_SHOT_TOOLTIP_RANGED_HASTE_PCT, wanted);
+    if (wanted)
+        player->CustomData.Set(AutoShotHasteKey, new AutoShotHasteApplied());
+    else
+        player->CustomData.Erase(AutoShotHasteKey);
+}
+
+class witch_hunter_auto_shot_haste : public PlayerScript
+{
+  public:
+    witch_hunter_auto_shot_haste()
+        : PlayerScript("witch_hunter_auto_shot_haste",
+                       {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL})
+    {
+    }
+
+    void OnPlayerLogin(Player* player) override { SyncAutoShotHaste(player); }
+
+    void OnPlayerLearnSpell(Player* player, uint32) override { SyncAutoShotHaste(player); }
+
+    void OnPlayerForgotSpell(Player* player, uint32) override { SyncAutoShotHaste(player); }
+};
 
 class witch_hunter_resources : public PlayerScript
 {
@@ -382,14 +567,36 @@ class witch_hunter_scaling : public UnitScript
   public:
     witch_hunter_scaling()
         : UnitScript("witch_hunter_scaling", true,
-                     {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST})
+                     {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST,
+                      UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
     {
+    }
+
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount) override
+    {
+        if (!caster || effect->GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE ||
+            effect->GetBase()->GetType() != UNIT_AURA_TYPE)
+            return;
+        Player* player = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!player || player->getClass() != CLASS_WITCH_HUNTER)
+            return;
+        Unit* victim = effect->GetBase()->GetUnitOwner();
+        if (uint32 raw = VictimAttackerBonus(victim, effect->GetId(), effect->GetEffIndex()))
+            amount += SpellDoneShare(caster, victim, effect->GetSpellInfo(), raw, DOT, effect->GetEffIndex(),
+                                     effect->GetPctMods());
     }
 
     void OnBeforeRollMeleeOutcomeAgainst(Unit const* attacker, Unit const*, WeaponAttackType, int32&, int32&, int32&,
                                          int32&, int32& crit, int32& miss, int32& dodge, int32& parry, int32&) override
     {
-        if (!attacker || (attacker->GetEntry() != 50124 && attacker->GetEntry() != 50224))
+        if (!attacker)
+            return;
+        if (CarriesWitchblight(attacker))
+        {
+            miss = GUARANTEED_MELEE_MISS;
+            return;
+        }
+        if (attacker->GetEntry() != 50124 && attacker->GetEntry() != 50224)
             return;
         Player* player = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
         if (!player || player->getClass() != CLASS_WITCH_HUNTER)
@@ -424,27 +631,21 @@ class witch_hunter_scaling : public UnitScript
     }
 };
 
-class witch_hunter_silver_bolts_shadow_trap : public UnitScript
+class witch_hunter_wide_swings_grasp : public UnitScript
 {
   public:
-    witch_hunter_silver_bolts_shadow_trap()
-        : UnitScript("witch_hunter_silver_bolts_shadow_trap", true, {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN})
+    witch_hunter_wide_swings_grasp()
+        : UnitScript("witch_hunter_wide_swings_grasp", true, {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN})
     {
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
         Player* player = attacker ? Owner(attacker) : nullptr;
-        if (!player || !target || !spellInfo || !target->HasAura(SPELL_SHADOW_TRAPPED))
+        if (!player || !target || !spellInfo || spellInfo->Id != 680483 || damage <= 0)
             return;
-        for (AuraEffect* effect : player->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS))
-            if (effect->GetId() == SPELL_SILVER_BOLTS && effect->IsAffectedOnSpell(spellInfo))
-            {
-                if (target->GetCreatureTypeMask() & effect->GetMiscValue())
-                    return;
-                AddPct(damage, effect->GetSpellInfo()->Effects[EFFECT_2].CalcValue(player));
-                return;
-            }
+        if (target->HasAura(680517, player->GetGUID()) && player->HasAura(681098))
+            damage = int32(damage * 1.2f);
     }
 };
 
@@ -472,6 +673,7 @@ void AddAscensionWitchHunterCompletionScripts()
 {
     new witch_hunter_scaling();
     new witch_hunter_resources();
-    new witch_hunter_silver_bolts_shadow_trap();
+    new witch_hunter_auto_shot_haste();
+    new witch_hunter_wide_swings_grasp();
     RegisterSpellScript(spell_ascension_witch_hunter_copy);
 }

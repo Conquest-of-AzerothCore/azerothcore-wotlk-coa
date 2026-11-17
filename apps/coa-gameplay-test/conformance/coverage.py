@@ -18,11 +18,12 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH, BEHAVIOUR_SOURCE_STACK, BEHAVIOUR_FALL_DAMAGE,
                         CONDITION_CONTRAST, LEARNED_CONTRAST, OWN_CAST_CONTRAST)
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
-from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, NOT_MEASURED, PASSIVE_METRIC,
-                     STACKED_SAME, STATUSES, Verdict, read_verdicts)
+from compare import (BONUS_DATA, CONFORMANT, CONTRAST, DATA_ONLY, HIT_CHECKS, LINKED_VERDICT_REFERENCE, NOT_MEASURED,
+                     PASSIVE_METRIC, STACKED_SAME, STATUSES, Verdict, read_verdicts)
 from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from kinds import kind_modules, kind_rows
+from metric_delta_options import option_rows
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK, PROC_ENERGIZE_CHECK
 from profile import DbcSetMismatch, require_server_sha
@@ -221,6 +222,27 @@ def require_effectiveness_subjects(clauses: list[dict]):
                                 f'of" a buff')
 
 
+PROMISE_OF = 'promise_of'
+
+
+def require_promise_sources(clauses: list[dict]):
+    for index, clause in enumerate(clauses):
+        if PROMISE_OF not in clause:
+            continue
+        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+        named = clause[PROMISE_OF]
+        if clause.get('kind') != 'claim' or not isinstance(named, str):
+            raise EvidenceError(f'{where} names a promise source but is not a claim entry naming a clause text')
+        if not any(other.get('spell') == clause.get('spell') and other.get('clause') == named
+                   for other in clauses[:index]):
+            raise EvidenceError(f'{where} names the promise source {named!r}, which is no earlier clause of the '
+                                f'same spell')
+
+
+def promise_words(clause: dict) -> str:
+    return clause.get(PROMISE_OF, '')
+
+
 def subject_claims(clause: dict, clauses: list[dict]) -> list[dict]:
     found = clause_claims(clause)
     named = clause.get(EFFECTIVENESS_OF)
@@ -392,21 +414,21 @@ METRIC_EVIDENCE = {
                      'owned_creature_health', 'server_packets', 'server_packet_u32',
                      'owned_creature_spell_cast_count'),
                     EVENT),
-    **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks', 'can_detect',
+    **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
                      'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms', 'aura_charges', 'cooldown_ms',
                      'spell_cooldown_packet_ms',
                      'spell_damage_done', 'spell_healing_done', 'spell_healing_taken', 'spell_critical_damage',
-                     'spell_done_crit_chance', 'melee_damage_done', 'aoe_damage_taken', 'script_spell_damage_taken',
-                     'spell_damage_taken', 'melee_damage_taken',
+                     'spell_done_crit_chance', 'spell_taken_crit_chance', 'melee_damage_done', 'aoe_damage_taken',
+                     'script_spell_damage_taken', 'spell_damage_taken', 'melee_damage_taken',
                      'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune',
                      'owned_aura', 'owned_creature_aura_max_duration_ms'),
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',
                      'power', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
-                     'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance', 'weapon_damage_min',
-                     'resistance', 'mana_regen', 'moving', 'threat', 'owned_creature_max_health',
+                     'melee_crit_chance', 'melee_crit_chance_refreshed', 'ranged_taken_crit_chance', 'spell_crit_chance',
+                     'weapon_damage_min', 'resistance', 'mana_regen', 'moving', 'threat', 'owned_creature_max_health',
                      'owned_creature_attack_time_ms', 'owned_creature_crit_chance', 'owned_creature_armor',
                      'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
                      'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
@@ -417,7 +439,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_spell_hit_chance', 'alive', 'can_attack',
                      'owned_creature_react_state', 'nearest_creature_distance', 'casting',
                      'item_count', 'track_creature_type', 'owned_creature_stat', 'owned_creature_display',
-                     'distance_2d'), STATE),
+                     'distance_2d', 'point_distance_2d', 'can_detect', 'temporary_spell_replacement'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
@@ -433,7 +455,7 @@ STATE_PROMISES = {
     'power': rf'{POWER_WORDS}|\bcost', 'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
     'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
-    'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
+    'ranged_taken_crit_chance': CRIT_WORDS, 'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
     'owned_creature_attack_time_ms': r'haste|attack speed', 'owned_creature_crit_chance': CRIT_WORDS,
     'owned_creature_armor': r'armou?r', 'owned_creature_run_speed_rate': r'movement speed|run speed|slow\w*',
@@ -452,12 +474,17 @@ STATE_PROMISES = {
     'threat_multiplier': r'threat',
     'owned_creature_spell_crit_chance': CRIT_WORDS,
     'owned_creature_school_spell_crit_chance': CRIT_WORDS,
+    'spell_done_crit_chance': CRIT_WORDS,
+    'spell_taken_crit_chance': CRIT_WORDS,
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
     'casting': r'\bcast\w*|haste|all actions',
     'item_count': r'creat\w*',
     'distance_2d': r'location|hook\w*|pull\w*',
+    'point_distance_2d': r'leap\w*|range|yds?',
+    'can_detect': r'seen|detect\w*|stealth\w*',
+    'temporary_spell_replacement': r'transform\w*|replac\w*|last \w+ consumed',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
@@ -476,6 +503,9 @@ CONTRAST_PROOF = {
     'owned_creature_spell_crit_chance': LEARNED_CONTRAST,
     'owned_creature_school_spell_crit_chance': LEARNED_CONTRAST,
     'enemy_player_aura_duration_ms': LEARNED_CONTRAST,
+    'spell_done_crit_chance': LEARNED_CONTRAST,
+    'spell_taken_crit_chance': LEARNED_CONTRAST,
+    'ranged_taken_crit_chance': LEARNED_CONTRAST,
 }
 KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES,
                    'CONTRAST_PROOF': CONTRAST_PROOF}
@@ -489,7 +519,7 @@ def kind_row_overrides(modules=None) -> list[tuple[str, str, str]]:
 
 
 def metric_evidence() -> dict[str, str]:
-    return {**METRIC_EVIDENCE, **kind_rows('METRIC_EVIDENCE')}
+    return {**METRIC_EVIDENCE, **kind_rows('METRIC_EVIDENCE'), **option_rows('METRIC_EVIDENCE')}
 
 
 def contrast_proof() -> dict[str, str]:
@@ -497,7 +527,7 @@ def contrast_proof() -> dict[str, str]:
 
 
 def state_promises() -> dict[str, str]:
-    return {**STATE_PROMISES, **kind_rows('STATE_PROMISES')}
+    return {**STATE_PROMISES, **kind_rows('STATE_PROMISES'), **option_rows('STATE_PROMISES')}
 
 
 K3 = 'K3'
@@ -634,7 +664,7 @@ NO_STACK_WORDS = r'do(?:es)? not stack'
 CONDITION_WORDS = r'while|whenever|as long as'
 
 
-def promised_state(verdict: Verdict, clause: str) -> bool:
+def promised_state(verdict: Verdict, clause: str, promise: str = '') -> bool:
     detail = verdict.detail or {}
     if verdict.check == BEHAVIOUR_GROUP_STACK_CAP:
         return (detail.get(STACKED_SAME) is True
@@ -647,12 +677,12 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST):
         return False
     words = state_promises().get(detail[PASSIVE_METRIC])
-    return words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is not None
+    return words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None
 
 
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
-                     row: str = '') -> str:
+                     row: str = '', promise: str = '') -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -672,23 +702,49 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     required = contrast_proof().get(detail[PASSIVE_METRIC])
     if required is not None and detail.get(CONTRAST) == required:
         words = state_promises().get(detail[PASSIVE_METRIC])
-        if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row}', re.IGNORECASE) is not None:
+        if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row} {promise}', re.IGNORECASE) is not None:
             return BEHAVIOUR
     words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
     if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
         return DATA
-    if observed == EVENT or (observed == STATE and promised_state(verdict, clause)):
+    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise)):
         return BEHAVIOUR
     return DATA
 
 
+BONUS_HIT_CHECKS = HIT_CHECKS | {BEHAVIOUR_HIT_RATIO}
+BONUS_HIT_METRICS = frozenset({'spell_damage_total', 'spell_heal_total', 'melee_damage_total'})
+HIT_SPELL_POWER = 'spell_power'
+SPELL_POWER_COEFFICIENT = 'direct_bonus'
+
+
+def applied_hit(verdict: Verdict) -> bool:
+    if verdict.status not in CONFORMANT or verdict.status == 'closed':
+        return False
+    return verdict.check in BONUS_HIT_CHECKS or (
+        verdict.check == BEHAVIOUR_METRIC_DELTA and (verdict.detail or {}).get(PASSIVE_METRIC) in BONUS_HIT_METRICS)
+
+
+def bonus_terms_unproven(matched: list[Verdict]) -> bool:
+    rows = [verdict.detail[BONUS_DATA] for verdict in matched
+            if isinstance((verdict.detail or {}).get(BONUS_DATA), dict)]
+    if not rows:
+        return False
+    hits = [verdict for verdict in matched if applied_hit(verdict)]
+    if any(row.get(SPELL_POWER_COEFFICIENT) for row in rows):
+        hits = [verdict for verdict in hits if ((verdict.detail or {}).get(HIT_SPELL_POWER) or 0) > 0]
+    return not hits
+
+
 def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
-                   promoted: frozenset[str] = frozenset(), row: str = '') -> str:
+                   promoted: frozenset[str] = frozenset(), row: str = '', promise: str = '') -> str:
     labels = claim['labels']
     if not clause_proven(labels, statuses):
         return UNPROVEN
     matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
-    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row)
+    if bonus_terms_unproven(matched):
+        return UNPROVEN
+    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise)
              for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
@@ -701,7 +757,8 @@ def claims_evidence(found: list[str]) -> str:
 
 def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
                     promoted: frozenset[str] = frozenset()) -> str:
-    return claims_evidence([claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''))
+    return claims_evidence([claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''),
+                                           promise_words(clause))
                             for claim in clause_claims(clause)])
 
 
@@ -738,6 +795,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     require_tool_gaps(clauses)
     require_no_routes(clauses)
     require_effectiveness_subjects(clauses)
+    require_promise_sources(clauses)
     require_text_sources(clauses, frozenset(streamed_texts()) if streamed is None else streamed)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
@@ -745,7 +803,8 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     promoted = frozenset(label for label, result in results.items() if result == CONSUMED)
     not_consumed = frozenset(label for label, result in results.items() if result == NOT_CONSUMED)
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
-    per_claim = [[claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''))
+    per_claim = [[claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''),
+                                 promise_words(clause))
                   for claim in subject_claims(clause, clauses)]
                  for clause in claims]
     project_text = [clause for clause in claims if not independent_text(clause)]

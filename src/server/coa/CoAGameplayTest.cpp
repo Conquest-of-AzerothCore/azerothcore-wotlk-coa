@@ -1002,6 +1002,7 @@ struct SpellDamageEvent
     bool critical = false;
     bool blocked = false;
     bool resisted = false;
+    bool periodic = false;
     uint32 casterEntry = 0;
     uint64 atMs = 0;
 };
@@ -1277,6 +1278,7 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         uint8 critical;
         response >> critical;
         event.critical = critical != 0;
+        event.periodic = true;
     }
     if (event.damage)
     {
@@ -5063,13 +5065,15 @@ private:
             auto critical = step.get_optional<bool>("critical");
             auto blocked = step.get_optional<bool>("blocked");
             auto resisted = step.get_optional<bool>("resisted");
+            auto periodic = step.get_optional<bool>("periodic");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
                 if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
                     event.spell == spell && (!target || event.target == target) &&
                     (!targetEntry || (event.target.IsCreature() && event.target.GetEntry() == *targetEntry)) &&
                     (!critical || event.critical == *critical) &&
-                    (!blocked || event.blocked == *blocked) && (!resisted || event.resisted == *resisted))
+                    (!blocked || event.blocked == *blocked) && (!resisted || event.resisted == *resisted) &&
+                    (!periodic || event.periodic == *periodic))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
         }

@@ -4,7 +4,9 @@
 reference stats, the known auras and the reference target. `casts` is the number of casts the mean needs; the scenario
 performs `scheduled_casts(casts)`, `ceil(casts x 1.5)`, so that the hits excluded from the mean (critical, blocked)
 rarely leave fewer usable hits (ruling R9). It learns the rank, measures the target, then repeats: `set_power` to the
-cost (when the cost is a plain `ManaCost`), `reset_cooldown`, the `CasterAuraSpell` fixture of the record (see
+cost (when the cost is a plain `ManaCost`), or to the class file's `base_mana.value` when the cost is a percentage
+of base mana and the class file records it (`hits.base_mana_steps`, ADR 0688; refused when the cost exceeds it),
+`reset_cooldown`, the `CasterAuraSpell` fixture of the record (see
 above), `cast`, and a wait of
 `max(StartRecoveryTime, cast time, duration of a periodic aura) + 500 ms`; a 3 s drain precedes the measurements.
 
@@ -16,6 +18,12 @@ above), `cast`, and a wait of
 | `heal` | 10 | as `school`, on the caster, without mitigation |
 | `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
 | `triggered_weapon` | 6, aura 23 whose `EffectTriggerSpell` is a `weapon` hit | the `weapon` hit of the triggered spell, per tick; `hits_per_cast` is `Duration / EffectAmplitude` |
+
+A rank the class file lists in `weapon_school_hits` (ADR 0741) whose effects are one weapon percent effect and one
+school damage effect (Quickdraw 806851: `$s1`% Ranged Weapon Damage plus `${$m2+0+$RAP*0.2}`) is a `school` hit plus
+the weapon percent part, summed per cast before mitigation, as a script-cast weapon part is (`script_weapon_part`);
+the weapon part takes the ranged attack power for a ranged weapon spell. Unlisted, such a rank stays unmodelled
+("effects of several hit models").
 
 `hit_kind` can face an effect without its own token, or several effects whose types belong to different kinds.
 Temple Guardian 801165/803792 charges an ally and heals both it and the caster for the same amount
@@ -55,7 +63,10 @@ are multiplied by the same positive constant); only the reported numbers and wor
 of "mean") change. Only effects that tick are
 read this way: an aura the server makes periodic (`AuraEffect::CalculatePeriodic`, `SpellAuraEffects.cpp:682-702`:
 3, 8, 20, 21, 23, 24, 48, 53, 62, 64, 89, 162, 226, 227) with a positive `EffectAmplitude`. Rapid 680323 (aura 107,
-amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms.
+amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms. A token of another spell (`${($500564d*1000/$500564T1)*(...)}` in
+Feast of Talons 500056) is classed by that spell's effect (ADR 0676): a `total` over its ticks goes to
+`periodic_totals` under its foreign label (`500056 effect_value 500564e0 #0`, with `effect_spell`), never to a
+one-tick `spell_effect_value` read; a `tick` or `mixed` foreign token keeps its read.
 
 `hits_per_cast` clearing the combined event count (above) proves a `heal` kind's events landed somewhere, but not on
 whom: two heals both landing on the ally would still clear `minimum_hits` for Temple Guardian. A class file's
@@ -103,6 +114,17 @@ longer than the budget is `unmodelled`.
 The weapon roll is `urand(floor(min + AP / 14 x speed), floor(max + AP / 14 x speed))` (`Unit::CalculateDamage`),
 with the normalized speed when an effect is 121 and the weapon speed otherwise. `tooltip_mean` is the same sum without
 integer steps: for Argent Blade 807268, 2.15 x ((min + max) / 2 + AP / 14 x 3.3) + (421 + 0.4725 x AP).
+A ranged weapon attack (`DmgClass` 3 with a bow/gun/crossbow/thrown mask, the ranged-slot attribute or the hunter
+family, `hits.ranged_weapon_attack`, `SpellInfo::IsRangedWeaponSpell`) reads the ranged attack power in place of AP
+(`hits.weapon_attacker`, ADR 0680). The hit scenario's dummy stands at `values.cast_distance` of the rank: the midpoint
+of the spell's hostile range for a `SPELL_RANGE_RANGED` range (Shadowblast's range 114, 0-35 yd: 17.5 yd), the 3 yd
+melee distance otherwise; the value scenario's dummy does the same, and a missile cast from the ranged distance is
+waited for before the value scenario's aura reads (`values.missile_wait_ms`). The behaviour kinds `hit_ratio`,
+`script_hit`, `cost_gate` and `cast_applies_aura` (and its expiry pair) place their dummy by the same rule
+(`behaviours.dummy_placement`, ADR 0687): the spell cast at the dummy (the cast or observed spell of a `hit_ratio`
+that does not swing, the first `script_hit` cast at the dummy, the `cost_gate` gated spell, the `cast_applies_aura`
+cast spell) sets it, and an entry's `dummy_distance` (0 to 100 yd, as `metric_delta`) overrides it; a placement off
+3 yd is stated in the contract. No missile wait is added there.
 Each server integer step is then applied to every possible hit, never as a tolerance:
 
 1. a known aura's modifier, `floor(hit x (100 + percent) / 100)` (`Unit::SpellDamageBonusDone`,
@@ -137,7 +159,8 @@ A spell that fits no model is never dropped: its expectation has `check` `unmode
 tooltip value, a periodic duration that is unreadable). Its scenario learns the rank and has no hit measurement. The
 parts of the tooltip the reader could not evaluate become `hit_mean` expectations whose rule starts with
 `unreadable: `, without a measurement. Not modelled: talent or proc modifiers, critical strikes, spell power
-coefficients the tooltip does not show, and costs that are a percentage of base mana (no `set_power`).
+coefficients the tooltip does not show, and costs that are a percentage of base mana when the class file records no
+`base_mana` (no `set_power`).
 
 A class file's `hit_notes` list (`[{"spell": <id>, "reason": "..."}]`, matched against the spell's own id or its
 `max_rank`, same shape as `effect_notes` above) substitutes a specific explanation for `hit_parts`'s own generic
@@ -232,6 +255,17 @@ A class file may list `hit_casts` entries `{"spell": <max rank>, "casts": N, "re
 scenario of that rank schedules at least N casts (N x 1.5 scheduled, the usual outcome margin) and its mean needs at
 least N hits, even where the model's own sizing asks for fewer. Ranks without an entry are unchanged. Sacred Swing
 572769: the model's sigma 1.9 on a mean of 472.6 asked for 2 casts; the floor is 40.
+
+## A start location for a hit scenario (`hit_location`, ADR 0940)
+
+A class file may list `hit_location` entries `{"spell": <max rank>, "location": {"map", "x", "y", "z", "o"},
+"reason": ...}` for a hostile rank: every hit part of that rank sets the scenario's `location`, so the caster is
+teleported there before the steps and the dummy is summoned 3 yd ahead (+x). The hit rule names the location.
+Ranks without an entry are unchanged; a listed heal rank, a second entry for one rank, a missing reason or a location
+without exactly the five numeric keys is refused. Repulse 680273 knocks its target 5.184 yd back on every hit; at
+map 1 (-6524.53, -3824.85, -63.3) a collision holds the dummy at 3.51 yd for every cast (the location is measured,
+not computed: prove a new one with a diagnostic run that reads the dummy's distance and the casts' line_of_sight).
+That spot is under water, so the class file's `cast_auras` sets Water Breathing 7178 before each cast.
 
 ## Learned weapon parts (`learned_hits`, ADR 0172)
 

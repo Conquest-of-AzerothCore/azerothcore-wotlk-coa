@@ -36,6 +36,44 @@ weapon that is not a dagger), and the Maces skill spell 198 is on line 54. One-H
 Templar proficiency in `AscensionLiveBaselineData.h` (`Proficiencies`) and `AscensionCustomClassData.h`
 (`ClassProficiencies`).
 
+### Weapon sets
+
+A class whose specializations wear different weapons lists them in `weapon_sets` {name: {`main_hand`, `off_hand`,
+`ranged`}}, each hand a weapon entry with `skill_line` (or `null`), `default_weapon_set` and `spell_weapon_sets`
+{rank id: set} ([ADR 0681](../../../../docs/adr/0681-a-specialization-wears-its-own-weapon-set.md)). `armed(class_file,
+requirement, spell_id)` (`values.armed_for` passes the rank's `EQUIP_FIELDS` and attack fields) takes the first set,
+in the order the rank's set, the default set, the others, where one hand passes `unfit_reason` (the
+`Player::HasItemFitToSpellRequirements` slot scan, `Player.cpp:13494-13499`) and the hand an `AttributesEx3` main-hand
+or off-hand requirement names fits (`Spell.cpp:8005-8031`); without a fitting set it keeps the rank's set. The result
+has `weapon_set`, `weapon` = the hand of the rank's attack type (`Spell.cpp:596-614`: off hand for a melee rank with
+the off-hand requirement, the ranged hand for a ranged weapon rank or an auto-repeat rank, else the main hand), and
+every hand's skill line in `skill_lines` and `reference_stats`. `base_steps` equips every hand of the set (slots 15,
+16, 17), the default set for a class file not yet armed. A behaviour, proc, trigger, target-gate or learned-hit
+entry starts from the set of its own spell (`for_entry`, the `spell` or `aura` of the entry); a spell it casts keeps
+that set when the set fits it and otherwise takes the first fitting set in the order above. The class file's `weapon` stays the default set's main hand
+(`check_weapon_sets` refuses another, an unknown set name or a hand in the wrong slot). Classes without `weapon_sets`
+keep `weapon` and `alternate_weapons`. The Witch Hunter (class 15) sets, from `item_template` on 2026-11-15:
+Black Knight 2529 Zweihander (two-hand sword, 73.62-103.34, 2800 ms), Inquisition two 2027 Scimitar (one-hand sword,
+17.25-28.75, 2300 ms), Boltslinger 15809 Heavy Crossbow (49-50, 2800 ms, main hand empty), Houndmaster (default) two
+2027 Scimitar and 15809. `spell_weapon_sets` holds every rank of the class spells of the `CharacterAdvancement` tabs
+39 Boltslinger, 40 Darkness (Houndmaster), 41 Inquisition and 94 WitchKnight (Black Knight); the tab 87 Class spells
+take the default set.
+
+`server_inventory_masks` {rank id: {`mask`, `source`}} states a rank's `EquippedItemInventoryTypeMask` as the server
+loads it, when the server repairs the DBC mask (`source` names the server code; ADR
+[0890](../../../../docs/adr/0890-a-class-file-can-state-the-server-repaired-equip-mask.md)). Every weapon requirement
+read (`values.equip_requirement`, `values.weapon_requirement`, `compare.read_tokens`) then uses `mask`; ranks without an
+entry keep the DBC mask. `check_server_inventory_masks` refuses an entry without a source, and `server_requirement` a
+mask that drops a DBC bit. Witch Hunter: 501349 = 71335936 (`AscensionClassMechanics.cpp:1006-1019`, `:1225-1227`).
+
+`rank_hit_effects` {rank id: {`hit_mean`, `periodic_total`, `source`}} names the effect each hit label of a rank
+models when its tooltip states a direct hit and a periodic total that both own tokens (`hits.hit_kind` otherwise
+refuses the rank as several hit models; ADR [0920](../../../../docs/adr/0920-a-rank-can-split-its-direct-hit-from-its-periodic-total.md)).
+`hits.rank_hit` then reads only the named effect's tooltip values and refuses an effect whose model is not the label's
+(a periodic model for `periodic_total`, any other for `hit_mean`); the hit scenario's damage reads carry `periodic`
+false or true, so each label judges only its own events. Ranks without an entry are unchanged. Witch Hunter: 501349
+(direct Effect[2], periodic Effect[0]).
+
 `base_steps` waits 5 s, adds and equips the weapon, sets each line of `skill_lines` to 5 × level with `set_skill`
 (value and maximum: 300 at level 60, owner answer Q4) and measures it back with `skill_value` (label `skill
 <line>`), then measures with the extreme bounds of an exploratory measurement (the judgement is made by the

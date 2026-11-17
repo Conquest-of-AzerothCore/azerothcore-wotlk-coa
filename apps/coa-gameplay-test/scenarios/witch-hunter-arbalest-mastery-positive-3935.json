@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Normally acquired Arbalest Mastery is a caster buff during Witchbane (#3935)",
   "contract": [
-    "Arbalest Mastery's tooltip grants increasing Witchbane damage during the channel. The progress stacks therefore belong to the caster. PR #4019 marks helper 706241 positive in spell_custom_attr; its effective attributes are 234881024 on main. Normal Boltslinger talent acquisition and an ordinary Witchbane channel must create a positive caster aura, leave the enemy without that progress aura, and clean the helper up when the channel finishes. A Witch Hunter without Arbalest Mastery supplies the negative control. Native aura classification is checked; client rendering is outside this scenario."
+    "Arbalest Mastery's tooltip grants increasing Witchbane damage during the channel. The progress stacks therefore belong to the caster. PR #4019 marks helper 706241 positive in spell_custom_attr; its effective attributes are 234881024 on main. Normal Boltslinger talent acquisition and an ordinary Witchbane channel must create a positive caster aura, leave the enemy without that progress aura, and drop the helper when its 1200 ms timer runs out after the channel's last shot (mentor D-152: the stacks carry across chained casts, so the channel end no longer removes them). A Witch Hunter without Arbalest Mastery supplies the negative control. Native aura classification is checked; client rendering is outside this scenario."
   ],
   "timeout_ms": 60000,
   "players": [

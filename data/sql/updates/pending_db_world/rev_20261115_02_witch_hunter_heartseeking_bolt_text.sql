@@ -1,0 +1,8 @@
+-- Heartseeking Bolt (807280-807284): owner ruling O-15 (2026-11-15), the server stands on 300% Ranged Weapon Damage with the raised base and a ranged attack power share of 0.5; the client text shows 200%, the old base and 0.4 (a literal 300%: the client prints "$%" for ${$s2+100}).
+DELETE FROM `coa_client_spell_description` WHERE `ID` IN (807280, 807281, 807282, 807283, 807284);
+INSERT INTO `coa_client_spell_description` (`ID`, `Description`, `ToolTip`) VALUES
+(807280, 'Charge up a powerful bolt that deals 300% Ranged Weapon Damage plus ${$m1+69+0+$RAP*0.5+$sps*0.3} to an enemy and reduces their healing received by $807316s1% for $807316d.\r\n\r\nGenerates Rage based on the damage dealt.', ''),
+(807281, 'Charge up a powerful bolt that deals 300% Ranged Weapon Damage plus ${$m1+91+0+$RAP*0.5+$sps*0.3} to an enemy and reduces their healing received by $807316s1% for $807316d.\r\n\r\nGenerates Rage based on the damage dealt.', ''),
+(807282, 'Charge up a powerful bolt that deals 300% Ranged Weapon Damage plus ${$m1+123+0+$RAP*0.5+$sps*0.3} to an enemy and reduces their healing received by $807316s1% for $807316d.\r\n\r\nGenerates Rage based on the damage dealt.', ''),
+(807283, 'Charge up a powerful bolt that deals 300% Ranged Weapon Damage plus ${$m1+167+0+$RAP*0.5+$sps*0.3} to an enemy and reduces their healing received by $807316s1% for $807316d.\r\n\r\nGenerates Rage based on the damage dealt.', ''),
+(807284, 'Charge up a powerful bolt that deals 300% Ranged Weapon Damage plus ${$m1+244+0+$RAP*0.5+$sps*0.3} to an enemy and reduces their healing received by $807316s1% for $807316d.\r\n\r\nGenerates Rage based on the damage dealt.', '');

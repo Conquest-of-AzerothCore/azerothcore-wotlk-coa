@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 import conformance
-from cost import CostError, cost_totals, parse_time, role_of
+from cost import CostError, cost_totals, parse_time, role_of, transcripts
 
 FIXTURE = Path(__file__).parent / 'fixtures' / 'cost'
 SINCE = datetime(2026, 1, 2, tzinfo=timezone.utc)
@@ -77,6 +77,20 @@ class TotalsTest(unittest.TestCase):
     def test_a_missing_directory_is_an_error(self):
         with self.assertRaises(CostError):
             cost_totals(FIXTURE / 'absent', SINCE)
+
+    def test_a_symlinked_subagents_directory_is_followed_and_a_loop_ends(self):
+        import os
+        import shutil
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'root'
+            real = Path(temporary) / 'real-subagents'
+            root.mkdir()
+            real.mkdir()
+            source = next(FIXTURE.rglob('*.jsonl'))
+            shutil.copy(source, real / source.name)
+            os.symlink(real, root / 'subagents')
+            os.symlink(root, real / 'loop')
+            self.assertEqual([path.name for path in transcripts(root)], [source.name])
 
     def test_naive_times_are_utc(self):
         self.assertEqual(parse_time('2026-01-02T00:00:00'), SINCE)

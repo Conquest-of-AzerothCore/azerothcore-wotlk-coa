@@ -1120,8 +1120,145 @@ class ProcBaselineCompareTest(unittest.TestCase):
         self.assertIn('2 events in 20 baseline trials without the passive', verdict.explanation)
 
 
-if __name__ == '__main__':
-    unittest.main()
+
+class ExcludedTriggerCastBaselineTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, baseline_events: int, excluded: bool = True, failures: int = 0):
+        model = proc_model(trigger={'action': 'cast', 'spell': ARGENT_BLADE_MAX_RANK})
+        model.update({'part_attempts': 1699, 'exclude_trigger_casts': excluded,
+                      'baseline': {**BASELINE_LABELS, 'attempts': 20}})
+        expectation = Expectation(PROC_LABEL, PROC_CHECK, SCOURGEBANE, SCOURGEBANE, None, CHANCE_TOKEN, 'rule', model)
+        casts = 1699 - failures
+        steps = proc_steps(1699 + 20, casts + 340 + baseline_events) + [
+            assert_step(BASELINE_LABELS['trials'], '20'), assert_step(BASELINE_LABELS['events'], str(baseline_events))]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        self.workspace.cast_failures[PROC_KEY] = [{'spell': str(ARGENT_BLADE_MAX_RANK), 'reason': '22'}] * failures
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_the_baseline_casts_of_the_trigger_are_not_events(self):
+        verdict = self.verdict(20)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 340 / 1699)
+        self.assertIn('no event in 20 baseline trials without the passive', verdict.explanation)
+
+    def test_a_recast_beyond_the_baseline_casts_is_an_alert(self):
+        verdict = self.verdict(22)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 2)
+        self.assertIn('2 events beyond its 20 completed player casts in 20 baseline trials', verdict.explanation)
+
+    def test_without_the_exclusion_every_baseline_cast_is_an_event(self):
+        verdict = self.verdict(20, excluded=False)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('20 events in 20 baseline trials without the passive', verdict.explanation)
+
+    def test_a_failed_cast_never_lowers_the_baseline_events_below_a_recast(self):
+        verdict = self.verdict(20, failures=1)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('1 events beyond its 19 completed player casts', verdict.explanation)
+
+DUSK_BLADE, DUSK_BLADE_OFF_HAND = 802258, 803502
+OFF_HAND_TRIALS = '92111 proc trials spell_damage_count 803502'
+OFF_HAND_BASELINE = '92111 proc baseline trials 803502'
+LANDED_HITS = 'triggering hits only'
+
+
+class TriggerSpellsCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, readings):
+        expectation = proc_expectation(minimum=1000, trigger={'action': 'cast', 'spell': DUSK_BLADE},
+                                       readings=readings)
+        expectation = replace(expectation, model={**expectation.model, 'chance_pct': 5.0, 'baseline': {
+            **BASELINE_LABELS, 'attempts': 90, 'added_trials': {OFF_HAND_TRIALS: OFF_HAND_BASELINE}}})
+        steps = proc_steps(1050, 100) + [assert_step(OFF_HAND_TRIALS, '1060'),
+                                         assert_step(BASELINE_LABELS['trials'], '50'),
+                                         assert_step(BASELINE_LABELS['events'], '0'),
+                                         assert_step(OFF_HAND_BASELINE, '60')]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader(5.0))
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_every_landed_hit_of_a_listed_spell_is_a_trial_without_the_baseline(self):
+        verdict = self.verdict([{'name': LANDED_HITS, 'labels': [LABELS['trials'], OFF_HAND_TRIALS],
+                                 'minus_events': False}])
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 100 / 2000)
+        self.assertIn('100 procs in 2000 trials', verdict.explanation)
+
+    def test_seeded_trials_of_the_first_spell_only_alert(self):
+        verdict = self.verdict([{'name': LANDED_HITS, 'labels': [LABELS['trials']], 'minus_events': False}])
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 100 / 1000)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class TriggerSpellsScenarioTest(unittest.TestCase):
+    ANGUISH, LIGHTBRINGER = 504742, 680538
+
+    def setUp(self):
+        from profile import load_class_file
+        self.class_file = load_class_file(15)
+
+    def entry(self, aura):
+        return next(entry for entry in self.class_file['procs'] if entry['aura'] == aura)
+
+    def test_the_dusk_blade_procs_count_both_strikes_and_say_so_in_the_contract(self):
+        for aura in (self.ANGUISH, self.LIGHTBRINGER):
+            with self.subTest(aura=aura):
+                scenario, [expectation, *_] = proc_scenario(self.class_file, self.entry(aura))
+                run.validate(scenario)
+                measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+                added = f'{aura} proc trials spell_damage_count {DUSK_BLADE_OFF_HAND}'
+                baseline = f'{aura} proc baseline trials {DUSK_BLADE_OFF_HAND}'
+                self.assertEqual((measured[added]['metric'], measured[added]['spell'], measured[added]['target']),
+                                 ('spell_damage_count', DUSK_BLADE_OFF_HAND, 'dummy'))
+                self.assertEqual(measured[baseline]['spell'], DUSK_BLADE_OFF_HAND)
+                self.assertEqual(measured[f'{aura} proc trials']['spell'], DUSK_BLADE)
+                self.assertEqual(expectation.model['readings'][0]['labels'], [f'{aura} proc trials', added])
+                self.assertEqual(expectation.model['baseline']['added_trials'], {added: baseline})
+                self.assertIn(f'Each landed hit of {DUSK_BLADE} or {DUSK_BLADE_OFF_HAND} rolls the proc',
+                              scenario['contract'])
+                self.assertIn('Residual failure probability', scenario['contract'])
+                self.assertIn('one trial per landed hit of any listed spell', expectation.rule)
+
+    def test_trigger_spells_need_the_trigger_first_a_second_spell_a_source_and_no_readings(self):
+        entry = self.entry(self.ANGUISH)
+        unsourced = {key: value for key, value in entry.items() if key != 'trigger_spells_source'}
+        for bad in ({**entry, 'trigger_spells': [DUSK_BLADE_OFF_HAND, DUSK_BLADE]},
+                    {**entry, 'trigger_spells': [DUSK_BLADE]}, {**entry, 'trigger_spells': [DUSK_BLADE] * 2},
+                    {**entry, 'trial_readings': [{'name': 'every strike', 'adds': []}]}, unsourced,
+                    {**entry, 'trigger': {**entry['trigger'], 'target': 'ally'}}):
+            with self.subTest(entry={key: bad.get(key) for key in ('trigger', 'trigger_spells')}):
+                with self.assertRaises(ValueError):
+                    proc_scenario(self.class_file, bad)
+
+    def test_without_trigger_spells_the_trials_stay_the_first_spell(self):
+        entry = {key: value for key, value in self.entry(self.ANGUISH).items()
+                 if key not in ('trigger_spells', 'trigger_spells_source')}
+        scenario, [expectation, *_] = proc_scenario(self.class_file, entry)
+        self.assertEqual(expectation.model['readings'][0]['labels'], [f'{self.ANGUISH} proc trials'])
+        self.assertNotIn('added_trials', expectation.model['baseline'])
+        self.assertNotIn('Each landed hit', scenario['contract'])
+
+
+from test_proc_avoided import AvoidedProcJudgeTest, AvoidedProcLabelTest, AvoidedProcScenarioTest  # noqa: E402,F401
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -1177,3 +1314,329 @@ class ChanceModifierTests(unittest.TestCase):
                 judged, low, high, why = rate_judgement(procs, 18665.0, plan.needed, expected)
                 judged, *_ = banded_rate(judged, low, high, expected, why)
                 self.assertEqual(judged, status)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class BorrowedModifierTokenTests(unittest.TestCase):
+    FLAMES_OF_THE_SINNED = 560207
+    FLAMES_OF_SIN = 803422
+
+    def entry(self, **changes) -> dict:
+        return {'aura': self.FLAMES_OF_THE_SINNED, 'name': 'Flames of the Sinned', 'chance_token': '$h', 'band': True,
+                'trigger': {'action': 'cast', 'spell': 803364}, 'trigger_text': 'Your Smite Evil',
+                'event_metric': 'spell_cast_count', 'events_exclude_trigger_casts': True, 'proc_spell': 803364,
+                'events_per_proc': 1, 'chance_modifiers': [[self.FLAMES_OF_SIN, '$803422s3']], **changes}
+
+    def class_file(self, entry: dict) -> dict:
+        from profile import load_fixture_class_file
+        class_file = load_fixture_class_file(23)
+        return {**class_file, 'procs': [*class_file['procs'], entry]}
+
+    def test_a_modifier_without_a_tooltip_borrows_the_auras_reference_token(self):
+        entry = self.entry()
+        self.assertEqual(proc_plan(self.class_file(entry), entry).chance_pct, 35.0)
+        _, [expectation, *_] = proc_scenario(self.class_file(entry), entry)
+        self.assertEqual(expectation.model['chance_modifier_tooltips'], {'803422': self.FLAMES_OF_THE_SINNED})
+
+    def test_a_modifier_with_its_own_token_borrows_nothing(self):
+        from profile import load_fixture_class_file
+        entry = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == 300940)
+        entry = {**entry, 'band': True, 'chance_modifiers': [[504357, '$s1']]}
+        _, [expectation, *_] = proc_scenario(self.class_file(entry), entry)
+        self.assertNotIn('chance_modifier_tooltips', expectation.model)
+
+    def test_only_a_reference_to_the_modifier_itself_is_borrowed(self):
+        for token in ('$803422s2', '$803423s3', '$s3'):
+            entry = self.entry(chance_modifiers=[[self.FLAMES_OF_SIN, token]])
+            with self.subTest(token=token), self.assertRaises(ValueError):
+                proc_plan(self.class_file(entry), entry)
+
+    def test_compare_reads_the_borrowed_token_again_and_a_changed_one_alerts(self):
+        from compare import Verdict, stated_chance
+        from profile import base_steps
+        from test_behaviours import FakeRun
+        entry = self.entry()
+        class_file = self.class_file(entry)
+        _, [expectation, *_] = proc_scenario(class_file, entry)
+        values = {step['label']: 0.0 for step in base_steps(class_file) if step.get('action') == 'assert'}
+
+        class Shown:
+            def __init__(self, text, kind, value):
+                self.text, self.kind, self.value = text, kind, value
+
+        class Tooltips:
+            def __init__(self, points):
+                self.points = points
+
+            def read(self, spell, caster, forced=None, unscaled=False):
+                shown = {self.FLAMES: [Shown('$h', 'chance_pct', 25.0), Shown('$803422s3', 'percent', self.points)]}
+                return type('Readout', (), {'values': shown.get(spell, [])})()
+
+        Tooltips.FLAMES = self.FLAMES_OF_THE_SINNED
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'key', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        manifest = {'class_file': class_file}
+        self.assertEqual(stated_chance(manifest, FakeRun(values), expectation, Tooltips(10.0), base, 0.35), 35.0)
+        changed = stated_chance(manifest, FakeRun(values), expectation, Tooltips(5.0), base, 0.35)
+        self.assertEqual(changed.status, 'alert')
+
+
+class OffHandTrialTests(unittest.TestCase):
+    OFF_HAND = {'item': 2027, 'slot': 16, 'subclass': 7, 'min_damage': 17.25, 'max_damage': 28.75, 'speed_ms': 1800,
+                'inventory_type': 13, 'normalized_speed': 2.4, 'skill_line': 43}
+
+    def dual_wielding(self) -> dict:
+        main = {**CLASS_FILE['weapon'], 'skill_line': 44}
+        return {**CLASS_FILE, 'weapon_sets': {'Pair': {'main_hand': main, 'off_hand': self.OFF_HAND, 'ranged': None}},
+                'default_weapon_set': 'Pair'}
+
+    def entry(self, **changes) -> dict:
+        entry = next(entry for entry in CLASS_FILE['procs'] if entry['aura'] == 560648)
+        return {**entry, 'trial_hand': 1, **changes}
+
+    def test_off_hand_trials_read_hand_one_at_the_off_hand_speed(self):
+        class_file = self.dual_wielding()
+        plan = proc_plan(class_file, self.entry())
+        self.assertEqual(plan.attempt_ms, 1800)
+        scenario, [expectation, *_] = proc_scenario(class_file, self.entry())
+        run.validate(scenario)
+        reads = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+        labels = expectation.model['measurements']
+        self.assertEqual((reads[labels['trials']]['metric'], reads[labels['trials']]['hand']), ('melee_damage_count', 1))
+        self.assertEqual(reads[labels['attempts']]['hand'], 1)
+        self.assertIn('off-hand melee hits', expectation.rule)
+
+    def test_main_hand_trials_stay_the_default(self):
+        _, [expectation, *_] = proc_scenario(CLASS_FILE, next(entry for entry in CLASS_FILE['procs']
+                                                              if entry['aura'] == 560648))
+        self.assertIn('main-hand melee hits', expectation.rule)
+
+    def test_off_hand_trials_need_an_off_hand_weapon_and_a_plain_attack_trigger(self):
+        with self.assertRaises(ValueError):
+            proc_plan(CLASS_FILE, self.entry())
+        for changes in ({'trial_hand': 2}, {'trial_hand': True},
+                        {'trigger': {'action': 'cast', 'spell': 504561, 'target': 'dummy'}}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                proc_plan(self.dual_wielding(), self.entry(**changes))
+
+
+class BaseManaPerAttemptTests(unittest.TestCase):
+    TUNDRA_WARRIORS = 92122
+    PERCENT_COST_TRIGGER = 707402
+    BASE_MANA = {'power': 0, 'value': 1720, 'source': 'seeded'}
+
+    def class_file(self) -> dict:
+        from profile import load_fixture_class_file
+        return {**load_fixture_class_file(23), 'base_mana': self.BASE_MANA}
+
+    def entry(self, **changes) -> dict:
+        entry = next(entry for entry in self.class_file()['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+        return {**entry, 'trigger': {'action': 'cast', 'spell': self.PERCENT_COST_TRIGGER}, **changes}
+
+    def casts_and_refills(self, steps: list[dict]) -> tuple[int, int]:
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == self.PERCENT_COST_TRIGGER]
+        refilled = [index for index in casts
+                    if any(step.get('action') == 'set_power' and step.get('value') == 1720
+                           for step in steps[max(0, index - 4):index])]
+        return len(casts), len(refilled)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_every_attempt_of_a_percent_cost_trigger_refills_base_mana_when_asked(self):
+        from procs import proc_scenario
+        scenario, _ = proc_scenario(self.class_file(), self.entry(base_mana_per_attempt=True))
+        casts, refilled = self.casts_and_refills(scenario['steps'])
+        self.assertGreater(casts, 0)
+        self.assertEqual(refilled, casts)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_without_the_field_no_attempt_refills_mana(self):
+        from procs import proc_scenario
+        scenario, _ = proc_scenario(self.class_file(), self.entry())
+        self.assertEqual(self.casts_and_refills(scenario['steps'])[1], 0)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_a_stated_dummy_distance_places_the_dummy_and_absent_keeps_the_default(self):
+        from procs import proc_scenario
+        from values import DUMMY_DISTANCE
+        placed, _ = proc_scenario(self.class_file(), self.entry(dummy_distance=17.5))
+        self.assertEqual(placed['creatures'][0]['distance'], 17.5)
+        self.assertIn('The dummy stands 17.5 yd from the caster.', placed['contract'])
+        plain, _ = proc_scenario(self.class_file(), self.entry())
+        self.assertEqual(plain['creatures'][0]['distance'], DUMMY_DISTANCE)
+        with self.assertRaises(ValueError):
+            proc_scenario(self.class_file(), self.entry(dummy_distance=0))
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_the_field_on_a_trigger_without_a_percent_cost_is_refused(self):
+        from procs import proc_scenario
+        entry = {**self.entry(base_mana_per_attempt=True), 'trigger': {'action': 'cast', 'spell': 504868}}
+        with self.assertRaises(ValueError):
+            proc_scenario(self.class_file(), entry)
+
+
+class TakenHitProcTests(unittest.TestCase):
+    TUNDRA_WARRIORS = 92122
+    STRIKER_SPELL = 41394
+
+    def entry(self, **changes) -> dict:
+        from profile import load_fixture_class_file
+        entry = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+        return {**entry, 'trigger': {'action': 'taken_hit', 'spell': self.STRIKER_SPELL, 'striker_entry': 36},
+                **changes}
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_a_taken_hit_proc_counts_the_strikers_hits_on_the_caster_after_a_baseline(self):
+        from procs import proc_scenario
+        from profile import load_fixture_class_file
+        scenario, [expectation] = proc_scenario(load_fixture_class_file(23), self.entry(baseline=True))
+        run.validate(scenario)
+        self.assertEqual([(creature['id'], creature['entry']) for creature in scenario['creatures']], [('striker', 36)])
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast']
+        self.assertTrue(casts and all((step['actor'], step['target'], step['spell'])
+                                      == ('striker', 'caster', self.STRIKER_SPELL) for step in casts))
+        trials = next(step for step in scenario['steps'] if step.get('label') == f'{self.TUNDRA_WARRIORS} proc trials')
+        self.assertEqual((trials['caster'], trials['target'], trials['metric']),
+                         ('striker', 'caster', 'spell_damage_count'))
+        steps = scenario['steps']
+        baseline = next(index for index, step in enumerate(steps)
+                        if step.get('label') == f'{self.TUNDRA_WARRIORS} proc baseline trials')
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step.get('spell') == self.TUNDRA_WARRIORS)
+        self.assertLess(baseline, learn)
+        self.assertIn('baseline', expectation.model)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_a_taken_hit_proc_needs_a_spell_and_a_striker(self):
+        from procs import proc_scenario
+        from profile import load_fixture_class_file
+        for trigger in ({'action': 'taken_hit', 'spell': self.STRIKER_SPELL},
+                        {'action': 'taken_hit', 'striker_entry': 36}):
+            with self.subTest(trigger=trigger), self.assertRaises(ValueError):
+                proc_scenario(load_fixture_class_file(23), {**self.entry(), 'trigger': trigger})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ControlWeaponScenarioTest(unittest.TestCase):
+    GRASP, TWO_HANDER, ONE_HANDER = 707064, 2529, 2027
+
+    def setUp(self):
+        from profile import for_entry, load_class_file
+        self.class_file = for_entry(load_class_file(15), self.GRASP)
+
+    def entry(self, **changes):
+        entry = next(entry for entry in self.class_file['procs'] if entry['aura'] == self.GRASP)
+        return {**entry, **changes}
+
+    def test_the_first_part_swings_the_one_hander_with_the_passive_before_the_two_hander(self):
+        scenario, [expectation, *_] = proc_scenario(self.class_file, self.entry())
+        run.validate(scenario)
+        steps = scenario['steps']
+        index = {(step['action'], step.get('item'), step.get('label')): position for position, step in enumerate(steps)}
+        learn = next(position for position, step in enumerate(steps)
+                     if step == {'action': 'learn', 'actor': 'caster', 'spell': self.GRASP})
+        control = index[('equip', self.ONE_HANDER, None)]
+        trials = index[('assert', None, f'{self.GRASP} proc baseline trials')]
+        events = index[('assert', None, f'{self.GRASP} proc baseline events')]
+        back = max(position for position, step in enumerate(steps)
+                   if step['action'] == 'equip' and step['item'] == self.TWO_HANDER)
+        self.assertLess(learn, control)
+        self.assertLess(control, trials)
+        self.assertLess(events, back)
+        self.assertLess(back, index[('wait', None, 'swings')])
+        self.assertEqual(steps[index[('wait', None, 'control swings')]]['ms'],
+                         math.ceil(20 * EXCLUDED_OUTCOME_MARGIN) * 2300)
+        self.assertEqual((steps[trials]['metric'], steps[trials]['hand']), ('melee_damage_count', 0))
+        self.assertEqual((steps[events]['metric'], steps[events]['spell']), ('spell_cast_count', 680483))
+        self.assertEqual(expectation.model['baseline'],
+                         {'trials': f'{self.GRASP} proc baseline trials',
+                          'events': f'{self.GRASP} proc baseline events', 'attempts': 20,
+                          'control_weapon': 'Inquisition', 'control_item': self.ONE_HANDER, 'minimum_trials': 20})
+        self.assertIn('control arm in part 1: the Inquisition one-handed main hand 2027', expectation.rule)
+        self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+    def test_the_later_parts_hold_no_control_arm(self):
+        scenario, [expectation, *_] = proc_scenario(self.class_file, self.entry(), 1)
+        self.assertNotIn(self.ONE_HANDER, [step.get('item') for step in scenario['steps']])
+        self.assertNotIn('baseline', expectation.model)
+
+    def test_without_the_option_no_one_hander_is_swung_and_no_control_is_judged(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'control_weapon'}
+        scenario, [expectation, *_] = proc_scenario(self.class_file, entry)
+        self.assertNotIn(self.ONE_HANDER, [step.get('item') for step in scenario['steps']])
+        self.assertNotIn('baseline', expectation.model)
+        self.assertNotIn('control arm', expectation.rule)
+        self.assertLess(proc_plan(self.class_file, entry).parts, proc_plan(self.class_file, self.entry()).parts)
+
+    def test_the_control_needs_a_one_hander_a_two_handed_own_set_and_a_main_hand_attack_trigger(self):
+        from profile import with_weapon_set
+        one_handed_own = with_weapon_set(self.class_file, 'Inquisition', {})
+        for name, class_file, entry in (
+                ('two-handed control', self.class_file, self.entry(control_weapon='Black Knight')),
+                ('unknown set', self.class_file, self.entry(control_weapon='Nope')),
+                ('one-handed own set', one_handed_own, self.entry()),
+                ('cast trigger', self.class_file, self.entry(trigger={'action': 'cast', 'spell': 680483})),
+                ('off hand', self.class_file, self.entry(trial_hand=1)),
+                ('extra events', self.class_file, self.entry(extra_event_terms=[{'metric': 'spell_cast_count',
+                                                                                  'spell': 680483}]))):
+            with self.subTest(case=name), self.assertRaises(ValueError):
+                proc_scenario(class_file, entry)
+
+    def test_the_finished_class_files_hold_no_control_weapon(self):
+        from profile import load_class_file
+        for class_id in (19, 23):
+            with self.subTest(class_id=class_id):
+                self.assertEqual([entry['aura'] for entry in load_class_file(class_id).get('procs', [])
+                                  if 'control_weapon' in entry], [])
+
+
+CONTROL_LABELS = {**BASELINE_LABELS, 'attempts': 20, 'control_weapon': 'Inquisition', 'control_item': 2027,
+                  'minimum_trials': 20}
+
+
+class ControlWeaponCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, control_trials: int, control_events: int, aura: int = 1):
+        expectation = proc_expectation()
+        expectation = replace(expectation, model={**expectation.model, 'baseline': CONTROL_LABELS})
+        steps = proc_steps(1699 + control_trials, 340 + control_events, aura=aura) + [
+            assert_step(BASELINE_LABELS['trials'], str(control_trials)),
+            assert_step(BASELINE_LABELS['events'], str(control_events))]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_a_silent_control_arm_is_taken_out_of_the_judged_trials(self):
+        verdict = self.verdict(27, 0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 340 / 1699)
+        self.assertIn('no event in 27 control hits with the Inquisition one-handed main hand 2027',
+                      verdict.explanation)
+
+    def test_seeded_procs_on_the_one_hander_alert(self):
+        verdict = self.verdict(27, 6)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 6)
+        self.assertIn('6 events in 27 control hits with the Inquisition one-handed main hand 2027', verdict.explanation)
+
+    def test_too_few_control_hits_are_not_judged(self):
+        verdict = self.verdict(12, 0)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('fewer than the 20 the control arm needs', verdict.explanation)
+
+    def test_an_uncounted_control_part_is_not_judged(self):
+        verdict = self.verdict(27, 0, aura=0)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('control weapon was not judged', verdict.explanation)
+
+
+if __name__ == '__main__':
+    unittest.main()

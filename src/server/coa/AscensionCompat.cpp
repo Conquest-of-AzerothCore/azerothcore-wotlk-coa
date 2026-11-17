@@ -4526,10 +4526,9 @@ private:
   static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
   static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
-  static constexpr std::array<uint32, 28> RANGED_PREPARATION_CLIENT_SPELLS = {
+  static constexpr std::array<uint32, 19> RANGED_PREPARATION_CLIENT_SPELLS = {
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
-      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870, 804179,
-      680256, 680257, 680258, 680259, 680260, 680261, 680262, 681203};
+      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
@@ -5705,8 +5704,11 @@ private:
       row.Strings[SPELL_WIRE_DESCRIPTION] = REPLENISHMENT_FIELD_DESCRIPTION;
     }
 
+    uint32 const firstRank = info->GetFirstRankSpell()->Id;
+    bool const witchHunterShot = info->SpellFamilyName == 21 && (firstRank == 804179 || firstRank == 805754);
     if ((info->Attributes & SPELL_ATTR0_USES_RANGED_SLOT) && !info->IsAutoRepeatRangedSpell() &&
-        info->CastTimeEntry && (info->CastTimeEntry->CastTime > 0 || !info->IsChanneled()))
+        !witchHunterShot && info->CastTimeEntry &&
+        (info->CastTimeEntry->CastTime > 0 || !info->IsChanneled()))
       if (uint32 const prepared = RangedPreparationCastTimeIndex(info->CastTimeEntry->CastTime))
         row.Values[SPELL_CAST_TIME_INDEX_FIELD] = prepared;
 

@@ -5,8 +5,8 @@ from pathlib import Path
 import unittest
 
 from compare import compare
-from procs import (PROC_CHECK, PROC_ENERGIZE_CHECK, baseline_attempts, baseline_labels, energize_labels,
-                   proc_measurements, proc_plan, proc_scenario)
+from procs import (EVENTS_BASELINE, PROC_CHECK, PROC_ENERGIZE_CHECK, baseline_attempts, baseline_labels,
+                   energize_labels, proc_measurements, proc_plan, proc_scenario, rate_band, residual_sizing)
 from profile import DBC_DIR, FIXTURE_CLASSES_DIR
 from test_compare import Workspace, assert_step, constant_reader
 from tooltip import Displayed
@@ -14,7 +14,7 @@ from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, MINION_COOLDOWN_BAND,
                       cooldown_gate_label, cooldown_gate_scenario, cooldown_label, cooldown_measurement_labels,
                       cooldown_trial_label, magnitude_measurement_labels, magnitude_ratio_scenario,
                       minion_cooldown_event_label, minion_cooldown_scenario, trigger_scenario)
-from values import Expectation
+from values import Expectation, Unmodelled
 
 NECROMANCER = json.loads((FIXTURE_CLASSES_DIR / 'necromancer.json').read_text(encoding='utf-8'))
 CHOMP = 707283
@@ -31,6 +31,8 @@ MUCK_SUMMONER = 806086
 LESSER_ZOMBIE = 503031
 ROTLING = 50133
 WINDOW_MS = 3000
+GRANT_CAST = 804191
+ANOINTED = 280912
 
 
 def necromancer_entry(section: str, aura: int, kind: str | None = None) -> dict:
@@ -181,6 +183,119 @@ class MinionJudgeTest(unittest.TestCase):
     def test_banded_proc_mutant_at_half_the_chance_alerts(self):
         self.assertEqual(self.banded_proc(125, 5000).status, 'alert')
 
+    def commanded_proc(self, procs: int, trials: int):
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        model = {**self.proc_model(False), 'chance_pct': 50.0, 'band': 0.025, 'minimum_trials': 4000,
+                 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL, 'pet_attack': True,
+                             'summon_target': 'dummy'}}
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_CHECK}', PROC_CHECK, OVERWHELMING_FORCE,
+                                  OVERWHELMING_FORCE, None, '$h', 'rule', model)
+        steps = [assert_step(labels['trials'], str(trials)), assert_step(labels['attempts'], str(trials)),
+                 assert_step(labels['events'], str(procs)), assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-531128-part-1', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_CHECK, constant_reader(Displayed('$h', 50.0, None, 'chance_pct')))
+
+    def test_a_commanded_minion_proc_at_the_stated_chance_is_ok(self):
+        self.assertEqual(self.commanded_proc(5000, 10000).status, 'ok')
+
+    def test_a_commanded_minion_proc_mutant_at_half_the_chance_alerts(self):
+        self.assertEqual(self.commanded_proc(2500, 10000).status, 'alert')
+
+    def owner_rage_proc(self, procs: int, aura: int):
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        model = {**self.proc_model(False), 'chance_pct': 50.0, 'band': 0.025, 'minimum_trials': 4000,
+                 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL},
+                 'minion_auras': [{'spell': OVERWHELMING_FORCE, 'caster': 'owner', 'source': 'fixture'}]}
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_CHECK}', PROC_CHECK, OVERWHELMING_FORCE,
+                                  OVERWHELMING_FORCE, None, '$h', 'rule', model)
+        steps = [assert_step(labels['trials'], '10000'), assert_step(labels['attempts'], '10000'),
+                 assert_step(labels['events'], str(procs)), assert_step(labels['aura'], str(aura))]
+        self.workspace.scenario('conformance-necromancer-proc-531128-part-1', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_CHECK, constant_reader(Displayed('$h', 50.0, None, 'chance_pct')))
+
+    def test_an_owner_cast_minion_aura_proc_at_the_stated_chance_is_ok(self):
+        self.assertEqual(self.owner_rage_proc(5000, 1).status, 'ok')
+
+    def test_an_owner_cast_minion_aura_mutant_that_never_strikes_alerts(self):
+        self.assertEqual(self.owner_rage_proc(0, 1).status, 'alert')
+
+    def test_a_minion_aura_without_its_owner_as_caster_is_not_counted(self):
+        verdict = self.owner_rage_proc(5000, 0)
+        self.assertNotEqual(verdict.status, 'ok')
+        self.assertIn(f'aura {OVERWHELMING_FORCE} absent', verdict.explanation)
+
+    def granted_proc(self, procs: int, grant_reads: list[str | None]):
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        grant_labels = [f'{OVERWHELMING_FORCE} grant {GRANT_CAST} {index}' for index in range(len(grant_reads))]
+        model = {**self.proc_model(False), 'chance_pct': 50.0, 'band': 0.025, 'minimum_trials': 4000,
+                 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL},
+                 'grants': [{'aura': OVERWHELMING_FORCE, 'cast': GRANT_CAST, 'entry': GHOUL,
+                             'labels': grant_labels}]}
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_CHECK}', PROC_CHECK, OVERWHELMING_FORCE,
+                                  OVERWHELMING_FORCE, None, '$h', 'rule', model)
+        steps = [assert_step(label, read) for label, read in zip(grant_labels, grant_reads) if read is not None]
+        steps += [assert_step(labels['trials'], '10000'), assert_step(labels['attempts'], '10000'),
+                  assert_step(labels['events'], str(procs)), assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-531128-part-1', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_CHECK, constant_reader(Displayed('$h', 50.0, None, 'chance_pct')))
+
+    def test_a_really_granted_minion_aura_proc_at_the_stated_chance_is_ok(self):
+        verdict = self.granted_proc(5000, ['1', '1', '1'])
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn(f'granted by a real {GRANT_CAST} cast: present after each of the 3 grants', verdict.explanation)
+        self.assertNotIn('by harness', verdict.explanation)
+
+    def assert_ungranted(self, reads: list[str], missing: int):
+        verdict = self.granted_proc(5000, reads)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('minion aura absent after its real grant', verdict.explanation)
+        self.assertIn(f'{missing} of 3 reads at 0 after a {GRANT_CAST} cast', verdict.explanation)
+        self.assertIn(f'granted by a real {GRANT_CAST} cast', verdict.explanation)
+
+    def test_a_minion_aura_absent_after_one_real_grant_fails_whatever_the_rate(self):
+        self.assert_ungranted(['1', '0', '1'], 1)
+
+    def test_a_minion_aura_never_granted_fails_whatever_the_rate(self):
+        self.assert_ungranted(['0', '0', '0'], 3)
+
+    def test_a_missing_grant_read_is_not_counted(self):
+        self.assertNotEqual(self.granted_proc(5000, ['1', None, '1']).status, 'ok')
+
+    def residual_proc(self, procs: int, trials: int):
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        residual = residual_sizing({'aura': OVERWHELMING_FORCE, 'band': True, 'residual_target': 0.001,
+                                    'min_detectable': 5.0}, 50.0)
+        model = {**self.proc_model(False), 'chance_pct': 50.0, 'band': 0.025, 'residual': residual,
+                 'minimum_trials': residual['trials'],
+                 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL}}
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_CHECK}', PROC_CHECK, OVERWHELMING_FORCE,
+                                  OVERWHELMING_FORCE, None, '$h', 'rule', model)
+        steps = [assert_step(labels['trials'], str(trials)), assert_step(labels['attempts'], str(trials)),
+                 assert_step(labels['events'], str(procs)), assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-531128-part-1', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_CHECK, constant_reader(Displayed('$h', 50.0, None, 'chance_pct')))
+
+    def test_a_residual_sized_proc_at_the_chance_is_ok_and_states_its_rejection(self):
+        verdict = self.residual_proc(10000, 20000)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('Wilson 0.9995 interval', verdict.explanation)
+        self.assertRegex(verdict.explanation, r'a deviation of 5 points from the chance rejected with probability '
+                                              r'>= (0\.99|1\.0)')
+        self.assertNotIn('between-part', verdict.explanation)
+
+    def test_a_residual_sized_proc_mutant_above_by_the_detectable_shift_alerts(self):
+        self.assertEqual(self.residual_proc(11000, 20000).status, 'alert')
+
+    def test_a_residual_sized_proc_mutant_below_by_the_detectable_shift_alerts(self):
+        self.assertEqual(self.residual_proc(9000, 20000).status, 'alert')
+
+    def test_a_residual_sized_proc_below_its_trials_is_not_judged(self):
+        self.assertEqual(self.residual_proc(5000, 10000).status, 'insufficient_trials')
+
     def energize(self, each: int):
         labels = energize_labels(OVERWHELMING_FORCE, 6)
         model = {'part': 0, 'parts': 1, 'power': 6, 'expected': 20, 'percent_of_max': None, 'measurements': labels}
@@ -225,6 +340,62 @@ class MinionPlanTest(unittest.TestCase):
         del entry['minion_aura_refresh_ms']
         with self.assertRaises(ValueError):
             checked_entry(entry)
+
+    def test_minion_command_options_take_their_documented_values_only(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', CHOMP))
+        for changes in ({'pet_attack': True}, {'pet_attack': False}, {'summon_target': 'dummy'},
+                        {'summon_target': 'caster'}):
+            with self.subTest(changes=changes):
+                checked_entry({**entry, 'trigger': {**entry['trigger'], **changes}})
+        for changes in ({'pet_attack': 'yes'}, {'pet_attack': 1}, {'summon_target': 'self'},
+                        {'summon_target': None}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                checked_entry({**entry, 'trigger': {**entry['trigger'], **changes}})
+
+    def test_a_minion_aura_caster_is_the_owner_or_absent(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', CHOMP))
+        fixture = entry['minion_auras'][0]
+        checked_entry({**entry, 'minion_auras': [{**fixture, 'caster': 'owner'}]})
+        for caster in ('caster', 'minion', None, True):
+            with self.subTest(caster=caster), self.assertRaises(ValueError):
+                checked_entry({**entry, 'minion_auras': [{**fixture, 'caster': caster}]})
+
+    def residual_force(self, **options) -> dict:
+        entry = copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))
+        chance = proc_plan(NECROMANCER, entry).chance_pct
+        return {**entry, 'residual_target': 0.001, 'min_detectable': 2 * rate_band(chance / 100) * 100, **options}
+
+    def test_a_residual_target_under_sized_plan_fails_with_its_attempt_count(self):
+        entry = self.residual_force()
+        chance = proc_plan(NECROMANCER, copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))).chance_pct
+        needed = residual_sizing(entry, chance)['attempts']
+        with self.assertRaisesRegex(ValueError, f'under-sized for residual_target 0.001: needs {needed} attempts'):
+            proc_plan(NECROMANCER, entry)
+
+    def test_a_residual_target_sized_by_its_parts_plans_and_models_the_confidence(self):
+        entry = self.residual_force()
+        plain = proc_plan(NECROMANCER, copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE)))
+        residual = residual_sizing(entry, plain.chance_pct)
+        sized = {**entry, 'min_parts': math.ceil(residual['attempts'] / plain.per_part)}
+        plan = proc_plan(NECROMANCER, sized)
+        self.assertGreaterEqual(plan.scheduled, residual['attempts'])
+        scenario, expectations = proc_scenario(NECROMANCER, sized)
+        model = expectations[0].model
+        self.assertEqual(model['residual'], residual)
+        self.assertEqual(model['minimum_trials'], max(plain.needed, residual['trials']))
+        self.assertAlmostEqual(residual['confidence'], 0.9995)
+        self.assertIn('residual_target 0.001 per pair', expectations[0].rule)
+        _, plain_expectations = proc_scenario(NECROMANCER, copy.deepcopy(necromancer_entry('procs',
+                                                                                           OVERWHELMING_FORCE)))
+        self.assertNotIn('residual', plain_expectations[0].model)
+        self.assertNotIn('residual_target', plain_expectations[0].rule)
+
+    def test_a_residual_target_needs_a_band_and_a_shift_outside_it(self):
+        entry = self.residual_force()
+        for broken in ({'band': False}, {'residual_target': 0}, {'residual_target': 1.5}, {'residual_target': True},
+                       {'min_detectable': None}, {'min_detectable': 0.5}):
+            with self.subTest(broken=broken), self.assertRaises(ValueError):
+                proc_plan(NECROMANCER, {**entry, **broken})
 
     def test_a_minion_magnitude_count_is_one_its_trigger_metric_allows(self):
         entry = copy.deepcopy(necromancer_entry('triggers', DEPRAVITY, 'magnitude_ratio'))
@@ -299,6 +470,49 @@ class MinionScenarioTest(unittest.TestCase):
         self.assertEqual({expectation.check for expectation in expectations}, {PROC_CHECK, PROC_ENERGIZE_CHECK})
         self.assertEqual(expectations[0].model['baseline']['attempts'], baseline_attempts(plan.chance_pct))
 
+    def commanded_force(self, **options) -> list[dict]:
+        entry = copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))
+        entry['trigger'].update(options)
+        scenario, expectations = proc_scenario(NECROMANCER, entry)
+        return scenario['steps'], expectations
+
+    def test_a_pet_attack_command_follows_each_caster_attack_only_when_asked(self):
+        steps, expectations = self.commanded_force(pet_attack=True)
+        attacks = [index for index, step in enumerate(steps) if step == {'action': 'attack', 'actor': 'caster',
+                                                                          'target': 'dummy'}]
+        self.assertTrue(attacks)
+        for index in attacks:
+            self.assertEqual(steps[index + 1], {'action': 'attack', 'actor': 'caster', 'target': 'dummy', 'pet': True})
+        self.assertIn('commands its pet to attack the dummy', expectations[0].rule)
+        plain, plain_expectations = self.commanded_force()
+        self.assertFalse([step for step in plain if step.get('pet')])
+        self.assertNotIn('commands its pet', plain_expectations[0].rule)
+
+    def test_a_dummy_summon_target_casts_the_raise_at_the_dummy_only_when_asked(self):
+        def raise_cast(steps: list[dict]) -> dict:
+            return next(step for step in steps if step['action'] == 'cast' and step['spell'] == RAISE_GHOUL)
+        steps, expectations = self.commanded_force(summon_target='dummy')
+        self.assertEqual(raise_cast(steps)['target'], 'dummy')
+        self.assertIn(f'{RAISE_GHOUL} is cast at the dummy', expectations[0].rule)
+        for options in ({}, {'summon_target': 'caster'}):
+            with self.subTest(options=options):
+                steps, expectations = self.commanded_force(**options)
+                self.assertNotIn('target', raise_cast(steps))
+                self.assertNotIn('is cast at the dummy', expectations[0].rule)
+
+    def test_an_owner_minion_aura_is_set_and_removed_with_the_caster_only_when_asked(self):
+        entry = copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))
+        entry['minion_aura_refresh_ms'] = 8000
+        fixture = {'spell': 280912, 'source': 'fixture'}
+        for fixtures, caster in (([{**fixture, 'caster': 'owner'}], {'caster': 'caster'}), ([fixture], {})):
+            with self.subTest(fixtures=fixtures):
+                scenario, _ = proc_scenario(NECROMANCER, {**entry, 'minion_auras': fixtures})
+                held = [step for step in scenario['steps'] if step['action'] == 'set_aura'
+                        and step.get('owned_entry') == GHOUL and step['spell'] == 280912]
+                self.assertEqual({step['stacks'] for step in held}, {0, 1})
+                for step in held:
+                    self.assertEqual({key: step[key] for key in step if key == 'caster'}, caster)
+
     def test_study_of_death_windows_open_after_the_settle(self):
         entry = necromancer_entry('triggers', STUDY_OF_DEATH, 'cooldown_delta')
         scenario, expectations = minion_cooldown_scenario(NECROMANCER, entry)
@@ -317,6 +531,62 @@ class MinionScenarioTest(unittest.TestCase):
         entry = {**necromancer_entry('triggers', STUDY_OF_DEATH, 'cooldown_delta'), 'observe_settle_ms': -1}
         with self.assertRaises(ValueError):
             checked_entry(entry)
+
+    def granted_force(self, **fixture_options) -> tuple[dict, list]:
+        entry = copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))
+        entry['minion_aura_refresh_ms'] = 8000
+        entry['caster_power'] = {'power': 1, 'value': 400, 'source': 'fixture'}
+        fixture = {'spell': ANOINTED, 'caster': 'owner', 'source': 'fixture', **fixture_options}
+        return proc_scenario(NECROMANCER, {**entry, 'minion_auras': [fixture]})
+
+    def test_a_granted_minion_aura_is_cast_for_real_instead_of_set(self):
+        scenario, expectations = self.granted_force(grant_cast=GRANT_CAST)
+        expectation = next(expectation for expectation in expectations if expectation.check == PROC_CHECK)
+        steps = scenario['steps']
+        self.assertFalse([step for step in steps if step['action'] == 'set_aura' and step['spell'] == ANOINTED])
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == GRANT_CAST]
+        grants = expectation.model['grants']
+        self.assertEqual([(grant['aura'], grant['cast'], grant['entry']) for grant in grants],
+                         [(ANOINTED, GRANT_CAST, GHOUL)])
+        self.assertEqual(len(casts), len(grants[0]['labels']))
+        self.assertGreater(len(casts), 1)
+        self.assertEqual(len(set(grants[0]['labels'])), len(casts))
+        for index in casts:
+            self.assertEqual(steps[index]['target'], 'dummy')
+            self.assertEqual([step['action'] for step in steps[index - 2:index]], ['set_power', 'reset_cooldown'])
+            self.assertEqual(steps[index - 2]['value'], 400)
+            read = steps[index + 2]
+            self.assertIn(read['label'], grants[0]['labels'])
+            self.assertEqual((read['metric'], read['entry'], read['spell'], read['caster']),
+                             ('owned_creature_count', GHOUL, ANOINTED, 'caster'))
+        self.assertIn(f'granted every 8000 ms by a real {GRANT_CAST} cast', expectation.rule)
+        self.assertNotIn(f'minion aura {ANOINTED} set every', expectation.rule)
+
+    def test_a_granted_minion_aura_keeps_the_swing_time_of_the_set_one(self):
+        def swing_ms(scenario):
+            return sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait'
+                       and ('minion swings' in step.get('label', '') or ' read' in step.get('label', '')))
+        self.assertEqual(swing_ms(self.granted_force(grant_cast=GRANT_CAST)[0]), swing_ms(self.granted_force()[0]))
+
+    def test_a_granted_minion_aura_is_refused_with_a_set_aura_or_an_amount(self):
+        entry = copy.deepcopy(necromancer_entry('procs', OVERWHELMING_FORCE))
+        entry['minion_aura_refresh_ms'] = 8000
+        granted = {'spell': ANOINTED, 'source': 'fixture', 'grant_cast': GRANT_CAST}
+        for auras in ([granted, {'spell': ANOINTED, 'source': 'fixture'}], [{**granted, 'amount': 100}],
+                      [{**granted, 'grant_cast': 0}], [{**granted, 'grant_cast': True}],
+                      [{**granted, 'grant_cast': '804191'}]):
+            with self.subTest(auras=auras), self.assertRaises(ValueError):
+                proc_plan(NECROMANCER, {**entry, 'minion_auras': auras})
+        with self.assertRaises(ValueError):
+            proc_plan(NECROMANCER, {**entry, 'minion_auras': [granted], 'minion_aura_refresh_ms': 500})
+        proc_plan(NECROMANCER, {**entry, 'minion_auras': [granted]})
+
+    def test_a_trigger_entry_refuses_a_granted_minion_aura(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', CHOMP))
+        fixture = {**entry['minion_auras'][0], 'grant_cast': GRANT_CAST}
+        fixture.pop('amount', None)
+        with self.assertRaises(ValueError):
+            checked_entry({**entry, 'minion_auras': [fixture]})
 
     def test_pandemic_has_no_settle_step(self):
         entry = necromancer_entry('triggers', PANDEMIC, 'cooldown_delta')
@@ -403,6 +673,109 @@ class SummonProcTest(unittest.TestCase):
 def replace_model(expectation: Expectation, model: dict) -> Expectation:
     return Expectation(expectation.label, expectation.check, expectation.spell_id, expectation.rank_id,
                        expectation.effect_index, expectation.displayed, expectation.rule, model)
+
+
+
+SELF_CAST_SUMMON = 807933
+OWN_SUMMONS_CHANCE_PCT = 5.0
+OWN_SUMMONS_BASELINE_CASTS = baseline_attempts(OWN_SUMMONS_CHANCE_PCT)
+OWN_SUMMONS_TREATMENT_CASTS = 3200
+OWN_SUMMONS_PROCS = 160
+OWN_SUMMONS_HELD = 2 * OWN_SUMMONS_BASELINE_CASTS
+OWN_SUMMONS_WITH = 2 * OWN_SUMMONS_TREATMENT_CASTS + OWN_SUMMONS_PROCS
+
+
+def muck_summoner() -> dict:
+    return necromancer_entry('procs', MUCK_SUMMONER)
+
+
+def own_summons_entry(per_attempt: int = 2) -> dict:
+    return {**muck_summoner(), 'trial_casts': True, 'events_per_proc': 1, EVENTS_BASELINE: per_attempt}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class OwnSummonsPlanTest(unittest.TestCase):
+    def test_an_entry_without_the_field_keeps_its_model_and_rule(self):
+        _, plain = proc_scenario(NECROMANCER, muck_summoner())
+        self.assertNotIn(EVENTS_BASELINE, plain[0].model)
+        self.assertNotIn('by itself', plain[0].rule)
+
+    def test_the_field_reaches_the_model_and_the_rule(self):
+        _, expectations = proc_scenario(NECROMANCER, own_summons_entry())
+        self.assertEqual(expectations[0].model[EVENTS_BASELINE], 2)
+        self.assertIn('must read exactly 2 per completed cast', expectations[0].rule)
+
+    def test_the_field_needs_a_whole_positive_count_and_cast_trials(self):
+        for value in (0, -1, True, 1.5):
+            with self.assertRaises(ValueError):
+                proc_plan(NECROMANCER, own_summons_entry(value))
+        for removed in ('trial_casts', 'baseline'):
+            entry = own_summons_entry()
+            del entry[removed]
+            with self.assertRaises(ValueError):
+                proc_plan(NECROMANCER, entry)
+        with self.assertRaises(ValueError):
+            proc_plan(NECROMANCER, {**own_summons_entry(), 'event_metric': 'spell_cast_count'})
+
+    def test_a_self_cast_trigger_is_accepted_only_with_the_field(self):
+        trigger = {'action': 'cast', 'spell': SELF_CAST_SUMMON}
+        plan = proc_plan(NECROMANCER, {**own_summons_entry(), 'trigger': trigger})
+        self.assertGreater(plan.scheduled, 0)
+        with self.assertRaises(Unmodelled):
+            proc_plan(NECROMANCER, {**muck_summoner(), 'trigger': trigger})
+        with self.assertRaises(Unmodelled):
+            proc_plan(NECROMANCER, {**muck_summoner(), 'trigger': trigger, 'trial_casts': True})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class OwnSummonsJudgeTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def judged(self, baseline_events: int, treatment_events: int, per_attempt: int = 2,
+               baseline_casts: int = OWN_SUMMONS_BASELINE_CASTS):
+        _, expectations = proc_scenario(NECROMANCER, own_summons_entry(per_attempt))
+        expectation = expectations[0]
+        model = {**expectation.model, 'parts': 1}
+        labels, held = proc_measurements(MUCK_SUMMONER), baseline_labels(MUCK_SUMMONER)
+        casts = baseline_casts + OWN_SUMMONS_TREATMENT_CASTS
+        steps = [assert_step(held['trials'], str(baseline_casts)), assert_step(held['events'], str(baseline_events)),
+                 assert_step(labels['trials'], str(casts)), assert_step(labels['attempts'], str(casts)),
+                 assert_step(labels['events'], str(baseline_events + treatment_events)),
+                 assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-806086-part-1', 'proc',
+                                [replace_model(expectation, model)], steps=steps, spell=MUCK_SUMMONER,
+                                rank=MUCK_SUMMONER)
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results, tooltips=constant_reader(
+            Displayed('$h', OWN_SUMMONS_CHANCE_PCT, None, 'chance_pct'))) if verdict.check == PROC_CHECK]
+        self.assertEqual(len(verdicts), 1)
+        return verdicts[0]
+
+    def test_two_own_summons_per_cast_are_subtracted_and_the_extra_rate_is_ok(self):
+        verdict = self.judged(OWN_SUMMONS_HELD, OWN_SUMMONS_WITH)
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertAlmostEqual(verdict.measured, OWN_SUMMONS_PROCS / OWN_SUMMONS_TREATMENT_CASTS)
+        self.assertIn('exactly 2 events per completed cast', verdict.explanation)
+
+    def test_mutant_baseline_of_one_per_cast_alerts(self):
+        verdict = self.judged(OWN_SUMMONS_HELD, OWN_SUMMONS_WITH, per_attempt=1)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_mutant_extra_summon_in_the_control_arm_alerts(self):
+        verdict = self.judged(OWN_SUMMONS_HELD + 1, OWN_SUMMONS_WITH)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_an_empty_control_arm_leaves_the_rate_unmeasured(self):
+        verdict = self.judged(0, OWN_SUMMONS_WITH, baseline_casts=0)
+        self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_fewer_own_summons_than_subtracted_with_the_passive_alerts(self):
+        verdict = self.judged(OWN_SUMMONS_HELD, 2 * OWN_SUMMONS_TREATMENT_CASTS - 10)
+        self.assertEqual(verdict.status, 'alert')
 
 
 if __name__ == '__main__':

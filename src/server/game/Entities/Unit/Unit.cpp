@@ -5091,6 +5091,10 @@ bool Unit::CanDefendDuringChannel(Unit const* attacker) const
 
     Spell* channel = GetCurrentSpell(CURRENT_CHANNELED_SPELL);
     Spell* generic = GetCurrentSpell(CURRENT_GENERIC_SPELL);
+    if (IsPlayer() && getClass() == CLASS_WITCH_HUNTER && channel && channel->IsChannelActive() &&
+        channel->getState() != SPELL_STATE_FINISHED && channel->GetSpellInfo()->Id == 805751 &&
+        (!generic || generic->getState() == SPELL_STATE_FINISHED))
+        return true;
     return IsPlayer() && getClass() == CLASS_DEMON_HUNTER && channel && channel->IsChannelActive() &&
         channel->getState() != SPELL_STATE_FINISHED && channel->GetSpellInfo()->Id == 800206 &&
         (!generic || generic->getState() == SPELL_STATE_FINISHED);

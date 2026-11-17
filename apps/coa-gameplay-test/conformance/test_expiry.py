@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 from pathlib import Path
 import shutil
@@ -8,9 +9,10 @@ import unittest
 from behaviours import NotModelled, behaviour_entries
 from compare import Run, Verdict, evaluate, judge_behaviour
 from coverage import BEHAVIOUR, EVIDENCE
-from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, LOCKOUT_METRIC, SCHOOL_LOCKOUT,
-                    act_margins_of, behaviour_expiry, expiry_arm, lands_within_its_cast_step, margins_of, pair_steps,
-                    school_lockout_scenario, shift_of, trigger_expiry)
+from expiry import (APPLY_WITHIN_MS, BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, LOCKOUT_METRIC,
+                    SCHOOL_LOCKOUT,
+                    act_margins_of, arm_model, behaviour_expiry, expiry_arm, lands_within_its_cast_step, margins_of,
+                    pair_steps, school_lockout_scenario, shift_of, trigger_expiry)
 from hits import MAX_ACCELERATED_SCENARIO_MS
 from profile import DBC_DIR, load_fixture_class_file
 from tooltip import Records
@@ -381,6 +383,84 @@ class SchoolLockoutTest(unittest.TestCase):
             school_lockout_scenario(CLASS_FILE, {**lockout_entry(), 'channel_spell': FROSTBOLT})
 
 
+STUN_IMMUNITY = 57290
+
+
+def immune_lockout_entry() -> dict:
+    return {**lockout_entry(), 'target_auras': [[STUN_IMMUNITY, 1]]}
+
+
+def immune_lockout_judged(ends: dict[str, float] | None = None, values: dict[str, float] | None = None) -> Verdict:
+    scenario, expectations = school_lockout_scenario(CLASS_FILE, immune_lockout_entry())
+    expectation = expectations[0]
+    stated = {arm['name']: arm['expected_ms'] for arm in expectation.model['arms']}
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'expiry-run', expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    return judge_behaviour(base, simulated(scenario, expectation, stated | (ends or {}), values=values), expectation)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class SchoolLockoutTargetAurasTest(unittest.TestCase):
+    def test_target_auras_are_set_on_the_dummy_before_its_channel_and_read_after_the_pair(self):
+        scenario, expectations = school_lockout_scenario(CLASS_FILE, immune_lockout_entry())
+        run.validate(scenario)
+        arm = expectations[0].model['arms'][0]
+        steps = scenario['steps']
+        fixture = next(index for index, step in enumerate(steps) if step.get('spell') == STUN_IMMUNITY)
+        channel = next(index for index, step in enumerate(steps) if step.get('spell') == EVOCATION)
+        after = next(index for index, step in enumerate(steps) if step.get('label') == arm['after_label'])
+        self.assertLess(fixture, channel)
+        self.assertEqual((steps[fixture]['action'], steps[fixture]['target'], steps[fixture]['stacks']),
+                         ('set_aura', 'dummy', 1))
+        self.assertEqual([(step['actor'], step['metric']) for step in steps[after + 1:]],
+                         [('dummy', 'stunned'), ('dummy', 'casting')])
+        self.assertEqual([[label.split()[-3:], value] for label, value in arm['requires'][2:]],
+                         [[['stun', 'after', 'cast'], 0.0], [['channel', 'after', 'cast'], 0.0]])
+        self.assertEqual((arm['before_margin_ms'], arm['after_margin_ms']), (124, 26))
+
+    def test_without_target_auras_the_scenario_is_unchanged(self):
+        plain, plain_expectations = school_lockout_scenario(CLASS_FILE, lockout_entry())
+        empty, empty_expectations = school_lockout_scenario(CLASS_FILE, {**lockout_entry(), 'target_auras': []})
+        self.assertEqual(json.dumps(plain, sort_keys=True), json.dumps(empty, sort_keys=True))
+        self.assertEqual(plain_expectations[0].model, empty_expectations[0].model)
+        self.assertNotIn('fixtures', plain_expectations[0].model)
+        self.assertNotIn('fixture: aura', lockout_judged().explanation)
+
+    def test_the_verdict_names_its_target_aura_fixture(self):
+        verdict = immune_lockout_judged()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertTrue(verdict.explanation.endswith(
+            "; fixture: aura 57290 (1 stack) set by harness set_aura on the dummy (a precondition, not the claim's "
+            'subject)'))
+
+    def test_mutant_a_model_without_its_fixtures_does_not_name_them(self):
+        scenario, expectations = school_lockout_scenario(CLASS_FILE, immune_lockout_entry())
+        expectation = expectations[0]
+        stripped = replace(expectation, model={key: value for key, value in expectation.model.items()
+                                               if key != 'fixtures'})
+        stated = {arm['name']: arm['expected_ms'] for arm in expectation.model['arms']}
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'expiry-run', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        found = simulated(scenario, expectation, stated)
+        named, mutant = judge_behaviour(base, found, expectation), judge_behaviour(base, found, stripped)
+        self.assertNotIn('fixture: aura', mutant.explanation)
+        self.assertEqual((mutant.status, mutant.measured, mutant.low, mutant.high),
+                         (named.status, named.measured, named.low, named.high))
+
+    def test_a_conformant_lockout_on_an_unstunned_dummy_is_ok(self):
+        self.assertEqual(immune_lockout_judged().status, 'ok')
+
+    def test_seeded_landed_stun_or_shortened_lockout_does_not_pass(self):
+        scenario, expectations = school_lockout_scenario(CLASS_FILE, immune_lockout_entry())
+        stun, channel = (label for label, _ in expectations[0].model['arms'][0]['requires'][2:])
+        self.assertEqual(immune_lockout_judged({'cast': 0.0}, {stun: 1.0}).status, 'unmeasured')
+        self.assertEqual(immune_lockout_judged({'cast': 0.0}).status, 'alert')
+        self.assertEqual(immune_lockout_judged(values={stun: 1.0}).status, 'unmeasured')
+        self.assertEqual(immune_lockout_judged(values={channel: 1.0}).status, 'unmeasured')
+        self.assertEqual(immune_lockout_judged({'cast': 3000.0 - shift_of(3000.0)}).status, 'alert')
+        self.assertEqual(immune_lockout_judged({'cast': 3000.0 + shift_of(3000.0)}).status, 'alert')
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class GenerateExpiryTest(unittest.TestCase):
     def setUp(self):
@@ -421,6 +501,123 @@ class GenerateExpiryTest(unittest.TestCase):
         verdicts = [verdict for verdict in evaluate(manifest_path, self.out / 'results').verdicts
                     if verdict.check == BEHAVIOUR_EXPIRY]
         self.assertEqual([verdict.status for verdict in verdicts], ['ok'])
+
+
+CHAINS_OF_DARKNESS = 680521
+CHAINS_TAUNT = 680522
+
+
+def travelling_entry(**extra) -> dict:
+    return {'spell': CHAINS_OF_DARKNESS, 'name': 'Chains of Darkness (taunt duration)', 'kind': 'cast_applies_aura',
+            'label_suffix': 'taunt', 'quote': 'and taunting them for $680522d.', 'expected_ms': 3000,
+            'applied_aura': CHAINS_TAUNT, 'target': 'dummy', **extra}
+
+
+def travelling_run(scenario: dict, expectation, flight_ms: float, end_ms: float) -> Run:
+    arm = expectation.model['arms'][0]
+    clock, landing, steps, found = 0.0, None, [], {}
+    for index, step in enumerate(scenario['steps']):
+        clock += CLOCK_STEP_MS if index else 0.0
+        label = step.get('label', step['action'])
+        elapsed = float(step['ms']) if step['action'] == 'wait' else 0.0
+        if label == arm['act_label']:
+            landing = clock + flight_ms
+        if label == arm['applied_label']:
+            elapsed = max(0.0, landing - clock)
+        clock += elapsed
+        steps.append({'index': str(index), 'action': step['action'], 'label': label, 'elapsed_ms': str(elapsed)})
+        if label in (arm['before_label'], arm['after_label']):
+            found[label] = 1.0 if landing <= clock < landing + end_ms else 0.0
+    for requirement, value in arm['requires']:
+        found.setdefault(requirement, value)
+    return Run('travel-run', 'passed', '', found, steps, float(CLOCK_STEP_MS))
+
+
+def travelling_verdict(expectation, run: Run) -> Verdict:
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', run.key, expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    return judge_behaviour(base, run, expectation)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class TravellingAuraExpiryTest(unittest.TestCase):
+    def built(self, **extra):
+        scenario, expectations = behaviour_expiry(CLASS_FILE, travelling_entry(read_after_ms=150, **extra))
+        return scenario, expectations[0]
+
+    def test_without_read_after_ms_the_travelling_end_stays_unmodelled(self):
+        scenario, expectations = behaviour_expiry(CLASS_FILE, travelling_entry())
+        self.assertIsNone(scenario)
+        self.assertEqual(expectations[0].check, 'unmodelled')
+
+    def test_the_arm_polls_the_landing_and_states_its_anchor_error_and_ten_percent_shift(self):
+        scenario, expectation = self.built()
+        run.validate(scenario)
+        arm = expectation.model['arms'][0]
+        self.assertEqual((arm['shift_ms'], arm['anchor_error_ms']), (300.0, CLOCK_STEP_MS))
+        self.assertEqual((arm['before_margin_ms'], arm['after_margin_ms']), (126, 99))
+        labels = [step.get('label') for step in scenario['steps']]
+        poll = scenario['steps'][labels.index(arm['applied_label'])]
+        self.assertEqual(labels.index(arm['applied_label']), labels.index(arm['act_label']) + 1)
+        self.assertEqual((poll['actor'], poll['spell'], poll['min']), ('dummy', CHAINS_TAUNT, 1))
+
+    def test_the_stated_end_after_any_flight_is_ok_and_its_interval_excludes_ten_percent_off(self):
+        scenario, expectation = self.built()
+        for flight in (0.0, 30.0, 80.0, 400.0):
+            verdict = travelling_verdict(expectation, travelling_run(scenario, expectation, flight, 3000.0))
+            self.assertEqual(verdict.status, 'ok', (flight, verdict.explanation))
+
+    def test_ends_ten_percent_off_alert(self):
+        scenario, expectation = self.built()
+        for end in (2700.0, 3300.0):
+            for flight in (0.0, 80.0):
+                verdict = travelling_verdict(expectation, travelling_run(scenario, expectation, flight, end))
+                self.assertEqual(verdict.status, 'alert', (end, flight, verdict.explanation))
+
+    def test_the_anchor_error_widens_the_bracket_until_it_reads_unmeasured(self):
+        scenario, expectation = self.built()
+        expectation.model['arms'][0]['anchor_error_ms'] = 200
+        verdict = travelling_verdict(expectation, travelling_run(scenario, expectation, 80.0, 3000.0))
+        self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+
+    def test_an_arm_without_the_anchor_error_keeps_its_model_keys(self):
+        arm = expiry_arm('1 2', 'with', 60000)
+        self.assertNotIn('anchor_error_ms', arm_model(arm))
+        self.assertEqual(arm_model(arm)['shift_ms'], shift_of(60000))
+
+
+
+def bolt_entry(**extra) -> dict:
+    return {'spell': 807284, 'name': 'Heartseeking Bolt (healing debuff duration)', 'kind': 'cast_applies_aura',
+            'label_suffix': 'debuff_duration', 'quote': 'for $807316d.', 'expected_ms': 10000,
+            'applied_aura': 807316, 'target': 'dummy', 'cast_spell': 807284, 'cast_target': 'dummy', **extra}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class CastTimeAuraExpiryTest(unittest.TestCase):
+    def applied_poll(self, entry: dict) -> tuple[dict, dict, object]:
+        scenario, expectations = behaviour_expiry(CLASS_FILE, entry)
+        arm = expectations[0].model['arms'][0]
+        labels = [step.get('label') for step in scenario['steps']]
+        return scenario, scenario['steps'][labels.index(arm['applied_label'])], expectations[0]
+
+    def test_the_applied_poll_waits_out_the_cast_time_with_read_after_ms(self):
+        scenario, poll, _ = self.applied_poll(bolt_entry(read_after_ms=3200))
+        run.validate(scenario)
+        self.assertEqual(poll['within_ms'], APPLY_WITHIN_MS + 3000)
+
+    def test_an_instant_travelling_aura_keeps_the_plain_applied_window(self):
+        _, poll, _ = self.applied_poll(travelling_entry(read_after_ms=150))
+        self.assertEqual(poll['within_ms'], APPLY_WITHIN_MS)
+
+    def test_a_debuff_landing_at_the_cast_end_is_judged_and_ten_percent_off_alerts(self):
+        scenario, _, expectation = self.applied_poll(bolt_entry(read_after_ms=3200))
+        for flight in (2950.0, 3000.0, 3350.0):
+            verdict = travelling_verdict(expectation, travelling_run(scenario, expectation, flight, 10000.0))
+            self.assertEqual(verdict.status, 'ok', (flight, verdict.explanation))
+        for end in (9000.0, 11000.0):
+            verdict = travelling_verdict(expectation, travelling_run(scenario, expectation, 2950.0, end))
+            self.assertEqual(verdict.status, 'alert', (end, verdict.explanation))
 
 
 if __name__ == '__main__':

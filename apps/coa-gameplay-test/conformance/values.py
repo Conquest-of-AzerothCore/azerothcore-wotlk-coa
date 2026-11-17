@@ -3,11 +3,11 @@ import math
 from pathlib import Path
 import re
 from statistics import fmean, pstdev
-from typing import Sequence
+from typing import Mapping, Sequence
 
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet, dataset
-from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, armed, base_steps, character_of, known_aura_label, measurement,
-                     player_fixture, skill_target)
+from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, WEAPON_REQUIREMENT_FIELDS, armed, base_steps, character_of,
+                     known_aura_label, measurement, player_fixture, server_requirement, skill_target)
 from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displayed, ForcedPoints, Records, Tooltip,
                      Unreadable, mixed_period_reason, period_reading, read_tooltip)
 
@@ -25,6 +25,7 @@ RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
+SPELL_RANGE_RANGED = 2
 GAP_CLOSER_MARGIN_YD = 2.0
 GAP_CLOSER_DISTANCE = 'gap_closer_distance'
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
@@ -32,6 +33,8 @@ MANA = 0
 CAST_MARGIN_MS = 500
 GCD_WAIT_MS = 1600
 CAST_WAIT_LABEL = 'cast time'
+MISSILE_WAIT_LABEL = 'missile travel'
+MISSILE_MIN_DISTANCE_YD = 5.0
 UNREADABLE = 'unreadable: '
 UNMEASURABLE = 'unmeasurable: '
 CALC_AMOUNT_HOOKS_METRIC = 'spell_calc_amount_hooks'
@@ -60,7 +63,9 @@ FROST_NOVA = 122
 TARGET_STATE_AURAS = {AURA_STATE_FROZEN: FROST_NOVA}
 TARGET_HEALTH_WAIT_MS = 1000
 FORCED_CRIT_RATING = 100000
-FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
+RANGED_FORCE_CRIT = 'ranged'
+FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating',
+                      RANGED_FORCE_CRIT: 'ranged_crit_rating'}
 
 
 class Unmodelled(Exception):
@@ -125,12 +130,38 @@ def facts_of(records: Records, rank_id: int) -> RankFacts:
         target_aura_state=spell('TargetAuraState'))
 
 
-def equip_requirement(records: Records, rank_id: int) -> dict[str, int]:
-    return {name: records.field('Spell', rank_id, name) for name in EQUIP_FIELDS}
+def equip_requirement(records: Records, rank_id: int, class_file: dict | None = None) -> Mapping[str, int]:
+    requirement = {name: records.field('Spell', rank_id, name) for name in EQUIP_FIELDS}
+    return requirement if class_file is None else server_requirement(class_file, rank_id, requirement)
+
+
+def weapon_requirement(records: Records, rank_id: int, class_file: dict | None = None) -> Mapping[str, int]:
+    requirement = {name: records.field('Spell', rank_id, name) for name in WEAPON_REQUIREMENT_FIELDS}
+    return requirement if class_file is None else server_requirement(class_file, rank_id, requirement)
 
 
 def armed_for(class_file: dict, records: Records, rank_id: int) -> dict:
-    return armed(class_file, equip_requirement(records, rank_id))
+    return armed(class_file, weapon_requirement(records, rank_id, class_file), rank_id)
+
+
+def cast_distance(records: Records, spell_id: int) -> float:
+    range_index = records.field('Spell', spell_id, 'RangeIndex')
+    if records.field('SpellRange', range_index, 'Flags') != SPELL_RANGE_RANGED:
+        return DUMMY_DISTANCE
+    low = records.field('SpellRange', range_index, 'RangeMin[0]')
+    high = records.field('SpellRange', range_index, 'RangeMax[0]')
+    distance = (low + high) / 2
+    if distance <= low + NOMINAL_MELEE_RANGE_YD:
+        raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd, ranged) leaves no distance past its '
+                         f'minimum plus the {NOMINAL_MELEE_RANGE_YD:g} yd melee range')
+    return distance
+
+
+def missile_wait_ms(records: Records, spell_id: int, distance: float) -> int:
+    speed = records.field('Spell', spell_id, 'Speed')
+    if distance == DUMMY_DISTANCE or speed <= 0:
+        return 0
+    return math.ceil(max(distance, MISSILE_MIN_DISTANCE_YD) / speed * 1000) + CAST_MARGIN_MS
 
 
 def structure_stats(class_file: dict, known_spells: frozenset[int] = frozenset()) -> CasterStats:
@@ -141,6 +172,12 @@ def structure_stats(class_file: dict, known_spells: frozenset[int] = frozenset()
         stats={stat: LEVEL_PLACEHOLDER_STAT for stat in range(5)},
         known_spells=known_spells,
         **character_of(class_file, skills))
+
+
+def sizing_stats(caster: CasterStats) -> CasterStats:
+    return replace(caster, ap=LEVEL_PLACEHOLDER_STAT, rap=LEVEL_PLACEHOLDER_STAT,
+                   sp_by_school={school: LEVEL_PLACEHOLDER_STAT for school in range(1, 7)},
+                   stats={stat: LEVEL_PLACEHOLDER_STAT for stat in range(5)})
 
 
 def is_hostile(facts: RankFacts) -> bool:
@@ -185,6 +222,47 @@ def aura_carrier(facts: RankFacts, effect: int) -> dict:
     if facts.target_a[effect] in SELF_TARGETS or not is_hostile(facts):
         return {'actor': CASTER, 'caster': CASTER}
     return {'actor': TARGET, 'caster': CASTER}
+
+
+SUMMON_AURA_EFFECT = 190
+SUMMON_AURA_METRICS = {'aura': 'owned_creature_count', 'aura_duration_ms': 'owned_creature_aura_max_duration_ms'}
+SUMMON_AURA_SETTLE_MS = 8000
+SUMMON_AURA_ONLY = ("the aura is applied to the caster's summons only (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS "
+                    "190, UnitAura::FillTargetMap)")
+
+
+def applies_to_summons(facts: RankFacts, effect: int) -> bool:
+    return facts.effects[effect] == SUMMON_AURA_EFFECT
+
+
+def summon_aura_carrier(class_file: dict, rank_id: int) -> dict | None:
+    return next((carrier for carrier in class_file.get('summon_aura_carriers', []) if carrier['spell'] == rank_id),
+                None)
+
+
+def summon_aura_gap(metric: str) -> str:
+    if metric not in SUMMON_AURA_METRICS:
+        return f'{SUMMON_AURA_ONLY} and no harness metric reads {metric} on an owned creature'
+    return ''
+
+
+def summon_aura_measurement(label: str, metric: str, spell: int, carrier: dict) -> dict:
+    fields = {'caster': CASTER} if metric == 'aura' else {}
+    return measurement(label, CASTER, SUMMON_AURA_METRICS[metric], spell=spell, entry=carrier['entry'], **fields)
+
+
+def summon_aura_setup_steps(records: Records, carrier: dict) -> list[dict]:
+    facts = facts_of(records, carrier['summon'])
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+             for spell in [*carrier.get('learn', []), carrier['summon']]]
+    if facts.mana_cost > 0 and facts.power_type != MANA:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+    cast = {'action': 'cast', 'actor': CASTER, 'spell': carrier['summon']}
+    if is_hostile(facts):
+        cast['target'] = TARGET
+    return steps + [cast, {'action': 'assert', 'label': f'SETUP: the {carrier["entry"]} summon carries the aura read',
+                           'actor': CASTER, 'metric': 'owned_creature_count', 'entry': carrier['entry'],
+                           'equals': carrier.get('count', 1), 'within_ms': SUMMON_AURA_SETTLE_MS}]
 
 
 def required_aura_steps(facts: RankFacts) -> list[dict]:
@@ -341,13 +419,14 @@ def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
 OVER_TICKS_REASON = 'a total over the ticks of periodic effect'
 
 
-def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: Displayed) -> str:
-    effect = shown.effect_index
-    aura = records.field('Spell', rank_id, f'EffectApplyAuraName[{effect}]')
-    if aura not in TICKING_AURAS or records.field('Spell', rank_id, f'EffectAmplitude[{effect}]') <= 0:
+def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: Displayed,
+                    token: tuple[int, int] | None = None) -> str:
+    spell, effect = token if token is not None else (rank_id, shown.effect_index)
+    aura = records.field('Spell', spell, f'EffectApplyAuraName[{effect}]')
+    if aura not in TICKING_AURAS or records.field('Spell', spell, f'EffectAmplitude[{effect}]') <= 0:
         return ''
     try:
-        reading = period_reading(records, rank_id, caster, shown, effect)
+        reading = period_reading(records, rank_id, caster, shown, effect, period_spell=spell)
     except Unreadable as error:
         return error.reason
     if reading == OVER_TICKS:
@@ -457,8 +536,21 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                  calc_amount_hooks_measurement(label, spell_id, effect)]
                 + effect_modifier_measurements(records, label, spell_id, effect))
 
+    summon_carrier = summon_aura_carrier(class_file, rank_id)
+    summon_reads = False
+
+    def carried_by_summon(carrier_effect: int) -> bool:
+        return summon_carrier is not None and applies_to_summons(facts, carrier_effect)
+
     def aura_measurement(label: str, metric: str, carrier_effect: int, **fields) -> dict:
+        nonlocal summon_reads
+        if carried_by_summon(carrier_effect):
+            summon_reads = True
+            return summon_aura_measurement(label, metric, rank_id, summon_carrier)
         return measurement(label, metric=metric, spell=rank_id, **aura_carrier(facts, carrier_effect), **fields)
+
+    def summon_gap(carrier_effect: int, metric: str) -> str:
+        return summon_aura_gap(metric) if carried_by_summon(carrier_effect) else ''
 
     def expect(label: str, check: str, effect: int | None, displayed: str, rule: str, model: dict | None = None):
         expectations.append(Expectation(label, check, spell.spell_id, rank_id, effect, displayed, rule, model))
@@ -485,6 +577,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             sample_rolled(label, ordinal, shown.text, rank_id, effect)
             if facts.aura_names[effect] and not facts.passive:
                 aura_label = f'{rank_id} aura_amount e{effect} #{ordinal}'
+                gap = summon_gap(effect, 'aura_amount')
+                if gap:
+                    expect(aura_label, 'aura_amount', effect, shown.text, note_rule(UNMEASURABLE + gap, note))
+                    return
                 after_cast.append(aura_measurement(aura_label, 'aura_amount', effect, effect=effect))
                 expect(aura_label, 'aura_amount', effect, shown.text, note_rule(f'read {shown.kind}', note))
                 cast_wanted = True
@@ -526,6 +622,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 expect(label, 'aura_amplitude_ms', None, shown.text,
                        note_rule(UNMEASURABLE + 'the remaining amplitude of a cast-time spell is read after its '
                                  'cast', note))
+            elif summon_gap(amplitude_effect, 'aura_amplitude_ms'):
+                expect(label, 'aura_amplitude_ms', None, shown.text,
+                       note_rule(UNMEASURABLE + summon_gap(amplitude_effect, 'aura_amplitude_ms'), note))
             else:
                 after_cast.append(aura_measurement(label, 'aura_amplitude_ms', amplitude_effect,
                                                    effect=amplitude_effect))
@@ -565,6 +664,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         foreign, unmeasurable = foreign_effect(records, rank_id, shown, disabled_effects)
         if foreign:
             label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
+            periodic = periodic_reason(records, rank_id, caster, shown, (foreign['effect_spell'], foreign['effect']))
+            if periodic.startswith(OVER_TICKS_REASON):
+                periodic_totals.append({'label': label, 'effect': foreign['effect'], **foreign})
+                return
             measured.extend(effect_measurements(label, foreign['effect_spell'], foreign['effect']))
             expect(label, 'effect_value', None, shown.text, note_rule(f'read {shown.kind}', note), foreign)
             sample_rolled(label, ordinal, shown.text, foreign['effect_spell'], foreign['effect'])
@@ -584,9 +687,14 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 expect(label, 'aura_duration_ms', None, shown.text,
                        note_rule(UNMEASURABLE + 'the remaining duration of a cast-time spell is read after its '
                                  'cast', note))
+            elif summon_gap(aura_effect, 'aura_duration_ms'):
+                expect(label, 'aura_duration_ms', None, shown.text,
+                       note_rule(UNMEASURABLE + summon_gap(aura_effect, 'aura_duration_ms'), note))
             else:
                 after_cast.append(aura_measurement(label, 'aura_duration_ms', aura_effect))
-                expect(label, 'aura_duration_ms', None, shown.text, note_rule(f'read {shown.kind}', note))
+                read = (f'read {shown.kind} as the maximum duration on the owned {summon_carrier["entry"]}'
+                        if carried_by_summon(aura_effect) else f'read {shown.kind}')
+                expect(label, 'aura_duration_ms', None, shown.text, note_rule(read, note))
                 cast_wanted = True
             return
         reason = f'{shown.kind} token without a no-combat metric'
@@ -635,12 +743,18 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'die', 'actor': ALLY})
             cast['target'] = ALLY
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
+        if summon_reads:
+            cast_steps += summon_aura_setup_steps(records, summon_carrier)
         cast_steps.append(cast)
         if facts.cast_time_ms:
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
+        travel_ms = missile_wait_ms(records, rank_id, cast_distance(records, rank_id)) if is_hostile(facts) else 0
+        if travel_ms:
+            cast_steps.append({'action': 'wait', 'label': MISSILE_WAIT_LABEL, 'ms': travel_ms})
         cast_steps.append(measurement(f'{rank_id} cast_failure', CASTER, 'cast_failure', spell=rank_id))
-        if any(step.get('metric', '').startswith('aura_') for step in after_cast):
+        if any(step.get('metric', '').startswith('aura_') or step.get('metric') in SUMMON_AURA_METRICS.values()
+               for step in after_cast):
             effect = first_aura_effect(facts) or 0
             cast_steps.append(aura_measurement(f'{rank_id} aura_present', 'aura', effect))
 
@@ -660,9 +774,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         'contract': 'No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.',
         'players': [player_fixture(class_file)],
         'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
-    if is_hostile(facts) and cast_wanted:
+    summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))
+    if (is_hostile(facts) or summon_target) and cast_wanted:
+        placed = rank_id if is_hostile(facts) else summon_carrier['summon']
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
-                                  'health': DUMMY_HEALTH, 'distance': DUMMY_DISTANCE}]
+                                  'health': DUMMY_HEALTH, 'distance': cast_distance(records, placed)}]
     if (targets_resurrect(facts) or needs_ally_target) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals

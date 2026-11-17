@@ -28,6 +28,16 @@ other steps leave of the harness's 10000-step limit (`MAX_SCENARIO_STEPS`, `run.
 simulated clock; the harness runs one step per world update); otherwise the effect is read once and its verdict is
 `measured`. Templar: 51 rolled tokens, 2 to 1716 reads (Vindication 501589 102, Reckoning 572741 366).
 
+When the rolled token carries a power term (`$AP`, `$RAP`, `$SP`, `$sp<school>`) and the effect owner has a
+`spell_bonus_data` row with terms (its own row, or for a rank without one the row of the first rank of its
+`SpellRank.dbc` chain, as `SpellMgr::GetSpellBonusData` resolves it; ADR 0688), the reads are modelled before the
+judgement (ADR 0679): a direct damage effect
+(`SCHOOL_DAMAGE`, `HEALTH_LEECH`) adds `ap_bonus` x AP (RAP for a ranged weapon spell outside the melee class) and
+`direct_bonus` x the school's spell power, the terms `Unit::SpellDamageBonusDone` adds after `CalcValue`; the verdict
+names the row and its SQL source in `detail['bonus_data']`. The case is `not_measured` when the row cannot be
+modelled from the recorded stats (a periodic term, another effect type, a level penalty or a family coefficient
+modifier on a non-zero stat, no single school) or when `bonus_data.py` cannot read the table.
+
 A token without an id names the spell whose tooltip holds it: for a token of an expanded `@s:` tooltip that is the
 referenced spell, so its `$sN`, `$u` and `$d` are checked as tokens of another spell (Zealotry 92108 `$s2` is
 `effect_value` of 801450 effect 1; Glory 801481 checks its own `$d` as `aura_duration_ms` and the `$d` of Downfall
@@ -92,6 +102,12 @@ citing the DBC trigger effect or the script that applies it) lists the pairs thi
 test player reached by its own reset-cooldown-and-recast sequence, chosen by whether the rank's own effects target
 `TARGET_UNIT_TARGET_ALLY` (`targets_ally`). Only the listed pairs get this extra check, so an uninvestigated
 `foreign_duration` match elsewhere in the class is unaffected (ADR 0051).
+An aura that `SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS` (190) applies reaches the caster's summons only, never the
+caster. A class file's `summon_aura_carriers` (`{spell, entry, summon, learn, reason}`, ADR 0697) names a summon for
+such a rank: `value_scenario` learns `learn` and `summon`, casts `summon` (at the dummy when it is hostile), requires
+one owned `entry` creature, then casts the rank and reads the aura on that creature: presence as
+`owned_creature_count` with the spell, the duration as `owned_creature_aura_max_duration_ms`; an amount or amplitude
+has no owned-creature metric and is unmeasurable. A rank without an entry keeps the caster read.
 `spell_effect_value` is `SpellEffectInfo::CalcValue`, before aura scripts: every `effect_value` verdict carries
 `detail['scope']` "CalcValue before aura scripts (CalcAmount hooks not covered)". Each judged `effect_value` read
 (`read <kind>` rule, own or foreign effect) is followed by `<label> calc_amount_hooks`, the harness metric

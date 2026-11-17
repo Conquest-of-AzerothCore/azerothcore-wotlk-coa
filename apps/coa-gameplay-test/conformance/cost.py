@@ -2,6 +2,7 @@ import argparse
 from collections import Counter
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -86,7 +87,16 @@ def description_of(path: Path) -> str:
 
 
 def transcripts(root: Path) -> Iterator[Path]:
-    return iter(sorted(root.rglob('*.jsonl')))
+    found = []
+    visited = set()
+    for directory, names, files in os.walk(root, followlinks=True):
+        real = os.path.realpath(directory)
+        if real in visited:
+            names[:] = []
+            continue
+        visited.add(real)
+        found.extend(Path(directory) / name for name in files if name.endswith('.jsonl'))
+    return iter(sorted(found))
 
 
 def empty_totals() -> Counter:

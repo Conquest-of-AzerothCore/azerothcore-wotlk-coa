@@ -45,6 +45,11 @@ A JSON array. Each entry is one clause:
   formula, a `$` token other than a duration, radius or range, or a literal number), the entries carrying it are added
   to the claim's words for the state-promise match; with two or more values, or none, nothing changes. Templar:
   Martyr 300530 names Gift of Zeal 300923.
+- `promise_of` (optional, a `"claim"` entry, ADR 0707): the exact text of an earlier clause of the same spell. Its
+  words join every claim's words for the state-promise match only (`STATE_PROMISES` and the contrast rows), so a
+  clause that continues a sentence ("increasing by $s1% every ...") is promised the state its subject clause names
+  ("critical strike chance"). A source that is not an earlier clause of the spell is refused. Witch Hunter: Slayer's
+  Mark 804068.
 
 ### Stated claims
 
@@ -158,6 +163,11 @@ but leaves it without a proving test empties its `labels`, so the clause counts 
   (including a label that is simply absent from this run's verdicts), is unproven. An entry with declared
   `claims` is proven only when every one of its claims is; `ClauseCoverage.claim_evidence` holds the status of each
   claim, in the order of `evidence`.
+- A claim whose matched verdicts carry a modelled `detail['bonus_data']` (a `spell_bonus_data` row added to a
+  rolled read, ADR 0679 and 0683) is unproven unless another of its matched labels is a conformant applied hit: a
+  `hit_mean`, `melee_mean`, `periodic_total` or `behaviour_hit_ratio` verdict, or a `behaviour_metric_delta` of
+  `spell_damage_total`, `spell_heal_total` or `melee_damage_total`. When the row has a spell power coefficient
+  (`direct_bonus`), that hit must also record a non-zero `detail['spell_power']` (ADR 0686).
 - A label may omit the trailing `" #<ordinal>"` that `values.py` appends when a spell has several tokens of
   the same effect/spell/kind (`92111 effect_value 801832e1`, not `92111 effect_value 801832e1 #1`) — the audit
   (`claims-merged.json`) writes labels this way since it cannot predict the ordinal a future generate run will
@@ -278,7 +288,10 @@ not in the table fails the whole run (`EvidenceError`, no default):
   text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell power" or
   "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating" or a
   `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A metric in `coverage.CONTRAST_PROOF` (kind modules add rows) is behaviour only when `detail.contrast` equals its
-  row's contrast, whatever the claim words say (ADR 0616). A `behaviour_group_stack_cap` state read
+  row's contrast, whatever the claim words say (ADR 0616), unless the metric also has a `STATE_PROMISES` row: then the
+  clause or its row must use those words. A readback metric has such a row only to gate its contrast proof, as
+  `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
+  chance with the attacker's conditional rules, the same way (ADR 0800). A `behaviour_group_stack_cap` state read
   is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
   value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition
@@ -286,6 +299,8 @@ not in the table fails the whole run (`EvidenceError`, no default):
   "While", "Whenever" or "As long as" (`coverage.CONDITION_WORDS`, ADR 0548); the effect claim of the same sentence
   still needs its own promised read. `distance_2d` (the distance between two actors) is a state read too: behaviour
   under a learned or own-cast contrast for a clause that promises the move ("location", "hook", "pull", ADR 0584).
+  `point_distance_2d` (the distance from a unit to a fixed point) is one as well, for a clause that promises a leap
+  or a range ("leap", "range", "yd", ADR 0708).
   A stat read as a
   proxy for another effect stays data. A conformant verdict with `detail['data_only']` (a `passive_delta` the integer floor alone accepted, or
   whose integer stat did not move; ADR 0124) is data whatever its metric.

@@ -47,6 +47,13 @@ class MetricDeltaOptionRegistryTests(unittest.TestCase):
                 self.assertTrue(callable(module.parse))
                 self.assertTrue((PACKAGE / 'metric_delta_options' / f'test_{module.NAME}.py').is_file())
 
+    def test_an_option_coverage_row_does_not_override_a_base_row(self):
+        from coverage import KIND_ROW_TABLES
+        for table, base in KIND_ROW_TABLES.items():
+            with self.subTest(table=table):
+                self.assertEqual(sorted(key for module in option_modules() for key in getattr(module, table, {})
+                                        if key in base), [])
+
     def test_an_option_field_is_not_also_a_spec_field(self):
         names = {field.name for field in fields(MetricDeltaSpec)}
         self.assertEqual(sorted(module.NAME for module in option_modules() if module.NAME in names), [])

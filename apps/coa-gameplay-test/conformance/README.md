@@ -65,7 +65,7 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   targets, phrase checks, the passive with/without scenario.
 - [Max-rank hit scenarios](docs/hit-scenarios.md) — the hit/melee scenario of a spell's highest rank.
 - [Proc rates](docs/proc-rates.md) — proc entries, procs per trigger (ADR 0130), the two-reading/Ascension-log fallback,
-  nested proc rates.
+  nested proc rates, `residual_target` sizing (ADR 0781; its Wilson coverage is nominal, not exact).
 - [Trigger entries](docs/trigger-entries.md) — always-on triggers, taken-hit, cooldown-delta, duration-delta
   entries.
 - [Behaviour scenarios](docs/behaviour-scenarios.md) — prose-only behaviours: target count, healing ratio, aura

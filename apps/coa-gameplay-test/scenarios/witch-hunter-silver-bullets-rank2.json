@@ -1,0 +1,5108 @@
+{
+  "schema": 1,
+  "name": "Silver Bullets rank 2 gives Darkslayer x1.40 on applied Undead hits, x1.10 / x1.20 on the control (#2178)",
+  "contract": "Silver Bullets 574149 / 574163 read 'Increases the damage of Darkslayer by $s1%, increased by an additional $s2% against Undead' with $s1 = $s2 = 10 (rank 1) / 20 (rank 2) (Spell.dbc EffectBasePoints[0] and [1]); mentor D-85 case (b) reads one total against Undead, so an applied Darkslayer hit is x1.20 (rank 1) / x1.40 (rank 2) on an Undead target and x1.10 / x1.20 on any other. Effect 0 is aura 108 SPELLMOD_DAMAGE on class mask word2 0x20 (Darkslayer), applied natively in the damage calculation. Effect 1 is aura 112 with the private selector 20014 and MiscValueB 32 (Undead = 1 << (6 - 1)); KeepCreatureTypeDamageForScript (AscensionWitchHunterCompletion.cpp) makes it a dummy aura and SilverBulletsCreatureTypeShare (AscensionWitchHunterAbilities.cpp, Witch Hunter ADR 0003) multiplies the hit by (100 + $s1 + $s2) / (100 + $s1) = 120/110 or 140/120 in AllSpellScript::OnSpellCalculatedTarget, which Spell.cpp calls after the effect damage and the crit roll of each target and before the hit is dealt. The deterministic melee_spell_damage_done metric does not reach that hook, so this scenario reads the APPLIED damage of real Darkslayer 804179 hits from the native combat packets (spell_damage_total / spell_damage_count): 64 (Undead) and 32 (control) casts per arm at the Brittlebones Skeleton 201 (creature_template type 6, Undead) and at the Harvest Golem 36 (type 9, Mechanical, the non-Undead control), without the talent, with rank 1, then with rank 2, each ratio taken against the same target's talent-free arm. Sizing: 64 Undead casts in the talent-free and rank 2 arms and 32 in each control arm, with the per-hit standard deviation of 0.75% read in the first run: the rank 2 Undead ratio has a standard deviation of 0.0075 x 1.40 x sqrt(1/64 + 1/64) = 0.00186, so the band 1.38..1.42 is 10.7 sigma either side of 1.40 (residual failure probability below 1e-20 per run) and the pre-fix 1.44 is 10.7 sigma above its upper bound; the controls (32 against 32) have 0.0021 (rank 1, band 1.08..1.12) and 0.0023 (rank 2, band 1.18..1.22), 9.7 and 8.9 sigma. The rank 1 Undead ratio is in witch-hunter-silver-bullets (256 hits per arm). Crit variance is removed by forcing every hit to crit (crit ratings +100000) and counting only critical hits, with an exact hit-count assert per arm: a plain scenario divides a reading by one snapshot only, so a non-critical filter with an unequal crit count per arm could not give a per-hit mean; the crit multiplier is the same factor in every arm and cancels in the ratio. Pre-fix arithmetic: before a6a7739ab3 effect 1 was converted to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, a separate DoneTotalMod factor that MeleeDamageBonusDone multiplies with the SPELLMOD_DAMAGE bonus, so the applied Undead hit read 1.10 x 1.10 = 1.21 and 1.20 x 1.20 = 1.44 (ADR 0003: +20.91% / +43.72% measured); with effect 1 a dummy and no hook, only the native 1.10 / 1.20 would remain on the Undead hit. Both fall outside the Undead bands (rank 1 1.195..1.205, rank 2 1.38..1.42), so either pre-fix arithmetic fails this scenario; the non-Undead control is 1.10 / 1.20 in every version. Ranged attack power +5000 and the hit/expertise ratings are fixture bonuses in all arms (precondition fixtures, not the claim's subject).",
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "ranged_attack_power": 5000,
+      "spell_crit_rating": 100000,
+      "melee_crit_rating": 100000,
+      "ranged_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "undead",
+      "owner": "wh",
+      "entry": 201,
+      "level": 60,
+      "health": 50000000,
+      "distance": 17.5,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "plain",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 20,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 2027,
+      "slot": 16
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 3025
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 3025,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "wh",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "wh",
+      "skill": 58,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "wh",
+      "skill": 59,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "wh",
+      "skill": 60,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "wh",
+      "skill": 501,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "wh",
+      "skill": 46,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574149
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574163
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "snapshot",
+      "label": "Without Silver Bullets, Undead: total before",
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "save_as": "undead_base_t0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Without Silver Bullets, Undead: hits before",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "save_as": "undead_base_c0"
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Without Silver Bullets, Undead: drain",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Without Silver Bullets, Undead: all 64 casts landed as critical hits (equal hit count per arm)",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "relative_to": "undead_base_c0",
+      "equals": 64
+    },
+    {
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "relative_to": "undead_base_t0",
+      "action": "snapshot",
+      "label": "Without Silver Bullets, Undead: applied damage of the 64 hits",
+      "save_as": "undead_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Without Silver Bullets, Mechanical control: total before",
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "save_as": "plain_base_t0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Without Silver Bullets, Mechanical control: hits before",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "save_as": "plain_base_c0"
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Without Silver Bullets, Mechanical control: drain",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Without Silver Bullets, Mechanical control: all 32 casts landed as critical hits (equal hit count per arm)",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "relative_to": "plain_base_c0",
+      "equals": 32
+    },
+    {
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "relative_to": "plain_base_t0",
+      "action": "snapshot",
+      "label": "Without Silver Bullets, Mechanical control: applied damage of the 32 hits",
+      "save_as": "plain_base"
+    },
+    {
+      "action": "learn",
+      "label": "Silver Bullets rank 1",
+      "actor": "wh",
+      "spell": 574149
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 1, Mechanical control: total before",
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "save_as": "r1_plain_t0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 1, Mechanical control: hits before",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "save_as": "r1_plain_c0"
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Rank 1, Mechanical control: drain",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1, Mechanical control: all 32 casts landed as critical hits (equal hit count per arm)",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "relative_to": "r1_plain_c0",
+      "equals": 32
+    },
+    {
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "relative_to": "r1_plain_t0",
+      "action": "assert",
+      "label": "Rank 1: applied Darkslayer hit x1.10 on the non-Undead control (effect 0, native SPELLMOD_DAMAGE)",
+      "ratio_to": "plain_base",
+      "min": 1.08,
+      "max": 1.12
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574149
+    },
+    {
+      "action": "learn",
+      "label": "Silver Bullets rank 2",
+      "actor": "wh",
+      "spell": 574163
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 2, Mechanical control: total before",
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "save_as": "r2_plain_t0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 2, Mechanical control: hits before",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "save_as": "r2_plain_c0"
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Rank 2, Mechanical control: drain",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2, Mechanical control: all 32 casts landed as critical hits (equal hit count per arm)",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "relative_to": "r2_plain_c0",
+      "equals": 32
+    },
+    {
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "plain",
+      "critical": true,
+      "relative_to": "r2_plain_t0",
+      "action": "assert",
+      "label": "Rank 2: applied Darkslayer hit x1.20 on the non-Undead control (effect 0, native SPELLMOD_DAMAGE)",
+      "ratio_to": "plain_base",
+      "min": 1.18,
+      "max": 1.22
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 2, Undead: total before",
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "save_as": "r2_undead_t0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 2, Undead: hits before",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "save_as": "r2_undead_c0"
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 804179,
+      "target": "undead"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Rank 2, Undead: drain",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2, Undead: all 64 casts landed as critical hits (equal hit count per arm)",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "relative_to": "r2_undead_c0",
+      "equals": 64
+    },
+    {
+      "actor": "wh",
+      "metric": "spell_damage_total",
+      "spell": 804179,
+      "target": "undead",
+      "critical": true,
+      "relative_to": "r2_undead_t0",
+      "action": "assert",
+      "label": "Rank 2: applied Darkslayer hit x1.40 on the Undead (effect 0 native, effect 1 share 140/120 from the class hit hook); the pre-fix 1.20 x 1.20 = 1.44 and a missing hook 1.20 fall outside",
+      "ratio_to": "undead_base",
+      "min": 1.38,
+      "max": 1.42
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574163
+    }
+  ]
+}
