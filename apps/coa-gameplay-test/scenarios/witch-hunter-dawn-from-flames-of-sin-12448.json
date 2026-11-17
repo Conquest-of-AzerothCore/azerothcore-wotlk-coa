@@ -8,7 +8,8 @@
     "'Flames of Sin: Deals Fire Damage.' (SchoolMask 4), but Check returned false for every outgoing spell in",
     "Extra(), which lists 802850, so those Fire hits never reached Dawn and its buff 503658 never stacked from",
     "them. Physical auto attacks alone must leave 503658 absent (control); with Flames of Sin on the Witch",
-    "Hunter, the 802850 hits that follow the swings must apply 503658. Ratings remove melee misses, dodges and",
+    "Hunter, the 802850 hits that follow the swings must apply 503658. Flames of Sin lasts 100 ms in Spell.dbc, so",
+    "the fixture grants it through its helper 802845 (3000 ms, no damage). Ratings remove melee misses, dodges and",
     "parries and the Fire hit's spell miss; the fixture dual-wields as in witch-hunter-flames-of-sin-auto-attack."
   ],
   "timeout_ms": 90000,
@@ -27,6 +28,7 @@
     { "action": "learn", "actor": "hunter", "spell": 1180 },
     { "action": "learn", "actor": "hunter", "spell": 674 },
     { "action": "learn", "actor": "hunter", "spell": 705484 },
+    { "action": "learn", "actor": "hunter", "spell": 802845 },
     { "action": "add_item", "actor": "hunter", "item": 25 },
     { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
     { "action": "add_item", "actor": "hunter", "item": 2092 },
@@ -46,8 +48,12 @@
       "metric": "aura", "spell": 503658, "equals": 0
     },
     {
-      "action": "set_aura", "label": "Flames of Sin on the Witch Hunter", "actor": "hunter", "spell": 803422,
-      "stacks": 1
+      "action": "cast", "label": "Grant three seconds of Flames of Sin (helper 802845, no damage)",
+      "actor": "hunter", "spell": 802845, "target": "hunter"
+    },
+    {
+      "action": "assert", "label": "SETUP: Flames of Sin is on the Witch Hunter", "actor": "hunter",
+      "metric": "aura", "spell": 803422, "caster": "hunter", "equals": 1, "within_ms": 1000
     },
     {
       "action": "assert", "label": "SETUP: an auto attack under Flames of Sin is followed by a Fire hit",
