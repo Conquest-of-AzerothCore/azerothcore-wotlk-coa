@@ -77,7 +77,7 @@
       "label": "DISCRIMINATING: the player stands on the surface, not under the map",
       "actor": "horde",
       "metric": "position_z",
-      "min": 70,
+      "min": 85,
       "max": 130
     },
     {
