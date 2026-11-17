@@ -34,14 +34,9 @@ Provisional number, renumbered at merge (14.4).
   reading with truncated Rage, alerting mutants (Rage independent of the damage, a fixed Rage per hit added, no Rage),
   `unmeasured` phases (two hits, no hit, a critical hit, a small contrast, the cap, a missing read, no damage) and refused
   inputs.
-<!-- coderabbit-ai-generated:v1 -->
-
-<!-- coderabbit-ai-generated-section:v1:b08456b2a73fa93932935d5be64fbb2b3bfb90f7343e0063d3e807f2969c6231 -->
-
 - At one hit per phase the truncation moves r by at most 1/170 + 1/340 (about 0.9%) at the Witch Hunter's reference
   stats, inside the band: the read is deterministic (false alert 0). A Rage independent of the damage reads 1 / contrast
-  (<= 0.667 at the stated minimum contrast) and always alerts; a fixed Rage per hit on top of a proportional part passes
-  only while the fixed part is at most 10% of the before phase's Rage at contrast 2, or 15% at contrast 1.5.
-  These detection limits depend on contrast at tolerance 0.05.
-
-<!-- /coderabbit-ai-generated:v1 -->
+  (<= 0.667 at the stated minimum contrast) and always alerts. A fixed Rage f per hit on top of a proportional part p
+  reads r = (c·p + f) / (c·(p + f)) at contrast c and passes while f / p <= 0.05c / (0.95c - 1): a fixed share
+  f / (p + f) of the before phase's Rage up to 10% at c = 2 and 15% at c = 1.5 (about 10.5% at the counted contrast
+  of about 1.9).

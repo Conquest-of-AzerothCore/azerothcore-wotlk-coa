@@ -22,6 +22,7 @@ before the talent is learned, and reads 0 again right before the treatment cast 
 open the spawn window). The talent's creature is present while the count reads `baseline_count + 1` and gone once it
 reads `baseline_count`; any other count in the end window, a baseline left after its expiry or a creature before the cast
 is `unmeasured`. An end window that reads `baseline_count + 1` throughout, or `baseline_count` from its first poll,
-bounds the lifetime at that window edge, so a lifetime past the window alerts. `roll_source` (only with a baseline)
+bounds the lifetime on one side only (at least the last poll, or at most the first poll, from the spawn edge): it
+alerts when that bound lies wholly outside the band and is otherwise `unmeasured`, never `ok`. `roll_source` (only with a baseline)
 names the server line that rolls the talent outside the forcing modifier, cited in the contract; such entries pool
 `parts`.

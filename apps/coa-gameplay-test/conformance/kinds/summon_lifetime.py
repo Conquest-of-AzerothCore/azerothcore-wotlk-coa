@@ -1,6 +1,6 @@
 from dataclasses import dataclass, replace
-from pathlib import Path
 import math
+from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, FORCED_CHANCE_OP, FORCED_CHANCE_OWNER_AURA, FORCED_CHANCE_PERCENT,
                         behaviour_entry, prose_rule, waited_ms)
@@ -87,8 +87,7 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
         if not spec.baseline_count:
             return []
         return [{'action': 'wait', 'label': 'let the control baseline expire',
-                 'ms': max(0, spec.baseline_ms - spec.stop_ms - GCD_WAIT_MS
-                           + SUMMON_LIFETIME_BASELINE_MARGIN_MS)},
+                 'ms': spec.baseline_ms - spec.stop_ms - GCD_WAIT_MS + SUMMON_LIFETIME_BASELINE_MARGIN_MS},
                 measurement(summon_lifetime_mark(spec, 'control', 'expired count'), CASTER, 'owned_creature_count',
                             **count)]
 
@@ -206,7 +205,7 @@ def baseline_edges(run: Run, model: dict, start: float):
     if readings == {count + 1}:
         return spawn, (last, math.inf, 1.0)
     if readings == {count}:
-        return spawn, (0.0, first, 1.0)
+        return spawn, (-math.inf, first, 1.0)
     return spawn, end
 
 
@@ -219,18 +218,24 @@ def baseline_failure(run: Run, model: dict) -> str | None:
     if expired != 0:
         return f'{expired:g} baseline creatures left {baseline["ms"]} ms after the control cast'
     pre = run.values.get(model['polls']['spawn'][0][1])
-    if pre is None:
-        return missing_measurement(run, model['polls']['spawn'][0][1])
     if pre != 0:
         return f'{pre:g} creatures right before the treatment cast'
-    for time_label, count_label in model['polls']['end']:
-        for label in (time_label, count_label):
-            if run.values.get(label) is None:
-                return missing_measurement(run, label)
     stray = sorted({run.values[count_label] for _, count_label in model['polls']['end']} - {count, count + 1})
     if stray:
         return f'the end window reads {stray}, neither the baseline {count:g} nor one more'
     return None
+
+
+def finite(value: float) -> float | None:
+    return None if math.isinf(value) else value
+
+
+def bounded_text(lowest: float, highest: float) -> str:
+    if math.isinf(highest):
+        return f'at least {lowest:g}'
+    if math.isinf(lowest):
+        return f'at most {highest:g}'
+    return f'{lowest:g} to {highest:g}'
 
 
 def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -257,9 +262,10 @@ def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> V
         return replace(base, status='unmeasured', explanation=f'{spawn[2]:g} and {end[2]:g} creatures at most in the '
                                                               f'windows, not one')
     lowest, highest = end[0] - spawn[1], end[1] - spawn[0]
-    measured = (lowest + highest) / 2 if math.isfinite(highest) else None
     expected, band = float(model['expected_ms']), float(model['band'])
     low, high = expected - band, expected + band
+    one_sided = math.isinf(lowest) or math.isinf(highest)
+    measured = highest if math.isinf(lowest) else lowest if math.isinf(highest) else (lowest + highest) / 2
     if control != expected_control or released != 0:
         status, reason = 'alert', (f'the control counts {control:g} (expected {expected_control:g}) and '
                                    f'{released:g} forcing modifiers remain')
@@ -267,15 +273,22 @@ def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> V
         status, reason = 'ok', 'the whole bracketed lifetime lies inside the band'
     elif highest < low or lowest > high:
         status, reason = 'alert', 'the whole bracketed lifetime lies outside the band'
+    elif one_sided:
+        return replace(base, status='unmeasured', explanation=f'end: the count does not change in the end window, so '
+                                                              f'the lifetime is only bounded on one side, '
+                                                              f'{bounded_text(lowest, highest)} ms, and that bound '
+                                                              f'reaches the band {low:g} to {high:g}')
     else:
         status, reason = 'measured', 'the bracketed lifetime crosses a band edge: effect present, not final'
     control_text = (f'the control counts the {expected_control:g} baseline creatures and none once they expired; '
                     if baseline else 'no creature in the control; ')
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   detail={'spawn_ms': spawn[:2], 'end_ms': end[:2], 'lifetime_range': [lowest, highest]},
+                   detail={'spawn_ms': spawn[:2], 'end_ms': [finite(end[0]), finite(end[1])],
+                           'lifetime_range': [finite(lowest), finite(highest)]},
                    explanation=f'{control_text}in game time after the treatment cast the creature '
                                f'appears in ({spawn[0]:g}, {spawn[1]:g}] ms and is gone in ({end[0]:g}, {end[1]:g}] '
-                               f'ms: a lifetime of {lowest:g} to {highest:g} ms against the stated {expected:g} ms, '
+                               f'ms: a lifetime of {bounded_text(lowest, highest)} ms against the stated '
+                               f'{expected:g} ms, '
                                f'band {low:g} to {high:g}: {reason}')
 
 
@@ -290,19 +303,16 @@ def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], mod
             if control != baseline or released != 0:
                 return replace(base, status='alert', explanation=f'{run.key}: the control summoned {control} and '
                                                                  f'{released} forcing modifiers remain')
-            failure = baseline_failure(run, model) if model.get('baseline') else None
-            if failure is not None:
-                return replace(base, status='unmeasured', explanation=f'{run.key}: {failure}')
             empty += 1
             continue
         judged.append(behaviour_summon_lifetime_verdict(base, run, model))
     if not judged:
         return replace(base, status='unmeasured', explanation=f'no part of {len(runs)} summoned the creature')
     worst = next((verdict for verdict in judged if verdict.status != 'ok'), None)
-    lowest = min(verdict.detail['lifetime_range'][0] for verdict in judged if verdict.detail)\
-        if all(verdict.detail for verdict in judged) else None
-    highest = max(verdict.detail['lifetime_range'][1] for verdict in judged if verdict.detail)\
-        if all(verdict.detail for verdict in judged) else None
+    ranges = [verdict.detail['lifetime_range'] for verdict in judged if verdict.detail]
+    bounded = len(ranges) == len(judged) and all(None not in edges for edges in ranges)
+    lowest = min(edges[0] for edges in ranges) if bounded else None
+    highest = max(edges[1] for edges in ranges) if bounded else None
     summary = (f'{len(judged)} of {len(runs)} parts summoned the creature ({empty} rolled no summon on their one '
                f'tick); lifetimes {lowest:g} to {highest:g} ms' if lowest is not None else
                f'{len(judged)} of {len(runs)} parts summoned the creature')

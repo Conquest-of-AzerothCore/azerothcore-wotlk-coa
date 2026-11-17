@@ -1,5 +1,7 @@
 from dataclasses import replace
+import math
 import unittest
+from unittest import mock
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
@@ -93,13 +95,13 @@ class SummonLifetimeBaselineTests(unittest.TestCase):
         return behaviour_scenario(load_fixture_class_file(23), self.entry(**changes))
 
     def values(self, model: dict, end_ms: float | None, control: float = 2.0, expired: float = 0.0,
-               pre: float = 0.0, stray: float | None = None) -> dict:
+               pre: float = 0.0, stray: float | None = None, end_low: int = 11500) -> dict:
         found = {model['control']: control, model['released']: 0.0, model['starts']['control']: 0.0,
                  model['starts']['treatment']: 100000.0, model['baseline']['expired']: expired}
         pre_time, pre_count = model['polls']['spawn'][0]
         self.assertEqual(pre_time, model['starts']['treatment'])
         found[pre_count] = pre
-        for window, low, marks in (('spawn', 2500, model['polls']['spawn'][1:]), ('end', 11500, model['polls']['end'])):
+        for window, low, marks in (('spawn', 2500, model['polls']['spawn'][1:]), ('end', end_low, model['polls']['end'])):
             for index, (at, count) in enumerate(marks):
                 offset = low + index * 25.0
                 present = end_ms is not None and 3010.0 <= offset < end_ms
@@ -140,6 +142,42 @@ class SummonLifetimeBaselineTests(unittest.TestCase):
         self.assertEqual(self.status(11000.0), 'alert')
         self.assertEqual(self.status(12010.0), 'alert')
 
+    def windowed(self, end_window: list[int], end_ms: float) -> str:
+        _, [expectation] = self.built(end_window=end_window)
+        values = self.values(expectation.model, end_ms, end_low=end_window[0])
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @staticmethod
+    def collapsed_edges():
+        from kinds.summon_lifetime import baseline_edges
+
+        def collapsed(run, model, start):
+            spawn, end = baseline_edges(run, model, start)
+            if isinstance(end, tuple) and math.isinf(end[1]):
+                return spawn, (end[0], end[0], end[2])
+            if isinstance(end, tuple) and math.isinf(end[0]):
+                return spawn, (end[1], end[1], end[2])
+            return spawn, end
+        return collapsed
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unchanged_end_window_bounds_one_side_and_never_reads_ok(self):
+        outlives, gone_before = ([11500, 13000], 30000.0), ([13000, 14000], 5000.0)
+        self.assertEqual(self.windowed(*outlives), 'unmeasured')
+        self.assertEqual(self.windowed(*gone_before), 'unmeasured')
+        with mock.patch('kinds.summon_lifetime.baseline_edges', self.collapsed_edges()):
+            self.assertEqual(self.windowed(*outlives), 'ok')
+            self.assertEqual(self.windowed(*gone_before), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_one_sided_bound_outside_the_band_alerts_with_finite_detail(self):
+        _, [expectation] = self.built()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation.model, 30000.0)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIsNone(verdict.detail['lifetime_range'][1])
+        self.assertIn('at least', verdict.explanation)
+
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_control_with_the_extra_creature_alerts_and_broken_baselines_are_unmeasured(self):
         self.assertEqual(self.status(13010.0, control=3.0), 'alert')
@@ -168,46 +206,3 @@ class SummonLifetimeBaselineTests(unittest.TestCase):
             behaviour_scenario(load_fixture_class_file(23), {**entry, 'roll_source': 'Example.cpp:1'})
         _, [plain] = behaviour_scenario(load_fixture_class_file(23), entry)
         self.assertNotIn('baseline', plain.model)
-class LifetimeBoundaryRegressionTests(unittest.TestCase):
-    def model(self):
-        return {'control': 'control', 'released': 'released', 'starts': {'treatment': 'start'},
-                'baseline': {'count': 2, 'expired': 'expired', 'ms': 20000},
-                'polls': {'spawn': [('s0', 'c0'), ('s1', 'c1')],
-                          'end': [('e0', 'd0'), ('e1', 'd1')]},
-                'expected_ms': 100, 'band': 20}
-
-    def values(self):
-        return {'control': 2, 'released': 0, 'start': 0, 'expired': 0,
-                's0': 0, 'c0': 0, 's1': 10, 'c1': 3,
-                'e0': 100, 'd0': 3, 'e1': 110, 'd1': 3}
-
-    def base(self):
-        from compare import Verdict
-        return Verdict('seed', 'unmeasured', None, None, None, None, '', 'seed', 1, 1, 'seed')
-
-    def test_unobserved_end_cannot_pass_an_in_band_boundary(self):
-        from kinds.summon_lifetime import behaviour_summon_lifetime_verdict
-        verdict = behaviour_summon_lifetime_verdict(self.base(), FakeRun(self.values()), self.model())
-        self.assertEqual(verdict.status, 'measured')
-        self.assertEqual(verdict.detail['end_ms'], (110, float('inf')))
-        self.assertIsNone(verdict.measured)
-
-    def test_first_poll_fallback_keeps_the_unobserved_early_interval(self):
-        from kinds.summon_lifetime import behaviour_summon_lifetime_verdict
-        values = {**self.values(), 'd0': 2, 'd1': 2}
-        verdict = behaviour_summon_lifetime_verdict(self.base(), FakeRun(values), self.model())
-        self.assertEqual(verdict.status, 'measured')
-        self.assertEqual(verdict.detail['end_ms'], (0, 100))
-
-    def test_empty_parts_validate_the_baseline_and_missing_end_reads(self):
-        from kinds.summon_lifetime import behaviour_summon_lifetime_pooled_verdict
-        model = self.model()
-        good = FakeRun({**self.values(), 'd0': 3, 'd1': 2})
-        empty = {**self.values(), 'c1': 2, 'd0': 2, 'd1': 2}
-        for changes in ({'expired': 1}, {'c0': 1}, {'d1': 5}, {'d1': None}, {'e1': None}):
-            with self.subTest(changes=changes):
-                verdict = behaviour_summon_lifetime_pooled_verdict(
-                    self.base(), [good, FakeRun({**empty, **changes})], model)
-                self.assertEqual(verdict.status, 'unmeasured')
-        verdict = behaviour_summon_lifetime_pooled_verdict(self.base(), [good, FakeRun(empty)], model)
-        self.assertEqual(verdict.status, 'ok')

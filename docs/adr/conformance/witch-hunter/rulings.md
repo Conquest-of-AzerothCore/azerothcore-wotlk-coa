@@ -23,10 +23,6 @@ read, the narrowest change, a regression and an ADR.
 
 ## 2. Server change ruled
 
-<!-- coderabbit-ai-generated:v1 -->
-
-<!-- coderabbit-ai-generated-section:v1:95aeefdf72850cd4f344ef4a2ff88fea26f105241fb4419d418253c4630a0973 -->
-
 | Date, author | Spell and question | Ruling | Owner's words | Recorded in |
 |---|---|---|---|---|
 | 2026-11-15, owner, through the mentor | Guardbreaker 681493, effect 2 with an empty class mask (D-16, O-1) | The +50% applies to Pommel Smash only, restricted in Witch Hunter code; no engine or other-class change | not recorded | Fix a43b861378 (`AscensionWitchHunterCompletion.cpp:129-131`, `ApplyContracts`); no ADR |
@@ -52,6 +48,4 @@ read, the narrowest change, a regression and an ADR.
 | 2026-11-17, owner, through the mentor | Vampire Hunter 803638, "for every curse active" (card Q-wh-30, O-35, relayed by mentor D-394; classification D-376) | The curse just applied counts in the percent as it does in the duration: `min(95, 10 + 5 * count)`; cap and duration unchanged; one line of Witch Hunter code, no SQL, no DBC, no engine file | not recorded | [ADR 0023](0023-vampire-hunter-counts-the-new-curse-in-its-reduction.md) |
 | 2026-11-17, owner, through the mentor | Slayer's Mark 804068, "increasing the attack power of all attackers against that target by 150", melee side (O-35; mentor D-403, D-362, D-374) | The ADR 0021 routes extended to the 40 `c.ap` rows whose tooltip has an explicit AP term and whose effect is an attack on the target: victim's melee attacker bonus times `c.ap`; heal and absorb rows and two leech rows left out; Witch Hunter code only, no SQL, no engine file | not recorded | [ADR 0024](0024-slayers-mark-melee-bonus-reaches-the-ap-rows.md) |
 | 2026-11-17, mentor, under the owner's principle | Twilight Frenzy 805751, the shot 805753's "$805753s2% Ranged Weapon Damage" taken from the main hand (claim 379.0; mentor D-467, D-473, D-374) | Form (B): EquippedItemSubClassMask 262156 on 805753 in Witch Hunter `ApplyContracts`, guarded on EquippedItemClass -1 and mask 0; the shot takes the ranged weapon and the ranged attack type (ranged crit, ranged hit skill, ranged-slot item procs and PPM, ranged attacker bonuses); no SQL, no engine file, no text change | not recorded | [ADR 0025](0025-twilight-frenzy-shots-use-the-ranged-weapon.md) |
-| 2026-11-17, owner, through the mentor | Pavise 520865, "While you remain near it, hostile spells targeting you are deflected." (claim 224.0 of 681453; O-47, card Q-wh-45 answer b; mentor D-486, D-374) | Deflected from every direction: the Witch Hunter hook rolls the 1108180 amount for the engine's deflect spell set when the attacker is behind, once per eligible unique target per cast (separate rolls for multiple targets); the stunned exclusion kept (O-47 ruled the direction only); Witch Hunter code only, no SQL, no engine file | not recorded | [ADR 0026](0026-pavise-deflects-hostile-spells-from-every-direction.md) |
-
-<!-- /coderabbit-ai-generated:v1 -->
+| 2026-11-17, owner, through the mentor | Pavise 520865, "While you remain near it, hostile spells targeting you are deflected." (claim 224.0 of 681453; O-47, card Q-wh-45 answer b; mentor D-486, D-374) | Deflected from every direction: the Witch Hunter hook rolls the 1108180 amount for the engine's deflect spell set when the attacker is behind, once per cast; the stunned exclusion kept (O-47 ruled the direction only); Witch Hunter code only, no SQL, no engine file | not recorded | [ADR 0026](0026-pavise-deflects-hostile-spells-from-every-direction.md) |
