@@ -42,7 +42,8 @@ enum WitchHunterCastSpells
     SPELL_SHADOWSTORM_HEAL = 520793,
     SPELL_SHADOWSTORM_LEECH = 520794,
     SPELL_SMITE_EVIL_WICKEDNESS = 802844,
-    SPELL_COLLECT_BOUNTY = 504687
+    SPELL_COLLECT_BOUNTY = 504687,
+    SPELL_PAVISE_EFFECT = 1108180
 };
 
 enum WitchHunterHounds
@@ -247,6 +248,63 @@ void WitchblightMiss(Spell* spell, Unit* caster, SpellInfo const* info)
             attacker->RemoveAurasDueToSpell(rank);
 }
 
+bool MagicDeflectRolled(Unit* attacker, Unit* victim, SpellInfo const* info)
+{
+    return (victim->IsAlive() || victim->IsPlayer()) && !attacker->IsVehicle() &&
+           !info->HasAttribute(SPELL_ATTR7_NO_ATTACK_MISS);
+}
+
+bool DeflectRolledFromFront(Unit* attacker, Unit* victim, SpellInfo const* info)
+{
+    if (info->HasAttribute(SPELL_ATTR3_ALWAYS_HIT) ||
+        ((info->IsPositive() || info->HasEffect(SPELL_EFFECT_DISPEL)) && !attacker->IsHostileTo(victim)))
+        return false;
+    switch (info->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_RANGED:
+            return !info->HasAttribute(SPELL_ATTR0_NO_ACTIVE_DEFENSE);
+        case SPELL_DAMAGE_CLASS_NONE:
+            return !info->SpellFamilyName &&
+                   std::none_of(std::begin(info->Effects), std::end(info->Effects), [](SpellEffectInfo const& effect)
+                   {
+                       return effect.Effect && effect.Effect != SPELL_EFFECT_SCHOOL_DAMAGE &&
+                              effect.ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE;
+                   }) && MagicDeflectRolled(attacker, victim, info);
+        case SPELL_DAMAGE_CLASS_MAGIC:
+            return MagicDeflectRolled(attacker, victim, info);
+        default:
+            return false;
+    }
+}
+
+int32 PaviseDeflectChance(Unit* victim)
+{
+    int32 chance = 0;
+    for (AuraEffect const* effect : victim->GetAuraEffectsByType(SPELL_AURA_DEFLECT_SPELLS))
+        if (effect->GetId() == SPELL_PAVISE_EFFECT)
+            chance += effect->GetAmount();
+    return chance;
+}
+
+void PaviseDeflectFromBehind(Spell* spell, SpellInfo const* info)
+{
+    Unit* attacker = spell->GetOriginalCaster();
+    if (!attacker)
+        return;
+    for (TargetInfo& target : *spell->GetUniqueTargetInfo())
+    {
+        if (target.missCondition != SPELL_MISS_NONE || target.targetGUID == attacker->GetGUID())
+            continue;
+        Unit* victim = ObjectAccessor::GetUnit(*attacker, target.targetGUID);
+        if (!victim || victim->HasInArc(M_PI, attacker) || victim->HasIgnoreHitDirectionAura() ||
+            victim->HasUnitState(UNIT_STATE_STUNNED))
+            continue;
+        int32 const chance = PaviseDeflectChance(victim);
+        if (chance > 0 && DeflectRolledFromFront(attacker, victim, info) && roll_chance_i(chance))
+            target.missCondition = SPELL_MISS_DEFLECT;
+    }
+}
+
 class witch_hunter_casts : public AllSpellScript
 {
   public:
@@ -292,6 +350,7 @@ class witch_hunter_casts : public AllSpellScript
 
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
+        PaviseDeflectFromBehind(spell, info);
         WitchblightMiss(spell, caster, info);
         Player* player = Owner(caster);
         if (!player || spell->IsTriggered())

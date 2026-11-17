@@ -10,6 +10,7 @@ from tooltip import Records
 from values import Expectation, dataset, facts_of, required_aura_steps
 
 PARTY_PULSE_FIELD = 'party_pulse'
+PARTY_PULSE_KEYS = {'radius_spell', 'pulses', 'far_margin', 'near_distance', 'near_limit', 'note'}
 SPELL_EFFECT_DISPEL_MECHANIC = 108
 PARTY_PULSE_MINIMUM_PULSES = 2
 PARTY_PULSE_TIME_RULE_SHARE = 0.1
@@ -28,18 +29,26 @@ class PartyPulseSpec:
     radius_spell: int
     pulses: int
     power: int | None = None
+    near_distance: float = PARTY_ALLY_NEAR_DISTANCE_YD
+    far_margin: float = PARTY_ALLY_FAR_MARGIN_YD
+    near_limit: float | None = None
+    note: str = ''
 
 
 def party_pulse_spec(entry: dict) -> PartyPulseSpec:
     pulse = entry[PARTY_PULSE_FIELD]
-    if not isinstance(pulse, dict) or set(pulse) - {'radius_spell', 'pulses'} or 'radius_spell' not in pulse:
-        raise ValueError(f'{entry["spell"]} periodic_dispel party_pulse needs {{"radius_spell": id, "pulses": n}}, '
-                         f'here {pulse!r}')
+    if not isinstance(pulse, dict) or set(pulse) - PARTY_PULSE_KEYS or 'radius_spell' not in pulse:
+        raise ValueError(f'{entry["spell"]} periodic_dispel party_pulse needs {{"radius_spell": id, "pulses": n}} '
+                         f'and the optional far_margin, near_distance, near_limit and note, here {pulse!r}')
     if 'margin_ms' not in entry:
         raise ValueError(f'{entry["spell"]} periodic_dispel party_pulse needs its own margin_ms')
     return PartyPulseSpec(entry['spell'], entry['name'], entry['quote'], tuple(int(d) for d in entry['debuffs']),
                           int(entry['period_ms']), int(entry['margin_ms']), int(pulse['radius_spell']),
-                          int(pulse.get('pulses', PARTY_PULSE_MINIMUM_PULSES)), entry.get('power'))
+                          int(pulse.get('pulses', PARTY_PULSE_MINIMUM_PULSES)), entry.get('power'),
+                          float(pulse.get('near_distance', PARTY_ALLY_NEAR_DISTANCE_YD)),
+                          float(pulse.get('far_margin', PARTY_ALLY_FAR_MARGIN_YD)),
+                          None if pulse.get('near_limit') is None else float(pulse['near_limit']),
+                          str(pulse.get('note', '')))
 
 
 def dispelled_mechanics(records: Records, spell: int) -> set[int]:
@@ -85,12 +94,20 @@ def party_pulse_validate(records: Records, spec: PartyPulseSpec) -> float:
     if spec.pulses < PARTY_PULSE_MINIMUM_PULSES:
         raise ValueError(f'{spec.spell} party_pulse needs at least {PARTY_PULSE_MINIMUM_PULSES} pulses after the '
                          f'first, here {spec.pulses}')
+    radius = records.radius(spec.radius_spell, 0)
+    near_bound = radius if spec.near_limit is None else spec.near_limit
+    if (spec.near_limit is not None and spec.near_limit < radius) or not 0 < spec.near_distance < near_bound \
+            or spec.far_margin <= 0 or radius + spec.far_margin <= near_bound:
+        raise ValueError(f'{spec.spell} party_pulse places the near member inside the {near_bound:g} yd bound and the '
+                         f'far '
+                         f'one beyond it, here near_distance {spec.near_distance:g}, far_margin '
+                         f'{spec.far_margin:g} and near_limit {spec.near_limit}')
     low, high = period_bracket(spec)
     share = PARTY_PULSE_TIME_RULE_SHARE * spec.period_ms
     if not (low > spec.period_ms - share and high < spec.period_ms + share):
         raise ValueError(f'{spec.spell} party_pulse margin {spec.margin_ms} ms brackets the period in {low}..{high} '
                          f'ms, which does not exclude {spec.period_ms - share:g} and {spec.period_ms + share:g} ms')
-    return records.radius(spec.radius_spell, 0)
+    return radius
 
 
 def party_pulse_moments(spec: PartyPulseSpec) -> list[tuple[str, int, int, bool]]:
@@ -109,7 +126,7 @@ def party_pulse_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expe
     behaviour = behaviour_entry(records, spec.spell, spec.name, 'periodic_dispel', spec.quote, 0.0)
     facts = facts_of(records, spec.spell)
     near, far = party_ally_id(0), party_ally_id(1)
-    far_distance = radius + PARTY_ALLY_FAR_MARGIN_YD
+    far_distance = radius + spec.far_margin
     count = len(spec.debuffs)
 
     def place(ally: str, stacks: int = 1) -> list[dict]:
@@ -120,7 +137,7 @@ def party_pulse_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expe
                 for debuff in spec.debuffs]
 
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
-             + relocate_steps(near, PARTY_ALLY_NEAR_DISTANCE_YD) + [{'action': 'group', 'actor': CASTER, 'target': near}]
+             + relocate_steps(near, spec.near_distance) + [{'action': 'group', 'actor': CASTER, 'target': near}]
              + relocate_steps(far, far_distance) + [{'action': 'group', 'actor': CASTER, 'target': far}]
              + place(near) + place(far)
              + [{'action': 'wait', 'label': 'control without the spell wait', 'ms': window_ms(spec)}]
@@ -152,14 +169,14 @@ def party_pulse_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expe
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour periodic dispel party pulse',
-        'contract': f'A party member {PARTY_ALLY_NEAR_DISTANCE_YD:g} yd away and a party member {far_distance:g} yd '
+        'contract': f'A party member {spec.near_distance:g} yd away and a party member {far_distance:g} yd '
                     f'away (beyond the {radius:g} yd radius of {spec.radius_spell}) carry {list(spec.debuffs)}, which '
                     f'stay on both for {window_ms(spec)} ms without {spec.spell}. With it cast at the caster, the '
                     f'near member has none left {spec.margin_ms} ms after the cast; the debuffs are set again after '
                     f'each pulse, all present {spec.margin_ms} ms before and none left {spec.margin_ms} ms after each '
                     f'of {spec.pulses} periods of {spec.period_ms} ms, so every pulse removes all of them and the '
                     f'period lies in {low}..{high} ms; the far member keeps all of them to the end, proving the '
-                    f'"{spec.quote}" clause.',
+                    f'"{spec.quote}" clause.' + (f' {spec.note}' if spec.note else ''),
         'players': [player_fixture(class_file), party_ally_fixture(0, class_file), party_ally_fixture(1, class_file)],
         'steps': steps}
     return timed(scenario, waited_ms(steps)), expectations

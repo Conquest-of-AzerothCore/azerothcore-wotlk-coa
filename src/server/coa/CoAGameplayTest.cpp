@@ -3590,7 +3590,7 @@ private:
         {
             Unit* target = GetUnit(step.get<std::string>("target"));
             uint32 const probe = step.get<uint32>("id") - 1;
-            Require(probe <= 5, "Unknown native avoidance probe");
+            Require(probe <= 6, "Unknown native avoidance probe");
             SpellInfo const* info = sSpellMgr->GetSpellInfo(step.get<uint32>("spell", 78));
             Require(info != nullptr, "Avoidance probe spell missing");
             uint32 count = 0;
@@ -3610,6 +3610,8 @@ private:
                     SpellMissInfo const outcome = unit->MeleeSpellHitResult(target, info);
                     count += outcome == SPELL_MISS_DODGE || outcome == SPELL_MISS_PARRY || outcome == SPELL_MISS_BLOCK;
                 }
+                else if (probe == 6)
+                    count += unit->MagicSpellHitResult(target, info) == SPELL_MISS_DEFLECT;
                 else
                     count += unit->isSpellBlocked(target, info);
             }
@@ -5638,6 +5640,21 @@ private:
                     && player->GetExactDist2d(creature) >= minDistance
                     && (!ownerDisplay || creature->GetDisplayId() == player->GetDisplayId());
             });
+        }
+        if (metric == "owned_creature_remaining_ms")
+        {
+            uint32 entry = step.get<uint32>("entry");
+            Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr, "Unknown creature entry in metric");
+            std::list<Creature*> creatures;
+            player->GetCreatureListWithEntryInGrid(creatures, entry, 100.0f);
+            creatures.remove_if([player](Creature* creature) { return !IsLivingSummonOf(player, creature); });
+            Require(creatures.size() <= 1, "Remaining summon lifetime needs at most one owned creature");
+            if (creatures.empty())
+                return -1.0;
+            TempSummon* summon = creatures.front()->ToTempSummon();
+            Require(summon != nullptr && summon->GetSummonType() == TEMPSUMMON_TIMED_DESPAWN,
+                "Remaining summon lifetime needs a timed-despawn summon");
+            return summon->GetTimer();
         }
         if (metric == "owned_creature_spacing")
         {

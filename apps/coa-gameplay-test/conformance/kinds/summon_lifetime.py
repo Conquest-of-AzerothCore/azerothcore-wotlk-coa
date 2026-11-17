@@ -15,6 +15,7 @@ ORDER = 8
 
 
 SUMMON_LIFETIME_POLL_MS = 25
+SUMMON_LIFETIME_BASELINE_MARGIN_MS = 1000
 
 
 @dataclass(frozen=True)
@@ -31,6 +32,9 @@ class SummonLifetimeSpec:
     end_window: tuple[int, int]
     cast_power: int | None = None
     label_suffix: str = ''
+    baseline_count: int = 0
+    baseline_ms: int | None = None
+    roll_source: str = ''
 
 
 def summon_lifetime_mark(spec: SummonLifetimeSpec, phase: str, mark: str) -> str:
@@ -43,6 +47,12 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
     if not 0 < spawn_low < spawn_high < spec.stop_ms < end_low < end_high:
         raise ValueError(f'{spec.spell} summon_lifetime polls the spawn, stops the trigger, then polls the end, in '
                          f'that order after the cast')
+    if (spec.baseline_count > 0) != (spec.baseline_ms is not None) or spec.baseline_count < 0 or (
+            spec.baseline_ms is not None and spec.baseline_ms <= end_high):
+        raise ValueError(f'{spec.spell} summon_lifetime sets baseline_count and baseline_ms together, the baseline '
+                         f'creatures outliving the end window')
+    if spec.roll_source and not spec.baseline_count:
+        raise ValueError(f'{spec.spell} summon_lifetime names a roll_source only with a baseline')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'summon_lifetime', spec.quote, float(spec.expected_ms))
     facts = facts_of(records, spec.trigger_spell)
@@ -72,14 +82,29 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
         polls[window] = marks
         return steps
 
+    def baseline_expiry_steps() -> list[dict]:
+        if not spec.baseline_count:
+            return []
+        return [{'action': 'wait', 'label': 'let the control baseline expire',
+                 'ms': spec.baseline_ms - spec.stop_ms - GCD_WAIT_MS + SUMMON_LIFETIME_BASELINE_MARGIN_MS},
+                measurement(summon_lifetime_mark(spec, 'control', 'expired count'), CASTER, 'owned_creature_count',
+                            **count)]
+
+    def pre_cast_steps() -> list[dict]:
+        if not spec.baseline_count:
+            return []
+        return [measurement(summon_lifetime_mark(spec, 'treatment', 'pre count'), CASTER, 'owned_creature_count',
+                            **count)]
+
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell},
                                        {'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.talent,
                                         'op': FORCED_CHANCE_OP, 'percent': FORCED_CHANCE_PERCENT}]
              + cast('control') + [{'action': 'wait', 'label': 'control trigger', 'ms': spec.stop_ms}] + stop()
              + [{'action': 'wait', 'label': 'control settle', 'ms': GCD_WAIT_MS},
-                measurement(summon_lifetime_mark(spec, 'control', 'count'), CASTER, 'owned_creature_count', **count),
-                {'action': 'learn', 'actor': CASTER, 'spell': spec.talent}]
-             + cast('treatment') + [{'action': 'wait', 'label': 'to the spawn window', 'ms': spawn_low}]
+                measurement(summon_lifetime_mark(spec, 'control', 'count'), CASTER, 'owned_creature_count', **count)]
+             + baseline_expiry_steps()
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.talent}]
+             + pre_cast_steps() + cast('treatment') + [{'action': 'wait', 'label': 'to the spawn window', 'ms': spawn_low}]
              + poll('spawn', spawn_low, spawn_high))
     polled = spawn_low + len(polls['spawn']) * SUMMON_LIFETIME_POLL_MS
     steps += ([{'action': 'wait', 'label': 'to the trigger stop', 'ms': max(1, spec.stop_ms - polled)}] + stop()
@@ -98,16 +123,23 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
                      f'owned creature {spec.entry} count is polled with game-time stamps every '
                      f'{SUMMON_LIFETIME_POLL_MS} ms in {spec.spawn_window} and {spec.end_window} ms after the cast, '
                      f'the trigger aura removed at {spec.stop_ms} ms so one creature is summoned; its lifetime, '
-                     f'bracketed by the polls, must be {spec.expected_ms} ms within the G-19 band.'),
+                     f'bracketed by the polls, must be {spec.expected_ms} ms within the G-19 band.'
+                     + baseline_contract(spec)),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
+    if spec.baseline_count:
+        polls['spawn'] = [[summon_lifetime_mark(spec, 'treatment', 'start'),
+                           summon_lifetime_mark(spec, 'treatment', 'pre count')], *polls['spawn']]
     model = {'kind': 'summon_lifetime', 'metric': 'owned_creature_count', 'quote': entry.quote,
              'expected_ms': spec.expected_ms,
              'band': bonus_band(float(spec.expected_ms)), 'polls': polls,
              'starts': {phase: summon_lifetime_mark(spec, phase, 'start') for phase in ('control', 'treatment')},
              'control': summon_lifetime_mark(spec, 'control', 'count'),
              'released': summon_lifetime_mark(spec, 'treatment', 'released')}
+    if spec.baseline_count:
+        model['baseline'] = {'count': spec.baseline_count, 'ms': spec.baseline_ms,
+                             'expired': summon_lifetime_mark(spec, 'control', 'expired count')}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}'
                               + (f' {spec.label_suffix}' if spec.label_suffix else ''), BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.trigger_spell, None, str(spec.expected_ms),
@@ -115,22 +147,39 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
     return timed(scenario, waited_ms(steps)), [expectation]
 
 
+def baseline_contract(spec: SummonLifetimeSpec) -> str:
+    if not spec.baseline_count:
+        return ''
+    return (f' The trigger itself summons {spec.baseline_count} creatures {spec.entry} for {spec.baseline_ms} ms: the '
+            f'control must read exactly {spec.baseline_count}, and none once they expired (read '
+            f'{SUMMON_LIFETIME_BASELINE_MARGIN_MS} ms past their lifetime, before the talent is learned); the '
+            f'treatment count reads 0 right before the cast, the talent\'s creature is present while the count reads '
+            f'{spec.baseline_count + 1} and gone once it reads {spec.baseline_count}, and a count that holds '
+            f'{spec.baseline_count + 1} through the end window or reads {spec.baseline_count} at its first poll '
+            f'brackets a lifetime past that window\'s edge.'
+            + (f' The talent\'s roll is made in {spec.roll_source}, which the forcing modifier does not reach, so '
+               f'parts that roll no summon are left out of the pool.' if spec.roll_source else ''))
+
+
 def summon_lifetime_spec(entry: dict) -> SummonLifetimeSpec:
     return SummonLifetimeSpec(entry['spell'], entry['name'], entry['quote'], int(entry['talent']),
                               int(entry['trigger_spell']), int(entry['stop_ms']), int(entry['entry']),
                               int(entry['expected_ms']), tuple(int(value) for value in entry['spawn_window']),
                               tuple(int(value) for value in entry['end_window']), entry.get('cast_power'),
-                              entry.get('label_suffix', ''))
+                              entry.get('label_suffix', ''), int(entry.get('baseline_count', 0)),
+                              None if entry.get('baseline_ms') is None else int(entry['baseline_ms']),
+                              str(entry.get('roll_source', '')))
 
 
-def summon_lifetime_edge(run: Run, polls: list, start: float, rising: bool) -> tuple[float, float, float] | str:
+def summon_lifetime_edge(run: Run, polls: list, start: float, rising: bool,
+                         baseline: float = 0.0) -> tuple[float, float, float] | str:
     before, after, most = None, None, 0.0
     for time_label, count_label in polls:
         at, count = run.values.get(time_label), run.values.get(count_label)
         if at is None or count is None:
             return missing_measurement(run, time_label if at is None else count_label)
-        most = max(most, count)
-        present = count >= 0.5
+        most = max(most, count - baseline)
+        present = count >= baseline + 0.5
         if after is None:
             if present == rising:
                 after = at - start
@@ -143,6 +192,39 @@ def summon_lifetime_edge(run: Run, polls: list, start: float, rising: bool) -> t
     return before, after, most
 
 
+def baseline_edges(run: Run, model: dict, start: float):
+    count = float(model['baseline']['count'])
+    spawn = summon_lifetime_edge(run, model['polls']['spawn'], start, True, count)
+    end = summon_lifetime_edge(run, model['polls']['end'], start, False, count)
+    if isinstance(spawn, str) or not isinstance(end, str) or end != 'the polls do not hold the edge':
+        return spawn, end
+    marks = model['polls']['end']
+    first, last = run.values[marks[0][0]] - start, run.values[marks[-1][0]] - start
+    readings = {run.values[count_label] for _, count_label in marks}
+    if readings == {count + 1}:
+        return spawn, (last, last, 1.0)
+    if readings == {count}:
+        return spawn, (first, first, 1.0)
+    return spawn, end
+
+
+def baseline_failure(run: Run, model: dict) -> str | None:
+    baseline = model['baseline']
+    count = float(baseline['count'])
+    expired = run.values.get(baseline['expired'])
+    if expired is None:
+        return missing_measurement(run, baseline['expired'])
+    if expired != 0:
+        return f'{expired:g} baseline creatures left {baseline["ms"]} ms after the control cast'
+    pre = run.values.get(model['polls']['spawn'][0][1])
+    if pre != 0:
+        return f'{pre:g} creatures right before the treatment cast'
+    stray = sorted({run.values[count_label] for _, count_label in model['polls']['end']} - {count, count + 1})
+    if stray:
+        return f'the end window reads {stray}, neither the baseline {count:g} nor one more'
+    return None
+
+
 def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     labels = [model['control'], model['released'], *model['starts'].values()]
     values = [run.values.get(label) for label in labels]
@@ -150,11 +232,19 @@ def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> V
         return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
     control, released = values[0], values[1]
     start = run.values[model['starts']['treatment']]
-    spawn = summon_lifetime_edge(run, model['polls']['spawn'], start, True)
-    end = summon_lifetime_edge(run, model['polls']['end'], start, False)
+    baseline = model.get('baseline')
+    if baseline:
+        spawn, end = baseline_edges(run, model, start)
+    else:
+        spawn = summon_lifetime_edge(run, model['polls']['spawn'], start, True)
+        end = summon_lifetime_edge(run, model['polls']['end'], start, False)
     for name, edge in (('spawn', spawn), ('end', end)):
         if isinstance(edge, str):
             return replace(base, status='unmeasured', explanation=f'{name}: {edge}')
+    failure = baseline_failure(run, model) if baseline else None
+    if failure is not None:
+        return replace(base, status='unmeasured', explanation=failure)
+    expected_control = float(baseline['count']) if baseline else 0.0
     if spawn[2] != 1 or end[2] != 1:
         return replace(base, status='unmeasured', explanation=f'{spawn[2]:g} and {end[2]:g} creatures at most in the '
                                                               f'windows, not one')
@@ -162,17 +252,20 @@ def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> V
     measured = (lowest + highest) / 2
     expected, band = float(model['expected_ms']), float(model['band'])
     low, high = expected - band, expected + band
-    if control != 0 or released != 0:
-        status, reason = 'alert', f'the control summoned {control:g} and {released:g} forcing modifiers remain'
+    if control != expected_control or released != 0:
+        status, reason = 'alert', (f'the control counts {control:g} (expected {expected_control:g}) and '
+                                   f'{released:g} forcing modifiers remain')
     elif low - 1e-9 <= lowest and highest <= high + 1e-9:
         status, reason = 'ok', 'the whole bracketed lifetime lies inside the band'
     elif highest < low or lowest > high:
         status, reason = 'alert', 'the whole bracketed lifetime lies outside the band'
     else:
         status, reason = 'measured', 'the bracketed lifetime crosses a band edge: effect present, not final'
+    control_text = (f'the control counts the {expected_control:g} baseline creatures and none once they expired; '
+                    if baseline else 'no creature in the control; ')
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
                    detail={'spawn_ms': spawn[:2], 'end_ms': end[:2], 'lifetime_range': [lowest, highest]},
-                   explanation=f'no creature in the control; in game time after the treatment cast the creature '
+                   explanation=f'{control_text}in game time after the treatment cast the creature '
                                f'appears in ({spawn[0]:g}, {spawn[1]:g}] ms and is gone in ({end[0]:g}, {end[1]:g}] '
                                f'ms: a lifetime of {lowest:g} to {highest:g} ms against the stated {expected:g} ms, '
                                f'band {low:g} to {high:g}: {reason}')
@@ -183,9 +276,10 @@ def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], mod
     for run in runs:
         start = run.values.get(model['starts']['treatment'])
         counts = [run.values.get(count) for _, count in model['polls']['spawn']]
-        if start is not None and None not in counts and not any(count >= 0.5 for count in counts):
+        baseline = float(model['baseline']['count']) if model.get('baseline') else 0.0
+        if start is not None and None not in counts and not any(count >= baseline + 0.5 for count in counts):
             control, released = run.values.get(model['control']), run.values.get(model['released'])
-            if control != 0 or released != 0:
+            if control != baseline or released != 0:
                 return replace(base, status='alert', explanation=f'{run.key}: the control summoned {control} and '
                                                                  f'{released} forcing modifiers remain')
             empty += 1

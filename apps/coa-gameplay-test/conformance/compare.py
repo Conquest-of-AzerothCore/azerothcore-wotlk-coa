@@ -1024,6 +1024,35 @@ ProcPart = tuple[dict, Run, Expectation]
 
 
 def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model: HitModelSource) -> Verdict:
+    verdict = judged_hit(base, class_file, parts, hit_model)
+    model = parts[0][2].model or {}
+    if model.get('strikes') is None:
+        return verdict
+    return strikes_verdict(verdict, [run for _, run, _ in parts], model['strikes'], model['measurements']['count'])
+
+
+def strikes_verdict(verdict: Verdict, runs: list, strikes: dict, usable_label: str) -> Verdict:
+    per_cast, texts, held = strikes['per_cast'], [], True
+    labels = [label for pair in strikes['trials'] for label in pair] + [strikes['landed'], strikes['critical'],
+                                                                           usable_label]
+    for run in runs:
+        missing = next((label for label in labels if run.values.get(label) is None), None)
+        if missing is not None:
+            return replace(verdict, status='unmeasured',
+                           explanation=f'{verdict.explanation}; strike count: {missing_measurement(run, missing)}')
+        calls = [run.values[after] - run.values[before] for before, after in strikes['trials']]
+        casts, landed = sum(calls), run.values[strikes['landed']]
+        held = held and all(call == per_cast for call in calls)
+        texts.append(f'{run.key}: casts per call {", ".join(f"{call:g}" for call in calls)}; {casts:g} casts, '
+                     f'{landed:g} landed, {run.values[usable_label]:g} usable, {run.values[strikes["critical"]]:g} '
+                     f'critical, {casts - landed:g} not landed')
+    explanation = f'{verdict.explanation}; strike count, {per_cast} per call expected: {"; ".join(texts)}'
+    if not held:
+        return replace(verdict, status='alert', explanation=f'{explanation}: a call cast another number of strikes')
+    return replace(verdict, explanation=explanation)
+
+
+def judged_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model: HitModelSource) -> Verdict:
     expectation = parts[0][2]
     model = expectation.model or {}
     labels = model.get('measurements', {})

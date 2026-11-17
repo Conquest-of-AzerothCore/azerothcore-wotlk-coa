@@ -11,6 +11,7 @@ WITCHING_IDOL = 804051
 FEAR, SLEEP, CHARM = 65931, 9159, 6358
 STEP_MS = 3
 FIRST_PULSE_MS = 3
+EDGE_PULSE = {'radius_spell': 853203, 'pulses': 2, 'near_distance': 18.0, 'far_margin': 2.0}
 
 
 class SeededRun:
@@ -37,15 +38,19 @@ def idol_entry(**changes) -> dict:
             'party_pulse': {'radius_spell': 853203, 'pulses': 2}, **changes}
 
 
-def simulated(steps: list[dict], period_ms: int, removed_per_pulse: int | None = None, reaches_far: bool = False
-              ) -> SeededRun:
+def simulated(steps: list[dict], period_ms: int, removed_per_pulse: int | None = None, reaches_far: bool = False,
+              radius_yd: float | None = None) -> SeededRun:
     auras = {'ally': [], 'ally_far': []}
+    placed = {ally: sum(step['dx'] for step in steps if step['action'] == 'relocate' and step['actor'] == ally)
+              for ally in auras}
+    reached = (tuple(ally for ally in auras if placed[ally] <= radius_yd) if radius_yd is not None
+               else ('ally', 'ally_far') if reaches_far else ('ally',))
     values, clock, cast_at, next_pulse = {}, 0, None, None
 
     def pulse_until(moment: int):
         nonlocal next_pulse
         while next_pulse is not None and next_pulse <= moment:
-            for ally in ('ally', 'ally_far') if reaches_far else ('ally',):
+            for ally in reached:
                 keep = 0 if removed_per_pulse is None else max(len(auras[ally]) - removed_per_pulse, 0)
                 auras[ally] = auras[ally][len(auras[ally]) - keep:]
             next_pulse += period_ms
@@ -123,6 +128,60 @@ class PartyPulseTests(unittest.TestCase):
                         {'party_pulse': {'radius_spell': 853203, 'pulse': 2}}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.built(**changes)
+
+    def test_far_margin_and_near_distance_bracket_the_radius(self):
+        scenario, _ = self.built(party_pulse=EDGE_PULSE)
+        run.validate(scenario)
+        placed = {ally: sum(step['dx'] for step in scenario['steps']
+                            if step['action'] == 'relocate' and step['actor'] == ally) for ally in ('ally', 'ally_far')}
+        self.assertEqual(placed, {'ally': 18.0, 'ally_far': 22.0})
+        self.assertIn('A party member 18 yd away and a party member 22 yd away', scenario['contract'])
+
+    def test_seeded_radius_of_twenty_is_ok_at_the_edges(self):
+        scenario, expectations = self.built(party_pulse=EDGE_PULSE)
+        statuses = self.statuses(simulated(scenario['steps'], 2500, radius_yd=20.0), expectations)
+        self.assertEqual(set(statuses.values()), {'ok'})
+
+    def test_mutant_radius_of_thirty_or_fifteen_alerts(self):
+        scenario, expectations = self.built(party_pulse=EDGE_PULSE)
+        wide = self.statuses(simulated(scenario['steps'], 2500, radius_yd=30.0), expectations)
+        self.assertEqual(wide[f'{WITCHING_IDOL} periodic_dispel far_after_2'], 'alert')
+        narrow = self.statuses(simulated(scenario['steps'], 2500, radius_yd=15.0), expectations)
+        self.assertEqual(narrow[f'{WITCHING_IDOL} periodic_dispel after_0'], 'alert')
+
+    def test_default_placement_is_unchanged_without_the_fields(self):
+        default, _ = self.built()
+        explicit, _ = self.built(party_pulse={'radius_spell': 853203, 'pulses': 2, 'near_distance': 3.0,
+                                              'far_margin': 15.0})
+        self.assertEqual(default, explicit)
+
+    def test_refuses_a_near_member_outside_the_radius_or_no_far_margin(self):
+        for changes in ({'near_distance': 20.0}, {'near_distance': 0.0}, {'far_margin': 0.0}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.built(party_pulse={**EDGE_PULSE, **changes})
+
+    def test_near_limit_places_the_near_member_beyond_the_radius_and_inside_the_limit(self):
+        pulse = {**EDGE_PULSE, 'near_distance': 21.0, 'far_margin': 4.0, 'near_limit': 22.5, 'note': 'Ruling O-47.'}
+        scenario, expectations = self.built(party_pulse=pulse)
+        run.validate(scenario)
+        placed = {ally: sum(step['dx'] for step in scenario['steps']
+                            if step['action'] == 'relocate' and step['actor'] == ally) for ally in ('ally', 'ally_far')}
+        self.assertEqual(placed, {'ally': 21.0, 'ally_far': 24.0})
+        self.assertTrue(scenario['contract'].endswith('Ruling O-47.'))
+        reach = self.statuses(simulated(scenario['steps'], 2500, radius_yd=22.5), expectations)
+        self.assertEqual(set(reach.values()), {'ok'})
+        for radius in (20.0, 25.0):
+            wrong = self.statuses(simulated(scenario['steps'], 2500, radius_yd=radius), expectations)
+            self.assertIn('alert', wrong.values())
+
+    def test_near_limit_refuses_an_unordered_bracket_and_stays_inert_unset(self):
+        for changes in ({'near_limit': 19.0}, {'near_distance': 21.0, 'near_limit': 20.5},
+                        {'near_distance': 21.0, 'far_margin': 1.0, 'near_limit': 22.5}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.built(party_pulse={**EDGE_PULSE, **changes})
+        unset, _ = self.built(party_pulse=EDGE_PULSE)
+        none, _ = self.built(party_pulse={**EDGE_PULSE, 'near_limit': None})
+        self.assertEqual(unset, none)
 
     def test_without_party_pulse_the_entry_keeps_the_one_per_period_model(self):
         entry = idol_entry()

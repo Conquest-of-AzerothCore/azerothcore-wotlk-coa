@@ -8037,6 +8037,75 @@ class TakenHitScenarioTests(unittest.TestCase):
                         expectation.model, control, per_hit)), expectation)
                     self.assertEqual(verdict.status, status)
 
+    def striker_cast_entry(self, **changes) -> dict:
+        def arm(name: str, learn: bool) -> dict:
+            return {'name': name, 'auras': [[702, 1], [3237, 1, TARGET]], ('learn' if learn else 'unlearn'): [803638],
+                    'striker_casts': [1714], 'opening_settle_ms': 2500}
+        return {'spell': 803638, 'name': 'Vampire Hunter', 'kind': 'taken_hit', 'variant': 'curses',
+                'label_suffix': 'curses', 'judge': 'damage_ratio', 'expected': 0.75, 'quote': 'reduced',
+                'strike_spell': 41394, 'caster_health_pct': 100, 'caster_max_health': 100000, 'trials': 4,
+                'settle_ms': 200, 'arms': [arm('control', False), arm('treatment', True)], **changes}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_striker_casts_open_each_arm_before_its_settle_and_are_removed_at_its_end(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.striker_cast_entry())
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER
+                 and step['spell'] == 1714]
+        self.assertEqual(len(casts), 2)
+        for index in casts:
+            self.assertEqual(steps[index]['target'], CASTER)
+            self.assertEqual([steps[index + 1]['ms'], steps[index + 2]['ms']], [300, 2500])
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 41394]
+        self.assertTrue(casts[0] < strikes[0] and casts[1] > strikes[3] and casts[1] < strikes[4])
+        removed = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 1714]
+        self.assertEqual([step['stacks'] for step in removed], [0, 0])
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == STRIKER)
+        self.assertEqual(striker['spell_hit_bonus'], 100)
+        self.assertIn(TARGET, [creature['id'] for creature in scenario['creatures']])
+        self.assertIn('the striker casts [1714] at the caster', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_attributed_arm_aura_is_set_and_removed_with_its_caster(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.striker_cast_entry())
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        attributed = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 3237]
+        self.assertEqual(len(attributed), 2 * (1 + 4 + 1))
+        self.assertTrue(all(step['caster'] == TARGET for step in attributed))
+        self.assertEqual([step['stacks'] for step in attributed].count(0), 2)
+        self.assertTrue(all('caster' not in step for step in steps
+                            if step['action'] == 'set_aura' and step['spell'] == 702))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_striker_casts_keeps_a_plain_striker_and_opening_settle(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == STRIKER)
+        self.assertNotIn('spell_hit_bonus', striker)
+        self.assertNotIn('striker casts', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_striker_casts_and_attributed_auras_refuse_unsupported_shapes(self):
+        entry = self.striker_cast_entry()
+        arms = entry['arms']
+        for changes in ({'arms': [{**arms[0], 'auras': [[3237, 1, STRIKER]]}, arms[1]]},
+                        {'arms': [{**arms[0], 'striker_casts': [], 'opening_settle_ms': 100}, arms[1]]},
+                        {'arms': [{**arms[0], 'opening_settle_ms': -1}, arms[1]]},
+                        {'arms': [{**arms[0], 'striker_casts': [41394]}, arms[1]]},
+                        {'striker_race': 2}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, {**entry, **changes})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_seeded_curse_reduction_absent_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, self.striker_cast_entry())
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_HIT_RATIO)
+        for per_hit, status in ((825.0, 'ok'), (1100.0, 'alert'), (880.0, 'alert')):
+            with self.subTest(per_hit=per_hit):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.ratio_values(
+                    expectation.model, 1100.0, per_hit)), expectation)
+                self.assertEqual(verdict.status, status)
+
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_refreshed_arm_removes_its_auras_before_each_trial_and_waits_its_settle(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, route_entry(300529, 'periodic'))
@@ -12544,6 +12613,130 @@ class SummonSchoolCritArmTests(unittest.TestCase):
         self.assertNotIn({'action': 'learn', 'actor': CASTER, 'spell': 300240}, steps)
 
 
+class ShadowhoundStrikesPerCallTests(unittest.TestCase):
+    def built(self, strikes: bool = True):
+        entry = dict(witch_hunter_entry(802273, 'script_hit', 'shadowhound_strike'))
+        if not strikes:
+            entry.pop('strikes_per_cast')
+        scenario, [expectation] = behaviour_scenario(witch_hunter_file(802273), entry)
+        run.validate(scenario)
+        return scenario, expectation
+
+    def seeded(self, expectation: Expectation, calls: list[float]) -> FakeRun:
+        strikes = expectation.model['strikes']
+        values = {strikes['landed']: sum(calls), strikes['critical']: 0,
+                  expectation.model['measurements']['count']: sum(calls)}
+        for (before, after), call in zip(strikes['trials'], calls):
+            values.update({before: 10.0, after: 10.0 + call})
+        return FakeRun(values)
+
+    def judged(self, expectation: Expectation, run_values: FakeRun) -> Verdict:
+        ok = replace(base_verdict(expectation), status='ok', explanation='seeded hit mean')
+        model = expectation.model
+        return compare_module.strikes_verdict(ok, [run_values], model['strikes'], model['measurements']['count'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_each_treatment_call_is_read_before_the_call_and_after_its_settle(self):
+        scenario, expectation = self.built()
+        steps = scenario['steps']
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'owned_creature_spell_cast_count']
+        calls = [index for index, step in enumerate(steps) if step.get('action') == 'cast' and step['spell'] == 802273]
+        self.assertEqual(len(reads), 12)
+        self.assertEqual(len(calls), 6)
+        for call, (before, after) in zip(calls, zip(reads[::2], reads[1::2])):
+            self.assertLess(before, call)
+            self.assertLess(call, after)
+            self.assertEqual((steps[before]['spell'], steps[before]['entry']), (706332, 50124))
+        self.assertEqual(expectation.model['strikes']['per_cast'], 2)
+        landed = [step for step in steps if step.get('label') == expectation.model['strikes']['landed']]
+        self.assertEqual(len(landed), 1)
+        self.assertNotIn('critical', landed[0])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_one_strike_per_call_alerts_and_two_keep_the_hit_verdict(self):
+        _, expectation = self.built()
+        self.assertEqual(self.judged(expectation, self.seeded(expectation, [2] * 6)).status, 'ok')
+        self.assertEqual(self.judged(expectation, self.seeded(expectation, [1] * 6)).status, 'alert')
+        self.assertEqual(self.judged(expectation, self.seeded(expectation, [2] * 5 + [0])).status, 'alert')
+        self.assertEqual(self.judged(expectation, self.seeded(expectation, [2] * 5 + [4])).status, 'alert')
+        verdict = self.judged(expectation, self.seeded(expectation, [2] * 6))
+        self.assertIn('12 casts, 12 landed, 12 usable, 0 critical, 0 not landed', verdict.explanation)
+        missing = self.seeded(expectation, [2] * 6)
+        del missing.values[expectation.model['strikes']['landed']]
+        self.assertEqual(self.judged(expectation, missing).status, 'unmeasured')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_the_field_keeps_its_scenario_and_verdict(self):
+        scenario, expectation = self.built(strikes=False)
+        self.assertNotIn('strikes', expectation.model)
+        self.assertFalse(any(step.get('metric') == 'owned_creature_spell_cast_count' for step in scenario['steps']))
+        sentinel = replace(base_verdict(expectation), status='ok', explanation='seeded hit mean')
+        with mock.patch.object(compare_module, 'judged_hit', return_value=sentinel):
+            self.assertIs(compare_module.judge_hit(base_verdict(expectation), {}, [(None, FakeRun({}), expectation)],
+                                                   None), sentinel)
+
+
+class PaviseRemainingLifetimeTests(unittest.TestCase):
+    def built(self, variant: str):
+        entry = witch_hunter_entry(705524, 'metric_delta', variant)
+        scenario, [expectation] = behaviour_scenario(witch_hunter_file(705524), entry)
+        run.validate(scenario)
+        return scenario, expectation
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_timer_is_read_at_the_same_step_after_each_cast_with_the_talent_learned_between(self):
+        scenario, expectation = self.built('pavise_remaining')
+        steps = scenario['steps']
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'owned_creature_remaining_ms']
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        learn = steps.index({'action': 'learn', 'actor': CASTER, 'spell': 705524})
+        self.assertEqual(len(reads), 2)
+        self.assertEqual([steps[index]['entry'] for index in reads], [50519, 50519])
+        self.assertEqual([steps[index]['spell'] for index in casts], [520865, 520865])
+        self.assertLess(reads[0], learn)
+        self.assertLess(learn, casts[1])
+        for cast, read in zip(casts, reads):
+            self.assertEqual(steps[cast + 1:read], [{'action': 'wait', 'ms': 500}])
+        self.assertEqual((expectation.model['expected_gain'], expectation.model['tolerance']), (2000, 100))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_timer_gain_alerts_for_a_missing_or_off_extension(self):
+        _, expectation = self.built('pavise_remaining')
+        model = expectation.model
+
+        shield = model['shield_after_learn']
+
+        def judged(before: float, after: float) -> str:
+            values = {model['before_label']: before, model['after_label']: after,
+                      shield['before_label']: shield['item'], shield['after_label']: shield['item']}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(9500, 11500), 'ok')
+        self.assertEqual(judged(9475, 11525), 'ok')
+        self.assertEqual(judged(9500, 9500), 'alert')
+        self.assertEqual(judged(9500, 11300), 'alert')
+        self.assertEqual(judged(9500, 11700), 'alert')
+        self.assertEqual(judged(-1, 11500), 'alert')
+        self.assertEqual(judged(9500, -1), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_presence_arms_read_gone_and_held_at_the_same_moment(self):
+        moments = {}
+        for variant in ('pavise_base_gone', 'pavise_ext_margin'):
+            scenario, expectation = self.built(variant)
+            steps = scenario['steps']
+            cast = max(index for index, step in enumerate(steps)
+                       if step.get('action') == 'cast' and step.get('spell') == 520865)
+            elapsed, seen = 0, []
+            for step in steps[cast + 1:]:
+                elapsed += step.get('ms', 0) if step.get('action') == 'wait' else 0
+                if step.get('metric') == 'owned_creature_count':
+                    seen.append(elapsed)
+            moments[variant] = seen
+            self.assertEqual(expectation.model['after_expiry_expected'], 0)
+        self.assertEqual(moments['pavise_base_gone'], [9925, 10975])
+        self.assertEqual(moments['pavise_ext_margin'], [10975, 12975])
+
+
 class TakenHitLearnedArmTests(unittest.TestCase):
     def entry(self, suffix: str) -> dict:
         return next(entry for entry in load_fixture_class_file(23)['behaviours']
@@ -12737,6 +12930,7 @@ class MetricDeltaOwnCastContrastTests(unittest.TestCase):
 
 
 from test_periodic_dispel_party import PartyPulseTests  # noqa: E402,F401
+from test_fixed_count_swing import FixedCountSwingTests  # noqa: E402,F401
 
 
 UNBROKEN = 707407
@@ -13141,6 +13335,63 @@ class CostGateMutantTests(unittest.TestCase):
                 self.assertEqual(self.judged(variant, {'with'})['with'], 'alert')
                 self.assertEqual(self.judged(variant, {'beyond'})['beyond'], 'alert')
                 self.assertEqual(self.judged(variant, {'without'})['without'], 'alert')
+
+
+OWNED_AURA_PET = 50124
+OWNED_AURA_TRIALS = 20
+
+
+def hound_entry(**changes) -> dict:
+    entry = next(entry for entry in load_class_file(15)['behaviours']
+                 if entry.get('spell') == 680255 and entry.get('variant') == 'hound_crit')
+    return {**entry, **changes}
+
+
+def owned_aura_readings(model: dict, control_hit: float = 880.0, treatment_hit: float = 1320.0) -> dict:
+    values = {}
+    for arm, hit in (('control', control_hit), ('treatment', treatment_hit)):
+        for mark, (total_label, count_label) in enumerate(model['reads'][arm]):
+            values[total_label], values[count_label] = 2 * mark * hit, 2 * mark
+    return values
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class HitRatioOwnedAurasTests(unittest.TestCase):
+    def judged(self, **reads):
+        _, [expectation] = behaviour_scenario(load_class_file(15), hound_entry())
+        values = owned_aura_readings(expectation.model, **reads)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_the_owned_creature_fixture_is_set_before_every_observed_cast_of_both_arms(self):
+        scenario, _ = behaviour_scenario(load_class_file(15), hound_entry())
+        run.validate(scenario)
+        steps = scenario['steps']
+        fixtures = [index for index, step in enumerate(steps)
+                    if step['action'] == 'set_aura' and step.get('owned_entry') == OWNED_AURA_PET]
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 802273]
+        self.assertEqual(len(fixtures), 2 * 2 * OWNED_AURA_TRIALS)
+        self.assertEqual(len(casts), 2 * OWNED_AURA_TRIALS)
+        for cast in casts:
+            self.assertEqual(sum(cast - 8 < index < cast for index in fixtures), 2)
+        self.assertIn('[[984954, 1, 50124], [823764, 1, 50124]]', scenario['contract'])
+
+    def test_without_the_field_no_owned_creature_fixture_is_set(self):
+        entry = {key: value for key, value in hound_entry().items() if key != 'owned_auras'}
+        scenario, _ = behaviour_scenario(load_class_file(15), entry)
+        self.assertFalse([step for step in scenario['steps'] if 'owned_entry' in step])
+
+    def test_crit_hits_at_one_and_a_half_times_the_control_are_ok(self):
+        self.assertEqual(self.judged().status, 'ok')
+
+    def test_hounds_without_the_crit_damage_aura_alert(self):
+        self.assertEqual(self.judged(treatment_hit=880.0).status, 'alert')
+        self.assertEqual(self.judged(treatment_hit=880.0 * 7 / 6).status, 'alert')
+
+    def test_a_fixture_on_another_creature_or_without_a_caster_entry_is_refused(self):
+        for changes in ({'owned_auras': [[984954, 1, 50224]]}, {'owned_auras': [[984954, 0, OWNED_AURA_PET]]},
+                        {'caster_entry': None}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                behaviour_scenario(load_class_file(15), hound_entry(**changes))
 
 
 if __name__ == '__main__':
