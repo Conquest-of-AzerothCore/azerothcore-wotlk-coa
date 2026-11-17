@@ -5,7 +5,6 @@
 #include "GameTime.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -213,7 +212,15 @@ class aura_ascension_barbarian_volley : public AuraScript
             return;
         player->CastSpell(target, GetId() == 707584 ? 520541 : 807236, true, nullptr, effect);
         if (++_shots == 3 && GetId() == 707584)
-            player->GetMotionMaster()->MoveJumpTo(float(M_PI), 15.0f, 7.5f);
+            LeapBack(player);
+    }
+
+    void LeapBack(Player* player)
+    {
+        SpellEffectInfo const& leap = GetSpellInfo()->Effects[EFFECT_0];
+        player->JumpTo(leap.MiscValue / 10.0f, leap.CalcValue(player) / 10.0f, false);
+        sScriptMgr->AnticheatSetUnderACKmount(player);
+        player->SetFallInformation(GameTime::GetGameTime().count(), player->GetPositionZ());
     }
 
     void Register() override

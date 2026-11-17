@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "A Barbarian's Spite flings the caster back after its third Berserker Throw (#12466)",
+  "contract": [
+    "Spite 707584 reads: unleash 3 Berserker Throws at your target and then fling yourself back a great distance.",
+    "Its native leap (effect 0) is removed at load, and aura_ascension_barbarian_volley throws every 200 ms.",
+    "After the third throw it must send the leap: LEAP_BACK MiscValue 250 and BasePoints 74 + DieSides 1.",
+    "MotionMaster::MoveJumpTo returns at once for players, so the old script never moved the Barbarian.",
+    "A caster facing east (o 0) is sent west: direction cosine -1, sine 0, speeds 25 and 7.5 (Z negated).",
+    "This observes the trajectory instruction; client landing and input remain unverified."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "b",
+      "entry": 36,
+      "level": 3,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 707584
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 707584,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 707584,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Barbarian is sent back, away from the target it faces",
+      "actor": "b",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 3,
+      "min": -1.01,
+      "max": -0.99,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the direction has no sideways component",
+      "actor": "b",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 2,
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "the great distance keeps the authored horizontal speed",
+      "actor": "b",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 1,
+      "min": 24.95,
+      "max": 25.05
+    },
+    {
+      "action": "assert",
+      "label": "the leap keeps the authored vertical speed",
+      "actor": "b",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 0,
+      "min": -7.55,
+      "max": -7.45
+    }
+  ]
+}
