@@ -10,6 +10,7 @@
 #include "Pet.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include <array>
 
 namespace
 {
@@ -61,14 +62,26 @@ void RemoveLift(Unit* unit)
 
 void ApplyLift(Unit* unit, Policy::Lift const& lift)
 {
-    RemoveLift(unit);
     if (lift.Empty())
+    {
+        RemoveLift(unit);
         return;
+    }
 
+    uint32 const health = unit->GetHealth();
+    std::array<uint32, MAX_POWERS> powers;
+    for (uint8 power = 0; power < MAX_POWERS; ++power)
+        powers[power] = unit->GetPower(Powers(power));
+
+    RemoveLift(unit);
     HandleLiftModifiers(unit, lift, true);
     auto* applied = new AppliedLift();
     applied->lift = lift;
     unit->CustomData.Set(LiftKey, applied);
+
+    unit->SetHealth(health);
+    for (uint8 power = 0; power < MAX_POWERS; ++power)
+        unit->SetPower(Powers(power), powers[power]);
 }
 
 uint32 LiftTargetLevel(Player const* player)
