@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Dynamic training dummies are viewed at the player's own level under world scaling (#12681)",
+  "contract": [
+    "Report #12681: with world scaling on, a level 60 player saw the Stormwind dynamic training dummies at level 57.",
+    "npc_advanced_training_dummy idles at level 1 and only sets its real level to the attacker's (boss: +3) when",
+    "engaged, while Destiny Weaver shows every open-world creature at max(own, player - offset). An idle dummy was",
+    "therefore viewed below the player. The view of a dummy is now max(own, player level): a level 60 viewer sees",
+    "an idle Dynamic Training Dummy (967254) at 60. An ordinary level 1 creature next to it is the control and",
+    "still gets the normal offset view, below 60. Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1",
+    "and map 0 in DestinyWeaver.Scaling.WorldMaps; the scaling packet turns the player's own choice on."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "viewer", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "ordinary", "owner": "viewer", "entry": 36, "level": 1, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "level_scaling_packet", "actor": "viewer", "value": 1 },
+    { "action": "wait", "label": "Let the login and choice refresh windows close", "ms": 6000 },
+    { "action": "summon", "actor": "viewer", "entry": 967254, "as": "dummy", "distance": 4 },
+    { "action": "wait", "label": "Let the dummy reset to its idle level", "ms": 2000 },
+    { "action": "assert", "label": "SETUP: the idle dummy's own level is 1", "actor": "dummy", "metric": "level", "equals": 1 },
+    { "action": "assert", "label": "CONTROL: an ordinary level 1 creature is viewed with the offset, below the player",
+      "actor": "viewer", "metric": "view_level", "target": "ordinary", "min": 2, "max": 59 },
+    { "action": "assert", "label": "FIX: the idle dummy is viewed at the player's level",
+      "actor": "viewer", "metric": "view_level", "target": "dummy", "equals": 60 }
+  ]
+}
