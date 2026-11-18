@@ -32,8 +32,11 @@ chain — and only Graceful Fighter's stale aura tooltip still reads "up to 2 Oa
 Breakers consume the chain unless Keeping the Oath is active. Chain expiry clears the Oaths and the
 Zealotry contribution to Upheaval. Aggramar refreshes owned Blade of Faith at ten chain stacks.
 Tempest snapshots the four damage-bearing Oath types before consumption, including 30% per stack;
-Cleave's utility Oath retains its additional-target effect. Fervent Castigation and Scarlet Secrets
-produce Retribution according to their separate next-chain/every-second-Argent rules.
+Cleave's utility Oath retains its additional-target effect. Blade of Faith's ticks gain each held Lunge and
+Retribution Oath's own 30% per stack, additive; Condemn and Vindication reach them through aura 271 and Holy
+Cleave's Oath through its flat periodic modifier
+([ADR 1010](../adr/1010-blade-of-faith-ticks-gain-the-oaths-own-thirty-percent-per-stack.md)). Fervent Castigation
+and Scarlet Secrets produce Retribution according to their separate next-chain/every-second-Argent rules.
 
 The existing three-icon client artwork is retained as distinct Oath icons. Each icon displays its
 current stack count, with a separate chain count out of ten. Replaced/removed Oaths are cleared on
