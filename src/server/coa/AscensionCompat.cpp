@@ -1195,13 +1195,19 @@ public:
                     reachedRanks[reachedRanks.size() - 1 - std::min(index, reachedRanks.size() - 1)];
         }
 
+        std::vector<std::pair<uint32, uint32>> byRank(replacements.begin(), replacements.end());
+        std::stable_sort(byRank.begin(), byRank.end(), [](auto const& left, auto const& right)
+        {
+            return sSpellMgr->GetSpellRank(left.first) < sSpellMgr->GetSpellRank(right.first);
+        });
+
         std::set<uint32> desired;
         for (auto const& [id, replacement] : replacements)
         {
             if (replacement)
                 desired.insert(replacement);
         }
-        for (auto const& [id, replacement] : replacements)
+        for (auto const& [id, replacement] : byRank)
         {
             uint32 const current = player->GetTemporarySpellReplacement(id);
             if (current != replacement && (!replacement || !desired.count(current)))
@@ -1232,7 +1238,7 @@ public:
             }
         }
         bool barChanged = false;
-        for (auto const& [id, replacement] : replacements)
+        for (auto const& [id, replacement] : byRank)
         {
             player->SetTemporarySpellReplacement(id, replacement);
             if (!replacement)
