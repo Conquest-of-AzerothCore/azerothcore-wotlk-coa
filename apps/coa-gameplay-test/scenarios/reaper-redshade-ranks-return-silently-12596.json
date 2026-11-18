@@ -1,0 +1,457 @@
+{
+  "schema": 1,
+  "name": "Reap's ranks come back from Redshade's Bloodshatter silently (#12596)",
+  "contract": [
+    "A level 60 Reaper knows Reap ranks 1 to 8 (500357 to 573303) as separate active spells, and Redshade's",
+    "Bloodshatter (Dummy) 525299 swaps every rank for Bloodshatter 505326. Undoing a swap that other ranks",
+    "still share took the previousShared branch of Player::SetTemporarySpellReplacement, which sent a plain",
+    "SMSG_LEARNED_SPELL, so the client printed 'You have learned a new ability: Reap (Rank N)' for every",
+    "rank but the last, as reported in game on 2026-11-18. That learn packet is now sent between the hidden",
+    "and restored notice rows the removal branch already uses. Expected: every rank is Reap again and no",
+    "rank or Bloodshatter prints a chat line. reaper-redshade-client-swap-12596 covers the single-rank swap."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500357
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504056
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504057
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504058
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504557
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 505151
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 573302
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 573303
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 524735
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talent owns Bloodshatter",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505326,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 1 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 500357,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 2 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 504056,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 3 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 504057,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 4 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 504058,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 5 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 504557,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 6 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505151,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 7 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 573302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 8 is active",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 573303,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 500357,
+      "save_as": "rank1_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504056,
+      "save_as": "rank2_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504057,
+      "save_as": "rank3_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504058,
+      "save_as": "rank4_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504557,
+      "save_as": "rank5_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 505151,
+      "save_as": "rank6_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 573302,
+      "save_as": "rank7_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 573303,
+      "save_as": "rank8_lines"
+    },
+    {
+      "action": "set_aura",
+      "label": "The Bloodshatter step",
+      "actor": "reaper",
+      "spell": 525299,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 1 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 2 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504056,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 3 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504057,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 4 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504058,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 5 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504557,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 6 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 505151,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 7 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 573302,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap rank 8 stands as Bloodshatter",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 573303,
+      "equals": 505326,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "The Bloodshatter step ends",
+      "actor": "reaper",
+      "spell": 525299,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 1 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 2 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504056,
+      "equals": 504056,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 3 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504057,
+      "equals": 504057,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 4 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504058,
+      "equals": 504058,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 5 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 504557,
+      "equals": 504557,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 6 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 505151,
+      "equals": 505151,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 7 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 573302,
+      "equals": 573302,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Reap rank 8 is itself again",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 573303,
+      "equals": 573303,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 1 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 500357,
+      "relative_to": "rank1_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 2 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504056,
+      "relative_to": "rank2_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 3 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504057,
+      "relative_to": "rank3_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 4 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504058,
+      "relative_to": "rank4_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 5 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 504557,
+      "relative_to": "rank5_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 6 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 505151,
+      "relative_to": "rank6_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 7 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 573302,
+      "relative_to": "rank7_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no chat line for Reap rank 8 coming back",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 573303,
+      "relative_to": "rank8_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No chat line for Bloodshatter",
+      "actor": "reaper",
+      "metric": "client_chat_lines_for",
+      "spell": 505326,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 8 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 573303,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client no longer lists Bloodshatter",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 505326,
+      "equals": 0
+    }
+  ]
+}
