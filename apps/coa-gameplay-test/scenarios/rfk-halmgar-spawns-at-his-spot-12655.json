@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Earthcaller Halmgar spawns at his spot west of the Blind Hunter",
+  "contract": [
+    "Our testers know Earthcaller Halmgar (4842) from live runs at 2058.2 1734.2 76.6 in Razorfen Kraul (#12655);",
+    "the stock AzerothCore spawn stood about 65 yards east of it. His spawn row now stands there, on the ground."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Halmgar's spawn stands at the spot from the tester's screenshot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 1975863,
+      "spawn_type": "creature",
+      "x": 2058.24,
+      "y": 1734.22,
+      "z": 76.607,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "He stands on the ground there, within 0.8 yards",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 1975863,
+      "spawn_type": "creature"
+    }
+  ]
+}
