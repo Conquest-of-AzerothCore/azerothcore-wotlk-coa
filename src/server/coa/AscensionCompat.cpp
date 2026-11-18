@@ -1073,7 +1073,7 @@ public:
 
     learned += RestorePurchasedRanks(player);
     learned += SynchronizeTaughtAbilities(player);
-    learned += SynchronizeTalentReplacements(player);
+    SynchronizeTalentReplacements(player);
     RemoveAscensionPrimalistWeapons(player);
     SynchronizeAscensionRunemasterEchoes(player, GetActiveSpecialization(player));
 
