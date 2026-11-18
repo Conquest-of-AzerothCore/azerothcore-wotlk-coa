@@ -16,7 +16,9 @@
     "1364: at least 316 above it. The bands asserted on the dummy's Lichfrost damage (670 to 730 for one hit,",
     "1340 to 1460 for two) keep both margins above 290. After the first Lichfrost the primary is still frozen; after",
     "the second, with each hit below the cap and their sum above it, the freeze is gone, while the control dummy",
-    "stays frozen, so the freeze ended on damage and not on its duration."
+    "stays frozen, so the freeze ended on damage and not on its duration.",
+    "Both root effects are read as aura_amount: 1048 before any damage and 318 to 378 (the cap minus the 670 to 730",
+    "band) after the first hit, so a wrong initial cap or a wrong debit fails apart from the freeze reads."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -76,6 +78,14 @@
       "action": "assert", "label": "SETUP: the control dummy is frozen",
       "actor": "control", "metric": "aura", "spell": 504845, "equals": 1, "within_ms": 1000
     },
+    {
+      "action": "assert", "label": "Root effect 0 starts with the full 1048 damage cap",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 0, "equals": 1048
+    },
+    {
+      "action": "assert", "label": "Root effect 1 starts with the full 1048 damage cap",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 1, "equals": 1048
+    },
     { "action": "set_power", "actor": "caster", "power": 0, "value": 1373 },
     { "action": "cast", "actor": "caster", "spell": 501978, "target": "primary" },
     { "action": "wait", "label": "First Lichfrost: 2.5 s cast and flight", "ms": 3200 },
@@ -90,6 +100,14 @@
     {
       "action": "assert", "label": "One hit below the cap leaves the freeze on",
       "actor": "primary", "metric": "aura", "spell": 504845, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Root effect 0 keeps the cap minus the first hit",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 0, "min": 318, "max": 378
+    },
+    {
+      "action": "assert", "label": "Root effect 1 keeps the cap minus the first hit",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 1, "min": 318, "max": 378
     },
     { "action": "set_power", "actor": "caster", "power": 0, "value": 1373 },
     { "action": "cast", "actor": "caster", "spell": 501978, "target": "primary" },
