@@ -1,0 +1,652 @@
+{
+  "schema": 1,
+  "name": "Low-level battleground players are lifted to their bracket top while inside",
+  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket gain the difference between the level 29 and level 12 rows of player_class_stats and player_race_stats: Warrior Strength +24, Agility +15, Stamina +22, Intellect +3, Spirit +7 and maximum health +459 (base health +239, 22 Stamina x 10); class 12 Strength +14, Agility +27, Stamina +14, Intellect +4, Spirit +7 and maximum health +394 (base health +254, 14 Stamina x 10). A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes the lift instead of stacking it. Leaving through the leave packet or by teleport removes the lift and clamps health to the restored maximum.",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "war",
+      "race": 1,
+      "class": 1,
+      "level": 12
+    },
+    {
+      "id": "coa",
+      "race": 1,
+      "class": 12,
+      "level": 12
+    },
+    {
+      "id": "top",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "top2",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "stat",
+      "save_as": "war_stat0",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "stat",
+      "save_as": "war_stat1",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "stat",
+      "save_as": "war_stat2",
+      "stat": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "stat",
+      "save_as": "war_stat3",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "stat",
+      "save_as": "war_stat4",
+      "stat": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "max_health",
+      "save_as": "war_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "coa",
+      "metric": "stat",
+      "save_as": "coa_stat0",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "coa",
+      "metric": "stat",
+      "save_as": "coa_stat1",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "coa",
+      "metric": "stat",
+      "save_as": "coa_stat2",
+      "stat": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "coa",
+      "metric": "stat",
+      "save_as": "coa_stat3",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "coa",
+      "metric": "stat",
+      "save_as": "coa_stat4",
+      "stat": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "coa",
+      "metric": "max_health",
+      "save_as": "coa_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "stat",
+      "save_as": "top_stat2",
+      "stat": 2
+    },
+    {
+      "action": "client_packet",
+      "actor": "war",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "war is invited to the 10-29 bracket",
+      "actor": "war",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "war",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "war"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "war enters Warsong Gulch",
+      "actor": "war",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "coa",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "coa is invited to the 10-29 bracket",
+      "actor": "coa",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "coa",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "coa"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "coa enters Warsong Gulch",
+      "actor": "coa",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top is invited to the 10-29 bracket",
+      "actor": "top",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top enters Warsong Gulch",
+      "actor": "top",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top2 is invited to the 10-29 bracket",
+      "actor": "top2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 Warrior Strength rises by the level 29 difference 24",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat0",
+      "equals": 24,
+      "stat": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 Warrior Agility rises by the level 29 difference 15",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat1",
+      "equals": 15,
+      "stat": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 Warrior Stamina rises by the level 29 difference 22",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat2",
+      "equals": 22,
+      "stat": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 Warrior Intellect rises by the level 29 difference 3",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat3",
+      "equals": 3,
+      "stat": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 Warrior Spirit rises by the level 29 difference 7",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat4",
+      "equals": 7,
+      "stat": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 Warrior maximum health rises by 239 base health and 22 Stamina (459)",
+      "actor": "war",
+      "metric": "max_health",
+      "relative_to": "war_health",
+      "equals": 459,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 class 12 Strength rises by the level 29 difference 14",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat0",
+      "equals": 14,
+      "stat": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 class 12 Agility rises by the level 29 difference 27",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat1",
+      "equals": 27,
+      "stat": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 class 12 Stamina rises by the level 29 difference 14",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat2",
+      "equals": 14,
+      "stat": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 class 12 Intellect rises by the level 29 difference 4",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat3",
+      "equals": 4,
+      "stat": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 class 12 Spirit rises by the level 29 difference 7",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat4",
+      "equals": 7,
+      "stat": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 12 class 12 maximum health rises by 254 base health and 14 Stamina (394)",
+      "actor": "coa",
+      "metric": "max_health",
+      "relative_to": "coa_health",
+      "equals": 394,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Level 29 Warrior at the bracket top gets no lift",
+      "actor": "top",
+      "metric": "stat",
+      "relative_to": "top_stat2",
+      "equals": 0,
+      "stat": 2
+    },
+    {
+      "action": "set_level",
+      "actor": "war",
+      "value": 13
+    },
+    {
+      "action": "assert",
+      "label": "Leveling to 13 inside keeps Stamina at the level 29 value (no stacked lift)",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat2",
+      "equals": 22,
+      "stat": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "coa",
+      "spell": 139,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 100000
+    },
+    {
+      "action": "assert",
+      "label": "coa heals to the lifted maximum",
+      "actor": "coa",
+      "metric": "health_pct",
+      "equals": 100,
+      "within_ms": 10000
+    },
+    {
+      "action": "client_packet",
+      "actor": "coa",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "class 12 leaves Warsong Gulch",
+      "actor": "coa",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores class 12 Strength",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat0",
+      "equals": 0,
+      "stat": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores class 12 Agility",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat1",
+      "equals": 0,
+      "stat": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores class 12 Stamina",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat2",
+      "equals": 0,
+      "stat": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores class 12 Intellect",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat3",
+      "equals": 0,
+      "stat": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores class 12 Spirit",
+      "actor": "coa",
+      "metric": "stat",
+      "relative_to": "coa_stat4",
+      "equals": 0,
+      "stat": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores class 12 maximum health",
+      "actor": "coa",
+      "metric": "max_health",
+      "relative_to": "coa_health",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "class 12 health is clamped to the restored maximum",
+      "actor": "coa",
+      "metric": "health_pct",
+      "max": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "war",
+      "spell": 139,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 100000
+    },
+    {
+      "action": "assert",
+      "label": "war heals to the lifted maximum",
+      "actor": "war",
+      "metric": "health_pct",
+      "equals": 100,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "actor": "war",
+      "ignore_access": true,
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6
+    },
+    {
+      "action": "assert",
+      "label": "Warrior teleports out of Warsong Gulch",
+      "actor": "war",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Teleporting out restores Stamina to the level 13 value (+1 over level 12)",
+      "actor": "war",
+      "metric": "stat",
+      "relative_to": "war_stat2",
+      "equals": 1,
+      "stat": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Warrior health is clamped to the restored maximum",
+      "actor": "war",
+      "metric": "health_pct",
+      "max": 100
+    }
+  ]
+}
