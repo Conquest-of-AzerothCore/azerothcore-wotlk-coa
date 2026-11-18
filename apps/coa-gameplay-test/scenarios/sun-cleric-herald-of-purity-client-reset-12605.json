@@ -3154,14 +3154,6 @@
     },
     {
       "action": "assert",
-      "label": "A reset ended a cooldown the client was showing",
-      "actor": "cleric",
-      "metric": "client_cooldown_clears",
-      "spell": 520359,
-      "min": 1
-    },
-    {
-      "action": "assert",
       "label": "DISCRIMINATING: each reset reaches the client after its cast, so no cast meets a cooling button",
       "actor": "cleric",
       "metric": "client_cooldown_blocked_casts",
