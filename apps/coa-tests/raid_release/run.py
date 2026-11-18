@@ -29,6 +29,8 @@ def command(source, exe):
 
 def harness(source):
     hook = method(source, 'bool OnPlayerCanEnterMap(').replace(' override', '')
+    refresh = method(source, 'void RefreshDungeonFinderLocks(')
+    reentry = method(source, 'void OnPlayerMapChanged(').replace(' override', '')
     expected = ','.join(f'{{{map_id},{stage}}}' for map_id, stage in EXPECTED_STAGES.items())
     difficulties = ','.join(f'{{{difficulty},{stage}}}' for difficulty, stage in DIFFICULTY_STAGES.items())
     ungated = ','.join(str(map_id) for map_id in UNGATED_MAPS)
@@ -39,6 +41,9 @@ def harness(source):
 #include <cassert>
 #include <cstdint>
 #include <utility>
+#include <shared_mutex>
+#include <mutex>
+#include <unordered_map>
 using uint32 = std::uint32_t;
 constexpr uint32 LANG_INSTANCE_CLOSED = 2010;
 enum Difficulty : uint32 {{ DUNGEON_DIFFICULTY_NORMAL, DUNGEON_DIFFICULTY_HEROIC, DUNGEON_DIFFICULTY_EPIC }};
@@ -69,16 +74,46 @@ struct WorldSession
     uint32 messages = 0;
     void SendAreaTriggerMessage(uint32 text) {{ assert(text == LANG_INSTANCE_CLOSED); ++messages; }}
 }};
+struct Group {{ }};
 struct Player
 {{
+    bool inWorld = true;
+    Group* group = nullptr;
+    uint32 refreshes = 0;
+    uint32 lockedStage = 0;
+    bool IsInWorld() const {{ return inWorld; }}
+    Group* GetGroup() const {{ return group; }}
     WorldSession session;
     Difficulty dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
     WorldSession* GetSession() {{ return &session; }}
     Difficulty GetDifficulty(bool isRaid) const {{ return isRaid ? DUNGEON_DIFFICULTY_NORMAL : dungeonDifficulty; }}
 }};
 uint32 g_raidReleaseStage = RaidRelease::AllReleased;
+struct LFGMgr
+{{
+    void InitializeLockedDungeons(Player* player, Group const* group)
+    {{
+        assert(player->IsInWorld());
+        assert(group == player->GetGroup());
+        ++player->refreshes;
+        player->lockedStage = g_raidReleaseStage;
+    }}
+}} lfgMgr;
+#define sLFGMgr (&lfgMgr)
+std::shared_mutex playersLock;
+namespace ObjectAccessor
+{{
+    std::unordered_map<uint32, Player*> players;
+    auto const& GetPlayers() {{ return players; }}
+}}
+template<class T> struct HashMapHolder
+{{
+    static std::shared_mutex* GetLock() {{ return &playersLock; }}
+}};
+{refresh}
 struct Hook
 {{
+{reentry}
 {hook}
 }};
 
@@ -100,6 +135,26 @@ int main()
     uint32 const ungatedRaids[] = {{{ungated_raids}}};
     uint32 const dungeons[] = {{{dungeons}}};
     Hook hook;
+    Player online, transferring;
+    Group group;
+    transferring.group = &group;
+    transferring.inWorld = false;
+    ObjectAccessor::players = {{{{1, &online}}, {{2, &transferring}}}};
+    for (uint32 stage : {{ RaidRelease::StageMythicDungeons, uint32(0) }})
+    {{
+        g_raidReleaseStage = stage;
+        uint32 const previousRefreshes = transferring.refreshes;
+        RefreshDungeonFinderLocks();
+        assert(online.lockedStage == stage);
+        assert(transferring.refreshes == previousRefreshes);
+        transferring.inWorld = true;
+        hook.OnPlayerMapChanged(&transferring);
+        assert(transferring.refreshes == previousRefreshes + 1);
+        assert(transferring.lockedStage == stage);
+        transferring.inWorld = false;
+    }}
+    assert(online.refreshes == 2);
+    ObjectAccessor::players.clear();
     static_assert(RaidRelease::AllReleased == 8);
     static_assert(RaidRelease::RaidLootStage(309) == RaidRelease::StageZulGurub);
     static_assert(RaidRelease::RaidLootStage(533) == RaidRelease::StageNaxxramas);
@@ -154,7 +209,7 @@ def main():
     source = (ROOT / 'src/server/coa/AscensionRaidRelease.cpp').read_text(encoding='utf-8')
     loader = (ROOT / 'src/server/coa/CoAScriptLoader.cpp').read_text(encoding='utf-8')
     config = (ROOT / 'src/server/coa/conf/coa.conf.dist').read_text(encoding='utf-8')
-    assert '{ PLAYERHOOK_CAN_ENTER_MAP })' in source
+    assert '{ PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_ON_MAP_CHANGED })' in source
     assert '"Ascension.CallboardCache.ReleaseStage"' in source
     assert 'WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD' in source
     assert loader.count('AddSC_AscensionRaidRelease()') == 2

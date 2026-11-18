@@ -91,7 +91,12 @@ class ascension_raid_release_player : public PlayerScript
 {
 public:
     ascension_raid_release_player()
-        : PlayerScript("ascension_raid_release_player", { PLAYERHOOK_CAN_ENTER_MAP }) { }
+        : PlayerScript("ascension_raid_release_player", { PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_ON_MAP_CHANGED }) { }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        sLFGMgr->InitializeLockedDungeons(player, player->GetGroup());
+    }
 
     bool OnPlayerCanEnterMap(Player* player, MapEntry const* entry, InstanceTemplate const*, MapDifficulty const*,
         bool) override
