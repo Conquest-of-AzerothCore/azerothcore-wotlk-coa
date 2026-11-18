@@ -23,7 +23,9 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include "World.h"
@@ -267,10 +269,64 @@ void UpdateCarrier(Player* player)
             player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
             player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
             player->CastSpell(player, Spite, true);
+            player->UpdateSpeed(MOVE_RUN, true);
         }
     }
     else if (player->HasAura(Spite))
+    {
         player->RemoveAurasDueToSpell(Spite);
+        player->UpdateSpeed(MOVE_RUN, true);
+    }
+}
+
+bool AppliesAura(SpellInfo const* info, AuraType first, AuraType second)
+{
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        if (effect.ApplyAuraName == first || effect.ApplyAuraName == second)
+            return true;
+    return false;
+}
+
+bool AppliesHiding(SpellInfo const* info)
+{
+    return AppliesAura(info, SPELL_AURA_MOD_STEALTH, SPELL_AURA_MOD_INVISIBILITY);
+}
+
+bool AppliesImmunity(SpellInfo const* info)
+{
+    return AppliesAura(info, SPELL_AURA_SCHOOL_IMMUNITY, SPELL_AURA_DAMAGE_IMMUNITY);
+}
+
+bool Hides(SpellInfo const* info)
+{
+    if (AppliesHiding(info))
+        return true;
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        if (effect.TriggerSpell)
+            if (SpellInfo const* triggered = sSpellMgr->GetSpellInfo(effect.TriggerSpell))
+                if (AppliesHiding(triggered))
+                    return true;
+    return false;
+}
+
+bool MovesCaster(SpellInfo const* info)
+{
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        switch (effect.Effect)
+        {
+            case SPELL_EFFECT_TELEPORT_UNITS:
+            case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
+            case SPELL_EFFECT_LEAP:
+            case SPELL_EFFECT_LEAP_BACK:
+            case SPELL_EFFECT_CHARGE:
+            case SPELL_EFFECT_CHARGE_DEST:
+            case SPELL_EFFECT_JUMP:
+            case SPELL_EFFECT_JUMP_DEST:
+                return true;
+            default:
+                break;
+        }
+    return false;
 }
 
 bool Eligible(Player const* player)
@@ -419,9 +475,25 @@ bool Claim(Player* player, GameObject* object, bool completedCast)
     return true;
 }
 
-void Drop(Player* player)
+char const* DropMessage(DropReason reason)
+{
+    switch (reason)
+    {
+        case DropReason::Immunity:
+            return "You dropped Crow's Cache: immunity effects cannot be used while carrying it.";
+        case DropReason::LeftMode:
+            return "You dropped Crow's Cache: carrying it requires High-Risk and Mercenary mode.";
+        case DropReason::LeftMap:
+            return "You dropped Crow's Cache: it cannot leave the open world it appeared in.";
+        default:
+            return nullptr;
+    }
+}
+
+void Drop(Player* player, DropReason reason)
 {
     std::lock_guard lock(mutex);
+    bool dropped = false;
     for (auto& [id, event] : events)
     {
         if (event.phase != Phase::Carried || event.carrier != player->GetGUID().GetCounter())
@@ -433,12 +505,34 @@ void Drop(Player* player)
         event.phase = Phase::Dropped;
         event.carrier = 0;
         event.item = 0;
-        event.map = player->GetMapId();
-        event.position.Relocate(player);
+        if (reason != DropReason::LeftMap)
+        {
+            event.map = player->GetMapId();
+            event.position.Relocate(player);
+        }
         Save(event, player);
-        Spawn(player->GetMap(), event);
+        if (reason != DropReason::LeftMap)
+            Spawn(player->GetMap(), event);
+        dropped = true;
     }
     UpdateCarrier(player);
+    if (char const* message = dropped ? DropMessage(reason) : nullptr)
+        ChatHandler(player->GetSession()).SendSysMessage(message);
+}
+
+template <typename Action>
+void OnceSettled(Player* player, Action action)
+{
+    ObjectGuid const guid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([guid, action]()
+    {
+        Player* carrier = ObjectAccessor::FindPlayer(guid);
+        if (!carrier || !carrier->IsInWorld())
+            return;
+        std::lock_guard lock(mutex);
+        if (Carries(carrier))
+            action(carrier);
+    }, 0ms);
 }
 
 bool Open(Player* player, Item* cache)
@@ -765,8 +859,20 @@ class Players final : public PlayerScript
 public:
     Players() : PlayerScript("crows_cache_players", {PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_LOGIN,
         PLAYERHOOK_ON_UPDATE_AREA, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_SEND_MAIL,
-        PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT}) { }
-    void OnPlayerJustDied(Player* player) override { Drop(player); }
+        PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_BEFORE_LOGOUT, PLAYERHOOK_ON_MAP_CHANGED}) { }
+    void OnPlayerJustDied(Player* player) override { Drop(player, DropReason::Death); }
+    void OnPlayerBeforeLogout(Player* player) override { Drop(player, DropReason::Logout); }
+    void OnPlayerMapChanged(Player* player) override
+    {
+        std::lock_guard lock(mutex);
+        bool const left = std::any_of(events.begin(), events.end(), [player](auto const& row)
+        {
+            return row.second.phase == Phase::Carried && row.second.carrier == player->GetGUID().GetCounter()
+                && LeftCacheMap(row.second.map, player->GetMapId(), player->GetMap()->Instanceable());
+        });
+        if (left)
+            Drop(player, DropReason::LeftMap);
+    }
     void OnPlayerLogin(Player* player) override
     {
         std::lock_guard lock(mutex);
@@ -866,12 +972,19 @@ public:
                     result = SPELL_FAILED_BAD_TARGETS;
             }
         }
-        if (!player->HasAura(Spite))
+        SpellInfo const* info = spell->GetSpellInfo();
+        if (info->IsPassive())
             return;
-        for (SpellEffectInfo const& effect : spell->GetSpellInfo()->GetEffects())
-            if (effect.Effect == SPELL_EFFECT_TELEPORT_UNITS || effect.Effect == SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
-                || effect.ApplyAuraName == SPELL_AURA_MOD_STEALTH || effect.ApplyAuraName == SPELL_AURA_MOD_INVISIBILITY)
-                result = SPELL_FAILED_NOT_HERE;
+        bool const hides = Hides(info);
+        bool const moves = MovesCaster(info);
+        if (!hides && !moves)
+            return;
+        std::lock_guard lock(mutex);
+        if (!Carries(player))
+            return;
+        Unit const* original = spell->GetOriginalCaster();
+        if (hides || RefuseMovement(true, moves, original && original != player))
+            result = SPELL_FAILED_NOT_HERE;
     }
 };
 
@@ -879,7 +992,44 @@ class Combat final : public UnitScript
 {
 public:
     Combat() : UnitScript("crows_cache_damage", true, {UNITHOOK_ON_DAMAGE, UNITHOOK_CAN_UNIT_ATTACK,
-        UNITHOOK_CAN_UNIT_ASSIST, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK}) { }
+        UNITHOOK_CAN_UNIT_ASSIST, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+        UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_ON_UPDATE_RUN_SPEED}) { }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        Player* player = unit->ToPlayer();
+        if (!player)
+            return;
+        SpellInfo const* info = aura->GetSpellInfo();
+        bool const hiding = AppliesHiding(info);
+        bool const immunity = AppliesImmunity(info);
+        if (!hiding && !immunity)
+            return;
+        std::lock_guard lock(mutex);
+        bool const carrying = Carries(player);
+        if (hiding && carrying)
+            OnceSettled(player, [id = info->Id](Player* carrier) { carrier->RemoveAurasDueToSpell(id); });
+        if (ImmunityDrops(carrying, immunity, aura->GetCasterGUID() == player->GetGUID()))
+            OnceSettled(player, [](Player* carrier) { Drop(carrier, DropReason::Immunity); });
+    }
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        uint32 const id = application->GetBase()->GetId();
+        Player* player = unit->ToPlayer();
+        if (player && (id == Mercenary || id == HighRisk))
+            OnceSettled(player, [](Player* carrier)
+            {
+                if (ModeDrops(true, carrier->HasAura(HighRisk), carrier->HasAura(Mercenary)))
+                    Drop(carrier, DropReason::LeftMode);
+            });
+    }
+    void OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus) override
+    {
+        if (!unit->IsMounted() || !unit->HasAura(Spite))
+            return;
+        mainSpeedMod = 0;
+        stackBonus = 1.0f;
+        nonStackBonus = 1.0f;
+    }
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const*) override
     {
         return !Walled(attacker, target);
