@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder locks specific Mythic dungeons until the Mythic Dungeons release stage",
+  "contract": [
+    "The client lists Random Mythic dungeons only after the server sends the Mythic difficulty game events, which",
+    "happens from release stage 2 (Mythic Dungeons, Ascension.CallboardCache.ReleaseStage or .raidphase). Its",
+    "Specific Dungeons list still shows every Mythic dungeon, and LFGMgr::InitializeLockedDungeons did not read the",
+    "release stage, so a player queued a specific Mythic dungeon before Mythic was released. Below stage 2 each",
+    "Mythic (difficulty 2) dungeon entry must carry LFG_LOCKSTATUS_NOT_IN_SEASON (1031), which the client shows as",
+    "the generic requirements tooltip, and a join for Vaults of the Inquisition Mythic (2401) must be refused.",
+    "Heroic (1401) stays open from stage 1, and at stage 2 the Mythic entry is unlocked and the same join queues.",
+    "A .raidphase change rebuilds the online players' locks."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "seeker", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "label": "SETUP: the realm is at the Mythic Dungeons release stage",
+     "command": "raidphase set 2", "restore": "raidphase clear"},
+    {"action": "assert", "label": "CONTROL: at stage 2 Vaults of the Inquisition Mythic is open", "actor": "seeker",
+     "metric": "lfg_lock_status", "dungeon": 2401, "equals": 0},
+    {"action": "console", "label": "SETUP: the realm goes back to the Heroic Dungeons release stage",
+     "command": "raidphase set 1"},
+    {"action": "assert", "label": "at stage 1 Vaults of the Inquisition Mythic is locked", "actor": "seeker",
+     "metric": "lfg_lock_status", "dungeon": 2401, "equals": 1031},
+    {"action": "assert", "label": "CONTROL: at stage 1 Vaults of the Inquisition Heroic stays open",
+     "actor": "seeker", "metric": "lfg_lock_status", "dungeon": 1401, "equals": 0},
+    {"action": "lfg_join", "label": "the player picks Vaults of the Inquisition Mythic as a specific dungeon",
+     "actor": "seeker", "dungeons": [2401], "roles": 8},
+    {"action": "assert", "label": "at stage 1 the specific Mythic join is refused", "actor": "seeker",
+     "metric": "lfg_state", "equals": 0},
+    {"action": "assert", "label": "at stage 1 the Mythic dungeon is not selected", "actor": "seeker",
+     "metric": "lfg_selected_dungeon", "dungeon": 2401, "equals": 0},
+    {"action": "console", "label": "SETUP: the realm releases Mythic Dungeons", "command": "raidphase set 2"},
+    {"action": "assert", "label": "at stage 2 Vaults of the Inquisition Mythic is unlocked again", "actor": "seeker",
+     "metric": "lfg_lock_status", "dungeon": 2401, "equals": 0},
+    {"action": "lfg_join", "label": "CONTROL: the same specific Mythic join at stage 2", "actor": "seeker",
+     "dungeons": [2401], "roles": 8},
+    {"action": "assert", "label": "CONTROL: at stage 2 the specific Mythic join queues", "actor": "seeker",
+     "metric": "lfg_state", "equals": 2},
+    {"action": "assert", "label": "CONTROL: at stage 2 the Mythic dungeon is selected", "actor": "seeker",
+     "metric": "lfg_selected_dungeon", "dungeon": 2401, "equals": 1}
+  ]
+}

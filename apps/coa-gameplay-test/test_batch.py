@@ -348,7 +348,7 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'test-zone-bonus-command', 'test-zone-bonus-westfall', 'void-portal-capture',
                      'path-to-ascension-arena-solo-queue-tutorial', 'pvp-armor-arena-10463',
                      'molten-core-lucifron-encounter', 'setis-world-boss-altar-loot',
-                     'snowgrave-world-boss-instance',
+                     'snowgrave-world-boss-instance', 'lfg-mythic-dungeons-follow-release-stage',
                      'battleground-spirit-guide-queue-follows-range',
                      'battleground-spirit-guide-client-queue-request-10146',
                      'mercenary-battleground-team-faction', 'mercenary-war-mode-battleground',

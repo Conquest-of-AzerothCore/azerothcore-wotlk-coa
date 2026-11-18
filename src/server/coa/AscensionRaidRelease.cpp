@@ -7,13 +7,17 @@
 #include "Config.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
+#include "GlobalScript.h"
 #include "Language.h"
+#include "LFGMgr.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "PlayerScript.h"
 #include "ScriptMgr.h"
 #include "WorldSession.h"
 #include "WorldState.h"
 #include <atomic>
+#include <shared_mutex>
 
 using namespace Acore::ChatCommands;
 
@@ -25,11 +29,20 @@ constexpr uint32 WorldStateReleasedStage = 20121;
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
 
+void RefreshDungeonFinderLocks()
+{
+    std::shared_lock lock(*HashMapHolder<Player>::GetLock());
+    for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
+        if (player->IsInWorld())
+            sLFGMgr->InitializeLockedDungeons(player, player->GetGroup());
+}
+
 void RefreshReleasedStage()
 {
     uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
     g_raidReleaseStage = stageOverride ? stageOverride - 1 : g_configuredStage;
     sWorldState->setWorldState(WorldStateReleasedStage, g_raidReleaseStage);
+    RefreshDungeonFinderLocks();
 }
 
 void LoadRaidReleaseStage()
@@ -99,6 +112,23 @@ public:
     }
 };
 
+class ascension_dungeon_finder_release_locks : public GlobalScript
+{
+public:
+    ascension_dungeon_finder_release_locks()
+        : GlobalScript("ascension_dungeon_finder_release_locks", { GLOBALHOOK_ON_INITIALIZE_LOCKED_DUNGEONS }) { }
+
+    void OnInitializeLockedDungeons(Player*, uint8&, uint32& lockData, lfg::LFGDungeonData const* dungeon) override
+    {
+        if (lockData)
+            return;
+
+        MapEntry const* map = sMapStore.LookupEntry(dungeon->map);
+        if (map && !map->IsRaid() && !RaidRelease::IsDungeonDifficultyReleased(dungeon->difficulty, g_raidReleaseStage))
+            lockData = lfg::LFG_LOCKSTATUS_NOT_IN_SEASON;
+    }
+};
+
 class ascension_raid_release_commands : public CommandScript
 {
 public:
@@ -161,5 +191,6 @@ void AddSC_AscensionRaidRelease()
 {
     new ascension_raid_release_config();
     new ascension_raid_release_player();
+    new ascension_dungeon_finder_release_locks();
     new ascension_raid_release_commands();
 }
