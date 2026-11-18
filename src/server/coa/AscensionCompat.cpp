@@ -455,24 +455,6 @@ constexpr std::array<uint32, 18> BROKEN_COMPANION_SPELLS = {
 constexpr std::size_t COMPANION_SPELLS_PER_BATCH = 4;
 constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 
-enum AscensionItems : uint32
-{
-    ITEM_HEARTWOOD_KEY = 1041710,
-    ITEM_CUIRBOULLI_BOOTS = 2143,
-    ITEM_RED_RIBBONED_WRAPPING_PAPER = 5042,
-    ITEM_ASHEN_TABLET = 9302130
-};
-
-constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
-{
-    10521, 10522, 10523, 10524, 10525, 10526, 10527, 10528, 1041704
-};
-
-constexpr std::array<uint32, 8> GOBLIN_SALVAGE_QUEST_ITEMS =
-{
-    9707001, 9707002, 9707003, 9707004, 9707005, 9707006, 9707007, 9707008
-};
-
 constexpr std::array<uint32, 2> GOBLIN_SALVAGE_FIELD_TESTING_QUESTS = { 176003, 176013 };
 constexpr float GOBLIN_SALVAGE_FIELD_TESTING_LOOT_REACH = 10.0f;
 
@@ -10732,14 +10714,6 @@ void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
 
 void AddAscensionCompatScripts() {
   MountDisplayFallback::Owner.store(&CollectionMountDisplay, std::memory_order_relaxed);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_ASHEN_TABLET);
-  for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
-    Ascension::ClientItemPatches::Instance().Register(itemId);
-  for (uint32 itemId : GOBLIN_SALVAGE_QUEST_ITEMS)
-    Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {
     config.Booleans.emplace_back("CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED", true);
     config.Booleans.emplace_back("CONFIG_THROWN_WEAPON_APPEARANCES_ENABLED",

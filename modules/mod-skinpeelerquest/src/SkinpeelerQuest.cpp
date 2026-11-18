@@ -74,11 +74,6 @@ namespace
         100331, 1004111, 1004112, 1004113, 1004114,
         1004115, 1004116, 1004117, 1004118, 1004120};
 
-    // Item.dbc rows are only streamed for ids registered here. Without this the
-    // client never learns the item, so the bag draws a question mark.
-    constexpr std::array<uint32, 4> APEX_CLIENT_ITEMS = {
-        APEX_PELT_STORMFANG, APEX_PELT_OWLCAT, APEX_PELT_TIDE};
-
     // Stormfang has no CreatureAI of its own: its brain is the creature update below.
     // The probe therefore lives in a map the unit script can feed from the damage hook.
     // The update and damage hooks can run on different map threads, so every access is
@@ -868,9 +863,6 @@ void Addmod_skinpeelerquestScripts()
 {
     for (uint32 spellId : APEX_CLIENT_SPELLS)
         Ascension::ClientSpellPatches::Instance().Register(spellId);
-
-    for (uint32 itemId : APEX_CLIENT_ITEMS)
-        Ascension::ClientItemPatches::Instance().Register(itemId);
 
     new SkinpeelerStormfangSpellScript();
     new SkinpeelerStormfangCreatureScript();

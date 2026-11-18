@@ -498,7 +498,6 @@ void AddSC_coa_legendary_items()
         Ascension::ClientSpellPatches::Instance().Register(AuraEntryBase + index, {}, IsEnabled);
         for (uint32 level = 1; level <= MaximumCreatureLevel; ++level)
         {
-            Ascension::ClientItemPatches::Instance().Register(EntryForLevel(index, level), {}, IsEnabled);
             Ascension::ClientSpellPatches::Instance().Register(TooltipForLevel(index, level), {}, IsEnabled,
                 Ascension::ClientSpellPatches::Delivery::Item);
         }
