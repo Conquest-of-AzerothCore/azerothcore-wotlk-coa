@@ -5218,3 +5218,14 @@ Cluster.IsCrossrealm=0
 # Conflicting notes or more than 50 friend accounts require administrator reconciliation.
 # Ignore lists remain character-specific. Restart required; default disabled.
 Social.AccountWideFriends = 0
+
+# CoA.RaidReset.CostGold
+# Flat gold fee for one personal or raid-and-bots reset at the Stormwind Raid Registrar.
+# Applies once to all eligible raid locks, across all difficulties. No locks means no charge.
+# Resets are unlimited. Set 0 for free resets. Applied on .reload config.
+CoA.RaidReset.CostGold = 10
+
+# Modules.ConfigDirectory
+# Optional directory for module config files. Empty uses the compiled config directory's modules folder.
+# Gameplay verification uses this to isolate its module configs from the installed server.
+Modules.ConfigDirectory = ""

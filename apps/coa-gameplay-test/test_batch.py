@@ -820,7 +820,7 @@ class BatchTests(unittest.TestCase):
         self.assertEqual(result['cases']['alpha']['status'], 'passed')
         self.assertEqual(self.summary('alpha')['world_cache']['mode'], 'reused')
 
-    def test_harness_overrides_cover_every_reserved_setting(self):
+    def test_harness_overrides_cover_every_required_reserved_setting(self):
         connections = {role: run.Connection('127.0.0.1', 3306, 'user', 'secret', f'source_{role}')
                        for role in run.DATABASE_SETTINGS}
         names = {role: f'coa_test_012345abcdef_{role}' for role in run.DATABASE_SETTINGS}
@@ -828,7 +828,7 @@ class BatchTests(unittest.TestCase):
         files = {'ready': self.path / 'ready.json', 'cases': self.path / 'cases'}
         overrides = run.harness_overrides(connections, names, self.path, self.path, private, '012345abcdef',
                                           '012345abcdef', files)
-        self.assertEqual(set(overrides), run.reserved_settings())
+        self.assertEqual(set(overrides), run.reserved_settings() - set(run.OPTIONAL_DATABASE_SETTINGS.values()))
         self.assertEqual({key: str(overrides[key]) for key in DEFAULT_DATABASES}, DEFAULT_DATABASES)
         tuned = batch.database_settings(SimpleNamespace(clock=batch.SIMULATED_CLOCK, character_db_workers=6))
         self.assertLessEqual(set(tuned), run.reserved_settings())

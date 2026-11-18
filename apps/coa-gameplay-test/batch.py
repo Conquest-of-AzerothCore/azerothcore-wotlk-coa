@@ -350,6 +350,7 @@ class Server:
                                               cache.metadata['world_id'] if cache else self.batch_id, files,
                                               batch.clock_settings) | batch.database_settings
             overrides['WorldServerPort'] = batch.claim_port(overrides['WorldServerPort'])
+            overrides['Modules.ConfigDirectory'] = str(batch.module_target.resolve())
             run.write_config(batch.source_config, generated, overrides)
             self.serve(run.server_command(batch.binary, generated), run.server_environment(overrides), cache)
         except run.ServerStillRunning as error:
@@ -775,9 +776,9 @@ class Batch:
         self.mysql = args.mysql.resolve(strict=True)
         self.dump = args.mysqldump.resolve(strict=True)
         config = run.read_config(self.source_config)
-        self.connections = run.source_connections(config, args.database_client_config)
-        self.data_dir = run.data_directory(config, self.binary)
         self.module_source = args.modules_config_dir or self.source_config.parent / 'modules'
+        self.connections = run.source_connections(config, args.database_client_config, self.module_source)
+        self.data_dir = run.data_directory(config, self.binary)
         self.module_target = args.server_modules_dir or output / 'configs' / 'modules'
         self.cache_root = args.world_cache_root.resolve()
         self.binary_sha256 = run.sha256(self.binary)

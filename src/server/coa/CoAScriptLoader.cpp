@@ -392,6 +392,7 @@ void AddSC_AscensionFireLordCache();
 void AddSC_AscensionTierTokenVendor();
 void AddSC_AscensionWarcraftRebornScrollShops();
 void AddSC_CoALevelBoostNpc();
+void AddSC_CoARaidResetNpc();
 void AddSC_AscensionFeatherOfAncients();
 void AddSC_AscensionVultureCultQuests();
 void AddSC_AscensionCaravanCarts();
@@ -702,6 +703,7 @@ void AddCoAScripts()
     AddSC_AscensionTierTokenVendor();
     AddSC_AscensionWarcraftRebornScrollShops();
     AddSC_CoALevelBoostNpc();
+    AddSC_CoARaidResetNpc();
     AddSC_AscensionFeatherOfAncients();
     AddSC_AscensionVultureCultQuests();
     AddSC_AscensionCaravanCarts();
