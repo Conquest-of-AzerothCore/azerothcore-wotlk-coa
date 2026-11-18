@@ -1099,6 +1099,16 @@ CrowsCache.GoldenMarksOfWar = "10 10"
 #        Default:     400
 
 CrowsCache.BazaarTokens = 400
+
+#
+#    CrowsCache.WallRange
+#        Description: Yards around a Crow's Cache (chest, carrier or dropped cache) in which a
+#                     Mercenary for Hire! player and a player without it cannot attack, heal or
+#                     buff each other, also when grouped. Applies when either of the two is in range.
+#                     0 = no wall. Maximum 500.
+#        Default:     100
+
+CrowsCache.WallRange = 100
 CrowsCache.X = -7831
 CrowsCache.Y = -3465
 CrowsCache.Z = 56.87

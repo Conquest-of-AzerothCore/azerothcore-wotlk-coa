@@ -352,7 +352,8 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'battleground-spirit-guide-queue-follows-range',
                      'battleground-spirit-guide-client-queue-request-10146',
                      'mercenary-battleground-team-faction', 'mercenary-war-mode-battleground',
-                     'high-risk-challenge-survives-battleground', 'mercenary-wintergrasp-team-faction'}
+                     'high-risk-challenge-survives-battleground', 'mercenary-wintergrasp-team-faction',
+                     'crows-cache-mercenary-wall-12720'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)
 
 

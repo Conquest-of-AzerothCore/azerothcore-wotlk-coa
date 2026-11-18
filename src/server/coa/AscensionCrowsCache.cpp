@@ -3,6 +3,7 @@
 #include "AscensionBloodforged.h"
 #include "AscensionBazaarTokenCap.h"
 #include "AscensionCrowsCachePolicy.h"
+#include "AscensionMercenary.h"
 #include "Chat.h"
 #include "Config.h"
 #include "Containers.h"
@@ -71,6 +72,7 @@ uint32 warning = 1800;
 std::array<uint32, 2> silverMarks = {SilverMarksMin, SilverMarksMax};
 std::array<uint32, 2> goldenMarks = {GoldenMarks, GoldenMarks};
 uint32 bazaarTokens = DefaultBazaarTokens;
+float wallRange = DefaultWallRange;
 uint64 nextStart = 0;
 Position location(-7831.0f, -3465.0f, 56.87f, 0.0f);
 Position silithus(-7203.1616f, 372.38562f, 25.355282f, 4.4326873f);
@@ -274,6 +276,40 @@ void UpdateCarrier(Player* player)
 bool Eligible(Player const* player)
 {
     return Eligible(player->GetLevel(), player->HasAura(HighRisk), player->HasAura(Mercenary), player->IsAlive());
+}
+
+bool NearCache(WorldObject const* object)
+{
+    return std::any_of(events.begin(), events.end(), [object](auto const& row)
+    {
+        Event const& event = row.second;
+        return WallPhase(event.phase) && event.map == object->GetMapId()
+            && object->GetExactDist(&event.position) <= wallRange;
+    });
+}
+
+bool Walled(Unit const* first, Unit const* second)
+{
+    if (!enabled || wallRange <= 0.0f || !first || !second)
+        return false;
+    Player const* firstPlayer = first->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player const* secondPlayer = second->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!firstPlayer || !secondPlayer || firstPlayer == secondPlayer)
+        return false;
+    bool const firstMercenary = AscensionMercenary::Active(firstPlayer);
+    bool const secondMercenary = AscensionMercenary::Active(secondPlayer);
+    if (firstMercenary == secondMercenary)
+        return false;
+    std::lock_guard lock(mutex);
+    return Walled(firstMercenary, secondMercenary, NearCache(first) || NearCache(second));
+}
+
+void TrackCarrier(Player const* player)
+{
+    for (auto& [id, event] : events)
+        if (event.phase == Phase::Carried && event.carrier == player->GetGUID().GetCounter()
+            && event.map == player->GetMapId())
+            event.position.Relocate(player);
 }
 
 Event* Find(GameObject const* object)
@@ -647,6 +683,7 @@ public:
         if (!enabled)
             return;
         bazaarTokens = sConfigMgr->GetOption<uint32>("CrowsCache.BazaarTokens", DefaultBazaarTokens);
+        wallRange = std::clamp(sConfigMgr->GetOption<float>("CrowsCache.WallRange", DefaultWallRange), 0.0f, 500.0f);
         if (!ReadMarkRange("CrowsCache.SilverMarksOfWar", silverMarks)
             || !ReadMarkRange("CrowsCache.GoldenMarksOfWar", goldenMarks))
         {
@@ -716,7 +753,10 @@ public:
             Spawn(map, event);
         for (auto const& reference : map->GetPlayers())
             if (Player* player = reference.GetSource())
+            {
                 UpdateCarrier(player);
+                TrackCarrier(player);
+            }
     }
 };
 
@@ -835,12 +875,33 @@ public:
     }
 };
 
-class Damage final : public UnitScript
+class Combat final : public UnitScript
 {
 public:
-    Damage() : UnitScript("crows_cache_damage", true, {UNITHOOK_ON_DAMAGE}) { }
-    void OnDamage(Unit*, Unit* victim, uint32& damage) override
+    Combat() : UnitScript("crows_cache_damage", true, {UNITHOOK_ON_DAMAGE, UNITHOOK_CAN_UNIT_ATTACK,
+        UNITHOOK_CAN_UNIT_ASSIST, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK}) { }
+    bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const*) override
     {
+        return !Walled(attacker, target);
+    }
+    bool CanUnitAssist(Unit const* assister, Unit const* target, SpellInfo const*) override
+    {
+        return !Walled(assister, target);
+    }
+    void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const*) override
+    {
+        if (Walled(healer, target))
+            heal = 0;
+    }
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const*) override
+    {
+        if (Walled(attacker, target))
+            damage = 0;
+    }
+    void OnDamage(Unit* attacker, Unit* victim, uint32& damage) override
+    {
+        if (Walled(attacker, victim))
+            damage = 0;
         if (!InterruptOpening(false, damage))
             return;
         Spell* spell = victim->GetCurrentSpell(CURRENT_GENERIC_SPELL);
@@ -1038,7 +1099,7 @@ void AddSC_AscensionCrowsCache()
     new CrowsCache::Chest();
     RegisterSpellScript(CrowsCache::Opening);
     new CrowsCache::Casts();
-    new CrowsCache::Damage();
+    new CrowsCache::Combat();
     new CrowsCache::Cache();
     new CrowsCache::Packets();
     new CrowsCache::Commands();
