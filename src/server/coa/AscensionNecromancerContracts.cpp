@@ -20,6 +20,7 @@ enum RangeIndex : uint32
 {
     SPELL_RANGE_THIRTY_YARDS = 4
 };
+constexpr uint32 STANCE_GLOBAL_COOLDOWN_MS = 1500;
 constexpr std::array<uint32, 8> FLESH_TO_WORMS_RANKS = {500338, 501855, 501856, 501857,
                                                        501858, 501859, 501860, 501861};
 void GrantFleshToWormsPeriodicCrit(Unit* target, Aura* aura)
@@ -52,7 +53,7 @@ void ApplyContracts(SpellInfo* info)
         if (coefficient.id == info->Id)
             info->Effects[coefficient.effect].BonusMultiplier = 0.0f;
     if (info->Id == 504845)
-        info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+        info->ProcFlags |= PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG;
     if (info->Id == 570042)
     {
         info->Effects[EFFECT_2].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
@@ -212,6 +213,8 @@ void ApplyContracts(SpellInfo* info)
         dummy(0);
     if (id == 500982 || id == 500983 || id == 500985)
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
+    if (id == 500982 || id == 500983 || id == 500985 || id == 504692 || id == 504902)
+        info->StartRecoveryTime = STANCE_GLOBAL_COOLDOWN_MS;
     if (id == 500983)
     {
         dummy(0);
@@ -320,7 +323,7 @@ void ApplyContracts(SpellInfo* info)
         for (uint8 i = 1; i < MAX_SPELL_EFFECTS; ++i)
             info->Effects[i].Effect = 0;
     }
-    if (id == 504845 || id == 704860)
+    if (id == 704860)
     {
         info->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
         info->Effects[0].ApplyAuraName = SPELL_AURA_MOD_ROOT;
@@ -328,8 +331,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
         info->Effects[0].TargetB = SpellImplicitTargetInfo();
     }
-    if (id == 504845)
-        info->Effects[1].Effect = 0;
     if (id == 800043)
         info->Effects[1].Effect = info->Effects[2].Effect = 0;
     if (id == 500933)

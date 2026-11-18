@@ -1,6 +1,6 @@
 # 0011. Bonefreeze takes the damage interrupt outside the family contracts
 
-- Status: accepted
+- Status: superseded by [0082](0082-bonefreeze-breaks-on-the-stock-damage-cap.md)
 - Date: 2026-11-13
 
 ## Context
