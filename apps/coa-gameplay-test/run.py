@@ -88,7 +88,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'placement_audit_spawns', 'placement_audit_anomalies',
     'placement_audit_event_spawns',
     'loot_gear_item_level',
-    'position_x', 'position_y', 'position_z',
+    'position_x', 'position_y', 'position_z', 'object_scale',
     'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp', 'sent_visible_item',
     'level_scaling_choice',
     'spell_mod_mutants',

@@ -14695,7 +14695,8 @@ void Unit::RestoreDisplayId()
     }
 
     // no auras found - set modelid to default
-    SetDisplayId(GetNativeDisplayId());
+    SetDisplayId(GetNativeDisplayId(), GetNativeObjectScale());
+    RecalculateObjectScale();
 }
 
 void Unit::AddComboPoints(Unit* target, int8 count)
