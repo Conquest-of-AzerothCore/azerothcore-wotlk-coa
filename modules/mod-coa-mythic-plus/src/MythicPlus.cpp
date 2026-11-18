@@ -2076,6 +2076,8 @@ namespace
     constexpr uint32 MARK_VENDOR = 9414500;           // Mark of Triumph items; + slot group: Heroic Dungeon items
     constexpr uint32 TEXT_EDRIM = 9416000;
     constexpr uint32 TEXT_MARKUS = 9414500;
+    constexpr uint32 MARKUS_ICON_SIZE = 48;
+    constexpr uint32 MARKUS_ICON_RISE = 3;
     constexpr uint32 RANDOMIZE_COST = 10 * GOLD;
 
     char const* const SLOT_NAMES[17] = { "", "Head", "Neck", "Shoulders", "Back", "Chest", "Wrists", "Main Hand",
@@ -2086,9 +2088,9 @@ namespace
 
     // Ascension menus paint their own icon into the option text, hanging over the row's left edge (as the Destiny
     // Weaver menus do): |TInterface/ICONS/<icon>:<size>:<size>:<shift>:0|t|r<label>.
-    std::string Opt(char const* icon, std::string const& label, uint32 size = 40)
+    std::string Opt(char const* icon, std::string const& label, uint32 size = 40, uint32 rise = 0)
     {
-        return Acore::StringFormat("|TInterface/ICONS/{}:{}:{}:-{}:0|t|r{}", icon, size, size, size / 2 + 2, label);
+        return Acore::StringFormat("|TInterface/ICONS/{}:{}:{}:-{}:{}|t|r{}", icon, size, size, size / 2 + 2, rise, label);
     }
 
     std::string ItemOpt(ItemTemplate const* proto, std::string const& label)
@@ -2505,8 +2507,10 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         ClearGossipMenuFor(player);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt("pvecurrency-valor", "Mark of Triumph"), 2, 0);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt("pvecurrency-valor", "Heroic Dungeon Items"), 1, 0);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+            Opt("pvecurrency-valor", "|cffa335eeMark of Triumph|r", MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 2, 0);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+            Opt("pvecurrency-valor", "|cffa335eeHeroic Dungeon Items|r", MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 1, 0);
         SendGossipMenuFor(player, TEXT_MARKUS, creature->GetGUID());
         return true;
     }
@@ -2518,7 +2522,8 @@ public:
         {
             for (uint32 slot = 1; slot <= 16; ++slot)
                 if (VendorItemData const* items = sObjectMgr->GetNpcVendorItemList(MARK_VENDOR + slot); items && !items->Empty())
-                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt(SLOT_ICONS[slot], SLOT_NAMES[slot]), 2, slot);
+                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+                        Opt(SLOT_ICONS[slot], SLOT_NAMES[slot], MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 2, slot);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, Opt("Spell_Shadow_Teleport", "Back"), 3, 0);
             SendGossipMenuFor(player, TEXT_MARKUS, creature->GetGUID());
             return true;
