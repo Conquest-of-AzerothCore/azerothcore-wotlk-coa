@@ -178,12 +178,12 @@ public:
             {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_REMOVE_PLAYER_AT_LEAVE})
     { }
 
-    void OnBattlegroundAddPlayer(Battleground* /*battleground*/, Player* player) override
+    void OnBattlegroundAddPlayer(Battleground*, Player* player) override
     {
         RefreshOwnerLifts(player);
     }
 
-    void OnBattlegroundRemovePlayerAtLeave(Battleground* /*battleground*/, Player* player) override
+    void OnBattlegroundRemovePlayerAtLeave(Battleground*, Player* player) override
     {
         RemoveOwnerLifts(player);
     }
@@ -197,7 +197,7 @@ public:
             {PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_LOGOUT})
     { }
 
-    void OnPlayerLevelChanged(Player* player, uint8 /*oldLevel*/) override
+    void OnPlayerLevelChanged(Player* player, uint8) override
     {
         if (player->CustomData.Get<AppliedLift>(LiftKey))
             RefreshPlayerLift(player);
@@ -222,7 +222,7 @@ public:
             {PETHOOK_ON_INIT_STATS_FOR_LEVEL, PETHOOK_ON_PET_ADD_TO_WORLD})
     { }
 
-    void OnInitStatsForLevel(Guardian* guardian, uint8 /*petLevel*/) override
+    void OnInitStatsForLevel(Guardian* guardian, uint8) override
     {
         Pet* pet = guardian->ToPet();
         if (!pet)
