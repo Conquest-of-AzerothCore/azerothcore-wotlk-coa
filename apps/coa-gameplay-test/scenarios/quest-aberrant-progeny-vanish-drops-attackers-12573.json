@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "The True Heir of the Cains: the Aberrant Progeny sheds its attackers when it vanishes (#12573)",
+  "contract": "npc_coa_aberrant_progeny (161757) vanishes below 30% health: it turns invisible and unselectable and takes no damage while four copies (9300259) fight. It only stopped its own attack, so every unit already swinging at it kept that victim and went on hitting the invisible boss; the reporter's Necromancer minions did. Vanish now ends every attack aimed at it. The hero melees the Progeny, drops it below 30% and must no longer have it as attack victim, while it can no longer be attacked at all.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1928.89, "y": 1957.86, "z": 148.653, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 5, "class": 1, "level": 10, "allow_regeneration": false, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "progeny", "owner": "hero", "entry": 161757, "level": 7, "health": 100000, "reaction": 2, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "hero", "value": 1000000, "maximum": 1000000 },
+    { "action": "wait", "label": "Let the fixtures settle", "ms": 3000 },
+    { "action": "attack", "actor": "hero", "target": "progeny" },
+    { "action": "assert", "label": "CONTROL: the hero swings at the Progeny", "actor": "hero", "metric": "victim", "target": "progeny", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the Progeny can be attacked before it vanishes", "actor": "hero", "metric": "can_attack", "target": "progeny", "equals": 1 },
+    { "action": "set_health_pct", "label": "Drop the Progeny below its 30% split threshold", "actor": "hero", "target": "progeny", "pct": 25 },
+    { "action": "assert", "label": "CONTROL: the Progeny vanished and cannot be targeted", "actor": "hero", "metric": "can_attack", "target": "progeny", "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the hero no longer attacks the invisible Progeny", "actor": "hero", "metric": "victim", "target": "progeny", "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The hero does not pick the hidden Progeny up again", "actor": "hero", "metric": "victim", "target": "progeny", "equals": 0 },
+    { "action": "assert", "label": "The Progeny survives its vanish", "actor": "progeny", "metric": "alive", "equals": 1 }
+  ]
+}
