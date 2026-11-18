@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Crow's Cache: next to the cache Mercenaries and other players cannot attack or heal each other",
-  "contract": "Issue #12720. Within CrowsCache.WallRange (100 yards) of a Crow's Cache, a Mercenary for Hire! player and a player without it cannot attack, heal or buff each other, also when grouped; Mercenaries keep fighting each other, and beyond that range Mercenary rules are unchanged. An Undead High-Risk Mercenary priest, an Orc High-Risk warrior without Mercenary for Hire! grouped with the priest as its escort, and an Orc High-Risk Mercenary warrior hunting them start in Elwynn Forest, where no cache of this or an earlier case can be near. Controls there: the hunter and the escort can attack each other, the two Mercenaries can attack each other, the priest's Lesser Heal (2050) lands on the escort, and the escort's Devotion Aura (465, a raid area aura) reaches the priest. They move to the Thousand Needles cache point and the chest appears: there the hunter and the escort cannot attack each other while the two Mercenaries still can, the Lesser Heal on the escort is refused and heals nothing, and Prayer of Healing (596) heals the priest but not the escort in its party. The escort's Devotion Aura leaves the priest and stays off while the escort keeps it. Back in Elwynn Forest attacks and the heal work again. A player outside Mercenary mode cannot heal a Mercenary anywhere because Mercenaries are free-for-all flagged, so that direction needs no cache. Nothing is probabilistic: attack permission is read from the native target check and heals are counted from combat packets on a half-health target. Pets and effects already ticking when a player enters the range are not covered here. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 with released Heroic Bloodforged rewards and automatic cycles deferred.",
+  "contract": "Issue #12720. Within CrowsCache.WallRange (100 yards) of a Crow's Cache, a Mercenary for Hire! player and a player without it cannot attack, heal or buff each other, also when grouped; Mercenaries keep fighting each other, and beyond that range Mercenary rules are unchanged. An Undead High-Risk Mercenary priest, an Orc High-Risk warrior without Mercenary for Hire! grouped with the priest as its escort, and an Orc High-Risk Mercenary warrior hunting them start in Elwynn Forest, where no cache of this or an earlier case can be near. Controls there: the hunter and the escort can attack each other, the two Mercenaries can attack each other, the priest's Lesser Heal (2050) lands on the escort, and the escort's Devotion Aura (465, a raid area aura) reaches the priest. They move to the Thousand Needles cache point and the chest appears: there the hunter and the escort cannot attack each other while the two Mercenaries still can, the Lesser Heal on the escort is refused and heals nothing, and Prayer of Healing (596) heals the priest but not the escort in its party. The escort's Devotion Aura leaves the priest and stays off while the escort keeps it. Prayer of Healing also has its control in Elwynn Forest, where it heals the escort. With the cache still standing, 300 yards away from it in Thousand Needles the hunter and the escort can attack each other again and the Devotion Aura returns, so the distance decides and not the map. Back in Elwynn Forest attacks and the heal work again. A player outside Mercenary mode cannot heal a Mercenary anywhere because Mercenaries are free-for-all flagged, so that direction needs no cache. Nothing is probabilistic: attack permission is read from the native target check and heals are counted from combat packets on a half-health target. Pets and effects already ticking when a player enters the range are not covered here. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 with released Heroic Bloodforged rewards and automatic cycles deferred.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -236,6 +236,28 @@
       "within_ms": 4000
     },
     {
+      "action": "set_health",
+      "actor": "escort",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 596,
+      "target": "merc"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a cache Prayer of Healing heals the escort in the priest's party",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 596,
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
       "action": "teleport",
       "actor": "merc",
       "map": 1,
@@ -395,6 +417,12 @@
       "value": 50000
     },
     {
+      "action": "set_health",
+      "actor": "escort",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
       "action": "cast",
       "actor": "merc",
       "spell": 596,
@@ -407,17 +435,81 @@
       "metric": "spell_heal_count",
       "spell": 596,
       "target": "merc",
-      "equals": 1,
+      "equals": 2,
       "within_ms": 6000
     },
     {
       "action": "assert",
-      "label": "but skips the escort in its party",
+      "label": "but skips the injured escort in its party",
       "actor": "merc",
       "metric": "spell_heal_count",
       "spell": 596,
       "target": "escort",
-      "equals": 0
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "merc",
+      "map": 1,
+      "x": -5505.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 1,
+      "x": -5505.16,
+      "y": -3901.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "escort",
+      "map": 1,
+      "x": -5505.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Let all three stand 300 yards from the cache, still in Thousand Needles",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "They stand together",
+      "actor": "merc",
+      "metric": "distance",
+      "target": "escort",
+      "max": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "300 yards from the cache, on the same map, a Mercenary can attack the escort again",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and the escort can attack back",
+      "actor": "escort",
+      "metric": "can_attack",
+      "target": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the escort's Devotion Aura reaches the Mercenary again while the cache still stands",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 1,
+      "within_ms": 5000
     },
     {
       "action": "teleport",
