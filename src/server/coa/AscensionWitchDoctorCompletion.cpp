@@ -247,6 +247,12 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
         info->Effects[EFFECT_0].MiscValue == SPELLMOD_EFFECT3)
         info->Effects[EFFECT_0].SpellClassMask = flag96(512, 0, 0);
+    if (id == Seeker && info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+        info->Effects[EFFECT_0].MiscValue == SPELLMOD_COST)
+    {
+        info->Effects[EFFECT_0].SpellClassMask[0] |= 128;
+        info->Effects[EFFECT_0].SpellClassMask[1] |= 1048576;
+    }
     if (id == Mimic && info->Effects[EFFECT_2].Effect == SPELL_EFFECT_SUMMON)
         info->Effects[EFFECT_2].BasePoints = 1;
     if (Family(info, 0, 4))

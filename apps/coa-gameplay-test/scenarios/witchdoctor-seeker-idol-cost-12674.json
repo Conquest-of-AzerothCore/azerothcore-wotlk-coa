@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Seeker reduces the mana cost of every Idol, including Cleansing and Spirit Link (#12674)",
+  "contract": [
+    "Report #12674: the Witch Doctor talent Seeker (705880) reads 'Reduces the mana cost of your Wards, Idols, and",
+    "Effigies by 20%'. Its only effect is SPELL_AURA_ADD_PCT_MODIFIER / SPELLMOD_COST -20 with class mask (0x2000, 0, 0),",
+    "which covers the Serene, Dark, Jungle and Swift Idols, the Healing Ward and the Cursed Effigy but not the",
+    "Cleansing Idol 504840 (mask (0, 0x100000, 0)) or the Spirit Link Idol 706369 (mask (0x80, 0, 0)), whose costs",
+    "Seeker left unchanged. The mask now also carries 0x80 in word 0 and 0x100000 in word 1; the only other",
+    "family-19 spell with either bit is Spirit Eclipse 802717, which costs no mana. Expected: each idol costs 80% of",
+    "its cost before the talent (truncated to whole mana), the Serene Idol as the control that already worked."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wd",
+      "race": 8,
+      "class": 13,
+      "level": 46
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 504840
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 706369
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 504759
+    },
+    {
+      "action": "snapshot",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 504840,
+      "save_as": "before_504840",
+      "label": "Cleansing Idol cost before Seeker"
+    },
+    {
+      "action": "snapshot",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 706369,
+      "save_as": "before_706369",
+      "label": "Spirit Link Idol cost before Seeker"
+    },
+    {
+      "action": "snapshot",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 504759,
+      "save_as": "before_504759",
+      "label": "Serene Idol cost before Seeker"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 504840,
+      "min": 20,
+      "label": "SETUP: Cleansing Idol costs mana"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 706369,
+      "min": 20,
+      "label": "SETUP: Spirit Link Idol costs mana"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 504759,
+      "min": 20,
+      "label": "SETUP: Serene Idol costs mana"
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 705880
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 705880,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "SETUP: the Seeker passive is active"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 504759,
+      "ratio_to": "before_504759",
+      "min": 0.75,
+      "max": 0.81,
+      "label": "CONTROL: Seeker reduces the Serene Idol's cost by 20%"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 504840,
+      "ratio_to": "before_504840",
+      "min": 0.75,
+      "max": 0.81,
+      "label": "FIX: Seeker reduces the Cleansing Idol's cost by 20%"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_power_cost",
+      "spell": 706369,
+      "ratio_to": "before_706369",
+      "min": 0.75,
+      "max": 0.81,
+      "label": "FIX: Seeker reduces the Spirit Link Idol's cost by 20%"
+    }
+  ]
+}
