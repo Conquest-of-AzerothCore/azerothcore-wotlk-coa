@@ -14241,6 +14241,9 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, b
     }
     if (previous != replacement && IsInWorld() && HasActiveSpell(original))
     {
+        LOG_ERROR("server", "COA-PROBE-SWAP guid={} original={} previous={} replacement={} previousShared={} "
+            "sharedReplacement={}", GetGUID().GetCounter(), original, previous, replacement, previousShared,
+            sharedReplacement);
         if (sharedReplacement)
         {
             sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, replacement, false);
