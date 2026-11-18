@@ -2922,6 +2922,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
                             Acore::UnitListSearcher<Acore::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
@@ -2930,6 +2934,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
                             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:

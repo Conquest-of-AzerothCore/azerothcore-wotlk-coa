@@ -269,14 +269,10 @@ void UpdateCarrier(Player* player)
             player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
             player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
             player->CastSpell(player, Spite, true);
-            player->UpdateSpeed(MOVE_RUN, true);
         }
     }
     else if (player->HasAura(Spite))
-    {
         player->RemoveAurasDueToSpell(Spite);
-        player->UpdateSpeed(MOVE_RUN, true);
-    }
 }
 
 bool AppliesAura(SpellInfo const* info, AuraType first, AuraType second)
@@ -983,7 +979,7 @@ public:
         if (!Carries(player))
             return;
         Unit const* original = spell->GetOriginalCaster();
-        if (hides || RefuseMovement(true, moves, original && original != player))
+        if (hides || RefuseMovement(true, moves, spell->IsTriggered() || (original && original != player)))
             result = SPELL_FAILED_NOT_HERE;
     }
 };
@@ -993,7 +989,7 @@ class Combat final : public UnitScript
 public:
     Combat() : UnitScript("crows_cache_damage", true, {UNITHOOK_ON_DAMAGE, UNITHOOK_CAN_UNIT_ATTACK,
         UNITHOOK_CAN_UNIT_ASSIST, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
-        UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_ON_UPDATE_RUN_SPEED}) { }
+        UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE}) { }
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
         Player* player = unit->ToPlayer();
@@ -1021,14 +1017,6 @@ public:
                 if (ModeDrops(true, carrier->HasAura(HighRisk), carrier->HasAura(Mercenary)))
                     Drop(carrier, DropReason::LeftMode);
             });
-    }
-    void OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus) override
-    {
-        if (!unit->IsMounted() || !unit->HasAura(Spite))
-            return;
-        mainSpeedMod = 0;
-        stackBonus = 1.0f;
-        nonStackBonus = 1.0f;
     }
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const*) override
     {
@@ -1089,6 +1077,17 @@ public:
             if (item && item->GetEntry() == CacheItem)
             {
                 Open(player, item);
+                return false;
+            }
+        }
+        if (packet.GetOpcode() == CMSG_SUMMON_RESPONSE || packet.GetOpcode() == CMSG_ACTIVATETAXI
+            || packet.GetOpcode() == CMSG_ACTIVATETAXIEXPRESS)
+        {
+            std::lock_guard lock(mutex);
+            if (Carries(player))
+            {
+                ChatHandler(session).SendSysMessage(
+                    "You cannot be summoned or take a flight while carrying Crow's Cache.");
                 return false;
             }
         }
