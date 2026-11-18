@@ -134,6 +134,19 @@ public:
     }
 };
 
+class reaper_redshade_casts : public AllSpellScript
+{
+public:
+    reaper_redshade_casts() : AllSpellScript("reaper_redshade_casts", {ALLSPELLHOOK_ON_CAST}) { }
+
+    void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
+    {
+        if (caster->IsPlayer() && caster->getClass() == CLASS_REAPER && !spell->IsTriggered() &&
+            info->Id == SPELL_BLOODSHATTER)
+            caster->RemoveAurasDueToSpell(SPELL_BLOODSHATTER_DUMMY);
+    }
+};
+
 class reaper_decimation_events : public UnitScript
 {
 public:
@@ -258,6 +271,7 @@ class spell_ascension_reaper_redshade_reap : public SpellScript
 void AddSC_AscensionReaperRedshade()
 {
     new reaper_decimation_casts();
+    new reaper_redshade_casts();
     new reaper_decimation_events();
     RegisterSpellScript(aura_ascension_reaper_decimation_counter);
     RegisterSpellScript(aura_ascension_reaper_redshade_spells);
