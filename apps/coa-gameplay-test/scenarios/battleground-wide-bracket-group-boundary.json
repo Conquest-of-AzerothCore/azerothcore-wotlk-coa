@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "A group cannot queue a wide battleground bracket across a bracket boundary",
-  "contract": "With the default wide brackets, a group of a level 29 and a level 30 Alliance player is refused when its leader queues it for Warsong Gulch, because the members fall in the 10-29 and 30-49 brackets. Neither member is queued or enters the battleground, while a lone level 29 Horde player who queues at the same time is queued normally and, with no other player in its bracket, is not invited.",
+  "contract": "With the default wide brackets, a group of a level 29 and a level 30 Alliance player is refused when its leader queues it for Warsong Gulch, because the members fall in the 10-29 and 30-49 brackets. Neither member is queued or enters the battleground. A Horde group of a level 30 and a level 49 player, who share the 30-49 bracket although stock brackets would split them, is queued as a group. Meanwhile a lone level 29 Horde player who queues at the same time is queued normally and, with no Alliance player in its bracket, is not invited.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -27,6 +27,18 @@
       "race": 2,
       "class": 1,
       "level": 29
+    },
+    {
+      "id": "low",
+      "race": 2,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "high",
+      "race": 2,
+      "class": 1,
+      "level": 49
     }
   ],
   "steps": [
@@ -38,6 +50,11 @@
       "action": "group",
       "actor": "leader",
       "target": "member"
+    },
+    {
+      "action": "group",
+      "actor": "low",
+      "target": "high"
     },
     {
       "action": "wait",
@@ -84,6 +101,26 @@
       ]
     },
     {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
       "action": "wait",
       "ms": 20000
     },
@@ -105,6 +142,20 @@
       "action": "assert",
       "label": "lone level 29 is queued",
       "actor": "horde",
+      "metric": "battleground_queued",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "level 30 leader of a 30-49 group is queued",
+      "actor": "low",
+      "metric": "battleground_queued",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "level 49 member of a 30-49 group is queued",
+      "actor": "high",
       "metric": "battleground_queued",
       "equals": 1
     },

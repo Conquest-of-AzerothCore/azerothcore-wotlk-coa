@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Low-level battleground players are lifted to their bracket top while inside",
-  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket gain the difference between the level 29 and level 12 rows of player_class_stats and player_race_stats: Warrior Strength +24, Agility +15, Stamina +22, Intellect +3, Spirit +7 and maximum health +459 (base health +239, 22 Stamina x 10); class 12 Strength +14, Agility +27, Stamina +14, Intellect +4, Spirit +7 and maximum health +394 (base health +254, 14 Stamina x 10). A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes the lift instead of stacking it. Leaving through the leave packet or by teleport removes the lift and clamps health to the restored maximum.",
+  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket gain the difference between the level 29 and level 12 rows of player_class_stats and player_race_stats: Warrior Strength +24, Agility +15, Stamina +22, Intellect +3, Spirit +7 and maximum health +459 (base health +239, 22 Stamina x 10); class 12 Strength +14, Agility +27, Stamina +14, Intellect +4, Spirit +7 and maximum health +394 (base health +254, 14 Stamina x 10). A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes the lift instead of stacking it and keeps the level-up fill at the lifted maximum health. Leaving through the leave packet or by teleport removes the lift and clamps health to the restored maximum.",
   "timeout_ms": 240000,
   "location": {
     "map": 0,
@@ -483,6 +483,14 @@
       "relative_to": "war_stat2",
       "equals": 22,
       "stat": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Leveling to 13 inside leaves the Warrior at the full lifted maximum health",
+      "actor": "war",
+      "metric": "health_pct",
+      "equals": 100,
       "within_ms": 5000
     },
     {
