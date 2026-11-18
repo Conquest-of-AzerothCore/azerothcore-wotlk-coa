@@ -439,6 +439,62 @@
     },
     {
       "action": "assert",
+      "label": "The client lists Reap rank 1 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 500357,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 2 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 504056,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 3 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 504057,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 4 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 504058,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 5 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 504557,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 6 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 505151,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client lists Reap rank 7 again",
+      "actor": "reaper",
+      "metric": "client_knows_spell",
+      "spell": 573302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
       "label": "The client lists Reap rank 8 again",
       "actor": "reaper",
       "metric": "client_knows_spell",

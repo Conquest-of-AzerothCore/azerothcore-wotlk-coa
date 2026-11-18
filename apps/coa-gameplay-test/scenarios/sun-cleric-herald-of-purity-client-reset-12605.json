@@ -10,8 +10,9 @@
     "button kept its full 8 sec (#12605, 132 hits without one visible reset). The reset now runs on the player's next",
     "update, after the cast. The cast loop of sun-cleric-herald-of-purity-justice-reset-9129 is kept at level 60: 270",
     "attempts every 1650 ms with two strikes per cast at 8%, where 54 casts complete without a reset and all 54 miss",
-    "every reset with probability about 0.012%. client_cooldown_clears counts clears that ended a cooldown the client",
-    "was still showing; a clear sent before the cast's SMSG_SPELL_GO never counts."
+    "every reset with probability about 0.012%. A clear sent before a cast's SMSG_SPELL_GO is undone by that GO, so",
+    "under the old order every cast a reset allowed reached the client while it still showed the 8 sec cooldown:",
+    "client_cooldown_blocked_casts counts those casts and must stay 0 while more than 54 casts complete."
   ],
   "timeout_ms": 600000,
   "players": [
@@ -3153,11 +3154,19 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: a reset reaches the client after the cast it resets, so the button is ready again",
+      "label": "A reset ended a cooldown the client was showing",
       "actor": "cleric",
       "metric": "client_cooldown_clears",
       "spell": 520359,
       "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: each reset reaches the client after its cast, so no cast meets a cooling button",
+      "actor": "cleric",
+      "metric": "client_cooldown_blocked_casts",
+      "spell": 520359,
+      "equals": 0
     }
   ]
 }

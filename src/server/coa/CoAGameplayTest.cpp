@@ -1158,6 +1158,7 @@ struct Actor
     std::vector<SpellCastEvent> spellCasts;
     std::map<uint32, ClientCooldown> clientCooldowns;
     std::map<uint32, uint32> clientCooldownClears;
+    std::map<uint32, uint32> clientCooldownBlockedCasts;
     std::vector<SpellDamageEvent> spellDamage;
     std::vector<SpellLogEvent> spellLogs;
     std::vector<SpellHealEvent> spellHeals;
@@ -1250,6 +1251,15 @@ uint32 ResolveLiveEntry(Player* player, ObjectGuid const& guid)
     return guid.GetEntry();
 }
 
+bool ClientCooldownReady(Actor const& actor, uint32 spell, uint64 now)
+{
+    uint32 const category = sSpellMgr->AssertSpellInfo(spell)->GetCategory();
+    for (auto const& [id, cooldown] : actor.clientCooldowns)
+        if (cooldown.endMs > now && (id == spell || (category && cooldown.category == category)))
+            return false;
+    return true;
+}
+
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
     if (packet.GetOpcode() != SMSG_SPELL_GO)
@@ -1264,9 +1274,13 @@ void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
     actor.spellCasts.push_back(event);
     if (event.caster != actor.guid || !actor.clientSpells.count(event.spell))
         return;
-    if (SpellInfo const* info = sSpellMgr->GetSpellInfo(event.spell))
-        if (uint32 duration = std::max(info->RecoveryTime, info->CategoryRecoveryTime))
-            actor.clientCooldowns[event.spell] = { event.atMs + duration, info->GetCategory() };
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(event.spell);
+    if (!info)
+        return;
+    if (!ClientCooldownReady(actor, event.spell, event.atMs))
+        ++actor.clientCooldownBlockedCasts[event.spell];
+    if (uint32 duration = std::max(info->RecoveryTime, info->CategoryRecoveryTime))
+        actor.clientCooldowns[event.spell] = { event.atMs + duration, info->GetCategory() };
 }
 
 void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
@@ -4180,7 +4194,7 @@ private:
             metric == "trainer_window_state" || metric == "trainer_window_ability" ||
             metric == "temporary_spell_replacement" || metric == "client_knows_spell" ||
             metric == "client_spellbook_copies" || metric == "client_cooldown_ready" ||
-            metric == "client_cooldown_clears")
+            metric == "client_cooldown_clears" || metric == "client_cooldown_blocked_casts")
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
         if (metric == "knows_spell")
             return player->HasSpell(spell);
@@ -4222,19 +4236,14 @@ private:
         if (metric == "client_knows_spell")
             return _actors.at(step.get<std::string>("actor")).clientSpells.count(spell) ? 1.0 : 0.0;
         if (metric == "client_cooldown_ready")
+            return ClientCooldownReady(_actors.at(step.get<std::string>("actor")), spell, GameNowMs()) ? 1.0 : 0.0;
+        if (metric == "client_cooldown_clears" || metric == "client_cooldown_blocked_casts")
         {
-            uint32 const category = sSpellMgr->AssertSpellInfo(spell)->GetCategory();
-            uint64 const now = GameNowMs();
-            for (auto const& [id, cooldown] : _actors.at(step.get<std::string>("actor")).clientCooldowns)
-                if (cooldown.endMs > now && (id == spell || (category && cooldown.category == category)))
-                    return 0.0;
-            return 1.0;
-        }
-        if (metric == "client_cooldown_clears")
-        {
-            auto const& clears = _actors.at(step.get<std::string>("actor")).clientCooldownClears;
-            auto const found = clears.find(spell);
-            return found == clears.end() ? 0.0 : double(found->second);
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto const& counts = metric == "client_cooldown_clears" ? actor.clientCooldownClears :
+                actor.clientCooldownBlockedCasts;
+            auto const found = counts.find(spell);
+            return found == counts.end() ? 0.0 : double(found->second);
         }
         if (metric == "client_spellbook_copies")
         {
