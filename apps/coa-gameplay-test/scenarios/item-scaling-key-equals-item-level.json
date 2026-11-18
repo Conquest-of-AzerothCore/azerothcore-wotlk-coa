@@ -20,6 +20,9 @@
     { "action": "assert", "label": "The looted armor stores the client key 10, its own item level", "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 10, "within_ms": 2000 },
     { "action": "assert", "label": "The owned armor is the authored item: required level 5, not the ladder row's 9", "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 5 },
     { "action": "assert", "label": "The owned armor keeps item level 10", "actor": "hero", "metric": "carried_item_level", "item": 17922, "equals": 10 },
-    { "action": "close_loot", "actor": "hero" }
+    { "action": "close_loot", "actor": "hero" },
+    { "action": "assert", "label": "SETUP: the fight is over, so equipment can change", "actor": "hero", "metric": "combat", "equals": 0, "within_ms": 10000 },
+    { "action": "equip", "actor": "hero", "item": 17922, "slot": 4 },
+    { "action": "assert", "label": "The level 8 looter equips the armor, as its required level 5 allows", "actor": "hero", "metric": "equipped_item", "slot": 4, "equals": 17922, "within_ms": 2000 }
   ]
 }

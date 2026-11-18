@@ -8,7 +8,7 @@
     "Cleansing Idol 504840 (mask (0, 0x100000, 0)) or the Spirit Link Idol 706369 (mask (0x80, 0, 0)), whose costs",
     "Seeker left unchanged. The mask now also carries 0x80 in word 0 and 0x100000 in word 1; the only other",
     "family-19 spell with either bit is Spirit Eclipse 802717, which costs no mana. Expected: each idol costs 80% of",
-    "its cost before the talent (truncated to whole mana), the Serene Idol as the control that already worked."
+    "its cost before the talent truncated to whole mana (Cleansing 281 -> 224, Spirit Link 33 -> 26), the Serene Idol (173 -> 138) as the control that already worked."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -69,24 +69,24 @@
       "actor": "wd",
       "metric": "spell_power_cost",
       "spell": 504840,
-      "min": 20,
-      "label": "SETUP: Cleansing Idol costs mana"
+      "label": "SETUP: Cleansing Idol costs 281 mana at level 46",
+      "equals": 281
     },
     {
       "action": "assert",
       "actor": "wd",
       "metric": "spell_power_cost",
       "spell": 706369,
-      "min": 20,
-      "label": "SETUP: Spirit Link Idol costs mana"
+      "label": "SETUP: Spirit Link Idol costs 33 mana at level 46",
+      "equals": 33
     },
     {
       "action": "assert",
       "actor": "wd",
       "metric": "spell_power_cost",
       "spell": 504759,
-      "min": 20,
-      "label": "SETUP: Serene Idol costs mana"
+      "label": "SETUP: Serene Idol costs 173 mana at level 46",
+      "equals": 173
     },
     {
       "action": "learn",
@@ -107,30 +107,24 @@
       "actor": "wd",
       "metric": "spell_power_cost",
       "spell": 504759,
-      "ratio_to": "before_504759",
-      "min": 0.75,
-      "max": 0.81,
-      "label": "CONTROL: Seeker reduces the Serene Idol's cost by 20%"
+      "label": "CONTROL: Seeker reduces the Serene Idol's cost by 20%",
+      "equals": 138
     },
     {
       "action": "assert",
       "actor": "wd",
       "metric": "spell_power_cost",
       "spell": 504840,
-      "ratio_to": "before_504840",
-      "min": 0.75,
-      "max": 0.81,
-      "label": "FIX: Seeker reduces the Cleansing Idol's cost by 20%"
+      "label": "FIX: Seeker reduces the Cleansing Idol's cost by 20%",
+      "equals": 224
     },
     {
       "action": "assert",
       "actor": "wd",
       "metric": "spell_power_cost",
       "spell": 706369,
-      "ratio_to": "before_706369",
-      "min": 0.75,
-      "max": 0.81,
-      "label": "FIX: Seeker reduces the Spirit Link Idol's cost by 20%"
+      "label": "FIX: Seeker reduces the Spirit Link Idol's cost by 20%",
+      "equals": 26
     }
   ]
 }
