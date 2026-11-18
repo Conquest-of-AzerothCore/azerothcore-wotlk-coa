@@ -6,7 +6,8 @@
     "Their per-player baselines are 192908 and 48639. Boss Normal values remain unchanged; Razorgore is 521444 per player.",
     "All four tiers use 1/1.44/1.88/2.32. These tests use 25 real player fixtures, independent of bot-weight configuration.",
     "Twenty-five players produce twenty-five shares; one remaining player produces ten shares for new creatures.",
-    "An already spawned creature keeps its health pool when the instance population shrinks."
+    "An already spawned creature keeps its health pool when the instance population shrinks.",
+    "The boss total permits one HP of rounding because the core health stat uses single-precision storage at these large pools."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -749,8 +750,9 @@
       "action": "assert",
       "actor": "boss25",
       "metric": "max_health",
-      "equals": 18771975,
-      "label": "25 counted players: boss25 uses the flex pool"
+      "label": "25 counted players: boss25 uses the flex pool",
+      "min": 18771974,
+      "max": 18771976
     },
     {
       "action": "assert",
