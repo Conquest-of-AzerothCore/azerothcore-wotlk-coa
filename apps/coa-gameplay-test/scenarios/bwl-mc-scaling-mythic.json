@@ -1,0 +1,1045 @@
+{
+  "schema": 2,
+  "name": "BWL: mythic bosses and trash share MC-style flex health",
+  "contract": [
+    "Realm tuning: BWL Normal Wyrmguard and Spellbinder health per player is 1.44x the MC Normal Molten Giant and Firelord.",
+    "Their per-player baselines are 192908 and 48639. Boss Normal values remain unchanged; Razorgore is 521444 per player.",
+    "All four tiers use 1/1.44/1.88/2.32. These tests use 25 real player fixtures, independent of bot-weight configuration.",
+    "Twenty-five players produce twenty-five shares; one remaining player produces ten shares for new creatures.",
+    "An already spawned creature keeps its health pool when the instance population shrinks."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "raider0",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider6",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider7",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider8",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider9",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider10",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider11",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider12",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider13",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider14",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider15",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider16",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider17",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider18",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider19",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider20",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider21",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider22",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider23",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider24",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider1"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider2"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider3"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider4"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider5"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider6"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider7"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider8"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider9"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider10"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider11"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider12"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider13"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider14"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider15"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider16"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider17"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider18"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider19"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider20"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider21"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider22"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider23"
+    },
+    {
+      "action": "group",
+      "actor": "raider0",
+      "target": "raider24"
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider0",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_health",
+      "actor": "raider0",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider0",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider1",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider1",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider2",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider2",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider3",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider3",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider4",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider4",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider5",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider5",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider6",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider6",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider7",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider7",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider8",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider8",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider9",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider9",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider10",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider10",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider11",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider11",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider12",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider12",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider13",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider13",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider14",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider14",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider15",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider15",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider16",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider16",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider17",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider17",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider18",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider18",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider19",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider19",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider20",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider20",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider21",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider21",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider22",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider22",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider23",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider23",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "raider24",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider24",
+      "map": 469,
+      "x": -7672.46,
+      "y": -1107.19,
+      "z": 396.65,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "raider0",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "raider0",
+      "entry": 12460,
+      "as": "guard25",
+      "distance": 4,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "guard25",
+      "metric": "max_health",
+      "equals": 9066675,
+      "label": "25 counted players: guard25 uses the flex pool"
+    },
+    {
+      "action": "summon",
+      "actor": "raider0",
+      "entry": 12457,
+      "as": "caster25",
+      "distance": 4,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "caster25",
+      "metric": "max_health",
+      "equals": 2286025,
+      "label": "25 counted players: caster25 uses the flex pool"
+    },
+    {
+      "action": "summon",
+      "actor": "raider0",
+      "entry": 12435,
+      "as": "boss25",
+      "distance": 4,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "boss25",
+      "metric": "max_health",
+      "equals": 24507875,
+      "label": "25 counted players: boss25 uses the flex pool"
+    },
+    {
+      "action": "assert",
+      "actor": "raider0",
+      "metric": "nearby_creature_template",
+      "entry": 12460,
+      "equals": 212460,
+      "label": "The trash uses the selected difficulty template"
+    },
+    {
+      "action": "teleport",
+      "actor": "raider1",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider2",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider3",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider4",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider5",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider6",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider7",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider8",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider9",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider10",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider11",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider12",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider13",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider14",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider15",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider16",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider17",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider18",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider19",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider20",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider21",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider22",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider23",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider24",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "raider0",
+      "entry": 12460,
+      "as": "guard10",
+      "distance": 4,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "guard10",
+      "metric": "max_health",
+      "equals": 3626670,
+      "label": "One remaining raider: guard10 uses the ten-player floor"
+    },
+    {
+      "action": "summon",
+      "actor": "raider0",
+      "entry": 12457,
+      "as": "caster10",
+      "distance": 4,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "caster10",
+      "metric": "max_health",
+      "equals": 914410,
+      "label": "One remaining raider: caster10 uses the ten-player floor"
+    },
+    {
+      "action": "assert",
+      "actor": "guard25",
+      "metric": "max_health",
+      "equals": 9066675,
+      "label": "An already spawned creature keeps its original pool after players leave"
+    }
+  ]
+}
