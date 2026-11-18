@@ -37,8 +37,9 @@ unchanged, and so is ADR 0289's rule for Keeping the Oath: a held Oath counts th
 
 ## Consequences
 
-One tick of 803880 (rank 9, level 60, crit forced to 0), against the 191 no-Oath tick measured under ADR 0289. All
-values are computed (c). None was measured on this change before it was written.
+One tick of 803880 (rank 9, level 60, crit forced to 0), against the 191 no-Oath tick measured under ADR 0289. The
+ADR 1010 column holds predictions, all computed (c); none was measured on this change before it was written. In the
+ADR 0289 column, (m) marks a value measured under ADR 0289 and (c) a value it computed.
 
 | Oath(s) at cast | ADR 0289 | ADR 1010 |
 |---|---:|---:|

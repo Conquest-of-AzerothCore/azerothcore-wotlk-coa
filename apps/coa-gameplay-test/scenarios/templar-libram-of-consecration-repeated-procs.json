@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Libram of Consecration adds its Holy damage to every damaging ability and Zealotry hit under one buff, never to auto attacks",
-  "contract": "Libram of Consecration 803893: \"causing damaging abilities to deal an additional Holy damage to your target and 4 nearby enemies for $d\" (804148). #12670 reports a 1 s internal cooldown; spell_proc 803893 has Cooldown 0 and the script no timer. The owner ruled on 2026-11-18 that Zealotry 801450 hits trigger it, as on live (256 of 281 isolated Zealotry hits), and that auto attacks do not (0 of 160 swings) (ADR 1011). One level 60 Templar, hit and expertise forced, dual wields Frostmane Club 2259 and Ancient Bone Mace 30754 (Zealotry needs an off-hand weapon); resistance removed by 823764. Arm cleave: one Libram buff, five Holy Cleave 573049 casts at one dummy, spaced 1300 ms because Holy Cleave's own global cooldown is 1250 ms (asserted); five hits give five 804148 hits. Arm zealotry, same buff: five direct Zealotry casts 1000 ms apart (no global cooldown) give five 804148 hits. Arm swing: Libram read again, the Level 10 passive 92108 learned, auto attack for 9 s: each off-hand swing casts Zealotry inside the Templar event guard, and 804148 hits equal Zealotry hits, so the Zealotry hits proc it and the swings never do. The dummies stand 40 yd apart, beyond 804148's 5 yd jump radius and Holy Cleave's second target. No step is probabilistic: 803893 and 92108 proc at 100%, hit and expertise are forced.",
+  "contract": "Libram of Consecration 803893: \"causing damaging abilities to deal an additional Holy damage to your target and 4 nearby enemies for $d\" (804148). #12670 reports a 1 s internal cooldown; spell_proc 803893 has Cooldown 0 and the script no timer. The owner ruled on 2026-11-18 that Zealotry 801450 hits trigger it, as on live (256 of 281 isolated Zealotry hits), and that auto attacks do not (0 of 160 swings) (ADR 1011). One level 60 Templar, hit and expertise forced, dual wields Frostmane Club 2259 and Ancient Bone Mace 30754 (Zealotry needs an off-hand weapon); resistance removed by 823764. Arm cleave: one Libram buff, five Holy Cleave 573049 casts at one dummy, spaced 1300 ms because Holy Cleave's own global cooldown is 1250 ms (asserted); five hits give five 804148 hits. Arm zealotry, same buff: five direct Zealotry casts 1000 ms apart (no global cooldown) give five 804148 hits. Arm no zealotry swing: Libram removed (absence asserted) and read again, 92108 not learned, auto attack with both hands for 9 s: main- and off-hand swings land and give zero 804148 hits, so auto attacks never proc it. Arm swing: Libram removed and read again, the Level 10 passive 92108 learned, auto attack for 9 s: each off-hand swing casts Zealotry inside the Templar event guard, and 804148 hits equal Zealotry hits, so those nested Zealotry hits proc it. The dummies stand 40 yd apart, beyond 804148's 5 yd jump radius and Holy Cleave's second target. No step is probabilistic: 803893 and 92108 proc at 100%, hit and expertise are forced.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -446,6 +446,108 @@
       "max": 3.5
     },
     {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 803893,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: the earlier Libram buff is removed before the recast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: Libram of Consecration is read again by this cast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "save_as": "plain_main_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "save_as": "plain_off_before"
+    },
+    {
+      "action": "attack",
+      "actor": "templar",
+      "target": "d_swing"
+    },
+    {
+      "action": "wait",
+      "label": "no zealotry swing: auto attack with both hands, 92108 not learned",
+      "ms": 9000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "templar"
+    },
+    {
+      "action": "wait",
+      "label": "no zealotry swing: let the last swing resolve",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: main-hand auto attacks hit the dummy",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "relative_to": "plain_main_before",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: off-hand auto attacks hit the dummy",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "relative_to": "plain_off_before",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: without 92108 no Zealotry fires",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "d_swing",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: auto attacks of both hands under the Libram buff never deal its extra Holy damage",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 804148,
+      "target": "d_swing",
+      "equals": 0
+    },
+    {
       "action": "learn",
       "actor": "templar",
       "spell": 92108
@@ -456,13 +558,27 @@
       "spell": 803893
     },
     {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 803893,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "swing: the earlier Libram buff is removed before the recast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 0
+    },
+    {
       "action": "cast",
       "actor": "templar",
       "spell": 803893
     },
     {
       "action": "assert",
-      "label": "swing: Libram of Consecration is read again",
+      "label": "swing: Libram of Consecration is read again by this cast",
       "actor": "templar",
       "metric": "aura",
       "spell": 803893,
@@ -515,7 +631,7 @@
     },
     {
       "action": "assert",
-      "label": "swing: each Zealotry from an off-hand swing dealt the Libram extra Holy damage, and no auto attack did",
+      "label": "swing: each Zealotry from an off-hand swing dealt the Libram extra Holy damage; the arm without 92108 dealt none, so the swings themselves never do",
       "actor": "templar",
       "metric": "spell_damage_count",
       "spell": 804148,

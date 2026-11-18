@@ -40,16 +40,20 @@ therefore adds no recursion.
 
 ## Consequences
 
-- Regression: `templar-libram-of-consecration-repeated-procs`, all under one Libram buff:
-  - five Holy Cleave 573049 hits give five 804148 hits;
-  - five direct Zealotry casts 1000 ms apart give five;
-  - with 92108 and auto attack, the 804148 hits equal the Zealotry hits from off-hand swings, and main-hand swings
-    add none.
+- Regression: `templar-libram-of-consecration-repeated-procs`:
+  - under one Libram buff, five Holy Cleave 573049 hits give five 804148 hits;
+  - under the same buff, five direct Zealotry casts 1000 ms apart give five;
+  - under a fresh buff (the old one removed and its absence asserted), auto attack with both hands and without
+    92108 gives no 804148 hit;
+  - under another fresh buff, with 92108 and auto attack, the 804148 hits equal the Zealotry hits from off-hand
+    swings.
 - The scenario spaces the Holy Cleave arm 1300 ms apart. Holy Cleave's own global cooldown is 1250 ms
   (StartRecoveryTime 1250, category 133, melee class, so `Spell::TriggerGlobalCooldown` applies no haste), and the
-  scenario asserts it. A second Holy Cleave submitted 1000 ms after the first is therefore refused by the global
-  cooldown. This is engine behaviour, not a Libram cooldown, and is recorded as an observation for #12670. It was not
-  measured on a client.
+  scenario asserts it. A second Holy Cleave submitted 1000 ms after the first therefore cannot execute immediately.
+  With `SpellQueue.Enabled = 1` and `SpellQueue.Window = 400` in `worldserver.conf.dist` it may instead be queued
+  until the global cooldown ends; the scenario waits 1300 ms and does not establish whether it is refused or queued.
+  This is engine behaviour, not a Libram cooldown, and is recorded as an observation for #12670. It was not measured
+  on a client.
 - Zealotry from Sermon repeats, Condemnation 706325, One With The Light 504807 and Oath: Vindication also reaches
   the Libram now. The regression covers only the direct cast and the 92108 path.
 - Not changed: other derived Templar damage, such as Scourgebane 801832, which live logs did not single out.
