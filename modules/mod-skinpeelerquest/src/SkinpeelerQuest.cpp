@@ -66,9 +66,6 @@ namespace
     // ids used before the quest moved onto client-tracked ids; honoured so a log
     // entry accepted under them keeps tracking until it is re-accepted
     constexpr std::array<uint32, 4> APEX_HUNT_QUEST_IDS = {17839, 17844, 9916201, 9916211};
-    constexpr uint32 APEX_PELT_STORMFANG = 1009302;
-    constexpr uint32 APEX_PELT_OWLCAT = 1009303;
-    constexpr uint32 APEX_PELT_TIDE = 1009304;
 
     constexpr std::array<uint32, 10> APEX_CLIENT_SPELLS = {
         100331, 1004111, 1004112, 1004113, 1004114,
