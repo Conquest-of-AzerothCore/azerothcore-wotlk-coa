@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Rotting Flesh's buff tooltip amount is sent to the caster's client (#12626)",
+  "contract": [
+    "Rotting Flesh 573131 shows \"Damage dealt increased by ${$w1}%.\" on the Necromancer's own buff, and the client",
+    "reads $w1 from the SMSG_ASCENSION_AURA_AMOUNT packet (slot 0). Effect 0 is",
+    "SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with aura 79, BasePoints 1 and DieSides 1, so 2 per stack",
+    "(StackAmount 10); effect 1 is a dummy APPLY_AURA on the caster with BasePoints 0. The summon-aura effect only",
+    "targets the owner's summons, so the caster's own application never carries effect 0 and the packet builder sent",
+    "0 for it at every stack. The packet now sends the amount of summon-aura effects, as it already did for",
+    "enemy-area effects (#10787). The fixture sets 3 and then 10 stacks on the caster; aura_amount confirms the",
+    "server-side amount of 6 and 20, sent_aura_amount reads what the caster's session was sent: 6 and 20 for",
+    "effect 0 and 0 for the dummy effect 1."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "ascension_client": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "set_aura", "label": "Three stacks of Rotting Flesh on the caster",
+      "actor": "necro", "spell": 573131, "stacks": 3
+    },
+    {
+      "action": "assert", "label": "SETUP: the buff is visible on the caster",
+      "actor": "necro", "metric": "aura_visible", "spell": 573131, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the summon-aura effect holds 2 x 3 on the caster's aura",
+      "actor": "necro", "metric": "aura_amount", "spell": 573131, "effect": 0, "equals": 6
+    },
+    {
+      "action": "assert", "label": "The client is told 6, not zero, for the $w1 token at three stacks",
+      "actor": "necro", "metric": "sent_aura_amount", "spell": 573131, "effect": 0, "equals": 6, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The dummy effect still reads zero",
+      "actor": "necro", "metric": "sent_aura_amount", "spell": 573131, "effect": 1, "equals": 0
+    },
+    {
+      "action": "set_aura", "label": "Ten stacks of Rotting Flesh on the caster",
+      "actor": "necro", "spell": 573131, "stacks": 10
+    },
+    {
+      "action": "assert", "label": "SETUP: the summon-aura effect holds 2 x 10 on the caster's aura",
+      "actor": "necro", "metric": "aura_amount", "spell": 573131, "effect": 0, "equals": 20
+    },
+    {
+      "action": "assert", "label": "The client is told 20 for the $w1 token at ten stacks",
+      "actor": "necro", "metric": "sent_aura_amount", "spell": 573131, "effect": 0, "equals": 20, "within_ms": 2000
+    }
+  ]
+}
