@@ -4335,8 +4335,10 @@ public:
       if (CreatureDisplayInfoEntry const *entry =
               sCreatureDisplayInfoStore.LookupEntry(displayId)) {
         auto const textures = rows.CreatureDisplayTextures.find(displayId);
+        auto const alpha = rows.CreatureDisplayAlphas.find(displayId);
         bytes += SendDisplayInfoRow(player, *entry,
-            textures != rows.CreatureDisplayTextures.end() ? &textures->second : nullptr);
+            textures != rows.CreatureDisplayTextures.end() ? &textures->second : nullptr,
+            alpha != rows.CreatureDisplayAlphas.end() ? alpha->second : uint8(255));
         ++sent;
       }
     }
@@ -4572,6 +4574,7 @@ private:
     std::vector<VehicleSeatPatchRow> VehicleSeats;
     std::vector<VehiclePatchRow> Vehicles;
     std::unordered_map<uint32, std::array<std::string, 4>> CreatureDisplayTextures;
+    std::unordered_map<uint32, uint8> CreatureDisplayAlphas;
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
@@ -4908,7 +4911,8 @@ private:
 
   std::size_t SendDisplayInfoRow(Player *player,
                                  CreatureDisplayInfoEntry const &entry,
-                                 std::array<std::string, 4> const *textures) const {
+                                 std::array<std::string, 4> const *textures,
+                                 uint8 alpha = 255) const {
     WorldPacket packet(SMSG_PATCH_CREATURE_DISPLAY_INFO, 80);
 
     uint32 const soundId = 0;
@@ -4918,7 +4922,7 @@ private:
     std::memcpy(displayRow + 0x08, &soundId, sizeof(uint32));
     std::memcpy(displayRow + 0x0C, &entry.ExtendedDisplayInfoID, sizeof(uint32));
     std::memcpy(displayRow + 0x10, &entry.scale, sizeof(float));
-    displayRow[0x14] = 255;
+    displayRow[0x14] = alpha;
 
     packet.append(displayRow, sizeof(displayRow));
     for (uint8 stringIndex = 0; stringIndex < 4; ++stringIndex)
@@ -5434,6 +5438,7 @@ private:
       _rows.Vehicles = LoadVehiclePatchRows();
       _rows.CreatureModels = BuildCreatureModelPatchRows();
       _rows.CreatureDisplayTextures = LoadCreatureDisplayTextureRows();
+      _rows.CreatureDisplayAlphas = LoadCreatureDisplayAlphaRows();
       _rowsPrepared = true;
     }
     return _rows;
@@ -5604,6 +5609,22 @@ private:
       std::array<std::string, 4> &textures = rows[fields[0].Get<uint32>()];
       for (uint8 index = 0; index < 4; ++index)
         textures[index] = fields[index + 1].Get<std::string>();
+    } while (result->NextRow());
+
+    return rows;
+  }
+
+  static std::unordered_map<uint32, uint8> LoadCreatureDisplayAlphaRows() {
+    std::unordered_map<uint32, uint8> rows;
+    QueryResult result = WorldDatabase.Query(
+        "SELECT `ID`, `CreatureModelAlpha` FROM `creaturedisplayinfo_dbc` "
+        "WHERE `CreatureModelAlpha` BETWEEN 1 AND 254");
+    if (!result)
+      return rows;
+
+    do {
+      Field const *fields = result->Fetch();
+      rows[fields[0].Get<uint32>()] = uint8(fields[1].Get<int32>());
     } while (result->NextRow());
 
     return rows;
