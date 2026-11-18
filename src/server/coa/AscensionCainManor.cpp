@@ -267,6 +267,7 @@ private:
         me->InterruptNonMeleeSpells(true);
         me->RemoveAllAuras();
         me->AttackStop();
+        me->RemoveAllAttackers();
         me->SetReactState(REACT_PASSIVE);
         me->SetControlled(true, UNIT_STATE_ROOT);
         me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
