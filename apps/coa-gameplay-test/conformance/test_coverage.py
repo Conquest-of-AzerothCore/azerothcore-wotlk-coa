@@ -837,6 +837,12 @@ class EvidenceTablesTest(unittest.TestCase):
                          and observed(expectation).get('metric') not in metric_evidence()]
             self.assertEqual(unstamped, [], path.name)
 
+    def test_the_summon_remaining_lifetime_is_a_state_read_promised_by_a_lasting_duration(self):
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_remaining_ms'], STATE)
+        words = STATE_PROMISES['owned_creature_remaining_ms']
+        self.assertRegex('Your Pavise now lasts $/1000;s2 additional sec', rf'(?i)\b(?:{words})\b')
+        self.assertNotRegex('Summons a Pavise.', rf'(?i)\b(?:{words})\b')
+
     def test_every_state_metric_names_its_promise(self):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
         self.assertEqual(states, set(STATE_PROMISES) - {metric for metric in CONTRAST_PROOF if metric not in states})

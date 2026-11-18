@@ -471,6 +471,20 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(scenario)
 
+    def test_owned_creature_remaining_ms_needs_a_player_and_an_entry(self):
+        for actor, entry, valid in (('caster', 50519, True), ('caster', None, False), ('target', 50519, False)):
+            scenario = copy.deepcopy(self.scenario)
+            step = {'action': 'assert', 'actor': actor, 'metric': 'owned_creature_remaining_ms', 'min': 0}
+            if entry is not None:
+                step['entry'] = entry
+            scenario['steps'].append(step)
+            with self.subTest(actor=actor, entry=entry):
+                if valid:
+                    self.assertIs(run.validate(scenario), scenario)
+                else:
+                    with self.assertRaises(ValueError):
+                        run.validate(scenario)
+
     def test_owned_creature_count_victim_filter(self):
         for target, valid in (('target', True), ('nobody', False)):
             scenario = copy.deepcopy(self.scenario)

@@ -1112,6 +1112,9 @@ the caster heals and healing received when the ally heals the caster. The caster
 `cast_unit_auras` (`[[spell, stacks], ...]`, ADR 0494) are set on the casting unit before every cast in both arms,
 the ally when it casts: a precondition fixture on the unit whose hits are read (Corpse Wagon 503738 party: 823764 on
 the casting ally removes its partial resists). Swing entries refuse them.
+`owned_auras` (`[[spell, stacks, entry], ...]`, ADR draft nf-e) need `caster_entry` and name it in every row: each aura is set on that
+owned creature (harness `set_aura` with `owned_entry`) before every observed cast in both arms, a precondition fixture on the
+creature whose hits are read (Witch Hunter 680255 `hound_crit`: 984954 forces the Shadowhound pet's 706332 crits).
 `target_auras` (`[[spell, stacks], ...]`, ADR 0542) are set on the cast target by the caster before every observed
 cast in both arms: a precondition fixture on the unit that is hit, such as a frozen state for a crit claim "against
 Frozen targets" (Chilling Presence 300958: Ice Lock 22856 on the dummy before every Ice Barrage). Swing entries and a
@@ -1257,6 +1260,10 @@ cast), `before_<n>` / `after_<n>` per pulse (all present, then none left; the ne
 each), and `far_after_<pulses>` (all present). Every fixture must carry a mechanic of `radius_spell`'s
 `SPELL_EFFECT_DISPEL_MECHANIC` effects, all of them together, and outlast the window; `margin_ms` is required and
 must bracket the period (`period - 2 * margin .. period + margin`) inside 10% of it (D-200).
+The optional `party_pulse` fields `near_distance` (default 3 yd, inside the radius) and `far_margin` (default 15 yd,
+above 0) place the two members (ADR 1001), so an entry can bracket the radius, for example 18 and 22 yd around a 20 yd
+radius; a range check that adds the units' sizes reaches past the radius. Omitted, the generated scenario is
+unchanged.
 
 ### Dispel-count scenarios (`behaviour_dispel_count`, `kind: "dispel_count"`)
 
@@ -1472,6 +1479,9 @@ of that effect, to the school part (ADR 0208, the Scourgebane strike 801832 from
 527269 from `$527270m3`). `value_rolls: true` (ADR 0996, only with `value_spell`) rolls the die of `value_spell`'s
 `value_effect` instead of the hit spell's, one modelled value per roll (Shadow Rage 680275 `$m3`, 57..58, struck by
 567570); without it the hit spell's die is rolled, as before.
+`strikes_per_cast` (ADR 1007, with a minion `caster_entry` and casts) reads that minion's casts of the hit spell before
+each treatment call and after its settle; the verdict alerts unless every call cast that many, and lists per run the
+casts, landed (any outcome), usable, critical and not-landed strikes (Houndmaster's Call 802273: two per call).
 `stat_auras` (ADR 0210) are set on the caster before its stats are measured, so the hit model reads the stats they
 leave; `label_suffix` names a second entry of the same hit (Divine Charge `no_power`: Demoralizing Shout 1159613 holds
 attack power at 0, so only the trample's base term is read).
@@ -1715,6 +1725,13 @@ Four kinds can set auras around their casts. Without the fields every scenario i
   baseline interval by each haste factor (`relation: inverse`) within `tolerance` ms.
 - `taken_hit` arm `opening_casts`: `[spell, target]` cast once before the arm's first read, followed by a 1500 ms
   settle. Testament of Hope 1397742 summons its two copies once, before the treatment arm's strikes.
+- `taken_hit` arm `striker_casts` (ADR 0999): spells the striker casts once at the struck unit at the arm's start,
+  after its auras, 300 ms apart, removed from it at the arm's end; with them the striker holds `spell_hit_bonus` 100.
+  `opening_settle_ms` replaces the 1500 ms settle after the opening or striker casts. An arm aura may name its caster
+  as a third element (`[spell, stacks, "dummy"]`, the dummy is then added), set and removed with that caster. Vampire
+  Hunter 803638: the striker's Curse of Tongues 1714 is the enemy curse; Light of the Naaru 41394 hits 1100 in the
+  control arm (same curses, talent unlearned) and 935 / 880 / 825 under one / two / three curses; held and gone
+  windows 900 to 300 ms before and 200 to 800 ms after the stated 10 / 12 / 14 s read ratios of the reduction and 1.
 
 ### School lockouts and positioned taken hits (ADR 0171)
 
@@ -1874,6 +1891,12 @@ the one 3 yd behind never.
   Hounds 570726: 984584 effect 0 at -500 (SPELL_AURA_ASCENSION_SUPPRESS_AVOIDANCE, dodge, parry and block off) and
   530014 effect 1 at 100 (SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE, the miss chance clamped to 0), so an avoided swing
   cannot hide a missing cleave. Omitted, the generated scenario and model are unchanged.
+- `fixed_count` `swing_ms` (ADR 1000, a positive time in ms, with `cast_target` the primary and no `layout`,
+  `swing_cleave` or `gate`) replaces each cast of `cast_spell` by the caster's own auto attack on the primary for
+  `swing_ms`, then a `stop_attack`; everything else (dummies, reads, per-cast model, judge) stays as for a cast, so a
+  spell that only a landed swing triggers is counted per window. Flourish 805365: Flames of Sin 802850, cast directly,
+  carries no copied damage and its jumps log nothing; on a real swing they do. Omitted, the generated scenario and
+  model are unchanged.
 - `cast_condition` `condition: "avoided"` (with `learn`) adds an aggressive, rooted attacker in front of the caster. The
   blocked attempt comes before any attack; the allowed one after Evasion 26669, one engaging swing interval and 6000 ms
   of the attacker's swings (the dodges are read). The attempts set no caster aura. Sacred Swing 572769 with Keeping the
@@ -2120,6 +2143,8 @@ Options with a module:
   in the treatment phase (ADR 0620)
 - [`area_dummies`](metric_delta_options/area_dummies.md): more dummies beside the dummy, struck by an area cast and
   read through `fields.target`, never a setup target (ADR 0995)
+- [`area_sum`](metric_delta_options/area_sum.md): the entry's metric read on the dummy and every area dummy and
+  judged as one sum, for a stated target count (ADR 0998)
 - [`attacker_attempts`](metric_delta_options/attacker_attempts.md): two attempts of a spell by 8 passive attackers per
   trial, an aura set on them in one arm, read per attempt and judged by its own verdict (ADR 0997)
 - [`after_trigger_strike`](metric_delta_options/after_trigger_strike.md): a strike at the caster after the treatment
@@ -2155,3 +2180,7 @@ Options with a module:
   value also set at the start of a before phase that does not cast the trigger (ADR 0870)
 - [`player_ranged_attack_power`](metric_delta_options/player_ranged_attack_power.md): the caster's ranged
   attack-power fixture, for a `$RAP` term (ADR 0863)
+- [`rage_per_damage`](metric_delta_options/rage_per_damage.md): one hit per phase at two damage levels, the Rage per
+  point of damage judged equal in both phases, by its own verdict (ADR 1004)
+- [`stop_shooting_after_ms`](metric_delta_options/stop_shooting_after_ms.md): the caster moved out of range a set
+  time after an auto-repeat shot, its hits read so no shot fires after the move (ADR 1005)

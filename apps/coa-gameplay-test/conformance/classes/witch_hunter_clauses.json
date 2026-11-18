@@ -1172,7 +1172,7 @@
       "spell": 562025,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
     },
-    "reason": "Cycle 18 f-b8 (D-57): the AP .35 and SP 1.0625 terms are added to the 562025 effect value by ModifySpellEffectBaseValue (Completion.cpp WitchCoefficients), and the hits are 520271 (spell_bonus_data 0/0/0/0). Four forced critical ticks on one dummy, read as the caster's 520271 spell_damage_total: at the reference attack power, at +20000 attack power (contrast: the AP term alone moves it from about 1.8k to 43.8k) and at +20000 spell power (player_spell_power hit_arm, about 129k). Fast mode f-b8: the readback 562025 aura_amount e0 #1 (1 read, 17 needed) is dropped; the AP/SP contrast arms (+20000 AP, +20000 SP, forced crit, 4 ticks) read the tick amount by behaviour (pair 20261116-221924/-221956).",
+    "reason": "Cycle 18 f-b8 (D-57): the AP .35 and SP 1.0625 terms are added to the 562025 effect value by ModifySpellEffectBaseValue (Completion.cpp WitchCoefficients), and the hits are 520271 (spell_bonus_data 0/0/0/0). Four forced critical ticks on one dummy, read as the caster's 520271 spell_damage_total: at the reference attack power, at +20000 attack power (contrast: the AP term alone moves it from about 1.8k to 43.8k) and at +20000 spell power (player_spell_power hit_arm, about 129k). Fast mode f-b8: the readback 562025 aura_amount e0 #1 (1 read, 17 needed) is dropped; the AP/SP contrast arms (+20000 AP, +20000 SP, forced crit, 4 ticks) read the tick amount by behaviour (pair 20261116-221924/-221956). nf-a (not-final 80.1, 'every $t1 sec'): the aura_amplitude_ms read is a readback; the part now also carries hit_period tick_period: 520271 damage hits of a real Darkflock cast stamped in game time on the dummy, the mean gap of the four hits 2006 ms against 2000 +- 100 (the first hit 2132 to 2191 ms after the command, the last 8150 to 8209 ms), no hit before the cast. Pair 20261117-144023 / 20261117-144206 (worldserver sha256 4b7fb257fea1), ok in both runs, deterministic stamps. Reference search (nf-a): nothing found beyond the tooltip.",
     "claims": [
       {
         "claim": "command a flock of crows to deal ${$m1+0+$AP*.35+$SP*1.0625} Shadow damage to enemies in front of you",
@@ -1186,7 +1186,8 @@
       {
         "claim": "every $t1 sec.",
         "labels": [
-          "562025 aura_amplitude_ms #2"
+          "562025 aura_amplitude_ms #2",
+          "562025 behaviour_metric_delta tick_period"
         ]
       }
     ]
@@ -1676,13 +1677,15 @@
       {
         "claim": "Place a dark trap on the ground lasting $d",
         "labels": [
-          "680238 aura_duration_ms #0"
+          "680238 behaviour_metric_delta trap_held",
+          "680238 behaviour_metric_delta trap_ends"
         ]
       },
       {
         "claim": "that will curse the first enemy to approach it and up to $681179i enemies",
         "labels": [
-          "680238 effect_value #1"
+          "680238 behaviour_metric_delta count_stun",
+          "680238 behaviour_metric_delta count_dot"
         ]
       },
       {
@@ -1692,24 +1695,29 @@
         ]
       }
     ],
-    "reason": "Cycle 19 (f-b4), split by claim. Radius: one real Shadow Trap cast puts the trap 2 yd in front of the caster; the first enemy within 3 yd of it fires it and the stun 681179 reaches the dummy 0.5 yd inside 3 yd + both combat reaches (1.275 each) of that enemy and never the one 0.5 yd beyond (radius_edge_stun, aura read on each dummy); control: the cast before the spell is learned is refused and no dummy is stunned. Not measured here: the lifetime $d (label aura_duration_ms is unmodelled, the spell applies no aura; a trap_held/trap_ends pair for entry 506250 is the other route), the count 'up to $681179i' (MaxAffectedTargets 5 needs six enemies inside the radius; radius_edge places three dummies) and the curse, which states no value. Reference search: the Houndmaster and deep-dive video reports and the coabuildhub text name the trap and its stun without a radius or count value; nothing else found."
+    "reason": "Cycle 19 (f-b4), split by claim. Radius: one real Shadow Trap cast puts the trap 2 yd in front of the caster; the first enemy within 3 yd of it fires it and the stun 681179 reaches the dummy 0.5 yd inside 3 yd + both combat reaches (1.275 each) of that enemy and never the one 0.5 yd beyond (radius_edge_stun, aura read on each dummy); control: the cast before the spell is learned is refused and no dummy is stunned. Not measured here: the lifetime $d (label aura_duration_ms is unmodelled, the spell applies no aura; a trap_held/trap_ends pair for entry 506250 is the other route), the count 'up to $681179i' (MaxAffectedTargets 5 needs six enemies inside the radius; radius_edge places three dummies) and the curse, which states no value. Reference search: the Houndmaster and deep-dive video reports and the coabuildhub text name the trap and its stun without a radius or count value; nothing else found. Not-final pass (nf-c): the lifetime is measured: the label 680238 aura_duration_ms #0 is dropped (the spell applies no aura, unmodelled, values.py:683; the 681445 / 681450 precedent) and the owned trap 506250 is out 29300 ms and gone 30750 ms of game time after a real cast (DurationIndex 9 = 30000 ms, $d), the trap_held and trap_ends reads. Count (nf-c, owner ruling O-47, mentor D-482, card Q-wh-44 answer a: keep 5 for stun and DoT): count_stun and count_dot read 681179 and 681177 on seven enemies inside the radius after a real cast and sum them (area_sum), expected 5 in total by the ruling. Live deviation accepted by the owner: live logs (coa-history, 186 logs) show the DoT 681177 on up to 18 targets per trap, and 33 of 83 traps above 5; our server caps both auras at 5 (code reading). End pair end3 (mentor D-496): the readback label 680238 effect_value #1 is dropped (unmodelled both runs, \"count token without a no-combat metric\", as for 117.0 and 119.0); count_stun and count_dot prove the count."
   },
   {
     "spell": 680238,
     "clause": "stunning them for $681179d",
     "labels": [
-      "680238 spell_duration 681179 #3"
+      "680238 spell_duration 681179 #3",
+      "680238 behaviour_metric_delta stun_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not-final pass (nf-c): the trap fires on the dummy 1 yd from it at its first pulse and casts 681179 (DurationIndex 35 = 4000 ms); last_application_expiry stamps the application and the removal of 681179 on the dummy in game time, the bracket inside 4000 +- 200 ms (excludes 3600 and 4400, D-200); control: the trap cast before it is learned is refused. Reference search: coa-history has no 681179 event in 186 logs; ~/CoaServer/reference snapshots carry the tooltip text only."
   },
   {
     "spell": 680238,
     "clause": "and dealing ${($681177d*1000/$681177T1)*($681177m1+$681177ppl1+$AP*0.34)} Shadow damage over $681177d.",
     "labels": [
-      "680238 effect_value 681177e0 #4",
-      "680238 spell_duration 681177 #5"
+      "680238 spell_duration 681177 #5",
+      "680238 behaviour_metric_delta dot_base",
+      "680238 behaviour_metric_delta dot_ap",
+      "680238 behaviour_metric_delta dot_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not-final pass (nf-c): the 681177 total on the dummy the trap fires on, 10500 ms after a real cast: 4 ticks (8000 / 2000) of 9..11 + 106.25 (2.125 x 50 levels) + 0.34 x AP, read 840..852 at attack power 282 (dot_base) and 28040..28052 at 20282 (dot_ap, the D-57 contrast arm: a coefficient 10% off moves the total by 2758); crit and partial resists removed by precondition fixtures (16255 at -100, 823764). The 8 sec is dot_duration (last_application_expiry on 681177, 8000 +- 400 ms stamped). Reference search: coa-history 681177 logs 1345 periodic hits over 462 applications on live (older states, other levels and gear, not expected values). Review review-c I-1: the readback label 680238 effect_value 681177e0 #4 is dropped (unmodelled), as for 117.0; the behaviour labels dot_base, dot_ap and dot_duration and the spell_duration read prove the clause."
   },
   {
     "spell": 680247,
@@ -1753,10 +1761,12 @@
       },
       {
         "claim": "Your and your Shadow Hounds",
-        "labels": []
+        "labels": [
+          "680255 behaviour_hit_ratio hound_crit"
+        ]
       }
     ],
-    "reason": "Batch 2 author A: the caster's share is measured by 680255 behaviour_hit_ratio crit (counted pair, measured crit-hit ratio 1.4974 against the tooltip reading 1.5, every crit hit of March of the Black King 681094 on the dummy, control without the talent). The Shadow Hounds' share (Effect[2], SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS) has no label. The Legacy of the Silver Hand ruling of 2026-11-12 does not apply (Templar-only; Legacy 806522 is aura 108 misc 15, a spell mod on the bonus part, while 680255 is aura 163 MOD_CRIT_DAMAGE_BONUS): the engine's AddPct on the whole crit amount (Unit.cpp:10602-10611, a spell crit 1.5 x base becomes 2.25 x) gives the measured 1.5. Not a server change (G-2), the tooltip's whole-hit reading."
+    "reason": "Batch 2 author A: the caster's share is measured by 680255 behaviour_hit_ratio crit (counted pair, measured crit-hit ratio 1.4974 against the tooltip reading 1.5, every crit hit of March of the Black King 681094 on the dummy, control without the talent). The Shadow Hounds' share (Effect[2], SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS) is 680255 behaviour_hit_ratio hound_crit (nf-e, D-462/D-468): the critical Shadow strikes 706332 of the Shadowhound pet 50124, crit forced by a precondition fixture on the pet, with and without 680255, ratio 1.5. The Legacy of the Silver Hand ruling of 2026-11-12 does not apply (Templar-only; Legacy 806522 is aura 108 misc 15, a spell mod on the bonus part, while 680255 is aura 163 MOD_CRIT_DAMAGE_BONUS): the engine's AddPct on the whole crit amount (Unit.cpp:10602-10611, a spell crit 1.5 x base becomes 2.25 x) gives the measured 1.5. Not a server change (G-2), the tooltip's whole-hit reading. Reference search (nf-i, 2026-11-17): coa-history spell 680255 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of 680255, nothing found on the Shadow Hounds share of the critical damage beyond the tooltip words."
   },
   {
     "spell": 680255,
@@ -3324,11 +3334,12 @@
       {
         "claim": "for $681447d",
         "labels": [
-          "681445 spell_duration 681447 #2"
+          "681445 spell_duration 681447 #2",
+          "681445 behaviour_metric_delta silence_duration"
         ]
       }
     ],
-    "reason": "Cycle 10 Houndmaster sample: the owned trap 506251 is out 59300 ms and gone 60750 ms of game time after a real cast (60000 ms, $d). The curse, the 5 yd radius and the 6 s silence stay data labels: they need the dummy inside the trap's 3 yd trigger and a second creature at the radius edge. Cycle 18 (f-nt1): the label 681445 aura_duration_ms #0 is dropped: the spell applies no aura, so the label reads unmodelled (values.py:683) and left the lifetime part unproven; trap_held and trap_ends measure the $d (as 705534 dropped its own label). Cycle 19 (f-b4): the radius is measured: one real Inquisitor's Trap cast, the first enemy within 3 yd of the trap fires it and the silence 681447 reaches the dummy 0.5 yd inside 5 yd + both combat reaches (1.275 each) and never the one 0.5 yd beyond (radius_edge_silence, aura read on each dummy); control: the cast before the spell is learned is refused, no dummy silenced. The 6 s silence duration stays a data label: the trap fires on a 1 s pulse whose exact apply time the run does not read, so a presence read cannot exclude values 10% off on both sides."
+    "reason": "Cycle 10 Houndmaster sample: the owned trap 506251 is out 59300 ms and gone 60750 ms of game time after a real cast (60000 ms, $d). The curse, the 5 yd radius and the 6 s silence stay data labels: they need the dummy inside the trap's 3 yd trigger and a second creature at the radius edge. Cycle 18 (f-nt1): the label 681445 aura_duration_ms #0 is dropped: the spell applies no aura, so the label reads unmodelled (values.py:683) and left the lifetime part unproven; trap_held and trap_ends measure the $d (as 705534 dropped its own label). Cycle 19 (f-b4): the radius is measured: one real Inquisitor's Trap cast, the first enemy within 3 yd of the trap fires it and the silence 681447 reaches the dummy 0.5 yd inside 5 yd + both combat reaches (1.275 each) and never the one 0.5 yd beyond (radius_edge_silence, aura read on each dummy); control: the cast before the spell is learned is refused, no dummy silenced. The 6 s silence duration stays a data label: the trap fires on a 1 s pulse whose exact apply time the run does not read, so a presence read cannot exclude values 10% off on both sides. Not-final pass (nf-c): the 6 s silence is measured with last_application_expiry: the default dummy 1 yd from the trap fires it at its first pulse and the application and removal of 681447 on the dummy are stamped in game time (the pulse moment no longer enters the read), bracket inside 6000 +- 300 ms; control: the cast before the spell is learned is refused."
   },
   {
     "spell": 681450,
@@ -3344,19 +3355,25 @@
       },
       {
         "claim": "that will curse the first enemy to approach it, marking them for death,",
-        "labels": []
+        "labels": [
+          "681450 behaviour_metric_delta mark"
+        ]
       }
     ],
-    "reason": "Cycle 18 (f-nt1), split by claim (f-m2, review2 I-1, I-3). Lifetime: the label 681450 aura_duration_ms #0 is dropped (the spell applies no aura, unmodelled, values.py:683); the owned trap 506252 is out 59300 ms and gone 60750 ms of game time after a real cast (DurationIndex 3 = 60000 ms, $d), the trap_held and trap_ends reads. Curse: 'curse the first enemy to approach it, marking them for death' states no value and no label reads the trap firing on an enemy or the mark (the trap_held and trap_ends entries keep the dummy 40 yd away so the trap stays out; the damage and its 1 minute delay are the next clause, 221.0, with data labels only): unproven, no label invented. Reference search: the Houndmaster and deep-dive video reports (video-deepdive-wgc9dDFTAPI.md:528, video-houndmaster.md:466, older states) and the coabuildhub snapshot text give the same lifetime of 1 minute and no curse value; nothing else found."
+    "reason": "Cycle 18 (f-nt1), split by claim (f-m2, review2 I-1, I-3). Lifetime: the label 681450 aura_duration_ms #0 is dropped (the spell applies no aura, unmodelled, values.py:683); the owned trap 506252 is out 59300 ms and gone 60750 ms of game time after a real cast (DurationIndex 3 = 60000 ms, $d), the trap_held and trap_ends reads. Curse: 'curse the first enemy to approach it, marking them for death' states no value and no label reads the trap firing on an enemy or the mark (the trap_held and trap_ends entries keep the dummy 40 yd away so the trap stays out; the damage and its 1 minute delay are the next clause, 221.0, with data labels only): unproven, no label invented. Reference search: the Houndmaster and deep-dive video reports (video-deepdive-wgc9dDFTAPI.md:528, video-houndmaster.md:466, older states) and the coabuildhub snapshot text give the same lifetime of 1 minute and no curse value; nothing else found. Not-final pass (nf-c): the mark is read: the default dummy 1 yd from the trap fires it at its first pulse and carries 681452 (Dispel 2 = curse, MaxAffectedTargets 1) 1500 ms after a real cast, 0 before (mark)."
   },
   {
     "spell": 681450,
     "clause": "causing them to take ${$681452m1+$681452ppl1+$AP*1} Shadow damage after $681452d.",
     "labels": [
       "681450 effect_value 681452e0 #1",
-      "681450 spell_duration 681452 #2"
+      "681450 spell_duration 681452 #2",
+      "681450 behaviour_metric_delta doom_waits",
+      "681450 behaviour_metric_delta doom_base",
+      "681450 behaviour_metric_delta doom_ap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not-final pass (nf-c): 681452 (aura 3, amplitude 59999, DurationIndex 3 = 60000 ms) hits the marked dummy once: 500 + 2600 (100 x 26 levels) + AP x 1 = 3382 at attack power 282 (doom_base) and 23382 at 20282 (doom_ap, D-57 contrast arm), read 63500 ms of game time after the cast; doom_waits reads no 681452 damage 58500 ms after the cast. The mark lands 1000..1500 ms after the cast (first pulse; the mark entry reads it at 1500 ms), so the hit lies after 57000 ms and before 62500 ms of the mark: a delay 10% off on either side (54000 or 66000 ms) fails one read (D-200). Crit and partial resists removed by precondition fixtures. Reference search: coa-history 681452 logs 4 periodic hits on live (1078..29689, older states, not expected values)."
   },
   {
     "spell": 681453,
@@ -3388,8 +3405,12 @@
   {
     "spell": 681453,
     "clause": "While you remain near it, hostile spells targeting you are deflected.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "681453 behaviour_metric_delta pavise_deflect",
+      "681453 behaviour_metric_delta pavise_deflect_rolls"
+    ],
+    "kind": "claim",
+    "reason": "nf-e (D-464/D-465): 681453 behaviour_metric_delta pavise_deflect judges a striker's Arcane Blasts at the caster: all land before any Pavise, none (at most 1 of 20) land from the front near the Pavise, all land in front with the caster out of the 1108180 radius. nf-k (owner ruling O-47, card Q-wh-45 answer b, mentor D-486): from behind with the aura none (at most 1 of 20) land either; the engine deflects only from the front (Unit.cpp:4087-4094), the Witch Hunter hook rolls the 1108180 amount from behind (Witch Hunter ADR 0026). The miss type DEFLECT is the data arm pavise_deflect_rolls (avoidance_samples probe 7, READBACK). Reference search (nf-i, 2026-11-17): coa-history spell 1108180, 520865 and 681453 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of Pavise Crossbowman 681453, nothing found on an arc, front, behind or near-distance reading."
   },
   {
     "spell": 681484,
@@ -4047,10 +4068,13 @@
     "labels": [
       "705524 effect_value e1 #0",
       "705524 behaviour_metric_delta pavise_base",
-      "705524 behaviour_metric_delta pavise_ext"
+      "705524 behaviour_metric_delta pavise_ext",
+      "705524 behaviour_metric_delta pavise_remaining",
+      "705524 behaviour_metric_delta pavise_base_gone",
+      "705524 behaviour_metric_delta pavise_ext_margin"
     ],
     "kind": "claim",
-    "reason": "review23 I-1/I-3: not final. The same real Pavise 520865 cast with 681453 learned and the shield equipped through the real route, once without 705524 (pavise_base) and once with it (pavise_ext). The pavise creature 50519 is owned at the held read and gone at the ends read of each arm, in game time after the cast: base 9934 / 10543 ms, extended 11934 / 12543 ms (judged windows base [9928, 9940] / [10528, 10555], extended [11928, 11940] / [12528, 12555]; counting pair 20261117-001952 / -002020). The ends reads were moved from 10093 / 12093 to 10543 / 12543 because the creature is removed by TempSummon::Update (TemporarySummon.cpp:80-84) on the map update after its timer runs out: a read 93 ms past the nominal end read it still owned in all three recent runs, so the earlier counted passes at 10093 / 12093 were timing-dependent. With the removal lag between 93 and 543 ms, the increase lies in (11934 - 10543, 12543 - 9934) = (1391, 2609) ms, which does not exclude 1800 and 2200 ms, so D-200 on the stated 2000 ms increase is NOT met. Pavise 520865 has no aura and the harness reads only owned_creature_count (CoAGameplayTest.cpp:5542), so no read free of the removal lag exists in the class file; a bracket would need the summon timer or a lag bound under about 200 ms (a shared-tool change, stopped per mentor D-382). The data label 705524 effect_value e1 #0 reads 2000 (SPELLMOD_DURATION, class mask Pavise). Reference search: bindmysoul talents snapshot and the two video reports (video-overview-3qLYu74QhH4, video-deepdive-wgc9dDFTAPI) repeat the tooltip only; no Pavise duration, charge or Bolt and Dash value found."
+    "reason": "review23 I-1/I-3: not final. The same real Pavise 520865 cast with 681453 learned and the shield equipped through the real route, once without 705524 (pavise_base) and once with it (pavise_ext). The pavise creature 50519 is owned at the held read and gone at the ends read of each arm, in game time after the cast: base 9934 / 10543 ms, extended 11934 / 12543 ms (judged windows base [9928, 9940] / [10528, 10555], extended [11928, 11940] / [12528, 12555]; counting pair 20261117-001952 / -002020). The ends reads were moved from 10093 / 12093 to 10543 / 12543 because the creature is removed by TempSummon::Update (TemporarySummon.cpp:80-84) on the map update after its timer runs out: a read 93 ms past the nominal end read it still owned in all three recent runs, so the earlier counted passes at 10093 / 12093 were timing-dependent. With the removal lag between 93 and 543 ms, the increase lies in (11934 - 10543, 12543 - 9934) = (1391, 2609) ms, which does not exclude 1800 and 2200 ms, so D-200 on the stated 2000 ms increase is NOT met. Pavise 520865 has no aura and the harness reads only owned_creature_count (CoAGameplayTest.cpp:5542), so no read free of the removal lag exists in the class file; a bracket would need the summon timer or a lag bound under about 200 ms (a shared-tool change, stopped per mentor D-382). The data label 705524 effect_value e1 #0 reads 2000 (SPELLMOD_DURATION, class mask Pavise). Reference search: bindmysoul talents snapshot and the two video reports (video-overview-3qLYu74QhH4, video-deepdive-wgc9dDFTAPI) repeat the tooltip only; no Pavise duration, charge or Bolt and Dash value found. nf-f (mentor D-467 / D-472, ADR 1006): owned_creature_remaining_ms reads the TempSummon timer of the pavise creature 50519 (TempSummon::GetTimer, a getter, no state change) 500 ms after each real Pavise cast, before and after 705524 is learned (pavise_remaining): 9578 / 11575 ms in both runs of the counting pair, a gain of 1997 against 2000 +- 100 ms (the first pair 20261117-151543 / -151711 read gains 1994 and 1978) (5%, excludes 1800 and 2200); both reads sit at the same step after their casts, so the removal lag does not enter. Presence arms at the same moment, 10975 ms nominal after the cast: without 705524 held at 9934 and gone at 10993 ms (pavise_base_gone), with it held at 10984 and gone at 12993 ms (pavise_ext_margin), the 975 ms margin (reads at 10975 and 12975 ms, 975 ms past the nominal ends) holding the 93..543 ms lag; pavise_base (9934 / 10543) and pavise_ext (11934 / 12543) re-read in the same runs. Counting pair 20261117-151949 / 20261117-152020 (all six labels of the row, effect_value e1 2000 included), worldserver sha256 6785634f21d336f08cf7f3ef656f93bc9b1d00b532dd756ab78cb39f90ec3c78 (commit 9d43ee87a1), every label ok in both runs, deterministic reads (no roll; residual false-pass and false-alert probability 0 for the judged values)."
   },
   {
     "spell": 705524,
@@ -4116,11 +4140,12 @@
       {
         "claim": "for $573266d",
         "labels": [
-          "705531 spell_duration 573266 #1"
+          "705531 spell_duration 573266 #1",
+          "705531 behaviour_metric_delta hound_haste_duration"
         ]
       }
     ],
-    "reason": "Observation (review I-8, mentor D-136, kept because the server DBC wins): bindmysoul, the coabuildhub tooltip and ~/CoaServer/dbc_clientset all give 10% (EffectBasePoints 9), against server DBC 573266 EffectBasePoints 14 (15%); the part counts the server value. Cycle 9 Houndmaster sample author: a Shadowhound summoned by a real Houndmaster's Whistle swings every 2000 ms; with Defender of Darkshire learned and Auto Shot forced to crit at a dummy 20 yd away the swing interval reads 1739.13 ms (ratio 0.8696 = 1/1.15) in both runs. The 5000 ms duration is read from the data only: the continuing Auto Shot refreshes the aura, so no expiry read exists."
+    "reason": "Observation (review I-8, mentor D-136, kept because the server DBC wins): bindmysoul, the coabuildhub tooltip and ~/CoaServer/dbc_clientset all give 10% (EffectBasePoints 9), against server DBC 573266 EffectBasePoints 14 (15%); the part counts the server value. Cycle 9 Houndmaster sample author: a Shadowhound summoned by a real Houndmaster's Whistle swings every 2000 ms; with Defender of Darkshire learned and Auto Shot forced to crit at a dummy 20 yd away the swing interval reads 1739.13 ms (ratio 0.8696 = 1/1.15) in both runs. Earlier (before nf-a2) the 5000 ms duration was read from the data only, because the continuing Auto Shot refreshed the aura; the stop_shooting_after_ms option below now gives the expiry read, and ADR 1008 makes it a behaviour read of 'for $573266d'. nf-a2 (mentor D-465/D-468, ADR 1005 provisional): 'for $573266d' is now a behaviour read, 705531 behaviour_metric_delta hound_haste_duration: option stop_shooting_after_ms moves the caster 40 yd out of Auto Shot's 35 yd range 300 ms after the cast (dummy 8 yd away), one forced-crit hit of 75 before the move and none after it; the hound swing interval reads 2000 before, 1739.13 at 4899 ms of game time after the cast (window 4825..4975, aura start within 325 ms: lasted at least 4500 ms) and 2000 at 5461 ms (window 5375..5475 when measured, 5375..5495 since ADR 1008 provisional: ended before 5500 ms; 5461 lies inside both), the move at 309 ms, in both runs of pair 20261117-151120 / -151258 (worldserver sha256 7cbe5fdb1a99, branch feat/coa-witch-hunter-nf-a2 at c9d1f90520, 40 scenarios, 0 flips); a 4500 or 5500 ms duration fails one window (D-200). Deterministic reads: false alert and false pass 0 given the fixture holds."
   },
   {
     "spell": 705533,
@@ -4236,11 +4261,12 @@
       {
         "claim": "for $707890d.",
         "labels": [
-          "706365 spell_duration 707890 #1"
+          "706365 spell_duration 707890 #1",
+          "706365 behaviour_metric_delta hound_lifetime"
         ]
       }
     ],
-    "reason": "f-t22 (T22, mentor D-332/D-335, ADR 0960 provisional): claim 1 measured by the procs entry 706365 (events_baseline_per_attempt 2): real Unleash the Hounds 807933 casts at the dummy, Lesser Shadow Hounds 50224 counted by owned_creature_summon_count; the baseline arm of 20 casts before 706365 is learned read exactly 2 hounds per completed cast in every run, and 2 per completed cast are subtracted. Pair 20261116-192454 / -193411 (worldserver ac1f5fce79c6, commit b76d59d85b, 141 parts, 0 flips): run 1 8488 procs in 34126 casts (0.2487, Wilson 0.9995 [0.2407, 0.2570]), run 2 8487 in 34120 (0.2487, [0.2407, 0.2570]), inside the band [0.23, 0.27] of 25% (expected from the tooltip token $h, source DBC ProcChance 706365 = 25). D-261 sizing completed by D-335: residual_target 0.001 per pair, min_detectable 4 points, so a 4-point error (21% and 29%) is excluded; false alert at the chance <= 8.76e-07 per pair; the neighbouring rank's 50% and the control 0% are further out. One cast per part failed with SPELL_FAILED_NO_POWER (not a trial: trials are completed casts). Claim 'for $707890d' (707890 DurationIndex 8, 15000 ms) is not read by this entry and stays unproven. Reference search (f-m6): ~/CoaServer/reference carries the tooltip text only; nothing found beyond it."
+    "reason": "f-t22 (T22, mentor D-332/D-335, ADR 0960 provisional): claim 1 measured by the procs entry 706365 (events_baseline_per_attempt 2): real Unleash the Hounds 807933 casts at the dummy, Lesser Shadow Hounds 50224 counted by owned_creature_summon_count; the baseline arm of 20 casts before 706365 is learned read exactly 2 hounds per completed cast in every run, and 2 per completed cast are subtracted. Pair 20261116-192454 / -193411 (worldserver ac1f5fce79c6, commit b76d59d85b, 141 parts, 0 flips): run 1 8488 procs in 34126 casts (0.2487, Wilson 0.9995 [0.2407, 0.2570]), run 2 8487 in 34120 (0.2487, [0.2407, 0.2570]), inside the band [0.23, 0.27] of 25% (expected from the tooltip token $h, source DBC ProcChance 706365 = 25). D-261 sizing completed by D-335: residual_target 0.001 per pair, min_detectable 4 points, so a 4-point error (21% and 29%) is excluded; false alert at the chance <= 8.76e-07 per pair; the neighbouring rank's 50% and the control 0% are further out. One cast per part failed with SPELL_FAILED_NO_POWER (not a trial: trials are completed casts). Claim 'for $707890d' (707890 DurationIndex 8, 15000 ms) is not read by this entry and stays unproven. Reference search (f-m6): ~/CoaServer/reference carries the tooltip text only; nothing found beyond it. nf-a2 (mentor D-465, ADR 1003 provisional): 'for $707890d.' is now a behaviour read, 706365 behaviour_metric_delta hound_lifetime: summon_lifetime with baseline_count 2 / baseline_ms 20000 (the two 807933 hounds), 27 pooled parts because the roll is hard-coded (AscensionWitchHunterAbilities.cpp:647-650); the extra hound lives 14956..15024 ms (5 of 27 parts summoned) and 14953..15024 ms (6 of 27) against 15000 ms, band 14250..15750, in pair 20261117-151120 / -151258 (worldserver sha256 7cbe5fdb1a99, branch feat/coa-witch-hunter-nf-a2 at c9d1f90520, 40 scenarios, 0 flips). Residual: a run with no summon 2 x 0.75^27 = 8.5e-4 per pair; a 10% off lifetime alerts at the end window's edge."
   },
   {
     "spell": 707064,
@@ -4454,14 +4480,14 @@
         ]
       },
       {
-        "claim": "the increase stops at 20% of maximum health, and the cap follows the maximum health",
+        "claim": "the attack power increase stops at 20% of maximum health, and the cap follows the maximum health",
         "labels": [
           "707407 behaviour_metric_delta cap_full",
           "707407 behaviour_metric_delta cap_half"
         ]
       }
     ],
-    "reason": "Cycle 17 f-m10: rise read by other_rate (75 per 1000 from a non-Demon, 707407 EffectBasePoints[2]) and below_cap (4 Demon strikes of 1000, 1300 = 4 x 325, below the cap); the cap read as 2000 at 10000 maximum health after 8 strikes (2600 uncapped) and 1000 at 5000 after 4 (1300 uncapped), expected from the tooltip 20% of the maximum health."
+    "reason": "Cycle 17 f-m10: rise read by other_rate (75 per 1000 from a non-Demon, 707407 EffectBasePoints[2]) and below_cap (4 Demon strikes of 1000, 1300 = 4 x 325, below the cap); the cap read as 2000 at 10000 maximum health after 8 strikes (2600 uncapped) and 1000 at 5000 after 4 (1300 uncapped), expected from the tooltip 20% of the maximum health. nf-a (not-final 295.1): the cap labels cap_full and cap_half read the caster's attack power (a state metric, behaviour only when the claim words promise attack power); the claim text now names the attack power increase, so the existing reads count as behaviour. No new measurement: the pair of the count of record end2 (20261117-115548 / -123222, build f7d3b36b12dc) read 2000 of 10000 maximum health after 8 strikes and 1000 of 5000 after 4, ok in both runs."
   },
   {
     "spell": 707407,
@@ -4480,7 +4506,9 @@
       {
         "claim": "Increased further against Demons and Undead: the displayed additional attack power against Demons and Undead ($w2 of 707487), 50% of the stored attack power",
         "labels": [
-          "707407 behaviour_metric_delta versus_amount"
+          "707407 behaviour_metric_delta versus_amount",
+          "707407 behaviour_hit_ratio versus_hits",
+          "707407 behaviour_hit_ratio versus_hits_demon"
         ]
       },
       {
@@ -4491,7 +4519,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-28: Unbroken keeps both readings and the current values. Part A (296.0, the gain per 1000 damage taken: 325 Demon, 150 Undead, 75 other, 707407 Spell.dbc EffectBasePoints[0..2], EffectDieSides 0): one strike of 32247 (1000 Physical) from creature 418 Lesser Voidwalker (type 3), 3 Flesh Eater (type 6) and 36 Harvest Golem (type 9), types read from acore_world creature_template, the strikers otherwise identical (metric_delta strike striker_entry, ADR 0771); attack power 282 before, gains 325, 150 and 75 within 1 point. Part B1 (296.1, the displayed $w2 of 707487 Effect[1], aura 102, EffectMiscValue 36): 162 after the Demon strike against 162.5 +- 1 (50% of 325, the O-28 value), 0 before (control, aura absent). Pair 20261116-104601 / -104630 (worldserver c9a6ffd6e5a9), every label ok in both runs, deterministic reads, residual 0. Part B2 (296.2, the damage against Demons and Undead): c15-tool3 hit_ratio versus_creature_type (ADR 0782), plain main-hand swings at 36 Harvest Golem (type 9) and 6133 Shade of Elura (type 6, in the 707487 Effect[1] mask 36), dummies read equal (armor 528, level, resistances), after the same Demon strikes; modelled int(amount / 14 x 2.8) x armor factor. Resized to 4 pooled parts of 70 swings (280 per arm, 284 and 286 plain hits). Pair 20261116-133349 / -133559 (worldserver c0b350c4e636): +175.2 (99% interval +172.1 to +178.3) and +174.2 (+171.1 to +177.4) against +180.8 and +180.8, band +-9.04, half-widths 3.10 and 3.14 (limit 3.62), ok in both runs; both intervals lie below the model (ratios 1.3631 and 1.3612, a shortfall of 3.1% and 3.6%), cause not settled, model unchanged."
+    "reason": "Owner ruling O-28: Unbroken keeps both readings and the current values. Part A (296.0, the gain per 1000 damage taken: 325 Demon, 150 Undead, 75 other, 707407 Spell.dbc EffectBasePoints[0..2], EffectDieSides 0): one strike of 32247 (1000 Physical) from creature 418 Lesser Voidwalker (type 3), 3 Flesh Eater (type 6) and 36 Harvest Golem (type 9), types read from acore_world creature_template, the strikers otherwise identical (metric_delta strike striker_entry, ADR 0771); attack power 282 before, gains 325, 150 and 75 within 1 point. Part B1 (296.1, the displayed $w2 of 707487 Effect[1], aura 102, EffectMiscValue 36): 162 after the Demon strike against 162.5 +- 1 (50% of 325, the O-28 value), 0 before (control, aura absent). Pair 20261116-104601 / -104630 (worldserver c9a6ffd6e5a9), every label ok in both runs, deterministic reads, residual 0. Part B2 (296.2, the damage against Demons and Undead): c15-tool3 hit_ratio versus_creature_type (ADR 0782), plain main-hand swings at 36 Harvest Golem (type 9) and 6133 Shade of Elura (type 6, in the 707487 Effect[1] mask 36), dummies read equal (armor 528, level, resistances), after the same Demon strikes; modelled int(amount / 14 x 2.8) x armor factor. Resized to 4 pooled parts of 70 swings (280 per arm, 284 and 286 plain hits). Pair 20261116-133349 / -133559 (worldserver c0b350c4e636): +175.2 (99% interval +172.1 to +178.3) and +174.2 (+171.1 to +177.4) against +180.8 and +180.8, band +-9.04, half-widths 3.10 and 3.14 (limit 3.62), ok in both runs; both intervals lie below the model (ratios 1.3631 and 1.3612, a shortfall of 3.1% and 3.6%), cause not settled, model unchanged. nf-f (not-final 296.1, review-a I-1, mentor D-470): the displayed amount of 707487 (versus_amount) is a readback of aura_amount, so the part also carries the hit labels of 296.2 (versus_hits, versus_hits_demon). Their model is the count-weighted int(amount / 14 x 2.8 s) of the 707487 Effect[1] amounts read in the run before each treatment swing (compare.py hit_ratio versus_creature_type), times the armor factor: they prove that the read amount reaches the player's hits against Demons and Undead, and their control arms swing at dummies of another creature type (36 Mechanical, 17525 Beast): a control receiving the same extra would read a difference near 0, so the contrast arm is present and excludes it (a residual extra on the control is not separated from the shortfall below; it could only lower the measured difference, so it cannot raise a reading above the model). They do not prove the share: a server storing another share would move the model with it, so the 50% share is data only (versus_amount, 162 against 162.5 +- 1 after one Demon strike of 325). Pair B 20261117-144338 / -144418 (worldserver sha256 4b7fb257fea18646e9575b883cdb4179dc6651b8ba5c1c51fb16f7406066cc25, commit 66191e976434, 280 trials per arm) re-read all three labels on one build, ok in both runs: versus_amount 162 / 162; versus_hits +174.97 (99% interval 171.93 to 178.02) and +173.69 (170.63 to 176.75) against the model +180.77 / +180.79, band +-9.04; versus_hits_demon +175.95 (172.86 to 179.04) and +177.80 (174.66 to 180.95) against +182.62 / +182.64, band +-9.13. The four readings lie 2.6% to 3.9% under the model, inside the band, and every interval excludes the model: a systematic shortfall, cause not settled, kept as a lead (as the earlier pair's 3.1% and 3.6%); the model is unchanged. Reference search (nf-i, 2026-11-17): coa-history spell 707407 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots: nothing found on a Demon or Undead bonus of 707407 (the one bindmysoul entry with that spellId is a differently named talent without such text)."
   },
   {
     "spell": 707407,
@@ -4617,11 +4645,12 @@
       {
         "claim": "for $707890d.",
         "labels": [
-          "707891 spell_duration 707890 #1"
+          "707891 spell_duration 707890 #1",
+          "707891 behaviour_metric_delta hound_lifetime"
         ]
       }
     ],
-    "reason": "f-t22 (T22, mentor D-332/D-335, ADR 0960 provisional): claim 1 measured by the procs entry 707891 (events_baseline_per_attempt 2): real Unleash the Hounds 807933 casts at the dummy, Lesser Shadow Hounds 50224 counted by owned_creature_summon_count; the baseline arm of 20 casts before 707891 is learned read exactly 2 hounds per completed cast in every run, and 2 per completed cast are subtracted. Pair 20261116-192454 / -193411 (worldserver ac1f5fce79c6, commit b76d59d85b, 121 parts, 0 flips): run 1 14533 procs in 29165 casts (0.4983, Wilson 0.9995 [0.4881, 0.5085]), run 2 14671 in 29163 (0.5031, [0.4929, 0.5133]), inside the band [0.475, 0.525] of 50% (expected from the tooltip token $h, source DBC ProcChance 707891 = 50). D-261 sizing completed by D-335: residual_target 0.001 per pair, min_detectable 5 points, so a 5-point error (45% and 55%) is excluded; false alert at the chance <= 8.47e-07 per pair; the neighbouring rank's 25% and the control 0% are further out. One cast per part failed with SPELL_FAILED_NO_POWER (not a trial: trials are completed casts). Claim 'for $707890d' (707890 DurationIndex 8, 15000 ms) is not read by this entry and stays unproven. Reference search (f-m6): ~/CoaServer/reference carries the tooltip text only; nothing found beyond it."
+    "reason": "f-t22 (T22, mentor D-332/D-335, ADR 0960 provisional): claim 1 measured by the procs entry 707891 (events_baseline_per_attempt 2): real Unleash the Hounds 807933 casts at the dummy, Lesser Shadow Hounds 50224 counted by owned_creature_summon_count; the baseline arm of 20 casts before 707891 is learned read exactly 2 hounds per completed cast in every run, and 2 per completed cast are subtracted. Pair 20261116-192454 / -193411 (worldserver ac1f5fce79c6, commit b76d59d85b, 121 parts, 0 flips): run 1 14533 procs in 29165 casts (0.4983, Wilson 0.9995 [0.4881, 0.5085]), run 2 14671 in 29163 (0.5031, [0.4929, 0.5133]), inside the band [0.475, 0.525] of 50% (expected from the tooltip token $h, source DBC ProcChance 707891 = 50). D-261 sizing completed by D-335: residual_target 0.001 per pair, min_detectable 5 points, so a 5-point error (45% and 55%) is excluded; false alert at the chance <= 8.47e-07 per pair; the neighbouring rank's 25% and the control 0% are further out. One cast per part failed with SPELL_FAILED_NO_POWER (not a trial: trials are completed casts). Claim 'for $707890d' (707890 DurationIndex 8, 15000 ms) is not read by this entry and stays unproven. Reference search (f-m6): ~/CoaServer/reference carries the tooltip text only; nothing found beyond it. nf-a2 (mentor D-465, ADR 1003 provisional): 'for $707890d.' is now a behaviour read, 707891 behaviour_metric_delta hound_lifetime: summon_lifetime with baseline_count 2 / baseline_ms 20000, 11 pooled parts (hard-coded roll, AscensionWitchHunterAbilities.cpp:647-650); the extra hound lives 14956..15024 ms in 5 of 11 parts in both runs of pair 20261117-151120 / -151258 (worldserver sha256 7cbe5fdb1a99, branch feat/coa-witch-hunter-nf-a2 at c9d1f90520, 40 scenarios, 0 flips), against 15000 ms, band 14250..15750. Residual: 2 x 0.5^11 = 9.8e-4 per pair."
   },
   {
     "spell": 712479,
@@ -5042,8 +5071,19 @@
   {
     "spell": 802273,
     "clause": "Command your Shadow Hounds to leap upon an enemy target, dealing two strikes for ${($706332m2+90)*$<scalingbp>+$RAP*0.55} Shadow damage.",
-    "labels": [
-      "802273 effect_value #0"
+    "claims": [
+      {
+        "claim": "Command your Shadow Hounds to leap upon an enemy target, dealing two strikes for ${($706332m2+90)*$<scalingbp>+$RAP*0.55} Shadow damage.",
+        "labels": [
+          "802273 script_hit 706332 shadowhound_strike"
+        ]
+      },
+      {
+        "claim": "dealing two strikes",
+        "labels": [
+          "802273 script_hit 706332 shadowhound_strike"
+        ]
+      }
     ],
     "kind": "claim",
     "dbc_clause": "Command your Shadow Hounds to leap upon an enemy target, dealing two strikes for ${$706332m2*$<scalingbp>2+$RAP*0.35} Shadow damage.",
@@ -5056,7 +5096,8 @@
       "ruling": "Owner ruling O-39: the stray 2 after $<scalingbp> hid the ranged attack power term of the client text; the text supersedes rev_20261029_41 (783f87fc5d, #9935, official changelog entries 71841 and 71842 of 2026-08-25: +90 base damage, ranged attack power scaling 55%, mentor D-2).",
       "spell": 802273,
       "dbc_differs": "Description differs from Spell.dbc"
-    }
+    },
+    "reason": "nf-a (not-final 333.0, O-39 text rev_20261117_01): the old label '802273 effect_value #0' read CalcValue of 706332 Effect[1] before the class script (222 at the measured level) against the whole figure 441.39 and alerted: an incorrect test, not a defect. 706332 Effect[1] is EffectBasePoints 224 + 1 = $706332m2 225 (Spell.dbc), and the server applies (m2 + 90) as value x 315 / 225 plus 0.55 x ranged attack power inside the hound's leap (AscensionWitchHunterSummons.cpp:216-229), so the strike's own hit is the proof. Entry 802273 shadowhound_strike (script_hit): a Houndmaster's Whistle 801343 summons the Shadowhound 50124 in both arms, the treatment arm casts Houndmaster's Call 802273 at the dummy; each 706332 strike of entry 50124 on the dummy is judged against the whole figure of the text at the measured stats, unresisted, with crits and partial resists removed as precondition fixtures; the control arm (whistle only) counts 0 hits. Pair 20261117-144023 / 20261117-144206 (worldserver sha256 4b7fb257fea1): 12 and 10 usable hits, strike 440 against the school model 441.000 (sigma 0), tooltip figure 441.39, tolerated (truncation) in both runs, control 0 hits. Reading of 'two strikes for X': each strike deals the whole figure X (the 705450 text for the Lesser hound says 'each'), no split into two halves; the wording is ambiguous and is recorded as an observation, not a change. Reference search (nf-a): ~/CoaServer/reference snapshots carry the tooltip text only; nothing found beyond the tooltip and official changelog entries 71841 and 71842 cited in the text_source. nf-f (review-a I-2, mentor D-475, ADR 1007): the row splits into the whole clause (part 0, unchanged label) and 'dealing two strikes' (part 1), both judged by the same label, which now sets strikes_per_cast 2: the 706332 casts of the hound 50124 are read before each call and after its settle. Counting pair 20261117-151949 / 20261117-152020 (and the first pair 20261117-151543 / -151711, the same reads), worldserver sha256 6785634f21d336f08cf7f3ef656f93bc9b1d00b532dd756ab78cb39f90ec3c78 (commit 9d43ee87a1): both runs casts per call 2, 2, 2, 2, 2, 2, 12 casts, 12 landed, 12 usable, 0 critical, 0 not landed; strike 440 against the school model 441.000, tooltip figure 441.39, tolerated (truncation); control 0 hits. A server casting one strike per call alerts in every call (deterministic counts, false-pass probability 0). The 2 unusable hits of the earlier run 20261117-144206 (10 of 12) cannot be read back (its raw results are gone): by code reading they are either critical strikes of the hound (the crit fixture 984954 sits on the player, and Unit.cpp:534 sets a base spell crit of 5 for every unit; the hound's effective crit chance is not read) or a call that did not strike; the new reads tell the two apart and showed neither."
   },
   {
     "spell": 802276,
@@ -5237,7 +5278,9 @@
         "claim": "When an enemy applies a curse to you",
         "labels": [
           "803638 behaviour_metric_delta curse_control_noncurse",
-          "803638 behaviour_metric_delta curse_duration_1"
+          "803638 behaviour_metric_delta curse_duration_1",
+          "803638 behaviour_hit_ratio taken_curse_none",
+          "803638 behaviour_hit_ratio taken_curse_1"
         ]
       },
       {
@@ -5246,7 +5289,10 @@
           "803638 effect_value 704570e0 #0",
           "803638 behaviour_metric_delta curse_amount_1",
           "803638 behaviour_metric_delta curse_amount_2",
-          "803638 behaviour_metric_delta curse_amount_3"
+          "803638 behaviour_metric_delta curse_amount_3",
+          "803638 behaviour_hit_ratio taken_curse_1",
+          "803638 behaviour_hit_ratio taken_curse_2",
+          "803638 behaviour_hit_ratio taken_curse_3"
         ]
       },
       {
@@ -5255,11 +5301,13 @@
           "803638 spell_duration 704570 #1",
           "803638 behaviour_metric_delta curse_duration_1",
           "803638 behaviour_metric_delta curse_duration_2",
-          "803638 behaviour_metric_delta curse_duration_3"
+          "803638 behaviour_metric_delta curse_duration_3",
+          "803638 behaviour_metric_delta curse_expiry_1",
+          "803638 behaviour_metric_delta curse_expiry_3"
         ]
       }
     ],
-    "reason": "f-b7 pairs 20261116-221827 / -221902 (build 17b06838948b) and the n343 reproduction (worldserver dd2bf749) read the amount at -10 at one curse and -20 at three against -15 and -25: the percent step left out the curse just applied while the duration (8000 + 2000 N) counted it. Owner ruling O-35 (card Q-wh-30, mentor D-394): every curse active counts, the new one included, for both; fixed in AscensionWitchHunterDefenses.cpp (Witch Hunter ADR 0023). The two-curse arms read the middle step. Pair after the fix 20261117-062112 / -062334 (worldserver 4f5ed44395c3, server 78c459d632): amount -15 / -20 / -25 and duration 9488 / 11488 / 13488 ms (read about 500 ms after the application) at one / two / three curses, control 0, all ok in both runs."
+    "reason": "f-b7 pairs 20261116-221827 / -221902 (build 17b06838948b) and the n343 reproduction (worldserver dd2bf749) read the amount at -10 at one curse and -20 at three against -15 and -25: the percent step left out the curse just applied while the duration (8000 + 2000 N) counted it. Owner ruling O-35 (card Q-wh-30, mentor D-394): every curse active counts, the new one included, for both; fixed in AscensionWitchHunterDefenses.cpp (Witch Hunter ADR 0023). The two-curse arms read the middle step. Pair after the fix 20261117-062112 / -062334 (worldserver 4f5ed44395c3, server 78c459d632): amount -15 / -20 / -25 and duration 9488 / 11488 / 13488 ms (read about 500 ms after the application) at one / two / three curses, control 0, all ok in both runs. nf-a (not-final 343.2, 'for $704570d'): the aura_duration_ms readbacks are a state read (METRIC_EVIDENCE readback, data), so two expiry arms are added on the aura metric (event): curse_expiry_1 and curse_expiry_3 read the presence of 704570 on the caster 9350 / 13300 ms and 750 ms later after the enemy curse (Curse of Tongues 1714 from a creature striker, same fixtures as curse_duration_1 and _3), the control phase without the enemy curse reading 0. One curse: present at 9359 ms and gone at 10118 ms of game time after the trigger cast, expected 8000 + 2000 = 10000; three curses: present at 13309 ms and gone at 14068 ms, expected 8000 + 6000 = 14000. The enemy curse lands about 200 ms before the trigger cast stamp, so the reads are at ages of about 9560 / 10320 ms and 13510 / 14270 ms, which excludes durations 10% short (9000, 12600) and 10% long (11000, 15400) and keeps both inside the 5% band. Pair 20261117-144023 / 20261117-144206 (worldserver sha256 4b7fb257fea1), ok in both runs. Reference search (nf-a): nothing found beyond the tooltip."
   },
   {
     "spell": 803638,
@@ -5267,9 +5315,13 @@
     "labels": [
       "803638 behaviour_metric_delta curse_amount_1",
       "803638 behaviour_metric_delta curse_amount_2",
-      "803638 behaviour_metric_delta curse_amount_3"
+      "803638 behaviour_metric_delta curse_amount_3",
+      "803638 behaviour_hit_ratio taken_curse_1",
+      "803638 behaviour_hit_ratio taken_curse_2",
+      "803638 behaviour_hit_ratio taken_curse_3"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Reference search (nf-a): nothing found beyond the tooltip (review-b M4)."
   },
   {
     "spell": 803638,
@@ -5277,9 +5329,16 @@
     "labels": [
       "803638 behaviour_metric_delta curse_duration_1",
       "803638 behaviour_metric_delta curse_duration_2",
-      "803638 behaviour_metric_delta curse_duration_3"
+      "803638 behaviour_metric_delta curse_duration_3",
+      "803638 behaviour_hit_ratio taken_duration_1_held",
+      "803638 behaviour_hit_ratio taken_duration_1_gone",
+      "803638 behaviour_hit_ratio taken_duration_2_held",
+      "803638 behaviour_hit_ratio taken_duration_2_gone",
+      "803638 behaviour_hit_ratio taken_duration_3_held",
+      "803638 behaviour_hit_ratio taken_duration_3_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Reference search (nf-a): nothing found beyond the tooltip (review-b M4)."
   },
   {
     "spell": 804024,
@@ -5380,7 +5439,7 @@
     "spell": 804051,
     "clause": "sleep, and charm effects every $806696T1 sec from party members within $853203a1 yds.",
     "kind": "claim",
-    "reason": "Review fix (f-m8, review8 I-1): the clause is split so the radius is its own part. Period, sleep, charm and party-member parts: Cycle G12 (f-g12, ADR 0930): 806696 (EffectAmplitude[0] 2500 ms, $806696T1) pulses 853203 (three SPELL_EFFECT_DISPEL_MECHANIC effects: mechanics 1 charm, 5 fear, 10 sleep; SpellRadius 9 = 20 yd, $853203a1). The periodic_dispel party_pulse entry reads fear 65931, sleep 9159 and charm 6358 on a party member 3 yd from the idol: all present without the cast (control), none left 100 ms after the cast and after each of two 2500 ms periods, all present 100 ms before each period, so one period lies in 2300..2600 ms (excludes 2250 and 2750 ms, D-200); a party member 35 yd away (beyond 20 yd) keeps all three to the end. Pair 20261116-183539 / 20261116-183951 (build b979b27e0c08): all ten 804051 labels ok in both runs. The label 804051 aura_amplitude_ms #1 is dropped: it read unmodelled (amplitude of a foreign spell, final17), as 705534 dropped its own; the pulse period is measured by the before/after reads. Radius part \"within $853203a1 yds.\": data only, 853203 SpellRadius 9 = 20 yd read by the label 804051 effect_radius 853203e0 #2; the party_pulse far member stands at 35 yd (radius + 15 yd margin, PARTY_ALLY_FAR_MARGIN_YD), so it proves only 'not at 35 yd' and a server pulsing at 30 yd would pass it: no behaviour label claims the radius, and no bracketed pair (one member inside, one just past 20 yd) exists without a shared-tool option on party_pulse (far margin), which is a stop under D-237. Reference search (G-11): sidekick data.js and the Black Knight video (video-blackknight-Ff842iqFIRQ.md 6:14, 7:05) repeat the tooltip text with no radius value; nothing else found. Final status of the clause: radius part data, so not status 1.",
+    "reason": "Review fix (f-m8, review8 I-1): the clause is split so the radius is its own part. Period, sleep, charm and party-member parts: Cycle G12 (f-g12, ADR 0930): 806696 (EffectAmplitude[0] 2500 ms, $806696T1) pulses 853203 (three SPELL_EFFECT_DISPEL_MECHANIC effects: mechanics 1 charm, 5 fear, 10 sleep; SpellRadius 9 = 20 yd, $853203a1). The periodic_dispel party_pulse entry reads fear 65931, sleep 9159 and charm 6358 on a party member 3 yd from the idol: all present without the cast (control), none left 100 ms after the cast and after each of two 2500 ms periods, all present 100 ms before each period, so one period lies in 2300..2600 ms (excludes 2250 and 2750 ms, D-200); a party member 35 yd away (beyond 20 yd) keeps all three to the end. Pair 20261116-183539 / 20261116-183951 (build b979b27e0c08): all ten 804051 labels ok in both runs. The label 804051 aura_amplitude_ms #1 is dropped: it read unmodelled (amplitude of a foreign spell, final17), as 705534 dropped its own; the pulse period is measured by the before/after reads. Radius part \"within $853203a1 yds.\": data only, 853203 SpellRadius 9 = 20 yd read by the label 804051 effect_radius 853203e0 #2; the party_pulse far member stands at 35 yd (radius + 15 yd margin, PARTY_ALLY_FAR_MARGIN_YD), so it proves only 'not at 35 yd' and a server pulsing at 30 yd would pass it: no behaviour label claims the radius, and no bracketed pair (one member inside, one just past 20 yd) exists without a shared-tool option on party_pulse (far margin), which is a stop under D-237. Reference search (G-11): sidekick data.js and the Black Knight video (video-blackknight-Ff842iqFIRQ.md 6:14, 7:05) repeat the tooltip text with no radius value; nothing else found. Final status of the clause before the ruling: radius part data, so not status 1. Radius bracket (nf-d2, ADR 1001, mentor D-467): party_pulse near_distance 18 and far_margin 2 put the members at 18 and 22 yd (10% each side of 20 yd). Pair 20261117-150929 / 20261117-151118 (build ff5cfdfb8800): the 18 yd member loses all three debuffs at each pulse (ok), but the 22 yd member loses them too (far_after_2 alert, 0 of 3, both runs). Cause (code reading and the test DB, the idol's position not read): the idol dispels through Nearby(me, 20) (AscensionWitchHunterSummons.cpp:376-377), AnyUnitInObjectRangeCheck -> IsWithinDistInMap with both object sizes (Object.cpp:1256-1263): 20 + the idol's combat reach 1.0 (creature_model_info 410389 CombatReach 1.0, DisplayScale 1, Creature.cpp:3849) + the player's 1.5 (DEFAULT_COMBAT_REACH x scale 1, Player.h:1110) = 22.5 yd; stock area spells add only the target's combat reach (Spell.cpp:9437-9441). Owner ruling O-47 (mentor D-482, card Q-wh-47 answer a): keep the 22.5 yd reach. Radius bracket (nf-j, ADR 1009, mentor D-484): party_pulse near_limit 22.5 lets the members stand at 21 and 24 yd (6.7% inside and beyond 22.5 yd); the expectation is 22.5 yd by the ruling (20 yd radius of 853203 + 1.0 idol + 1.5 player combat reaches, Nearby, AscensionWitchHunterSummons.cpp:374-380), so a pulse reaching 20 or 25 yd alerts; the labels after_0 (21 yd member cleansed) and far_after_2 (24 yd member keeps all three) judge it. Reference search: nothing found beyond the earlier search above. Pair 20261117-154033 / 20261117-154142 (worldserver 0698818c12f8): after_0 (21 yd member) and far_after_2 (24 yd member) ok in both runs, with the other eight 804051 periodic_dispel labels.",
     "claims": [
       {
         "claim": "sleep, and charm effects every $806696T1 sec from party members",
@@ -5398,7 +5457,9 @@
       {
         "claim": "within $853203a1 yds.",
         "labels": [
-          "804051 effect_radius 853203e0 #2"
+          "804051 effect_radius 853203e0 #2",
+          "804051 periodic_dispel after_0",
+          "804051 periodic_dispel far_after_2"
         ]
       }
     ]
@@ -5595,10 +5656,12 @@
       },
       {
         "claim": "and allowing them to ignore Armor.",
-        "labels": []
+        "labels": [
+          "804194 behaviour_metric_delta hound_ignore_armor"
+        ]
       }
     ],
-    "reason": "Decimate applies its auras to the summons only (effect 190, UnitAura::FillTargetMap): the value scenario reads them on a summoned Lesser Shadow Hound (summon_aura_carriers, ADR 0697), so its aura_amount label is unmeasurable (no owned-creature amount metric) and the damage claim is judged on the hound's strikes: 705450 script_hit 706332 one_leap_decimate, counted pair 20261115-163258 / -163350 (worldserver 7cbb6fe9bc40), 218 / 218 per strike against the text figure x 1.3 = 218.4, tolerated (truncation). Haste and armor have no route yet. Cycle 10 Houndmaster sample: the haste half is measured on the Shadowhound's swing interval (2000 ms before, 1538.46 ms after a real Decimate cast, a ratio of 1/1.30). The Armor half has no route yet: no metric reads whether a hound's melee hit ignored the target's armor."
+    "reason": "Decimate applies its auras to the summons only (effect 190, UnitAura::FillTargetMap): the value scenario reads them on a summoned Lesser Shadow Hound (summon_aura_carriers, ADR 0697), so its aura_amount label is unmeasurable (no owned-creature amount metric) and the damage claim is judged on the hound's strikes: 705450 script_hit 706332 one_leap_decimate, counted pair 20261115-163258 / -163350 (worldserver 7cbb6fe9bc40), 218 / 218 per strike against the text figure x 1.3 = 218.4, tolerated (truncation). Haste and armor have no route yet. Cycle 10 Houndmaster sample: the haste half is measured on the Shadowhound's swing interval (2000 ms before, 1538.46 ms after a real Decimate cast, a ratio of 1/1.30). The Armor half has no route yet: no metric reads whether a hound's melee hit ignored the target's armor. The Armor half is 804194 behaviour_metric_delta hound_ignore_armor (nf-e, D-462/D-463): the Shadowhound pet's plain physical swings on an armored and a zero-armor dummy, ratio 1.0 with Decimate and the read armor factor without it (706332 is Shadow, which armor never reduces). Reference search (nf-i, 2026-11-17): coa-history spell 804194 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of Decimate 804194, nothing found on armor ignored by the hounds beyond the tooltip words. Trials 40 -> 200 after the end3 pair read insufficient_trials (half-width 4.39 / 4.17), focused pair 20261117-180011 / 20261117-180138 ok/ok on worldserver 40bc26f54cd8, proven on a focused pair only (O-43), labels unchanged, no key shift."
   },
   {
     "spell": 804404,
@@ -5719,12 +5782,27 @@
   {
     "spell": 805365,
     "clause": "and causing your Flames of Sin to cleave up to $s3 additional enemies for $d.",
-    "labels": [
-      "805365 effect_value e2 #2",
-      "805365 aura_amount e2 #2",
-      "805365 aura_duration_ms #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not-final pass (nf-d2, ADR 1000, mentor D-467): the clause is split so the duration is its own part. Cleave part: Flourish 805365 Effect[2] SPELLMOD_JUMP_TARGETS +3 ($s3) on 802850 (class mask word 2 16384); Flames of Sin 803422 casts 802850 with 40% of every landed auto attack and the Flames contract sets its ChainTarget to 1 (AscensionWitchHunterFlames.cpp:145-165, 262-268). fixed_count swing_ms: Flourish at the caster, then one auto attack on the primary for 2000 ms, five dummies within 4 yd of it and one beyond the 10 yd jump radius: 3 of 4 extras hit, the far dummy unhit; control (Flames of Sin from its helper 803710, no Flourish): 0 of 4. Pair 20261117-150929 / 20261117-151118 (build ff5cfdfb8800): both labels ok in both runs. The direct cast of 802850 used before (pair 20261117-144038 / -144507) read 0 extras because an untriggered 802850 carries no copied damage and its 0-damage jumps log nothing. Duration part \"for $d.\": data only (805365 aura_duration_ms #3, DurationIndex 18 = 20000 ms); no behaviour label reads the cleave ending with Flourish. Reference search (nf-d, review-ad I-1): coa-history 802850 6284 SPELL_DAMAGE events (5 logs) and 805365 73 applications (per-log index, per-swing cleave counts not read); video-deepdive-wgc9dDFTAPI [67:44] shows the same cleave sentence (lead only); ~/CoaServer/reference: nothing beyond the tooltip. Nf-l (mentor D-493, part 373.1): the duration is also read as behaviour, the aura 805365 on the caster (Effect[2] apply aura 107, DurationIndex 18 = 20000 ms): present 19000 ms after the cast, absent 21000 ms after it (5% either side of 20000 ms, metric aura, deterministic reads). Pair 20261117-161747 / 20261117-161948 (build 8311a4113764): both labels ok in both runs.",
+    "claims": [
+      {
+        "claim": "and causing your Flames of Sin to cleave up to $s3 additional enemies",
+        "labels": [
+          "805365 effect_value e2 #2",
+          "805365 aura_amount e2 #2",
+          "805365 flourish_swing_cleave behaviour_fixed_count",
+          "805365 flourish_swing_cleave_control behaviour_fixed_count"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "805365 aura_duration_ms #3",
+          "805365 behaviour_metric_delta flourish_duration_present",
+          "805365 behaviour_metric_delta flourish_duration_absent"
+        ]
+      }
+    ]
   },
   {
     "spell": 805365,
@@ -5832,9 +5910,12 @@
     "clause": "firing shots at nearby enemies for $805753s2% Ranged Weapon Damage plus ${$cond($gt($sps, $sph), $805753m1+$805753ppl1+$sps*.2+$RAP*.1, $805753m1+$805753ppl1+$sph*.2+$RAP*.1)} as Twilight Damage.",
     "labels": [
       "805751 effect_value 805753e1 #1",
-      "805751 effect_value 805753e0 #2"
+      "805751 effect_value 805753e0 #2",
+      "805751 behaviour_hit_ratio shot_sp",
+      "805751 behaviour_hit_ratio shot_rap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Server fix Witch Hunter ADR 0025 (mentor D-467, D-473): the shot 805753 takes its 50% weapon part from the ranged weapon. Before: run 20261117-144749 (worldserver 10733f3c8ee0) read shot_sp 2.964 (alert), unresisted hits 104 / 286 / 303, the main-hand model. After: counted pair 20261117-152917 / -153017 (worldserver sha256 aefdc4216bd5, server commit 04dfb5da11), 800 trials per arm, both runs ok: shot_sp 2.7075 / 2.6997 and shot_rap 2.7071 / 2.7045 against 2.7029 (band 8.5 points), unresisted hits 117 (control) and 317 (+1000 ranged attack power, +1000 spell power), the tooltip's 117.45 / 317.45 / 317.45. shot_sp holds the weapon source and the SP term (false pass against the main hand below 1e-40 per pair); shot_rap holds the RAP terms and alone passes a 100% weapon part with 0.34% per pair, a defect shot_sp alerts (2.2056). The effect_value labels give the 50% and the flat 69 at RAP 237. Joint reading (mentor D-480, review-g): 379.0 counts on shot_sp AND shot_rap together; shot_rap is never read alone for this part. A false pass must get through both: for a 100% weapon part shot_rap alone passes at about 0.34% per pair, shot_sp alerts it (2.2056), so the joint false-pass residual per pair is below 1e-30, under D-343. Reference search (fix note nf/fix-379): snapshots name Twilight Frenzy talents only; videos boltslinger HwCt84i9iKA [8:44] and overview 3qLYu74QhH4 [34:20] show '50% Ranged Weapon Damage' (older state); coa-history 805753 13852 SPELL_DAMAGE events in 8 logs cannot separate the weapon source; coa-server-guide: nothing found."
   },
   {
     "spell": 805751,
@@ -5945,10 +6026,12 @@
       },
       {
         "claim": "based on the damage dealt.",
-        "labels": []
+        "labels": [
+          "807284 behaviour_metric_delta rage_per_damage"
+        ]
       }
     ],
-    "reason": "f-t383 (ADR 0870): the Rage part is a behaviour read of the caster's Rage power (PowerType 1) with regeneration and decay off, set to 0 at the start of both phases (phase_power with phase_power_in_uncast_before). Control (no bolt) reads 0; after one real Heartseeking Bolt at the dummy it reads at least 1 raw Rage. The tooltip states no amount, so none is judged. 'based on the damage dealt' states a proportionality that no read measures, so it stays unproven. Pair: counted pair 20261116-171530 / 20261116-171646, worldserver sha256 d0f13b394fe3: rage ok, before 0 and 0, after 169 and 181.",
+    "reason": "f-t383 (ADR 0870): the Rage part is a behaviour read of the caster's Rage power (PowerType 1) with regeneration and decay off, set to 0 at the start of both phases (phase_power with phase_power_in_uncast_before). Control (no bolt) reads 0; after one real Heartseeking Bolt at the dummy it reads at least 1 raw Rage. The tooltip states no amount, so none is judged. 'based on the damage dealt' was unproven until nf-a2: the rage_per_damage option below reads Rage per point of damage across two damage levels, and ADR 1008 makes it a behaviour read of that claim. Pair: counted pair 20261116-171530 / 20261116-171646, worldserver sha256 d0f13b394fe3: rage ok, before 0 and 0, after 169 and 181. nf-a2 (mentor D-465, ADR 1004 provisional): 'based on the damage dealt.' is now judged by 807284 behaviour_metric_delta rage_per_damage: one non-critical bolt per phase, the after phase with +1000 AP 10031; (Rage / damage after) / (Rage / damage before) reads 0.9987 (172 Rage for 1059, 333 for 2053) and 0.9987 (171 for 1053, 337 for 2078) against 1 within 0.05, damage contrast 1.94 and 1.97, under the 1000 Rage cap, in pair 20261117-151120 / -151258 (worldserver sha256 7cbe5fdb1a99, branch feat/coa-witch-hunter-nf-a2 at c9d1f90520, 40 scenarios, 0 flips). A Rage independent of the damage would read about 0.51 (false pass 0); the truncation bound (about 0.9%) keeps the false alert at 0. Reference search (nf-a2, review-ad I-1): ~/CoaServer/reference: 807284 only in snapshots/ascension-data/tables/skill_line_ability.csv (no Rage data); plans video-*.md: nothing found.",
     "text_source": {
       "table": "coa_client_spell_description",
       "file": "rev_20261115_02_witch_hunter_heartseeking_bolt_text.sql",

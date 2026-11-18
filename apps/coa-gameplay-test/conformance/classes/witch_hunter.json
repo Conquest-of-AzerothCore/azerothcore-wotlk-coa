@@ -2081,6 +2081,29 @@
       "cast_in_before": false
     },
     {
+      "spell": 562025,
+      "name": "Darkflock (tick period)",
+      "kind": "hit_period",
+      "variant": "tick_period",
+      "label_suffix": "tick_period",
+      "quote": "command a flock of crows to deal ${$m1+0+$AP*.35+$SP*1.0625} Shadow damage to enemies in front of you every $t1 sec.",
+      "trigger_spell": 562025,
+      "hit_spell": 520271,
+      "expected_ms": 2000,
+      "window": [
+        0,
+        8500
+      ],
+      "fixtures": [
+        [
+          823764,
+          "caster"
+        ]
+      ],
+      "poll_ms": 50,
+      "observe_source": "562025 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 2000 ms ($t1 = 2 sec), DurationIndex 31 = 8000 ms, triggering 520271 on enemies in front of the caster. The 520271 damage hits on the dummy are stamped over 8500 ms of game time after a real Darkflock cast, and the mean gap between the first and the last stamped hit must lie within the G-19 band of 2000 ms (100 ms); no 520271 hit before the cast. Beeg spellpen 823764 is a harness set_aura precondition fixture (it removes partial resists, as the dark_base entry), not the claim's subject."
+    },
+    {
       "spell": 501349,
       "name": "Tormentor (periodic damage duration)",
       "kind": "cast_applies_aura",
@@ -4682,6 +4705,68 @@
     },
     {
       "spell": 805751,
+      "name": "Twilight Frenzy (shot damage, +1000 ranged attack power)",
+      "kind": "hit_ratio",
+      "effect": 0,
+      "variant": "shot_rap",
+      "label_suffix": "shot_rap",
+      "quote": "firing shots at nearby enemies for $805753s2% Ranged Weapon Damage plus ${$cond($gt($sps, $sph), $805753m1+$805753ppl1+$sps*.2+$RAP*.1, $805753m1+$805753ppl1+$sph*.2+$RAP*.1)} as Twilight Damage.",
+      "expected": 2.7029,
+      "observe_spell": 805753,
+      "learn": [
+        805753
+      ],
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [
+          [
+            10031,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 160,
+      "parts": 5,
+      "dummy_distance": 10,
+      "expected_source": "Twilight Frenzy 805751 fires 805753 at nearby enemies every 500 ms through 805752 (Effect[2] aura 23, EffectAmplitude 500); 805753 is cast directly at the dummy 10 yd away (SpellRange 6, 0 to 100 yd, Flags 0), the shot the clause describes. Spell.dbc 805753: Effect[1] 31 WEAPON_PERCENT_DAMAGE 49 + 1 = 50% ($805753s2); Effect[0] 2 SCHOOL_DAMAGE 14 + 1 = 15 ($805753m1) with EffectRealPointsPerLevel 1.0 from SpellLevel 29: at level 60 int32(31 x 1.0) = 31, so 46; SchoolMask 34 (Holy and Shadow, Twilight). The Witch Hunter coefficient row {805753, effect 0, rap 0.1, sp 0.2, school 34} (AscensionWitchHunterCoefficients.h:119) adds 0.1 x RAP + 0.2 x max(Holy, Shadow spell power) to Effect[0] (AscensionWitchHunterCompletion.cpp:611-623; $sps and $sph are the Shadow and Holy spell power tokens, so the server's max matches the tooltip's $cond) and zeroes its stock BonusMultiplier (:421-423); the record's effect_value 805753e0 read 69 at RAP 237 (46 + 23.7). Weapon part: 50% of the Boltslinger crossbow 15809 (49-50, 2800 ms) with RAP / 14 x 2.8 = 0.2 x RAP: B = 0.5 x (49.5 + 0.2 x RAP) + 46 + int(0.1 x RAP) + 0.2 x SP; reference RAP 237, SP 0: 48.45 + 69 = 117.45. Non-critical hits only; partial resists and percent modifiers act alike in both arms, so the ratio does not depend on them. Ranged attack power contrast (D-57): QA Test +1000 Melee and Ranged AP 10031 in the treatment arm only (a real aura, as the Heartseeking Bolt rap entry), RAP 1237: B = 0.5 x (49.5 + 247.4) + 46 + 123 = 317.45, ratio 317.45 / 117.45 = 2.7029 (+170.3%, band 8.5 points). Readings that must alert: no RAP term 2.0588, a 100% weapon part 2.808, a 0.2 RAP term 3.121, no weapon part 2.449. Sizing from the measured spread (Witch Hunter ADR 0025 first pair 20261117-152309 / -152444, 60 trials per arm: 99% half-widths 10.8 to 12.0 points, a standard error of about 4.7 points, mostly from the 10% partial-resist steps): 160 trials x 5 parts = 800 per arm, standard error about 1.3 points, 99% half-width about 3.3 under the 4.26 limit. False alert (true +170.3%, estimate outside +-8.51) about 3e-11 per run. False pass: no RAP term (2.0588), a 0.2 RAP term (3.121) and no weapon part (2.449) are at least 16.9 points outside the band (below 1e-30 per pair); a 100% weapon part (+180.8%) lies 2.0 points beyond the band edge, so this entry alone passes it with about 6% per run, 0.34% per pair, and that defect is held by the shot_sp entry (it reads 2.2056 there, 41 points outside its band, false pass below 1e-30 per pair). The main-hand weapon source reads 2.756 here, inside the band: this entry cannot tell the weapon source, shot_sp does.",
+      "observe_source": " Joint reading (mentor D-480, review-g): 379.0 counts on shot_sp AND shot_rap together; shot_rap is never read alone for this part. A false pass must get through both: for a 100% weapon part shot_rap alone passes at about 0.34% per pair, shot_sp alerts it (2.2056), so the joint false-pass residual per pair is below 1e-30, under D-343."
+    },
+    {
+      "spell": 805751,
+      "name": "Twilight Frenzy (shot damage, +1000 spell power)",
+      "kind": "hit_ratio",
+      "effect": 0,
+      "variant": "shot_sp",
+      "label_suffix": "shot_sp",
+      "quote": "firing shots at nearby enemies for $805753s2% Ranged Weapon Damage plus ${$cond($gt($sps, $sph), $805753m1+$805753ppl1+$sps*.2+$RAP*.1, $805753m1+$805753ppl1+$sph*.2+$RAP*.1)} as Twilight Damage.",
+      "expected": 2.7029,
+      "observe_spell": 805753,
+      "learn": [
+        805753
+      ],
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [
+          [
+            10030,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 160,
+      "parts": 5,
+      "dummy_distance": 10,
+      "expected_source": "Twilight Frenzy 805751 fires 805753 at nearby enemies every 500 ms through 805752 (Effect[2] aura 23, EffectAmplitude 500); 805753 is cast directly at the dummy 10 yd away (SpellRange 6, 0 to 100 yd, Flags 0), the shot the clause describes. Spell.dbc 805753: Effect[1] 31 WEAPON_PERCENT_DAMAGE 49 + 1 = 50% ($805753s2); Effect[0] 2 SCHOOL_DAMAGE 14 + 1 = 15 ($805753m1) with EffectRealPointsPerLevel 1.0 from SpellLevel 29: at level 60 int32(31 x 1.0) = 31, so 46; SchoolMask 34 (Holy and Shadow, Twilight). The Witch Hunter coefficient row {805753, effect 0, rap 0.1, sp 0.2, school 34} (AscensionWitchHunterCoefficients.h:119) adds 0.1 x RAP + 0.2 x max(Holy, Shadow spell power) to Effect[0] (AscensionWitchHunterCompletion.cpp:611-623; $sps and $sph are the Shadow and Holy spell power tokens, so the server's max matches the tooltip's $cond) and zeroes its stock BonusMultiplier (:421-423); the record's effect_value 805753e0 read 69 at RAP 237 (46 + 23.7). Weapon part: 50% of the Boltslinger crossbow 15809 (49-50, 2800 ms) with RAP / 14 x 2.8 = 0.2 x RAP: B = 0.5 x (49.5 + 0.2 x RAP) + 46 + int(0.1 x RAP) + 0.2 x SP; reference RAP 237, SP 0: 48.45 + 69 = 117.45. Non-critical hits only; partial resists and percent modifiers act alike in both arms, so the ratio does not depend on them. Spell power contrast (D-57): QA Test +1000 SP 10030 (aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, EffectMiscValue 127, so Holy and Shadow both rise by 1000) in the treatment arm only: B = 117.45 + 0.2 x 1000 = 317.45, ratio 2.7029 (+170.3%, band 8.5 points). Readings that must alert: no SP term 1.0, a 0.1 SP term 1.8515, a 0.3 SP term 3.5543. Sizing as the rap entry: 160 trials x 5 parts = 800 per arm, standard error about 1.3 points, 99% half-width about 3.3 under the 4.26 limit; false alert about 3e-11 per run. False pass against the nearest alerting reading, the main-hand weapon source 2.964 measured before Witch Hunter ADR 0025 (+196.4%, 17.6 points beyond the band edge), below 1e-40 per pair; a 100% weapon part reads 2.2056 and the 0.1 and 0.3 SP terms 1.8515 and 3.5543, further away.",
+      "observe_source": " Joint reading (mentor D-480, review-g): 379.0 counts on shot_sp AND shot_rap together; shot_rap is never read alone for this part. A false pass must get through both: for a 100% weapon part shot_rap alone passes at about 0.34% per pair, shot_sp alerts it (2.2056), so the joint false-pass residual per pair is below 1e-30, under D-343."
+    },
+    {
+      "spell": 805751,
       "name": "Twilight Frenzy (the channel continues while the caster moves)",
       "kind": "metric_delta",
       "variant": "moving_channel",
@@ -4972,6 +5057,46 @@
     },
     {
       "spell": 805365,
+      "name": "Flourish (aura present at 19000 ms)",
+      "kind": "metric_delta",
+      "variant": "flourish_duration_present",
+      "label_suffix": "flourish_duration_present",
+      "quote": "for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805365,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 19000,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 805365
+      },
+      "observe_source": "805365 Spell.dbc DurationIndex 18 = SpellDuration 18 Duration 20000 ms ($d); Effect[2] 6 SPELL_EFFECT_APPLY_AURA, aura 107 ADD_FLAT_MODIFIER on the caster, so the owned aura 805365 sits on the caster for the whole duration. Control (before): no cast, 805365 absent on the caster (0). After: one Flourish 805365, the aura read on the caster 19000 ms later: present (1): the aura outlasts 19000 ms. The read sits 1000 ms (5% of 20000 ms) before the stated end, so a duration 10% short (18000 ms) or 10% long (22000 ms) flips one of the two reads (present at 19000 ms, absent at 21000 ms); the 25 ms harness step is far inside the 1000 ms margin. Deterministic reads (no roll): false-alert and false-pass probability 0 per pair for a server whose duration is 18000 or 22000 ms. Existing aura read only (metric aura, as flourish_grant and flourish_extension_absent). Reference search: coa-history 805365 73 applications (per-log index, duration not read); nothing found for a duration beyond the tooltip."
+    },
+    {
+      "spell": 805365,
+      "name": "Flourish (aura absent at 21000 ms)",
+      "kind": "metric_delta",
+      "variant": "flourish_duration_absent",
+      "label_suffix": "flourish_duration_absent",
+      "quote": "for $d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 805365,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 21000,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 805365
+      },
+      "observe_source": "805365 Spell.dbc DurationIndex 18 = SpellDuration 18 Duration 20000 ms ($d); Effect[2] 6 SPELL_EFFECT_APPLY_AURA, aura 107 ADD_FLAT_MODIFIER on the caster, so the owned aura 805365 sits on the caster for the whole duration. Control (before): no cast, 805365 absent on the caster (0). After: one Flourish 805365, the aura read on the caster 21000 ms later: absent (0): the aura has ended by 21000 ms. The read sits 1000 ms (5% of 20000 ms) past the stated end, so a duration 10% short (18000 ms) or 10% long (22000 ms) flips one of the two reads (present at 19000 ms, absent at 21000 ms); the 25 ms harness step is far inside the 1000 ms margin. Deterministic reads (no roll): false-alert and false-pass probability 0 per pair for a server whose duration is 18000 or 22000 ms. Existing aura read only (metric aura, as flourish_grant and flourish_extension_absent). Reference search: coa-history 805365 73 applications (per-log index, duration not read); nothing found for a duration beyond the tooltip."
+    },
+    {
+      "spell": 805365,
       "name": "Flourish (pulse damage)",
       "kind": "metric_delta",
       "variant": "flourish_damage",
@@ -5137,6 +5262,53 @@
       "after_at_least": 3,
       "after_at_most": 3,
       "observe_source": "Flourish 805365 links the owned periodic aura 807637 (spell_linked_spell type 2, rev_20260907_16_witch_hunter_flourish.sql:3-5): Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 4000 ms ($807637t1), EffectTriggerSpell 807762 (fire damage). The caster casts 805365 at the dummy and the dummy's 807762 damage count (spell_damage_count of the caster, spell 807762) is read 8200 ms later: 3. The first pulse lands with the cast itself, so pulse k lies at 4000 x (k-1) ms; this read sits 200 ms (5% of the 4000 ms period) after the instant of pulse 3. Three pulses: the third has landed, so it lies in (7800, 8200] ms.Beeg spellpen 823764 on the caster (harness set_aura) is a precondition fixture, not the claim's subject. Before (control): no cast, no 807762 hit. Not hit_period: its judge needs a first read of none, and the first pulse lands with the cast (a read at 3500 ms already held one, pairs 20261115-113201 / -113239 and -113415 / -113443)."
+    },
+    {
+      "spell": 805365,
+      "name": "Flourish (Flames of Sin cleaves up to 3 additional enemies on a real swing)",
+      "variant": "flourish_swing_cleave",
+      "label_suffix": "flourish_swing_cleave",
+      "expected": 3,
+      "setup_casts": [
+        [
+          805365,
+          "caster"
+        ]
+      ],
+      "kind": "fixed_count",
+      "quote": "to cleave up to $s3 additional enemies",
+      "radius": 10.0,
+      "cluster_yd": 4.0,
+      "primary_distance_reads": true,
+      "cast_spell": 802850,
+      "target_rank": 802850,
+      "repeats": 1,
+      "swing_ms": 2000,
+      "radius_reason": "Flourish 805365 Effect[2] is aura 107 (ADD_FLAT_MODIFIER) with EffectMiscValue 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints 2 + 1 = 3 ($s3) and EffectSpellClassMask word 2 = 16384, on the caster; its Effect[0] triggers Flames of Sin 803422 and its Effect[1] (177, EffectBasePoints 9999 + 1) grants it for 10000 ms (GrantOrExtend, AscensionWitchHunterFlames.cpp:101-119). Flames of Sin casts 802850 (SpellFamilyFlags[2] 16384, so the mask matches) at the victim of every landed auto attack of the caster that deals damage, with 40% of that damage (EffectBasePoints[0] 39 + 1, AscensionWitchHunterFlames.cpp:145-165, a triggered cast that loads the copied damage, :186-201); the Flames contract sets 802850 ChainTarget 1 (AscensionWitchHunterFlames.cpp:262-268), so Flourish raises it to 4, and every jump keeps EffectDamageMultiplier 0.95 of a nonzero hit. 802850 is DmgClass 1 (magic): Spell::SearchChainTargets takes a jump radius of 10 yd (Spell.cpp:2210-2225). Swing route (swing_ms): Flourish is cast at the caster first, then the caster auto attacks the primary dummy 3 yd away for 2000 ms and stops; the class ratings (10000 melee hit and expertise) remove misses, dodges and parries, so the swing at the attack start lands. The counted runs (20261117-164456 / -172516) read the primary 802850 count 0 -> 2 from cast 0 to cast 1 in every result, so each window held two 802850 triggers (source not established), and the extras are judged on the union of both triggers' targets. Chain targets are unique per trigger (Spell.cpp:2242, :2291-2292), so the 2 hits on each of three extras and none on the fourth mean each trigger hit exactly 3. The additional dummies stand within 4 yd of the primary (primary_distance_reads); one dummy beyond the three stated stays in the cluster and must stay unhit (headroom), and one dummy beyond the radius must stay unhit. A cap of 4 reads 4 on the exact count and alerts; a cap of 2 reads 2 and alerts only while both triggers of a window take the same targets (chain order by distance, Spell.cpp:2273-2281, with unmoving dummies; not proven), so its false pass per pair is not established; a window without a primary hit is unmeasured, never ok (false alert 0 per pair). The direct cast of 802850 (pair 20261117-144038 / -144507) carried no copied damage (the script loads only for a triggered cast), so its jumps dealt int32(1 x 0.95) = 0 and logged nothing; this entry takes the real path."
+    },
+    {
+      "spell": 805365,
+      "name": "Flourish (control: Flames of Sin without Flourish cleaves none on a real swing)",
+      "variant": "flourish_swing_cleave_control",
+      "label_suffix": "flourish_swing_cleave_control",
+      "expected": 0,
+      "headroom": 4,
+      "setup_casts": [
+        [
+          803710,
+          "caster"
+        ]
+      ],
+      "kind": "fixed_count",
+      "quote": "to cleave up to $s3 additional enemies",
+      "radius": 10.0,
+      "cluster_yd": 4.0,
+      "primary_distance_reads": true,
+      "cast_spell": 802850,
+      "target_rank": 802850,
+      "repeats": 1,
+      "swing_ms": 2000,
+      "radius_reason": "Control arm of the Flourish swing cleave entry: the same five dummies (headroom 4), the same 2000 ms auto attack on the primary, without Flourish. Flames of Sin 803422 comes from its helper 803710 cast at the caster (Effect[0] 64 triggers 803422, Effect[1] 177 EffectBasePoints 2999 + 1 = 3000 ms, the helper the Dawn Blade talent 92094 casts; a precondition fixture, not the claim's subject); the attack starts after the 1600 ms wait of that cast, inside the 3000 ms. Without SPELLMOD_JUMP_TARGETS 802850 keeps ChainTarget 1, so no additional dummy may be hit, while the primary hit shows that the swing triggered 802850."
     },
     {
       "spell": 707535,
@@ -8458,6 +8630,50 @@
         ]
       ],
       "unresisted": true
+    },
+    {
+      "spell": 802273,
+      "name": "Houndmaster's Call (Shadowhound strikes)",
+      "kind": "script_hit",
+      "variant": "shadowhound_strike",
+      "label_suffix": "shadowhound_strike",
+      "quote": "Command your Shadow Hounds to leap upon an enemy target, dealing two strikes for ${($706332m2+90)*$<scalingbp>+$RAP*0.55} Shadow damage.",
+      "hit_spell": 706332,
+      "caster_entry": 50124,
+      "casts": [
+        [
+          801343,
+          "caster"
+        ],
+        [
+          802273,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          801343,
+          "caster"
+        ]
+      ],
+      "trials": 6,
+      "minimum_hits": 2,
+      "cast_power": 500,
+      "settle_ms": 3000,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "contract_note": "Houndmaster's Whistle 801343 summons the Shadowhound 50124 in both arms (a precondition); the treatment arm then casts Houndmaster's Call 802273 at the dummy and the hound leaps and casts Houndmaster's Call 706332 twice (AscensionWitchHunterSummons.cpp:216-229, no 0.3 factor for entry 50124), each strike judged against the whole figure of the text at the measured stats, unresisted, crits and partial resists removed on the caster as precondition fixtures (984954, 823764). The control arm (whistle only, no call) must show no 706332 hit from entry 50124 inside the 3000 ms settle, before the uncommanded auto-leap. Review-a I-2, mentor D-475: strikes_per_cast 2 reads the 706332 casts of the hound before each call and after its settle, two per call (the leap casts 706332 twice, AscensionWitchHunterSummons.cpp:224-227), and lists landed, usable, critical and not-landed strikes per run; a server casting one strike per call alerts in every trial.",
+      "observe_source": "802273 text (O-39, rev_20261117_01): ${($706332m2+90)*$<scalingbp>+$RAP*0.55}: 706332 Effect[1] SCHOOL_DAMAGE EffectBasePoints 224 + 1 = $706332m2 225; the server implements (m2 + 90) as value x 315 / 225 plus 0.55 x ranged attack power (AscensionWitchHunterSummons.cpp:216-229). The effect_value read of 802273 (CalcValue of 706332 Effect[1], 222 at the measured level, before the script) cannot show the 315/225 factor or the attack power term, so the strike's own hit is the proof.",
+      "strikes_per_cast": 2
     },
     {
       "spell": 574149,
@@ -12259,6 +12475,436 @@
       "repeats": 1,
       "settle_ms": 1500,
       "observe_source": "681445 Effect[0] summons 506251; the class script casts 681447 (Effect[0] SPELL_AURA_MOD_SILENCE, EffectRadiusIndex 8 = 5 yd, $681447a1) on every valid enemy within 5 yd of the first enemy (the script's literal 5.0f, AscensionWitchHunterSummons.cpp, entry 506251 branch). Trap placement: the cast's Effect[0] is SPELL_EFFECT_SUMMON, TargetA TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd (server DBC set), so the trap stands 2 yd in front of the caster (AscensionWitchHunterSummons.cpp, spell_ascension_witch_hunter_summon). Its first pulse comes 1 s after the summon; it fires on the first valid enemy within 3 yd of it (Nearby, AnyUnitInObjectRangeCheck: WorldObject::IsWithinDistInMap with both object sizes, Object.cpp:1381-1384) and then victims are searched around that enemy. The primary stands 4 yd from the caster (2 yd from the trap); the inside dummy is 4 + radius + 1.275 + 1.275 - 0.5 yd out, beyond the trap's own 3 yd trigger reach even with an object size of 1.5 yd for the trap, so the primary is the only enemy that can fire it. Control arm: the trap spell is cast before it is learned and is refused, so no aura reaches any dummy; treatment: one cast after learning, the aura read 1500 ms later (the trap fires on its 1 s pulse). The center is a living creature, so its own object size adds to the edge (both radii of IsWithinDistInMap). The aura read is the silence 681447 on each dummy."
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (trap held)",
+      "kind": "metric_delta",
+      "variant": "trap_held",
+      "label_suffix": "trap_held",
+      "quote": "Place a dark trap on the ground lasting $d",
+      "trigger_spell": 680238,
+      "target": "caster",
+      "dummy_distance": 20,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 506250
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_in_before": false,
+      "wait_ms": 29300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29300,
+          29350
+        ]
+      },
+      "observe_source": "680238 Effect[0] 28 SPELL_EFFECT_SUMMON of creature 506250 (EffectMiscValue[0]), DurationIndex 9 (30000 ms, $d, SpellDuration 9 = 30000/30000). The class summon script fires the trap only for an enemy within 3 yd (AscensionWitchHunterSummons.cpp:400-402), so the dummy stands 20 yd away and the trap stays out: the owned trap 506250 is still out 29300 ms of game time after a real cast of 680238 (G-19 band 5% of 30000 = 1500 ms; a 27000 ms lifetime, 10% short, would read 0); the held and ends readings bracket the 30000 ms end (the 681445 / 681450 trap_held precedent). Control: no cast in the before phase, 0.",
+      "select_dummy": true
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (trap ends)",
+      "kind": "metric_delta",
+      "variant": "trap_ends",
+      "label_suffix": "trap_ends",
+      "quote": "Place a dark trap on the ground lasting $d",
+      "trigger_spell": 680238,
+      "target": "caster",
+      "dummy_distance": 20,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 506250
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "cast_in_before": false,
+      "wait_ms": 30750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          30750,
+          30800
+        ]
+      },
+      "observe_source": "680238 Effect[0] 28 SPELL_EFFECT_SUMMON of creature 506250 (EffectMiscValue[0]), DurationIndex 9 (30000 ms, $d). The dummy stands 20 yd away so the trap never fires (AscensionWitchHunterSummons.cpp:400-402): the owned trap 506250 is gone 30750 ms of game time after a real cast of 680238 (G-19 band 5% of 30000 = 1500 ms; a 33000 ms lifetime, 10% long, would read 1); with trap_held it brackets the 30000 ms end. Control: no cast in the before phase, 0.",
+      "select_dummy": true
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (stun duration on the fired enemy)",
+      "kind": "last_application_expiry",
+      "variant": "stun_duration",
+      "label_suffix": "stun_duration",
+      "quote": "stunning them for $681179d",
+      "gate_spell": 680238,
+      "trigger_spell": 680238,
+      "aura": 681179,
+      "expected_ms": 4000,
+      "control_window_ms": 500,
+      "window_ms": 7000,
+      "poll_ms": 50,
+      "trigger_power": 1720,
+      "observe_source": "681179 Effect[0] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 35 = 4000 ms ($681179d, server DBC set); the Shadow Trap 506250 casts it on the enemy that fires it (AscensionWitchHunterSummons.cpp:418-421). The trap stands 2 yd in front of the caster (680238/681445/681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. The kind stamps the application (the dummy's 681179 apply count rising) and the removal in game time, so the pulse moment does not enter the reading: the bracket must lie inside 4000 +- 200 ms (G-19 5%), which excludes 3600 and 4400 (D-200). Control: 680238 cast before it is learned, refused, no 681179. The trap costs ManaCostPercentage 11 of the class base mana (no flat ManaCost), so the caster's mana is set to 1720 (class file base_mana) before each cast (trigger_power)."
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (damage over time at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "dot_base",
+      "label_suffix": "dot_base",
+      "quote": "and dealing ${($681177d*1000/$681177T1)*($681177m1+$681177ppl1+$AP*0.34)} Shadow damage over $681177d.",
+      "before_expected": 0,
+      "trigger_spell": 680238,
+      "target": "dummy",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 10500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681177,
+        "target": "dummy"
+      },
+      "expected": 845,
+      "after_at_least": 840,
+      "after_at_most": 852,
+      "observe_source": "681177 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Shadow, EffectBasePoints 8, EffectDieSides 3 ($681177m1 = 9, roll 9..11), EffectRealPointsPerLevel 2.125 from BaseLevel / SpellLevel 10 ($681177ppl1 = 2.125 x 50 = 106.25 at level 60), EffectAmplitude 2000 ($681177T1), DurationIndex 31 = 8000 ms ($681177d): 8000 / 2000 = 4 ticks. Reference attack power 282 (class file reference_stats), 0.34 x 282 = 95.88. Tooltip per tick 9 + 106.25 + 95.88 = 211.13, total 844.5; the engine rolls once per aura (115..117 with the level part truncated, or 115.25..117.25 kept) and truncates each tick, so 4 ticks read 840..852. The coefficient 0.34 x 10% off moves the total by 38, outside the window; dot_ap isolates the AP term. The trap stands 2 yd in front of the caster (680238/681445/681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. The total is read 10500 ms after the cast (pulse 1000 + 8000 + slack). Beeg spellpen 823764 and Thundering Strikes 16255 at -100 are set on the caster (harness set_aura, precondition fixtures for the partial resists and the critical ticks, not the claim's subject, the 680521 damage_base precedent); the class file sets spell_hit_rating 10000, so the DmgClass 1 aura does not miss. Control: the before reading, no cast, 0."
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (damage over time at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "dot_ap",
+      "label_suffix": "dot_ap",
+      "quote": "and dealing ${($681177d*1000/$681177T1)*($681177m1+$681177ppl1+$AP*0.34)} Shadow damage over $681177d.",
+      "before_expected": 0,
+      "trigger_spell": 680238,
+      "target": "dummy",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 10500,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681177,
+        "target": "dummy"
+      },
+      "expected": 28046,
+      "after_at_least": 28040,
+      "after_at_most": 28052,
+      "observe_source": "D-57 contrast arm for the $AP*0.34 term, in the same pair as dot_base. The caster holds 20000 more attack power (player_attack_power, harness fixture, the 680521 damage_ap precedent): 20282, 0.34 x 20282 = 6895.88 per tick; per tick 115..117 + 6895.88 truncated = 7010..7013, 4 ticks 28040..28052 (tooltip 4 x (9 + 106.25 + 6895.88) = 28044.5). A coefficient 10% off (0.306 or 0.374) moves the total by 2758, outside the window. The trap stands 2 yd in front of the caster (680238/681445/681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. Beeg spellpen 823764 and Thundering Strikes 16255 at -100 are set on the caster (harness set_aura, precondition fixtures for the partial resists and the critical ticks, not the claim's subject, the 680521 damage_base precedent); the class file sets spell_hit_rating 10000, so the DmgClass 1 aura does not miss. Control: the before reading, 0."
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (damage over time lasts 8 sec)",
+      "kind": "last_application_expiry",
+      "variant": "dot_duration",
+      "label_suffix": "dot_duration",
+      "quote": "Shadow damage over $681177d.",
+      "gate_spell": 680238,
+      "trigger_spell": 680238,
+      "aura": 681177,
+      "expected_ms": 8000,
+      "control_window_ms": 500,
+      "window_ms": 10500,
+      "poll_ms": 50,
+      "trigger_power": 1720,
+      "observe_source": "681177 DurationIndex 31 = 8000 ms ($681177d, server DBC set), cast by the Shadow Trap 506250 on the enemy that fires it (AscensionWitchHunterSummons.cpp:418-421). The trap stands 2 yd in front of the caster (680238/681445/681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. The application and removal of 681177 on the dummy are stamped in game time: the bracket must lie inside 8000 +- 400 ms (G-19 5%), excluding 7200 and 8800 (D-200). Control: 680238 cast before it is learned, refused, no 681177. The trap costs ManaCostPercentage 11 of the class base mana (no flat ManaCost), so the caster's mana is set to 1720 (class file base_mana) before each cast (trigger_power)."
+    },
+    {
+      "spell": 681445,
+      "name": "Inquisitor's Trap (silence duration on the fired enemy)",
+      "kind": "last_application_expiry",
+      "variant": "silence_duration",
+      "label_suffix": "silence_duration",
+      "quote": "for $681447d.",
+      "gate_spell": 681445,
+      "trigger_spell": 681445,
+      "aura": 681447,
+      "expected_ms": 6000,
+      "control_window_ms": 500,
+      "window_ms": 9000,
+      "poll_ms": 50,
+      "trigger_power": 1720,
+      "observe_source": "681447 Effect[0] aura 27 SPELL_AURA_MOD_SILENCE, DurationIndex 32 = 6000 ms ($681447d, server DBC set), DmgClass 0; the Inquisitor's Trap 506251 casts it on every valid enemy within 5 yd of the enemy that fires it (AscensionWitchHunterSummons.cpp:410-424). The trap stands 2 yd in front of the caster (681445 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. The kind stamps the application and removal of 681447 on the dummy in game time (the reason this part stayed a data label was the unread pulse moment): the bracket must lie inside 6000 +- 300 ms (G-19 5%), excluding 5400 and 6600 (D-200). Control: 681445 cast before it is learned, refused, no 681447. The trap costs ManaCostPercentage 11 of the class base mana (no flat ManaCost), so the caster's mana is set to 1720 (class file base_mana) before each cast (trigger_power)."
+    },
+    {
+      "spell": 681450,
+      "name": "Death Trap (marks the enemy that fires it)",
+      "kind": "metric_delta",
+      "variant": "mark",
+      "label_suffix": "mark",
+      "quote": "that will curse the first enemy to approach it, marking them for death,",
+      "trigger_spell": 681450,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 681452
+      },
+      "observe_source": "The Death Trap 506252 casts 681452 (Death Trap, Dispel 2 = curse, aura 3 PERIODIC_DAMAGE, MaxAffectedTargets 1) on the first valid enemy within 3 yd and despawns (AscensionWitchHunterSummons.cpp:402-406, 428-429). The trap stands 2 yd in front of the caster (681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. The read is the 681452 aura on the dummy 1500 ms after a real cast: 0 before, 1 after. The clause states no value; the curse type is the DBC Dispel field. Control: the before reading, no cast, 0."
+    },
+    {
+      "spell": 681450,
+      "name": "Death Trap (no damage before the delay)",
+      "kind": "metric_delta",
+      "variant": "doom_waits",
+      "label_suffix": "doom_waits",
+      "quote": "causing them to take ${$681452m1+$681452ppl1+$AP*1} Shadow damage after $681452d.",
+      "trigger_spell": 681450,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 58500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          58500,
+          58550
+        ]
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681452,
+        "target": "dummy"
+      },
+      "observe_source": "681452 DurationIndex 3 = 60000 ms ($681452d), EffectAmplitude 59999: one tick at the end. The trap stands 2 yd in front of the caster (681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. The mark lands between 1000 ms (first pulse) and 1500 ms (the mark entry reads it present then) after the cast, so 58500 ms of game time after the cast is 57000..57500 ms after the mark: no 681452 damage yet. A delay 10% short (54000 ms) would have dealt it by then and read above 0 (D-200 lower side); doom_base is the upper side. Beeg spellpen 823764 and Thundering Strikes 16255 at -100 are set on the caster (harness set_aura, precondition fixtures for the partial resists and the critical ticks, not the claim's subject, the 680521 damage_base precedent); the class file sets spell_hit_rating 10000, so the DmgClass 1 aura does not miss. Control: the before reading, 0."
+    },
+    {
+      "spell": 681450,
+      "name": "Death Trap (damage after the delay at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "doom_base",
+      "label_suffix": "doom_base",
+      "quote": "causing them to take ${$681452m1+$681452ppl1+$AP*1} Shadow damage after $681452d.",
+      "trigger_spell": 681450,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 3382,
+      "after_at_least": 3381,
+      "after_at_most": 3383,
+      "wait_ms": 63500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          63500,
+          63550
+        ]
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681452,
+        "target": "dummy"
+      },
+      "observe_source": "681452 Effect[0] aura 3 PERIODIC_DAMAGE, Shadow, EffectBasePoints 499, EffectDieSides 1 ($681452m1 = 500), EffectRealPointsPerLevel 100 from BaseLevel / SpellLevel 34 ($681452ppl1 = 100 x 26 = 2600 at level 60), DurationIndex 3 = 60000 ms, EffectAmplitude 59999 (one tick). Reference attack power 282, x 1 = 282: one hit of 3382 (window 3381..3383). A coefficient 10% off moves it by 28. The trap stands 2 yd in front of the caster (681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. Read 63500 ms of game time after the cast, 62000..62500 ms after the mark: a delay 10% long (66000 ms) would read 0 (D-200 upper side; doom_waits is the lower side). Beeg spellpen 823764 and Thundering Strikes 16255 at -100 are set on the caster (harness set_aura, precondition fixtures for the partial resists and the critical ticks, not the claim's subject, the 680521 damage_base precedent); the class file sets spell_hit_rating 10000, so the DmgClass 1 aura does not miss. Control: the before reading, 0."
+    },
+    {
+      "spell": 681450,
+      "name": "Death Trap (damage after the delay at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "doom_ap",
+      "label_suffix": "doom_ap",
+      "quote": "causing them to take ${$681452m1+$681452ppl1+$AP*1} Shadow damage after $681452d.",
+      "trigger_spell": 681450,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 23382,
+      "after_at_least": 23381,
+      "after_at_most": 23383,
+      "wait_ms": 63500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          63500,
+          63550
+        ]
+      },
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681452,
+        "target": "dummy"
+      },
+      "observe_source": "D-57 contrast arm for the $AP*1 term, in the same pair as doom_base: attack power 282 + 20000 (player_attack_power, harness fixture) = 20282, so the hit is 3100 + 20282 = 23382 (window 23381..23383); a coefficient 10% off moves it by 2028. The trap stands 2 yd in front of the caster (681450 Effect[0] SUMMON, TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 7 = 2 yd, server DBC set) and its first pulse comes 1 s after the summon, then every 250 ms (AscensionWitchHunterSummons.cpp:358, 433); the default dummy stands 3 yd from the caster, 1 yd from the trap, inside its 3 yd trigger (Summons.cpp:402), so a real cast fires the trap on the dummy at its first pulse. Beeg spellpen 823764 and Thundering Strikes 16255 at -100 are set on the caster (harness set_aura, precondition fixtures for the partial resists and the critical ticks, not the claim's subject, the 680521 damage_base precedent); the class file sets spell_hit_rating 10000, so the DmgClass 1 aura does not miss. Control: the before reading, 0."
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (stunned enemies among seven enemies)",
+      "kind": "metric_delta",
+      "variant": "count_stun",
+      "label_suffix": "count_stun",
+      "quote": "that will curse the first enemy to approach it and up to $681179i enemies",
+      "trigger_spell": 680238,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "after_at_least": 5,
+      "after_at_most": 5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 681179
+      },
+      "area_dummies": [
+        2.5,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5
+      ],
+      "area_sum": true,
+      "observe_source": "Owner ruling O-47 (mentor D-482, card Q-wh-44, answer a): the expectation is 5 in total, the first enemy included. 681179 MaxAffectedTargets 5 ($681179i). The trap 506250 stands 2 yd in front of the caster and fires at its first pulse (1 s) on the first valid enemy within 3 yd; it then casts 681179 and 681177 on every valid enemy within 3 yd of that enemy (681179 Effect[0] radius), the first enemy included, and stops at count >= 5 (AscensionWitchHunterSummons.cpp:400-428; both spells single-target on this server, AscensionWitchHunterCompletion.cpp:390-395). Seven enemies: the dummy at 3 yd and six area dummies at [2.5, 3.5, 4.0, 4.5, 5.0, 5.5] yd on the same line, all within 3 yd of the trap and within 3 yd plus both combat reaches of each other, so every enemy is a valid victim whichever fires the trap. The read is the 681179 aura on each of the seven 1500 ms after a real cast, summed (area_sum): 0 before, exactly 5 after; 6 or 7 alerts. Control: the before reading, no cast, 0."
+    },
+    {
+      "spell": 680238,
+      "name": "Shadow Trap (damage over time among seven enemies)",
+      "kind": "metric_delta",
+      "variant": "count_dot",
+      "label_suffix": "count_dot",
+      "quote": "that will curse the first enemy to approach it and up to $681179i enemies",
+      "trigger_spell": 680238,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "after_at_least": 5,
+      "after_at_most": 5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 681177
+      },
+      "area_dummies": [
+        2.5,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5
+      ],
+      "area_sum": true,
+      "observe_source": "Owner ruling O-47 (mentor D-482, card Q-wh-44, answer a): the expectation is 5 in total, the first enemy included. 681179 MaxAffectedTargets 5 ($681179i). The trap 506250 stands 2 yd in front of the caster and fires at its first pulse (1 s) on the first valid enemy within 3 yd; it then casts 681179 and 681177 on every valid enemy within 3 yd of that enemy (681179 Effect[0] radius), the first enemy included, and stops at count >= 5 (AscensionWitchHunterSummons.cpp:400-428; both spells single-target on this server, AscensionWitchHunterCompletion.cpp:390-395). Seven enemies: the dummy at 3 yd and six area dummies at [2.5, 3.5, 4.0, 4.5, 5.0, 5.5] yd on the same line, all within 3 yd of the trap and within 3 yd plus both combat reaches of each other, so every enemy is a valid victim whichever fires the trap. The read is the 681177 aura on each of the seven 1500 ms after a real cast, summed (area_sum): 0 before, exactly 5 after; 6 or 7 alerts. Control: the before reading, no cast, 0."
     },
     {
       "spell": 804190,
@@ -19798,6 +20444,32 @@
       "observe_source": "500086 DurationIndex 39 ($d = 2000 ms, SpellDuration.dbc); Effect[0] aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE, EffectBasePoints -101 + 1 = -100 is the aura on the caster, Effect[1] 138 SPELL_EFFECT_LEAP_BACK the jump. One real cast of Daring Escape (ManaCostPercentage 21: the mana is set to the class base mana 1720 first): the aura is on the caster 1900 to 2000 ms of game time after the cast and gone 2100 to 2200 ms after it, so the end lies inside the G-19 band (5% of 2000 = 100 ms) on both sides. Control (before): no cast, absent."
     },
     {
+      "spell": 500086,
+      "name": "Daring Escape (next Bolt knocks the enemy back)",
+      "kind": "fixed_count",
+      "variant": "daring_escape_knockback",
+      "label_suffix": "daring_escape_knockback",
+      "quote": "will knock your enemy back.",
+      "expected": 0,
+      "uncapped": true,
+      "learn": [
+        500901
+      ],
+      "setup_casts": [
+        [
+          500086,
+          "caster"
+        ]
+      ],
+      "cast_spell": 680322,
+      "target_rank": 680322,
+      "repeats": 1,
+      "radius": 10.0,
+      "push_reads": true,
+      "settle_ms": 1500,
+      "radius_reason": "Create Distance 500901 (Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 681299, EffectSpellClassMask word 2 = 2) is the talent the tooltip branch $?s500901 names; 681299 (aura 42, no class mask, 3000 ms, DurationIndex 27 = $680231d) triggers 707322 (Effect[0] 98 SPELL_EFFECT_KNOCK_BACK, EffectBasePoints 99, EffectMiscValue 100, target type 6). The coabuildhub snapshot of 500901 reads 'Casting Daring Escape now makes the next ability used within 3 sec knock your target back'. Daring Escape 500086 is cast first (setup) and Witching Bolt 680322, a Bolt by name, is cast at the primary dummy within 3 s; the primary dummy must end at least 1 yd farther from the caster and the dummy beyond the radius, which Witching Bolt never strikes, must move under 0.5 yd, which proves the caster's own jump has finished before the first distance read. No control arm without 500901 can pass this judge: the far dummy is the in-run contrast."
+    },
+    {
       "spell": 805767,
       "name": "Evasive (damage taken while Twilight Frenzy is active)",
       "kind": "taken_hit",
@@ -21099,9 +21771,13 @@
       "margin_ms": 100,
       "party_pulse": {
         "radius_spell": 853203,
-        "pulses": 2
+        "pulses": 2,
+        "near_distance": 21.0,
+        "far_margin": 4.0,
+        "near_limit": 22.5,
+        "note": "Owner ruling O-47 (mentor D-482, card Q-wh-47, answer a) keeps the 22.5 yd reach: the 20 yd radius of 853203 plus the idol's 1.0 and the player's 1.5 combat reaches (Nearby, AscensionWitchHunterSummons.cpp:374-380), so the member at 21 yd is inside it and the one at 24 yd outside, 1.5 yd (6.7%) each side of 22.5 yd."
       },
-      "observe_source": "804051 Effect[0] SPELL_EFFECT_SUMMON of totem 254862; 806696 (Tribal Totem) EffectAmplitude[0] 2500 ms ($806696T1) triggers 853203, whose three SPELL_EFFECT_DISPEL_MECHANIC effects name mechanics 1 charm, 5 fear and 10 sleep, SpellRadius 9 = 20 yd ($853203a1). The tooltip states no count, so every fear, sleep and charm effect goes at each pulse. Fixtures, all SPELL_AURA_MOD_STUN so the party member does not move: Intimidating Shout 65931 (Mechanic 5 fear, 8000 ms), Sleep 9159 (Mechanic 10 sleep, 10000 ms), Seduction 6358 (Mechanic 1 charm, 15000 ms). The near party member is 3 yd from the caster, the far one 35 yd (beyond 20 yd). Margin 100 ms brackets one period in 2300..2600 ms, excluding 2250 and 2750 ms (D-200)."
+      "observe_source": "804051 Effect[0] SPELL_EFFECT_SUMMON of totem 254862; 806696 (Tribal Totem) EffectAmplitude[0] 2500 ms ($806696T1) triggers 853203, whose three SPELL_EFFECT_DISPEL_MECHANIC effects name mechanics 1 charm, 5 fear and 10 sleep, SpellRadius 9 = 20 yd ($853203a1). The tooltip states no count, so every fear, sleep and charm effect goes at each pulse. Fixtures, all SPELL_AURA_MOD_STUN so the party member does not move: Intimidating Shout 65931 (Mechanic 5 fear, 8000 ms), Sleep 9159 (Mechanic 10 sleep, 10000 ms), Seduction 6358 (Mechanic 1 charm, 15000 ms). The near party member stands 21 yd from the caster and the far one 24 yd (near_distance 21, far_margin 4 on the 20 yd radius, near_limit 22.5): by owner ruling O-47 (card Q-wh-47, answer a) the expected reach is 22.5 yd = 20 yd 853203 radius + 1.0 idol + 1.5 player combat reaches (Nearby, AscensionWitchHunterSummons.cpp:374-380), and 21 / 24 yd are 6.7% inside and 6.7% beyond it, so a pulse reaching 20 yd or 25 yd alerts. The idol is summoned at the caster's position on a self cast (code reading). Margin 100 ms brackets one period in 2300..2600 ms, excluding 2250 and 2750 ms (D-200)."
     },
     {
       "spell": 681211,
@@ -23737,6 +24413,118 @@
     },
     {
       "spell": 705524,
+      "kind": "metric_delta",
+      "quote": "Your Pavise now lasts $/1000;s2 additional sec",
+      "name": "Dead and Gone (Pavise remaining lifetime without and with 705524)",
+      "variant": "pavise_remaining",
+      "label_suffix": "pavise_remaining",
+      "trigger_spell": 520865,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_remaining_ms",
+      "fields": {
+        "entry": 50519
+      },
+      "learn": [
+        681453
+      ],
+      "shield_after_learn": {
+        "item": 1200,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "wait_ms": 500,
+      "expire_ms": 11000,
+      "before_expected": 9400,
+      "expected": 11400,
+      "expected_gain": 2000,
+      "tolerance": 100,
+      "observe_source": "D-467 / D-472 timer read of 'lasts $/1000;s2 additional sec' (2 s): the same real Pavise 520865 cast (681453 learned, item 1200 Large Wooden Shield equipped after the learn), once before 705524 is learned and once after, each read 500 ms after its cast with owned_creature_remaining_ms, the TempSummon timer of the one owned pavise creature 50519 (TempSummon::GetTimer, TemporarySummon.h:68, a getter that changes no state). The gain must be 2000 +- 100 ms: both arms read the timer at the same step after their casts, and the timer counts down only on the summon's own updates (TemporarySummon.cpp:80-88), so the D-382 removal lag of 93..543 ms (unsummon on the update after the timer runs out) does not enter the reading; the 100 ms band is 5% of the stated 2000 ms and excludes 1800 and 2200 (D-200). The before reading must reach 9300 ms (Pavise DurationIndex 1 = 10 sec, less the 500 ms wait and the band). expire_ms 11000 lets the first pavise end before the second cast, so one creature is read. 705524 Effect[1] aura 107 SPELLMOD_DURATION (EffectMiscValue 1) EffectBasePoints 1999 + 1 = +2000 ms on EffectSpellClassMask[1] 1073741824 (Pavise SpellFamilyFlags[1])."
+    },
+    {
+      "spell": 705524,
+      "kind": "metric_delta",
+      "quote": "Your Pavise now lasts $/1000;s2 additional sec",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 520865,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 1050,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50519
+      },
+      "shield_after_learn": {
+        "item": 1200,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "name": "Dead and Gone control (Pavise without 705524: gone 975 ms past 10 s)",
+      "variant": "pavise_base_gone",
+      "label_suffix": "pavise_base_gone",
+      "gate_spell": 681453,
+      "wait_ms": 9925,
+      "game_time": {
+        "after": [
+          9928,
+          9940
+        ],
+        "expired": [
+          10978,
+          11035
+        ]
+      },
+      "observe_source": "D-472 presence arm of 'lasts $/1000;s2 additional sec' beside the pavise_remaining timer read: the same moment 10975 ms after the real Pavise 520865 cast (nominal, game time stamped), 975 ms past the 10 sec base duration (Pavise DurationIndex 1), reads the pavise creature 50519 gone without 705524 and still owned with it; the extended arm then reads it gone 12975 ms after the cast, 975 ms past 10 + 2 s. The 1000 ms margin holds the D-382 removal lag (93..543 ms, TempSummon::Update unsummons on the update after the timer runs out). The timer read gives the precision; these reads show the summon really outlives the base duration by the extension."
+    },
+    {
+      "spell": 705524,
+      "kind": "metric_delta",
+      "quote": "Your Pavise now lasts $/1000;s2 additional sec",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 520865,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50519
+      },
+      "shield_after_learn": {
+        "item": 1200,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "name": "Dead and Gone (Pavise with 705524: held past 10 s, gone 975 ms past 12 s)",
+      "variant": "pavise_ext_margin",
+      "label_suffix": "pavise_ext_margin",
+      "learn": [
+        681453
+      ],
+      "wait_ms": 10975,
+      "game_time": {
+        "after": [
+          10978,
+          11035
+        ],
+        "expired": [
+          12978,
+          13035
+        ]
+      },
+      "observe_source": "D-472 presence arm of 'lasts $/1000;s2 additional sec' beside the pavise_remaining timer read: the same moment 10975 ms after the real Pavise 520865 cast (nominal, game time stamped), 975 ms past the 10 sec base duration (Pavise DurationIndex 1), reads the pavise creature 50519 gone without 705524 and still owned with it; the extended arm then reads it gone 12975 ms after the cast, 975 ms past 10 + 2 s. The 1000 ms margin holds the D-382 removal lag (93..543 ms, TempSummon::Update unsummons on the update after the timer runs out). The timer read gives the precision; these reads show the summon really outlives the base duration by the extension."
+    },
+    {
+      "spell": 705524,
       "name": "Dead and Gone (Bolt and Dash charges)",
       "kind": "metric_delta",
       "variant": "bolt_dash_charges",
@@ -24572,6 +25360,104 @@
     },
     {
       "spell": 803638,
+      "name": "Vampire Hunter (the reduction aura ends 10000 ms after 1 enemy curse landed)",
+      "kind": "metric_delta",
+      "variant": "curse_expiry_1",
+      "label_suffix": "curse_expiry_1",
+      "quote": "When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 802277,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 1714,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 704570
+      },
+      "wait_ms": 9350,
+      "expire_ms": 500,
+      "observe_source": "Vampire Hunter 803638, duration 10000 ms = 8000 + 2000 x 1 (SpellDuration 31 = 8000 ms for $704570d, plus 2 seconds for every curse active, the one just applied included, owner ruling O-35 and Witch Hunter ADR 0023; the curse_duration_1 readback reads the same value). Same fixtures as curse_duration_1 (striker Curse of Tongues 1714, the fixture curses set by other casters, 803638 known in both phases, control phase without the enemy curse reads 0), but the presence of 704570 on the caster is read by the aura metric twice: 9350 ms after the trigger cast, and 750 ms later. The enemy curse lands about 200 ms before the trigger cast (strike wait_ms 200), so at the stamped game times the aura is about 200 ms older than the stamps: present at an age of about 9500 ms or more (the duration is not 5% short; 10% short is 9000 ms) and gone by an age of about 10462 ms (5% long is 10500 ms; 10% long is 11000 ms). Game-time windows after the trigger cast: after [9300, 9500], expired [10050, 10250].",
+      "expiry_wait_ms": 750,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          9300,
+          9500
+        ],
+        "expired": [
+          10050,
+          10250
+        ]
+      }
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (the reduction aura ends 14000 ms after the enemy curse landed on a caster with 2 other curses)",
+      "kind": "metric_delta",
+      "variant": "curse_expiry_3",
+      "label_suffix": "curse_expiry_3",
+      "quote": "and duration is increased by 2 seconds for every curse active.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 802277,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 1714,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 704570
+      },
+      "wait_ms": 13300,
+      "expire_ms": 500,
+      "observe_source": "Vampire Hunter 803638, duration 14000 ms = 8000 + 2000 x 3 (SpellDuration 31 = 8000 ms for $704570d, plus 2 seconds for every curse active, the one just applied included, owner ruling O-35 and Witch Hunter ADR 0023; the curse_duration_3 readback reads the same value). Same fixtures as curse_duration_3 (striker Curse of Tongues 1714, the fixture curses set by other casters, 803638 known in both phases, control phase without the enemy curse reads 0), but the presence of 704570 on the caster is read by the aura metric twice: 13300 ms after the trigger cast, and 750 ms later. The enemy curse lands about 200 ms before the trigger cast (strike wait_ms 200), so at the stamped game times the aura is about 200 ms older than the stamps: present at an age of about 13450 ms or more (the duration is not 5% short; 10% short is 12600 ms) and gone by an age of about 14462 ms (5% long is 14700 ms; 10% long is 15400 ms). Game-time windows after the trigger cast: after [13250, 13450], expired [14050, 14250].",
+      "phase_auras": [
+        [
+          702,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          1490,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "expiry_wait_ms": 750,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          13250,
+          13450
+        ],
+        "expired": [
+          14050,
+          14250
+        ]
+      }
+    },
+    {
+      "spell": 803638,
       "name": "Vampire Hunter (a non-curse magic hit grants nothing)",
       "kind": "metric_delta",
       "variant": "curse_control_noncurse",
@@ -24600,6 +25486,710 @@
       "expire_ms": 500,
       "tolerance": 1,
       "observe_source": "Control of the Vampire Hunter amount and duration entries: the same after phase with Arcane Blast 16067 (SchoolMask 64, Dispel 0, direct damage, no aura) struck at the caster instead of the curse. Vampire Hunter is known, but no curse is applied, so 704570 must stay absent (amount 0): the enemy curse is the cause of the effect. Tooltip 'When an enemy applies a curse to you' (DBC Spell 803638 Description)."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (no reduction without an enemy curse)",
+      "kind": "taken_hit",
+      "variant": "taken_curse_none",
+      "label_suffix": "taken_curse_none",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "settle_ms": 200,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            16067
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            16067
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Control of the curse cause: both arms have the striker cast Arcane Blast 16067 (SCHOOL_DAMAGE, Arcane, Dispel 0, no aura) at the caster at the arm's start instead of a curse; the control arm unlearns 803638, the treatment arm learns it. No curse is applied, so the Holy hits must read the same in both arms, ratio 1.0 (band 2 points: a stated 15% reduction, ratio 0.85, is excluded). Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (magic damage taken under 1 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_curse_1",
+      "label_suffix": "taken_curse_1",
+      "judge": "damage_ratio",
+      "expected": 0.85,
+      "quote": "When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "settle_ms": 200,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Both arms hold the same curses (the striker casts Curse of Tongues 1714 (Dispel 2 curse; aura 216 spell haste and aura 75 language, neither changes damage taken or dealt) at the caster: one curse active); the control arm unlearns 803638 and the treatment arm learns it, so the contrast isolates the talent, not the curses. The striker's curse lands at the arm's start; the ten trials strike between about 1.8 and 6.3 s after it, inside the 10000 ms reduction. Expected ratio 0.85 (reduction 15%, tooltip and Witch Hunter ADR 0023); hits are fixed at 1100, so the ratio is exact and the neighbouring steps (10% and 20%, ratios 0.9 and 0.8) lie outside the 2-point band: false pass 0 for a deterministic hit. Residual: a trial counts only when its hit is non-critical; at least 5 of 10 non-critical hits are needed per arm. Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (magic damage taken under 2 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_curse_2",
+      "label_suffix": "taken_curse_2",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "The damage reduction is increased by 5%",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "settle_ms": 200,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ],
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ],
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Both arms hold the same curses (the caster carries Curse of Weakness 702 set by itself (Dispel 2; aura 344 flat attack power of its bearer and aura 101 physical armor percent, neither changes Holy damage taken) and the striker casts Curse of Tongues 1714: two curses active); the control arm unlearns 803638 and the treatment arm learns it, so the contrast isolates the talent, not the curses. The striker's curse lands at the arm's start; the ten trials strike between about 1.8 and 6.3 s after it, inside the 12000 ms reduction. Expected ratio 0.8 (reduction 20%, tooltip and Witch Hunter ADR 0023); hits are fixed at 1100, so the ratio is exact and the neighbouring steps (15% and 25%, ratios 0.85 and 0.75) lie outside the 2-point band: false pass 0 for a deterministic hit. Residual: a trial counts only when its hit is non-critical; at least 5 of 10 non-critical hits are needed per arm. Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (magic damage taken under 3 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_curse_3",
+      "label_suffix": "taken_curse_3",
+      "judge": "damage_ratio",
+      "expected": 0.75,
+      "quote": "The damage reduction is increased by 5%",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "settle_ms": 200,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              702,
+              1
+            ],
+            [
+              3237,
+              1,
+              "dummy"
+            ]
+          ],
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              702,
+              1
+            ],
+            [
+              3237,
+              1,
+              "dummy"
+            ]
+          ],
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Both arms hold the same curses (the caster carries Curse of Weakness 702 set by itself and Curse of Thule 3237 set by the dummy (Dispel 2, SpellFamilyName 0; aura 29 Spirit about -4.8 at the dummy's level (DBC 3237 BasePoints -3, DieSides 1, RealPointsPerLevel -0.2; -2 is the tooltip's level-6 figure; Spirit does not change Holy damage taken), no damage effect; DurationIndex 4 = 120000 ms, so it never lapses inside an arm: a lapsed fixture curse re-set by the dummy each trial would be a new enemy application, AscensionWitchHunterDefenses.cpp OnAuraApply, and restart the reduction, which the first run showed with the 12 s Curse of Exhaustion 18223) and the striker casts Curse of Tongues 1714: three curses active. The dummy's fixture curse is itself an enemy application when it is set at the arm's start (two curses then, -20% for 12 s); the striker's curse just after it recasts the reduction with three curses, so the -25% and the 14 s timing read come from the striker's real cast); the control arm unlearns 803638 and the treatment arm learns it, so the contrast isolates the talent, not the curses. The striker's curse lands at the arm's start; the ten trials strike between about 1.8 and 6.3 s after it, inside the 14000 ms reduction. Expected ratio 0.75 (reduction 25%, tooltip and Witch Hunter ADR 0023); hits are fixed at 1100, so the ratio is exact and the neighbouring steps (20% and 30%, ratios 0.8 and 0.7) lie outside the 2-point band: false pass 0 for a deterministic hit. Residual: a trial counts only when its hit is non-critical; at least 5 of 10 non-critical hits are needed per arm. Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (reduction still held before 10 s, 1 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_duration_1_held",
+      "label_suffix": "taken_duration_1_held",
+      "judge": "damage_ratio",
+      "expected": 0.85,
+      "quote": "When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 3,
+      "settle_ms": 0,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 8800,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 8800,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Duration read through damage taken: both arms hold the same curses (the striker casts Curse of Tongues 1714 (Dispel 2 curse; aura 216 spell haste and aura 75 language, neither changes damage taken or dealt) at the caster: one curse active); control unlearns 803638, treatment learns it. The arm waits 8800 ms after the striker's curse wait (300 ms), then three trials strike 300 ms apart, at about 9100, 9400 and 9700 ms after the curse: the stated 10000 ms reduction (tooltip, Witch Hunter ADR 0023) must still cut them by 15% (ratio 0.85). A duration 10% short (9000 ms) ends before every strike and reads ratio 1.0: excluded (D-200). The paired taken_duration_1_gone entry bounds the other side. Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0. Timing (review-b M5): the strike times are nominal sums of waits; the harness runs one step per tick (CoAGameplayTest.cpp:2728) and the last strike is 32 steps after the curse cast; drift is not measured; a false pass of a 10%-long duration would need about 800 ms of drift before the first strike (12 steps), implausible under the simulated tick caps (docs/coa/verification.md:410)."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (reduction gone after 10 s, 1 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_duration_1_gone",
+      "label_suffix": "taken_duration_1_gone",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 3,
+      "settle_ms": 0,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 9900,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 9900,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Duration read through damage taken: same arms and curses as taken_duration_1_held (the striker casts Curse of Tongues 1714 (Dispel 2 curse; aura 216 spell haste and aura 75 language, neither changes damage taken or dealt) at the caster: one curse active). The arm waits 9900 ms after the striker's curse wait (300 ms), then three trials strike 300 ms apart, at about 10200, 10500 and 10800 ms after the curse: the stated 10000 ms reduction (tooltip, Witch Hunter ADR 0023) has ended, ratio 1.0. A duration 10% long (11000 ms) still cuts every strike by 15% and reads ratio 0.85: excluded (D-200). Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0. Timing (review-b M5): the strike times are nominal sums of waits; the harness runs one step per tick (CoAGameplayTest.cpp:2728) and the last strike is 32 steps after the curse cast; drift is not measured; a false pass of a 10%-long duration would need about 800 ms of drift before the first strike (12 steps), implausible under the simulated tick caps (docs/coa/verification.md:410)."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (reduction still held before 12 s, 2 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_duration_2_held",
+      "label_suffix": "taken_duration_2_held",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "and duration is increased by 2 seconds for every curse active.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 3,
+      "settle_ms": 0,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ],
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 10800,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ],
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 10800,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Duration read through damage taken: both arms hold the same curses (the caster carries Curse of Weakness 702 set by itself (Dispel 2; aura 344 flat attack power of its bearer and aura 101 physical armor percent, neither changes Holy damage taken) and the striker casts Curse of Tongues 1714: two curses active); control unlearns 803638, treatment learns it. The arm waits 10800 ms after the striker's curse wait (300 ms), then three trials strike 300 ms apart, at about 11100, 11400 and 11700 ms after the curse: the stated 12000 ms reduction (tooltip, Witch Hunter ADR 0023) must still cut them by 20% (ratio 0.8). A duration 10% short (10800 ms) ends before every strike and reads ratio 1.0: excluded (D-200). The paired taken_duration_2_gone entry bounds the other side. Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0. Timing (review-b M5): the strike times are nominal sums of waits; the harness runs one step per tick (CoAGameplayTest.cpp:2728) and the last strike is 32 steps after the curse cast; drift is not measured; a false pass of a 10%-long duration would need about 800 ms of drift before the first strike (12 steps), implausible under the simulated tick caps (docs/coa/verification.md:410)."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (reduction gone after 12 s, 2 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_duration_2_gone",
+      "label_suffix": "taken_duration_2_gone",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "and duration is increased by 2 seconds for every curse active.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 3,
+      "settle_ms": 0,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ],
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 11900,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ],
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 11900,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Duration read through damage taken: same arms and curses as taken_duration_2_held (the caster carries Curse of Weakness 702 set by itself (Dispel 2; aura 344 flat attack power of its bearer and aura 101 physical armor percent, neither changes Holy damage taken) and the striker casts Curse of Tongues 1714: two curses active). The arm waits 11900 ms after the striker's curse wait (300 ms), then three trials strike 300 ms apart, at about 12200, 12500 and 12800 ms after the curse: the stated 12000 ms reduction (tooltip, Witch Hunter ADR 0023) has ended, ratio 1.0. A duration 10% long (13200 ms) still cuts every strike by 20% and reads ratio 0.8: excluded (D-200). Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0. Timing (review-b M5): the strike times are nominal sums of waits; the harness runs one step per tick (CoAGameplayTest.cpp:2728) and the last strike is 32 steps after the curse cast; drift is not measured; a false pass of a 10%-long duration would need about 800 ms of drift before the first strike (12 steps), implausible under the simulated tick caps (docs/coa/verification.md:410)."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (reduction still held before 14 s, 3 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_duration_3_held",
+      "label_suffix": "taken_duration_3_held",
+      "judge": "damage_ratio",
+      "expected": 0.75,
+      "quote": "and duration is increased by 2 seconds for every curse active.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 3,
+      "settle_ms": 0,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              702,
+              1
+            ],
+            [
+              3237,
+              1,
+              "dummy"
+            ]
+          ],
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 12800,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              702,
+              1
+            ],
+            [
+              3237,
+              1,
+              "dummy"
+            ]
+          ],
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 12800,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Duration read through damage taken: both arms hold the same curses (the caster carries Curse of Weakness 702 set by itself and Curse of Thule 3237 set by the dummy (Dispel 2, SpellFamilyName 0; aura 29 Spirit about -4.8 at the dummy's level (DBC 3237 BasePoints -3, DieSides 1, RealPointsPerLevel -0.2; -2 is the tooltip's level-6 figure; Spirit does not change Holy damage taken), no damage effect; DurationIndex 4 = 120000 ms, so it never lapses inside an arm: a lapsed fixture curse re-set by the dummy each trial would be a new enemy application, AscensionWitchHunterDefenses.cpp OnAuraApply, and restart the reduction, which the first run showed with the 12 s Curse of Exhaustion 18223) and the striker casts Curse of Tongues 1714: three curses active. The dummy's fixture curse is itself an enemy application when it is set at the arm's start (two curses then, -20% for 12 s); the striker's curse just after it recasts the reduction with three curses, so the -25% and the 14 s timing read come from the striker's real cast); control unlearns 803638, treatment learns it. The arm waits 12800 ms after the striker's curse wait (300 ms), then three trials strike 300 ms apart, at about 13100, 13400 and 13700 ms after the curse: the stated 14000 ms reduction (tooltip, Witch Hunter ADR 0023) must still cut them by 25% (ratio 0.75). A duration 10% short (12600 ms) ends before every strike and reads ratio 1.0: excluded (D-200). The paired taken_duration_3_gone entry bounds the other side. Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0. Timing (review-b M5): the strike times are nominal sums of waits; the harness runs one step per tick (CoAGameplayTest.cpp:2728) and the last strike is 32 steps after the curse cast; drift is not measured; a false pass of a 10%-long duration would need about 800 ms of drift before the first strike (12 steps), implausible under the simulated tick caps (docs/coa/verification.md:410)."
+    },
+    {
+      "spell": 803638,
+      "name": "Vampire Hunter (reduction gone after 14 s, 3 curse(s))",
+      "kind": "taken_hit",
+      "variant": "taken_duration_3_gone",
+      "label_suffix": "taken_duration_3_gone",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "and duration is increased by 2 seconds for every curse active.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 3,
+      "settle_ms": 0,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              702,
+              1
+            ],
+            [
+              3237,
+              1,
+              "dummy"
+            ]
+          ],
+          "unlearn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 13900,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              702,
+              1
+            ],
+            [
+              3237,
+              1,
+              "dummy"
+            ]
+          ],
+          "learn": [
+            803638
+          ],
+          "striker_casts": [
+            1714
+          ],
+          "opening_settle_ms": 13900,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 803638,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 1714,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Vampire Hunter 803638 tooltip (DBC Spell 803638 Description): 'When an enemy applies a curse to you, your Magic damage taken is reduced by $704570s1% for $704570d. The damage reduction is increased by 5% and duration is increased by 2 seconds for every curse active.' 704570 Effect[0] aura 214 EffectMiscValue 126 (every magic school), EffectBasePoints[0] -11 + 1 = -10 ($704570s1 = 10), DurationIndex 31 = 8000 ms ($704570d = 8 s). Every curse active counts, the one just applied included (owner ruling O-35, Witch Hunter ADR 0023): N curses give -(10 + 5 N)% and 8000 + 2000 N ms, so -15/-20/-25% and 10/12/14 s at one/two/three curses. Strike: Light of the Naaru 41394 (SCHOOL_DAMAGE, SchoolMask 2 Holy, a magic school, EffectBasePoints 1099 + EffectDieSides 1 = 1100 fixed, no per-level term, instant, Speed 0) cast by a stationary creature striker (entry 36, spell_hit_bonus 100) at the caster held at 100% of 100000 health before every trial; only non-critical hits are read (critical strikes are left out of the damage logs judged), so every judged hit is 1100 before the talent. Duration read through damage taken: same arms and curses as taken_duration_3_held (the caster carries Curse of Weakness 702 set by itself and Curse of Thule 3237 set by the dummy (Dispel 2, SpellFamilyName 0; aura 29 Spirit about -4.8 at the dummy's level (DBC 3237 BasePoints -3, DieSides 1, RealPointsPerLevel -0.2; -2 is the tooltip's level-6 figure; Spirit does not change Holy damage taken), no damage effect; DurationIndex 4 = 120000 ms, so it never lapses inside an arm: a lapsed fixture curse re-set by the dummy each trial would be a new enemy application, AscensionWitchHunterDefenses.cpp OnAuraApply, and restart the reduction, which the first run showed with the 12 s Curse of Exhaustion 18223) and the striker casts Curse of Tongues 1714: three curses active. The dummy's fixture curse is itself an enemy application when it is set at the arm's start (two curses then, -20% for 12 s); the striker's curse just after it recasts the reduction with three curses, so the -25% and the 14 s timing read come from the striker's real cast). The arm waits 13900 ms after the striker's curse wait (300 ms), then three trials strike 300 ms apart, at about 14200, 14500 and 14800 ms after the curse: the stated 14000 ms reduction (tooltip, Witch Hunter ADR 0023) has ended, ratio 1.0. A duration 10% long (15400 ms) still cuts every strike by 25% and reads ratio 0.75: excluded (D-200). Crit (review-b M1): the striker cannot crit by code (no owner GUID, SpellDoneCritChance -100, Unit.cpp:10246), so every strike reads 1100 and the crit residual is 0. Timing (review-b M5): the strike times are nominal sums of waits; the harness runs one step per tick (CoAGameplayTest.cpp:2728) and the last strike is 32 steps after the curse cast; drift is not measured; a false pass of a 10%-long duration would need about 800 ms of drift before the first strike (12 steps), implausible under the simulated tick caps (docs/coa/verification.md:410)."
     },
     {
       "spell": 805770,
@@ -24697,6 +26287,315 @@
         ]
       ],
       "observe_source": "Witching Shroud 805770 (tooltip, DBC Spell 805770 Description): 'Only usable for $805771d after being hit by a magical critical strike.'; 805771 DurationIndex 1 = 10000 ms and it is the window aura read here. Reference search (guide 4): the video-deepdive report and the snapshots only repeat the tooltip; nothing found beyond it.  Observation of the clause's 'magical' condition (mentor D-370): a striker casts Strike 11976 (SchoolMask 1 Physical, DmgClass 2 melee) at the caster, a critical melee strike, expected 0 because the tooltip says magical. Vulnerable 213 (aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints[1] 9999 + 1 = +10000% to be critically struck) is a precondition fixture on the caster so the strike always crits (the entries of Alertness 681152 use the same fixture); the striker's spell_hit_bonus is 100, so the forced hit has no residual failure. Witching Shroud is learned between the phases (control before, treatment after); both phases set the fixture, strike and read 805771 on the caster 500 ms after the neutral trigger Pyro Tonic 802277."
+    },
+    {
+      "spell": 681453,
+      "kind": "metric_delta",
+      "quote": "teaches you Pavise.",
+      "trigger_spell": 520865,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 1200,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "name": "Pavise Crossbowman (Pavise deflects hostile spells from the front)",
+      "variant": "pavise_deflect",
+      "label_suffix": "pavise_deflect",
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 16067,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 20,
+      "expected": 20,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "strike": {
+        "spell": 16067,
+        "health": 20000,
+        "max_health": 20000,
+        "count": 20,
+        "wait_ms": 100,
+        "after_trigger_ms": 1500
+      },
+      "deflect_arcs": {
+        "aura": 1108180,
+        "outside": [
+          0,
+          8
+        ],
+        "behind": [
+          6,
+          -8
+        ],
+        "settle_ms": 1000,
+        "present_entry": 50519
+      },
+      "observe_source": "Claim 224.0 of 681453 (\"While you remain near it, hostile spells targeting you are deflected.\"), Pavise 520865 taught by 681453 (@s:520865). 520865 Effect[0] summons 50519 (Effect[1] zeroed, AscensionWitchHunterCompletion.cpp:397-398); the summon casts 1108180 Pavise Effect on itself (AscensionWitchHunterSummons.cpp:353-357): Effect[0] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 287 SPELL_AURA_DEFLECT_SPELLS, EffectBasePoints[0] 99 + 1 = 100, EffectRadiusIndex[0] 16 (SpellRadius 16 = 1 yd), Spell.dbc read with apps/coa-dbc/inspect_dbc.py. The engine adds that aura's 100 x 100 to the magic hit roll as SPELL_MISS_DEFLECT only when the caster is in the victim's front 180 degrees and the victim is not stunned (Unit::MagicSpellHitResult, Unit.cpp:4087-4094); from behind, the Witch Hunter hook rolls the same 1108180 amount once for the same spell set (owner ruling O-47, Witch Hunter ADR 0026). The striker (the harness strike, creature 36, the class level, spell_hit_bonus 100, 3 yd along +x) casts Arcane Blast 16067 (Effect[0] SCHOOL_DAMAGE only, DmgClass magic, no mechanic, no aura) at the caster, harness-triggered: the hit roll is capped at 100%, no miss and no resist term, so a strike lands unless deflected; the deflect roll leaves 1 in 10000 (irand(1, 10000) < 10000). Arms (deflect_arcs): control, before any Pavise cast, striker in front: 20 strikes must all land; front, 1500 ms after the real Pavise cast at the caster, 1108180 read on the caster: 20 strikes, at most 1 may land (judged: the gain of landed strikes over the control is 0 within 1); outside, the caster moved 8 yd to the side (the striker still in front, read from the positions and the caster's orientation), 1108180 read 0, the Pavise 50519 still present (owned_creature_count 50519 read on the caster in this arm: it must read 1, a 0 or a missing read alerts): all 20 land; behind, the caster moved to stand 3 yd past the striker (the striker behind it, read from the positions and the caster's orientation), Pavise cast again there, 1108180 read: 20 strikes, at most 1 may land (judged, owner ruling O-47 on card Q-wh-45: every direction). Sizing: a strike lands through the aura with probability 1e-4, so 2 or more of 20 land with probability 1.9e-6 per arm and run, 7.6e-6 per pair over the front and behind arms (false alert); a server deflecting 50% passes an arm with at most 1 of 20 landed with probability 21 / 2^20 = 2.0e-5 per run, 4e-10 per pair (false pass). Proven: hostile spells cast at the caster from the front and from behind while it stands near the Pavise do not land, and do land with the caster out of the radius; the miss type DEFLECT is the data arm pavise_deflect_rolls (READBACK). Reference search (nf-i, 2026-11-17): coa-history spell 1108180, 520865 and 681453 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of Pavise Crossbowman 681453, nothing found on an arc, front, behind or near-distance reading."
+    },
+    {
+      "spell": 681453,
+      "kind": "metric_delta",
+      "quote": "teaches you Pavise.",
+      "trigger_spell": 520865,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 1200,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "name": "Pavise Crossbowman (Pavise deflect rolls, data arm)",
+      "variant": "pavise_deflect_rolls",
+      "label_suffix": "pavise_deflect_rolls",
+      "measure_actor": "striker",
+      "metric": "avoidance_samples",
+      "fields": {
+        "target": "caster",
+        "id": 7,
+        "spell": 16067
+      },
+      "before_expected": 0,
+      "expected": 512,
+      "after_at_least": 509,
+      "after_at_most": 512,
+      "strike": {
+        "spell": 16067,
+        "health": 20000,
+        "max_health": 20000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 1500
+      },
+      "observe_source": "Claim 224.0 of 681453 (\"While you remain near it, hostile spells targeting you are deflected.\"), Pavise 520865 taught by 681453 (@s:520865). 520865 Effect[0] summons 50519 (Effect[1] zeroed, AscensionWitchHunterCompletion.cpp:397-398); the summon casts 1108180 Pavise Effect on itself (AscensionWitchHunterSummons.cpp:353-357): Effect[0] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 287 SPELL_AURA_DEFLECT_SPELLS, EffectBasePoints[0] 99 + 1 = 100, EffectRadiusIndex[0] 16 (SpellRadius 16 = 1 yd), Spell.dbc read with apps/coa-dbc/inspect_dbc.py. The engine adds that aura's 100 x 100 to the magic hit roll as SPELL_MISS_DEFLECT only when the caster is in the victim's front 180 degrees and the victim is not stunned (Unit::MagicSpellHitResult, Unit.cpp:4087-4094). The striker (the harness strike, creature 36, the class level, spell_hit_bonus 100, 3 yd along +x) casts Arcane Blast 16067 (Effect[0] SCHOOL_DAMAGE only, DmgClass magic, no mechanic, no aura) at the caster, harness-triggered: the hit roll is capped at 100%, no miss and no resist term, so a strike lands unless deflected; the deflect roll leaves 1 in 10000 (irand(1, 10000) < 10000). Data arm (READBACK): avoidance_samples probe 7 counts SPELL_MISS_DEFLECT among 512 samples of the native Unit::MagicSpellHitResult(caster, 16067) rolled by the striker in front, before any Pavise cast (expected 0: no deflect aura) and 1500 ms after the Pavise cast (expected 512, at least 509). Sizing: a sample escapes the deflect with probability 1e-4, so 4 or more of 512 escape with probability 2.8e-7 per run, 5.6e-7 per pair; a 50% deflect reads about 256. Reference search (nf-i, 2026-11-17): coa-history spell 1108180, 520865 and 681453 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of Pavise Crossbowman 681453, nothing found on an arc, front, behind or near-distance reading."
+    },
+    {
+      "spell": 680255,
+      "name": "Deal With The Devil (Shadowhound Shadow critical damage)",
+      "kind": "hit_ratio",
+      "effect": 2,
+      "variant": "hound_crit",
+      "label_suffix": "hound_crit",
+      "quote": "Your and your Shadow Hounds critical damage dealt with Shadow damage is increased by $s1%,",
+      "expected": 1.5,
+      "observe_spell": 706332,
+      "cast_spell": 802273,
+      "caster_entry": 50124,
+      "warmup": [
+        801343
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          680255
+        ]
+      },
+      "critical": true,
+      "trials": 20,
+      "cast_power": 500,
+      "cast_wait_ms": 3000,
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "owned_auras": [
+        [
+          984954,
+          1,
+          50124
+        ],
+        [
+          823764,
+          1,
+          50124
+        ]
+      ],
+      "expected_source": "Claim 123.1 'Your and your Shadow Hounds' of 680255 (the hounds' half of \"Your and your Shadow Hounds critical damage dealt with Shadow damage is increased by $s1%\"): $s1 = 50; Effect[2] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectMiscValue[2] 32 (Shadow), EffectBasePoints[2] 49 + 1 = 50 (Spell.dbc read with apps/coa-dbc/inspect_dbc.py); UnitAura::FillTargetMap gives it to the caster's summons (SpellAuras.cpp:2952-2969). A hound deals Shadow damage: Houndmaster's Call strike 706332 (Effect[1] SCHOOL_DAMAGE, SchoolMask 32, DmgClass 2 melee, EffectDieSides[1] 1) is cast by the hound itself, twice per leap (AscensionWitchHunterSummons.cpp:226-229), and a critical melee-class hit adds the hound's own aura 163 by school mask to the doubled hit (Unit.cpp:1727-1757): 2 x base without the talent, 3 x base with it, ratio 1.5. The Shadowhound pet 50124 is summoned by Houndmaster's Whistle 801343 (Effect[0] 56 SUMMON_PET) in each arm; Houndmaster's Call 802273 at the dummy (705450 not known, so no Lesser hound) calls the pet to leap (AscensionWitchHunterAbilities.cpp:638-642). Only critical 706332 hits of entry 50124 are read, control without 680255, treatment with it learned. Precondition fixtures on the pet (owned_auras, D-468): 984954 (aura 52, +101% crit chance) so every strike crits, 823764 (aura 123 -9999) so no partial resist; on the caster 823764. Pilot (D-463, Lesser hound 50224, no crit fixture, run 20261117-145041, build 0664b3e5e408): every critical 706332 hit read 336 in control and 504 with 680255, 1.5 exactly, but only 9 to 14 crits per 40 Calls, under the judge's half-of-trials floor, hence the fixture. The values are deterministic (EffectDieSides 1, no resist), so a server whose hounds lack the aura reads 1.0 and the other reading of the Legacy ruling 1.1667: both lie outside the 5% band, false pass probability about 0; a false alert needs a crit value other than the model's. Reference search (nf-i, 2026-11-17): coa-history spell 680255 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of 680255, nothing found on the Shadow Hounds share of the critical damage beyond the tooltip words."
+    },
+    {
+      "spell": 804194,
+      "name": "Decimate (Shadowhound ignores Armor)",
+      "kind": "metric_delta",
+      "variant": "hound_ignore_armor",
+      "label_suffix": "hound_ignore_armor",
+      "quote": "granting them $s1% increased damage and haste and allowing them to ignore Armor.",
+      "trigger_spell": 804194,
+      "target": "caster",
+      "select_dummy": true,
+      "metric": "pet_melee_plain_damage",
+      "fields": {},
+      "expected": 1,
+      "before_expected": 1,
+      "cast_power": 2400,
+      "pet_armor_arms": {
+        "summon": 801343,
+        "entry": 50124,
+        "bare_aura": 40935,
+        "armor_aura": 22693,
+        "trials": 200,
+        "window_ms": 4000
+      },
+      "observe_source": "Claim 362.2 of Decimate 804194 (\"and allowing them to ignore Armor.\"): Effect[1] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, EffectBasePoints[1] 99 + 1 = 100 (Spell.dbc read with apps/coa-dbc/inspect_dbc.py), rewritten by the server to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT (AscensionWitchHunterCompletion.cpp:236-237), which Unit::CalcArmorReducedDamage sums on the attacker (Unit.cpp:2452-2466). The Houndmaster's Call strike 706332 is Shadow and armor never reduces non-physical damage (Unit::IsDamageReducedByArmor, Unit.cpp:2400-2404), so the claim is read on the Shadowhound pet's physical white swings (D-462). The Shadowhound 50124 is the current pet (Houndmaster's Whistle 801343 Effect[0] 56 SUMMON_PET); its plain swings are read by its pet GUID (pet_melee_plain_damage and _count with no entry, which avoids the entry match that never selects a Pet). Two dummies of the same fixture: the dummy holds Harden Skin 22693 (aura 22 SPELL_AURA_MOD_RESISTANCE, EffectMiscValue 1 armor, EffectBasePoints 9999 + 1 = +10000) as a precondition fixture so that its armor reduces a swing by far more than the band (pilot 20261117-150317 without it: armor 528, factor 0.913, too close to 1), the bare dummy holds Dematerialize Armor 40935 (aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, EffectMiscValue 1 armor, EffectBasePoints -101 + 1 = -100) as a precondition fixture, armor read 0. Decimate's +30% damage and haste act on both dummies alike and cancel in the per-hit ratio. Expected with Decimate: ratio 1.0 (100% of the armor ignored); contrast without it: the ratio equals the pet's armor_reduced_damage against the dummy read per 1000 (READBACK data arm, the engine's armor factor at the read armor and levels); both within 5% of the ratio (G-19), 99% interval rules of the hit ratio judge. Decimate is recast before every window (cooldown reset, mana set to 2400) and read on the pet at the end of each with-arm. Both fixtures are removed and set again before every window (a set_aura on a held aura keeps its running duration; Harden Skin lasts 10 s and Dematerialize Armor 8 s, so run 20261117-150521 met an armor that lapsed: contrast 0.44 against the read 0.344), and both dummies' armor is read at every window end and must equal the first reads. Sizing (D-261): the pilot's 20 windows of 4000 ms per arm gave a 99% half-width of 2.84 points against a power limit of 2.5 (half the band), trials_needed 26; 40 windows put it near 2.0, but the end pair read a 99% half-width of 4.39 and 4.17 points at 40 windows (trials_needed 124 and 112), so the entry runs 200 windows per arm: the focused pair 20261117-180011 and 20261117-180138 read 0.78 and 0.79 points. Residual: a server at the model alerts only when the whole 99% interval leaves the 5-point band, about 7 points or 9 standard errors off, probability below 1e-12 per run; false pass: a server ignoring no armor reads the contrast ratio (about 0.34 at 10528 armor) and one ignoring half of it about 0.5, both tens of standard errors outside the band. Reference search (nf-i, 2026-11-17): coa-history spell 804194 reads 0 events in 186 logs (every source and event type; no positive control run for it); ~/CoaServer/reference snapshots (bindmysoul, sidekick, ascension-data) carry only the tooltip text of Decimate 804194, nothing found on armor ignored by the hounds beyond the tooltip words."
+    },
+    {
+      "spell": 706365,
+      "name": "Kennel Master Rank 1 (extra Lesser Shadow Hound lifetime, pooled)",
+      "kind": "summon_lifetime",
+      "variant": "hound_lifetime",
+      "label_suffix": "hound_lifetime",
+      "quote": "for $707890d.",
+      "talent": 706365,
+      "trigger_spell": 807933,
+      "stop_ms": 1000,
+      "entry": 50224,
+      "expected_ms": 15000,
+      "spawn_window": [
+        25,
+        500
+      ],
+      "end_window": [
+        13500,
+        16500
+      ],
+      "baseline_count": 2,
+      "baseline_ms": 20000,
+      "roll_source": "AscensionWitchHunterAbilities.cpp:647-650 (roll_chance_i)",
+      "parts": 27,
+      "observe_source": "Kennel Master 706365 (ProcChance 25) adds one Lesser Shadow Hound 50224 to a cast of Unleash the Hounds 807933: AscensionWitchHunterAbilities.cpp:647-650 rolls roll_chance_i(25) with 706365 and calls SummonHounds(player, 1, 707890's duration, 707890, target); 707890 DurationIndex 8 = 15000 ms ($707890d). The roll is hard-coded, so the forcing modifier of the kind does not reach it: the parts are pooled (ADR 1003 provisional). Unleash the Hounds itself summons 2 Lesser Shadow Hounds 50224 (Effect[0] 28 SUMMON, EffectBasePoints 1 + 1) for 20000 ms (DurationIndex 18; the 807933 hound_held / hound_ends entries read them owned at 19000 ms and gone at 21000 ms): baseline_count 2, baseline_ms 20000. Control: 807933 cast without the talent reads exactly 2 and 0 once they expired (21000 ms after the cast); treatment: 0 right before the cast, 3 while the extra hound lives, 2 once it is gone (the baseline hounds outlive the 16500 ms end window). G-19 band 750 ms (14250..15750); the 25 ms polls bracket the lifetime, and the end window 13500..16500 reads a lifetime 10% off (13500 or 16500 ms) as an alert at its edge (D-200). Residual (D-197/D-343): a run with no summoned part is unmeasured, probability 8.47e-04 per pair (2 x 0.75^27); a summoned part is judged deterministically to the 25 ms poll, so a lifetime at the baseline 20000 ms or 10% off alerts in every summoned part (false pass 0 given one summon)."
+    },
+    {
+      "spell": 707891,
+      "name": "Kennel Master Rank 2 (extra Lesser Shadow Hound lifetime, pooled)",
+      "kind": "summon_lifetime",
+      "variant": "hound_lifetime",
+      "label_suffix": "hound_lifetime",
+      "quote": "for $707890d.",
+      "talent": 707891,
+      "trigger_spell": 807933,
+      "stop_ms": 1000,
+      "entry": 50224,
+      "expected_ms": 15000,
+      "spawn_window": [
+        25,
+        500
+      ],
+      "end_window": [
+        13500,
+        16500
+      ],
+      "baseline_count": 2,
+      "baseline_ms": 20000,
+      "roll_source": "AscensionWitchHunterAbilities.cpp:647-650 (roll_chance_i)",
+      "parts": 11,
+      "observe_source": "Kennel Master 707891 (ProcChance 50) adds one Lesser Shadow Hound 50224 to a cast of Unleash the Hounds 807933: AscensionWitchHunterAbilities.cpp:647-650 rolls roll_chance_i(50) with 707891 and calls SummonHounds(player, 1, 707890's duration, 707890, target); 707890 DurationIndex 8 = 15000 ms ($707890d). The roll is hard-coded, so the forcing modifier of the kind does not reach it: the parts are pooled (ADR 1003 provisional). Unleash the Hounds itself summons 2 Lesser Shadow Hounds 50224 (Effect[0] 28 SUMMON, EffectBasePoints 1 + 1) for 20000 ms (DurationIndex 18; the 807933 hound_held / hound_ends entries read them owned at 19000 ms and gone at 21000 ms): baseline_count 2, baseline_ms 20000. Control: 807933 cast without the talent reads exactly 2 and 0 once they expired (21000 ms after the cast); treatment: 0 right before the cast, 3 while the extra hound lives, 2 once it is gone (the baseline hounds outlive the 16500 ms end window). G-19 band 750 ms (14250..15750); the 25 ms polls bracket the lifetime, and the end window 13500..16500 reads a lifetime 10% off (13500 or 16500 ms) as an alert at its edge (D-200). Residual (D-197/D-343): a run with no summoned part is unmeasured, probability 9.77e-04 per pair (2 x 0.5^11); a summoned part is judged deterministically to the 25 ms poll, so a lifetime at the baseline 20000 ms or 10% off alerts in every summoned part (false pass 0 given one summon)."
+    },
+    {
+      "spell": 807284,
+      "name": "Heartseeking Bolt (Rage based on the damage dealt)",
+      "kind": "metric_delta",
+      "variant": "rage_per_damage",
+      "label_suffix": "rage_per_damage",
+      "quote": "based on the damage dealt.",
+      "expected": 1,
+      "before_expected": 1,
+      "tolerance": 0.05,
+      "trigger_spell": 807284,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "dummy_distance": 17.5,
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          10031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "rage_per_damage": {
+        "spell": 807284,
+        "target": "dummy",
+        "min_damage_ratio": 1.5
+      },
+      "observe_source": "Heartseeking Bolt 807284 (O-15 text rev_20261115_02_witch_hunter_heartseeking_bolt_text.sql, 'Generates Rage based on the damage dealt.') gives Rage through Unit::RewardRage(dealt, 0, true) (AscensionWitchHunterAbilities.cpp:453-454; Unit.cpp:17677-17708: dealt / rage conversion x 7.5 / 2 x 10 raw, truncated once per hit), so the Rage per point of damage is the same at any damage. Option rage_per_damage (ADR 1004 provisional, mentor D-465): one real bolt per phase at the dummy 17.5 yd away, Rage set to 0 at the start of both phases with regeneration and decay off; the before phase at the reference ranged attack power, the after phase with QA Test +1000 Melee and Ranged AP 10031 (the 807284 rap hit_ratio entry reads that contrast as +92% damage); Reduce Critical Strike Chance -100% 64481 in both phases, and a critical hit makes the phase unmeasured. Judged: (Rage / damage after) / (Rage / damage before) = 1 within 0.05 (G-19, 5% of 1), the damage contrast at least 1.5 and the after Rage under the caster's read maximum Rage (1000 raw). The per-hit truncation moves the ratio by at most 1/170 + 1/340 raw (about 0.9%), so the read is deterministic inside the band: false alert 0. A Rage independent of the damage reads 1 / contrast <= 0.667 and alerts in every run (false pass 0); a fixed Rage per hit added to a proportional part passes while its share of the before phase's Rage stays up to 10% at contrast 2 and 15% at contrast 1.5 (about 10.5% at the counted contrast of about 1.9; ADR 1004). The tooltip states no amount, so none is judged."
+    },
+    {
+      "spell": 705531,
+      "name": "Defender of Darkshire (hound melee haste duration)",
+      "kind": "metric_delta",
+      "variant": "hound_haste_duration",
+      "label_suffix": "hound_haste_duration",
+      "quote": "for $573266d.",
+      "expected": 1739.13,
+      "before_expected": 2000,
+      "tolerance": 0.5,
+      "after_expiry_expected": 2000,
+      "trigger_spell": 75,
+      "target": "dummy",
+      "force_crit": "ranged",
+      "setup_casts": [
+        801343
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1500,
+      "gate_timing": "start",
+      "gate_spell": 705531,
+      "trigger_only_after": true,
+      "wait_ms": 4575,
+      "expire_ms": 500,
+      "expiry_wait_ms": 550,
+      "game_time": {
+        "after": [
+          4825,
+          4975
+        ],
+        "expired": [
+          5375,
+          5495
+        ]
+      },
+      "dummy_distance": 8,
+      "metric": "owned_creature_attack_time_ms",
+      "fields": {
+        "entry": 50124
+      },
+      "stop_shooting_after_ms": {
+        "ms": 300,
+        "dx": -40,
+        "spell": 75,
+        "target": "dummy"
+      },
+      "observe_source": "573266 DurationIndex 28 (5000 ms, $573266d), Effect[0] aura 138 MOD_MELEE_HASTE 15% on the owner's Shadowhound 50124 (705531 proc on a ranged auto attack crit, AscensionWitchHunterEvents.cpp:151-152, :300-304; the hound_haste entry reads 1739.13 ms = 2000 / 1.15). 705531 is learned from the start; the before phase summons the hound with Houndmaster's Whistle 801343 and casts no Auto Shot (2000 ms). The treatment summons it again and casts Auto Shot 75 at the dummy 8 yd away (Speed 40 yd/s, about 200 ms of flight), every ranged hit a crit (ranged_crit_rating fixture). Option stop_shooting_after_ms (ADR 1005 provisional, mentor D-468): 300 ms after the cast the caster moves 40 yd back along x (two relocate steps of 20 yd), 48 yd from the dummy, beyond Auto Shot's 35 yd (SpellRange 114), so _UpdateAutoRepeatSpell's CheckCast fails and no shot fires (Unit.cpp:4740-4751; stop_attack cannot stop it, Unit.cpp:8357); the hit count of 75 must read at least 1 before the move and the same at both later readings, and the move must come at most 325 ms after the cast, so the aura began 0..325 ms after it. Game-time windows from the cast: the after reading at 4825..4975 ms must still read 1739.13 (the aura lasted at least 4825 - 325 = 4500 ms), the expired reading at 5375..5495 ms must read 2000 (it lasted less than 5495 ms): a duration 10% off (4500 or 5500 ms) fails one of them (D-200). The stated 5000 ms passes both with 50 ms or more to spare for an aura start anywhere in 0..325 ms. The expired window top is 5495 ms, not 5475 (ADR 1008 provisional, review C-1 follow-up): the measured expired reading at 5461 ms keeps 34 ms, more than one 25 ms step, and the top stays under 5500 ms, so a 5500 ms aura started at 0 ms or later is still present at any accepted reading. Deterministic reads to the 25 ms step: false alert and false pass 0 given the fixture holds (a failed fixture is unmeasured). Bound (review-h I-1): the cast stamp is taken two harness ticks before the read (behaviours.py:1752-1754, about 6 ms, more than the 5 ms spare under 5500 ms), so the window top alone does not fail a 5500 ms aura; it fails because the Auto Shot hit lands at least 125 ms after the cast (projectile flight, Spell.cpp:2474-2476, DBC Speed 40), so the aura cannot start before that and a 5500 ms aura is still present at any expired reading under 5495 ms."
     }
   ],
   "player_observations": [],

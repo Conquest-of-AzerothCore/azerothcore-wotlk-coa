@@ -221,6 +221,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if ((id == 807364 || id == 805751) && info->IsChanneled())
         info->AttributesEx5 &= ~SPELL_ATTR5_ALLOW_ACTION_DURING_CHANNEL;
+    if (id == 805753 && info->EquippedItemClass == -1 && !info->EquippedItemSubClassMask)
+        info->EquippedItemSubClassMask = 262156;
     if (id == SPELL_SILVER_BULLETS_R1 || id == SPELL_SILVER_BULLETS_R2)
         KeepCreatureTypeDamageForScript(info, EFFECT_1);
     if (id == SPELL_SILVER_BOLTS)
