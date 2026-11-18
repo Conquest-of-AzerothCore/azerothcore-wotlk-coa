@@ -74,6 +74,7 @@ constexpr uint32 SHOCK_FAMILY_FLAG_ZERO = 2048;
 constexpr uint32 BRINE_FAMILY_FLAG_ONE = 128;
 constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_ONE = 1;
 constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_TWO = 32;
+constexpr uint32 DELUGE_FAMILY_FLAG_ONE = 0x8000;
 
 bool IsConjureStorm(SpellInfo const* info)
 {
@@ -256,6 +257,9 @@ public:
 
         if (damage && !spell->IsTriggered() && (info->SpellFamilyFlags[1] & TORRENTIAL_WRATH_FAMILY_FLAG_ONE) &&
             (info->SpellFamilyFlags[2] & TORRENTIAL_WRATH_FAMILY_FLAG_TWO) && player->HasAura(SPELL_CONDUCTIVE))
+            player->CastSpell(target, SPELL_CONDUCTION, true);
+
+        if (damage && !spell->IsTriggered() && (info->SpellFamilyFlags[1] & DELUGE_FAMILY_FLAG_ONE))
             player->CastSpell(target, SPELL_CONDUCTION, true);
 
         if (damage && !spell->IsTriggered() &&
