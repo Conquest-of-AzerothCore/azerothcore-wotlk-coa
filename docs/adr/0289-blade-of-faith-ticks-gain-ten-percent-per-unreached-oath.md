@@ -1,6 +1,6 @@
 # 0289. Blade of Faith's ticks gain 10% for each consumed Oath that missed them
 
-- Status: accepted
+- Status: superseded by [1010](1010-blade-of-faith-ticks-gain-the-oaths-own-thirty-percent-per-stack.md)
 - Date: 2026-11-12
 
 ## Context
