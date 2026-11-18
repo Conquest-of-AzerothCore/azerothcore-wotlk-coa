@@ -105,7 +105,9 @@
 #include "WorldStatePackets.h"
 #include <cmath>
 #include <limits>
+#include <mutex>
 #include <queue>
+#include <unordered_set>
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
 //  however, for some reasons removing it would cause a damn linking issue
@@ -6282,7 +6284,17 @@ void Player::CheckAreaExploreAndOutdoor()
 
     if (offset >= PLAYER_EXPLORED_ZONES_SIZE)
     {
-        LOG_ERROR("entities.player", "Wrong area flag {} in map data for (X: {} Y: {}) point to field PLAYER_EXPLORED_ZONES_1 + {} ( {} must be < {} ).", areaEntry->flags, GetPositionX(), GetPositionY(), offset, offset, PLAYER_EXPLORED_ZONES_SIZE);
+        static std::mutex reportedAreasMutex;
+        static std::unordered_set<uint32> reportedAreas;
+        bool firstReport;
+        {
+            std::lock_guard<std::mutex> lock(reportedAreasMutex);
+            firstReport = reportedAreas.insert(areaId).second;
+        }
+        if (firstReport)
+            LOG_WARN("entities.player", "Area {} on map {} has exploration flag {} (field {} exceeds {} fields); "
+                "exploration credit skipped. Further warnings for this area suppressed until restart.",
+                areaId, GetMapId(), areaEntry->exploreFlag, offset, PLAYER_EXPLORED_ZONES_SIZE);
         return;
     }
 
