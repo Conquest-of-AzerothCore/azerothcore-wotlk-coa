@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "The Missing Diplomat (1249): Mikhail takes the quest back shortly after Tapoke is subdued (#12711)",
+  "contract": "Accepting 1249 from Mikhail (4963) removes his quest giver flag and sends Tapoke \"Slim\" Jahn (spawn 10873) running; he turns hostile at waypoint 3. Below 20% health he gives up, completes the quest and despawns, and only his respawn gives Mikhail the flag back. The vanilla respawn sweep had raised that spawn from 10 to 300 seconds, so Mikhail refused the turn-in for five minutes. With 10 seconds Mikhail accepts the turn-in 15 seconds after the subdue.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -3818.0, "y": -830.0, "z": 10.1, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 37, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "p", "value": 1000000, "maximum": 1000000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Tapoke waits at his spawn", "actor": "p", "metric": "nearby_creature_count", "entry": 4962, "min": 1 },
+    { "action": "prepare_quest", "actor": "p", "quest": 1248, "complete": true },
+    { "action": "reward_quest", "actor": "p", "quest": 1248 },
+    { "action": "quest_accept", "label": "accept The Missing Diplomat (1249) from Mikhail", "actor": "p", "quest": 1249, "entry": 4963 },
+    { "action": "assert", "label": "CONTROL: 1249 is in the quest log", "actor": "p", "metric": "quest_status", "quest": 1249, "equals": 3 },
+    { "action": "assert", "label": "CONTROL: Tapoke turns hostile on his escape route", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 4962, "equals": 1, "within_ms": 15000 },
+    { "action": "attack_nearby", "label": "Drop Tapoke below 20% health", "actor": "p", "entry": 4962, "radius": 100, "damage_pct": 85 },
+    { "action": "assert", "label": "CONTROL: Tapoke gives up and completes the quest", "actor": "p", "metric": "quest_status", "quest": 1249, "equals": 1, "within_ms": 30000 },
+    { "action": "wait", "label": "Tapoke despawns and respawns at home", "ms": 15000 },
+    { "action": "quest_turn_in", "actor": "p", "quest": 1249, "entry": 4963 },
+    { "action": "assert", "label": "DISCRIMINATING: Mikhail accepts the turn-in shortly after the subdue", "actor": "p", "metric": "quest_rewarded", "quest": 1249, "equals": 1, "within_ms": 3000 }
+  ]
+}
