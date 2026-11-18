@@ -3378,6 +3378,14 @@ private:
 
     static Battleground* InvitedBattleground(Player* player)
     {
+        if (Battleground* battleground = FindInvitedBattleground(player))
+            return battleground;
+
+        throw std::runtime_error("Packet invited battleground type requires a battleground invitation");
+    }
+
+    static Battleground* FindInvitedBattleground(Player* player)
+    {
         for (uint32 slot = 0; slot < PLAYER_MAX_BATTLEGROUND_QUEUES; ++slot)
         {
             BattlegroundQueueTypeId const queueType = player->GetBattlegroundQueueTypeId(slot);
@@ -3392,7 +3400,7 @@ private:
                     return battleground;
         }
 
-        throw std::runtime_error("Packet invited battleground type requires a battleground invitation");
+        return nullptr;
     }
 
     WorldObject* GetQuestGiver(Player* player, Tree const& step)
@@ -4699,6 +4707,13 @@ private:
             return player->GetMapId();
         if (metric == "instance_id")
             return player->GetInstanceId();
+        if (metric == "battleground_queued")
+            return player->InBattlegroundQueue() ? 1 : 0;
+        if (metric == "battleground_invited_max_level")
+        {
+            Battleground const* battleground = FindInvitedBattleground(player);
+            return battleground ? battleground->GetMaxLevel() : 0;
+        }
         if (metric == "map_difficulty")
             return player->GetMap()->GetSpawnMode();
         if (metric == "nearby_creature_max_health")
