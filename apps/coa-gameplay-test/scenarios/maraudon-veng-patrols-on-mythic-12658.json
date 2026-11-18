@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Maraudon: Veng patrols Foulspore Cavern on Mythic (#12658)",
+  "contract": "#12658: Veng, The Fifth Kahn (13738), had no spawn, so the Mythic Orange Crystals wing missed one of its three bosses (DungeonEncounterExtra 2611, lfg 2716). Ascension logs show him fought in Foulspore Cavern right before Noxxion, with his kit (Shoot, Multi-Shot, Charge, Cut Down) and a bow and a one-hand axe. He replaces the friendly Spirit of Veng (12243) on Mythic and walks the same path (539700); Normal and Heroic keep the spirit. He says 'Your presence desecrates this sacred tomb!' on aggro and yells 'My wrath... never ends...' as he dies.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 349,
+      "x": 1050.0,
+      "y": -405.0,
+      "z": -34.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maraudon on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Maraudon is spawned",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Veng walks his path in Foulspore Cavern on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 13738,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The friendly Spirit of Veng is not there on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 12243,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 13738,
+      "as": "veng",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "actor": "mythic",
+      "target": "veng"
+    },
+    {
+      "action": "assert",
+      "label": "Veng speaks when he is pulled",
+      "actor": "mythic",
+      "metric": "monster_chat_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "mythic",
+      "entry": 13738,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Veng shouts as he dies",
+      "actor": "mythic",
+      "metric": "monster_chat_count",
+      "min": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 349,
+      "x": 1050.0,
+      "y": -405.0,
+      "z": -34.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maraudon on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1 on Heroic",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "On Heroic the Spirit of Veng walks the path as before",
+      "actor": "heroic",
+      "metric": "nearby_creature_count",
+      "entry": 12243,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Veng is a Mythic boss only",
+      "actor": "heroic",
+      "metric": "nearby_creature_count",
+      "entry": 13738,
+      "equals": 0
+    }
+  ]
+}
