@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Wide battleground brackets match levels 12 and 29, and 30 and 49, but keep 29 and 30 apart",
+  "contract": "With the default CoA.Battleground.WideBrackets.Ranges (10-29,30-49,50-59) and one player per faction to start Warsong Gulch, a level 29 Alliance and a level 30 Horde player who queue together stay uninvited because they fall in different brackets. A level 12 Horde player then completes a 10-29 match with the level 29 player, and a level 49 Alliance player completes a 30-49 match with the level 30 player.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "low_horde",
+      "race": 2,
+      "class": 1,
+      "level": 12
+    },
+    {
+      "id": "high_alliance",
+      "race": 1,
+      "class": 1,
+      "level": 49
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "level 29 stays queued",
+      "actor": "alliance",
+      "metric": "battleground_queued",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "level 30 stays queued",
+      "actor": "horde",
+      "metric": "battleground_queued",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "level 29 is not matched with level 30",
+      "actor": "alliance",
+      "metric": "battleground_invited_max_level",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "level 30 is not matched with level 29",
+      "actor": "horde",
+      "metric": "battleground_invited_max_level",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "low_horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "level 12 and 29 share the 10-29 bracket",
+      "actor": "alliance",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "level 12 is invited to the 10-29 bracket",
+      "actor": "low_horde",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "level 30 is still not matched",
+      "actor": "horde",
+      "metric": "battleground_invited_max_level",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "high_alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "level 30 and 49 share the 30-49 bracket",
+      "actor": "horde",
+      "metric": "battleground_invited_max_level",
+      "equals": 49,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "level 49 is invited to the 30-49 bracket",
+      "actor": "high_alliance",
+      "metric": "battleground_invited_max_level",
+      "equals": 49,
+      "within_ms": 30000
+    }
+  ]
+}
