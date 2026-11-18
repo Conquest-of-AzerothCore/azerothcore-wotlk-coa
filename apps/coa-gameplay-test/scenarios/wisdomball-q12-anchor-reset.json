@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Wisdomball Q12 Links of the Binding: a reinforced Chain Anchor is usable again after Q12 is abandoned and accepted again (PR #12650 review)",
+  "contract": [
+    "Using a Chain Anchor 9417209 makes the player channel 59069 into its Anchor Focus 9417055; after 5 s the focus",
+    "credits 'Chain Anchor reinforced' (Q12 objective index 1, 4 needed) and sets GO_FLAG_NOT_SELECTABLE (16) on that",
+    "anchor (its flags go from 32 = NODESPAWN to 48). Khadgar 9417003, the Q12 giver, clears that flag on all four anchors (guids 9417013-9417016) when Q12 is",
+    "accepted. DISCRIMINATING: after reinforce -> abandon -> accept again, the first anchor is usable again and all four",
+    "anchors give the 4 credits; without the reset the first anchor stays locked and the run ends at 3."
+  ],
+  "timeout_ms": 240000,
+  "location": { "map": 0, "x": -8996.0, "y": 853.5, "z": 29.62, "o": 3.8 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 30 } ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1 (the questline's own phases come from its area auras)", "actor": "p", "value": 1 },
+    { "action": "prepare_quest", "label": "SETUP: Hold the Anchors (Q10) complete", "actor": "p", "quest": 9417110 },
+    { "action": "reward_quest", "label": "SETUP: Hold the Anchors turned in (Q12 needs it)", "actor": "p", "quest": 9417110 },
+    { "action": "assert", "label": "Q10 is rewarded", "actor": "p", "metric": "quest_status", "quest": 9417110, "equals": 6, "within_ms": 3000 },
+
+    { "action": "teleport", "label": "into Regret's Chasm next to Khadgar", "actor": "p", "map": 933, "x": -11361.0, "y": -3070.0, "z": 4.6, "o": 3.14, "ignore_access": true },
+    { "action": "assert", "label": "on map 933", "actor": "p", "metric": "map_id", "equals": 933, "within_ms": 15000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "quest_accept", "label": "accept Links of the Binding from Khadgar", "actor": "p", "quest": 9417112, "entry": 9417003 },
+    { "action": "assert", "label": "Q12 is in progress", "actor": "p", "metric": "quest_status", "quest": 9417112, "equals": 3, "within_ms": 3000 },
+
+    { "action": "teleport", "label": "to the middle of the four anchors", "actor": "p", "map": 933, "x": -11542.0, "y": -3104.0, "z": 5.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "attack_nearby", "label": "SETUP: clear every Chain-Gnawer around the anchors once (they respawn after 180 s, the run needs about 60 s)", "actor": "p", "entry": 9417024, "radius": 90, "kill": true, "all": true },
+
+    { "action": "teleport", "label": "to the first Chain Anchor", "actor": "p", "map": 933, "x": -11502.0, "y": -3100.0, "z": 5.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "the first anchor is usable", "actor": "p", "metric": "nearby_gameobject_flags", "entry": 9417209, "equals": 32 },
+    { "action": "use_nearby_gameobject", "label": "reinforce the first anchor", "actor": "p", "entry": 9417209 },
+    { "action": "wait", "ms": 6500 },
+    { "action": "assert", "label": "one anchor reinforced", "actor": "p", "metric": "quest_objective_count", "quest": 9417112, "index": 1, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "the first anchor is locked now", "actor": "p", "metric": "nearby_gameobject_flags", "entry": 9417209, "equals": 48 },
+
+    { "action": "quest_abandon", "label": "abandon Q12", "actor": "p", "quest": 9417112 },
+    { "action": "assert", "label": "Q12 is gone from the log", "actor": "p", "metric": "quest_status", "quest": 9417112, "equals": 0, "within_ms": 3000 },
+    { "action": "teleport", "label": "back to Khadgar", "actor": "p", "map": 933, "x": -11361.0, "y": -3070.0, "z": 4.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "quest_accept", "label": "accept Links of the Binding again", "actor": "p", "quest": 9417112, "entry": 9417003 },
+    { "action": "assert", "label": "Q12 is in progress again", "actor": "p", "metric": "quest_status", "quest": 9417112, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "the new run starts at 0 anchors", "actor": "p", "metric": "quest_objective_count", "quest": 9417112, "index": 1, "equals": 0 },
+
+    { "action": "teleport", "label": "to the first Chain Anchor again", "actor": "p", "map": 933, "x": -11502.0, "y": -3100.0, "z": 5.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the reinforced anchor is usable again after the new accept", "actor": "p", "metric": "nearby_gameobject_flags", "entry": 9417209, "equals": 32 },
+    { "action": "use_nearby_gameobject", "label": "reinforce the first anchor again", "actor": "p", "entry": 9417209 },
+    { "action": "wait", "ms": 6500 },
+    { "action": "assert", "label": "anchor 1 of 4", "actor": "p", "metric": "quest_objective_count", "quest": 9417112, "index": 1, "equals": 1, "within_ms": 3000 },
+
+    { "action": "teleport", "label": "to the second Chain Anchor", "actor": "p", "map": 933, "x": -11527.0, "y": -3125.0, "z": 5.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "use_nearby_gameobject", "label": "reinforce the second anchor", "actor": "p", "entry": 9417209 },
+    { "action": "wait", "ms": 6500 },
+    { "action": "assert", "label": "anchor 2 of 4", "actor": "p", "metric": "quest_objective_count", "quest": 9417112, "index": 1, "equals": 2, "within_ms": 3000 },
+
+    { "action": "teleport", "label": "to the third Chain Anchor", "actor": "p", "map": 933, "x": -11552.0, "y": -3080.0, "z": 5.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "use_nearby_gameobject", "label": "reinforce the third anchor", "actor": "p", "entry": 9417209 },
+    { "action": "wait", "ms": 6500 },
+    { "action": "assert", "label": "anchor 3 of 4", "actor": "p", "metric": "quest_objective_count", "quest": 9417112, "index": 1, "equals": 3, "within_ms": 3000 },
+
+    { "action": "teleport", "label": "to the fourth Chain Anchor", "actor": "p", "map": 933, "x": -11577.0, "y": -3110.0, "z": 5.6, "o": 3.14 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "use_nearby_gameobject", "label": "reinforce the fourth anchor", "actor": "p", "entry": 9417209 },
+    { "action": "wait", "ms": 6500 },
+    { "action": "assert", "label": "DISCRIMINATING: all four anchors count in the new run", "actor": "p", "metric": "quest_objective_count", "quest": 9417112, "index": 1, "equals": 4, "within_ms": 3000 }
+  ]
+}
