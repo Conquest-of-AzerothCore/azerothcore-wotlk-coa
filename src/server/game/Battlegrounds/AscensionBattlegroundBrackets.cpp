@@ -45,24 +45,18 @@ namespace
         return rows;
     }
 
-    std::size_t RangeIndexOf(std::vector<Policy::LevelRange> const& ranges, Policy::BracketRow const& row)
-    {
-        for (std::size_t index = 0; index < ranges.size(); ++index)
-            if (ranges[index].minLevel <= row.minLevel && row.maxLevel <= ranges[index].maxLevel)
-                return index;
-        return ranges.size();
-    }
-
     bool BuildFrom(std::vector<Policy::LevelRange> const& ranges)
     {
-        std::map<std::size_t, uint32> leadIdByRange;
-        for (auto const& [mapId, stockRows] : StockBattlegroundRowsBelowSixty())
+        auto const stockRowsByMap = StockBattlegroundRowsBelowSixty();
+        std::vector<uint32> mapIds;
+        std::vector<std::vector<Policy::BracketRow>> widenedPerMap;
+        for (auto const& [mapId, stockRows] : stockRowsByMap)
         {
             std::vector<Policy::BracketRow> rows;
             for (PvPDifficultyEntry const* entry : stockRows)
                 rows.push_back({ entry->bracketId, entry->minLevel, entry->maxLevel });
 
-            auto const widened = Policy::Widen(rows, ranges);
+            auto widened = Policy::Widen(rows, ranges);
             if (!widened)
             {
                 LOG_ERROR("server.loading", "CoA.Battleground.WideBrackets.Ranges \"{}\" splits a stock bracket of "
@@ -70,18 +64,25 @@ namespace
                 return false;
             }
 
-            MapBrackets& mapBrackets = brackets[mapId];
-            for (Policy::BracketRow const& row : *widened)
-            {
-                auto const [lead, inserted] = leadIdByRange.emplace(RangeIndexOf(ranges, row), row.bracketId);
-                if (!inserted && lead->second != row.bracketId)
-                {
-                    LOG_ERROR("server.loading", "CoA.Battleground.WideBrackets.Ranges \"{}\" gives map {} bracket id {} "
-                        "where another battleground uses {}; stock battleground brackets stay in use.",
-                        configuredRanges, mapId, row.bracketId, lead->second);
-                    return false;
-                }
+            mapIds.push_back(mapId);
+            widenedPerMap.push_back(std::move(*widened));
+        }
 
+        if (auto const misaligned = Policy::FirstMapWithMisalignedId(widenedPerMap, ranges))
+        {
+            LOG_ERROR("server.loading", "CoA.Battleground.WideBrackets.Ranges \"{}\" gives map {} a bracket id that "
+                "another battleground uses for a different range; stock battleground brackets stay in use.",
+                configuredRanges, mapIds[*misaligned]);
+            return false;
+        }
+
+        for (std::size_t index = 0; index < mapIds.size(); ++index)
+        {
+            uint32 const mapId = mapIds[index];
+            std::vector<PvPDifficultyEntry const*> const& stockRows = stockRowsByMap.at(mapId);
+            MapBrackets& mapBrackets = brackets[mapId];
+            for (Policy::BracketRow const& row : widenedPerMap[index])
+            {
                 uint32 difficulty = 0;
                 for (PvPDifficultyEntry const* entry : stockRows)
                 {

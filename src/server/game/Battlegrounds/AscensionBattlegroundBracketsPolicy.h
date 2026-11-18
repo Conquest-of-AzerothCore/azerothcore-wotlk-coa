@@ -126,6 +126,31 @@ namespace AscensionBattlegroundBracketsPolicy
         return widened;
     }
 
+    inline std::size_t RangeIndexOf(std::vector<LevelRange> const& ranges, BracketRow const& row)
+    {
+        for (std::size_t index = 0; index < ranges.size(); ++index)
+            if (ranges[index].minLevel <= row.minLevel && row.maxLevel <= ranges[index].maxLevel)
+                return index;
+        return ranges.size();
+    }
+
+    inline std::optional<std::size_t> FirstMapWithMisalignedId(
+        std::vector<std::vector<BracketRow>> const& widenedPerMap, std::vector<LevelRange> const& ranges)
+    {
+        std::vector<std::optional<std::uint32_t>> leadIds(ranges.size() + 1);
+        for (std::size_t map = 0; map < widenedPerMap.size(); ++map)
+        {
+            for (BracketRow const& row : widenedPerMap[map])
+            {
+                std::optional<std::uint32_t>& leadId = leadIds[RangeIndexOf(ranges, row)];
+                if (leadId && *leadId != row.bracketId)
+                    return map;
+                leadId = row.bracketId;
+            }
+        }
+        return std::nullopt;
+    }
+
     inline float Gain(std::uint32_t own, std::uint32_t target)
     {
         return target > own ? static_cast<float>(target - own) : 0.0f;

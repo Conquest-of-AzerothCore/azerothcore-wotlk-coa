@@ -22,11 +22,24 @@ struct AppliedLift final : DataMap::Base
     Policy::Lift lift;
 };
 
+void RaiseCreateStat(Unit* unit, Stats stat, float amount)
+{
+    unit->SetCreateStat(stat, unit->GetCreateStat(stat) + amount);
+    unit->UpdateStats(stat);
+}
+
 void HandleLiftModifiers(Unit* unit, Policy::Lift const& lift, bool apply)
 {
     for (std::size_t stat = 0; stat < lift.stats.size(); ++stat)
-        if (lift.stats[stat] != 0.0f)
+    {
+        if (lift.stats[stat] == 0.0f)
+            continue;
+
+        if (unit->IsPet())
+            RaiseCreateStat(unit, Stats(stat), apply ? lift.stats[stat] : -lift.stats[stat]);
+        else
             unit->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + stat), BASE_VALUE, lift.stats[stat], apply);
+    }
 
     if (lift.health != 0.0f)
         unit->HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, lift.health, apply);
@@ -43,19 +56,6 @@ void RemoveLift(Unit* unit)
 
     Policy::Lift const lift = applied->lift;
     unit->CustomData.Erase(LiftKey);
-    HandleLiftModifiers(unit, lift, false);
-}
-
-void DropLiftAfterHealthAndManaReset(Unit* unit)
-{
-    AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey);
-    if (!applied)
-        return;
-
-    Policy::Lift lift = applied->lift;
-    unit->CustomData.Erase(LiftKey);
-    lift.health = 0.0f;
-    lift.mana = 0.0f;
     HandleLiftModifiers(unit, lift, false);
 }
 
@@ -126,7 +126,8 @@ void RefreshPetLift(Pet* pet)
     bool const combatPet = type == HUNTER_PET || type == SUMMON_PET;
     uint32 const target = owner && combatPet ? LiftTargetLevel(owner) : 0;
     uint8 const level = pet->GetLevel();
-    uint32 const statsCreatureId = type == HUNTER_PET ? 1 : pet->GetEntry();
+    bool const hunterStats = pet->IsHunterPet();
+    uint32 const statsCreatureId = hunterStats ? 1 : pet->GetEntry();
     PetLevelInfo const* own = target > level ? sObjectMgr->GetPetLevelInfo(statsCreatureId, level) : nullptr;
     PetLevelInfo const* top = own ? sObjectMgr->GetPetLevelInfo(statsCreatureId, uint8(target)) : nullptr;
     if (!top)
@@ -135,8 +136,7 @@ void RefreshPetLift(Pet* pet)
         return;
     }
 
-    bool const hasMana = type != HUNTER_PET;
-    ApplyLift(pet, Policy::LiftBetween(PetLevelValues(*own, hasMana), PetLevelValues(*top, hasMana)));
+    ApplyLift(pet, Policy::LiftBetween(PetLevelValues(*own, !hunterStats), PetLevelValues(*top, !hunterStats)));
 }
 
 void RefreshOwnerLifts(Player* player)
@@ -228,7 +228,7 @@ public:
         if (!pet)
             return;
 
-        DropLiftAfterHealthAndManaReset(pet);
+        pet->CustomData.Erase(LiftKey);
         if (pet->IsInWorld())
             RefreshPetLift(pet);
     }

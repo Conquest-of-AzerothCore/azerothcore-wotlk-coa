@@ -55,6 +55,21 @@ static void WidensMapStartingAtTwenty()
     assert(widened && SameRows(*widened, { { 1, 20, 29 }, { 2, 30, 49 }, { 4, 50, 59 } }));
 }
 
+static void RejectsMapsThatGiveOneRangeDifferentIds()
+{
+    auto ranges = *ParseRanges("10-29,30-49,50-59");
+    auto const tenLevel = *Widen(StockTenLevelRows, ranges);
+    std::vector<BracketRow> const fromTwentyStock(StockTenLevelRows.begin() + 1, StockTenLevelRows.end());
+    auto const fromTwenty = *Widen(fromTwentyStock, ranges);
+    assert(!FirstMapWithMisalignedId({ tenLevel, tenLevel, tenLevel }, ranges));
+    assert(!FirstMapWithMisalignedId({ fromTwenty }, ranges));
+    assert(!FirstMapWithMisalignedId({ tenLevel, {}, tenLevel }, ranges));
+    auto const misaligned = FirstMapWithMisalignedId({ tenLevel, tenLevel, fromTwenty }, ranges);
+    assert(misaligned && *misaligned == 2);
+    auto const reversed = FirstMapWithMisalignedId({ fromTwenty, tenLevel }, ranges);
+    assert(reversed && *reversed == 1);
+}
+
 static void RejectsPartialRowsAndKeepsEmptyMaps()
 {
     assert(!Widen(StockTenLevelRows, *ParseRanges("10-25")));
@@ -86,6 +101,7 @@ int main()
     RejectsInvalidRanges();
     WidensEveryBattlegroundToAlignedIds();
     WidensMapStartingAtTwenty();
+    RejectsMapsThatGiveOneRangeDifferentIds();
     RejectsPartialRowsAndKeepsEmptyMaps();
     LiftsWarriorFromTwelveToTwentyNine();
     std::cout << "Battleground wide bracket policy checks passed\n";
