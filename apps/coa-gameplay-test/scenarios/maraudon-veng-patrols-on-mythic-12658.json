@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Maraudon: Veng patrols Foulspore Cavern on Mythic (#12658)",
-  "contract": "#12658: Veng, The Fifth Kahn (13738), had no spawn, so the Mythic Orange Crystals wing missed one of its three bosses (DungeonEncounterExtra 2611, lfg 2716). Ascension logs show him fought in Foulspore Cavern right before Noxxion, with his kit (Shoot, Multi-Shot, Charge, Cut Down) and a bow and a one-hand axe. He replaces the friendly Spirit of Veng (12243) on Mythic and walks the same path (539700); Normal and Heroic keep the spirit. He says 'Your presence desecrates this sacred tomb!' on aggro and yells 'My wrath... never ends...' as he dies.",
+  "contract": "#12658: Veng, The Fifth Kahn (13738), had no spawn, so the Mythic Orange Crystals wing missed one of its three bosses (DungeonEncounterExtra 2611, lfg 2716). Ascension logs show him fought in Foulspore Cavern right before Noxxion, with his kit (Shoot, Multi-Shot, Charge, Cut Down) and a bow and a one-hand axe. He replaces the friendly Spirit of Veng (12243) on Mythic and walks the same path (539700); Normal and Heroic keep the spirit. He says 'Your presence desecrates this sacred tomb!' on aggro and yells 'My wrath... never ends...' as he dies. He walks at normal walking speed (speed_walk 1, was 2.52) and uses his bow (Shoot, 2100156) only while his victim is 8-40 yards away; before, Shoot came every 3.7-4.2 s with the combat-move cast flag, so he stood and shot at the tank in melee.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -25,6 +25,12 @@
       "level": 60,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
+    },
+    {
+      "id": "field",
+      "race": 1,
+      "class": 1,
+      "level": 60
     }
   ],
   "steps": [
@@ -113,6 +119,18 @@
       "within_ms": 3000
     },
     {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: in melee Veng does not use his bow",
+      "actor": "veng",
+      "metric": "spell_cast_count",
+      "spell": 2100156,
+      "equals": 0
+    },
+    {
       "action": "attack_nearby",
       "actor": "mythic",
       "entry": 13738,
@@ -185,6 +203,35 @@
       "metric": "nearby_creature_count",
       "entry": 13738,
       "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "field",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "summon",
+      "actor": "field",
+      "entry": 13738,
+      "as": "archer",
+      "distance": 15
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "field",
+      "entry": 13738,
+      "damage_pct": 5,
+      "radius": 30
+    },
+    {
+      "action": "assert",
+      "label": "In the open, Veng opens the fight with his bow while his target is at range",
+      "actor": "archer",
+      "metric": "spell_cast_count",
+      "spell": 2100156,
+      "min": 1,
+      "within_ms": 3000
     }
   ]
 }

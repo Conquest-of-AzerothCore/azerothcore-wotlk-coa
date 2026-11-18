@@ -17,3 +17,10 @@ DELETE FROM `smart_scripts` WHERE `entryorguid` = 13738 AND `source_type` = 0 AN
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
     (13738, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Veng - On Aggro - Say Line 0'),
     (13738, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Veng - On Death - Say Line 1');
+
+UPDATE `creature_template` SET `speed_walk` = 1 WHERE `entry` = 13738;
+
+UPDATE `smart_scripts` SET `event_type` = 9, `event_param1` = 0, `event_param2` = 0, `event_param3` = 3700, `event_param4` = 4200, `event_param5` = 8, `event_param6` = 40,
+    `action_param2` = 0,
+    `comment` = 'Veng - Ascension kit - Victim within 8-40 yards (every 3.7-4.2 s) - Cast ''Shoot'''
+WHERE `entryorguid` = 13738 AND `source_type` = 0 AND `id` = 9000 AND `action_type` = 11 AND `action_param1` = 2100156;
