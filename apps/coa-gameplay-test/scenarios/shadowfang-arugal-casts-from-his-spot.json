@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Archmage Arugal casts from his spot at a player across the lair instead of walking to them",
+  "contract": [
+    "Archmage Arugal (4275) is a caster who stands at his desk and moves only by Shadow Port. His kit casts Wrath of Arugal",
+    "(2102677) with the SmartAI flag that allows combat movement when the cast fails. Since #12220 limited Wrath to 30 yards,",
+    "a player at the lair door (about 40 yards) made him walk toward the stairs. Wrath keeps the range Spell.dbc gives it",
+    "and ignores line of sight again, as Spell.dbc gives it, and Arugal no longer walks in combat.",
+    "The test pulls a summoned Arugal next to his spawn; it runs the same SmartAI as his spawn.",
+    "The kit rows have no difficulty mask, so the test runs on Normal."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -76.0,
+      "y": 2152.0,
+      "z": 155.8,
+      "o": 3.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p is in a Normal Shadowfang Keep",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Shadowfang Keep is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "arugal",
+      "entry": 4275,
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "arugal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal is in combat",
+      "actor": "arugal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p steps 18 yards west, staying in combat",
+      "actor": "p",
+      "dx": -18.0
+    },
+    {
+      "action": "relocate",
+      "label": "p steps another 18 yards west, across the lair",
+      "actor": "p",
+      "dx": -18.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p stands inside the lair, more than 30 yards from Arugal",
+      "actor": "p",
+      "metric": "distance",
+      "target": "arugal",
+      "min": 33,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "save_as": "health_at_door"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Arugal does not walk toward p",
+      "actor": "arugal",
+      "metric": "moving",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Arugal is still more than 30 yards from p",
+      "actor": "p",
+      "metric": "distance",
+      "target": "arugal",
+      "min": 33
+    },
+    {
+      "action": "assert",
+      "label": "Wrath of Arugal reaches p across the lair",
+      "actor": "p",
+      "metric": "health",
+      "relative_to": "health_at_door",
+      "max": -1,
+      "within_ms": 6000
+    }
+  ]
+}

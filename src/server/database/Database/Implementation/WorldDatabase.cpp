@@ -150,6 +150,13 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_SEL_MANASTORM_FLOOR_XP,
         "SELECT enabled, rdf_dungeon_id, multiplier FROM manastorm_floor_experience WHERE id = 1", CONNECTION_SYNCH);
 #endif
+    PrepareStatement(WORLD_SEL_COA_BOSS_LEASH,
+        "SELECT `entry`, `radius`, `target` FROM `coa_boss_leash`", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_COA_BOSS_LEASH_POINTS,
+        "SELECT `entry`, `x`, `y`, `z` FROM `coa_boss_leash_point` ORDER BY `entry`, `point`", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_INS_COA_BOSS_LEASH_RADIUS,
+        "INSERT INTO `coa_boss_leash` (`entry`, `radius`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `radius` = VALUES(`radius`)",
+        CONNECTION_ASYNC);
     PrepareStatement(WORLD_SEL_COA_NAME_FILTER, "SELECT term FROM coa_name_filter", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_COA_DUNGEON_SPELL_REACH, "SELECT spell_id, range_index, line_of_sight FROM coa_dungeon_spell_reach", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_COA_DUNGEON_CREATURE_DAMAGE, "SELECT entry, spell_id, multiplier FROM coa_dungeon_creature_damage", CONNECTION_SYNCH);
