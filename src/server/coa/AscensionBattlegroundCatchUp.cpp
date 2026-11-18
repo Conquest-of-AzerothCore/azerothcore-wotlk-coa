@@ -7,6 +7,7 @@
 #include "DataMap.h"
 #include "Map.h"
 #include "ObjectMgr.h"
+#include "Pet.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
@@ -42,6 +43,19 @@ void RemoveLift(Unit* unit)
 
     Policy::Lift const lift = applied->lift;
     unit->CustomData.Erase(LiftKey);
+    HandleLiftModifiers(unit, lift, false);
+}
+
+void DropLiftAfterHealthAndManaReset(Unit* unit)
+{
+    AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey);
+    if (!applied)
+        return;
+
+    Policy::Lift lift = applied->lift;
+    unit->CustomData.Erase(LiftKey);
+    lift.health = 0.0f;
+    lift.mana = 0.0f;
     HandleLiftModifiers(unit, lift, false);
 }
 
@@ -97,6 +111,48 @@ void RefreshPlayerLift(Player* player)
     ApplyLift(player, Policy::LiftBetween(PlayerLevelValues(player, level), PlayerLevelValues(player, uint8(target))));
 }
 
+Policy::LevelValues PetLevelValues(PetLevelInfo const& info, bool hasMana)
+{
+    Policy::LevelValues values{ info.health, hasMana ? info.mana : 0, {} };
+    for (uint8 stat = STAT_STRENGTH; stat < MAX_STATS; ++stat)
+        values.stats[stat] = info.stats[stat];
+    return values;
+}
+
+void RefreshPetLift(Pet* pet)
+{
+    PetType const type = pet->getPetType();
+    Player const* owner = pet->GetOwner();
+    bool const combatPet = type == HUNTER_PET || type == SUMMON_PET;
+    uint32 const target = owner && combatPet ? LiftTargetLevel(owner) : 0;
+    uint8 const level = pet->GetLevel();
+    uint32 const statsCreatureId = type == HUNTER_PET ? 1 : pet->GetEntry();
+    PetLevelInfo const* own = target > level ? sObjectMgr->GetPetLevelInfo(statsCreatureId, level) : nullptr;
+    PetLevelInfo const* top = own ? sObjectMgr->GetPetLevelInfo(statsCreatureId, uint8(target)) : nullptr;
+    if (!top)
+    {
+        RemoveLift(pet);
+        return;
+    }
+
+    bool const hasMana = type != HUNTER_PET;
+    ApplyLift(pet, Policy::LiftBetween(PetLevelValues(*own, hasMana), PetLevelValues(*top, hasMana)));
+}
+
+void RefreshOwnerLifts(Player* player)
+{
+    RefreshPlayerLift(player);
+    if (Pet* pet = player->GetPet())
+        RefreshPetLift(pet);
+}
+
+void RemoveOwnerLifts(Player* player)
+{
+    RemoveLift(player);
+    if (Pet* pet = player->GetPet())
+        RemoveLift(pet);
+}
+
 class ascension_battleground_wide_brackets_config : public WorldScript
 {
 public:
@@ -124,12 +180,12 @@ public:
 
     void OnBattlegroundAddPlayer(Battleground* /*battleground*/, Player* player) override
     {
-        RefreshPlayerLift(player);
+        RefreshOwnerLifts(player);
     }
 
     void OnBattlegroundRemovePlayerAtLeave(Battleground* /*battleground*/, Player* player) override
     {
-        RemoveLift(player);
+        RemoveOwnerLifts(player);
     }
 };
 
@@ -149,12 +205,37 @@ public:
 
     void OnPlayerMapChanged(Player* player) override
     {
-        RefreshPlayerLift(player);
+        RefreshOwnerLifts(player);
     }
 
     void OnPlayerLogout(Player* player) override
     {
-        RemoveLift(player);
+        RemoveOwnerLifts(player);
+    }
+};
+
+class ascension_battleground_catch_up_pet : public PetScript
+{
+public:
+    ascension_battleground_catch_up_pet()
+        : PetScript("ascension_battleground_catch_up_pet",
+            {PETHOOK_ON_INIT_STATS_FOR_LEVEL, PETHOOK_ON_PET_ADD_TO_WORLD})
+    { }
+
+    void OnInitStatsForLevel(Guardian* guardian, uint8 /*petLevel*/) override
+    {
+        Pet* pet = guardian->ToPet();
+        if (!pet)
+            return;
+
+        DropLiftAfterHealthAndManaReset(pet);
+        if (pet->IsInWorld())
+            RefreshPetLift(pet);
+    }
+
+    void OnPetAddToWorld(Pet* pet) override
+    {
+        RefreshPetLift(pet);
     }
 };
 }
@@ -164,4 +245,5 @@ void AddSC_AscensionBattlegroundCatchUp()
     new ascension_battleground_wide_brackets_config();
     new ascension_battleground_catch_up_battleground();
     new ascension_battleground_catch_up_player();
+    new ascension_battleground_catch_up_pet();
 }

@@ -6123,7 +6123,7 @@ private:
         }
         if (metric == "pet_entry" || metric == "pet_aura_stacks" || metric == "pet_aura_amount" ||
             metric == "pet_aura_amplitude_ms" || metric == "pet_aura_duration_ms" || metric == "pet_max_health" ||
-            metric == "pet_health" ||
+            metric == "pet_health" || metric == "pet_stat" ||
             metric == "pet_attack_power" || metric == "pet_run_speed_rate" || metric == "pet_is_banker" ||
             metric == "pet_display" || metric == "pet_native_display" || metric == "pet_scale" ||
             metric == "pet_flags" || metric == "pet_mirror_image" ||
@@ -6176,6 +6176,12 @@ private:
                 return player->GetExactDist2d(pet);
             if (metric == "pet_max_health")
                 return pet->GetMaxHealth();
+            if (metric == "pet_stat")
+            {
+                uint32 stat = step.get<uint32>("stat");
+                Require(stat < MAX_STATS, "Invalid stat index");
+                return pet->GetStat(Stats(stat));
+            }
             if (metric == "pet_health")
                 return pet->GetHealth();
             if (metric == "pet_attack_power")

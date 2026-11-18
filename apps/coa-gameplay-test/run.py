@@ -200,7 +200,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_resist_chance', 'spell_uses_armor',
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
     'equipped_item', 'visible_item',
-    'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_health', 'pet_attack_power',
+    'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_stat', 'pet_health', 'pet_attack_power',
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage', 'pet_melee_hits', 'pet_melee_blocked',
     'owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
@@ -251,7 +251,7 @@ PLAYER_STAT_METRICS = {
     'spell_resist_chance', 'spell_uses_armor',
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
     'equipped_item', 'visible_item',
-    'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_aura_duration_ms', 'pet_max_health', 'pet_health',
+    'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_aura_duration_ms', 'pet_max_health', 'pet_stat', 'pet_health',
     'pet_attack_power',
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage', 'pet_melee_hits', 'pet_melee_blocked',
@@ -1362,7 +1362,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:
                 require(False, f'{where}: x and y only apply to point metrics')
-            if metric in {'stat', 'stat_exact', 'owned_creature_stat'}:
+            if metric in {'stat', 'stat_exact', 'owned_creature_stat', 'pet_stat'}:
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)
             if metric == 'track_creature_type':
                 number(step.get('id'), f'{where}.id', 1, 32, True)

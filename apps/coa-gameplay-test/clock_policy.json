@@ -31,6 +31,7 @@
     "battleground-wide-bracket-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "battleground-wide-bracket-group-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "battleground-wide-bracket-catch-up": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "battleground-wide-bracket-pet-catch-up": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "mercenary-wintergrasp-team-faction": "Starts and stops the process-global Wintergrasp battle that every player in the zone takes part in"
   }
 }

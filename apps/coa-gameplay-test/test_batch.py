@@ -354,7 +354,7 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'mercenary-battleground-team-faction', 'mercenary-war-mode-battleground',
                      'high-risk-challenge-survives-battleground', 'mercenary-wintergrasp-team-faction',
                      'battleground-wide-bracket-boundary', 'battleground-wide-bracket-group-boundary',
-                     'battleground-wide-bracket-catch-up'}
+                     'battleground-wide-bracket-catch-up', 'battleground-wide-bracket-pet-catch-up'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)
 
 
