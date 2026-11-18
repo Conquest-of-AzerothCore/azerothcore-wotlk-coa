@@ -1159,6 +1159,7 @@ struct Actor
     std::map<uint32, ClientCooldown> clientCooldowns;
     std::map<uint32, uint32> clientCooldownClears;
     std::map<uint32, uint32> clientCooldownBlockedCasts;
+    std::map<uint32, bool> clientReadyAtAttempt;
     std::vector<SpellDamageEvent> spellDamage;
     std::vector<SpellLogEvent> spellLogs;
     std::vector<SpellHealEvent> spellHeals;
@@ -1253,7 +1254,8 @@ uint32 ResolveLiveEntry(Player* player, ObjectGuid const& guid)
 
 bool ClientCooldownReady(Actor const& actor, uint32 spell, uint64 now)
 {
-    uint32 const category = sSpellMgr->AssertSpellInfo(spell)->GetCategory();
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+    uint32 const category = info ? info->GetCategory() : 0;
     for (auto const& [id, cooldown] : actor.clientCooldowns)
         if (cooldown.endMs > now && (id == spell || (category && cooldown.category == category)))
             return false;
@@ -1277,7 +1279,12 @@ void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(event.spell);
     if (!info)
         return;
-    if (!ClientCooldownReady(actor, event.spell, event.atMs))
+    auto const attempt = actor.clientReadyAtAttempt.find(event.spell);
+    bool const ready = attempt != actor.clientReadyAtAttempt.end() ? attempt->second :
+        ClientCooldownReady(actor, event.spell, event.atMs);
+    if (attempt != actor.clientReadyAtAttempt.end())
+        actor.clientReadyAtAttempt.erase(attempt);
+    if (!ready)
         ++actor.clientCooldownBlockedCasts[event.spell];
     if (uint32 duration = std::max(info->RecoveryTime, info->CategoryRecoveryTime))
         actor.clientCooldowns[event.spell] = { event.atMs + duration, info->GetCategory() };
@@ -8525,7 +8532,11 @@ private:
             }
             targets.Write(packet);
             if (action == "cast" || action == "cast_no_target")
+            {
+                Actor& actor = _actors.at(step.get<std::string>("actor"));
+                actor.clientReadyAtAttempt[spell] = ClientCooldownReady(actor, spell, GameNowMs());
                 player->GetSession()->HandleCastSpellOpcode(packet);
+            }
             else if (action == "cast_charm")
                 player->GetSession()->HandlePetCastSpellOpcode(packet);
             else

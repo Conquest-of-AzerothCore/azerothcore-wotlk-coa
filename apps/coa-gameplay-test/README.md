@@ -600,8 +600,10 @@ SMSG_CLEAR_COOLDOWN for that spell that arrives later, so a clear sent before th
 `client_cooldown_clears` requires `spell` and counts the SMSG_CLEAR_COOLDOWN packets for it that ended a
 cooldown the client was still showing. That includes a clear that a later SMSG_SPELL_GO of the same cast
 restarts at once, so it does not prove the player saw a reset.
-`client_cooldown_blocked_casts` requires `spell` and counts the actor's own SMSG_SPELL_GO packets for it that
-arrived while the client still showed it cooling down: casts the server allowed but the button refused.
+`client_cooldown_blocked_casts` requires `spell` and counts the actor's own SMSG_SPELL_GO packets for it whose
+`cast` or `cast_no_target` step found the client still showing it cooling down: casts the server allowed but
+the button refused. Readiness is read when the step submits the cast, before any packet of that cast, and an
+SMSG_SPELL_GO without such a step is judged at its arrival.
 XP-delta assertions must also keep the level stable, or crossing a level would wrap the XP bar.
 
 Every step accepts a descriptive `label`. Assertions optionally accept `within_ms`: poll until the expected

@@ -11,8 +11,9 @@
     "update, after the cast. The cast loop of sun-cleric-herald-of-purity-justice-reset-9129 is kept at level 60: 270",
     "attempts every 1650 ms with two strikes per cast at 8%, where 54 casts complete without a reset and all 54 miss",
     "every reset with probability about 0.012%. A clear sent before a cast's SMSG_SPELL_GO is undone by that GO, so",
-    "under the old order every cast a reset allowed reached the client while it still showed the 8 sec cooldown:",
-    "client_cooldown_blocked_casts counts those casts and must stay 0 while more than 54 casts complete."
+    "under the old order every cast a reset allowed was pressed while the client still showed the 8 sec cooldown.",
+    "client_cooldown_blocked_casts reads readiness when each cast is submitted, before any packet of that cast,",
+    "so a cast's own early clear cannot hide it; it must stay 0 while more than 54 casts complete."
   ],
   "timeout_ms": 600000,
   "players": [
