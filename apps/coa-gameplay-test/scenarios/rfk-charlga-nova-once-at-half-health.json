@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "name": "Razorfen Kraul: Charlga Razorflank casts Lightning Nova once, at half health (#12656)",
+  "contract": "#12656: Charlga Razorflank (4421) cast Lightning Nova (2102774, 2102776 on Mythic) on a 30-32 s timer from 16.45-18.45 s into the fight. The design is one Nova per fight, when she drops below 50% health. Her Ascension kit row 9003 becomes a Between 0-50% Health event that does not repeat; a cast blocked by another cast is retried by SmartAI.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "tank",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 47,
+      "x": 2195.0,
+      "y": 1880.0,
+      "z": 76.0,
+      "o": 3.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Razorfen Kraul on Mythic",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "as": "charlga",
+      "entry": 4421,
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: on Mythic her Lightning Nova is 2102776",
+      "actor": "tank",
+      "metric": "spell_id_for_difficulty",
+      "target": "charlga",
+      "spell": 2102774,
+      "equals": 2102776
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "charlga"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Charlga is in combat",
+      "actor": "charlga",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "tank",
+      "target": "charlga",
+      "pct": 70
+    },
+    {
+      "action": "wait",
+      "ms": 32000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Charlga still fights above half health",
+      "actor": "charlga",
+      "metric": "health_pct",
+      "min": 51
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Lightning Nova above half health (the old timer cast its first one 16.45-18.45 s in, 6 s cast)",
+      "actor": "charlga",
+      "metric": "spell_cast_count",
+      "spell": 2102776,
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "tank",
+      "target": "charlga",
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "Lightning Nova once she drops below half health",
+      "actor": "charlga",
+      "metric": "spell_cast_count",
+      "spell": 2102776,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 40000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no second Lightning Nova in the next 40 s",
+      "actor": "charlga",
+      "metric": "spell_cast_count",
+      "spell": 2102776,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Charlga is still alive and fighting",
+      "actor": "charlga",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}
