@@ -27,19 +27,19 @@
     {
       "action": "assert",
       "actor": "other",
-      "metric": "server_packets",
-      "opcode": 2346,
-      "row": 2259,
-      "equals": 0,
+      "metric": "client_spell_row_u32",
+      "spell": 2259,
+      "index": 0,
+      "equals": -1,
       "label": "Alchemy receives no replacement row"
     },
     {
       "action": "assert",
       "actor": "other",
-      "metric": "server_packets",
-      "opcode": 2346,
-      "row": 3908,
-      "equals": 0,
+      "metric": "client_spell_row_u32",
+      "spell": 3908,
+      "index": 0,
+      "equals": -1,
       "label": "Tailoring receives no replacement row"
     },
     {

@@ -1255,7 +1255,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(isinstance(step.get('text'), str) and bool(step['text']),
                         f'{where}: client_spell_row_contains needs text')
             if metric == 'client_spell_row_u32':
-                number(step.get('index'), f'{where}.index', 0, 169, True)
+                number(step.get('index'), f'{where}.index', 0, None, True)
             if metric.startswith('aura') or metric in {
                     'knows_spell', 'spell_rank', 'first_rank_spell', 'cooldown_ms', 'spell_cooldown_packet_ms', 'sent_aura_amount', 'global_cooldown_ms', 'spell_charges', 'cast_remaining_ms', 'has_talent',
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies', 'learned_spell_at',

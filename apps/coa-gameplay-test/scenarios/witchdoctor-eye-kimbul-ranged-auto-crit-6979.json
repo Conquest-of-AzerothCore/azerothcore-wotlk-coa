@@ -37,10 +37,10 @@
     {
       "action": "assert",
       "actor": "w",
-      "metric": "server_packets",
-      "opcode": 2346,
-      "row": 802707,
-      "equals": 0,
+      "metric": "client_spell_row_u32",
+      "spell": 802707,
+      "index": 0,
+      "equals": -1,
       "label": "Eye of Kimbul 802707 has no published row, so the debuff shows its own stack-scaled DBC aura text"
     },
     { "action": "snapshot", "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "save_as": "crit" },
