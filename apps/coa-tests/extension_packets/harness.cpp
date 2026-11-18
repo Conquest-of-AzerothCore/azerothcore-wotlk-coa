@@ -392,10 +392,6 @@ public:
     }
 
     void SendPatchStream(Player*) { }
-
-    std::vector<uint32> ItemRequests;
-
-    void SendItemRowOnDemand(Player*, uint32 entry) { ItemRequests.push_back(entry); }
 };
 
 namespace ItemScaling
@@ -416,7 +412,6 @@ bool RealmOffersMysticAltars() { return MysticAltars; }
 }
 
 void RefreshAscensionLfgObjectiveDungeon(Player*) { }
-void SendAscensionClientDbcStream(WorldSession*) { }
 
 class AscensionCollectionService
 {
@@ -478,7 +473,6 @@ bool QueueAscensionDungeonDifficulty(WorldSession*, WorldPacket const&) { return
 struct AscensionCompatServerScript : ServerScript
 {
     // ACTUAL_CAN_PACKET_RECEIVE_EARLY
-    // ACTUAL_CAN_PACKET_SEND
 };
 
 struct AscensionCompatCommandScript
@@ -862,15 +856,11 @@ void TestItemQueries()
     player.Session = &session;
 
     session.PlayerObject = &player;
-    auto& itemPatches = AscensionDisplayPatchService::Instance().ItemRequests;
-    itemPatches.clear();
     std::vector<std::vector<uint8>> const replies = BulkReplies(session, player, BulkQuery({35, 999999, 135522}));
     std::vector<uint8> const unknown = {0x3F, 0x42, 0x0F, 0x80};
     Check(replies.size() == 3 && replies[0] == SingleQueryReply(35, -1) && replies[1] == unknown &&
         replies[2] == SingleQueryReply(135522, -1),
         "a bulk item query answers each entry in order with the stock single-item response");
-    Check(itemPatches == std::vector<uint32>{35, 999999 | 0x80000000u, 135522},
-        "bulk responses reach the demand-patch hook in order, including the native unknown-item marker");
 
     WorldPacket first(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 0);
     if (!replies.empty())
@@ -892,7 +882,6 @@ void TestItemQueries()
     Check(BulkReplies(session, player, BulkQuery(full)).size() == 50,
         "the client's largest batch of 50 entries is answered");
 
-    std::size_t const patchRequestsBeforeMalformed = itemPatches.size();
     bool rejected = true;
     for (WorldPacket const& malformed : {BulkQuery({}), BulkQuery(std::vector<uint32>(51, 35)),
             BulkQuery({35}, 2), BulkQuery({35, 36}, 1), WorldPacket(0x061B, 0)})
@@ -901,8 +890,6 @@ void TestItemQueries()
     shortCount << uint8(1) << uint8(0) << uint8(0);
     rejected &= BulkReplies(session, player, shortCount).empty();
     Check(rejected, "empty, oversized, truncated and padded batches are consumed without replies");
-    Check(itemPatches.size() == patchRequestsBeforeMalformed,
-        "malformed item queries do not reach the demand-patch service");
 
     AscensionCollectionService& service = AscensionCollectionService::Instance();
     session.Sent.clear();

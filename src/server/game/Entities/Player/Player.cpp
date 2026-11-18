@@ -25,7 +25,6 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionBazaarTokenReserve.h"
-#include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
@@ -3036,7 +3035,6 @@ void Player::SendInitialSpells()
     }
 
     SendDirectMessage(&data);
-    AscensionDisplayPatch::ResendSkillLineAbilityRows(this);
 }
 
 void Player::SendUnlearnSpells()
@@ -3293,7 +3291,6 @@ void Player::SendLearnPacket(uint32 spellId, bool learn, bool keepActionButtons 
         data << uint32(spellId);
         data << uint16(0);
         SendDirectMessage(&data);
-        AscensionDisplayPatch::ResendSkillLineAbilityRows(this, spellId);
     }
     else
     {
