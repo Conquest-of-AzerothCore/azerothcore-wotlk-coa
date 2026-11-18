@@ -46,6 +46,7 @@
 #include "WorldSession.h"
 
 #include <algorithm>
+#include <atomic>
 #include <limits>
 #include <unordered_map>
 
@@ -53,6 +54,7 @@ namespace
 {
     constexpr uint32 FLEX_MIN_PLAYERS = 10;
     constexpr uint32 FLEX_MAX_PLAYERS = 25;
+    std::atomic<float> botMemberWeight{0.3f};
 }
 
 namespace coa_flex
@@ -70,8 +72,7 @@ namespace coa_flex
 
     uint32 CountHealthPlayers(Map* map)
     {
-        float const botWeight =
-            std::clamp(sConfigMgr->GetOption<float>("CoaRaidDifficulty.BotMemberWeight", 0.3f), 0.0f, 1.0f);
+        float const botWeight = botMemberWeight.load();
         float count = 0.0f;
         map->DoForAllPlayers([&count, botWeight](Player* player)
         {
@@ -214,6 +215,8 @@ namespace
 
         void OnAfterConfigLoad(bool /*reload*/) override
         {
+            botMemberWeight = std::clamp(
+                sConfigMgr->GetOption<float>("CoaRaidDifficulty.BotMemberWeight", 0.3f), 0.0f, 1.0f);
             LoadFlex();
         }
     };
