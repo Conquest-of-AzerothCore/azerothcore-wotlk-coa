@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Reassignment: the map and the in-world tracker both mark Major Samuelson in the keep war room (#12166)",
-  "contract": "Quest 563 'Reassignment' ends at Major Samuelson 2439. rev_20260923_03_coa_stormwind.sql moved him (guid 16182) into the CoA keep war room at (-8407.6, 214.4, 155.347); the reporter of #12166 confirms him there (SexyMap 86.8, 35.6) while the marker stays at the stock spot (-8421, 405), ~190 yd away. The quest has one POI (id 0, ObjectiveIndex -1, WorldMapAreaId 301). This case sends the CMSG_QUEST_POI_QUERY a real client sends and requires the single point to be Samuelson's spawn rounded to the integer grid (-8408, 214). The in-world arrow and minimap pin are a second, independent route: QuestSuperTrack row 2464 (quest 563) resolves completion to SuperTrack node 1318, which the client ships at the stock spot (-8421.0, 404.99, 120.89); only row 2464 references node 1318. The core streams coa_client_super_track rows at login (SMSG_PATCH_SUPER_TRACK, 0x06BE), and the last assertions require row 1318 to stand on Samuelson's spawn with the client's own MapID 0, radius 5.5 and NextID 0. These are data assertions rather than a run: the harness cannot see what the client draws.",
+  "contract": "Quest 563 'Reassignment' ends at Major Samuelson 2439. rev_20260923_03_coa_stormwind.sql moved him (guid 16182) into the CoA keep war room at (-8407.6, 214.4, 155.347); the reporter of #12166 confirms him there (SexyMap 86.8, 35.6) while the marker stays at the stock spot (-8421, 405), ~190 yd away. The quest has one POI (id 0, ObjectiveIndex -1, WorldMapAreaId 301). This case sends the CMSG_QUEST_POI_QUERY a real client sends and requires the single point to be Samuelson's spawn rounded to the integer grid (-8408, 214). The in-world arrow and minimap pin are a second, independent route: QuestSuperTrack row 2464 (quest 563) resolves completion to SuperTrack node 1318, which the client ships at the stock spot (-8421.0, 404.99, 120.89); only row 2464 references node 1318. The corrected node ships in the client data and is not observed here. These are data assertions rather than a run: the harness cannot see what the client draws.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -124,82 +124,6 @@
       "index": 0,
       "equals": 214,
       "within_ms": 4000
-    },
-    {
-      "action": "assert",
-      "label": "The login patch stream carries the tracker's SuperTrack row 1318, the node 563 ends at",
-      "actor": "c",
-      "metric": "server_packets",
-      "opcode": 1726,
-      "row": 1318,
-      "equals": 1,
-      "within_ms": 8000
-    },
-    {
-      "action": "assert",
-      "label": "Row 1318 stays on the Eastern Kingdoms, MapID 0",
-      "actor": "c",
-      "metric": "server_packet_u32",
-      "opcode": 1726,
-      "row": 1318,
-      "index": 1,
-      "equals": 0,
-      "within_ms": 8000
-    },
-    {
-      "action": "assert",
-      "label": "DISCRIMINATING: row 1318 x is Samuelson's -8407.6, where the client had -8421.0",
-      "actor": "c",
-      "metric": "server_packet_u32",
-      "opcode": 1726,
-      "row": 1318,
-      "index": 2,
-      "equals": 3322109542,
-      "within_ms": 8000
-    },
-    {
-      "action": "assert",
-      "label": "DISCRIMINATING: row 1318 y is Samuelson's 214.4, where the client had 404.99",
-      "actor": "c",
-      "metric": "server_packet_u32",
-      "opcode": 1726,
-      "row": 1318,
-      "index": 3,
-      "equals": 1129735782,
-      "within_ms": 8000
-    },
-    {
-      "action": "assert",
-      "label": "Row 1318 z is the war room floor 155.347, where the client had 120.89",
-      "actor": "c",
-      "metric": "server_packet_u32",
-      "opcode": 1726,
-      "row": 1318,
-      "index": 4,
-      "equals": 1125865685,
-      "within_ms": 8000
-    },
-    {
-      "action": "assert",
-      "label": "Row 1318 keeps the client's own arrival radius of 5.5 yd",
-      "actor": "c",
-      "metric": "server_packet_u32",
-      "opcode": 1726,
-      "row": 1318,
-      "index": 5,
-      "equals": 1085276160,
-      "within_ms": 8000
-    },
-    {
-      "action": "assert",
-      "label": "Row 1318 keeps the client's own end of the chain, NextID 0",
-      "actor": "c",
-      "metric": "server_packet_u32",
-      "opcode": 1726,
-      "row": 1318,
-      "index": 6,
-      "equals": 0,
-      "within_ms": 8000
     }
   ]
 }

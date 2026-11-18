@@ -10,10 +10,10 @@
     "never teaches as a spell: Refresh() only applies 524781 as an aura to holders of",
     "800386. The clause therefore never renders even while Eclipse works, which is the",
     "#7950 report. The fix publishes 574328 in coa_client_spell_description with the",
-    "clause re-gated on $?s800386, mirroring Huntress Shot's $?s92134 gate, and streams",
-    "it via SMSG_PATCH_SPELL (opcode 2346). This scenario reads the streamed rows and",
-    "then proves the text is true: 574328 must arrive with the Lunar line, the",
-    "Soulrend row keeps its own line as the stream control, and an Eclipsed Touch",
+    "clause re-gated on $?s800386, mirroring Huntress Shot's $?s92134 gate, baked into",
+    "the client's spell rows. This scenario reads the client rows and",
+    "then proves the text is true: 574328 must carry the Lunar line, the",
+    "Soulrend row keeps its own line as the client row control, and an Eclipsed Touch",
     "consumes the Eclipse, refunds its mana and leaves one Lunar Phase stack."
   ],
   "timeout_ms": 120000,
@@ -28,52 +28,44 @@
   "steps": [
     {
       "action": "wait",
-      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "label": "Let spawn AI and level scaling settle",
       "ms": 7000
     },
     {
       "action": "assert",
-      "label": "STREAM: Touch of Moonlight (574328) reaches the client with its Lunar Eclipse line",
+      "label": "CLIENT ROW: Touch of Moonlight (574328) carries its Lunar Eclipse line",
       "actor": "star",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 574328,
+      "metric": "client_spell_row_contains",
+      "spell": 574328,
       "text": "Lunar Eclipse",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "STREAM: that row states the mana refund the report asked for",
+      "label": "CLIENT ROW: that row states the mana refund the report asked for",
       "actor": "star",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 574328,
+      "metric": "client_spell_row_contains",
+      "spell": 574328,
       "text": "refunds its mana cost",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "STREAM: the row no longer carries the old never-true Lunar Phase spell gate",
+      "label": "CLIENT ROW: the row no longer carries the old never-true Lunar Phase spell gate",
       "actor": "star",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 574328,
+      "metric": "client_spell_row_contains",
+      "spell": 574328,
       "text": "524781",
-      "equals": 0,
-      "within_ms": 5000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "CONTROL: the shared description table still streams Soulrend's own requirement line",
+      "label": "CONTROL: the client's Soulrend row still carries its own requirement line",
       "actor": "star",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 573316,
+      "metric": "client_spell_row_contains",
+      "spell": 573316,
       "text": "Requires Soul Infusion",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "learn",

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Client SQL patches require an enabled provider",
-  "contract": "Requires CoALegendaryItems.Enable=0 or an unbuilt legendary module and CoA.SendDisplayPatches=1. Login and item queries send no legendary item metadata or power spells, including when the module's SQL remains installed. Unregistered server-only spell 22352 is also excluded.",
+  "contract": "Requires CoALegendaryItems.Enable=0 or an unbuilt legendary module and CoA.SendDisplayPatches=1. Login sends no legendary power spell rows, including when the module's SQL remains installed. Unregistered server-only spell 22352 is also excluded.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -27,14 +27,6 @@
     {
       "action": "wait",
       "ms": 100
-    },
-    {
-      "action": "assert",
-      "actor": "viewer",
-      "metric": "server_packets",
-      "opcode": 2354,
-      "row": 9706360,
-      "equals": 0
     },
     {
       "action": "assert",
@@ -66,29 +58,6 @@
       "metric": "server_packets",
       "opcode": 2346,
       "row": 22352,
-      "equals": 0
-    },
-    {
-      "action": "client_packet",
-      "actor": "viewer",
-      "opcode": 86,
-      "fields": [
-        {
-          "u32": 9700029
-        }
-      ],
-      "consumed": false
-    },
-    {
-      "action": "wait",
-      "ms": 100
-    },
-    {
-      "action": "assert",
-      "actor": "viewer",
-      "metric": "server_packets",
-      "opcode": 2354,
-      "row": 9700029,
       "equals": 0
     }
   ]

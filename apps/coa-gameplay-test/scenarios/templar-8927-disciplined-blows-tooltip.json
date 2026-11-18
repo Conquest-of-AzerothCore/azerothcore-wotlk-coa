@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Disciplined Blows' tooltip no longer reads 'Cnly' (#8927)",
- "contract": "The client's Spell.dbc describes Disciplined Blows 680397 with the typo 'Cnly occur once every 0.5 sec.' (the same text is in the Ascension data), which the talent window shows. The shared description table coa_client_spell_description rewrites the text from the server, so one row for 680397 streams 'Only occurs once every 0.5 sec.' and keeps the damage clause and its $ tokens untouched. The row 500639 is already published by the same table and proves the stream is being captured.",
+ "contract": "The client's Spell.dbc describes Disciplined Blows 680397 with the typo 'Cnly occur once every 0.5 sec.' (the same text is in the Ascension data), which the talent window shows. The shared description table coa_client_spell_description rewrites the text in the client's spell rows, so the client row for 680397 carries 'Only occurs once every 0.5 sec.' and keeps the damage clause and its $ tokens untouched. The row 500639 is already published by the same table and proves the client rows are being read.",
  "timeout_ms": 60000,
  "players": [
   {
@@ -15,38 +15,33 @@
  "steps": [
   {
    "action": "wait",
-   "label": "Let spawn AI and the login spell patch stream settle",
+   "label": "Let spawn AI settle",
    "ms": 7000
   },
   {
    "action": "assert",
-   "label": "CONTROL: the shared description table still streams row 500639, so the patch stream is being captured",
+   "label": "CONTROL: the client's spell row 500639 still carries Runeshroud's own text, so client rows are being read",
    "actor": "t",
-   "metric": "server_packet_contains",
-   "opcode": 2346,
-   "row": 500639,
+   "metric": "client_spell_row_contains",
+   "spell": 500639,
    "text": "Requires Runeshroud",
-   "equals": 1,
-   "within_ms": 5000
+   "equals": 1
   },
   {
    "action": "assert",
-   "label": "THE FIX: Disciplined Blows streams the corrected closing sentence",
+   "label": "THE FIX: the client's Disciplined Blows row carries the corrected closing sentence",
    "actor": "t",
-   "metric": "server_packet_contains",
-   "opcode": 2346,
-   "row": 680397,
+   "metric": "client_spell_row_contains",
+   "spell": 680397,
    "text": "Only occurs once every 0.5 sec.",
-   "equals": 1,
-   "within_ms": 5000
+   "equals": 1
   },
   {
    "action": "assert",
    "label": "THE FIX: the typo is gone",
    "actor": "t",
-   "metric": "server_packet_contains",
-   "opcode": 2346,
-   "row": 680397,
+   "metric": "client_spell_row_contains",
+   "spell": 680397,
    "text": "Cnly",
    "equals": 0
   },
@@ -54,9 +49,8 @@
    "action": "assert",
    "label": "CONTROL: the damage clause keeps its scaling tokens",
    "actor": "t",
-   "metric": "server_packet_contains",
-   "opcode": 2346,
-   "row": 680397,
+   "metric": "client_spell_row_contains",
+   "spell": 680397,
    "text": "${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage to nearby enemies.",
    "equals": 1
   }
