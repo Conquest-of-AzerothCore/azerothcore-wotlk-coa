@@ -6326,7 +6326,7 @@
       ],
       "trials": 40,
       "minimum_hits": 20,
-      "observe_source": "AscensionTemplarEvents.cpp:92-101 (Check, the Libram cases: a damaging, non-periodic Ability hit) and :194-199 (Proc) cast 804148 at the target of the damaging ability while Libram of Consecration 803893 (top rank of 801441) is on the caster. Treatment: the Libram cast, then Chastise 503141 at the dummy; control: Chastise alone, no 804148 (ADR 0206, side a). The dummy's partial resists are in the hit model (its resistances and level are read)."
+      "observe_source": "AscensionTemplarEvents.cpp:93-102 (Check, the Libram cases: a damaging, non-periodic Ability hit, and for the Libram of Consecration ranks a Zealotry 801450 hit too, ADR 1011) and :195-200 (Proc) cast 804148 at the target of the damaging ability while Libram of Consecration 803893 (top rank of 801441) is on the caster. Treatment: the Libram cast, then Chastise 503141 at the dummy; control: Chastise alone, no 804148 (ADR 0206, side a). The dummy's partial resists are in the hit model (its resistances and level are read)."
     },
     {
       "spell": 705300,

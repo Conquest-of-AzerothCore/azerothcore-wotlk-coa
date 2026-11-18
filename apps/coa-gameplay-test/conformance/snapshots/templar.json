@@ -5,7 +5,7 @@
     "all": {
       "arguments": [],
       "files": {
-        "manifest.json": "73026810949a00cd0ae80eb136ebea32994cd1b59cebe346ca97da894d241726",
+        "manifest.json": "cb8123452c894581dfc621dd855ff6b8ae7419999d1cf8ff6b41839b09a1c108",
         "scenarios/conformance-templar-behaviour-1397742-cast-applies-aura.json": "d7d496678b9fd0aa7ed877e66ac1a3a19bd6d6c598c41095773088a0ec2df139",
         "scenarios/conformance-templar-behaviour-1397742-metric-delta-combat.json": "eb4dbfbbbb1d880b93858a9bd54328f5ce1ec2bbd7fb66012ae56ee4cf08f7df",
         "scenarios/conformance-templar-behaviour-1397742-metric-delta-copies-end.json": "27ebea3247ec7e7fbb74494b139f252a69a5d455bd7edbc7f325b1cf2021d1fa",
@@ -2314,7 +2314,7 @@
         "--stack"
       ],
       "files": {
-        "manifest.json": "0efbe8fd25f998b99ea84a3b2a8328e2cefd3e7be28ac8192ef07cdc4cf8f180",
+        "manifest.json": "f1394f6f2f2aa6c1b7261114ccd069d42ec717bb867a2bb3493e116831794bf9",
         "scenarios/conformance-templar-stack-c0-base-pass-1.json": "014ee65c4b27dd3b0e0c85f4b3e52a922ed36bfd829ca8e3c2ba114e4e1ae097",
         "scenarios/conformance-templar-stack-c0-base-pass-2.json": "a4ebbfc1970fd53f301bfa2dd151daadd916ee2d0ffc8d7b8ca13dd13d5edd01",
         "scenarios/conformance-templar-stack-c0-base-pass-3.json": "9c38fe1dbc73925bb65ed558ceab478fecf264f877a08e3feee3842c96942901",

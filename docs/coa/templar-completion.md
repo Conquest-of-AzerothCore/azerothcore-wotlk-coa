@@ -61,6 +61,9 @@ the selected Tome Barrier removes the full debt. The debt amount is stored in th
 Actual damage/healing events drive Deliverance, Retribution, Uther, Sacred Defense, Zealotry, Scourgebane,
 Chakras, Libram helpers, Scarlet Champion, Parry Dance and the other explicitly routed talents. Misses,
 zero effective healing and foreign ownership are filtered as appropriate. Helper recursion is bounded.
+Libram of Consecration adds its Holy damage to every damaging, non-periodic ability hit and to every Zealotry hit,
+including Zealotry cast from another Templar event, with no internal cooldown; auto attacks never trigger it
+([ADR 1011](../adr/1011-zealotry-hits-proc-libram-of-consecration.md)).
 Downfall/Redemption explicitly leech actual helper damage as well as primary damage, preserving any outer
 proc guard; self damage cannot leech. Redemption begins only when Downfall expires naturally.
 
