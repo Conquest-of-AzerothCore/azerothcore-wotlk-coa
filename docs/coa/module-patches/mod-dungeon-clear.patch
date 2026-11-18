@@ -1,0 +1,133 @@
+From efc2079c733865f790a9c6249c55ac6d7a8ef7b1 Mon Sep 17 00:00:00 2001
+From: prosbloom225 <prosbloom@gmail.com>
+Date: Wed, 18 Nov 2026 19:31:43 +0000
+Subject: [PATCH] fix(DungeonClear): link and register tests with current CoA
+ dependencies
+
+---
+ mod-dungeon-clear.cmake | 17 ++++++++++++++---
+ t/TestCombatPurge.cpp   |  3 ++-
+ t/TestPostCombatRez.cpp |  2 ++
+ t/TestTestRunRecord.cpp |  9 +++++----
+ 4 files changed, 23 insertions(+), 8 deletions(-)
+
+diff --git a/mod-dungeon-clear.cmake b/mod-dungeon-clear.cmake
+index 599956a..bb911b4 100644
+--- a/mod-dungeon-clear.cmake
++++ b/mod-dungeon-clear.cmake
+@@ -212,14 +212,24 @@ if (BUILD_TESTING)
+ 
+         # Link the necessary targets
+         target_link_libraries(dungeon_clear_tests
+-            game
+             gtest_main
+             gmock_main
+             game-interface
+-            modules
+-            scripts
+         )
+ 
++        set(DC_TEST_SERVER_LIBRARIES game modules scripts)
++        foreach(DC_TEST_OPTIONAL_LIBRARY coa modules-playerbots modules-ale)
++            if(TARGET ${DC_TEST_OPTIONAL_LIBRARY})
++                list(APPEND DC_TEST_SERVER_LIBRARIES ${DC_TEST_OPTIONAL_LIBRARY})
++            endif()
++        endforeach()
++        if(CMAKE_CXX_LINK_GROUP_USING_RESCAN_SUPPORTED OR CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED)
++            list(JOIN DC_TEST_SERVER_LIBRARIES "," DC_TEST_LINK_GROUP)
++            target_link_libraries(dungeon_clear_tests "$<LINK_GROUP:RESCAN,${DC_TEST_LINK_GROUP}>")
++        else()
++            target_link_libraries(dungeon_clear_tests ${DC_TEST_SERVER_LIBRARIES})
++        endif()
++
+         # Include directories
+         target_include_directories(dungeon_clear_tests PRIVATE
+             "${MOD_PATH}/src"
+@@ -231,6 +241,7 @@ if (BUILD_TESTING)
+         set_target_properties(dungeon_clear_tests PROPERTIES
+             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+         )
++        add_test(NAME dungeon_clear COMMAND dungeon_clear_tests)
+     endfunction()
+ 
+     # Defer execution to the root directory's configuration end, after googletest has been fetched by the core
+diff --git a/t/TestCombatPurge.cpp b/t/TestCombatPurge.cpp
+index 3623e7b..582e480 100644
+--- a/t/TestCombatPurge.cpp
++++ b/t/TestCombatPurge.cpp
+@@ -11,6 +11,7 @@
+ #include "Ai/Dungeon/DungeonClear/Data/DcNeverTargetRegistry.h"
+ #include "Ai/Dungeon/DungeonClear/Data/DcTargetExclusionRegistry.h"
+ #include "Ai/Dungeon/DungeonClear/Util/DcRunProgress.h"
++#include "Ai/Dungeon/DungeonClear/Util/DcModuleCombat.h"
+ 
+ namespace
+ {
+@@ -87,7 +88,7 @@ TEST(DcCombatPurgeRegistryTest, TheRowIsScopedToItsOwnMapAndEntry)
+ // non-attackable Dire Maul Crystal Totem, 4/18 at the watchdog.
+ TEST(DcCombatPurgeRegistryTest, DireMaulCrystalTotemMayBePurgedAndIsNeverATarget)
+ {
+-    EXPECT_TRUE(DcCombatPurgeRegistry::IsPurgeable(429, 13916, FIGHTING));
++    EXPECT_EQ(DcCombatPurgeRegistry::IsPurgeable(429, 13916, FIGHTING), !DC_MODULE_OWNS_COMBAT_PURGE);
+     EXPECT_TRUE(DcNeverTargetRegistry::IsNeverTarget(429, 13916));
+ }
+ 
+diff --git a/t/TestPostCombatRez.cpp b/t/TestPostCombatRez.cpp
+index 452bf58..d60a321 100644
+--- a/t/TestPostCombatRez.cpp
++++ b/t/TestPostCombatRez.cpp
+@@ -513,6 +513,7 @@ TEST(DcRezDecisionTest, RaidOwnerDownUnderALongBlockRegroups)
+     party[0].isDead = true;
+     party[0].drivesRun = true;
+     Inputs in = BaseInputs();
++    in.nowMs = 400000;
+     in.regroupOnWipe = true;
+     in.partyEngaged = true;  // survivors still swinging at the adds
+     in.rezBlocked = true;
+@@ -546,6 +547,7 @@ TEST(DcRezDecisionTest, RaidDeadNonOwnerUnderALongBlockNeverRegroups)
+     party[2].isDead = true;  // a DPS, not the owner
+     party[0].drivesRun = true;
+     Inputs in = BaseInputs();
++    in.nowMs = 400000;
+     in.regroupOnWipe = true;
+     in.rezBlocked = true;
+     in.blockedSinceMs = in.nowMs - 300000;
+diff --git a/t/TestTestRunRecord.cpp b/t/TestTestRunRecord.cpp
+index cdfcf56..7c2adb2 100644
+--- a/t/TestTestRunRecord.cpp
++++ b/t/TestTestRunRecord.cpp
+@@ -143,10 +143,10 @@ TEST(DcTestRunRecordTest, DeathsSerializeWhoDiedAndToWhat)
+     // left at their defaults here ("", -1 = unknown, no harm).
+     EXPECT_NE(line.find("\"deaths\":[{\"t\":410,\"name\":\"Bero\",\"opponent\":\"Anzu\","
+                         "\"opponentEntry\":23035,\"onBoss\":true,\"role\":\"\",\"manaPct\":-1,"
+-                        "\"healerManaPct\":-1,\"healerAlive\":false,\"hpPct\":-1,\"harm\":[]},"
++                        "\"healerManaPct\":-1,\"healerAlive\":false,\"hpPct\":-1,\"harm\":[],\"hits\":[]},"
+                         "{\"t\":413,\"name\":\"Olanne\",\"opponent\":\"Anzu\","
+                         "\"opponentEntry\":23035,\"onBoss\":true,\"role\":\"\",\"manaPct\":-1,"
+-                        "\"healerManaPct\":-1,\"healerAlive\":false,\"hpPct\":-1,\"harm\":[]}]"),
++                        "\"healerManaPct\":-1,\"healerAlive\":false,\"hpPct\":-1,\"harm\":[],\"hits\":[]}]"),
+               std::string::npos);
+     EXPECT_EQ(Count(line, "\"name\":\"Olanne\""), 1u);
+ }
+@@ -182,7 +182,7 @@ TEST(DcTestRunRecordTest, BossRosterSerializesInProgressionOrder)
+               std::string::npos);
+ }
+ 
+-TEST(DcTestRunRecordTest, SchemaIsNineteen)
++TEST(DcTestRunRecordTest, SchemaIsTwenty)
+ {
+     // 12: added combatHolders[].trigger, and with it a change of meaning in the
+     // sibling `legitimate` field — a trigger creature now sinks the verdict.
+@@ -195,7 +195,8 @@ TEST(DcTestRunRecordTest, SchemaIsNineteen)
+     // 17: added dispels (per dispellable debuff the party carried).
+     // 18: added dispels[].expiredWhy (expiries by the carrier's dispel reach).
+     // 19: added deaths[].hpPct and deaths[].harm (the victim's last sample).
+-    EXPECT_NE(ToJsonl(SampleRecord()).find("\"schema\":19"), std::string::npos);
++    // 20: added deaths[].hits (the damage events preceding a death).
++    EXPECT_NE(ToJsonl(SampleRecord()).find("\"schema\":20"), std::string::npos);
+     EXPECT_NE(ToJsonl(SampleRecord()).find("\"size\":"), std::string::npos);
+     EXPECT_NE(ToJsonl(SampleRecord()).find("\"difficulty\":"), std::string::npos);
+ }
+-- 
+2.47.3
+
