@@ -593,6 +593,17 @@ superseded, removed and unlearned) leave it in the client's spellbook. `client_s
 and counts how many rows the client's spellbook holds for it: the client appends a row per announcement and only
 its highest-rank view hides a spell that has ranks, so an unranked spell announced twice (a learned-spell packet
 beside the superseded one that delivers it) is listed twice on screen.
+`client_cooldown_ready` requires `spell` and is 1 unless the client still shows it cooling down. The client
+starts its own cooldown when SMSG_SPELL_GO reports its own cast of a spell in its spellbook (the longer of the
+DBC recovery and category recovery times, shared with the spell's category) and drops it only on an
+SMSG_CLEAR_COOLDOWN for that spell that arrives later, so a clear sent before the cast's SMSG_SPELL_GO is lost.
+`client_cooldown_clears` requires `spell` and counts the SMSG_CLEAR_COOLDOWN packets for it that ended a
+cooldown the client was still showing. That includes a clear that a later SMSG_SPELL_GO of the same cast
+restarts at once, so it does not prove the player saw a reset.
+`client_cooldown_blocked_casts` requires `spell` and counts the actor's own SMSG_SPELL_GO packets for it whose
+`cast` or `cast_no_target` step found the client still showing it cooling down: casts the server allowed but
+the button refused. Readiness is read when the step submits the cast, before any packet of that cast, and an
+SMSG_SPELL_GO without such a step is judged at its arrival.
 XP-delta assertions must also keep the level stable, or crossing a level would wrap the XP bar.
 
 Every step accepts a descriptive `label`. Assertions optionally accept `within_ms`: poll until the expected

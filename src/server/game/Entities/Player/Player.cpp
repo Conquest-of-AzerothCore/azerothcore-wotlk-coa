@@ -14250,7 +14250,11 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, b
         sScriptMgr->OnPlayerTemporarySpellReplacementNotice(this, previous, replacement, false);
         // Another rank still shows the previous spell, so its row stays and this rank gets a row of its own.
         if (previousShared)
+        {
+            sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, replacement, false);
             SendLearnPacket(replacement, true);
+            sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, replacement, true);
+        }
         else
         {
             WorldPacket packet(SMSG_SUPERCEDED_SPELL, 8);
