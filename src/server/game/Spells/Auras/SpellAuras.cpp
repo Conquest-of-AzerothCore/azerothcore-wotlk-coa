@@ -3038,6 +3038,10 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
             Cell::VisitObjects(GetDynobjOwner(), searcher, radius);
+            targetList.remove_if([this, dynObjOwnerCaster](Unit* target)
+            {
+                return dynObjOwnerCaster && !sScriptMgr->CanUnitAssist(dynObjOwnerCaster, target, GetSpellInfo());
+            });
         }
         // pussywizard: TARGET_DEST_DYNOBJ_NONE is supposed to search for both friendly and unfriendly targets, so for any unit
         // what about EffectImplicitTargetA?

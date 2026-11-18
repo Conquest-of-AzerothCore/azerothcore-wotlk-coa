@@ -63,8 +63,16 @@ struct Reward
     uint32 count = 1;
 };
 
+struct WallPoint
+{
+    uint32 map = 0;
+    Position position;
+};
+
 std::recursive_mutex mutex;
+std::mutex wallMutex;
 std::map<uint32, Event> events;
+std::vector<WallPoint> wall;
 std::vector<Reward> materials;
 bool enabled = false;
 bool randomLocation = true;
@@ -330,13 +338,21 @@ bool Eligible(Player const* player)
     return Eligible(player->GetLevel(), player->HasAura(HighRisk), player->HasAura(Mercenary), player->IsAlive());
 }
 
+void RefreshWall()
+{
+    std::vector<WallPoint> points;
+    for (auto const& [id, event] : events)
+        if (WallPhase(event.phase))
+            points.push_back({event.map, event.position});
+    std::lock_guard lock(wallMutex);
+    wall.swap(points);
+}
+
 bool NearCache(WorldObject const* object)
 {
-    return std::any_of(events.begin(), events.end(), [object](auto const& row)
+    return std::any_of(wall.begin(), wall.end(), [object](WallPoint const& point)
     {
-        Event const& event = row.second;
-        return WallPhase(event.phase) && event.map == object->GetMapId()
-            && object->GetExactDist(&event.position) <= wallRange;
+        return point.map == object->GetMapId() && object->GetExactDist(&point.position) <= wallRange;
     });
 }
 
@@ -352,7 +368,7 @@ bool Walled(Unit const* first, Unit const* second)
     bool const secondMercenary = AscensionMercenary::Active(secondPlayer);
     if (firstMercenary == secondMercenary)
         return false;
-    std::lock_guard lock(mutex);
+    std::lock_guard lock(wallMutex);
     return Walled(firstMercenary, secondMercenary, NearCache(first) || NearCache(second));
 }
 
@@ -362,6 +378,14 @@ void TrackCarrier(Player const* player)
         if (event.phase == Phase::Carried && event.carrier == player->GetGUID().GetCounter()
             && event.map == player->GetMapId())
             event.position.Relocate(player);
+}
+
+bool Jumps(SpellInfo const* info)
+{
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        if (effect.Effect == SPELL_EFFECT_JUMP || effect.Effect == SPELL_EFFECT_JUMP_DEST)
+            return true;
+    return false;
 }
 
 Event* Find(GameObject const* object)
@@ -465,7 +489,10 @@ bool Claim(Player* player, GameObject* object, bool completedCast)
     event->item = cache->GetGUID().GetCounter();
     Save(*event, player);
     RemoveObjects(player->GetMap(), *event);
+    player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+    player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
     UpdateCarrier(player);
+    RefreshWall();
     ChatHandler(player->GetSession()).PSendSysMessage("Crow's Cache claimed. Carry it to {} to open it.",
         DeliveryTown(*event));
     return true;
@@ -512,6 +539,7 @@ void Drop(Player* player, DropReason reason)
         dropped = true;
     }
     UpdateCarrier(player);
+    RefreshWall();
     if (char const* message = dropped ? DropMessage(reason) : nullptr)
         ChatHandler(player->GetSession()).SendSysMessage(message);
 }
@@ -726,6 +754,7 @@ void UpdateEvents()
             Announce(event, now);
         ++it;
     }
+    RefreshWall();
 }
 
 bool ReadMarkRange(std::string const& key, std::array<uint32, 2>& range)
@@ -847,6 +876,7 @@ public:
                 UpdateCarrier(player);
                 TrackCarrier(player);
             }
+        RefreshWall();
     }
 };
 
@@ -979,7 +1009,8 @@ public:
         if (!Carries(player))
             return;
         Unit const* original = spell->GetOriginalCaster();
-        if (hides || RefuseMovement(true, moves, spell->IsTriggered() || (original && original != player)))
+        bool const pulled = (original && original != player) || (spell->IsTriggered() && Jumps(info));
+        if (hides || RefuseMovement(true, moves, pulled))
             result = SPELL_FAILED_NOT_HERE;
     }
 };
