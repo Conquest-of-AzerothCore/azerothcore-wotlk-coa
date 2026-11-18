@@ -5,7 +5,8 @@ import tempfile
 import os
 
 HERE = Path(__file__).resolve().parent
-TESTS = ["test_brackets"]
+TESTS = ["test_brackets", "test_lift_resources"]
+ROOT = HERE.parents[2]
 
 
 def main():
@@ -17,6 +18,15 @@ def main():
         for name in TESTS:
             exe = out / (name + ".exe")
             source = str(HERE / (name + ".cpp"))
+            if name == "test_lift_resources":
+                production = (ROOT / "src/server/coa/AscensionBattlegroundCatchUp.cpp").read_text(encoding="utf-8")
+                helpers = production[production.index("constexpr char LiftKey"):production.index("uint32 LiftTargetLevel")]
+                refresh = production[production.index("void RefreshPlayerLift"):production.index("Policy::LevelValues PetLevelValues")]
+                code = Path(source).read_text(encoding="utf-8").replace("// ACTUAL_LIFT", helpers)
+                code = code.replace("// ACTUAL_REFRESH", refresh)
+                code = code.replace("POLICY_HEADER", (ROOT / "src/server/game/Battlegrounds/AscensionBattlegroundBracketsPolicy.h").as_posix())
+                source = str(out / (name + ".cpp"))
+                Path(source).write_text(code, encoding="utf-8")
             command = ([compiler, "/nologo", "/std:c++20", "/EHsc", "/W4", "/WX", source, "/Fe" + str(exe)]
                        if msvc else [compiler, "-std=c++20", "-Wall", "-Wextra", "-Werror", source, "-o", str(exe)])
             subprocess.run(command, cwd=out, check=True, timeout=120)
