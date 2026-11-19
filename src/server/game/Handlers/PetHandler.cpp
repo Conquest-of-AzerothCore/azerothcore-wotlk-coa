@@ -26,7 +26,6 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Pet.h"
-#include "PetAI.h"
 #include "PetPackets.h"
 #include "Player.h"
 #include "Spell.h"
@@ -985,12 +984,6 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPackets::Pet::PetSpellAutoc
             charmInfo->ToggleCreatureAutocast(spellInfo, packet.AutocastEnabled);
 
         charmInfo->SetSpellAutocast(spellInfo, packet.AutocastEnabled);
-
-        // CoA: Windpelt's autocast decides whether the Air Elemental chases to range or into melee
-        if (packet.SpellID == COA_AIR_ELEMENTAL_WINDPELT &&
-            GetStockPetEntry(pet->GetEntry()) == ENTRY_COA_AIR_ELEMENTAL && pet->IsCreature())
-            if (PetAI* ai = dynamic_cast<PetAI*>(pet->ToCreature()->AI()))
-                ai->RefreshChaseRange();
     }
 }
 
