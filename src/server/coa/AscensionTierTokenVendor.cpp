@@ -9,16 +9,20 @@
 
 namespace
 {
-constexpr uint32 TierVendorEntryCount = 13;
+constexpr uint32 TierVendorEntryCount = 17;
 
 constexpr std::array<uint32, TierVendorEntryCount> TierVendorEntries = {
-    91000001, 91000002, 91000003, 91000004,
+    91000101, 91000102, 91000103, 91000104,
+    91000105, 91000106, 91000107, 91000108,
     91000005, 91000006, 91000007, 91000008,
     91000009, 91000010, 91000011, 91000012, 91000013,
 };
 
 constexpr std::array<char const*, TierVendorEntryCount> TierVendorLabels = {
-    "Tokens T1 Normal", "Tokens T1 Heroic", "Tokens T1 Mythic", "Tokens T1 Ascended",
+    "Tokens T1 Normal (Part 1)", "Tokens T1 Normal (Part 2)",
+    "Tokens T1 Heroic (Part 1)", "Tokens T1 Heroic (Part 2)",
+    "Tokens T1 Mythic (Part 1)", "Tokens T1 Mythic (Part 2)",
+    "Tokens T1 Ascended (Part 1)", "Tokens T1 Ascended (Part 2)",
     "Tokens T2 Normal", "Tokens T2 Heroic", "Tokens T2 Mythic", "Tokens T2 Ascended",
     "Tokens T3 Normal", "Tokens T3 Heroic", "Tokens T3 Mythic", "Tokens T3 Ascended", "Tokens T3 Rings",
 };
