@@ -74,5 +74,5 @@ DELETE FROM `gameobject` WHERE `guid` = 9001088;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
-(9001088, 179972, 0, 40, 919, 1, 1, -10743.41, 1373.9106, 34.762943, 3.0416815, 0, 0, 0.998752, 0.049935, 300, 100,
-  1, '', 0, 'Stormwind Crate 01 the Defias Looter sits on (PR author''s in-game .gps of the footage spot)');
+(9001088, 179970, 0, 40, 919, 1, 1, -10743.41, 1373.9106, 34.762943, 3.0416815, 0, 0, 0.998752, 0.049935, 300, 100,
+  1, '', 0, 'Replace Crate 02 the Defias Looter sits on (PR author''s in-game .gps of the footage spot)');
