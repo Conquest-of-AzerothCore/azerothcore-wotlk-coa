@@ -94,7 +94,7 @@ void SetCraterPhase(Player* player, uint32 phase)
     player->GetSession()->SendSetPhaseShift(phase);
 }
 
-constexpr uint32 WISDOMBALL_QUEST_ITEMS[] = { 9417301, 9417303, 9417307, 9417328 };
+constexpr uint32 WISDOMBALL_QUEST_ITEMS[] = { 9417301, 9417303, 9417307, 9417328, 9417329, 9417330, 9417331, 9417332, 9417333 };
 
 constexpr uint32 REWARD_SHOWN_FIRST = 9417310;
 constexpr uint32 REWARD_SHOWN_LAST  = 9417326;
