@@ -209,6 +209,7 @@ namespace
     }
     std::unordered_map<uint32, Run> g_runs;             // by instance id
     std::unordered_map<uint32, uint32> g_forces;        // creature entry -> enemy forces
+    std::unordered_map<uint32, uint32> g_wingCredit;
     std::vector<Reward> g_rewards;
     std::unordered_map<ObjectGuid, uint32> g_socketed;   // player -> keystone item used, waiting for Start
 
@@ -462,8 +463,12 @@ namespace
             return nullptr;
         uint32 const base = BaseEntry(creature->GetEntry());
         for (WingEncounter const& encounter : *list)
-            if (encounter.creature == base || encounter.creature == creature->GetEntry())
+        {
+            auto const credit = g_wingCredit.find(encounter.id);
+            uint32 const killed = credit != g_wingCredit.end() ? credit->second : encounter.creature;
+            if (killed == base || killed == creature->GetEntry())
                 return &encounter;
+        }
         return nullptr;
     }
 
@@ -1281,6 +1286,12 @@ namespace
                 g_forces[result->Fetch()[0].Get<uint32>()] = result->Fetch()[1].Get<uint32>();
             while (result->NextRow());
 
+        g_wingCredit.clear();
+        if (QueryResult result = WorldDatabase.Query("SELECT encounter, creature FROM coa_mythic_wing_credit"))
+            do
+                g_wingCredit[result->Fetch()[0].Get<uint32>()] = result->Fetch()[1].Get<uint32>();
+            while (result->NextRow());
+
         g_rewards.clear();
         if (QueryResult result = WorldDatabase.Query("SELECT level_min, level_max, item, count FROM coa_mythic_reward"))
             do
@@ -1289,8 +1300,8 @@ namespace
                 g_rewards.push_back({ f[0].Get<uint32>(), f[1].Get<uint32>(), f[2].Get<uint32>(), f[3].Get<uint32>() });
             } while (result->NextRow());
 
-        LOG_INFO("server.loading", ">> Mythic+: {} enemy forces values, {} cache rows",
-            uint32(g_forces.size()), uint32(g_rewards.size()));
+        LOG_INFO("server.loading", ">> Mythic+: {} enemy forces values, {} wing credits, {} cache rows",
+            uint32(g_forces.size()), uint32(g_wingCredit.size()), uint32(g_rewards.size()));
     }
 }
 
