@@ -5,9 +5,9 @@
 -- 2026-09-04) gives type 7, type_flags 0, rank 0 and HealthModifier 1, but no level, faction, loot or spawns.
 -- Level, look and weapon come from the PR author's review of original Ascension footage
 -- (https://youtu.be/3Nl8pJ8tyWQ?t=6487): level 13, shirtless, green trousers, red bandana, fishing rod.
--- Stats, faction, money and loot are copied from Defias Trapper (504), plus a 5% Fishing Pole; the look is a
--- stand-in preset built on the Trapper's male display (2332) with the chest removed and green trousers (2082) in
--- place of brown.
+-- Stats, faction, money, loot and the low-health flee are copied from Defias Trapper (504), plus a 5% Fishing
+-- Pole; the look is a stand-in preset built on the Trapper's male display (2332) with the chest removed and green
+-- trousers (2082) in place of brown.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`,
   `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`,
   `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`,
@@ -17,11 +17,19 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
   `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`,
   `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (35913, 0, 0, 0, 0, 0, 'Defias Fisherman', '', NULL, 0, 13, 13, 0, 17, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000,
-  1, 1, 1, 32768, 2048, 0, 0, 7, 0, 35913, 504, 0, 0, 0, 3, 27, '', 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', 0)
+  1, 1, 1, 32768, 2048, 0, 0, 7, 0, 35913, 504, 0, 0, 0, 3, 27, 'SmartAI', 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', 0)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`),
   `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`), `type_flags` = VALUES(`type_flags`),
   `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `mingold` = VALUES(`mingold`),
   `maxgold` = VALUES(`maxgold`), `AIName` = VALUES(`AIName`), `HealthModifier` = VALUES(`HealthModifier`);
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 35913 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
+  `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
+  `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`,
+  `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`,
+  `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(35913, 0, 0, 0, 2, 0, 100, 1, 0, 15, 0, 0, 0, 0, 25, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  'Defias Fisherman - Between 0-15% Health - Flee For Assist (No Repeat)');
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 35913;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
