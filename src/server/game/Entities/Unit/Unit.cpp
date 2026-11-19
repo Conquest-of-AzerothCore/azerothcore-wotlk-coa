@@ -7012,7 +7012,7 @@ uint32 Unit::GetDiseasesByCaster(ObjectGuid casterGUID, uint8 mode)
                     uint32 countMin = aura->GetMaxDuration();
                     uint32 countMax = aura->GetSpellInfo()->GetMaxDuration() + 9000;
 
-                    if (AuraEffect const* epidemic = (*i)->GetCaster()->GetAuraEffectOfRankedSpell(49036, EFFECT_0))
+                    if (AuraEffect const* epidemic = (*i)->GetCaster()->GetAuraEffectOfRankedSpellOrTwin(49036, EFFECT_0))
                         countMax += epidemic->GetAmount();
 
                     if (countMin < countMax)
@@ -18941,7 +18941,7 @@ bool Unit::CanRestoreMana(SpellInfo const* spellInfo) const
         case 68285: // Improved Leader of the Pack
             return true;
         case 54428: // Divine Plea - only with talent Guarded by the Light
-            return HasSpell(53583);
+            return IsPlayer() ? ToPlayer()->HasSpellOrTwin(53583) : HasSpell(53583);
         default:
             break;
     }

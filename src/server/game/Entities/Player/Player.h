@@ -1762,6 +1762,8 @@ public:
     void _removeTalentAurasAndSpells(uint32 spellId);
     void _addTalentAurasAndSpells(uint32 spellId);
     [[nodiscard]] bool HasTalent(uint32 spell_id, uint8 spec) const;
+    /// HasTalent that also matches a stock talent's twins and namesakes (SpellMgr::GetSpellAndRelatives)
+    [[nodiscard]] bool HasTalentOrTwin(uint32 spell_id, uint8 spec) const;
 
     [[nodiscard]] uint32 CalculateTalentsPoints() const;
     void SetBonusTalentCount(uint32 count) { m_extraBonusTalentCount = count; };
