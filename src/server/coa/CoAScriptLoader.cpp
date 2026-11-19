@@ -59,6 +59,7 @@ void AddSC_AscensionAdventureModeRandomAggro();
 void AddSC_AscensionDungeonRelease();
 void AddSC_AscensionBattlegroundCatchUp();
 void AddSC_AscensionBattlegroundSpiritQueue();
+void AddSC_CoABattlegroundRewards();
 void AddSC_AscensionRaidRelease();
 void AddSC_AscensionPvPVendorRelease();
 void AddSC_AscensionThreatRedirect();
@@ -878,6 +879,7 @@ void AddCoAScripts()
     AddSC_AscensionDungeonRelease();
     AddSC_AscensionBattlegroundCatchUp();
     AddSC_AscensionBattlegroundSpiritQueue();
+    AddSC_CoABattlegroundRewards();
     AddSC_AscensionRaidRelease();
     AddSC_AscensionPvPVendorRelease();
     AddSC_AscensionThreatRedirect();
