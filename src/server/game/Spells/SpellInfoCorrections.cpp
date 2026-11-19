@@ -76,6 +76,11 @@ void SpellMgr::LoadSpellInfoCorrections()
 {
     uint32 oldMSTime = getMSTime();
 
+    ApplySpellFix({ 2110641 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_ON_PLAYER;
+    });
+
     // Custom balance: Thunderous +150% -> +50% critical damage.
     ApplySpellFix({ 804827 }, [](SpellInfo* spellInfo)
     {
