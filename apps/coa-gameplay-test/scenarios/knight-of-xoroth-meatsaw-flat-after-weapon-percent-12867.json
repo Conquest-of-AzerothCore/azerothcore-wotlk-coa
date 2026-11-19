@@ -5,10 +5,11 @@
     "#12867: Meatsaw seemed to deal only part of its tooltip. Rank 5 578119 reads 'dealing $s2% Weapon Damage plus",
     "$s1': 56% weapon damage plus 143-178. Its DBC lists the flat effect (121) before the percent effect (31), so the",
     "engine multiplied the flat value by 56% too. The maintainer ruled that Meatsaw follows its tooltip, so the chain",
-    "uses AscensionFlatAfterWeaponPercent (ADR 0010). An unarmed level 60 Knight of Xoroth with 300-500 attack power",
-    "(416 measured) has 53-88 normalized weapon damage, so a hit is 172-227 with the flat value added in full and at",
-    "most 149 when it is multiplied. The level 1 target barely mitigates it (asserted at 990 per 1000 or more) and",
-    "damage-done and damage-taken modifiers stay within 2% (asserted), so non-critical hits must average 160-250."
+    "uses AscensionFlatAfterWeaponPercent (ADR 0010). An unarmed level 60 Knight of Xoroth with 400-430 attack power",
+    "(416 measured) has 70-76 normalized weapon damage, so a hit before mitigation is 182-220 with the flat value added",
+    "in full and at most 142 when it is multiplied. The target lets 580-600 of 1000 through its armor (591 measured)",
+    "and damage-done and damage-taken modifiers stay within 2% (asserted), so non-critical hits must average 100-138;",
+    "the multiplied form would average at most 86."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -46,20 +47,21 @@
     },
     {
       "action": "assert",
-      "label": "Fixture: attack power keeps unarmed normalized weapon damage between 53 and 88",
+      "label": "Fixture: attack power keeps unarmed normalized weapon damage between 70 and 76",
       "actor": "k",
       "metric": "attack_power",
-      "min": 300,
-      "max": 500
+      "min": 400,
+      "max": 430
     },
     {
       "action": "assert",
-      "label": "Fixture: the target's armor barely mitigates Meatsaw",
+      "label": "Fixture: the target's armor lets 58-60% of Meatsaw through",
       "actor": "k",
       "metric": "armor_reduced_damage",
       "spell": 578119,
       "target": "dummy",
-      "min": 990
+      "min": 580,
+      "max": 600
     },
     {
       "action": "assert",
@@ -439,8 +441,8 @@
       "target": "dummy",
       "critical": false,
       "ratio_to": "meatsaw_hits",
-      "min": 160,
-      "max": 250
+      "min": 100,
+      "max": 138
     }
   ]
 }

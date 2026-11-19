@@ -7,22 +7,17 @@
     "drops on mount. Vizier Form and Wasp Form 805141 lacked the flag. Venomwing Form 520307 already drops on any",
     "cast. Each form is learned and cast, the Brown Horse 458 is cast while in it, and once mounted the form must be",
     "gone. Native dismount separates the two cases.",
-    "Vizier Form is taught by its specialization passive 504798, which the fixture learns first."
+    "Vizier Form is taught by its specialization passive 504798, which the fixture learns first.",
+    "Wasp Form is a flying form and fails with SPELL_FAILED_INCORRECT_AREA in Elwynn, so the fixture uses the",
+    "default level 80 start that venomancer-fix-wasp-form also uses."
   ],
   "timeout_ms": 120000,
-  "location": {
-    "map": 0,
-    "x": -8917.41,
-    "y": -115.853,
-    "z": 82.3711,
-    "o": 0
-  },
   "players": [
     {
       "id": "p",
       "race": 1,
       "class": 29,
-      "level": 60,
+      "level": 80,
       "allow_regeneration": false
     }
   ],
