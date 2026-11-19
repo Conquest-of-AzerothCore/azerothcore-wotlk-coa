@@ -144,6 +144,16 @@ bool PetAI::_canMeleeAttack()
                 // Attack command left it standing idle (#10225, #6291)
                 return stockEntry == ENTRY_IMP && !boltOnAutocast;
             }
+        // CoA: the Stormbringer Air Elemental casts Windpelt from range and holds position, like the Water Elemental
+        case ENTRY_COA_AIR_ELEMENTAL:
+            for (uint8 i = 0; i < me->GetPetAutoSpellSize(); ++i)
+                if (me->GetPetAutoSpellOnPos(i) == COA_AIR_ELEMENTAL_WINDPELT)
+                    if (SpellInfo const* windpelt = sSpellMgr->GetSpellInfo(COA_AIR_ELEMENTAL_WINDPELT))
+                    {
+                        combatRange = windpelt->GetMaxRange();
+                        return true;
+                    }
+            break;
         default:
             break;
     }
