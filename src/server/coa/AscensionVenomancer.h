@@ -16,6 +16,7 @@ namespace AscensionVenomancer
 constexpr uint32 Brood = 804972;
 constexpr uint32 Exposed = 805095;
 constexpr uint32 CharmOfWarding = 705967;
+constexpr uint32 ExposedFleshHeal = 806606;
 constexpr uint32 Spider = 800841;
 constexpr uint32 SpiderlingVenomSource = 807702;
 constexpr uint32 Beetle = 803183;

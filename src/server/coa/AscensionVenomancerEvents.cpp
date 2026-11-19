@@ -246,6 +246,8 @@ class aura_ascension_venomancer_event : public AuraScript
                 if (!amulet)
                 {
                     Cast(player,player,800914);
+                    if (!player->HasSpellCooldown(800914))
+                        player->SendClearCooldown(800914, player);
                     if (Aura* added = player->GetAura(800914))
                         added->SetDuration(std::min(5000,added->GetMaxDuration()));
                 }
