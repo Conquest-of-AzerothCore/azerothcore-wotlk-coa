@@ -1,10 +1,13 @@
 -- Defias guarding the Pilfered Lesser Healing Potions crate (gameobject guid 9001100) in Westfall, with the new
 -- Defias Fisherman (35913).
--- The client's Creature.dbc names entry 35913 but its display 700004 is not in the client, and no capture has his
--- stats, loot or spawns. Level, look and weapon come from the PR author's review of original Ascension footage
+-- The client's Creature.dbc names entry 35913 but its display 700004 is not in the client. The captured creature
+-- cache (hertigservices/ascension-data, cachedata/by-mode/conquest-of-azeroth/creaturecache.tsv.gz, captured
+-- 2026-09-04) gives type 7, type_flags 0, rank 0 and HealthModifier 1, but no level, faction, loot or spawns.
+-- Level, look and weapon come from the PR author's review of original Ascension footage
 -- (https://youtu.be/3Nl8pJ8tyWQ?t=6487): level 13, shirtless, green trousers, red bandana, fishing rod.
--- Stats, faction and loot are copied from Defias Trapper (504); the look is a stand-in preset built on the Trapper's
--- male display (2332) with the chest removed and green trousers (2082) in place of brown.
+-- Stats, faction, money and loot are copied from Defias Trapper (504), plus a 5% Fishing Pole; the look is a
+-- stand-in preset built on the Trapper's male display (2332) with the chest removed and green trousers (2082) in
+-- place of brown.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`,
   `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`,
   `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`,
@@ -14,7 +17,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
   `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`,
   `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (35913, 0, 0, 0, 0, 0, 'Defias Fisherman', '', NULL, 0, 13, 13, 0, 17, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000,
-  1, 1, 1, 32768, 2048, 0, 0, 7, 134217728, 35913, 504, 0, 0, 0, 3, 27, '', 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', 0)
+  1, 1, 1, 32768, 2048, 0, 0, 7, 0, 35913, 504, 0, 0, 0, 3, 27, '', 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, '', 0)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`),
   `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`), `type_flags` = VALUES(`type_flags`),
   `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `mingold` = VALUES(`mingold`),
