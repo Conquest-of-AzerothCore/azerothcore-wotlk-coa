@@ -3775,6 +3775,19 @@ private:
             Require(item != nullptr, "LFG Need metric needs a known item");
             return player->CanRollForItemInLFG(item, player) == EQUIP_ERR_OK ? 1 : 0;
         }
+        if (metric == "battleground_status")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Battleground status metric needs a player");
+            Battleground const* battleground = player->GetBattleground();
+            return battleground ? double(battleground->GetStatus()) : -1;
+        }
+        if (metric == "arena_points")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Arena points metric needs a player");
+            return player->GetArenaPoints();
+        }
         if (metric == "in_arena")
         {
             Player* player = unit->ToPlayer();
@@ -7776,6 +7789,18 @@ private:
             map->UpdateEncounterState((*finalEncounter)->creditType, (*finalEncounter)->creditEntry, nullptr);
             record.put("dungeon", dungeon);
             record.put("entry", (*finalEncounter)->creditEntry);
+        }
+        else if (action == "end_battleground")
+        {
+            Battleground* battleground = player->GetBattleground();
+            Require(battleground != nullptr && !battleground->isArena(), "end_battleground needs a battleground");
+            Require(battleground->GetStatus() == STATUS_IN_PROGRESS, "The battleground is not in progress");
+            std::string const winner = step.get<std::string>("winner");
+            Require(winner == "alliance" || winner == "horde" || winner == "draw",
+                "end_battleground winner must be alliance, horde or draw");
+            battleground->EndBattleground(winner == "alliance" ? PVP_TEAM_ALLIANCE
+                : winner == "horde" ? PVP_TEAM_HORDE : PVP_TEAM_NEUTRAL);
+            record.put("winner", winner);
         }
         else if (action == "encounter_start")
         {

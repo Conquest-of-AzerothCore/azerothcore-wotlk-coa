@@ -77,8 +77,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
     'lfg_selected_dungeon_count', 'lfg_selected_dungeon', 'lfg_need_allowed',
     'map_id', 'instance_id', 'battleground_queued', 'battleground_invited_max_level',
-    'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
-    'battleground_team', 'team', 'name_query_race',
+    'in_arena', 'arena_points', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
+    'battleground_team', 'battleground_status', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
     'nearby_creature_sent_spellclick', 'nearby_creature_sent_gossip', 'nearby_creature_can_attack', 'nearby_creature_mount_display',
     'nearby_creature_display', 'nearby_creature_scale', 'nearby_creature_aura_count', 'nearby_creature_at_client',
@@ -328,6 +328,7 @@ ACTIONS = {
     'lfg_set_roles': ({'actor', 'roles'}, {'actor', 'roles'}),
     'lfg_accept': ({'actor'}, {'actor'}),
     'lfg_final_credit': ({'actor'}, {'actor'}),
+    'end_battleground': ({'actor', 'winner'}, {'actor', 'winner'}),
     'encounter_credit': ({'actor', 'entry'}, {'actor', 'entry'}),
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
@@ -948,6 +949,9 @@ def validate(scenario, clock=REAL_CLOCK):
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
         if action == 'durability_loss':
             number(step['percent'], f'{where}.percent', 0.001, 100, False)
+        if action == 'end_battleground':
+            require(step['actor'] in player_ids, f'{where}: end_battleground needs a player')
+            require(step['winner'] in {'alliance', 'horde', 'draw'}, f'{where}: winner must be alliance, horde or draw')
         if action == 'set_level':
             number(step['value'], f'{where}.value', 1, 80, True)
         if action == 'set_reputation':
@@ -1236,11 +1240,12 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'lfg_lock_status':
                 require(step['actor'] in player_ids, f'{where}: LFG lock metric needs a player')
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
-            if metric in {'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins'}:
+            if metric in {'in_arena', 'arena_points', 'arena_team_members', 'arena_team_season_games',
+                          'arena_team_season_wins'}:
                 require(step['actor'] in player_ids, f'{where}: arena metric needs a player')
             if metric in {'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins'}:
                 number(step.get('slot'), f'{where}.slot', 0, 2, True)
-            if metric in {'battleground_team', 'team', 'name_query_race'}:
+            if metric in {'battleground_team', 'battleground_status', 'team', 'name_query_race'}:
                 require(step['actor'] in player_ids, f'{where}: team metric needs a player')
             if metric == 'lfg_dungeon_disabled':
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)

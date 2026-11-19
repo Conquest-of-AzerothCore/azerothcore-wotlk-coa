@@ -536,6 +536,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `lfg_set_roles` | Player `actor` in a group, `roles` mask: native `CMSG_LFG_SET_ROLES` answer to the group role check. |
 | `lfg_accept` | Player `actor`: native `CMSG_LFG_PROPOSAL_RESULT` acceptance of the last Dungeon Finder proposal the actor received. |
 | `lfg_final_credit` | Player `actor` in a Dungeon Finder dungeon: credits the final encounter of the group's assigned dungeon, as `encounter_credit` does for that boss, when the proposal chose the dungeon. |
+| `end_battleground` | Player `actor` in a battleground in progress, `winner` (`alliance`, `horde` or `draw`): ends the match through native `EndBattleground` for that side, as a score or timer end would; `draw` ends it with no winner. |
 | `encounter_credit` | Player `actor` in a dungeon, creature `entry`: credits that dungeon boss kill to the actor's map through the native encounter update, as a boss death does, including the Dungeon Finder completion it triggers. |
 | `encounter_start` | Player `actor`, `boss_entry`, optional `radius` (yards, default 100, maximum 200): finds the nearest living creature of that entry in the actor's phase and starts recording its [encounter timeline](#encounter-timelines). It fails at once with `encounter_start found no creature <entry> within <radius> yards` when none is in range. A scenario has at most one; the case runs exclusively because the recorder is process-global. |
 | `leave_group` | Player `actor`: native `CMSG_GROUP_DISBAND` leave request; fails if the player stays grouped. |
@@ -1218,6 +1219,9 @@ selection holds it, otherwise 0.
 loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
 group or its dungeon every item returns 1.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
+`arena_points` takes a player `actor` and returns the arena points the player holds.
+`battleground_status` takes a player `actor` and returns the native status of the player's battleground
+(1 waiting for the queue, 2 preparation, 3 in progress, 4 ended and waiting to close), or -1 outside one.
 `battleground_team` takes a player `actor` and returns the side that player fights for inside a battleground or
 arena (0 Alliance, 1 Horde), or -1 outside one. `team` returns the player's current team (0 Alliance, 1 Horde),
 which a cross-faction battleground replaces while the player is inside it. `name_query_race` returns the race the
