@@ -1,0 +1,399 @@
+{
+  "schema": 1,
+  "name": "A combat pet in a widened battleground bracket gains its own level-stat difference",
+  "contract": "A level 12 Human Warlock with an Imp (416) who enters a Warsong Gulch of the 10-29 bracket gains the level 29 minus level 12 rows of player_class_stats (maximum health +333: base health +223 and 11 Stamina x 10; maximum mana +714: base mana +384 and 22 Intellect x 15), and the Imp gains the difference of its own pet_levelstats rows: Strength +25, Agility +4, Stamina +19 and base health +407 and base mana +505 raise its create values, so its own Stamina and Intellect gains are not counted twice; the 75% Stamina and 30% Intellect it inherits from the lifted owner add at most 9 Stamina (health +490 in all) and 7 Intellect (mana +545 in all). A level 29 Orc Warrior completes the faction pairing. Leaving through the leave packet resummons the Imp without the lift.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "lock",
+      "race": 1,
+      "class": 9,
+      "level": 12
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Summon Imp",
+      "actor": "lock",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "The Warlock summons the Imp",
+      "actor": "lock",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Imp is summoned",
+      "actor": "lock",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "save_as": "imp_str",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "save_as": "imp_agi",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "save_as": "imp_sta",
+      "stat": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_max_health",
+      "save_as": "imp_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_max_power",
+      "save_as": "imp_mana",
+      "power": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "max_health",
+      "save_as": "lock_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "max_power",
+      "save_as": "lock_mana",
+      "power": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "lock",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Warlock is invited to the 10-29 bracket",
+      "actor": "lock",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "lock",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "lock"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Warlock enters Warsong Gulch",
+      "actor": "lock",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Horde Warrior is invited to the 10-29 bracket",
+      "actor": "horde",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "horde"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Horde Warrior enters Warsong Gulch",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The Imp follows the Warlock into Warsong Gulch",
+      "actor": "lock",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Warlock maximum health rises by base health +223 and 11 Stamina x 10",
+      "actor": "lock",
+      "metric": "max_health",
+      "relative_to": "lock_health",
+      "equals": 333,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Warlock maximum mana rises by base mana +384 and 22 Intellect x 15",
+      "actor": "lock",
+      "metric": "max_power",
+      "relative_to": "lock_mana",
+      "equals": 714,
+      "power": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Imp Strength rises by the level 29 difference 25",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_str",
+      "equals": 25,
+      "stat": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Imp Agility rises by the level 29 difference 4",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_agi",
+      "equals": 4,
+      "stat": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Imp Stamina rises by its own difference 19 plus at most the 9 it inherits from the owner",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_sta",
+      "min": 19,
+      "max": 28,
+      "stat": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Imp maximum health rises by its base health difference 407 plus 8.4 per Stamina it inherits from the owner, without counting its own Stamina gain twice",
+      "actor": "lock",
+      "metric": "pet_max_health",
+      "relative_to": "imp_health",
+      "min": 407,
+      "within_ms": 10000,
+      "max": 490
+    },
+    {
+      "action": "assert",
+      "label": "Imp maximum mana rises by its base mana difference 505 plus 4.95 per Intellect it inherits from the owner, without counting its own Intellect gain twice",
+      "actor": "lock",
+      "metric": "pet_max_power",
+      "relative_to": "imp_mana",
+      "min": 505,
+      "power": 0,
+      "within_ms": 10000,
+      "max": 545
+    },
+    {
+      "action": "client_packet",
+      "actor": "lock",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Warlock leaves Warsong Gulch",
+      "actor": "lock",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The Imp returns with the Warlock",
+      "actor": "lock",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores Imp Strength",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_str",
+      "equals": 0,
+      "stat": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores Imp Agility",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_agi",
+      "equals": 0,
+      "stat": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Imp Stamina is back to its value outside the battleground",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_sta",
+      "equals": 0,
+      "stat": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores Imp maximum health",
+      "actor": "lock",
+      "metric": "pet_max_health",
+      "relative_to": "imp_health",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores Imp maximum mana",
+      "actor": "lock",
+      "metric": "pet_max_power",
+      "relative_to": "imp_mana",
+      "equals": 0,
+      "power": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving restores Warlock maximum health",
+      "actor": "lock",
+      "metric": "max_health",
+      "relative_to": "lock_health",
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

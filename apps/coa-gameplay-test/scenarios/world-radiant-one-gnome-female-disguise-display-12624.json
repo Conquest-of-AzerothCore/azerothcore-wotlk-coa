@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Radiance Town: the gnome female Radiant One disguise uses the textured display 6982 (#12624)",
+  "contract": [
+    "Spell 256706 transforms a gnome female into Radiant One 161780. rev_20261015_10 gave 161780 the display 32697 (extra 21675), whose baked texture Textures\\BakedNpcTextures\\CreatureDisplayExtra-21675.blp, shoulder model and mail textures are in no MPQ of the installed client, so the disguise renders as a diving helmet on an untextured body.",
+    "Expected: 161780 uses 6982 (gnome female, space helmet, gold plate; extra 4711, baked texture in common.MPQ), the stand-in already used by Radiant Guard 161773 and Radiant Fanatic 161772 (#11937). The other disguise looks keep 25525, 141780 and 27657.",
+    "Template data assertions on creature_template_model: the harness cannot see whether the client finds a texture."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 7,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the player finish logging in", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: gnome female disguise 161780 uses the textured display 6982, not 32697",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161780,
+      "index": 0,
+      "equals": 6982
+    },
+    {
+      "action": "assert",
+      "label": "Dwarf male disguise 161778 keeps 25525",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161778,
+      "index": 0,
+      "equals": 25525
+    },
+    {
+      "action": "assert",
+      "label": "Dwarf female disguise 161779 keeps 141780",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161779,
+      "index": 0,
+      "equals": 141780
+    },
+    {
+      "action": "assert",
+      "label": "Gnome male disguise 161781 keeps 27657",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161781,
+      "index": 0,
+      "equals": 27657
+    }
+  ]
+}

@@ -388,6 +388,27 @@ HighRisk.ResourceChance = 50
 HighRisk.GoldChance = 50
 
 ###################################################################################################
+# BATTLEGROUND BRACKETS
+#
+#    CoA.Battleground.WideBrackets.Enable
+#        Description: Merge the stock ten-level battleground brackets below level 60 into the wider
+#                     brackets of CoA.Battleground.WideBrackets.Ranges. Arenas and the brackets from
+#                     level 60 up keep their stock ranges. Read at startup only.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, stock brackets)
+
+CoA.Battleground.WideBrackets.Enable = 1
+
+#    CoA.Battleground.WideBrackets.Ranges
+#        Description: Comma-separated, ascending level ranges between 1 and 59. Each range must hold
+#                     whole stock brackets (10-19, 20-29, ...) and keep the same lead bracket on every
+#                     battleground. An invalid value logs an error and keeps the stock brackets. Read at
+#                     startup only.
+#        Default:     "10-29,30-49,50-59"
+
+CoA.Battleground.WideBrackets.Ranges = "10-29,30-49,50-59"
+
+###################################################################################################
 # RATED SOLO ARENA
 #
 #    RatedSoloArena.RoleBalanceWaitSeconds

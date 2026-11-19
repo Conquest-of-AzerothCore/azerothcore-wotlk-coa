@@ -3,6 +3,7 @@
   "exclusive": {
     "setis-world-boss-altar-loot": "Sets the process-global raid release stage (.raidphase) that gates every raid map",
     "snowgrave-world-boss-instance": "Sets the process-global raid release stage (.raidphase) that gates every raid map",
+    "kazzak-throne-follows-release-stage": "Sets the process-global raid release stage (.raidphase) that gates every raid map",
     "lfg-mythic-dungeons-follow-release-stage": "Sets the process-global raid release stage (.raidphase) that gates every raid map and Dungeon Finder difficulty",
     "bloodforged-high-risk-drop": "set_phase 1 affects live creatures outside the case's lane phase",
     "coa-prestige-chromie-spawns": "set_phase 1 affects live creatures outside the case's lane phase",
@@ -29,6 +30,10 @@
     "mercenary-battleground-team-faction": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "mercenary-war-mode-battleground": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "high-risk-challenge-survives-battleground": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "battleground-wide-bracket-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "battleground-wide-bracket-group-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "battleground-wide-bracket-catch-up": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "battleground-wide-bracket-pet-catch-up": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "mercenary-wintergrasp-team-faction": "Starts and stops the process-global Wintergrasp battle that every player in the zone takes part in",
     "crows-cache-mercenary-wall-12720": "Starts the process-global Crow's Cache event, whose next start removes an unclaimed chest of another running case",
     "crows-cache-carrier-cannot-hide-12720": "Starts the process-global Crow's Cache event, whose next start removes an unclaimed chest of another running case",

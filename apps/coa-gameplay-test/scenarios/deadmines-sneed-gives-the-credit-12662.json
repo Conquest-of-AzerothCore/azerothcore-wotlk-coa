@@ -1,0 +1,271 @@
+{
+  "schema": 1,
+  "name": "Deadmines: Sneed, not Sneed's Shredder, gives the Heroic Mark of Triumph and the Mythic+ boss credit (#12662)",
+  "contract": "#12662: killing Sneed's Shredder (642) gave the Heroic Mark of Triumph and counted as the Sneed encounter of a Mythic+ run, because coa_dungeon_mark_bosses and the client's DungeonEncounterExtra.dbc (encounter 2162 for Deadmines lfg 2696) name the Shredder. The Shredder ejects Sneed (643) when it dies (Eject Sneed, 5141); Sneed is the boss. On Heroic the Shredder kill now gives no Mark and Sneed's kill gives one. In a +2 Deadmines key the Shredder kill leaves the progress packet (2313) without encounters and Sneed's kill adds encounter 2162.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "keyed",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 36,
+      "x": -283.0,
+      "y": -508.0,
+      "z": 49.7
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: The Deadmines on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 642,
+      "as": "shredder",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "heroic",
+      "entry": 642,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Sneed's Shredder dies",
+      "actor": "shredder",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shredder gives no Mark of Triumph",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Shredder ejected Sneed",
+      "actor": "heroic",
+      "metric": "nearby_creature_count",
+      "entry": 643,
+      "min": 1
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "heroic",
+      "entry": 643,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sneed gives the Mark of Triumph",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "keyed",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "keyed",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "keyed",
+      "map": 36,
+      "x": -283.0,
+      "y": -508.0,
+      "z": 49.7
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: The Deadmines on Mythic",
+      "actor": "keyed",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "keyed",
+      "item": 400334,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "keyed",
+      "item": 400334,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: socket window",
+      "actor": "keyed",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "keyed",
+      "opcode": 1319
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the run is under way",
+      "actor": "keyed",
+      "metric": "server_packet_u8",
+      "opcode": 2312,
+      "index": 8,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "keyed",
+      "map": 36,
+      "x": -283.0,
+      "y": -508.0,
+      "z": 49.7
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon",
+      "actor": "keyed",
+      "entry": 642,
+      "as": "keyshredder",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "keyed",
+      "entry": 642,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Sneed's Shredder dies in the key",
+      "actor": "keyshredder",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shredder completes no encounter",
+      "actor": "keyed",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "keyed",
+      "entry": 643,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sneed completes the Sneed encounter (2162)",
+      "actor": "keyed",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 1,
+      "equals": 2162,
+      "within_ms": 15000
+    }
+  ]
+}
