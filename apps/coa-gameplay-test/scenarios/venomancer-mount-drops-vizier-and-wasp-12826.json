@@ -6,7 +6,8 @@
     "mount interrupt flag and #6281 asserts the mount drops them; the maintainer ruled that every Venomancer form",
     "drops on mount. Vizier Form and Wasp Form 805141 lacked the flag. Venomwing Form 520307 already drops on any",
     "cast. Each form is learned and cast, the Brown Horse 458 is cast while in it, and once mounted the form must be",
-    "gone. Native dismount separates the two cases."
+    "gone. Native dismount separates the two cases.",
+    "Vizier Form is taught by its specialization passive 504798, which the fixture learns first."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -51,7 +52,17 @@
     {
       "action": "learn",
       "actor": "p",
-      "spell": 800912
+      "spell": 504798,
+      "label": "The Vizier Form specialization passive grants the form"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Vizier Form specialization teaches Vizier Form",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 800912,
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "cast",
