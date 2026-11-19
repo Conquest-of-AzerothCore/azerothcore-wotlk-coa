@@ -10,8 +10,8 @@ INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `Rewa
 (90010, 2, 44, 31, 3, 136, 1675638, 1, 375250, 300, 0, 'Classic Battleground 31-40 (Loss)', 12340),
 (90011, 2, 55, 41, 3, 136, 1675639, 1, 375250, 400, 0, 'Classic Battleground 41-50 (Loss)', 12340),
 (90012, 2, 65, 51, 3, 136, 1675640, 1, 375250, 400, 25, 'Classic Battleground 51-59 (Loss)', 12340),
-(190005, 2, 65, 60, 4, 136, 1175640, 1, 375250, 1000, 500, 'Classic Battleground 60 (Win)', 12340),
-(190012, 2, 65, 60, 3, 136, 1675640, 1, 375250, 400, 200, 'Classic Battleground 60 (Loss)', 12340) ON DUPLICATE KEY UPDATE `QuestType` = VALUES(`QuestType`), `QuestLevel` = VALUES(`QuestLevel`), `MinLevel` = VALUES(`MinLevel`), `RewardXPDifficulty` = VALUES(`RewardXPDifficulty`), `Flags` = VALUES(`Flags`), `RewardItem1` = VALUES(`RewardItem1`), `RewardAmount1` = VALUES(`RewardAmount1`), `RewardItem2` = VALUES(`RewardItem2`), `RewardAmount2` = VALUES(`RewardAmount2`), `RewardArenaPoints` = VALUES(`RewardArenaPoints`), `LogTitle` = VALUES(`LogTitle`);
+(190005, 2, 65, 60, 4, 136, 1175640, 1, 375250, 1000, 200, 'Classic Battleground 60 (Win)', 12340),
+(190012, 2, 65, 60, 3, 136, 1675640, 1, 375250, 400, 100, 'Classic Battleground 60 (Loss)', 12340) ON DUPLICATE KEY UPDATE `QuestType` = VALUES(`QuestType`), `QuestLevel` = VALUES(`QuestLevel`), `MinLevel` = VALUES(`MinLevel`), `RewardXPDifficulty` = VALUES(`RewardXPDifficulty`), `Flags` = VALUES(`Flags`), `RewardItem1` = VALUES(`RewardItem1`), `RewardAmount1` = VALUES(`RewardAmount1`), `RewardItem2` = VALUES(`RewardItem2`), `RewardAmount2` = VALUES(`RewardAmount2`), `RewardArenaPoints` = VALUES(`RewardArenaPoints`), `LogTitle` = VALUES(`LogTitle`);
 
 DELETE FROM `quest_template_addon` WHERE `ID` IN (90001, 90002, 90003, 90004, 90005, 90008, 90009, 90010, 90011, 90012, 190005, 190012);
 INSERT INTO `quest_template_addon` (`ID`, `SpecialFlags`) VALUES

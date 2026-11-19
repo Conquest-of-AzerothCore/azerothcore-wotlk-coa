@@ -20,9 +20,17 @@ public:
             return;
 
         bool const won = player->GetBgTeamId() == winnerTeamId;
-        uint32 const questId = CoABattlegroundRewardsPolicy::RewardQuestFor(player->GetLevel(), won);
-        if (Quest const* quest = questId ? sObjectMgr->GetQuestTemplate(questId) : nullptr)
-            player->RewardQuest(quest, 0, nullptr, false, true);
+        uint8 const level = player->GetLevel();
+        uint32 const questId = CoABattlegroundRewardsPolicy::RewardQuestFor(level, won);
+        Quest const* quest = questId ? sObjectMgr->GetQuestTemplate(questId) : nullptr;
+        if (!quest)
+            return;
+
+        uint32 const bonus = CoABattlegroundRewardsPolicy::FirstWinOfDayBonusFor(level, won,
+            player->SatisfyQuestDay(quest, false));
+        player->RewardQuest(quest, 0, nullptr, false, true);
+        if (bonus)
+            player->ModifyArenaPoints(bonus);
     }
 };
 

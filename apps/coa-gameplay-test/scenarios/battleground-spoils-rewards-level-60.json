@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Level 60 battlegrounds pay Battleground Spoils, currency and arena points by result",
-  "contract": "With Call to Arms off, one Alliance and one Horde level 60 player finish Warsong Gulch. The winner is paid Classic Battleground 60 (Win): Battleground Spoils (Win) 1175640, 1000 of 375250 and 500 arena points; the loser is paid Classic Battleground 60 (Loss): Battleground Spoils (Loss) 1675640, 400 of 375250 and 200 arena points. A second match that ends in a draw pays both players the loss reward.",
+  "name": "Level 60 battlegrounds pay Battleground Spoils and the first win of the day 500 arena points",
+  "contract": "With Call to Arms off, one Alliance and one Horde level 60 player finish Warsong Gulch twice on the same day, Alliance winning both. The winner is paid Classic Battleground 60 (Win): Battleground Spoils (Win) 1175640 and 1000 of 375250, with 500 arena points for the first win of the day and 200 for the next. The loser is paid Classic Battleground 60 (Loss): Battleground Spoils (Loss) 1675640, 400 of 375250 and 100 arena points for each loss.",
   "timeout_ms": 600000,
   "location": {
     "map": 0,
@@ -155,7 +155,7 @@
     },
     {
       "action": "end_battleground",
-      "label": "Alliance wins the first match",
+      "label": "Alliance wins the first match of the day",
       "actor": "alliance",
       "winner": "alliance"
     },
@@ -179,7 +179,7 @@
     },
     {
       "action": "assert",
-      "label": "The winner gets 500 arena points",
+      "label": "The first win of the day pays 500 arena points",
       "actor": "alliance",
       "metric": "arena_points",
       "equals": 500,
@@ -205,10 +205,10 @@
     },
     {
       "action": "assert",
-      "label": "The loser gets 200 arena points",
+      "label": "The loser gets 100 arena points",
       "actor": "horde",
       "metric": "arena_points",
-      "equals": 200,
+      "equals": 100,
       "within_ms": 5000
     },
     {
@@ -401,22 +401,30 @@
     },
     {
       "action": "end_battleground",
-      "label": "The second match ends in a draw",
+      "label": "Alliance wins a second match the same day",
       "actor": "alliance",
-      "winner": "draw"
+      "winner": "alliance"
     },
     {
       "action": "assert",
-      "label": "A draw pays the Alliance player the loss reward",
+      "label": "The second win pays another Battleground Spoils (Win)",
       "actor": "alliance",
       "metric": "item_count",
-      "item": 1675640,
-      "equals": 1,
+      "item": 1175640,
+      "equals": 2,
       "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "A draw pays the Horde player the loss reward",
+      "label": "The second win of the day adds 200 arena points",
+      "actor": "alliance",
+      "metric": "arena_points",
+      "equals": 700,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second loss pays another Battleground Spoils (Loss)",
       "actor": "horde",
       "metric": "item_count",
       "item": 1675640,
@@ -425,27 +433,11 @@
     },
     {
       "action": "assert",
-      "label": "A draw adds 200 arena points for the Alliance player",
-      "actor": "alliance",
-      "metric": "arena_points",
-      "equals": 700,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "A draw adds 200 arena points for the Horde player",
+      "label": "The second loss adds 100 arena points",
       "actor": "horde",
       "metric": "arena_points",
-      "equals": 400,
+      "equals": 200,
       "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Nobody wins the draw",
-      "actor": "horde",
-      "metric": "item_count",
-      "item": 1175640,
-      "equals": 0
     }
   ]
 }

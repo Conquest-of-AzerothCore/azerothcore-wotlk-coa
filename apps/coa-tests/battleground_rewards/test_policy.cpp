@@ -2,6 +2,7 @@
 #include <cassert>
 #include <iostream>
 
+using CoABattlegroundRewardsPolicy::FirstWinOfDayBonusFor;
 using CoABattlegroundRewardsPolicy::RewardQuestFor;
 
 static void PaysNothingOutsideTheBattlegroundLevels()
@@ -32,10 +33,20 @@ static void PaysTheLevelSixtyQuestsAtSixty()
     assert(RewardQuestFor(60, false) == 190012);
 }
 
+static void PaysTheFirstWinOfTheDayBonusOnlyForALevelSixtyWin()
+{
+    assert(FirstWinOfDayBonusFor(60, true, true) == 300);
+    assert(FirstWinOfDayBonusFor(60, true, false) == 0);
+    assert(FirstWinOfDayBonusFor(60, false, true) == 0);
+    assert(FirstWinOfDayBonusFor(59, true, true) == 0);
+    assert(FirstWinOfDayBonusFor(30, true, true) == 0);
+}
+
 int main()
 {
     PaysNothingOutsideTheBattlegroundLevels();
     PaysTheTenLevelQuestsBelowSixty();
     PaysTheLevelSixtyQuestsAtSixty();
+    PaysTheFirstWinOfTheDayBonusOnlyForALevelSixtyWin();
     std::cout << "Battleground reward quest policy checks passed\n";
 }

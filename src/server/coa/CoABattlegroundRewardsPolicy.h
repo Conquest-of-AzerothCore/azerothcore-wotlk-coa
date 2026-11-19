@@ -30,6 +30,14 @@ namespace CoABattlegroundRewardsPolicy
                 return won ? band.winQuest : band.lossQuest;
         return 0;
     }
+
+    inline constexpr uint8_t FirstWinOfDayLevel = 60;
+    inline constexpr uint32_t FirstWinOfDayBonusArenaPoints = 300;
+
+    constexpr uint32_t FirstWinOfDayBonusFor(uint8_t level, bool won, bool firstWinToday)
+    {
+        return won && firstWinToday && level == FirstWinOfDayLevel ? FirstWinOfDayBonusArenaPoints : 0;
+    }
 }
 
 #endif
