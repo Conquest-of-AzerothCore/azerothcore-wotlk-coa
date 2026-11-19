@@ -2922,6 +2922,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
                             Acore::UnitListSearcher<Acore::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
@@ -2930,6 +2934,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
                             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
@@ -3030,6 +3038,10 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
             Cell::VisitObjects(GetDynobjOwner(), searcher, radius);
+            targetList.remove_if([this, dynObjOwnerCaster](Unit* target)
+            {
+                return dynObjOwnerCaster && !sScriptMgr->CanUnitAssist(dynObjOwnerCaster, target, GetSpellInfo());
+            });
         }
         // pussywizard: TARGET_DEST_DYNOBJ_NONE is supposed to search for both friendly and unfriendly targets, so for any unit
         // what about EffectImplicitTargetA?
