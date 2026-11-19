@@ -1,0 +1,226 @@
+{
+ "schema": 1,
+ "name": "Wisdomball Q16 Hold the Rift: Delwyn's last line keeps its chat bubble (credit after the bubble, Pitho 2026-11-19)",
+ "contract": [
+  "Q16 9417116: rift Khadgar (guid 9417109) runs the scene; timed event 5 makes Delwyn (guid 9417194, phase 16) say",
+  "'It holds. I will not let it open - not until you are ready.' (61 chars, bubble ~150 ms/char + 1 s = 10.2 s).",
+  "The Q16 credit (9417065) flips the player's crater phase so the locked Delwyn 9417195 (phase 32) replaces him;",
+  "given together with the line it closed the bubble at once. DISCRIMINATING: the credit now comes 10.5 s later."
+ ],
+ "timeout_ms": 180000,
+ "location": {
+  "map": 0,
+  "x": -8996.0,
+  "y": 853.5,
+  "z": 29.62,
+  "o": 3.8
+ },
+ "players": [
+  {
+   "id": "p",
+   "race": 1,
+   "class": 1,
+   "level": 60
+  }
+ ],
+ "steps": [
+  {
+   "action": "set_phase",
+   "label": "world phase 1",
+   "actor": "p",
+   "value": 1
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: A Guardian's Shortcut complete",
+   "actor": "p",
+   "quest": 9417105
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: A Guardian's Shortcut turned in",
+   "actor": "p",
+   "quest": 9417105
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: The Rim of the Crater complete",
+   "actor": "p",
+   "quest": 9417106
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: The Rim of the Crater turned in",
+   "actor": "p",
+   "quest": 9417106
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Thieves at the Seal complete",
+   "actor": "p",
+   "quest": 9417107
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: Thieves at the Seal turned in",
+   "actor": "p",
+   "quest": 9417107
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: The Echo of Apprentice Delwyn complete",
+   "actor": "p",
+   "quest": 9417108
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: The Echo of Apprentice Delwyn turned in",
+   "actor": "p",
+   "quest": 9417108
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Wardstones of the Old Kirin Tor complete",
+   "actor": "p",
+   "quest": 9417109
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: Wardstones of the Old Kirin Tor turned in",
+   "actor": "p",
+   "quest": 9417109
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Hold the Anchors complete",
+   "actor": "p",
+   "quest": 9417110
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: Hold the Anchors turned in",
+   "actor": "p",
+   "quest": 9417110
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: The Drowned Dream complete",
+   "actor": "p",
+   "quest": 9417111
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: The Drowned Dream turned in",
+   "actor": "p",
+   "quest": 9417111
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Links of the Binding complete",
+   "actor": "p",
+   "quest": 9417112
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: Links of the Binding turned in",
+   "actor": "p",
+   "quest": 9417112
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: The Path of Shame complete",
+   "actor": "p",
+   "quest": 9417113
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: The Path of Shame turned in",
+   "actor": "p",
+   "quest": 9417113
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: The Dreamer in Ice complete",
+   "actor": "p",
+   "quest": 9417114
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: The Dreamer in Ice turned in",
+   "actor": "p",
+   "quest": 9417114
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Nightmare's Herald complete",
+   "actor": "p",
+   "quest": 9417115
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: Nightmare's Herald turned in",
+   "actor": "p",
+   "quest": 9417115
+  },
+  {
+   "action": "teleport",
+   "label": "to Khadgar at the crater rift",
+   "actor": "p",
+   "map": 4418,
+   "x": 304.0,
+   "y": 362.0,
+   "z": -62.4,
+   "o": 1.2,
+   "ignore_access": true
+  },
+  {
+   "action": "assert",
+   "label": "on map 4418",
+   "actor": "p",
+   "metric": "map_id",
+   "equals": 4418,
+   "within_ms": 15000
+  },
+  {
+   "action": "wait",
+   "ms": 4000
+  },
+  {
+   "action": "quest_accept",
+   "label": "accept Hold the Rift (Q16) from Khadgar",
+   "actor": "p",
+   "quest": 9417116,
+   "entry": 9417003
+  },
+  {
+   "action": "assert",
+   "label": "Q16 is in progress",
+   "actor": "p",
+   "metric": "quest_status",
+   "quest": 9417116,
+   "equals": 3,
+   "within_ms": 3000
+  },
+  {
+   "action": "wait",
+   "ms": 38000
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: 3.5 s after Delwyn's 'It holds' (at ~34.5 s) Q16 is still running, so the phase has not swapped him away mid-bubble",
+   "actor": "p",
+   "metric": "quest_status",
+   "quest": 9417116,
+   "equals": 3
+  },
+  {
+   "action": "assert",
+   "label": "Q16 completes once his bubble is gone (~45 s)",
+   "actor": "p",
+   "metric": "quest_status",
+   "quest": 9417116,
+   "equals": 1,
+   "within_ms": 12000
+  }
+ ]
+}
