@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Dire Maul West: Prince Tortheldrin's dual wield deals a boss's damage per second (#11473)",
+  "contract": "#11473: Prince Tortheldrin (11486) dual wields (Dual Wield 674 on reset) with a 1.5 s swing; his off hand hits for half his main hand. On Normal his DamageModifier 10 gave 795 main hand + 398 off hand every 1.5 s, 1.93 times Tendris Warpwood's 831 every 2 s; on Heroic 1.15 times. Ascension's logs show him dual wielding too (swings about 0.9 s apart). His DamageModifier now gives Tendris' damage per second from both hands: 5.23 on Normal, 11.63 on Heroic. Mythic (0.93 times) is unchanged.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 429,
+      "x": 120.4,
+      "y": 591.4,
+      "z": -48.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 11486,
+      "as": "prince0",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Tortheldrin swings every 1.5 s",
+      "actor": "prince0",
+      "metric": "attack_time_ms",
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tortheldrin's main hand deals 410-420 minimum, so both hands together deal Tendris Warpwood's damage per second (831 / 1916 every 2 s)",
+      "actor": "prince0",
+      "metric": "weapon_damage_min",
+      "min": 410.0,
+      "max": 420.0
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 120.4,
+      "y": 591.4,
+      "z": -48.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 11486,
+      "as": "prince1",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Tortheldrin swings every 1.5 s",
+      "actor": "prince1",
+      "metric": "attack_time_ms",
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tortheldrin's main hand deals 955-965 minimum, so both hands together deal Tendris Warpwood's damage per second (831 / 1916 every 2 s)",
+      "actor": "prince1",
+      "metric": "weapon_damage_min",
+      "min": 955.0,
+      "max": 965.0
+    },
+    {
+      "action": "assert",
+      "label": "The off hand hits for half",
+      "actor": "prince1",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "min": 475,
+      "max": 485
+    }
+  ]
+}
