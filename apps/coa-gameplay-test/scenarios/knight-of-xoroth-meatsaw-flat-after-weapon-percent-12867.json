@@ -1,0 +1,446 @@
+{
+  "schema": 1,
+  "name": "Meatsaw adds its flat damage after the weapon percent (#12867)",
+  "contract": [
+    "#12867: Meatsaw seemed to deal only part of its tooltip. Rank 5 578119 reads 'dealing $s2% Weapon Damage plus",
+    "$s1': 56% weapon damage plus 143-178. Its DBC lists the flat effect (121) before the percent effect (31), so the",
+    "engine multiplied the flat value by 56% too. The maintainer ruled that Meatsaw follows its tooltip, so the chain",
+    "uses AscensionFlatAfterWeaponPercent (ADR 0010). An unarmed level 60 Knight of Xoroth with 200-400 attack power",
+    "has 35-71 normalized weapon damage, so a hit is 162-218 with the flat value added in full and at most 139 when",
+    "it is multiplied. The level 1 target barely mitigates it (asserted at 990 per 1000 or more) and damage-done and",
+    "damage-taken modifiers stay within 2% (asserted), so non-critical hits must average 150-235."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "k",
+      "entry": 36,
+      "level": 1,
+      "min_level_armor": true,
+      "health": 50000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 578119
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: attack power keeps unarmed normalized weapon damage between 35 and 71",
+      "actor": "k",
+      "metric": "attack_power",
+      "min": 200,
+      "max": 400
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the target's armor barely mitigates Meatsaw",
+      "actor": "k",
+      "metric": "armor_reduced_damage",
+      "spell": 578119,
+      "target": "dummy",
+      "min": 990
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: no large damage-done or damage-taken modifier applies to Meatsaw",
+      "actor": "k",
+      "metric": "melee_spell_damage_done_scripted",
+      "spell": 578119,
+      "target": "dummy",
+      "min": 980,
+      "max": 1020
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 578119,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land and the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 578119,
+      "target": "dummy",
+      "critical": false,
+      "save_as": "meatsaw_hits"
+    },
+    {
+      "action": "assert",
+      "label": "Meatsaw lands non-critical hits",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 578119,
+      "target": "dummy",
+      "critical": false,
+      "min": 8
+    },
+    {
+      "action": "assert",
+      "label": "#12867: a non-critical Meatsaw averages 56% weapon damage plus the full 143-178",
+      "actor": "k",
+      "metric": "spell_damage_total",
+      "spell": 578119,
+      "target": "dummy",
+      "critical": false,
+      "ratio_to": "meatsaw_hits",
+      "min": 150,
+      "max": 235
+    }
+  ]
+}
