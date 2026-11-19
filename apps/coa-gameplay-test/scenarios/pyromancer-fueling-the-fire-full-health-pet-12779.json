@@ -1,7 +1,17 @@
 {
   "schema": 1,
   "name": "Pyromancer: Fueling the Fire erupts when Ember Touch hits a full-health Phoenix (#12779)",
-  "contract": "#12779, #12781, #12177: Fueling the Fire 806747 reads 'Using Ember Touch on your Roaring Pyre or Phoenix will cause them to erupt in flames, healing $806749i allies within $806749a1 yds', with no condition on the pet's health. The eruption used to follow only an effective heal, so Ember Touch 800818 on a Phoenix at full health healed 0 and nothing erupted, exactly as #12781 describes. The Phoenix is summoned at full health and left there, so Ember Touch overheals it completely (asserted: its 800818 heal log shows no effective healing); a grouped ally at 1 health beside it must still take a native heal log and effective healing from 806749. Ember Touch costs one Ember 807533 (ResourceCostRules, class 24). Asserted: before the cast the ally has no 806749 heal, and within 3 s after Ember Touch on the full-health Phoenix it has at least one heal log and effective healing.",
+  "contract": [
+    "#12779, #12781, #12177: Fueling the Fire 806747 reads 'Using Ember Touch on your Roaring Pyre or Phoenix",
+    "will cause them to erupt in flames, healing $806749i allies within $806749a1 yds', with no condition on the",
+    "pet's health. The eruption used to follow only an effective heal, so Ember Touch 800818 on a Phoenix at full",
+    "health healed 0 and nothing erupted, exactly as #12781 describes. The Phoenix is summoned at full health and",
+    "left there, so Ember Touch overheals it completely (asserted: its 800818 heal log shows no effective",
+    "healing); a grouped ally at 1 health beside it must still take a native heal log and effective healing from",
+    "806749. Ember Touch costs one Ember 807533 (ResourceCostRules, class 24). Asserted: before the cast the ally",
+    "has no 806749 heal, and within 3 s after Ember Touch on the full-health Phoenix it has at least one heal log",
+    "and effective healing."
+  ],
   "timeout_ms": 90000,
   "players": [
     {

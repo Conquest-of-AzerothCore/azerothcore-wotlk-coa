@@ -5,11 +5,11 @@
     "#12826: mounting in Vizier Form 800912 kept the form up. Spider, Beetle and Weaver forms carry the native",
     "mount interrupt flag and #6281 asserts the mount drops them; the maintainer ruled that every Venomancer form",
     "drops on mount. Vizier Form and Wasp Form 805141 lacked the flag. Venomwing Form 520307 already drops on any",
-    "cast. Each form is learned and cast, the Brown Horse 458 is cast while in it, and once mounted the form must be",
-    "gone. Native dismount separates the two cases.",
-    "Vizier Form is taught by its specialization passive 504798, which the fixture learns first.",
-    "Wasp Form is a flying form (SPELL_ATTR4_ONLY_FLYING_AREAS) and fails with SPELL_FAILED_INCORRECT_AREA where",
-    "flying is not allowed, so the fixture stands in Hellfire Peninsula with 300 riding skill."
+    "cast. Each form is learned and cast, the Brown Horse 458 is cast while in it, and once mounted the form must",
+    "be gone. Native dismount separates the two cases. Vizier Form is taught by its specialization passive",
+    "504798, which the fixture learns first. Wasp Form is a flying form (SPELL_ATTR4_ONLY_FLYING_AREAS) and fails",
+    "with SPELL_FAILED_INCORRECT_AREA where flying is not allowed, so the fixture stands in Hellfire Peninsula",
+    "with 300 riding skill."
   ],
   "timeout_ms": 120000,
   "players": [

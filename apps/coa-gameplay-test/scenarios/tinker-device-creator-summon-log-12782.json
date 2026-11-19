@@ -4,11 +4,12 @@
   "contract": [
     "#12782, #10267, #10271, #9792: Firepot Drone and Spider Bomb damage lands but never shows in Details,",
     "Recount or floating combat text. #9511 gave the devices their owner (UNIT_FIELD_SUMMONEDBY), which did not",
-    "change the meters. A native summon also records the creator (UNIT_FIELD_CREATEDBY) and the summoning spell, and",
-    "the summon is logged to the client as a SPELL_SUMMON combat log event, which is how meters tie a guardian's",
-    "damage to its owner. The shared Tinker Summon() helper now does all three, as the Knight of Xoroth summons do.",
-    "The scenario observes the creator link: each built device must be counted by a creator-only lookup for the",
-    "Tinker. The combat log event and the client display are client-side and are checked in game."
+    "change the meters. A native summon also records the creator (UNIT_FIELD_CREATEDBY) and the summoning spell,",
+    "and the summon is logged to the client as a SPELL_SUMMON combat log event, which is how meters tie a",
+    "guardian's damage to its owner. The shared Tinker Summon() helper now does all three, as the Knight of",
+    "Xoroth summons do. The scenario observes the creator link: each built device must be counted by a",
+    "creator-only lookup for the Tinker. The combat log event and the client display are client-side and are",
+    "checked in game."
   ],
   "timeout_ms": 90000,
   "players": [

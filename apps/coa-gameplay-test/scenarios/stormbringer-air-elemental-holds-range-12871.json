@@ -2,13 +2,14 @@
   "schema": 1,
   "name": "Stormbringer Air Elemental casts from range without moving (#12871)",
   "contract": [
-    "#12871: the Air Elemental only played its cast animation in melee range and crept toward the target on",
-    "every cast. The PR author's review of original Ascension footage shows it never moves while casting, unshackled or",
-    "not. Its attack is Windpelt 806016, a 2 s cast with medium range that movement interrupts, but native PetAI kept",
-    "a ranged chase only for the Imp and the Water Elemental, so the Air Elemental always chased into melee. With",
-    "Windpelt on autocast it now chases only to Windpelt's maximum range. The target stands 20 yards from the",
-    "stationary Stormbringer, inside that range: the pet starts beside its owner, must cast Windpelt, and must stay",
-    "within 6 yards of its owner, both normally and after Unshackle 706625. Chasing into melee would put it near 20."
+    "#12871: the Air Elemental only played its cast animation in melee range and crept toward the target on every",
+    "cast. The PR author's review of original Ascension footage shows it never moves while casting, unshackled or",
+    "not. Its attack is Windpelt 806016, a 2 s cast with medium range that movement interrupts, but native PetAI",
+    "kept a ranged chase only for the Imp and the Water Elemental, so the Air Elemental always chased into melee.",
+    "With Windpelt on autocast it now chases only to Windpelt's maximum range. The target stands 20 yards from",
+    "the stationary Stormbringer, inside that range: the pet starts beside its owner, must cast Windpelt, and",
+    "must stay within 6 yards of its owner, both normally and after Unshackle 706625. Chasing into melee would",
+    "put it near 20."
   ],
   "timeout_ms": 120000,
   "players": [
