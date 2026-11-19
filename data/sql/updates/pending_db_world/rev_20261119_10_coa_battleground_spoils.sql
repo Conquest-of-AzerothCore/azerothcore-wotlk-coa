@@ -28,7 +28,7 @@ INSERT INTO `quest_template_addon` (`ID`, `SpecialFlags`) VALUES
 (190005, 9),
 (190012, 9);
 
-UPDATE `item_template` SET `ScriptName` = 'item_coa_dungeon_spoils', `Flags` = 134219788 WHERE `entry` IN (1175636, 1175637, 1175638, 1175639, 1175640, 1675636, 1675637, 1675638, 1675639, 1675640);
+UPDATE `item_template` SET `ScriptName` = 'item_coa_dungeon_spoils', `Flags` = 134217740 WHERE `entry` IN (1175636, 1175637, 1175638, 1175639, 1175640, 1675636, 1675637, 1675638, 1675639, 1675640);
 
 DELETE FROM `item_loot_template` WHERE `Entry` IN (1175636, 1175637, 1175638, 1175639, 1175640, 1675636, 1675637, 1675638, 1675639, 1675640);
 INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
