@@ -378,7 +378,7 @@ namespace PathToAscension
 
             bool const worldBossMap = map->GetId() >= 880 && map->GetId() <= 890;
             if ((!map->Instanceable() || worldBossMap) &&
-                creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS)
+                creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS && creature->isWorldBoss())
                 CompleteVerifiedTutorial(player, 36);
 
             if (!map->IsRaid() || map->GetSpawnMode() > 3)
