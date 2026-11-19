@@ -18,6 +18,7 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "Vehicle.h"
+#include "WorldPacket.h"
 #include <algorithm>
 namespace AscensionTinker
 {
@@ -188,6 +189,12 @@ void Summon(Player* player, Unit* target, uint32 spell, Position const* destinat
         if (TempSummon* device = player->SummonCreature(entry,position,TEMPSUMMON_TIMED_DESPAWN,duration,0,properties))
         {
             device->SetOwnerGUID(player->GetGUID());
+            device->SetCreatorGUID(player->GetGUID());
+            device->SetUInt32Value(UNIT_CREATED_BY_SPELL,spell);
+            WorldPacket log(SMSG_SPELLLOGEXECUTE,8 + 4 + 4 + 4 + 4 + 8);
+            log << player->GetPackGUID() << uint32(spell) << uint32(1) << uint32(SPELL_EFFECT_SUMMON) << uint32(1)
+                << device->GetPackGUID();
+            player->SendMessageToSet(&log,true);
             device->AI()->SetData(1,spell);
             if (target)
                 device->AI()->SetGUID(target->GetGUID(),1);
