@@ -81,6 +81,24 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
   `auras`) VALUES
 (9950155, 0, 0, 0, 1, 379, 0, NULL),
 (9950160, 0, 0, 0, 1, 426, 0, NULL);
+-- Evading walks the crate-sitting Looter home onto the crate's collision, where the sit pose floats. His own copy
+-- of the Defias Looter (590) script teleports him back to his exact spawn point once he is home.
+DELETE FROM `smart_scripts` WHERE `entryorguid` = -9950160 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
+  `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
+  `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`,
+  `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`,
+  `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(-9950160, 0, 0, 0, 4, 0, 15, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+  'Defias Looter - On Aggro - Say Line 0 (No Repeat)'),
+(-9950160, 0, 1, 0, 0, 0, 100, 0, 3000, 4500, 2000, 9000, 0, 0, 11, 7159, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0,
+  'Defias Looter - In Combat - Cast ''Backstab'' (No Repeat)'),
+(-9950160, 0, 2, 0, 0, 0, 80, 0, 2000, 6000, 38100, 48200, 0, 0, 11, 6713, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0,
+  'Defias Looter - In Combat - Cast ''Disarm'' (No Repeat)'),
+(-9950160, 0, 3, 0, 2, 0, 100, 1, 0, 15, 0, 0, 0, 0, 25, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  'Defias Looter - Between 0-15% Health - Flee For Assist (No Repeat)'),
+(-9950160, 0, 4, 0, 21, 0, 100, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, -10743.577, 1373.9274,
+  34.76121, 3.0416815, 'Defias Looter - On Reached Home - Teleport Self To Crate Seat');
 DELETE FROM `gameobject` WHERE `guid` = 9001088;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
