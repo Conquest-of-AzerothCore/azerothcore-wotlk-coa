@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Maraudon: Veng patrols Foulspore Cavern on Mythic (#12658)",
-  "contract": "#12658: Veng, The Fifth Kahn (13738), had no spawn, so the Mythic Orange Crystals wing missed one of its three bosses (DungeonEncounterExtra 2611, lfg 2716). Ascension logs show him fought in Foulspore Cavern right before Noxxion, with his kit (Shoot, Multi-Shot, Charge, Cut Down) and a bow and a one-hand axe. He replaces the friendly Spirit of Veng (12243) on Mythic and walks the same path (539700); Normal and Heroic keep the spirit. He says 'Your presence desecrates this sacred tomb!' on aggro and yells 'My wrath... never ends...' as he dies. He walks at normal walking speed (speed_walk 1, was 2.52) and uses his bow (Shoot, 2100156) only while his victim is 8-40 yards away; before, Shoot came every 3.7-4.2 s with the combat-move cast flag, so he stood and shot at the tank in melee.",
+  "contract": "#12658: Veng, The Fifth Kahn (13738), had no spawn, so the Mythic Orange Crystals wing missed one of its three bosses (DungeonEncounterExtra 2611, lfg 2716). Ascension logs show him fought in Foulspore Cavern right before Noxxion, with his kit (Shoot, Multi-Shot, Charge, Cut Down) and a bow and a one-hand axe. He replaces the friendly Spirit of Veng (12243) on Mythic and walks the same path (539700); Normal and Heroic keep the spirit. He says 'Your presence desecrates this sacred tomb!' on aggro and yells 'My wrath... never ends...' as he dies. He walks at normal walking speed (speed_walk 1, was 2.52) and uses his bow (Shoot, 2100156) only while his victim is 8-40 yards away; before, Shoot came every 3.7-4.2 s with the combat-move cast flag, so he stood and shot at the tank in melee. On Mythic he uses his own template 213738 (level 63) like the other Maraudon bosses; before, he fought with his level 47 values and hit for about a quarter of a Mythic boss. His hits are 25% below a regular Mythic boss's (Noxxion 213282, DamageModifier 37.87): DamageModifier 45.15 with his 1.258 s swing, 37.87 x 0.75 x 2000 / 1258.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -109,6 +109,43 @@
       "action": "attack",
       "actor": "mythic",
       "target": "veng"
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 13282,
+      "as": "noxxion",
+      "distance": 30
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Noxxion, a regular Mythic boss, hits for 4159 at least",
+      "actor": "noxxion",
+      "metric": "weapon_damage_min",
+      "min": 4150,
+      "max": 4170
+    },
+    {
+      "action": "assert",
+      "label": "Veng is level 63 on Mythic",
+      "actor": "veng",
+      "metric": "level",
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "label": "Veng keeps his fast swing",
+      "actor": "veng",
+      "metric": "attack_time_ms",
+      "equals": 1258
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Veng's hits are 25% below Noxxion's (3120)",
+      "actor": "veng",
+      "metric": "weapon_damage_min",
+      "min": 3100,
+      "max": 3140
     },
     {
       "action": "assert",

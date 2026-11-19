@@ -24,3 +24,25 @@ UPDATE `smart_scripts` SET `event_type` = 9, `event_param1` = 0, `event_param2` 
     `action_param2` = 0,
     `comment` = 'Veng - Ascension kit - Victim within 8-40 yards (every 3.7-4.2 s) - Cast ''Shoot'''
 WHERE `entryorguid` = 13738 AND `source_type` = 0 AND `id` = 9000 AND `action_type` = 11 AND `action_param1` = 2100156;
+
+DELETE FROM `creature_template` WHERE `entry` = 213738;
+DROP TEMPORARY TABLE IF EXISTS `coa_veng_copy`;
+CREATE TEMPORARY TABLE `coa_veng_copy` AS SELECT * FROM `creature_template` WHERE `entry` = 13738;
+UPDATE `coa_veng_copy` SET `entry` = 213738, `difficulty_entry_1` = 0, `difficulty_entry_2` = 0, `difficulty_entry_3` = 0,
+    `minlevel` = 63, `maxlevel` = 63, `DamageModifier` = 45.15, `AIName` = '', `ScriptName` = '';
+INSERT INTO `creature_template` SELECT * FROM `coa_veng_copy`;
+DROP TEMPORARY TABLE `coa_veng_copy`;
+
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 213738;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`)
+SELECT 213738, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild` FROM `creature_template_model` WHERE `CreatureID` = 13738;
+
+DELETE FROM `creature_template_addon` WHERE `entry` = 213738;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`)
+SELECT 213738, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras` FROM `creature_template_addon` WHERE `entry` = 13738;
+
+DELETE FROM `creature_template_spell` WHERE `CreatureID` = 213738;
+INSERT INTO `creature_template_spell` (`CreatureID`, `Index`, `Spell`, `VerifiedBuild`)
+SELECT 213738, `Index`, `Spell`, `VerifiedBuild` FROM `creature_template_spell` WHERE `CreatureID` = 13738;
+
+UPDATE `creature_template` SET `difficulty_entry_2` = 213738 WHERE `entry` = 13738;
