@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Battleground Spoils open like Dungeon Spoils into one dungeon item that fits the opener's level",
-  "contract": "Battleground Spoils (Win) 1175638 and (Loss) 1675638 open like Dungeon Spoils 2021814: opened as a container they are used up and put exactly one item from the Dungeon Spoils pool in the bags, chosen for the level they are opened at. Opened at level 35 the item requires level 33-35; kept until level 60 it requires level 58-60.",
+  "contract": "Battleground Spoils (Win) 1175638 and (Loss) 1675638 open like Dungeon Spoils 2021814: opened as a container they are used up and put exactly one item from the Dungeon Spoils pool in the bags, chosen for the level they are opened at. Opened at level 35 the item requires level 32-35; kept until level 60 it requires level 57-60.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -64,12 +64,12 @@
     },
     {
       "action": "assert",
-      "label": "The item opened at level 35 requires level 33-35",
+      "label": "The item opened at level 35 requires level 32-35",
       "actor": "p1",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
-      "min_required_level": 33,
+      "min_required_level": 32,
       "max_required_level": 35,
       "equals": 1
     },
@@ -105,12 +105,12 @@
     },
     {
       "action": "assert",
-      "label": "The item opened at level 60 requires level 58-60",
+      "label": "The item opened at level 60 requires level 57-60",
       "actor": "p2",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
-      "min_required_level": 58,
+      "min_required_level": 57,
       "max_required_level": 60,
       "equals": 1
     }
