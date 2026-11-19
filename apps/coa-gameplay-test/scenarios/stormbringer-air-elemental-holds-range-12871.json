@@ -9,7 +9,8 @@
     "With Windpelt on autocast it now chases only to Windpelt's maximum range. The target stands 20 yards from",
     "the stationary Stormbringer, inside that range: the pet starts beside its owner, must cast Windpelt, and",
     "must stay within 6 yards of its owner, both normally and after Unshackle 706625. Chasing into melee would",
-    "put it near 20."
+    "put it near 20. Turning Windpelt autocast off mid-fight must reissue the active chase at melee range, so the",
+    "pet leaves its owner and closes on the target (more than 14 yards from the owner)."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -160,6 +161,21 @@
       "actor": "s",
       "metric": "pet_distance",
       "max": 6
+    },
+    {
+      "action": "pet_autocast",
+      "actor": "s",
+      "spell": 806016,
+      "enabled": false,
+      "label": "Turn Windpelt autocast off mid-fight"
+    },
+    {
+      "action": "assert",
+      "label": "Without Windpelt on autocast the pet reissues its chase and closes to melee",
+      "actor": "s",
+      "metric": "pet_distance",
+      "min": 14,
+      "within_ms": 8000
     }
   ]
 }

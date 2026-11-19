@@ -649,13 +649,7 @@ void PetAI::DoAttack(Unit* target, bool chase)
             me->GetCharmInfo()->SetIsCommandAttack(oldCmdAttack); // For passive pets commanded to attack so they will use spells
 
             if (_canMeleeAttack())
-            {
-                std::optional<ChaseAngle> chaseAngle;
-                if (combatRange == 0.f && !target->IsPlayer() && !target->IsPet())
-                    chaseAngle.emplace(float(M_PI), float(M_PI_4));
-
-                me->GetMotionMaster()->MoveChase(target, ChaseRange(0.f, combatRange), chaseAngle);
-            }
+                ChaseVictim(target);
         }
         else // (Stay && ((Aggressive || Defensive) && In Melee Range)))
         {
@@ -666,6 +660,27 @@ void PetAI::DoAttack(Unit* target, bool chase)
             me->GetMotionMaster()->MoveIdle();
         }
     }
+}
+
+void PetAI::ChaseVictim(Unit* target)
+{
+    std::optional<ChaseAngle> chaseAngle;
+    if (combatRange == 0.f && !target->IsPlayer() && !target->IsPet())
+        chaseAngle.emplace(float(M_PI), float(M_PI_4));
+
+    me->GetMotionMaster()->MoveChase(target, ChaseRange(0.f, combatRange), chaseAngle);
+}
+
+// CoA: an autocast toggle changes the chase range _canMeleeAttack derives, so reissue the active chase with it
+void PetAI::RefreshChaseRange()
+{
+    Unit* victim = me->GetVictim();
+    if (!victim || !me->GetCharmInfo() || me->GetCharmInfo()->HasCommandState(COMMAND_STAY) ||
+        me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+        return;
+
+    if (_canMeleeAttack())
+        ChaseVictim(victim);
 }
 
 void PetAI::MovementInform(uint32 moveType, uint32 data)

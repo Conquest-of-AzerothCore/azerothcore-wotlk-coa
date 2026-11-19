@@ -72,6 +72,7 @@ public:
     void SpellHit(Unit* caster, SpellInfo const* spellInfo) override;
 
     void PetStopAttack() override;
+    void RefreshChaseRange();
 
 private:
     bool _isVisible(Unit*) const;
@@ -90,6 +91,7 @@ private:
     Unit* SelectNextTarget(bool allowAutoSelect) const;
     void HandleReturnMovement();
     void DoAttack(Unit* target, bool chase);
+    void ChaseVictim(Unit* target);
     bool CanAttack(Unit* target, SpellInfo const* spellInfo = nullptr);
     void ClearCharmInfoFlags();
 };
