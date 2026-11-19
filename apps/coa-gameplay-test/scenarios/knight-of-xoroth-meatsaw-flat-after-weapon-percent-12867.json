@@ -8,8 +8,8 @@
     "uses AscensionFlatAfterWeaponPercent (ADR 0010). An unarmed level 60 Knight of Xoroth with 400-430 attack power",
     "(416 measured) has 70-76 normalized weapon damage, so a hit before mitigation is 182-220 with the flat value added",
     "in full and at most 142 when it is multiplied. The target lets 580-600 of 1000 through its armor (591 measured)",
-    "and damage-done and damage-taken modifiers stay within 2% (asserted), so non-critical hits must average 100-138;",
-    "the multiplied form would average at most 86."
+    "and damage-done and damage-taken modifiers scale it by 790-810 per 1000 (800 measured), so non-critical hits",
+    "must average 80-110; the multiplied form would average at most 69."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -65,13 +65,13 @@
     },
     {
       "action": "assert",
-      "label": "Fixture: no large damage-done or damage-taken modifier applies to Meatsaw",
+      "label": "Fixture: damage-done and damage-taken modifiers scale Meatsaw by 0.79-0.81",
       "actor": "k",
       "metric": "melee_spell_damage_done_scripted",
       "spell": 578119,
       "target": "dummy",
-      "min": 980,
-      "max": 1020
+      "min": 790,
+      "max": 810
     },
     {
       "action": "set_power",
@@ -441,8 +441,8 @@
       "target": "dummy",
       "critical": false,
       "ratio_to": "meatsaw_hits",
-      "min": 100,
-      "max": 138
+      "min": 80,
+      "max": 110
     }
   ]
 }

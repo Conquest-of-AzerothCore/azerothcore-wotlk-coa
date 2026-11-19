@@ -8,8 +8,8 @@
     "cast. Each form is learned and cast, the Brown Horse 458 is cast while in it, and once mounted the form must be",
     "gone. Native dismount separates the two cases.",
     "Vizier Form is taught by its specialization passive 504798, which the fixture learns first.",
-    "Wasp Form is a flying form and fails with SPELL_FAILED_INCORRECT_AREA in Elwynn, so the fixture uses the",
-    "default level 80 start that venomancer-fix-wasp-form also uses."
+    "Wasp Form is a flying form (SPELL_ATTR4_ONLY_FLYING_AREAS) and fails with SPELL_FAILED_INCORRECT_AREA where",
+    "flying is not allowed, so the fixture stands in Hellfire Peninsula with 300 riding skill."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -36,8 +36,8 @@
       "action": "set_skill",
       "actor": "p",
       "skill": 762,
-      "value": 75,
-      "maximum": 75
+      "value": 300,
+      "maximum": 300
     },
     {
       "action": "learn",
@@ -172,5 +172,12 @@
       "action": "wait",
       "ms": 1600
     }
-  ]
+  ],
+  "location": {
+    "map": 530,
+    "x": -211.237,
+    "y": 4278.54,
+    "z": 86.5678,
+    "o": 4.59776
+  }
 }
