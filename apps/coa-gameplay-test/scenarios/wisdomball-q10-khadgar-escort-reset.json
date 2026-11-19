@@ -4,8 +4,9 @@
   "contract": [
     "Khadgar 9417004 (guid 9417100, map 4418, phase 4) starts escort path 94171000 from the camp gossip 9417006 and",
     "clears his npcflags while escorting; the C++ wait helper stops him once no player is within 25 yd. Accepting",
-    "Hold the Anchors 9417110 from Khadgar 9417003 sets data 1 = 1 on guid 9417100, and in event phase 1 or 2",
-    "(escorting or channelling) he despawns and respawns at the camp after his 30 s spawn time with npcflag 1.",
+    "Hold the Anchors 9417110 while he escorts or channels, with no other Q10 holder within 25 yd of him, makes the",
+    "C++ wisdomball_anchors_escort_reset despawn his wave mobs and him; he respawns at the camp after his 30 s spawn",
+    "time with npcflag 1.",
     "DISCRIMINATING: after start -> abandon -> accept again, he is back within 8 yd of the camp spot and offers the",
     "escort gossip again; without the reset he stays where the escort stopped, with no gossip."
   ],
