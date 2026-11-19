@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "The Bloodsail Charts and Orders by the Bloodsail camp table rest on its top (#6332)",
+  "contract": "#6332 reported Bloodsail Charts and Orders floating near (-14679.5, 486.1). Patch-WB1 replaced the two crates under Charts guid 12165 and Orders guid 12156 with a Westfall table whose collision top the server vmaps place at 2.9547, so they stood 1.33 and 1.23 yd above it. Both now rest on the table top.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -14679.503,
+    "y": 486.118,
+    "z": 2.077,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Bloodsail Orders are in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 2087,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Charts rest on the table instead of 1.33 yd above it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.3,
+      "guid": 12165,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Orders rest on the table instead of 1.23 yd above it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.3,
+      "guid": 12156,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the Charts are grounded within 0.3 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 12165,
+      "spawn_type": "gameobject",
+      "tolerance": 0.3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Orders are grounded within 0.3 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 12156,
+      "spawn_type": "gameobject",
+      "tolerance": 0.3,
+      "equals": 0
+    }
+  ]
+}
