@@ -1,5 +1,5 @@
 -- Defias guarding the Pilfered Lesser Healing Potions crate (gameobject guid 9001100) in Westfall, with the new
--- Defias Fisherman (35913).
+-- Defias Fisherman (35913), and the crate raised onto the floor (Z from the PR author's in-game .gps).
 -- The client's Creature.dbc names entry 35913 but its display 700004 is not in the client. The captured creature
 -- cache (hertigservices/ascension-data, cachedata/by-mode/conquest-of-azeroth/creaturecache.tsv.gz, captured
 -- 2026-09-04) gives type 7, type_flags 0, rank 0 and HealthModifier 1, but no level, faction, loot or spawns.
@@ -87,3 +87,4 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
 (9001088, 179970, 0, 40, 919, 1, 1, -10743.41, 1373.9106, 34.762943, 3.0416815, 0, 0, 0.998752, 0.049935, 300, 100,
   1, '', 0, 'Replace Crate 02 the Defias Looter sits on (PR author''s in-game .gps of the footage spot)');
+UPDATE `gameobject` SET `position_z` = 35.816814 WHERE `guid` = 9001100 AND `id` = 480101;
