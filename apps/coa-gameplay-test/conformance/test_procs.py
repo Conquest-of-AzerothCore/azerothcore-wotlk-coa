@@ -1585,6 +1585,19 @@ class ControlWeaponScenarioTest(unittest.TestCase):
             with self.subTest(case=name), self.assertRaises(ValueError):
                 proc_scenario(class_file, entry)
 
+    def test_a_control_set_needing_spells_its_own_set_does_not_learn_is_refused(self):
+        seeded = {**self.class_file, 'weapon_set_spells': {'Inquisition': [707072]}}
+        with self.assertRaisesRegex(ValueError, r'needs the weapon set spells \[707072\]'):
+            proc_scenario(seeded, self.entry())
+        shared = {**self.class_file, 'weapon_set_spells': {'Inquisition': [707072], 'Black Knight': [707072]}}
+        scenario, _ = proc_scenario(shared, self.entry())
+        steps = scenario['steps']
+        learns = [position for position, step in enumerate(steps)
+                  if step == {'action': 'learn', 'actor': 'caster', 'spell': 707072}]
+        first_equip = next(position for position, step in enumerate(steps) if step['action'] == 'equip')
+        self.assertEqual(len(learns), 1)
+        self.assertLess(learns[0], first_equip)
+
     def test_the_finished_class_files_hold_no_control_weapon(self):
         from profile import load_class_file
         for class_id in (19, 23):

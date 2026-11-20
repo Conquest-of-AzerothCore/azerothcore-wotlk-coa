@@ -8,7 +8,7 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, 
                   base_mana_steps, cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed,
                   weapon_profile)
 from profile import (CASTER, EQUIPMENT_SLOT_MAIN_HAND, INVTYPE_WEAPON, INVTYPE_WEAPON_MAIN_HAND, SETTLE_MS,
-                     measurement, player_fixture)
+                     measurement, player_fixture, weapon_set_spells)
 from tooltip import read_tooltip
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, EFFECTS, READ_STEP_MS, TARGET, Expectation,
                     RankFacts, armed_for, facts_of, is_hostile, targets_ally)
@@ -198,6 +198,11 @@ def control_weapon(class_file: dict, entry: dict) -> dict | None:
                          f'{class_file.get("weapon_set")!r} holds no two-handed main hand')
     if control.get('inventory_type') not in ONE_HAND_INVENTORY_TYPES:
         raise ValueError(f'Proc {aura} {CONTROL_WEAPON} {name!r} holds no one-handed main hand')
+    own = class_file.get('weapon_set')
+    unlearned = set(weapon_set_spells(class_file, name)) - set(weapon_set_spells(class_file, own))
+    if unlearned:
+        raise ValueError(f'Proc {aura} {CONTROL_WEAPON} {name!r} needs the weapon set spells {sorted(unlearned)}, '
+                         f'which its own weapon set {own!r} does not learn')
     return control
 
 
