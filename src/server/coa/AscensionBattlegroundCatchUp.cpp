@@ -1,7 +1,9 @@
-/* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+﻿/* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionBattlegroundBrackets.h"
 #include "AscensionBattlegroundBracketsPolicy.h"
+#include "AscensionBattlegroundCatchUp.h"
+#include "AscensionBattlegroundCombat.h"
 #include "Battleground.h"
 #include "Config.h"
 #include "DataMap.h"
@@ -10,17 +12,23 @@
 #include "Pet.h"
 #include "Player.h"
 #include "ScriptMgr.h"
-#include <array>
+#include "SpellAuraEffects.h"
+#include "SpellAuras.h"
+#include "SpellInfo.h"
+#include <algorithm>
+#include <limits>
 
 namespace
 {
 namespace Policy = AscensionBattlegroundBracketsPolicy;
 
 constexpr char LiftKey[] = "AscensionBattlegroundCatchUp.Lift";
+uint32 MaxLiftLevels = 0;
 
 struct AppliedLift final : DataMap::Base
 {
     Policy::Lift lift;
+    float ratio = 1.0f;
 };
 
 void RaiseCreateStat(Unit* unit, Stats stat, float amount)
@@ -44,7 +52,7 @@ void HandleLiftModifiers(Unit* unit, Policy::Lift const& lift, bool apply)
         unit->HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, lift.health, apply);
 }
 
-void RemoveLift(Unit* unit)
+void DropLift(Unit* unit)
 {
     AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey);
     if (!applied)
@@ -55,7 +63,18 @@ void RemoveLift(Unit* unit)
     HandleLiftModifiers(unit, lift, false);
 }
 
-void ApplyLift(Unit* unit, Policy::Lift const& lift)
+void RemoveLift(Unit* unit)
+{
+    if (!unit->CustomData.Get<AppliedLift>(LiftKey))
+        return;
+
+    uint32 const health = unit->GetHealth();
+    uint32 const oldMax = unit->GetMaxHealth();
+    DropLift(unit);
+    unit->SetHealth(Policy::KeptHealth(health, oldMax, unit->GetMaxHealth()));
+}
+
+void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio)
 {
     if (lift.Empty())
     {
@@ -64,21 +83,21 @@ void ApplyLift(Unit* unit, Policy::Lift const& lift)
     }
 
     uint32 const health = unit->GetHealth();
-    std::array<uint32, MAX_POWERS> powers;
-    for (uint8 power = 0; power < MAX_POWERS; ++power)
-        powers[power] = unit->GetPower(Powers(power));
-
-    RemoveLift(unit);
+    uint32 const oldMax = unit->GetMaxHealth();
+    DropLift(unit);
     HandleLiftModifiers(unit, lift, true);
     auto* applied = new AppliedLift();
     applied->lift = lift;
+    applied->ratio = ratio;
     unit->CustomData.Set(LiftKey, applied);
 
-    unit->SetHealth(health);
-    for (uint8 power = 0; power < MAX_POWERS; ++power)
-        unit->SetPower(Powers(power), powers[power]);
+    unit->SetHealth(Policy::KeptHealth(health, oldMax, unit->GetMaxHealth()));
 }
 
+float PlayerOutputHealth(Policy::LevelValues const& values)
+{
+    return static_cast<float>(values.health) + Policy::PlayerStaminaHealth(values.stats[STAT_STAMINA]);
+}
 uint32 LiftTargetLevel(Player const* player)
 {
     Map const* map = player->FindMap();
@@ -108,15 +127,18 @@ Policy::LevelValues PlayerLevelValues(Player const* player, uint8 level)
 
 void RefreshPlayerLift(Player* player)
 {
-    uint32 const target = LiftTargetLevel(player);
     uint8 const level = player->GetLevel();
+    uint32 const target = Policy::CappedLiftLevel(level, LiftTargetLevel(player), MaxLiftLevels);
     if (target <= level)
     {
         RemoveLift(player);
         return;
     }
 
-    ApplyLift(player, Policy::LiftBetween(PlayerLevelValues(player, level), PlayerLevelValues(player, uint8(target))));
+    Policy::LevelValues const own = PlayerLevelValues(player, level);
+    Policy::LevelValues const lifted = PlayerLevelValues(player, uint8(target));
+    ApplyLift(player, Policy::LiftBetween(own, lifted),
+        Policy::OutputRatio(PlayerOutputHealth(own), PlayerOutputHealth(lifted)));
 }
 
 Policy::LevelValues PetLevelValues(PetLevelInfo const& info, bool hasMana)
@@ -132,8 +154,8 @@ void RefreshPetLift(Pet* pet)
     PetType const type = pet->getPetType();
     Player const* owner = pet->GetOwner();
     bool const combatPet = type == HUNTER_PET || type == SUMMON_PET;
-    uint32 const target = owner && combatPet ? LiftTargetLevel(owner) : 0;
     uint8 const level = pet->GetLevel();
+    uint32 const target = owner && combatPet ? Policy::CappedLiftLevel(level, LiftTargetLevel(owner), MaxLiftLevels) : 0;
     bool const hunterStats = pet->IsHunterPet();
     uint32 const statsCreatureId = hunterStats ? 1 : pet->GetEntry();
     PetLevelInfo const* own = target > level ? sObjectMgr->GetPetLevelInfo(statsCreatureId, level) : nullptr;
@@ -144,7 +166,8 @@ void RefreshPetLift(Pet* pet)
         return;
     }
 
-    ApplyLift(pet, Policy::LiftBetween(PetLevelValues(*own, !hunterStats), PetLevelValues(*top, !hunterStats)));
+    ApplyLift(pet, Policy::LiftBetween(PetLevelValues(*own, !hunterStats), PetLevelValues(*top, !hunterStats)),
+        Policy::OutputRatio(static_cast<float>(own->health), static_cast<float>(top->health)));
 }
 
 void RefreshOwnerLifts(Player* player)
@@ -175,6 +198,7 @@ public:
         AscensionBattlegroundBrackets::Configure(
             sConfigMgr->GetOption<bool>("CoA.Battleground.WideBrackets.Enable", true),
             sConfigMgr->GetOption<std::string>("CoA.Battleground.WideBrackets.Ranges", "10-29,30-49,50-59"));
+        MaxLiftLevels = sConfigMgr->GetOption<uint32>("CoA.Battleground.WideBrackets.MaxLiftLevels", 0);
     }
 };
 
@@ -248,8 +272,92 @@ public:
 };
 }
 
+namespace AscensionBattlegroundCatchUp
+{
+    float OutputRatio(Unit const* unit)
+    {
+        if (!unit)
+            return 1.0f;
+
+        if (AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey))
+            return applied->ratio;
+
+        Unit const* owner = unit->GetCharmerOrOwner();
+        AppliedLift const* ownerLift = owner ? owner->CustomData.Get<AppliedLift>(LiftKey) : nullptr;
+        return ownerLift ? ownerLift->ratio : 1.0f;
+    }
+
+    uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing)
+    {
+        if (!source || !target || amount == 0 || AscensionBattlegroundCombat::SharedTopLevel(source, target) == 0)
+            return amount;
+
+        if (spell && spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
+            return amount;
+
+        if (source->IsHostileTo(target) == healing)
+            return amount;
+
+        return Policy::ScaleAmount(amount, OutputRatio(source));
+    }
+}
+
+namespace
+{
+int32 ScaledSigned(Unit const* source, Unit const* target, int32 amount, SpellInfo const* spell, bool healing)
+{
+    if (amount <= 0)
+        return amount;
+
+    uint32 const scaled = AscensionBattlegroundCatchUp::ScaledOutput(source, target, uint32(amount), spell, healing);
+    return int32(std::min<uint32>(scaled, uint32(std::numeric_limits<int32>::max())));
+}
+
+class ascension_battleground_catch_up_output : public UnitScript
+{
+public:
+    ascension_battleground_catch_up_output()
+        : UnitScript("ascension_battleground_catch_up_output", true,
+            {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, UNITHOOK_MODIFY_MELEE_DAMAGE,
+                UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_ON_BEFORE_HEAL_ABSORB,
+                UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
+    { }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& amount, SpellInfo const* spell) override
+    {
+        amount = ScaledSigned(attacker, target, amount, spell, false);
+    }
+
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& amount) override
+    {
+        amount = AscensionBattlegroundCatchUp::ScaledOutput(attacker, target, amount, nullptr, false);
+    }
+
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& amount, SpellInfo const* spell) override
+    {
+        amount = AscensionBattlegroundCatchUp::ScaledOutput(attacker, target, amount, spell, false);
+    }
+
+    void OnBeforeHealAbsorb(HealInfo& healInfo) override
+    {
+        healInfo.SetHeal(AscensionBattlegroundCatchUp::ScaledOutput(healInfo.GetHealer(), healInfo.GetTarget(),
+            healInfo.GetHeal(), healInfo.GetSpellInfo(), true));
+    }
+
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount) override
+    {
+        AuraType const type = effect->GetAuraType();
+        if (type != SPELL_AURA_SCHOOL_ABSORB && type != SPELL_AURA_MANA_SHIELD)
+            return;
+
+        amount = ScaledSigned(caster, effect->GetBase()->GetUnitOwner(), amount, effect->GetSpellInfo(), true);
+    }
+};
+}
+
 void AddSC_AscensionBattlegroundCatchUp()
 {
+    new ascension_battleground_catch_up_output();
     new ascension_battleground_wide_brackets_config();
     new ascension_battleground_catch_up_battleground();
     new ascension_battleground_catch_up_player();

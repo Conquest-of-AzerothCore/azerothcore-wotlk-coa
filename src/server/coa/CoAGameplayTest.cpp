@@ -7,6 +7,7 @@
 #include "AccountMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
+#include "AscensionBattlegroundCatchUp.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionItemScaling.h"
 #include "AscensionNativeItemScaling.h"
@@ -3837,6 +3838,36 @@ private:
                 return double(team->GetMembersSize());
             ArenaTeamStats const& stats = team->GetStats();
             return metric == "arena_team_season_games" ? stats.SeasonGames : stats.SeasonWins;
+        }
+        if (metric == "battleground_output_ratio")
+        {
+            Unit* subject = unit;
+            if (auto entry = step.get_optional<uint32>("entry"))
+            {
+                Player* owner = unit->ToPlayer();
+                Require(owner != nullptr, "Output ratio of an owned creature needs a player");
+                subject = GetOwnedCreature(owner, *entry);
+                Require(subject != nullptr, "Output ratio needs a present owned creature");
+            }
+            else if (step.get<bool>("pet", false))
+            {
+                Player* owner = unit->ToPlayer();
+                Require(owner != nullptr, "Output ratio of a pet needs a player");
+                subject = owner->GetPet();
+                Require(subject != nullptr, "Output ratio needs a present pet");
+            }
+            return AscensionBattlegroundCatchUp::OutputRatio(subject);
+        }
+        if (metric == "scaled_output")
+        {
+            SpellInfo const* info = nullptr;
+            if (spell)
+            {
+                info = sSpellMgr->GetSpellInfo(spell);
+                Require(info != nullptr, "Scaled output needs a known spell");
+            }
+            return AscensionBattlegroundCatchUp::ScaledOutput(unit, GetUnit(step.get<std::string>("target")),
+                step.get<uint32>("amount"), info, step.get<bool>("healing", false));
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);

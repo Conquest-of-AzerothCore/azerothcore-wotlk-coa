@@ -91,7 +91,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'position_x', 'position_y', 'position_z', 'object_scale',
     'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp', 'sent_visible_item',
     'level_for_target', 'reward_level_for_target', 'weapon_skill_for_target', 'defense_skill_for_target',
-    'honor_points',
+    'honor_points', 'battleground_output_ratio', 'scaled_output',
     'level_scaling_choice',
     'spell_mod_mutants',
     'sent_average_item_level', 'sent_average_item_level_count',
@@ -267,7 +267,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'rating', 'op', 'subclass', 'part',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
                  'min_distance', 'owner_display', 'creator_only', 'caster_entry', 'ranged_weapon_subclass',
-                 'sheath_state', 'skill',
+                 'sheath_state', 'skill', 'amount', 'healing',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
                  'type_mask', 'hit_mask', 'spell_type_mask', 'items',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
@@ -1169,6 +1169,13 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step.get('hand', 0), f'{where}.hand', 0, 2, True)
             if metric == 'honor_points':
                 require(step['actor'] in player_ids, f'{where}: honor metric needs a player')
+            if metric == 'battleground_output_ratio':
+                require(step['actor'] in player_ids, f'{where}: output ratio metric needs a player')
+                require(not ('pet' in step and 'entry' in step), f'{where}: pet and entry are exclusive')
+            if metric == 'scaled_output':
+                require(step['actor'] in player_ids and step.get('target') in actor_ids,
+                        f'{where}: scaled output needs a player and target')
+                number(step.get('amount'), f'{where}.amount', 1, 2**31 - 1, True)
             if metric == 'sent_visible_item':
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'creature_query_rank', 'creature_query_quest_item'}:
@@ -1336,7 +1343,8 @@ def validate(scenario, clock=REAL_CLOCK):
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',
                                                            'spell_energize_total',
                                                            'armor_reduced_damage', 'spell_effect_value',
-                                                           'spell_damage_done', 'script_melee_damage_dealt'}),
+                                                           'spell_damage_done', 'script_melee_damage_dealt',
+                                                           'battleground_output_ratio'}),
                             f'{where}: {key} only filters supported spell combat events')
                     require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'entry' in step:

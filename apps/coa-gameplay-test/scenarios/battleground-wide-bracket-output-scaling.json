@@ -1,0 +1,1054 @@
+{
+  "schema": 1,
+  "name": "Widened battleground lifted units scale damage and healing by the health lift ratio",
+  "contract": "A level 12 Human Warrior (low) and a level 12 Human Priest (heal) of the Alliance enter a Warsong Gulch of the 10-29 bracket against two level 29 Orc Warriors (top, top2). The lift is health only and the lifted unit's damage and healing are multiplied by the ratio of lifted to own health, where a player's health is basehealth + PlayerStaminaHealth (20 + 10 per Stamina above 20). From player_class_stats: Warrior level 12 BaseHP 109 and Stamina 34 give 109 + 20 + 10 x 14 = 269; level 29 BaseHP 348 and Stamina 56 give 348 + 20 + 10 x 36 = 728; the Human race rows are zero. The Warrior ratio is 728 / 269 = 2.70632 and the maximum health gain is 239 base health + 22 Stamina x 10 = 459. Priest level 12 BaseHP 157 and Stamina 24 give 157 + 20 + 40 = 217; level 29 BaseHP 378 and Stamina 31 give 378 + 20 + 110 = 508; the Priest ratio is 508 / 217 = 2.34101. A level 29 Warrior is at the bracket top and has ratio 1. Mana, power and the primary stats Strength, Agility, Intellect and Spirit are not lifted and equal their snapshots before joining; low joins at full health and its health_pct is 100 at the lifted maximum, and after leaving at full health it is at full again. scaled_output is ScaledOutput itself: low to top with 1000 damage gives round(1000 x 2.70632) = 2706; low to the hostile Mortar Team Advanced Target Dummy (creature 12385, not a player, so no shared bracket top) gives 1000; low to heal, an ally, as damage gives 1000 because damage scales only against hostile targets; heal to low as healing with Flash Heal 2061 gives round(1000 x 2.34101) = 2341; heal to top as healing gives 1000 because top is hostile to heal and healing scales only on non-hostile targets; Infected 216 carries SPELL_AURA_PERIODIC_DAMAGE_PERCENT and low to top with it gives 1000 (never scaled). Wiring: Damage 100 (TEST) 2653 is a fire SPELL_EFFECT_SCHOOL_DAMAGE with EffectBasePoints 99 and EffectDieSides 1, so every non-critical hit is exactly 100 before scaling (no spell power coefficient on a Warrior). low casts it ten times at top, whose maximum health is raised to 100000 so it survives, and ten times at the dummy, whose health is refilled before each cast because its maximum is 120. Non-critical hits at top land as round(100 x 2.70632) = 271 and at the dummy as 100, so the average landed hit (spell_damage_total ratio_to the non-critical spell_damage_count, misses excluded) is 271 against top and 100 against the dummy; the bands [270.9, 271.1] and [90, 110] cannot overlap (an unscaled hit is at most 110, a scaled one at least 270.9); the dummy band is wider than 100 because the live run measured 98 per landed hit from target-side mitigation of the creature itself, which is not part of the lift; a scaled hit would be 271, so every landed non-critical hit decides the band deterministically and no probability argument is needed. After low leaves, its ratio is 1 and scaled_output low to top is 1000.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "low",
+      "race": 1,
+      "class": 1,
+      "level": 12
+    },
+    {
+      "id": "top",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "heal",
+      "race": 1,
+      "class": 5,
+      "level": 12
+    },
+    {
+      "id": "top2",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "stat",
+      "save_as": "low_stat0",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "stat",
+      "save_as": "low_stat1",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "stat",
+      "save_as": "low_stat3",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "stat",
+      "save_as": "low_stat4",
+      "stat": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "max_health",
+      "save_as": "low_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "max_power",
+      "save_as": "low_mana",
+      "power": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "max_health",
+      "save_as": "top_health"
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "heal",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low is invited to the 10-29 bracket",
+      "actor": "low",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top is invited to the 10-29 bracket",
+      "actor": "top",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "heal is invited to the 10-29 bracket",
+      "actor": "heal",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top2 is invited to the 10-29 bracket",
+      "actor": "top2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "low"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low enters Warsong Gulch",
+      "actor": "low",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top enters Warsong Gulch",
+      "actor": "top",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "heal",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "heal"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "heal enters Warsong Gulch",
+      "actor": "heal",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top2"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top2 enters Warsong Gulch",
+      "actor": "top2",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "teleport",
+      "label": "low meets the others outdoors",
+      "actor": "low",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others outdoors",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "heal meets the others outdoors",
+      "actor": "heal",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others outdoors",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "low has the Warrior output ratio 728 / 269",
+      "actor": "low",
+      "metric": "battleground_output_ratio",
+      "min": 2.7058,
+      "max": 2.7068,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "top at the bracket top has ratio 1",
+      "actor": "top",
+      "metric": "battleground_output_ratio",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "heal has the Priest output ratio 508 / 217",
+      "actor": "heal",
+      "metric": "battleground_output_ratio",
+      "min": 2.3405,
+      "max": 2.3415
+    },
+    {
+      "action": "assert",
+      "label": "low maximum health rises by 239 base health and 22 Stamina (459)",
+      "actor": "low",
+      "metric": "max_health",
+      "relative_to": "low_health",
+      "equals": 459,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "low joined at full health and is at its lifted maximum",
+      "actor": "low",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "low maximum power is not lifted",
+      "actor": "low",
+      "metric": "max_power",
+      "power": 0,
+      "relative_to": "low_mana",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "low Strength is not lifted",
+      "actor": "low",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "low_stat0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "low Agility is not lifted",
+      "actor": "low",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "low_stat1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "low Intellect is not lifted",
+      "actor": "low",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "low_stat3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "low Spirit is not lifted",
+      "actor": "low",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "low_stat4",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "top gets no maximum health lift",
+      "actor": "top",
+      "metric": "max_health",
+      "relative_to": "top_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "low to top 1000 damage scales to 2706",
+      "actor": "low",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 2653,
+      "healing": false,
+      "equals": 2706
+    },
+    {
+      "action": "assert",
+      "label": "low to the ally heal 1000 damage is unchanged",
+      "actor": "low",
+      "metric": "scaled_output",
+      "target": "heal",
+      "amount": 1000,
+      "spell": 2653,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "heal to the ally low 1000 healing scales to 2341",
+      "actor": "heal",
+      "metric": "scaled_output",
+      "target": "low",
+      "amount": 1000,
+      "spell": 2061,
+      "healing": true,
+      "equals": 2341
+    },
+    {
+      "action": "assert",
+      "label": "heal to the hostile top 1000 healing is unchanged",
+      "actor": "heal",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 2061,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "a periodic damage percent spell is never scaled",
+      "actor": "low",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 216,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch is in progress",
+      "actor": "low",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "teleport",
+      "label": "low meets the others again once the match starts",
+      "actor": "low",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others again once the match starts",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "heal meets the others again once the match starts",
+      "actor": "heal",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others again once the match starts",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "low loses the entry Honorless Target",
+      "actor": "low",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top loses the entry Honorless Target",
+      "actor": "top",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "heal loses the entry Honorless Target",
+      "actor": "heal",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top2 loses the entry Honorless Target",
+      "actor": "top2",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "label": "top survives ten scaled hits",
+      "actor": "top",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 2653
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (1)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (2)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (3)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (4)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (5)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (6)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (7)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (8)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (9)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at top (10)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "save_as": "top_hits",
+      "spell": 2653,
+      "target": "top",
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "At least one non-critical hit landed on top",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "spell": 2653,
+      "target": "top",
+      "critical": false,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Each non-critical hit on top is 271 (100 x 2.70632)",
+      "actor": "low",
+      "metric": "spell_damage_total",
+      "spell": 2653,
+      "target": "top",
+      "critical": false,
+      "ratio_to": "top_hits",
+      "min": 270.9,
+      "max": 271.1
+    },
+    {
+      "action": "summon",
+      "label": "A hostile dummy appears in the battleground",
+      "actor": "low",
+      "entry": 12385,
+      "as": "dummy",
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "label": "low to the hostile creature 1000 damage is unchanged",
+      "actor": "low",
+      "metric": "scaled_output",
+      "target": "dummy",
+      "amount": 1000,
+      "spell": 2653,
+      "healing": false,
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 1",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (1)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 2",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (2)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 3",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (3)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 4",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (4)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 5",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (5)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 6",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (6)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 7",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (7)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 8",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (8)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 9",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (9)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "set_health",
+      "label": "The dummy is refilled before cast 10",
+      "actor": "dummy",
+      "value": 120
+    },
+    {
+      "action": "cast",
+      "label": "low casts Damage 100 at the dummy (10)",
+      "actor": "low",
+      "spell": 2653,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "save_as": "dummy_hits",
+      "spell": 2653,
+      "target": "dummy",
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "At least one non-critical hit landed on the dummy",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "spell": 2653,
+      "target": "dummy",
+      "critical": false,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Each non-critical hit on the dummy stays near the unscaled 100",
+      "actor": "low",
+      "metric": "spell_damage_total",
+      "spell": 2653,
+      "target": "dummy",
+      "critical": false,
+      "ratio_to": "dummy_hits",
+      "min": 90,
+      "max": 110
+    },
+    {
+      "action": "set_aura",
+      "label": "low heals to the lifted maximum",
+      "actor": "low",
+      "spell": 139,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 100000
+    },
+    {
+      "action": "assert",
+      "label": "low is at its lifted maximum before leaving",
+      "actor": "low",
+      "metric": "health_pct",
+      "equals": 100,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "low leaves Warsong Gulch by teleport, as combat blocks the leave packet",
+      "actor": "low",
+      "ignore_access": true,
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6
+    },
+    {
+      "action": "assert",
+      "label": "low leaves Warsong Gulch",
+      "actor": "low",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "low maximum health is restored",
+      "actor": "low",
+      "metric": "max_health",
+      "relative_to": "low_health",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "low is at full health after leaving",
+      "actor": "low",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "low ratio is 1 after leaving",
+      "actor": "low",
+      "metric": "battleground_output_ratio",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "low to top 1000 damage is unchanged after leaving",
+      "actor": "low",
+      "metric": "scaled_output",
+      "target": "top",
+      "amount": 1000,
+      "spell": 2653,
+      "healing": false,
+      "equals": 1000
+    }
+  ]
+}
