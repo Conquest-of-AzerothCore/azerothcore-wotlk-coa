@@ -8,9 +8,10 @@
     "only aggro the starter on spawn and then follow normal threat. Using the Hakkar Worship Altar 2310500",
     "summons the Shade of Hakkar 8440, whose SmartAI summons Hakkari Bloodkeepers 8438. A Warrior tank in",
     "Defensive Stance 71 stands beside the starter. A Bloodkeeper first aims its Shadow Bolt 12471 at the starter",
-    "(the #11443 behaviour, asserted). The tank then taunts it with Taunt 355, and a Bloodkeeper must cast Shadow",
-    "Bolt at the tank. A fixated Bloodkeeper never would. Health fixtures keep both players alive; both join",
-    "world phase 1, where the altar and the event's creatures are."
+    "(the #11443 behaviour, asserted). Bloodkeepers cast from beyond Taunt's 30 yards, so the tank then steps up",
+    "to the first Bloodkeeper's summon point (-434.5, 288.3) and taunts the nearest one with Taunt 355, and a",
+    "Bloodkeeper must cast Shadow Bolt at the tank. A fixated Bloodkeeper never would. Health fixtures keep both",
+    "players alive; both join world phase 1, where the altar and the event's creatures are."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -184,11 +185,25 @@
       "spell": 12471
     },
     {
+      "action": "teleport",
+      "label": "tank steps up to the Bloodkeeper's summon point, inside Taunt range",
+      "actor": "tank",
+      "map": 109,
+      "x": -445.0,
+      "y": 284.0,
+      "z": -90.4,
+      "o": 0.3
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "select_nearby",
       "label": "tank targets the nearest Hakkari Bloodkeeper",
       "actor": "tank",
       "entry": 8438,
-      "radius": 40
+      "radius": 25
     },
     {
       "action": "cast_no_target",
