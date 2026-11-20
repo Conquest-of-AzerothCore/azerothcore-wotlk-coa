@@ -12,6 +12,7 @@
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "WorldSession.h"
+#include <unordered_set>
 
 namespace
 {
@@ -101,13 +102,16 @@ constexpr char const* RetaliationKey = "ascension_mercenary_retaliation";
 
 struct Retaliation final : DataMap::Base
 {
-    bool Shown = false;
+    std::unordered_set<ObjectGuid> Mercenaries;
 };
 
 bool ShowsHostileTo(Player const* player, Player const* viewer)
 {
-    return player && viewer && player != viewer && !ActiveMercenary(player) && IsPvPRuleset(player) &&
-           ActiveMercenary(viewer) && player->IsInCombatWith(viewer);
+    if (!player || !viewer || player == viewer || ActiveMercenary(player) || !IsPvPRuleset(player) ||
+        !ActiveMercenary(viewer))
+        return false;
+    Retaliation const* state = player->CustomData.Get<Retaliation>(RetaliationKey);
+    return state && state->Mercenaries.contains(viewer->GetGUID());
 }
 
 void ResendFaction(Player* player)
@@ -123,14 +127,11 @@ void ExposeToMercenary(Unit* attacker, Unit* victim)
     Player* player = attacker ? attacker->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
     Player* mercenary = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
     if (!player || !mercenary || player == mercenary || !ActiveMercenary(mercenary) || ActiveMercenary(player) ||
-        !IsPvPRuleset(player))
+        !IsPvPRuleset(player) || !player->IsInCombat())
         return;
 
-    Retaliation* state = player->CustomData.GetDefault<Retaliation>(RetaliationKey);
-    if (state->Shown)
-        return;
-    state->Shown = true;
-    ResendFaction(player);
+    if (player->CustomData.GetDefault<Retaliation>(RetaliationKey)->Mercenaries.insert(mercenary->GetGUID()).second)
+        ResendFaction(player);
 }
 
 bool ShowsFreeForAllTo(Player const* player, Player const* viewer)
@@ -376,9 +377,9 @@ public:
     {
         Player* player = unit->ToPlayer();
         Retaliation* state = player ? player->CustomData.Get<Retaliation>(RetaliationKey) : nullptr;
-        if (!state || !state->Shown)
+        if (!state || state->Mercenaries.empty())
             return;
-        state->Shown = false;
+        state->Mercenaries.clear();
         ResendFaction(player);
     }
 };
