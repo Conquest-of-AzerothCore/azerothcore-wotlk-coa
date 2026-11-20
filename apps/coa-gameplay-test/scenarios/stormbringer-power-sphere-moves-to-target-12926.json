@@ -12,7 +12,9 @@
     "Stormbringer stands 20 yards from a Harvest Golem, outside the sphere's 5 yard blast, and casts Shock 804020",
     "40 times. Each landed Shock has a 25% chance (706434 ProcChance) to summon a sphere while none is up, so the",
     "chance that no sphere ever appears is 0.75^40, about 1 in 100,000. At least one Power Sphere 706433",
-    "explosion must hit the enemy; a sphere that stays at the caster never reaches it."
+    "explosion must hit the enemy; a sphere that stays at the caster never reaches it. The enemy fixture is",
+    "stationary and its distance is asserted again at the end, so the explosion cannot come from the enemy",
+    "walking up to a sphere that stayed with the caster."
   ],
   "timeout_ms": 240000,
   "players": [
@@ -31,7 +33,8 @@
       "entry": 36,
       "level": 80,
       "health": 10000000,
-      "distance": 20
+      "distance": 20,
+      "stationary": true
     }
   ],
   "steps": [
@@ -717,6 +720,15 @@
       "target": "dummy",
       "min": 1,
       "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the enemy never came within the sphere's reach of the caster",
+      "actor": "sb",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 15,
+      "max": 30
     }
   ]
 }

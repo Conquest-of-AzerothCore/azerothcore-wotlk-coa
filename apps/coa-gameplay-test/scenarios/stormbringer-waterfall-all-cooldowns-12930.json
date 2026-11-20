@@ -15,7 +15,10 @@
     "its 15 s buff ends (the first run read a placeholder cooldown until then and the reductions were lost), so",
     "both casters cancel the buff straight after casting it, and its cooldown then runs normally, so its 4-5 *",
     "500 ms reduction after four or five critical Shocks proves 'all'. Five Shocks with at least four Waterfall",
-    "procs, as in the #3638 scenario, because the taken-side crit roll is not a hard 100%."
+    "procs, as in the #3638 scenario, because the taken-side crit roll is not a hard 100%. With at least four",
+    "procs asserted, both final cooldown checks accept -1900 to -2600 ms: four or five 500 ms reductions with 100",
+    "ms of timing slack (the baseline offset between the casters measured 6 ms), while three reductions (-1500",
+    "ms) fail."
   ],
   "timeout_ms": 180000,
   "players": [
@@ -394,13 +397,13 @@
     },
     {
       "action": "assert",
-      "label": "Gust of Wind still loses 4-5 * 500 = 2000-2500 ms more than elapsed time",
+      "label": "Gust of Wind still loses 4-5 * 500 ms (2000-2500, +/-100 ms) more than elapsed time",
       "actor": "wf",
       "metric": "cooldown_ms",
       "spell": 500932,
       "relative_to": "control_after",
-      "min": -3400,
-      "max": -1100
+      "min": -2600,
+      "max": -1900
     },
     {
       "action": "snapshot",
@@ -412,13 +415,13 @@
     },
     {
       "action": "assert",
-      "label": "#12930: the same critical strikes took 4-5 * 500 ms off Stormcloak, which 807661 never named",
+      "label": "#12930: the crits took 4-5 * 500 ms (+/-100) off Stormcloak, which 807661 never named",
       "actor": "wf",
       "metric": "cooldown_ms",
       "spell": 804833,
       "relative_to": "control_cloak_after",
-      "min": -3400,
-      "max": -1100
+      "min": -2600,
+      "max": -1900
     }
   ]
 }
