@@ -20,7 +20,8 @@ bool IsEnabled();
 
 uint32 GetReserve(uint32 accountId);
 
-// The Elite Warchest or the Daily Login Reward handed out `count` tokens (in bags or by mail to the account).
+// The Elite Warchest or the Daily Login Reward handed out `count` tokens (in bags or by mail to the account), or a
+// refund returned them: refunded tokens come back Realm Bound, so a purchase cannot turn reserved tokens free.
 void AddReserve(Player* player, uint32 count);
 void AddReserve(uint32 accountId, uint32 count);
 
