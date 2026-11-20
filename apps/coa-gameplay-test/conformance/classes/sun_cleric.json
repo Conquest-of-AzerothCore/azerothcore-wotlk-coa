@@ -106,6 +106,35 @@
       "spell_proc": {},
       "internal_cooldown_ms": 0,
       "base_mana_per_attempt": true
+    },
+    {
+      "aura": 704908,
+      "name": "Burning Heat",
+      "tooltip": "|cFF66DDFFLevel 20 Passive|r\nCasting |cffffffffSunflare|r now has a $h% chance to  transform your next |cffffffffSunflare|r into |cffffffffSun Ray|r.\n\nCasting |cffffffffHorusath Blast|r is now guaranteed to transform your next |CffffffffSunflare|r into |cffffffffSun Ray|r.@s:504764:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "base_mana_per_attempt": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 800231
+      },
+      "trial_casts": true,
+      "trigger_text": "Casting Sunflare",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 803238,
+      "proc_spell_source": "AscensionSunClericAbilities.cpp:202-203 casts the marker 803238 on the caster when Chance(player, 704908) succeeds on a Sunflare 800231 cast",
+      "events_per_proc": 1,
+      "handler": "AscensionSunClericAbilities.cpp:202-203: a Sunflare cast rolls Chance(player, 704908) (ProcChance 30) and casts 803238 at the caster; 704908's own aura 42 triggers 707529, a dummy aura.",
+      "dbc": {
+        "704908": {
+          "ProcChance": 30,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [],
@@ -1542,6 +1571,528 @@
       "kind": "caster_aura_gate",
       "quote": "Only usable while Dawn is active.",
       "observe_source": "Sunslam 807973 has CasterAuraSpell 807440 (Dawn, Spell.dbc); the kind attempts the cast without and with the aura and reads the cast failure (SPELL_FAILED_CASTER_AURASTATE without it)."
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Solar Power per auto attack)",
+      "variant": "solar_power",
+      "label_suffix": "solar_power",
+      "quote": "Auto attacks generate 1 Solar Power",
+      "attack_swings": 5,
+      "gate_spell": 807749,
+      "gate_cast": true,
+      "trigger_spell": 807749,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "observe_source": "EXPLORATORY"
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (auto attacks landed)",
+      "variant": "swings",
+      "label_suffix": "swings",
+      "quote": "Auto attacks generate 1 Solar Power",
+      "attack_swings": 5,
+      "gate_spell": 807749,
+      "gate_cast": true,
+      "trigger_spell": 807749,
+      "metric": "melee_damage_count",
+      "fields": {},
+      "before_expected": 10,
+      "expected": 20,
+      "observe_source": "EXPLORATORY"
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (melee damage)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "and deal $s2% increased damage.",
+      "cast_in_before": false,
+      "trigger_spell": 807749,
+      "metric": "script_melee_damage_dealt",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 1000,
+      "expected": 1100,
+      "observe_source": "EXPLORATORY"
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Fulfillment main hand attack)",
+      "variant": "fulfillment_main",
+      "label_suffix": "fulfillment_main",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 800626,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 506824,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Vow of the Valkyr 807749 (AscensionSunClericEvents.cpp:163-171): a damage event of a direct melee ability cast under Dawn calls Fulfill and casts 506821 at the target for each such damage event; 506821 Effect[0] and Effect[1] TRIGGER_SPELL cast 506824 (Mainhand) and 506823 (Offhand), normalized weapon damage events of the main and off hand. Glorious Execution 800626 (a melee ability) is cast at the dummy in both phases with Dawn set by set_aura as a precondition fixture (the subject is the Fulfillment effect, not Dawn) and the Vow cast for real between the phases (setup cast in the after phase only). Count of 506824 damage events on the dummy: 0 without the Vow. With it, 2: one per damage event of the ability (variant ability_hits reads the ability's damage events), one auto attack for each weapon per event.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 807749,
+      "name": "Vow of the Valkyr single Vow",
+      "kind": "exclusivity",
+      "quote": "Only 1 Vow can be active at a time.",
+      "chain": [
+        803489,
+        803491,
+        803719,
+        807435,
+        807547,
+        807749
+      ],
+      "wait_ms": 1500,
+      "observe_source": "EXPLORATORY"
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Fulfillment off hand attack)",
+      "variant": "fulfillment_off",
+      "label_suffix": "fulfillment_off",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 800626,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 506823,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Vow of the Valkyr 807749 (AscensionSunClericEvents.cpp:163-171): a damage event of a direct melee ability cast under Dawn calls Fulfill and casts 506821 at the target for each such damage event; 506821 Effect[0] and Effect[1] TRIGGER_SPELL cast 506824 (Mainhand) and 506823 (Offhand), normalized weapon damage events of the main and off hand. Glorious Execution 800626 (a melee ability) is cast at the dummy in both phases with Dawn set by set_aura as a precondition fixture (the subject is the Fulfillment effect, not Dawn) and the Vow cast for real between the phases (setup cast in the after phase only). Count of 506823 damage events on the dummy: 0 without the Vow. With it, 2: one per damage event of the ability (variant ability_hits reads the ability's damage events), one auto attack for each weapon per event.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Glorious Execution damage events, 800691)",
+      "variant": "ability_hits",
+      "label_suffix": "ability_hits",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 800626,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800691,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Glorious Execution 800626 (DmgClass melee) Effect[0] and Effect[2] are TRIGGER_SPELL_WITH_VALUE casts of 800691 and 802566, its two damage hits. This entry counts the damage events of 800691 on the dummy: 1 per cast, with and without the Vow. Fulfillment fires on each damage event of the ability (AscensionSunClericEvents.cpp:163-171), so the two hits of one cast give two Fulfillment casts of 506821, hence the 2 main hand and 2 off hand auto attacks read on variants fulfillment_main and fulfillment_off.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Glorious Execution damage events, 802566)",
+      "variant": "ability_hits_second",
+      "label_suffix": "ability_hits_second",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 800626,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802566,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Glorious Execution 800626 (DmgClass melee) Effect[0] and Effect[2] are TRIGGER_SPELL_WITH_VALUE casts of 800691 and 802566, its two damage hits. This entry counts the damage events of 800691 on the dummy: 1 per cast, with and without the Vow. Fulfillment fires on each damage event of the ability (AscensionSunClericEvents.cpp:163-171), so the two hits of one cast give two Fulfillment casts of 506821, hence the 2 main hand and 2 off hand auto attacks read on variants fulfillment_main and fulfillment_off.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "name": "Burning Heat (Horusath Blast marker)",
+      "variant": "horusath_marker",
+      "label_suffix": "horusath_marker",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "trigger_spell": 500154,
+      "metric": "aura",
+      "fields": {
+        "spell": 803238
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Burning Heat 704908 Effect[0] aura 42 triggers 707529 (a dummy aura); AscensionSunClericAbilities.cpp:202-207 casts the marker 803238 on the caster when a Sunflare 800231 cast rolls Chance(player, 704908) and, with 704908 known, on every Horusath Blast 500154 cast; 803238 makes the next Sunflare a Sun Ray 504764 (AscensionSunClericAbilities.cpp:30,353 area, Named marker lists). Horusath Blast is cast in both phases; the marker aura 803238 on the caster is read 1500 ms later: 0 without 704908, 1 with it."
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 800231,
+      "setup_casts": [
+        500154
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 6500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (the next Sunflare is a Sun Ray)",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 504764,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "Burning Heat 704908 Effect[0] aura 42 triggers 707529 (a dummy aura); AscensionSunClericAbilities.cpp:202-207 casts the marker 803238 on the caster when a Sunflare 800231 cast rolls Chance(player, 704908) and, with 704908 known, on every Horusath Blast 500154 cast; 803238 makes the next Sunflare a Sun Ray 504764 (AscensionSunClericAbilities.cpp:30,353 area, Named marker lists). Horusath Blast 500154 is cast (setup cast, both phases), then Sunflare 800231 (cast time index 5); the Sun Ray 504764 damage events on the dummy are counted 6500 ms later: 0 without 704908 (an ordinary Sunflare), 1 with it. 984954 and 823764 are precondition fixtures."
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 800231,
+      "setup_casts": [
+        500154
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 6500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Sun Ray damage range)",
+      "variant": "sun_ray_damage",
+      "label_suffix": "sun_ray_damage",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504764,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 808.5,
+      "tolerance": 36.5,
+      "observe_source": "Ledger clause 241 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Sun Ray 504764 Effect[0] SCHOOL_DAMAGE BasePoints 772, DieSides 72: a roll from 773 to 844 at spell power 0 (the reference spell power is 0 and the $sph coefficient 1 adds nothing). Expected 808.5 with a tolerance of 36.5 covers the whole roll; the Sun Ray is produced as in variant transform."
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 800231,
+      "setup_casts": [
+        500154
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 6500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Scorch Marks granted)",
+      "variant": "scorch_granted",
+      "label_suffix": "scorch_granted",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "aura",
+      "fields": {
+        "spell": 807059
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "Ledger clause 241 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Sun Ray 504764 Effect[1] TRIGGER_SPELL casts Scorch Marks 807059 (Spell.dbc; AscensionSunClericAbilities.cpp: id == 504764 casts 807059). The Sun Ray is produced as in variant transform; the aura 807059 on the caster is read 6500 ms later: 0 without 704908, 1 with it."
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 806060,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Radiant Flame costs no mana)",
+      "variant": "scorch_cost",
+      "label_suffix": "scorch_cost",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 340,
+      "expected": 0,
+      "wait_ms": 300,
+      "observe_source": "Ledger clause 242 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 costs ManaCostPercentage 25 of BaseMana 1363 (player_class_stats class 27 level 60) = 340. Scorch Marks 807059 Effect[2] SPELLMOD_COST misc 14, -101 (-100 as read). the cost is read by the engine's own SpellInfo::CalcPowerCost. Scorch Marks 807059 is set by set_aura at the start of the after phase only, a named precondition fixture: the Sun Ray route does not leave the aura on the caster (variant scorch_granted reads it absent 6500 ms after the hit), and the claim here is the effect of the aura on Radiant Flame, read from a real cast or the engine cost function, with the phase without the aura as the control.",
+      "after_auras": [
+        [
+          807059,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 806060,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Radiant Flame ticks faster)",
+      "variant": "scorch_period",
+      "label_suffix": "scorch_period",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "aura_amplitude_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 1000,
+      "expected": 500,
+      "tolerance": 10,
+      "wait_ms": 300,
+      "observe_source": "Ledger clause 242 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 Effect[0] periodic every 1000 ms; Scorch Marks 807059 Effect[1] SPELLMOD_ACTIVATION_TIME misc 19, -51 (-50 as read). Radiant Flame is cast at the dummy and its aura amplitude read 300 ms later: 1000 without, 500 with; 450 or 550 would be 10% off. Scorch Marks 807059 is set by set_aura at the start of the after phase only, a named precondition fixture: the Sun Ray route does not leave the aura on the caster (variant scorch_granted reads it absent 6500 ms after the hit), and the claim here is the effect of the aura on Radiant Flame, read from a real cast or the engine cost function, with the phase without the aura as the control.",
+      "after_auras": [
+        [
+          807059,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 806060,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Radiant Flame shorter)",
+      "variant": "scorch_duration",
+      "label_suffix": "scorch_duration",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "aura_duration_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 3700,
+      "expected": 1700,
+      "tolerance": 80,
+      "wait_ms": 300,
+      "observe_source": "Ledger clause 243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 lasts DurationIndex 35 (4000 ms); Scorch Marks 807059 Effect[0] SPELLMOD_DURATION misc 1, -51 (-50 as read), so 2000 ms. The aura remaining duration is read 300 ms after the cast: 3700 without, 1700 with; a 10% error on the total (1800 or 2200 ms) reads 1500 or 1900, outside the tolerance of 80. Scorch Marks 807059 is set by set_aura at the start of the after phase only, a named precondition fixture: the Sun Ray route does not leave the aura on the caster (variant scorch_granted reads it absent 6500 ms after the hit), and the claim here is the effect of the aura on Radiant Flame, read from a real cast or the engine cost function, with the phase without the aura as the control.",
+      "after_auras": [
+        [
+          807059,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],

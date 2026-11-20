@@ -2087,21 +2087,25 @@
     "spell": 704908,
     "clause": "Casting Sunflare now has a $h% chance to  transform your next Sunflare into Sun Ray.",
     "labels": [
-      "704908 effect_value #0"
+      "704908 proc_rate"
     ],
     "kind": "claim"
   },
   {
     "spell": 704908,
     "clause": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
-    "labels": [],
+    "labels": [
+      "704908 behaviour_metric_delta horusath_marker",
+      "704908 behaviour_metric_delta transform"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704908,
     "clause": "Shine the light of the sun on an enemy, dealing ${$m1+0+$sph*1} Holy Damage and granting you Scorch Marks.",
     "labels": [
-      "704908 effect_value 504764e0 #1"
+      "704908 behaviour_metric_delta sun_ray_damage",
+      "704908 behaviour_metric_delta scorch_granted"
     ],
     "kind": "claim"
   },
@@ -2109,7 +2113,8 @@
     "spell": 704908,
     "clause": "Your next Radiant Flame has no mana cost, ticks $s2% faster,",
     "labels": [
-      "704908 effect_value 807059e1 #2"
+      "704908 behaviour_metric_delta scorch_cost",
+      "704908 behaviour_metric_delta scorch_period"
     ],
     "kind": "claim"
   },
@@ -2117,7 +2122,7 @@
     "spell": 704908,
     "clause": "and its duration is reduced by $s1%.",
     "labels": [
-      "704908 effect_value 807059e0 #3"
+      "704908 behaviour_metric_delta scorch_duration"
     ],
     "kind": "claim"
   },
@@ -3584,28 +3589,40 @@
   {
     "spell": 807749,
     "clause": "Auto attacks generate 1 Solar Power",
-    "labels": [],
+    "labels": [
+      "807749 behaviour_metric_delta solar_power",
+      "807749 behaviour_metric_delta swings"
+    ],
     "kind": "claim"
   },
   {
     "spell": 807749,
     "clause": "and deal $s2% increased damage.",
     "labels": [
-      "807749 effect_value e1 #0",
-      "807749 aura_amount e1 #0"
+      "807749 behaviour_metric_delta damage"
     ],
     "kind": "claim"
   },
   {
     "spell": 807749,
     "clause": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
-    "labels": [],
+    "labels": [
+      "807749 behaviour_metric_delta fulfillment_main",
+      "807749 behaviour_metric_delta fulfillment_off"
+    ],
     "kind": "claim"
   },
   {
     "spell": 807749,
     "clause": "Only 1 Vow can be active at a time.",
-    "labels": [],
+    "labels": [
+      "803489 behaviour_exclusivity",
+      "803491 behaviour_exclusivity",
+      "803719 behaviour_exclusivity",
+      "807435 behaviour_exclusivity",
+      "807547 behaviour_exclusivity",
+      "807749 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
