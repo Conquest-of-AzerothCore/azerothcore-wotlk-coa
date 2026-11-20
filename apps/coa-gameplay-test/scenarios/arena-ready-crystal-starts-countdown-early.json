@@ -181,12 +181,24 @@
       "entry": 9900053
     },
     {
+      "action": "wait",
+      "label": "Let most of the shortened countdown run",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The gates stay closed during the 15 second countdown",
+      "actor": "first",
+      "metric": "battleground_status",
+      "equals": 2
+    },
+    {
       "action": "assert",
       "label": "DISCRIMINATING: with every player ready the gates open after 15 seconds, not at the end of the minute",
       "actor": "first",
       "metric": "battleground_status",
       "equals": 3,
-      "within_ms": 17000
+      "within_ms": 7000
     },
     {
       "action": "assert",
