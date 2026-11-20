@@ -1,18 +1,8 @@
-From 4e4fd07ea51abc3cd9953a75db4d78e2543e3ac1 Mon Sep 17 00:00:00 2001
-From: prosbloom225 <prosbloom@gmail.com>
-Date: Wed, 18 Nov 2026 19:31:43 +0000
-Subject: [PATCH] fix(Playerbots): reject live databases during gameplay
- verification
-
----
- src/Script/Playerbots.cpp | 10 ++++++++++
- 1 file changed, 10 insertions(+)
-
 diff --git a/src/Script/Playerbots.cpp b/src/Script/Playerbots.cpp
-index 7d2e42df..c59c271c 100644
+index 06b3acb0..dc294174 100644
 --- a/src/Script/Playerbots.cpp
 +++ b/src/Script/Playerbots.cpp
-@@ -50,6 +50,16 @@ public:
+@@ -53,6 +53,16 @@ public:
  
      bool OnDatabasesLoading() override
      {
@@ -29,6 +19,3 @@ index 7d2e42df..c59c271c 100644
          DatabaseLoader playerbotLoader("server.playerbots");
          playerbotLoader.SetUpdateFlags(sConfigMgr->GetOption<bool>("Playerbots.Updates.EnableDatabases", true)
                                             ? DatabaseLoader::DATABASE_PLAYERBOTS
--- 
-2.47.3
-
