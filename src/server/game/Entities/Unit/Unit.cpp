@@ -10030,15 +10030,26 @@ float Unit::GetAscensionPvpTuningDamageMultiplier(Unit const* victim, uint32 sch
 {
     // Copied aura 322 means damage against players (e.g. Fire and Ice 1582385,
     // "$s2% against players"). Enable only the reviewed PvP tuning records.
+    // Pets and guardians deal their player owner's PvP tuning against players.
     if (!victim || !victim->IsCharmedOwnedByPlayerOrPlayer())
         return 1.0f;
 
-    return GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_PVP_DAMAGE_DONE_PCT,
+    float multiplier = GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_PVP_DAMAGE_DONE_PCT,
         [schoolMask](AuraEffect const* effect)
         {
             return (IsAscensionPvpTuningAura(effect->GetId()) || effect->GetId() == 275097) &&
                 (effect->GetMiscValue() & schoolMask);
         });
+
+    if (!IsPlayer())
+        if (Player const* owner = GetCharmerOrOwnerPlayerOrPlayerItself())
+            multiplier *= owner->GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_PVP_DAMAGE_DONE_PCT,
+                [schoolMask](AuraEffect const* effect)
+                {
+                    return IsAscensionPvpTuningAura(effect->GetId()) && (effect->GetMiscValue() & schoolMask);
+                });
+
+    return multiplier;
 }
 
 float Unit::GetHealthBasedDamageTakenMultiplier() const
