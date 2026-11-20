@@ -249,6 +249,7 @@ enum DoctorSpells : uint32
     Seeker = 705880,
     MojoHigh = 706488,
     WarGolem = 800330,
+    GolemsVigilCut = 707333,
     StasisWard = 801678,
     Stasis = 801677,
     BigVoodoo = 802719,

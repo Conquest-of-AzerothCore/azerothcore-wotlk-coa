@@ -150,6 +150,11 @@ class aura_ascension_witch_doctor_event : public AuraScript
                 break;
             case Eye:
                 Cast(owner, target, EyeDebuff);
+                if (target && target->HasAura(EyeDebuff))
+                {
+                    target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                    target->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+                }
                 break;
             case Hexplosion:
                 buff(HasteBuff);
@@ -166,7 +171,7 @@ class aura_ascension_witch_doctor_event : public AuraScript
                 buff(OverflowBuff);
                 break;
             case MaliciousGolems:
-                Reduce(player, WarGolem, 1000);
+                Reduce(player, WarGolem, std::abs(Amount(GolemsVigilCut)));
                 break;
             case HollowSpirit:
                 Cast(owner, target, HollowDebuff);

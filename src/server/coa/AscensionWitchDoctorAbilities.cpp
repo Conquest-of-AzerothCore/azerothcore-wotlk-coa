@@ -64,6 +64,10 @@ class witch_doctor_casts : public AllSpellScript
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
     {
         SnapshotBuffs(spell, spell->GetCaster());
+        if (result == SPELL_CAST_OK && spell->GetCaster()->HasAura(EyeDebuff) &&
+            (spell->GetSpellInfo()->HasAura(SPELL_AURA_MOD_STEALTH) ||
+             spell->GetSpellInfo()->HasAura(SPELL_AURA_MOD_INVISIBILITY)))
+            result = SPELL_FAILED_CASTER_AURASTATE;
         Player* player = Owner(spell->GetCaster());
         if (!player || spell->GetCaster() != player || spell->IsTriggered() || result != SPELL_CAST_OK)
             return;
@@ -155,6 +159,8 @@ class witch_doctor_casts : public AllSpellScript
 
     void OnSpellCalculatedTarget(Spell* spell, Unit* target, TargetInfo& hit) override
     {
+        if (target && spell->GetSpellInfo()->Id == MarionetteExplosion && target->HasAura(MarionetteExplosion))
+            hit.effectMask &= ~(1 << EFFECT_1);
         Player* player = Owner(spell->GetCaster());
         if (!player || player != spell->GetCaster() || !target)
             return;
@@ -292,8 +298,8 @@ class witch_doctor_casts : public AllSpellScript
             for (auto const& [guid, id] : jinxes)
             {
                 caster->RemoveAurasDueToSpell(id, guid);
-                if (Unit* doctor = ObjectAccessor::GetUnit(*caster, guid))
-                    Cast(doctor, caster, JinxSilence);
+                if (caster->IsAlive())
+                    caster->CastSpell(caster, JinxSilence, true, nullptr, nullptr, guid);
             }
         }
         Player* player = Owner(caster);
