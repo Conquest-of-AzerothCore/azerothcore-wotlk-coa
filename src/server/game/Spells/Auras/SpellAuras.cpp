@@ -1527,7 +1527,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 LOG_ERROR("spells.aura", "Aura::HandleAuraSpecificMods: Unknown rank of Crypt Fever/Ebon Plague ({}) found", aurEff->GetId());
                         }
                         if (spellId)
-                            caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()), true, 0, GetEffect(0));
+                            caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()),
+                                true, 0, GetEffect(0));
                     }
                 }
                 // Unholy blight

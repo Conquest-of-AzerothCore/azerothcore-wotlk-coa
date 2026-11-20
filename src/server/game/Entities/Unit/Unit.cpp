@@ -18923,7 +18923,7 @@ void Unit::Whisper(uint32 textId, Player* target, bool isBossWhisper /*= false*/
 bool Unit::CanRestoreMana(SpellInfo const* spellInfo) const
 {
     // Aura of Despair exceptions
-    switch (spellInfo->Id)
+    switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id))
     {
         case 16666: // Demonic Rune
         case 27869: // Dark Rune

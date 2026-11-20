@@ -598,7 +598,8 @@ TALENT_COPY_SITES = {
         "switch (sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id))",
         "sSpellMgr->GetSpellTwinFor(60096, GetId())", "sSpellMgr->GetSpellTwinFor(60097, GetId())"],
     "src/server/game/Entities/Unit/Unit.cpp": [
-        "GetAuraEffectOfRankedSpellOrTwin(49036, EFFECT_0)", "ToPlayer()->HasSpellOrTwin(53583)"],
+        "GetAuraEffectOfRankedSpellOrTwin(49036, EFFECT_0)", "ToPlayer()->HasSpellOrTwin(53583)",
+        "switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id))"],
     "src/server/game/Spells/SpellEffects.cpp": [
         "sSpellMgr->GetSpellTwinSource(aurEff->GetId()) == 54037 ? 4 : 8",
         "switch (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 53385 ? 53385 : m_spellInfo->Id)"],
@@ -611,7 +612,8 @@ TALENT_COPY_SITES = {
 
 def check_talent_copy_sites():
     missing = [f"{path}: {needle}" for path, needles in TALENT_COPY_SITES.items()
-               for needle in needles if needle not in (ROOT / path).read_text(encoding="utf-8")]
+               for needle in needles
+               if re.sub(r"\s+", "", needle) not in re.sub(r"\s+", "", (ROOT / path).read_text(encoding="utf-8"))]
     print(f"{'PASS' if not missing else 'FAIL'}: stock special cases for Ebon Plague, Crypt Fever, Hysteria, Epidemic, "
           "Feeding Frenzy, Improved Barkskin, Improved Felhunter, Guarded by the Light, The Beast Within, "
           "Bestial Wrath, Pain Suppression, Dispersion, Guardian Spirit and Divine Storm also match the Reborn copies")
