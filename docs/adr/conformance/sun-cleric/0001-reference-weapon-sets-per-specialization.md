@@ -73,3 +73,22 @@ Sources read on 2026-11-20:
 - If the owner overturns the one-hand type, only the Scimitar item changes, and the naked run and the pair repeat.
 - The conformance tool does not judge class 4 requirements (`profile.unfit_reason` passes them). The shield is
   therefore worn only in the Seraphim set, and a shield claim is proven from that set.
+
+## Valkyr's Grip (2026-11-20, mentor D-27 to D-29)
+
+- The first base pair (20261120-201337 / -201547) could not equip the Valkyr set: the second 2529 was refused with
+  `EQUIP_ERR_ITEM_CANT_BE_EQUIPPED` (`Item.h:67`) because the reference character does not know Valkyr's Grip 707072.
+- `weapon_set_spells` is `{"Valkyr": [707072]}`. The set learns the spell for real before its equip steps
+  ([ADR 1012](../../1012-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)).
+- 707072 leaves `spell_weapon_sets`: its own value and passive scenarios measure before and after learning it, so they
+  wear the default set.
+- Effects of 707072 (Spell.dbc), and how each one is declared:
+  - effect 155, Titan Grip: it can cast the penalty aura 49152 (-10% physical damage done), which
+    `UpdateTitansGrip` removes when the player has Valkyr's Grip. 49152 is in `known_auras`, so a hit model applies it
+    only when a run measures it on the character.
+  - effect 40, Dual Wield: it allows the off-hand attacks of the set.
+  - aura 333, hit chance (`StatSystem.cpp:1031-1043`): the reference ratings already cap hit (10000 rating), so it
+    changes no measured value.
+- Valkyr-set naked reading 20261120-203401: both 2529 equipped, attack power 70, ranged attack power 25, stats
+  40/35/56/119/128, skill 55 300, `known_aura 49152` 0 (absent). The stats are those of the default set, so
+  `reference_stats` is unchanged.
