@@ -47,6 +47,18 @@ neither is used as a health target.
 | `lfg_dungeon_template` | none | unknown; nothing shows live ZG in RDF | — |
 | release gate | `StageZulGurub` 4, dist `ReleaseStage` 3: closed by default | config decision | — |
 
+Release Spirit checkpoints (tester, 2026-11-20): a player who releases is revived at the nearest checkpoint whose boss
+is dead, otherwise at the entrance as before. Arlokk's checkpoint is the tester's; Venoxis has none yet.
+
+| boss (id) | checkpoint (x, y, z, o) |
+|---|---|
+| Mar'li (2), Mandokir (6) | -12111.865, -1794.2035, 80.478745, 2.6665816 |
+| Arlokk (3) | -11617.389, -1617.7999, 38.90633, 1.5104696 |
+| Edge of Madness (9) | -11945.865, -1813.931, 52.090435, 0.07633516 |
+| Jeklik (0) | -11940.951, -1549.5022, 39.647, 4.4934187 |
+| Jin'do (7) | -11657.934, -1516.3619, 39.839127, 2.8283699 |
+| Thekal (4) | -11714.241, -1851.3381, 40.527004, 5.9236217 |
+
 ## 4. Bosses
 
 Measured health per player is net damage taken in the log divided by the group size; flex is assumed linear.
@@ -193,6 +205,7 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | tester feedback of 2026-11-15, round 9 (Bronzebeard video of 2025-11-13 from 27:10): Mandokir engages the moment his ride down from the ledge ends, not on a 6 s timer from its start (he stood idle about 5 s on the arena floor; a 10 s fallback remains); when Ohgan comes within 10 yards in the fight (15 yards and from 55 s since round 10), Mandokir mounts him for 30 s, riding Ohgan's display 215271 (a passenger seat since round 10) with Mounted 2118412 (+20 % damage done, -20 % taken) while Ohgan carries Mounted 2118411 and keeps attacking his rider's target, and both stay selectable and attackable; 30 s after dismounting he mounts again when Ohgan is in reach (his timers wait while he casts, so a Whirlwind can hold either step back by up to 9 s), and he dismounts for good when Ohgan dies (user decision; neither Mounted aura is in any live log, so the 10 yard reach and the 30 s before the next mount are estimated, the 30 s ride is the tester's measure from 28:07 to 28:40); Whirlwind keeps its first hit about a second into the spin (user decision: the live logs show the first 2118409 hit about 0.95 s after the spin starts, over at least 41 spins) | `boss_mandokir_coa.cpp` | tester video, live log, dbc, user decision |
 | tester feedback of 2026-11-16, round 10 (CoA PTR): Mandokir sits on Ohgan's back as a vehicle passenger (vehicle 485, a stand-in seat; no mount display of his own) instead of riding Ohgan's display while Ohgan fights beside him; he mounts no earlier than 55 s into the fight and only with Ohgan within 15 yards (testers; the video mounts 57 s after the pull), rides 30 s and mounts again 45 s after he dismounts (estimated); he casts Berserker Charge himself, on foot, 10 s into the fight and then 25 and 50 s apart in turn while Ohgan lives, as all six charges in the live log of 2026-08-02 do while Ohgan keeps hitting his own tank, and a charge due while he rides dismounts him first (user decision); every third 25 s slot, or every slot once Ohgan is dead or nobody stands out of melee, is a Whirlwind alone, so he still whirls every 25 s as that log shows; Jin'do resets once no living player within 250 yards (estimated) is in combat, whatever his ward, totems or shades still do (testers: he stayed in the fight after a wipe with a ward up; why is not reproduced); a Delusions curse is the vision 2118511 and one damage aura as in the live logs, and the vision itself reveals the Shade of Jin'do, so vanilla's 24306 no longer lands as a third debuff; the shade's own Seeking Shadow Bolts cast 2118556 ended its invisibility 24307 (an invisibility aura ends on a cast that breaks stealth), so every shade showed to everyone, which likely explains the shades dead testers saw (a retest without GM mode confirms it); it now casts without ending its auras; the Blood Orb 92008 is three times its size and the Spider Eggs 14915 1.5 times theirs (user request); Hakkar's Sons, bats and prowlers come up the stairs from the two platforms below him, taking turns (tester positions; the turn order is estimated); the Heart of Hakkar's missing nameplate is an uncertain expectation and unchanged | `boss_mandokir_coa.cpp`, `boss_jindo_coa.cpp`, `boss_hakkar_coa.cpp`, `rev_20261116_40` | tester, live log, dbc, user decision |
 | tester feedback of 2026-11-20, round 11: each boss resets once the 2.5 s boundary check finds it past the line the tester marked across its way out, a straight line through the mark at right angles to the direction from the boss's home to the mark (Jeklik from her cave home; Mar'li's, Venoxis's, Thekal's, Mandokir's and Jin'do's homes are their spawns; the Edge of Madness line runs from the summon spot): Jeklik (-12104.9, -1478.3), Venoxis (-11992.4, -1657.1), Mar'li (-12240.4, -1680.8), Thekal (-11716.1, -1864.6), Mandokir (-12285.6, -1905.0), Jin'do (-11614.6, -1360.5) and Gri'lek (-11939.5, -1843.1); Hazza'rah, Renataki and Wushoolay keep their stock scripts and no line, Arlokk's mark is still awaited, and Hakkar keeps his platform height check | `zg_coa_leash.h`, the seven boss scripts | tester |
+| tester feedback of 2026-11-20, round 11: Release Spirit revives the player at the nearest checkpoint whose boss is dead (§3), exact 3D distance; with no boss dead the player goes to the entrance as before. Mar'li and Mandokir share one spot, so the most recent kill never has to break a tie; Venoxis has no checkpoint yet | `AscensionDungeonRelease.cpp`, `zg_coa_checkpoints.cpp` | tester, user decision (nearest) |
 
 Normal boss health is unchanged except Gri'lek's and the Heart of Hakkar's. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
 to it in the log.
@@ -235,7 +248,7 @@ to it in the log.
     - Not changed, the live logs disagree: Thekal's Frenzy every 90 s, Mandokir charging only ranged players, a
       bleed from Ohgan, Arlokk's melee bleeding everyone, a 30 s Arlokk cycle, and Hakkar's click box (the client model, identical on live). Hakkar's Dungeon Spoils already drop
       (§6).
-    - No source yet: raid revive checkpoints, and the distance of Jin'do's totems.
+    - No source yet: the distance of Jin'do's totems. The raid revive checkpoints came in round 11 (§3, §7).
     - Gri'lek's melee: the live logs carry no armor, so the calibrated DamageModifier is a floor. The server's mean
       hit before armor with his avatar was 4,598; the live median hit is 17,520.
 17. Tester feedback of 2026-11-12:
