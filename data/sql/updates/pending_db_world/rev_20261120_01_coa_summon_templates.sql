@@ -2,6 +2,7 @@
 -- Source file: cachedata/by-locale/enUS/by-mode/conquest-of-azeroth/creaturecache.tsv.gz.
 -- The cache records the names, displays, families, types, flags, and health and mana modifiers.
 -- Faction, unit class, attack timing, and Mindbender model geometry use core summon defaults.
+-- Run after rev_20261003_20_ascension_creature_families.sql widens the creature family column.
 START TRANSACTION;
 
 DELETE FROM `creature_model_info` WHERE `DisplayID` = 464978;
