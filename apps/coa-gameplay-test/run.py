@@ -277,7 +277,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
                  'chat_target_name', *CHAT_LOG_FLAGS,
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
-                  'school_mask', 'rolls', 'stacks', 'target_entry'} \
+                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -1347,7 +1347,7 @@ def validate(scenario, clock=REAL_CLOCK):
                                                            'spell_energize_total',
                                                            'armor_reduced_damage', 'spell_effect_value',
                                                            'spell_damage_done', 'script_melee_damage_dealt',
-                                                           'battleground_output_ratio'}),
+                                                           'battleground_output_ratio', 'can_detect'}),
                             f'{where}: {key} only filters supported spell combat events')
                     require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'entry' in step:
@@ -1368,6 +1368,10 @@ def validate(scenario, clock=REAL_CLOCK):
                           'distance_2d', 'can_detect'} \
                     or metric.startswith('script_'):
                 require('target' in step, f'{where}: damage metric needs target')
+            if 'owned_entry' in step:
+                require(metric == 'can_detect' and not step.get('pet', False),
+                        f'{where}: owned_entry selects a detecting creature instead of a pet')
+                number(step['owned_entry'], f'{where}.owned_entry', 1, 2**32 - 1, True)
             if metric == 'school_prohibited':
                 number(step.get('school_mask'), f'{where}.school_mask', 1, 127, True)
             if metric == 'aura_proc_rate':

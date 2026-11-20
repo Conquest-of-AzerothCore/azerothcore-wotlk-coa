@@ -4077,7 +4077,16 @@ private:
         if (metric == "stealth_detection")
             return unit->m_stealthDetect.GetValue(STEALTH_GENERAL);
         if (metric == "can_detect")
-            return unit->CanSeeOrDetect(GetUnit(step.get<std::string>("target")));
+        {
+            Player* owner = unit->ToPlayer();
+            Unit* observer = unit;
+            if (step.get<bool>("pet", false))
+                observer = owner ? owner->GetGuardianPet() : nullptr;
+            if (auto entry = step.get_optional<uint32>("owned_entry"))
+                observer = owner ? GetOwnedCreature(owner, *entry) : nullptr;
+            Require(observer != nullptr, "Detection needs a present observer");
+            return observer->CanSeeOrDetect(GetUnit(step.get<std::string>("target")));
+        }
         if (metric == "spell_healing_taken")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);

@@ -331,3 +331,11 @@ to it in the log.
       takes a random point inside the area the outer six spots enclose (about 4,900 square yards), on the floor
       those spots stand on (76.6-81.2), out of the water, in Jin'do's sight and within the spell's 100 yd range,
       keeping the 20 yd spacing where the floor allows. Estimated: the area's edges and the floor band.
+21. Tester feedback of 2026-11-20 (round 11):
+    - Already works, no change: a pet or guardian sees and can attack a Shade of Jin'do while its own owner carries
+      the Delusions vision 2118511, and loses sight once the vision ends, because a controlled unit detects with
+      its owner's detection (`WorldObject::CanDetect`). A Warlock's Imp and a Mage's Mirror Images in one grouped
+      instance prove it, each only for its own cursed owner; the CoA hounds and Necromancer minions are guardians
+      with an owner too (summon properties 61 and 64). Uncertain expectation: the tester's report that pet classes
+      (Farstrider Ranger, Wildwalker Primalist, Houndmaster Witch Hunter, Necromancer) could not help; the tester is
+      asked which pet failed and whether its owner was cursed.
