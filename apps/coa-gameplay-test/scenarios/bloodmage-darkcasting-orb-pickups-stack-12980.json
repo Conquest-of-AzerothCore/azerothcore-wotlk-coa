@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: every Blood Orb pickup adds a Darkcasting stack (#12980)",
+  "contract": [
+    "#12980: Darkcasting 712383 has StackAmount 10 and its tooltip reads 'Each Blood Orb collected allows you to",
+    "spawn 1 Blood Worm when you use your next Animated Blood. Stacks $u times.' In game every pickup refreshed",
+    "it at 1 stack. Pickup spell 712419 is a SPELL_EFFECT_TRIGGER_SPELL for 712383, which",
+    "Spell::EffectTriggerSpell runs at launch-target; because 712383 needs an explicit unit target, the orb",
+    "itself cast it on the owner. The pickup script cancelled the default effect only at hit-target and then had",
+    "the owner cast its own copy. The orb's copy replaced the owner's stacked aura (one Darkcasting per target",
+    "from different casters) and the owner's new copy replaced the orb's, so the result was always a fresh single",
+    "stack. A temporary diagnostic confirmed it: two pickups left 1 stack and reset the duration, while direct",
+    "casts stacked. The pickup script now runs at launch-target, so the stock trigger never fires and the owner's",
+    "own cast is the only one. Real Blood Orbs (creature 315303) are summoned on the player so the native pickup",
+    "pulse runs. DISCRIMINATING: three pickups give 3 stacks of the owner's own Darkcasting, one Darkcasting and",
+    "one Blood Orb cooldown cast per pickup. Before the fix every pickup left 1 stack."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Darkcasting", "actor": "b", "spell": 706247 },
+    { "action": "summon", "label": "Blood Orb 1 on the player", "actor": "b", "as": "orb1", "entry": 315303,
+      "distance": 0.5 },
+    { "action": "assert", "label": "SETUP: pickup 1 casts Darkcasting once", "actor": "b",
+      "metric": "spell_cast_count", "spell": 712383, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: pickup 1 casts the Blood Orb cooldown once", "actor": "b",
+      "metric": "spell_cast_count", "spell": 712385, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: after pickup 1 the owner's Darkcasting has 1 stacks",
+      "actor": "b", "metric": "aura_stacks", "spell": 712383, "caster": "b", "equals": 1 },
+    { "action": "summon", "label": "Blood Orb 2 on the player", "actor": "b", "as": "orb2", "entry": 315303,
+      "distance": 0.5 },
+    { "action": "assert", "label": "SETUP: pickup 2 casts Darkcasting once", "actor": "b",
+      "metric": "spell_cast_count", "spell": 712383, "equals": 2, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: pickup 2 casts the Blood Orb cooldown once", "actor": "b",
+      "metric": "spell_cast_count", "spell": 712385, "equals": 2, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: after pickup 2 the owner's Darkcasting has 2 stacks",
+      "actor": "b", "metric": "aura_stacks", "spell": 712383, "caster": "b", "equals": 2 },
+    { "action": "summon", "label": "Blood Orb 3 on the player", "actor": "b", "as": "orb3", "entry": 315303,
+      "distance": 0.5 },
+    { "action": "assert", "label": "SETUP: pickup 3 casts Darkcasting once", "actor": "b",
+      "metric": "spell_cast_count", "spell": 712383, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: pickup 3 casts the Blood Orb cooldown once", "actor": "b",
+      "metric": "spell_cast_count", "spell": 712385, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: after pickup 3 the owner's Darkcasting has 3 stacks",
+      "actor": "b", "metric": "aura_stacks", "spell": 712383, "caster": "b", "equals": 3 },
+    { "action": "assert", "label": "DISCRIMINATING: no other copy of Darkcasting is on the owner", "actor": "b",
+      "metric": "aura_stacks", "spell": 712383, "equals": 3 }
+  ]
+}

@@ -1548,7 +1548,7 @@ class spell_ascension_bloodmage_blood_orb_pickup : public SpellScript
     {
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
             spell_ascension_bloodmage_blood_orb_pickup::SelectOwner, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
-        OnEffectHitTarget += SpellEffectFn(spell_ascension_bloodmage_blood_orb_pickup::Collect,
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_bloodmage_blood_orb_pickup::Collect,
             EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
     }
 };
