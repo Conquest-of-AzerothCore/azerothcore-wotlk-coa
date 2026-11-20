@@ -544,19 +544,58 @@
   {
     "spell": 300943,
     "clause": "Increases your critical damage dealt by $s2% and your critical strikes grant allies Replenishment.",
-    "labels": [
-      "300943 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your critical damage dealt by 150%",
+        "labels": [
+          "300943 behaviour_hit_ratio crit_damage"
+        ]
+      },
+      {
+        "claim": "your critical strikes grant Replenishment",
+        "labels": [
+          "300943 behaviour_metric_delta proc_aura"
+        ]
+      },
+      {
+        "claim": "to allies (not only the caster)",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261120-204022 / 20261120-204110, build 8f46b717, no flip; control = passive not learned. Aura 163 read as whole crit hit (2.5x), as Chivalric 705272."
   },
   {
     "spell": 300943,
     "clause": "Replenishes $s1% of maximum mana per 5 sec for $1257669d.",
-    "labels": [
-      "300943 effect_value 1257670e0 #1",
-      "300943 spell_duration 1257669 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Replenishes 5% of maximum mana",
+        "labels": [
+          "300943 behaviour_metric_delta replenish_tick"
+        ]
+      },
+      {
+        "claim": "per 5 sec",
+        "labels": [
+          "300943 behaviour_metric_delta replenish_total"
+        ]
+      },
+      {
+        "claim": "for 15 s: still active at 14.5 s",
+        "labels": [
+          "300943 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "for 15 s: gone by 16.4 s",
+        "labels": [
+          "300943 behaviour_metric_delta duration_gone"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261120-204022 / 20261120-204110; control = 0 before the learn. Embedded text of 1257670 (not in the 300943 description)."
   },
   {
     "spell": 301011,

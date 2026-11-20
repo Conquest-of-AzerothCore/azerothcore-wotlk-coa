@@ -242,6 +242,148 @@
       "expected": 1,
       "wait_ms": 27500,
       "observe_source": "Same events counted 27500 ms after the learn: still exactly 1, so the period is above 13.75 s (excludes 13.5 s, -10%). With period_upper the period lies in (13.75, 16.4] s around the stated 15 s. Control: 0 before the learn."
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage dealt by $s2% and your critical strikes grant allies Replenishment.",
+      "expected": 2.5,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300943
+        ]
+      },
+      "critical": true,
+      "force_crit": "spell",
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1000,
+      "expected_source": "$s2 = 150 (300943 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 149, EffectMiscValue 127 all schools, MiscValueB 2). Aura 163 scales the whole critical hit (Unit::SpellCriticalDamageBonus, passive-effects.md): ratio 1 + 150% = 2.5. Forced spell crits of Dawnsear 554406, critical hits only, spell power fixture 10000; control: passive not learned."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "Increases your critical damage dealt by $s2% and your critical strikes grant allies Replenishment.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment on a critical strike)",
+      "variant": "proc_aura",
+      "label_suffix": "proc_aura",
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 4000,
+      "observe_source": "300943 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, trigger 1257670 (Replenishment); AscensionSunClericEvents.cpp:117 names 300943 for a critical damage or healing hit. A forced-crit Dawnsear 554406 is cast at the dummy before and after the learn; Replenishment 1257670 on the caster 500 ms later: 0 before, 1 after. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment amount per tick)",
+      "variant": "replenish_tick",
+      "label_suffix": "replenish_tick",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 143,
+      "before_expected": 0,
+      "wait_ms": 9100,
+      "observe_source": "1257670 Effect[0] aura 24 periodic energize, EffectBasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000 ms: one tick by 5600 ms energizes 5% of the maximum mana, 5 x 2868 / 100 = 143 (integer percent of the maximum mana 2868 read before the learn in the 301345 max_mana entry; fixture of the reference character). Control: 0 before the learn. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment total over its duration)",
+      "variant": "replenish_total",
+      "label_suffix": "replenish_total",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 429,
+      "before_expected": 0,
+      "wait_ms": 19500,
+      "observe_source": "Three ticks at 5000, 10000 and 15000 ms (EffectAmplitude 5000, DurationIndex 8 = 15000 ms): 3 x 143 = 429 read 16000 ms after the crit. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment still active at 14.5 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 18000,
+      "observe_source": "Replenishment 1257670 is on the caster 14500 ms after the crit: its duration is above 14.5 s (excludes 13.5 s, -10% of $1257669d = 15 s). The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment gone at 16.4 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 0,
+      "before_expected": 0,
+      "wait_ms": 19900,
+      "observe_source": "Replenishment 1257670 is gone 16400 ms after the crit: its duration is below 16.4 s (excludes 16.5 s, +10%). With duration_held the duration lies in (14.5, 16.4] s around 15 s. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
     }
   ],
   "player_observations": [],
