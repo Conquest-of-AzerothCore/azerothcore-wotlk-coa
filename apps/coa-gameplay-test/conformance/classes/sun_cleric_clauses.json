@@ -922,11 +922,28 @@
   {
     "spell": 504848,
     "clause": "repeating every $t1 sec for $d.",
-    "labels": [
-      "504848 aura_amplitude_ms #1",
-      "504848 aura_duration_ms #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "repeating every 3 sec: one dispel by 2.65 s",
+        "labels": [
+          "504848 behaviour_metric_delta period_held"
+        ]
+      },
+      {
+        "claim": "repeating every 3 sec: the second dispel by 3.35 s",
+        "labels": [
+          "504848 behaviour_metric_delta period_done"
+        ]
+      },
+      {
+        "claim": "for 12 sec",
+        "labels": [
+          "504848 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261120-210030 / next run (see report), build 8f46b717, no flip; control = no cast. Mercy self-cast. Nothing found in references beyond the server DBC."
   },
   {
     "spell": 520024,

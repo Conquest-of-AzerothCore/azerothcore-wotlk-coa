@@ -560,6 +560,70 @@
       "wait_ms": 50,
       "expire_ms": 500,
       "observe_source": "$807059d = 10000 ms. Sun Ray 504764 grants Scorch Marks 807059 on the caster by script (AscensionSunClericAbilities.cpp:215-216); the remaining duration on the caster 50 ms after the cast reads 9950 within 100 ms (excludes 10% either side). Control: no cast, no aura, 0. The 40% chance roll itself is the proc entry."
+    },
+    {
+      "spell": 504848,
+      "kind": "metric_delta",
+      "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Mercy (duration)",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 504848
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 11950,
+      "tolerance": 100,
+      "wait_ms": 50,
+      "observe_source": "504848 DurationIndex 29 = 12000 ms ($d). The remaining duration of Mercy on the caster 50 ms after a self cast reads 11950 within 100 ms (excludes 10% either side). Control: no cast, 0."
+    },
+    {
+      "spell": 504848,
+      "kind": "metric_delta",
+      "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Mercy (one dispel by 2.65 s)",
+      "variant": "period_held",
+      "label_suffix": "period_held",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 503650
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2650,
+      "observe_source": "504848 Effect[0] aura 23 periodic trigger of 503650, EffectAmplitude 3000 ($t1 = 3 sec). Casts of 503650 counted 2650 ms after the self cast: 1 (the first tick at the application, none since: the period is above 2.65 s, excludes 2.7 s, -10%). Control: no cast, 0.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 504848,
+      "kind": "metric_delta",
+      "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Mercy (second dispel by 3.35 s)",
+      "variant": "period_done",
+      "label_suffix": "period_done",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 503650
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3350,
+      "observe_source": "Casts of 503650 counted 3350 ms after the self cast: 2 (the second tick has come: the period is at most 3.35 s, excludes 3.3 s, +10%). Each tick removes $503650s1 = 2 disease effects (the removal count is its own claim). Control: no cast, 0.",
+      "cast_in_before": false
     }
   ],
   "player_observations": [],
