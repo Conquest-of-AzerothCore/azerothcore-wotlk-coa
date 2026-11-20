@@ -3624,7 +3624,16 @@
     "labels": [
       "806699 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "The proc is rolled only on an automatic melee hit (AscensionSunClericEvents.cpp:124, damage && automatic && Chance) and its only effect is RemoveSpellCooldown of Glorious Execution (Reduce, INT32_MAX). Design 1, a procs entry counting the marker 806700 over 170 landed swings, read 0 casts (the marker is never cast). Design 2, proc_reset and cooldown_reset_rate: proc_reset is refused (NotModelled: Glorious Execution has no plain power cost to read, and 806700 carries no SPELLMOD_COST), cooldown_reset_rate casts its trigger and an automatic-hit proc never rolls on a cast. No existing kind counts a cooldown clear from automatic attacks.",
+      "attempts": [
+        {
+          "agent": "sc-b2b (class 27 batch 2 chunk 2 author)",
+          "report": ".agents/plans/sun-cleric-b2b/report.md#806699"
+        }
+      ]
+    }
   },
   {
     "spell": 806980,
