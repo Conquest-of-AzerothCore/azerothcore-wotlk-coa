@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Binder of Storms summons Thunder Orbs from Deluge's Conduction (#12920)",
+  "contract": [
+    "#12920: Binder of Storms 707542 reads 'Damage dealt by Conduction now has a 60% chance to summon a Thunder",
+    "Orb.' #3133 gave it a spell_proc row that selects Conduction 567560, and",
+    "stormbringer-fix-thunder-orb-summons-binder proves it with Conduction cast directly. In play Conduction is",
+    "always a triggered cast: Deluge and Torrential Wrath cast it from a hit-result hook",
+    "(stormbringer-deluge-triggers-conduction-12687). A proc entry without PROC_ATTR_TRIGGERED_CAN_PROC skips",
+    "triggered spells in Aura::GetProcEffectMask, and Conduction does not carry SPELL_ATTR3_NOT_A_PROC, so no orb",
+    "ever appeared. The row now sets AttributesMask 2. A level 60 Stormbringer with Binder of Storms casts Deluge",
+    "807713 12 times at an enemy; each cast triggers one Conduction (asserted), and at a 60% ProcChance the",
+    "chance of no proc in 12 hits is 0.4^12 = 1.7e-5. Deluge costs 50 Static (803102), so Static is set before",
+    "each cast, and spell hit rating forces every cast to land."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 8,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "storm",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 807713
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 707542
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Binder of Storms aura is up",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 707542,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Thunder Orb 50074 is owned yet",
+      "actor": "storm",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807713,
+      "target": "enemy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: each Deluge triggered Conduction on the enemy",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 567560,
+      "min": 12
+    },
+    {
+      "action": "assert",
+      "label": "#12920: Binder of Storms procced from a triggered Conduction",
+      "actor": "storm",
+      "metric": "spell_proc_count",
+      "spell": 707542,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "#12920: the proc cast Summon: Thunder Orb 801802",
+      "actor": "storm",
+      "metric": "spell_cast_count",
+      "spell": 801802,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "#12920: a Thunder Orb 50074 stands",
+      "actor": "storm",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
