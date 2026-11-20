@@ -132,10 +132,22 @@
   {
     "spell": 300322,
     "clause": "Increases your haste by $s1%.",
-    "labels": [
-      "300322 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your spell haste by 3%",
+        "labels": [
+          "300322 behaviour_metric_delta spell_haste"
+        ]
+      },
+      {
+        "claim": "increases your melee haste by 3%",
+        "labels": [
+          "300322 behaviour_metric_delta melee_haste"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry (reading before the learn). Expected from Spell.dbc 300322 e0 aura 216 and e1 aura 192, 3 points each."
   },
   {
     "spell": 300323,
@@ -1602,10 +1614,19 @@
   {
     "spell": 680645,
     "clause": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
-    "labels": [
-      "680645 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the critical damage of Gavels by 15%",
+        "labels": [
+          "680645 behaviour_hit_ratio crit_damage"
+        ]
+      },
+      {
+        "claim": "Gavels are guaranteed to critically strike against Undead enemies",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 680646,
