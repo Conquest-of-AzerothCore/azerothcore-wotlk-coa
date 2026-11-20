@@ -2196,7 +2196,7 @@
     "spell": 704500,
     "clause": "dealing ${$cond($gt($spfi, $spn), $m1+0+$spfi*.75, $m1+0+$spn*.75)} Fire damage",
     "labels": [
-      "704500 effect_value #4"
+      "704500 effect_value 807480e0 #1"
     ],
     "kind": "claim",
     "tool_gap": {
@@ -2228,7 +2228,7 @@
       {
         "claim": "for $d.",
         "labels": [
-          "704500 spell_duration 807480 #1",
+          "704500 spell_duration 807480 #2",
           "704500 behaviour_metric_delta curse_lasts"
         ]
       }
@@ -2243,13 +2243,13 @@
       {
         "claim": "The curse deals ${$cond($gt($spfi, $spn), $m2+0+$spfi*.1, $m2+0+$spn*.1)} Fire damage",
         "labels": [
-          "704500 effect_value #5"
+          "704500 effect_value 807480e1 #3"
         ]
       },
       {
         "claim": "every $t2 sec.",
         "labels": [
-          "704500 aura_amplitude_ms #2",
+          "704500 aura_amplitude_ms #4",
           "704500 behaviour_metric_delta curse_period"
         ]
       }
@@ -2283,7 +2283,7 @@
       {
         "claim": "for $808004d",
         "labels": [
-          "704500 spell_duration 808004 #3",
+          "704500 spell_duration 808004 #5",
           "704500 behaviour_metric_delta ward_lasts"
         ]
       },
@@ -4060,7 +4060,7 @@
     "spell": 802262,
     "clause": "dealing ${$cond($gt($spfi, $spn), $500473m1*$<scalingbp>+$RAP*0.125+$spfi*0.12, $500473m1*$<scalingbp>+$RAP*0.125+$spn*0.12)} Fire damage to up to $500473x1 nearby enemies.",
     "labels": [
-      "802262 effect_value #1",
+      "802262 effect_value 500473e0 #1",
       "802262 effect_value #2"
     ],
     "kind": "claim"
@@ -4265,7 +4265,7 @@
     "spell": 803846,
     "clause": "dealing ${$cond($gt($spfi, $spn), $500473m1*$<scalingbp>+$RAP*0.125+$spfi*0.12, $500473m1*$<scalingbp>+$RAP*0.125+$spn*0.12)} Fire damage to up to $500473x1 nearby enemies.",
     "labels": [
-      "803846 effect_value #1",
+      "803846 effect_value 500473e0 #1",
       "803846 effect_value #2"
     ],
     "kind": "claim"
@@ -4720,7 +4720,7 @@
       {
         "claim": "Blast an enemy with hexfire, dealing ${$cond($gt($spfi, $spn), $m1+0+$spfi*.55, $m1+0+$spn*.55+$SPI*.5)} Fire damage, scaling with your Spirit",
         "labels": [
-          "573026 effect_value #0"
+          "573026 effect_value e0 #0"
         ]
       },
       {
