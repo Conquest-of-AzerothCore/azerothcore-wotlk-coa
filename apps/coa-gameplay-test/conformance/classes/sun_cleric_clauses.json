@@ -3200,8 +3200,7 @@
     "spell": 807973,
     "clause": "dealing ${$m1+0+$AP*0.159426} Holy damage",
     "labels": [
-      "807973 effect_value e0 #1",
-      "807973 aura_amount e0 #1"
+      "807973 behaviour_metric_delta tick_damage"
     ],
     "kind": "claim"
   },
@@ -3224,13 +3223,18 @@
   {
     "spell": 807973,
     "clause": "Only usable while Dawn is active.",
-    "labels": [],
+    "labels": [
+      "807973 behaviour_cast_gate caster_aura_blocked",
+      "807973 behaviour_cast_gate caster_aura_allowed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 807973,
     "clause": "Usable while moving.",
-    "labels": [],
+    "labels": [
+      "807973 behaviour_metric_delta moving"
+    ],
     "kind": "claim"
   },
   {

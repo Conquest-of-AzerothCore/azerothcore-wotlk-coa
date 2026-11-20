@@ -104,7 +104,8 @@
         }
       },
       "spell_proc": {},
-      "internal_cooldown_ms": 0
+      "internal_cooldown_ms": 0,
+      "base_mana_per_attempt": true
     }
   ],
   "triggers": [],
@@ -1394,11 +1395,11 @@
         "spell": 807175
       },
       "before_expected": 0,
-      "expected": 9600,
+      "expected": 10000,
       "wait_ms": 3900,
       "measure_actor": "dummy",
-      "tolerance": 350,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the remaining duration of the Solar Flare aura on the dummy (applied at 3500 ms, read at 3900 ms; 10000 ms less 400 ms); 804630 is learned between the phases. 984954 and 823764 are precondition fixtures (fixed crit sheet, no resistance), not the claim."
+      "tolerance": 400,
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the remaining duration of the Solar Flare aura on the dummy (read 3900 ms after Dawnsear was cast; the marker makes it instant and the Solar Flare aura is read at 9963 to 10000 ms remaining, so its total duration is read at 10000 ms; 9000 and 11000 ms totals read at most 9000 and at least 10900 and are excluded by the tolerance of 400)."
     },
     {
       "spell": 804630,
@@ -1460,6 +1461,87 @@
       "expected": 8000,
       "tolerance": 600,
       "observe_source": "Rapture 806477 is cast at the dummy (3000 ms cast) and the caster's marker 804631 remaining duration is read 5000 ms later: 10000 ms less 2000 ms since completion = 8000 ms if the marker is applied when the cast completes and lasts 10000 ms; 9000 or 11000 ms total durations read 7000 and 9000 and are excluded by the tolerance of 600."
+    },
+    {
+      "spell": 807973,
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Sunslam (tick damage)",
+      "variant": "tick_damage",
+      "label_suffix": "tick_damage",
+      "quote": "dealing ${$m1+0+$AP*0.159426} Holy damage",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805639,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 111.16,
+      "tolerance": 6,
+      "wait_ms": 1500,
+      "observe_source": "Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (school damage), BasePoints 99 (100 as read) + 70 attack power x 0.159426 = 111.16 with the reference attack power 70 (tooltip token). Dawn 807440 is a precondition fixture (set_aura) in both phases, the cast itself is the claim; 984954 and 823764 are the fixed crit sheet and no-resistance fixtures. Before: no cast, 0 damage. After: one cast read 1500 ms later (one tick at 1000 ms), the total 805639 damage on the dummy; band 5% (G-19). Measured 222 (and 518 with 930 more attack power, 2 x (100 + 0.159426 x 1000)): exactly twice the tooltip formula at both attack powers, in one damage event. Diagnostics: not the class tuning aura 887015 (removed in both phases, still 222), not a second event (one 805639 event). Cause not found."
+    },
+    {
+      "spell": 807973,
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Sunslam (usable while moving)",
+      "variant": "moving",
+      "label_suffix": "moving",
+      "quote": "Usable while moving.",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "moving_before_trigger": {
+        "flag": "forward"
+      },
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 807973
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "observe_source": "Dawn is set by set_aura in both phases (a precondition fixture). The caster holds the forward movement flag from right before the cast until the read (moving_before_trigger). Before: no cast, aura 807973 absent on the dummy (0). After: the cast made while moving lands, aura read 1 500 ms later."
+    },
+    {
+      "spell": 807973,
+      "name": "Sunslam (Dawn gate)",
+      "kind": "caster_aura_gate",
+      "quote": "Only usable while Dawn is active.",
+      "observe_source": "Sunslam 807973 has CasterAuraSpell 807440 (Dawn, Spell.dbc); the kind attempts the cast without and with the aura and reads the cast failure (SPELL_FAILED_CASTER_AURASTATE without it)."
     }
   ],
   "player_observations": [],
@@ -1814,5 +1896,10 @@
     "Valkyr": [
       707072
     ]
+  },
+  "base_mana": {
+    "power": 0,
+    "value": 1363,
+    "source": "player_class_stats class 27 level 60 BaseMana 1363, read in the world database of the in-RAM test MySQL; set before every cast of a rank hit scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
   }
 }
