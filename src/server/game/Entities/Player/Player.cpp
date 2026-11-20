@@ -10662,6 +10662,10 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         }
     }
 
+    if (spell && op == SPELLMOD_DAMAGE && spell->GetSpellInfo()->Id == spellId && !temporaryPet)
+        if (uint64 const nightmare = spell->GetScriptValue(AscensionBloodmage::NightmareTalent))
+            totalmul *= CalculatePct(1.0f, 100.0f + float(nightmare));
+
     for (auto mod : m_spellMods[op])
     {
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
