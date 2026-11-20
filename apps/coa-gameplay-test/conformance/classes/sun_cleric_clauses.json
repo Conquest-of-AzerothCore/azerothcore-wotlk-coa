@@ -54,12 +54,26 @@
   {
     "spell": 92136,
     "clause": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
-    "labels": [
-      "92136 effect_value #0",
-      "92136 effect_radius 704911e0 #1",
-      "92136 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health",
+        "labels": [
+          "92136 behaviour_metric_delta sunlight_heal",
+          "92136 behaviour_metric_delta sunlight_bh"
+        ]
+      },
+      {
+        "claim": "to up to $704911i allies within $704911a1 yds",
+        "labels": [
+          "92136 effect_radius 704911e0 #1"
+        ]
+      },
+      {
+        "claim": "prioritizing the lowest health allies.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 92137,
@@ -918,7 +932,10 @@
       {
         "claim": "and will be healed for ${$520648m1+$SP*0.425+$AP*0.125}",
         "labels": [
-          "520647 effect_value 520648e0 #3"
+          "520647 effect_value 520648e0 #3",
+          "520647 behaviour_metric_delta tick_one",
+          "520647 behaviour_metric_delta tick_ap",
+          "520647 behaviour_metric_delta tick_sp"
         ]
       },
       {
@@ -3052,13 +3069,13 @@
         ]
       },
       {
-        "claim": "the $AP*0.12 term of the damage",
+        "claim": "$AP*0.12",
         "labels": [
           "804751 behaviour_metric_delta tick_ap"
         ]
       },
       {
-        "claim": "the $sph*0.22 term of the damage",
+        "claim": "$sph*0.22",
         "labels": [
           "804751 behaviour_metric_delta tick_sp"
         ]
@@ -3066,13 +3083,15 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "804751 behaviour_metric_delta two_ticks"
+          "804751 behaviour_metric_delta two_ticks",
+          "804751 behaviour_metric_delta period_floor"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "804751 behaviour_metric_delta whole_duration"
+          "804751 behaviour_metric_delta whole_duration",
+          "804751 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -3387,7 +3406,8 @@
     "spell": 806123,
     "clause": "Illuminate an ally, healing them for ${$m1+0+$bh*1.05}.",
     "labels": [
-      "806123 effect_value #2"
+      "806123 behaviour_metric_delta illum_heal",
+      "806123 behaviour_metric_delta illum_bh"
     ],
     "kind": "claim"
   },
@@ -3531,7 +3551,7 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Increases your critical strike rating by $s1% of your Intellect",
+        "claim": "Increases your critical strike rating",
         "labels": [
           "807654 behaviour_metric_delta melee_crit",
           "807654 behaviour_metric_delta ranged_crit",
