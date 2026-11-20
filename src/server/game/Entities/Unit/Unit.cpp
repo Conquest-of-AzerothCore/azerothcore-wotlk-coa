@@ -9886,6 +9886,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         // damage school unchanged for native resistance and damage modifiers.
         DoneAdvertisedBenefit += std::max(SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE),
             SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE));
+    // CoA: Stormbringer Shock's tooltip scales with the higher of Arcane and Nature spell power.
+    else if (spellProto->SpellFamilyName == 22 && spellProto->GetFirstRankSpell()->Id == 804020)
+        DoneAdvertisedBenefit += std::max(SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE),
+            SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE));
     else
         DoneAdvertisedBenefit += SpellBaseDamageBonusDone(spellPowerSchool);
 
