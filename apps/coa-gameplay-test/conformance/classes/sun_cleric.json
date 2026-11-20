@@ -48,13 +48,27 @@
   },
   "log_queries": {},
   "off_hand_weapons": [],
-  "known_auras": [],
-  "probe_auras": [],
+  "known_auras": [
+    887015
+  ],
+  "probe_auras": [
+    49152
+  ],
   "extra_spells": [],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
   "effect_overrides": [],
-  "item_armor_subclass_effects": [],
+  "item_armor_subclass_effects": [
+    {
+      "spell": 680652,
+      "effect": 0,
+      "subclass": 4,
+      "item": 8094,
+      "slot": 4,
+      "required_level": 45,
+      "citation": "Enveloped in Light 680652: aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT, EffectMiscValue[0] 1, EffectMiscValueB[0] 16 (1<<ITEM_SUBCLASS_ARMOR_PLATE); SpellInfo.cpp:382 recognises 680652. Item 8094 Platemail Armor from acore_world.item_template of the in-RAM test database (read 2026-11-20 with: select entry,name,Quality,RequiredLevel,InventoryType,armor from item_template where class=4 and subclass=4 and InventoryType in (5,20) and Quality between 1 and 2 and RequiredLevel<=60 and RequiredLevel>0 and name not like 'Monster -%' and stat_value1..10=0 and spellid_1..5=0): Quality 1, RequiredLevel 45, InventoryType 5 (chest, slot 4), armor 359, no stats and no spell."
+    }
+  ],
   "unmodelled_effects": [],
   "literal_tokens": [],
   "effect_notes": [],
@@ -671,6 +685,975 @@
       "wait_ms": 300,
       "expire_ms": 300,
       "observe_source": "Probe: the caster's total SPELL_AURA_MOD_THREAT multiplier for the Holy school mask 2 before any cast and after Holy Form (readback)."
+    },
+    {
+      "spell": 680652,
+      "name": "Enveloped in Light (Shadow damage taken)",
+      "kind": "taken_hit",
+      "variant": "shadow_taken",
+      "label_suffix": "shadow_taken",
+      "judge": "damage_ratio",
+      "expected": 0.97,
+      "quote": "and reduces Shadow damage taken by $s2%.",
+      "strike_spell": 47632,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            680652
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 680652,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            680652
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 680652,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "680652 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 32 (Shadow), BasePoints -4 (-3 as read). Grave Coil 47632 (600 Shadow, DmgClass 1 magic) strikes the caster without and with the passive learned; the damage ratio is judged against 0.97."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (melee critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "melee_crit",
+      "label_suffix": "melee_crit",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 8 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (ranged critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "ranged_crit",
+      "label_suffix": "ranged_crit",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 9
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 9 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (spell critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "spell_crit",
+      "label_suffix": "spell_crit",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 10 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (expertise rating)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 23
+      },
+      "before_expected": 10000,
+      "expected": 10020,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 23 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (first tick)",
+      "kind": "metric_delta",
+      "variant": "first_tick",
+      "label_suffix": "first_tick",
+      "quote": "dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 2.5,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "804751 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000 ($t1), trigger 804752 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, TARGET_DEST_CASTER / TARGET_UNIT_DEST_AREA_ENEMY), DurationIndex 29 (12000 ms, $d). $804752m1 = BasePoints 4 + 1 = 5, per level 37.6 truncated to 37 at level 60 (SpellInfo.cpp:497), AP 70 x 0.12 = 8.4, spell power 0: 50.4, read as 50 after the int32 truncation of CalcValue (base pair verdict 804751 effect_value 804752e0 #0). One real cast of 804751 with the dummy 5 yd away, spell crit and spell penetration fixtures 984954 and 823764 on the caster (harness precondition fixtures): the damage of 804752 on the dummy read 3500 ms after the cast. Control (before): no cast, 0."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (two ticks)",
+      "kind": "metric_delta",
+      "variant": "two_ticks",
+      "label_suffix": "two_ticks",
+      "quote": "every $t1 sec",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "tolerance": 5.0,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "observe_source": "804751 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000 ($t1), trigger 804752 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, TARGET_DEST_CASTER / TARGET_UNIT_DEST_AREA_ENEMY), DurationIndex 29 (12000 ms, $d). $804752m1 = BasePoints 4 + 1 = 5, per level 37.6 truncated to 37 at level 60 (SpellInfo.cpp:497), AP 70 x 0.12 = 8.4, spell power 0: 50.4, read as 50 after the int32 truncation of CalcValue (base pair verdict 804751 effect_value 804752e0 #0). One real cast of 804751 with the dummy 5 yd away, spell crit and spell penetration fixtures 984954 and 823764 on the caster (harness precondition fixtures): the damage of 804752 on the dummy read 6500 ms after the cast. Control (before): no cast, 0."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (still one tick at 5.7 s)",
+      "kind": "metric_delta",
+      "variant": "period_floor",
+      "label_suffix": "period_floor",
+      "quote": "every $t1 sec",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 2.5,
+      "wait_ms": 5700,
+      "expire_ms": 500,
+      "observe_source": "804751 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000 ($t1), trigger 804752 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, TARGET_DEST_CASTER / TARGET_UNIT_DEST_AREA_ENEMY), DurationIndex 29 (12000 ms, $d). $804752m1 = BasePoints 4 + 1 = 5, per level 37.6 truncated to 37 at level 60 (SpellInfo.cpp:497), AP 70 x 0.12 = 8.4, spell power 0: 50.4, read as 50 after the int32 truncation of CalcValue (base pair verdict 804751 effect_value 804752e0 #0). One real cast of 804751 with the dummy 5 yd away, spell crit and spell penetration fixtures 984954 and 823764 on the caster (harness precondition fixtures): the damage of 804752 on the dummy read 5700 ms after the cast: one tick (50), the second is not due before 6000 ms, so with two_ticks (two ticks by 6500 ms) the period lies in (2850, 3250] ms, excluding 2700 and 3300 ms, the 10% edges. Reference search: nothing found beyond the tooltip. Control (before): no cast, 0."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (whole duration)",
+      "kind": "metric_delta",
+      "variant": "whole_duration",
+      "label_suffix": "whole_duration",
+      "quote": "for $d.",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 200,
+      "tolerance": 10.0,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "observe_source": "804751 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000 ($t1), trigger 804752 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, TARGET_DEST_CASTER / TARGET_UNIT_DEST_AREA_ENEMY), DurationIndex 29 (12000 ms, $d). $804752m1 = BasePoints 4 + 1 = 5, per level 37.6 truncated to 37 at level 60 (SpellInfo.cpp:497), AP 70 x 0.12 = 8.4, spell power 0: 50.4, read as 50 after the int32 truncation of CalcValue (base pair verdict 804751 effect_value 804752e0 #0). One real cast of 804751 with the dummy 5 yd away, spell crit and spell penetration fixtures 984954 and 823764 on the caster (harness precondition fixtures): the damage of 804752 on the dummy read 15500 ms after the cast. Control (before): no cast, 0."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (aura lasts 12 s)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 804751
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 11300,
+      "expiry_wait_ms": 1300,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          11000,
+          11600
+        ],
+        "expired": [
+          12400,
+          13000
+        ]
+      },
+      "observe_source": "804751 DurationIndex 29 (12000 ms, $d). One real cast of 804751 on the caster: its aura is present when read 11000..11600 ms after the cast (game time) and gone when read 12400..13000 ms after it, so the duration lies between 11000 and 13000, inside 10% of 12000 (10800..13200) on both sides; the whole_duration entry reads the four ticks. Reference search: nothing found beyond the tooltip. Control (before): no cast, absent."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (first tick at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "tick_ap",
+      "label_suffix": "tick_ap",
+      "quote": "dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2450,
+      "tolerance": 25,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "As first_tick with 20000 more attack power (player_attack_power, harness fixture): 42 (5 + 37) + int32(0.12 x (70 + 20000)) = 42 + 2408 = 2450, against 50 at the reference. Control (before): no cast, 0; the contrast on the same build is the first_tick entry at the reference attack power.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (first tick at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "tick_sp",
+      "label_suffix": "tick_sp",
+      "quote": "dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4450,
+      "tolerance": 45,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "As first_tick with 20000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 42 + int32(0.12 x 70) + int32(0.22 x 20000) = 42 + 8 + 4400 = 4450, against 50 at the reference. Control (before): no cast, 0; the contrast on the same build is the first_tick entry at spell power 0.",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Gavel)",
+      "variant": "stack_one",
+      "label_suffix": "stack_one",
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); 680642 StackAmount 3 (Spell.dbc). Gavel of Wrath 802561 (rank 58, SpellFamilyName 33) cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crits without the passive, 0 stacks). One forced crit: 1 stack."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 5100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (four critical Gavels cap at three)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "expected": 3,
+      "setup_casts": [
+        802561,
+        802561,
+        802561
+      ],
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); 680642 StackAmount 3 (Spell.dbc). Gavel of Wrath 802561 (rank 58, SpellFamilyName 33) cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crits without the passive, 0 stacks). Four forced crits: the stacks read 3, not 4 (the stated cap). Gavels share a 5000 ms category cooldown (Spell.dbc Category 1207, CategoryRecoveryTime 5000): the three setup casts and the trigger cast are 5100 ms apart, so all four land (the run's cast_failures list must be empty); the aura lasts 20000 ms (DurationIndex 18) and each stack refreshes it."
+    },
+    {
+      "spell": 806123,
+      "name": "Solar Invigoration (allies take increased healing, Sunlight heals)",
+      "kind": "hit_ratio",
+      "variant": "healing_taken",
+      "label_suffix": "healing_taken",
+      "quote": "your allies take $s2% increased healing",
+      "expected": 1.2,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "casts": [
+          806123
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "806123 Effect[1] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 127, BasePoints 19 (20, $s2). The grouped ally's Sunlight 704911 heals are read without and with a real cast of 806123 on the caster (the area aura reaches the ally), the ally held at 50% health; 20000 spell power on the caster (harness fixture) so the stat part dominates the die. Control arm: no cast.",
+      "cast_power": 1360,
+      "ally_distance": 5
+    },
+    {
+      "spell": 806123,
+      "name": "Solar Invigoration (lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "For $d,",
+      "trigger_spell": 806123,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "aura",
+      "fields": {
+        "spell": 806123
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 13800,
+      "expiry_wait_ms": 2100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          13500,
+          14500
+        ],
+        "expired": [
+          15600,
+          16400
+        ]
+      },
+      "observe_source": "806123 DurationIndex 8 (15000 ms, $d). One real cast of 806123 on the caster: its aura is present when read 13500..14500 ms after the cast (game time) and gone when read 15600..16400 ms after it, so the duration lies between 13500 and 16400, inside 10% of 15000 (13500..16500) on both sides (the held / ends pair of the Crypt Plague ticks entry). Reference search: nothing found for the 15 sec duration beyond the tooltip. Control (before): no cast, absent."
+    },
+    {
+      "spell": 806123,
+      "kind": "metric_delta",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_only_after": true,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invigoration (second damage 2.85 s later gives no Illumination)",
+      "variant": "icd_blocked",
+      "quote": "Can only occur once every 3 sec.",
+      "setup_casts": [
+        806123,
+        572801
+      ],
+      "setup_wait_ms": 3100,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 502429,
+        "target": "caster"
+      },
+      "expected": 1,
+      "label_suffix": "icd_blocked",
+      "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Gavel of Wrath 802561 at the dummy; control (before): the same Gavel without the aura. Horusath Blast 572801 (Speed 20 in Spell.dbc, the dummy 5 yd away: it lands about 250 ms after its cast) then Gavel of Wrath 802561 (Gavels share a 5000 ms category cooldown, so another direct damage spell is the first) cast 3100 ms apart: the damage events are about 2850 ms apart, and one Illumination follows (the second is inside the 3 s gate, excluding a gate of 2700 ms or less, the -10% edge). Reference search: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 806123,
+      "kind": "metric_delta",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_only_after": true,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invigoration (second damage 3.15 s later gives a second Illumination)",
+      "variant": "icd_open",
+      "quote": "Can only occur once every 3 sec.",
+      "setup_casts": [
+        806123,
+        572801
+      ],
+      "setup_wait_ms": 3400,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 502429,
+        "target": "caster"
+      },
+      "expected": 2,
+      "label_suffix": "icd_open",
+      "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Gavel of Wrath 802561 at the dummy; control (before): the same Gavel without the aura. Horusath Blast 572801 (it lands about 250 ms after its cast) then Gavel of Wrath 802561 (another direct damage spell is the first, Gavels sharing a 5000 ms category cooldown) cast 3400 ms apart: the damage events are about 3150 ms apart, and two Illuminations follow (excluding a gate of 3300 ms or more, the +10% edge). The aura holder here is the caster, not another ally of the raid aura (the healing_taken arm uses an ally). Reference search: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (damage divert)",
+      "kind": "taken_hit",
+      "variant": "divert",
+      "label_suffix": "divert",
+      "judge": "absorb",
+      "quote": "Allies that stand inside of it will divert $560347s1% of all damage taken to the caster,",
+      "strike_spell": 41394,
+      "struck": "ally",
+      "transfer_spell": 560347,
+      "trials": 4,
+      "arms": [
+        {
+          "name": "control",
+          "absorb": "none",
+          "transfer_pct": 0
+        },
+        {
+          "name": "circle",
+          "opening_casts": [
+            [
+              520647,
+              "caster"
+            ]
+          ],
+          "absorb": "share",
+          "share_pct": 30,
+          "transfer_pct": 30
+        }
+      ],
+      "observe_source": "$560347s1 = 30 (560347 EffectBasePoints[0] 29 + 1). 520647 Effect[1] TRIGGER_SPELL 560347 on the caster with TARGET_DEST_DYNOBJ_ALLY: 560347 Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_PARTY, aura 81 SPELL_AURA_SPLIT_DAMAGE_PCT, MiscValue 127. As Gaze of the Black Knight 802138: Light of the Naaru 41394 strikes the grouped ally; the control arm has no circle (0 transferred), the circle arm has 520647 cast at the caster's position (the ally stands inside its 10 yd), and the caster must take floor(30% of the strike's damage plus absorbed amount) under 560347."
+    },
+    {
+      "spell": 520647,
+      "kind": "metric_delta",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Circle of Valor (ten heal ticks)",
+      "variant": "tick_count",
+      "label_suffix": "tick_count",
+      "quote": "every $T1 sec.",
+      "expected": 10,
+      "wait_ms": 16500,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, aura 23 PERIODIC_TRIGGER_SPELL every 1500 ms (EffectAmplitude, $T1), duration 15000 ms (DurationIndex 8, $d), radius index 13 (10 yd, $a1); it triggers 520648 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 49 + 1 = 50). $520648m1 = 50, AP 70 x 0.125 = 8.75, spell power 0: 58.75. One real cast of 520647 at the caster's position, the caster held at 30% health (the circle covers it); heals of 520648 on the caster read 16500 ms after the cast: 10 heal events (15000 / 1500), excluding a period or duration 10% off on either side (9 or 11 events).. Control (before): no cast, 0."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704911,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heal on a fulfilled Vow)",
+      "variant": "sunlight_heal",
+      "label_suffix": "sunlight_heal",
+      "after_at_least": 60,
+      "after_at_most": 64,
+      "expected": 62,
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. Control (before): the same casts without 92136, 0 healed by Sunlight. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000, set on the caster in both phases)."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704911,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heal at +20000 spell power)",
+      "variant": "sunlight_bh",
+      "label_suffix": "sunlight_bh",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "after_at_least": 2460,
+      "after_at_most": 2464,
+      "expected": 2462,
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. With 20000 more spell power: 75..81 + int32(0.15 x 20000) = 3075..3081 (BH term), the contrast of sunlight_heal on the same build. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000, set on the caster in both phases)."
+    },
+    {
+      "spell": 806123,
+      "kind": "metric_delta",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_only_after": true,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invigoration (Illumination heal)",
+      "variant": "illum_heal",
+      "quote": "their direct damage dealt now causes them to cast",
+      "setup_casts": [
+        806123
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 502429,
+        "target": "caster"
+      },
+      "after_at_least": 1179,
+      "after_at_most": 1315,
+      "expected": 1247,
+      "label_suffix": "illum_heal",
+      "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Gavel of Wrath 802561 at the dummy; control (before): the same Gavel without the aura. Read: the healing done by 502429 on the caster. Expected value: the DBC range x 0.8 (class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. ) x 1.2 (806123 Effect[1] aura 118 MOD_HEALING_PCT_TAKEN +20%, the caster holds the area aura and takes it on its own Illumination), truncated at each step in either order: 1229..1370 -> 1179..1315 and (1229..1370 + int(1.05 x 2000)) -> 3195..3331. Crit forced out by fixture 984954."
+    },
+    {
+      "spell": 806123,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_only_after": true,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invigoration (Illumination heal at +2000 spell power)",
+      "variant": "illum_bh",
+      "quote": "their direct damage dealt now causes them to cast",
+      "setup_casts": [
+        806123
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 502429,
+        "target": "caster"
+      },
+      "after_at_least": 3195,
+      "after_at_most": 3331,
+      "expected": 3263,
+      "label_suffix": "illum_bh",
+      "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Horusath Blast 572801 at the dummy; control (before): the same Gavel without the aura. Read: the healing done by 502429 on the caster. With 2000 spell power (harness fixture, recorded on the verdict) and the caster held at 30% health: 1229..1370 + int32(1.05 x 2000) = 3329..3470 (the $bh*1.05 term); the contrast of illum_heal at spell power 0 on the same build. Expected value: the DBC range x 0.8 (class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. ) x 1.2 (806123 Effect[1] aura 118 MOD_HEALING_PCT_TAKEN +20%, the caster holds the area aura and takes it on its own Illumination), truncated at each step in either order: 1229..1370 -> 1179..1315 and (1229..1370 + int(1.05 x 2000)) -> 3195..3331. Crit forced out by fixture 984954.",
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "caster_health_pct": 30
+    },
+    {
+      "spell": 520647,
+      "kind": "metric_delta",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Circle of Valor (one heal tick)",
+      "variant": "tick_one",
+      "label_suffix": "tick_one",
+      "quote": "and will be healed for ${$520648m1+$SP*0.425+$AP*0.125} every $T1 sec.",
+      "expected": 46,
+      "tolerance": 0.5,
+      "wait_ms": 1700,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, aura 23 PERIODIC_TRIGGER_SPELL every 1500 ms (EffectAmplitude, $T1), duration 15000 ms (DurationIndex 8, $d), radius index 13 (10 yd, $a1); it triggers 520648 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 49 + 1 = 50). $520648m1 = 50, AP 70 x 0.125 = 8.75, spell power 0: 58.75. One real cast of 520647 at the caster's position, the caster held at 30% health (the circle covers it); heals of 520648 on the caster read 1700 ms after the cast: one tick of 58..59 (int32 truncation of the AP term).. Control (before): no cast, 0. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. Value: int(58 x 0.8) = 46, int(2558 x 0.8) = 2046, int(4308 x 0.8) = 3446. Crit forced out by fixture 984954.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 520647,
+      "kind": "metric_delta",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Circle of Valor (one tick at +20000 attack power)",
+      "variant": "tick_ap",
+      "label_suffix": "tick_ap",
+      "quote": "${$520648m1+$SP*0.425+$AP*0.125}",
+      "expected": 2046,
+      "tolerance": 0.5,
+      "wait_ms": 1700,
+      "player_attack_power": 20000,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, aura 23 PERIODIC_TRIGGER_SPELL every 1500 ms (EffectAmplitude, $T1), duration 15000 ms (DurationIndex 8, $d), radius index 13 (10 yd, $a1); it triggers 520648 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 49 + 1 = 50). $520648m1 = 50, AP 70 x 0.125 = 8.75, spell power 0: 58.75. One real cast of 520647 at the caster's position, the caster held at 30% health (the circle covers it); heals of 520648 on the caster read 1700 ms after the cast with 20000 more attack power (harness fixture): 50 + int32(0.125 x 20070) = 2558.. Control (before): no cast, 0. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. Value: int(58 x 0.8) = 46, int(2558 x 0.8) = 2046, int(4308 x 0.8) = 3446. Crit forced out by fixture 984954.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 520647,
+      "kind": "metric_delta",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Circle of Valor (one tick at +10000 spell power)",
+      "variant": "tick_sp",
+      "label_suffix": "tick_sp",
+      "quote": "${$520648m1+$SP*0.425+$AP*0.125}",
+      "expected": 3446,
+      "tolerance": 0.5,
+      "wait_ms": 1700,
+      "player_spell_power": 10000,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, aura 23 PERIODIC_TRIGGER_SPELL every 1500 ms (EffectAmplitude, $T1), duration 15000 ms (DurationIndex 8, $d), radius index 13 (10 yd, $a1); it triggers 520648 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 49 + 1 = 50). $520648m1 = 50, AP 70 x 0.125 = 8.75, spell power 0: 58.75. One real cast of 520647 at the caster's position, the caster held at 30% health (the circle covers it); heals of 520648 on the caster read 1700 ms after the cast with 10000 spell power (harness fixture, recorded on the verdict): 50 + 8 + int32(0.425 x 10000) = 4308.. Control (before): no cast, 0. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. Value: int(58 x 0.8) = 46, int(2558 x 0.8) = 2046, int(4308 x 0.8) = 3446. Crit forced out by fixture 984954.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],
@@ -944,7 +1927,6 @@
     "704942": "Valkyr",
     "704947": "Valkyr",
     "706735": "Blessings",
-    "707072": "Valkyr",
     "707077": "Blessings",
     "707078": "Seraphim",
     "707079": "Seraphim",
@@ -1026,5 +2008,10 @@
     "power": 0,
     "value": 1363,
     "source": "player_class_stats class 27 level 60 BaseMana 1363, read in acore_world of the in-RAM test MySQL (class 27, level 60); set before every cast of a rank hit scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
+  },
+  "weapon_set_spells": {
+    "Valkyr": [
+      707072
+    ]
   }
 }

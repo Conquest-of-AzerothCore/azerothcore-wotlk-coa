@@ -54,12 +54,26 @@
   {
     "spell": 92136,
     "clause": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
-    "labels": [
-      "92136 effect_value #0",
-      "92136 effect_radius 704911e0 #1",
-      "92136 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health",
+        "labels": [
+          "92136 behaviour_metric_delta sunlight_heal",
+          "92136 behaviour_metric_delta sunlight_bh"
+        ]
+      },
+      {
+        "claim": "to up to $704911i allies within $704911a1 yds",
+        "labels": [
+          "92136 effect_radius 704911e0 #1"
+        ]
+      },
+      {
+        "claim": "prioritizing the lowest health allies.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 92137,
@@ -994,18 +1008,31 @@
     "spell": 520647,
     "clause": "Allies that stand inside of it will divert $560347s1% of all damage taken to the caster,",
     "labels": [
-      "520647 effect_value 560347e0 #2"
+      "520647 behaviour_taken_hit divert"
     ],
     "kind": "claim"
   },
   {
     "spell": 520647,
     "clause": "and will be healed for ${$520648m1+$SP*0.425+$AP*0.125} every $T1 sec.",
-    "labels": [
-      "520647 effect_value 520648e0 #3",
-      "520647 aura_amplitude_ms #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and will be healed for ${$520648m1+$SP*0.425+$AP*0.125}",
+        "labels": [
+          "520647 effect_value 520648e0 #3",
+          "520647 behaviour_metric_delta tick_one",
+          "520647 behaviour_metric_delta tick_ap",
+          "520647 behaviour_metric_delta tick_sp"
+        ]
+      },
+      {
+        "claim": "every $T1 sec",
+        "labels": [
+          "520647 behaviour_metric_delta tick_count"
+        ]
+      }
+    ]
   },
   {
     "spell": 520647,
@@ -1652,7 +1679,8 @@
     "spell": 680641,
     "clause": "stacking up to $680642u times.",
     "labels": [
-      "680641 max_stacks 680642 #2"
+      "680641 behaviour_metric_delta stack_one",
+      "680641 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1788,7 +1816,7 @@
     "spell": 680652,
     "clause": "Increases your armor contribution from plate items by $s1%",
     "labels": [
-      "680652 effect_value e0 #0"
+      "680652 e0 armor"
     ],
     "kind": "claim"
   },
@@ -1796,7 +1824,7 @@
     "spell": 680652,
     "clause": "and reduces Shadow damage taken by $s2%.",
     "labels": [
-      "680652 effect_value e1 #1"
+      "680652 behaviour_hit_ratio shadow_taken"
     ],
     "kind": "claim"
   },
@@ -3139,12 +3167,41 @@
   {
     "spell": 804751,
     "clause": "Become anointed by the light, summoning a blessed hammer that encircles you dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies every $t1 sec for $d.",
-    "labels": [
-      "804751 effect_value 804752e0 #0",
-      "804751 aura_amplitude_ms #1",
-      "804751 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "summoning a blessed hammer that encircles you dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+        "labels": [
+          "804751 behaviour_metric_delta first_tick"
+        ]
+      },
+      {
+        "claim": "$AP*0.12",
+        "labels": [
+          "804751 behaviour_metric_delta tick_ap"
+        ]
+      },
+      {
+        "claim": "$sph*0.22",
+        "labels": [
+          "804751 behaviour_metric_delta tick_sp"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "804751 behaviour_metric_delta two_ticks",
+          "804751 behaviour_metric_delta period_floor"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804751 behaviour_metric_delta whole_duration",
+          "804751 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 805267,
@@ -3448,30 +3505,44 @@
     "spell": 806123,
     "clause": "For $d,",
     "labels": [
-      "806123 aura_duration_ms #0"
+      "806123 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 806123,
     "clause": "your allies take $s2% increased healing and their direct damage dealt now causes them to cast Illumination.",
-    "labels": [
-      "806123 effect_value e1 #1",
-      "806123 aura_amount e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your allies take $s2% increased healing",
+        "labels": [
+          "806123 behaviour_hit_ratio healing_taken"
+        ]
+      },
+      {
+        "claim": "their direct damage dealt now causes them to cast Illumination",
+        "labels": [
+          "806123 behaviour_metric_delta icd_open"
+        ]
+      }
+    ]
   },
   {
     "spell": 806123,
     "clause": "Can only occur once every 3 sec.",
-    "labels": [],
+    "labels": [
+      "806123 behaviour_metric_delta icd_blocked",
+      "806123 behaviour_metric_delta icd_open"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806123,
     "clause": "Illuminate an ally, healing them for ${$m1+0+$bh*1.05}.",
     "labels": [
-      "806123 effect_value #2"
+      "806123 behaviour_metric_delta illum_heal",
+      "806123 behaviour_metric_delta illum_bh"
     ],
     "kind": "claim"
   },
@@ -3612,10 +3683,23 @@
   {
     "spell": 807654,
     "clause": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
-    "labels": [
-      "807654 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your critical strike rating",
+        "labels": [
+          "807654 behaviour_metric_delta melee_crit",
+          "807654 behaviour_metric_delta ranged_crit",
+          "807654 behaviour_metric_delta spell_crit"
+        ]
+      },
+      {
+        "claim": "and expertise rating by $s1% of your Intellect",
+        "labels": [
+          "807654 behaviour_metric_delta expertise"
+        ]
+      }
+    ]
   },
   {
     "spell": 807749,

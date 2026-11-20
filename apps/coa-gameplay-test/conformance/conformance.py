@@ -26,8 +26,8 @@ from ledger import ledger, parse_text_bases, write_ledger
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, modifier_key, proc_entries, proc_plan,
                    proc_scenario, proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell,
                    trigger_key)
-from profile import (DBC_DIR, DbcSetMismatch, control_entries, for_entry, ledger_consumption_path,
-                     load_class_file, server_dbc_dir, spell_dbc_sha256)
+from profile import (DBC_DIR, DbcSetMismatch, check_weapon_set_relearns, control_entries, for_entry,
+                     ledger_consumption_path, load_class_file, server_dbc_dir, spell_dbc_sha256)
 from questions import QUESTIONS_FILE
 from sample import SampleError, load_buckets, parse_minimums, sample_document
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
@@ -76,6 +76,7 @@ class ManifestWriter:
             raise ValueError(f'Duplicate scenario key {key}')
         file, sha = None, None
         if scenario is not None:
+            check_weapon_set_relearns(self.class_file, key, scenario)
             scenario = pinned_fixture_armor(scenario)
             text = json.dumps(run.validate(scenario, run.SIMULATED_CLOCK), indent=2) + '\n'
             file = f'{SCENARIO_DIR}/{key}.json'
