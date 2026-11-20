@@ -60,7 +60,9 @@ from `<DataDir>/dbc`: the Docker setup already uses `env/dist/data`, and for a l
 `"."` is the directory the worldserver runs from). Building the server does not need
 them; running it and the CoA tests in `apps/coa-tests/` that read client data do. Set
 `COA_DBC_DIR` when the tests should read another directory.
-[`apps/coa-dbc`](../../apps/coa-dbc/README.md) extracts and checks them.
+[`apps/coa-dbc`](../../apps/coa-dbc/README.md) extracts and checks them. Static client rows ship only in the
+client archives; how to add or change one and how to check that client and server agree is in
+[static client data](client-data.md).
 
 The models of the Venomancer Beetle, Venomwing and Weaver Forms (CreatureModelData 20612
 `custom_nerubianbeetle`, 22063 `custom_flyingnerubian2` and 23813
