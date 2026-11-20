@@ -931,6 +931,8 @@ for the actor and reports the percentage of fills holding an item of at least `q
 10000 times for the actor and reports the percentage of fills holding `item`.
 `creature_loot_item_rate` requires `entry` (a creature loot id) and `item`, fills that template `rolls` times
 (default 10000) for the actor and reports the percentage of fills holding `item`.
+`fishing_loot_item_rate` requires `entry` (a fishing loot area or zone id) and `item`, fills that template `rolls` times
+(default 10000) for the actor and reports the percentage of fills holding `item`.
 `forced_loot_count` requires `item`, adds it directly through `Loot::AddItem` with the actor as loot owner
 (bypassing any loot table), and reports how many uncollected copies survive that call; a gate inside `AddItem`
 that rejects the item for that actor reports zero.
