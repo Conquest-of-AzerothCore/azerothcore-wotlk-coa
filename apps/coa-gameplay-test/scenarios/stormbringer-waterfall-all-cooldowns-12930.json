@@ -108,13 +108,13 @@
       "action": "set_power",
       "actor": "control",
       "power": 0,
-      "value": 100000
+      "value": 2500
     },
     {
       "action": "set_power",
       "actor": "wf",
       "power": 0,
-      "value": 100000
+      "value": 2500
     },
     {
       "action": "cast",
@@ -128,6 +128,14 @@
       "actor": "wf",
       "spell": 804833,
       "target": "wf"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Stormcloak casts were accepted",
+      "actor": "wf",
+      "metric": "cast_failure",
+      "spell": 804833,
+      "equals": 0
     },
     {
       "action": "wait",
