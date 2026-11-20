@@ -436,15 +436,15 @@ private:
         auto next = std::make_shared<Settings>();
         std::atomic_store(&settings, std::make_shared<Settings const>());
         uint32 stage = sConfigMgr->GetOption<uint32>("HighRisk.ReleaseStage", DefaultHighRiskReleaseStage);
-        if (stage > RaidRelease::AllReleased)
+        if (stage > RaidRelease::StageNaxxramas)
         {
             LOG_ERROR("server.loading", "HighRisk.ReleaseStage {} is above {}, using {}", stage,
-                RaidRelease::AllReleased, RaidRelease::AllReleased);
-            stage = RaidRelease::AllReleased;
+                RaidRelease::StageNaxxramas, RaidRelease::StageNaxxramas);
+            stage = RaidRelease::StageNaxxramas;
         }
         configuredHighRiskStage = stage;
         if (uint32 stageOverride = uint32(sWorldState->getWorldState(WorldStateHighRiskStageOverride)))
-            stage = std::min<uint32>(stageOverride - 1, RaidRelease::AllReleased);
+            stage = std::min<uint32>(stageOverride - 1, RaidRelease::StageNaxxramas);
         highRiskStage = stage;
         if (!sConfigMgr->GetOption<bool>("Bloodforged.Enable", false))
             return;
@@ -1071,9 +1071,9 @@ public:
 
     static bool HandleStageSet(ChatHandler* handler, uint32 stage)
     {
-        if (stage < 1 || stage > RaidRelease::AllReleased)
+        if (stage < 1 || stage > RaidRelease::StageNaxxramas)
         {
-            handler->PSendSysMessage("High-Risk stage must be 1-{}.", RaidRelease::AllReleased);
+            handler->PSendSysMessage("High-Risk stage must be 1-{}.", RaidRelease::StageNaxxramas);
             return false;
         }
         sWorldState->setWorldState(WorldStateHighRiskStageOverride, stage + 1);

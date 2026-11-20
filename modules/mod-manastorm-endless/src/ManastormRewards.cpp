@@ -448,7 +448,8 @@ bool ManastormRewards::ResolveCacheItemEntry(
     uint32 completedDepth = 0;
     auto eligible = [&](CacheBracket const& bracket)
     {
-        if (ManastormReleaseStage::RequiredStage(bracket.CacheItemEntry) > ManastormModuleConfig::ReleaseStage())
+        if (ManastormReleaseStage::IsBlockedKarazhanCache(bracket.CacheItemEntry) ||
+            ManastormReleaseStage::RequiredStage(bracket.CacheItemEntry) > ManastormModuleConfig::ReleaseStage())
             return false;
 
         for (CacheUnlockRequirement const& requirement : _cacheUnlockRequirements)

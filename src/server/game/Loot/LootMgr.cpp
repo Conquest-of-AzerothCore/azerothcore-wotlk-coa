@@ -17,6 +17,7 @@
 
 #include "LootMgr.h"
 #include "AscensionEquippedGearLoot.h"
+#include "AscensionRaidDifficultyLoot.h"
 #include "Containers.h"
 #include "Creature.h"
 #include "DisableMgr.h"
@@ -612,6 +613,8 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     // Initial group is 0, top level set to True
     if (tab)
         tab->Process(*this, store, lootMode, lootOwner, 0, true);      // Processing is done there, callback via Loot::AddItem()
+
+    AscensionRaidDifficultyLoot::Apply(*this, store, lootId, lootSource);
 
     bool const equippedGear = &store == &LootTemplates_Creature && lootSource
         && AscensionEquippedGearLoot::AddLoot(lootSource->ToCreature(), *this, lootMode);

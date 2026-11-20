@@ -1,0 +1,134 @@
+{
+  "schema": 2,
+  "name": "Karazhan normal: Prince flex health and matching Tier 4 helm token",
+  "contract": [
+    "The native raid difficulty packet selects the real Karazhan instance mode.",
+    "With two fixtures, Prince uses the ten-effective-player flex floor.",
+    "A native creature kill and corpse loot window expose the mode-specific global helm token.",
+    "The map-wide trash health increase also applies to the Spectral Charger."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "member",
+      "raid": true,
+      "loot_method": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "leader",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_health",
+      "actor": "leader",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 532,
+      "x": -11108.9,
+      "y": -1942.14,
+      "z": 49.9725,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "nearby_creature_max_health",
+      "entry": 15547,
+      "min": 375700,
+      "max": 375720
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 532,
+      "x": -10959.2,
+      "y": -2021.73,
+      "z": 275.443,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 532,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "nearby_creature_max_health",
+      "entry": 15690,
+      "min": 66142304,
+      "max": 66142336,
+      "label": "Allow rounding from the float health modifier"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 15690,
+      "kill": true
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "leader",
+      "entry": 15690
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "loot_offered_item_count",
+      "item": 29761,
+      "equals": 1
+    }
+  ]
+}

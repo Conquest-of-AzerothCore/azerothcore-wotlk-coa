@@ -66,6 +66,7 @@ if (WITH_GAME_UNITY_BUILD)
   set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/AI/ScriptedAI/ScriptedFollowerAI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AI/SmartScripts/SmartScript.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Loot/AscensionRaidDifficultyLoot.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Spline/MovementPacketBuilder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Spells/SpellInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Spells/SpellMgr.cpp

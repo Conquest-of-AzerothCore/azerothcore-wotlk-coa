@@ -23,6 +23,11 @@ constexpr std::array<char const*, TierVendorEntryCount> TierVendorLabels = {
     "Tokens T3 Normal", "Tokens T3 Heroic", "Tokens T3 Mythic", "Tokens T3 Ascended", "Tokens T3 Rings",
 };
 
+constexpr std::array<uint32, 4> TierFourVendorEntries = { 91000014, 91000015, 91000016, 91000017 };
+constexpr std::array<char const*, TierFourVendorEntries.size()> TierFourVendorLabels = {
+    "Tokens T4 Normal", "Tokens T4 Heroic", "Tokens T4 Mythic", "Tokens T4 Ascended",
+};
+
 class npc_coa_tier_token_vendor : public CreatureScript
 {
 public:
@@ -33,6 +38,9 @@ public:
         ClearGossipMenuFor(player);
         for (uint32 i = 0; i < TierVendorEntryCount; ++i)
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, TierVendorLabels[i], GOSSIP_SENDER_MAIN, i + 1);
+        for (uint32 i = 0; i < TierFourVendorEntries.size(); ++i)
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, TierFourVendorLabels[i],
+                GOSSIP_SENDER_MAIN, TierVendorEntryCount + i + 1);
         SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
@@ -43,6 +51,9 @@ public:
         CloseGossipMenuFor(player);
         if (action >= 1 && action <= TierVendorEntryCount)
             player->GetSession()->SendListInventory(creature->GetGUID(), TierVendorEntries[action - 1]);
+        else if (action > TierVendorEntryCount && action <= TierVendorEntryCount + TierFourVendorEntries.size())
+            player->GetSession()->SendListInventory(creature->GetGUID(),
+                TierFourVendorEntries[action - TierVendorEntryCount - 1]);
         return true;
     }
 };

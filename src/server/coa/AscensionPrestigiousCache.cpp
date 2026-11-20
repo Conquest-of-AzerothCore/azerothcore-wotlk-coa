@@ -25,6 +25,7 @@ namespace
 constexpr uint32 GenericCacheAll = 1287330;
 constexpr uint32 GenericCacheTbc = 1297304;
 constexpr uint32 GenericCacheWotlk = 1297305;
+constexpr uint32 KarazhanCache = 1297310;
 
 std::vector<uint32> const ClassicLadder = { 1287304, 1287305, 1287306, 1287307,
                                             1287308, 1287309, 1287310, 1287311 };
@@ -51,6 +52,7 @@ struct CacheConfig
     uint8 classicStages = 8;
     uint8 tbcStages = 0;
     bool previousStageOnly = false;
+    bool callboardPreviousStageOnly = false;
 };
 
 CacheConfig g_config;
@@ -86,6 +88,10 @@ uint32 ReleasedStage(CacheConfig const& config)
 bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
 {
     uint32 const released = ReleasedStage(config);
+    if (cacheItemId == KarazhanCache)
+        return released >= RaidRelease::StageKarazhan &&
+            (!config.callboardPreviousStageOnly || RaidRelease::ReleasedStage() > RaidRelease::StageKarazhan);
+
     for (std::size_t index = 0; index < ClassicLadder.size(); ++index)
         if (ClassicLadder[index] == cacheItemId)
             return index < config.classicStages && ClassicStage(cacheItemId) <= released;
@@ -98,6 +104,9 @@ bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
 
 bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId, CacheConfig const& config)
 {
+    if (cacheItemId == KarazhanCache)
+        return tokenStage == 8 && IsCacheReleased(cacheItemId, config);
+
     uint32 stage = 0;
     switch (tokenStage)
     {
@@ -125,6 +134,7 @@ void LoadPrestigiousCachePools()
     config.tbcStages = uint8(std::min<uint32>(
         sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TbcStages", 0), TbcLadder.size()));
     config.previousStageOnly = sConfigMgr->GetOption<bool>("Ascension.PrestigiousCache.PreviousStageOnly", false);
+    config.callboardPreviousStageOnly = sConfigMgr->GetOption<bool>("Ascension.CallboardCache.PreviousStageOnly", false);
 
     std::unordered_map<uint32, CachePool> pools;
     if (QueryResult result = WorldDatabase.Query(
@@ -199,9 +209,8 @@ uint32 NewestReleasedCache(uint32 genericCacheItemId, CacheConfig const& config)
         return 0;
     if (genericCacheItemId == GenericCacheTbc)
         return NewestReleasedTier(TbcLadder, config);
-    if (config.tbcStages && sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) >= 70)
-        if (uint32 const tier = NewestReleasedTier(TbcLadder, config))
-            return tier;
+    if (uint32 const tier = NewestReleasedTier(TbcLadder, config))
+        return tier;
     return NewestReleasedTier(ClassicLadder, config);
 }
 

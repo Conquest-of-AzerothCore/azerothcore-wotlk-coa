@@ -23,13 +23,13 @@
       "id": "tank",
       "race": 1,
       "class": 18,
-      "level": 80
+      "level": 60
     },
     {
       "id": "raider",
       "race": 1,
       "class": 18,
-      "level": 80,
+      "level": 60,
       "allow_regeneration": false
     }
   ],
@@ -56,6 +56,7 @@
     {
       "action": "teleport",
       "label": "tank enters the real Karazhan at Prince Malchezaar's chamber",
+      "ignore_access": true,
       "actor": "tank",
       "map": 532,
       "x": -10959.2,
@@ -74,6 +75,7 @@
     {
       "action": "teleport",
       "label": "raider enters far from the chamber, out of melee/AOE range, to avoid incidental damage before the first wave",
+      "ignore_access": true,
       "actor": "raider",
       "map": 532,
       "x": -12100.0,
