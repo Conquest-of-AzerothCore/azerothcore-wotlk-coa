@@ -120,7 +120,7 @@ class HoundActions
     {
         Player* owner = Owner(_me->GetOwner());
         Unit* target = ObjectAccessor::GetUnit(*_me, victim);
-        if (!owner || !target || !owner->IsValidAttackTarget(target) || !_me->IsWithinDistInMap(target, 40.0f) ||
+        if (!owner || !target || !_me->IsValidAttackTarget(target) || !_me->IsWithinDistInMap(target, 40.0f) ||
             !_me->IsWithinLOSInMap(target) || _me->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         {
             _events.RescheduleEvent(EVENT_AUTO_LEAP, 1s);
@@ -194,7 +194,7 @@ class HoundActions
                         if (Unit* selected = owner->GetSelectedUnit())
                             if (selected->IsInCombatWith(owner))
                                 target = selected;
-                    if (target && owner->IsValidAttackTarget(target))
+                    if (target && _me->IsValidAttackTarget(target))
                         _me->AI()->AttackStart(target);
                     else if (_me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
                         _me->GetMotionMaster()->MoveFollow(owner, 2.0f, PET_FOLLOW_ANGLE);
@@ -204,7 +204,7 @@ class HoundActions
             else if (event == EVENT_CHECK_LANDING)
             {
                 Unit* target = ObjectAccessor::GetUnit(*_me, victim);
-                if (!target || !owner->IsValidAttackTarget(target))
+                if (!target || !_me->IsValidAttackTarget(target))
                     continue;
                 if (!_me->IsWithinMeleeRange(target))
                 {
