@@ -4,6 +4,7 @@
 #include "CoACreatureScalingPolicy.h"
 #include "CoADungeonNormal.h"
 #include "AllCreatureScript.h"
+#include "AscensionRaidReleasePolicy.h"
 #include "Config.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -23,6 +24,8 @@
 
 namespace
 {
+    constexpr float KarazhanEnemyHealthMultiplier = 1400000.0f / 422837.0f;
+
     std::mutex SettingsMutex;
     std::shared_ptr<CreatureScaling::Settings const> Configured = std::make_shared<CreatureScaling::Settings>();
     std::shared_ptr<CreatureScaling::Settings const> Override;
@@ -233,11 +236,13 @@ public:
     {
         if (!Enabled || !IsEligible(creature) || HasFlexHealth(creature))
             return;
+        Map const* map = creature->FindMap();
         CreatureScaling::Context const context = ContextOf(creature);
-        if (context == CreatureScaling::Context::None)
-            return;
-        float const multiplier = CreatureScaling::Multiplier(Active()->health, context, creature->GetMapId(),
-            creature->GetLevel());
+        float multiplier = context == CreatureScaling::Context::None ? 1.0f :
+            CreatureScaling::Multiplier(Active()->health, context, creature->GetMapId(), creature->GetLevel());
+        if (map && map->GetId() == RaidRelease::MapKarazhan && !map->IsScriptedPrivateInstance() &&
+            creature->IsHostileToPlayers())
+            multiplier *= KarazhanEnemyHealthMultiplier;
         if (multiplier == 1.0f)
             return;
         uint32 const health = CreatureScaling::Scaled(creature->GetCreateHealth(), multiplier);
