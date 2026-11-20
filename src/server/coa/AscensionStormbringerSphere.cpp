@@ -52,7 +52,7 @@ struct npc_ascension_power_sphere : ScriptedAI
             return;
         targetGuid = guid;
         if (Unit* target = ObjectAccessor::GetUnit(*me, targetGuid))
-            me->GetMotionMaster()->MoveChase(target, 0.0f);
+            me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f, MOTION_SLOT_ACTIVE, false, false);
     }
 
     void UpdateAI(uint32 diff) override
