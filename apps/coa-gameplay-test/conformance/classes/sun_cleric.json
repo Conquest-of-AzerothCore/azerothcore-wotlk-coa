@@ -54,7 +54,17 @@
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
   "effect_overrides": [],
-  "item_armor_subclass_effects": [],
+  "item_armor_subclass_effects": [
+    {
+      "spell": 680652,
+      "effect": 0,
+      "subclass": 4,
+      "item": 8094,
+      "slot": 4,
+      "required_level": 45,
+      "citation": "Enveloped in Light 680652: aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT, EffectMiscValue[0] 1, EffectMiscValueB[0] 16 (1<<ITEM_SUBCLASS_ARMOR_PLATE); SpellInfo.cpp:382 recognises 680652. Item 8094 Platemail Armor from acore_world.item_template of the in-RAM test database (read 2026-11-20 with: select entry,name,Quality,RequiredLevel,InventoryType,armor from item_template where class=4 and subclass=4 and InventoryType in (5,20) and Quality between 1 and 2 and RequiredLevel<=60 and RequiredLevel>0 and name not like 'Monster -%' and stat_value1..10=0 and spellid_1..5=0): Quality 1, RequiredLevel 45, InventoryType 5 (chest, slot 4), armor 359, no stats and no spell."
+    }
+  ],
   "unmodelled_effects": [],
   "literal_tokens": [],
   "effect_notes": [],
@@ -64,7 +74,167 @@
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 680652,
+      "name": "Enveloped in Light (Shadow damage taken)",
+      "kind": "taken_hit",
+      "variant": "shadow_taken",
+      "label_suffix": "shadow_taken",
+      "judge": "damage_ratio",
+      "expected": 0.97,
+      "quote": "and reduces Shadow damage taken by $s2%.",
+      "strike_spell": 47632,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            680652
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 680652,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            680652
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 680652,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "680652 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 32 (Shadow), BasePoints -4 (-3 as read). Grave Coil 47632 (600 Shadow, DmgClass 1 magic) strikes the caster without and with the passive learned; the damage ratio is judged against 0.97."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (melee critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "melee_crit",
+      "label_suffix": "melee_crit",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 8 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (ranged critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "ranged_crit",
+      "label_suffix": "ranged_crit",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 9
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 9 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (spell critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "spell_crit",
+      "label_suffix": "spell_crit",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 10 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    },
+    {
+      "spell": 807654,
+      "name": "Solar Discernment (expertise rating)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 807654,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 23
+      },
+      "before_expected": 10000,
+      "expected": 10020,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807654 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 3 (Intellect), BasePoints 11 (12). Combat rating 23 is read with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119), before and after the passive is learned: 12% of 167 = 20.04, within 1 for the rating's integer rounding."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],

@@ -1691,7 +1691,7 @@
     "spell": 680652,
     "clause": "Increases your armor contribution from plate items by $s1%",
     "labels": [
-      "680652 effect_value e0 #0"
+      "680652 e0 armor"
     ],
     "kind": "claim"
   },
@@ -1699,7 +1699,7 @@
     "spell": 680652,
     "clause": "and reduces Shadow damage taken by $s2%.",
     "labels": [
-      "680652 effect_value e1 #1"
+      "680652 behaviour_hit_ratio shadow_taken"
     ],
     "kind": "claim"
   },
@@ -3477,10 +3477,23 @@
   {
     "spell": 807654,
     "clause": "Increases your critical strike rating and expertise rating by $s1% of your Intellect.",
-    "labels": [
-      "807654 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your critical strike rating by $s1% of your Intellect",
+        "labels": [
+          "807654 behaviour_metric_delta melee_crit",
+          "807654 behaviour_metric_delta ranged_crit",
+          "807654 behaviour_metric_delta spell_crit"
+        ]
+      },
+      {
+        "claim": "and expertise rating by $s1% of your Intellect",
+        "labels": [
+          "807654 behaviour_metric_delta expertise"
+        ]
+      }
+    ]
   },
   {
     "spell": 807749,
