@@ -165,6 +165,83 @@
       "expected_source": "$s1 = 20 (504070 Effect[0] aura 107 on Dawnsear). Dawnsear 554406 Description: ${$m1+0+$spfi*0.765222}; $m1 = 668 + 1 .. 668 + 80 (EffectBasePoints 668, EffectDieSides 80): mean (669 + 748) / 2 = 708.5. With a spell power fixture of 10000 the coefficient part is 10000 x 0.765222 = 7652.22 and the bonus scales that part by 1.2: (708.5 + 7652.22 x 1.2) / (708.5 + 7652.22) = 1.1831. Control: Grace not learned. 823764 removes the dummy's magic resistance as in the Templar entries.",
       "cast_power": 1000,
       "critical": false
+    },
+    {
+      "spell": 301345,
+      "name": "Ancient Rites (maximum mana)",
+      "kind": "metric_delta",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "quote": "Increases your mana by $s2% of your Intellect,",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 358,
+      "before_expected": 1,
+      "expected_gain": 357,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301345 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 299 + 1 = 300 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119 (class file stat 3): 300% x 119 = 357 added to the maximum mana. Maximum mana read before and after the learn; expected_gain judges the difference, control = reading before the learn."
+    },
+    {
+      "spell": 301345,
+      "kind": "metric_delta",
+      "quote": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites (regeneration amount)",
+      "variant": "regen_amount",
+      "label_suffix": "regen_amount",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 301368
+      },
+      "expected": 129,
+      "before_expected": 0,
+      "wait_ms": 16000,
+      "observe_source": "301345 Effect[0] aura 227 periodic trigger, EffectBasePoints 3 + 1 = 4 (4%), EffectAmplitude 15000, triggers 301368 whose Effect[0] is ENERGIZE_PCT. One tick after 16000 ms: 4% of the maximum mana with the aura learned = 4% x (2868 + 357) = 129. 2868 is the maximum mana read before the learn by the regen_max_mana entry's twin (max_mana, run 20261120-203339) and 357 its proven gain: a fixture of the reference character, not a clause value. Control: nothing energized before the learn."
+    },
+    {
+      "spell": 301345,
+      "kind": "metric_delta",
+      "quote": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "name": "Ancient Rites (first tick by 16.4 s)",
+      "variant": "period_upper",
+      "label_suffix": "period_upper",
+      "expected": 1,
+      "wait_ms": 16400,
+      "observe_source": "301345 Effect[0] EffectAmplitude 15000 ($t1 = 15 sec). Energize events of 301368 counted 16400 ms after the learn and cast: exactly 1, so the period is at most 16.4 s (excludes 16.5 s, +10%). Control: 0 before the learn."
+    },
+    {
+      "spell": 301345,
+      "kind": "metric_delta",
+      "quote": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "name": "Ancient Rites (no second tick by 27.5 s)",
+      "variant": "period_lower",
+      "label_suffix": "period_lower",
+      "expected": 1,
+      "wait_ms": 27500,
+      "observe_source": "Same events counted 27500 ms after the learn: still exactly 1, so the period is above 13.75 s (excludes 13.5 s, -10%). With period_upper the period lies in (13.75, 16.4] s around the stated 15 s. Control: 0 before the learn."
     }
   ],
   "player_observations": [],

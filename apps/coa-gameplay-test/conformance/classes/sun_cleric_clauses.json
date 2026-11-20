@@ -680,18 +680,42 @@
   {
     "spell": 301345,
     "clause": "Increases your mana by $s2% of your Intellect,",
-    "labels": [
-      "301345 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your maximum mana by 300% of your Intellect",
+        "labels": [
+          "301345 behaviour_metric_delta max_mana"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = reading before the learn. Expected gain 3 x Intellect 119 (class file stat 3) = 357. Reference search: nothing found beyond the server DBC."
   },
   {
     "spell": 301345,
     "clause": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
-    "labels": [
-      "301345 aura_amplitude_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "regenerates mana equal to 4% of your maximum mana",
+        "labels": [
+          "301345 behaviour_metric_delta regen_amount"
+        ]
+      },
+      {
+        "claim": "every 15 sec: one tick by 16.4 s",
+        "labels": [
+          "301345 behaviour_metric_delta period_upper"
+        ]
+      },
+      {
+        "claim": "every 15 sec: no second tick by 27.5 s",
+        "labels": [
+          "301345 behaviour_metric_delta period_lower"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = count and total 0 before the learn. 4% x (2868 + 357) = 129, the maximum mana being the reference character's fixture. Nothing found in references beyond the server DBC."
   },
   {
     "spell": 301817,
