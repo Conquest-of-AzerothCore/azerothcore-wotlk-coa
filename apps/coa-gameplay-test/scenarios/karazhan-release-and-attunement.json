@@ -3,7 +3,7 @@
   "name": "Karazhan phase gate, personal unlock and bot exemption",
   "contract": [
     "Phase 8 closes Karazhan even to bots; phase 9 admits an unattuned bot.",
-    "A non-bot needs both the rewarded attunement quest and a subsequent actual raid boss kill.",
+    "A non-bot accepts Alturus's raid quest, kills Kel’Thuzad, and turns it in for the Master’s Key.",
     "The newly earned unlock survives logout and login."
   ],
   "timeout_ms": 120000,
@@ -125,21 +125,30 @@
       "equals": 0
     },
     {
-      "action": "prepare_quest",
+      "action": "teleport",
       "actor": "leader",
-      "quest": 9837
+      "map": 0,
+      "x": -11120.2,
+      "y": -2015.27,
+      "z": 47.1869,
+      "ignore_access": true
     },
     {
-      "action": "reward_quest",
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "quest_accept",
       "actor": "leader",
-      "quest": 9837
+      "quest": 200837,
+      "entry": 17613
     },
     {
       "action": "assert",
       "actor": "leader",
-      "metric": "quest_rewarded",
-      "quest": 9837,
-      "equals": 1
+      "metric": "quest_status",
+      "quest": 200837,
+      "equals": 3
     },
     {
       "action": "teleport",
@@ -187,12 +196,20 @@
       "radius": 90
     },
     {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "quest_status",
+      "quest": 200837,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
       "action": "teleport",
       "actor": "leader",
       "map": 0,
-      "x": -8826.9,
-      "y": 632.397,
-      "z": 93.8,
+      "x": -11120.2,
+      "y": -2015.27,
+      "z": 47.1869,
       "ignore_access": true
     },
     {
@@ -200,10 +217,26 @@
       "ms": 650
     },
     {
+      "action": "quest_turn_in",
+      "actor": "leader",
+      "quest": 200837,
+      "entry": 17613,
+      "reward": 0
+    },
+    {
       "action": "assert",
       "actor": "leader",
-      "metric": "map_id",
-      "equals": 0
+      "metric": "quest_rewarded",
+      "quest": 200837,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 24490,
+      "equals": 1
     },
     {
       "action": "relog",

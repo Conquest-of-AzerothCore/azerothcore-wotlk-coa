@@ -5,7 +5,6 @@
 #include "ChatCommand.h"
 #include "CommandScript.h"
 #include "Config.h"
-#include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GlobalScript.h"
@@ -28,14 +27,18 @@ namespace
 constexpr uint32 WorldStateStageOverride = 20120;
 constexpr uint32 WorldStateReleasedStage = 20121;
 constexpr uint32 KelThuzad = 15990;
-constexpr uint32 ReturnToKhadgar = 9837;
+constexpr uint32 LegacyReturnToKhadgar = 9837;
+constexpr uint32 KeyToKarazhan = 200837;
 constexpr char KarazhanUnlockSetting[] = "core.coa.karazhan";
 
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
 
-bool HasKarazhanUnlock(Player const* player)
+bool HasLegacyKarazhanUnlock(Player const* player)
 {
+    if (!player->GetQuestRewardStatus(LegacyReturnToKhadgar))
+        return false;
+
     PlayerSettingVector const* settings = player->FindPlayerSettings(KarazhanUnlockSetting);
     return settings && !settings->empty() && settings->front().IsEnabled();
 }
@@ -130,15 +133,9 @@ public:
         if (entry->MapID != RaidRelease::MapKarazhan || player->GetSession()->IsBot())
             return true;
 
-        if (!player->GetQuestRewardStatus(ReturnToKhadgar))
+        if (!player->GetQuestRewardStatus(KeyToKarazhan) && !HasLegacyKarazhanUnlock(player))
         {
-            player->GetSession()->SendAreaTriggerMessage("Complete Return to Khadgar to enter Karazhan.");
-            return false;
-        }
-
-        if (!HasKarazhanUnlock(player))
-        {
-            player->GetSession()->SendAreaTriggerMessage("Defeat Kel'Thuzad in Naxxramas to enter Karazhan.");
+            player->GetSession()->SendAreaTriggerMessage("Complete The Key to Karazhan from Archmage Alturus.");
             return false;
         }
 
@@ -162,13 +159,9 @@ public:
         for (auto const& reference : map->GetPlayers())
         {
             Player* player = reference.GetSource();
-            if (!player || player->GetSession()->IsBot() || !player->IsAtGroupRewardDistance(source) ||
-                HasKarazhanUnlock(player))
-                continue;
-
-            player->UpdatePlayerSetting(KarazhanUnlockSetting, 0, 1);
-            CharacterDatabase.Execute(PlayerSettingsStore::PrepareReplaceStatement(player->GetGUID().GetCounter(),
-                KarazhanUnlockSetting, *player->FindPlayerSettings(KarazhanUnlockSetting)));
+            if (player && !player->GetSession()->IsBot() && player->IsAtGroupRewardDistance(source) &&
+                player->GetQuestStatus(KeyToKarazhan) == QUEST_STATUS_INCOMPLETE)
+                player->KilledMonsterCredit(KelThuzad, source->GetGUID());
         }
     }
 };
