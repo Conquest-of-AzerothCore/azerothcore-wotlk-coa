@@ -448,7 +448,7 @@
     "spell": 300369,
     "clause": "Damage dealt by Radiant Flame now has a $h% chance to launch a Solar Flare at your target.",
     "labels": [
-      "300369 effect_value #0"
+      "300369 proc_rate"
     ],
     "kind": "claim"
   },
@@ -456,7 +456,7 @@
     "spell": 300369,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
     "labels": [
-      "300369 effect_value 807175e1 #1"
+      "804630 behaviour_metric_delta flare_damage"
     ],
     "kind": "claim"
   },
@@ -464,8 +464,8 @@
     "spell": 300369,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
-      "300369 effect_value 807175e0 #2",
-      "300369 spell_duration 807175 #3"
+      "804630 behaviour_metric_delta flare_hit",
+      "804630 behaviour_metric_delta flare_duration"
     ],
     "kind": "claim"
   },
@@ -3017,7 +3017,11 @@
     "spell": 804630,
     "clause": "Casting Rapture now causes your next Dawnsear within $804631d to strike your target twice and launch a Solar Flare at the target.",
     "labels": [
-      "804630 spell_duration 804631 #0"
+      "804630 behaviour_metric_delta twice",
+      "804630 behaviour_metric_delta flare_count",
+      "804630 behaviour_metric_delta window_in",
+      "804630 behaviour_metric_delta window_out",
+      "804630 behaviour_metric_delta window_age"
     ],
     "kind": "claim"
   },
@@ -3025,7 +3029,7 @@
     "spell": 804630,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
     "labels": [
-      "804630 effect_value 807175e1 #1"
+      "804630 behaviour_metric_delta flare_damage"
     ],
     "kind": "claim"
   },
@@ -3033,8 +3037,8 @@
     "spell": 804630,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
-      "804630 effect_value 807175e0 #2",
-      "804630 spell_duration 807175 #3"
+      "804630 behaviour_metric_delta flare_hit",
+      "804630 behaviour_metric_delta flare_duration"
     ],
     "kind": "claim"
   },
