@@ -41,7 +41,7 @@ struct RaidStage
     std::uint32_t stage;
 };
 
-constexpr std::array<RaidStage, 13> RaidStages = {{
+constexpr std::array<RaidStage, 14> RaidStages = {{
     { MapZulGurub, StageZulGurub },
     { MapSetis, StageZulGurub },
     { MapAzuregos, StageZulGurub },
@@ -54,6 +54,7 @@ constexpr std::array<RaidStage, 13> RaidStages = {{
     { MapBlackwingLair, StageBlackwingLair },
     { MapRuinsOfAhnQiraj, StageAhnQiraj },
     { MapTempleOfAhnQiraj, StageAhnQiraj },
+    { MapNaxxramas, StageNaxxramas },
     { MapKarazhan, StageKarazhan }
 }};
 
