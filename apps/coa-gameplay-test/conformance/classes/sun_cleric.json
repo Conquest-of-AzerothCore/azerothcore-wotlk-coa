@@ -1133,154 +1133,129 @@
     {
       "spell": 807964,
       "name": "Soul of Light (An'she's Blessing cooldown)",
-      "kind": "metric_delta",
+      "kind": "cost_gate",
       "variant": "cooldown",
       "label_suffix": "cooldown",
       "quote": "Reduces the cooldown of An'she's Blessing by $/1000;s1 sec",
-      "trigger_spell": 804058,
-      "gate_spell": 807964,
+      "gated_spell": 804058,
+      "resource": "cooldown",
+      "reduction": 60000,
       "target": "caster",
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 804058
-      },
-      "before_expected": 120000,
-      "expected": 60000,
-      "expected_gain": -60000,
-      "tolerance": 600,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "807964 Soul of Light Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (cooldown), BasePoints -60001 (-60000 ms, $/1000;s1 = 60 s), class mask word 1 = 33554432 = An'she's Blessing 804058's SpellFamilyFlags[1] (RecoveryTime 180000). An'she's Blessing is cast in both phases and its remaining cooldown read right after; the gain is the difference of the two phases (-60000, tolerance 600), the before reading must reach 120000 so that no floor hides it. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC."
+      "observe_source": "807964 Soul of Light Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (cooldown), BasePoints -60001 (-60000 ms, $/1000;s1 = 60 s), class mask word 1 = 33554432 = An'she's Blessing 804058's SpellFamilyFlags[1] (RecoveryTime 180000, CategoryRecoveryTime 180000, target caster, no power cost). Behaviour route: An'she's Blessing is cast and attempted again 120500 ms after the cast (60000 ms less than its cooldown plus 500 ms): refused without Soul of Light (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 119500 ms after the cast, so the cut lies within 500 ms (0.8%) of 60000 ms, inside 10% on both sides. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 804058 shows 9 SPELL_AURA_APPLIED events in 5 logs and no cooldown figure; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 300318,
       "name": "Light's Blessing (Pendant of the Sun cooldown)",
-      "kind": "metric_delta",
+      "kind": "cost_gate",
       "variant": "cooldown",
       "label_suffix": "cooldown",
       "quote": "Casting Sunslam now reduces the cooldown of Pendant of the Sun by $/1000;570145s2 sec.",
-      "trigger_spell": 805629,
-      "gate_spell": 300318,
-      "setup_casts": [
-        680630
+      "gated_spell": 680630,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "target": "caster",
+      "after_casts": [
+        [
+          805629,
+          "dummy"
+        ]
       ],
-      "setup_wait_ms": 1600,
-      "target": "dummy",
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 680630
-      },
-      "before_expected": 40000,
-      "expected": 30000,
-      "expected_gain": -10000,
-      "tolerance": 600,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "300318 Light's Blessing Effect[0] PROC_TRIGGER_SPELL 570145; 570145 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -10001 (-10000 ms, $/1000;570145s2 = 10 s), MiscValue 680630 Pendant of the Sun (RecoveryTime 60000). Pendant of the Sun is cast first in both phases, then Sunslam 805629; Pendant's remaining cooldown is read right after. The gain is the difference of the two phases (-10000, tolerance 600); the before reading must reach 40000. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Sunslam targets an enemy (a cast at the caster fails with reason 12, SPELL_FAILED_BAD_TARGETS, in the first run), so the trigger is cast at the dummy and Pendant of the Sun at the caster.",
-      "setup_target": "caster"
+      "after_wait_ms": 1600,
+      "observe_source": "300318 Light's Blessing Effect[0] PROC_TRIGGER_SPELL 570145; 570145 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -10001 (-10000 ms, $/1000;570145s2 = 10 s), MiscValue 680630 Pendant of the Sun (RecoveryTime 60000, target caster). Behaviour route: Pendant of the Sun is cast, Sunslam 805629 is cast at the dummy 1600 ms later (in every arm; Light's Blessing is learned only in the arms with it), and Pendant is attempted again 50500 ms after its cast (10000 ms less than its cooldown plus 500 ms): refused without the talent (control arm), accepted with it, and refused again 49500 ms after the cast, so the cut lies within 500 ms (5%) of 10000 ms, inside 10% on both sides. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 680630 shows 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 707414,
       "name": "It's Always Sunny (Radiance cooldown)",
-      "kind": "metric_delta",
+      "kind": "cost_gate",
       "variant": "radiance",
       "label_suffix": "radiance",
       "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
-      "trigger_spell": 804584,
-      "gate_spell": 707414,
-      "target": "dummy",
-      "setup_casts": [
-        800054
-      ],
-      "setup_wait_ms": 1600,
-      "phase_auras": [
+      "gated_spell": 800054,
+      "resource": "cooldown",
+      "reduction": 11920.0,
+      "target": "caster",
+      "after_casts": [
         [
-          500149,
-          20,
-          "caster",
+          804584,
           "caster"
         ]
       ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 800054
-      },
-      "before_expected": 99600,
-      "expected": 89640.0,
-      "expected_ratio": 0.9,
-      "tolerance": 0.01,
-      "wait_ms": 500,
-      "expire_ms": 61000,
-      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Radiance (120000 ms cooldown) is cast first in both phases, then Dawn 804584 with 20 Solar Power 500149 (a precondition fixture by harness set_aura) activates Dawn; the remaining cooldown of Radiance is read right after. The reading after the passive is learned is judged as a ratio of the reading before it (0.9, tolerance 0.01); the before reading must reach 99600. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Whether the 10% is of the remaining or of the full cooldown the tooltip does not say; the two differ by less than the tolerance here. Dawn lasts 60000 ms (DurationIndex 3) and the toggle of 804584 cancels it, so the pause between the phases is 61000 ms: the second phase starts without Dawn, as the first (the first run read Dawn gone after the second cast, a diagnostic probe, because the second cast cancelled the first phase's Dawn)."
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
+        }
+      ],
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Radiance (cooldown 120000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Radiance is attempted again 108330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 107830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 11840 ms at the Dawn cast) or of the full cooldown (12000 ms) the tooltip does not say; the stated cut is taken as their midpoint 11920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 707414,
       "name": "It's Always Sunny (Valkyr's Calling cooldown)",
-      "kind": "metric_delta",
+      "kind": "cost_gate",
       "variant": "valkyrs_calling",
       "label_suffix": "valkyrs_calling",
       "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
-      "trigger_spell": 804584,
-      "gate_spell": 707414,
+      "gated_spell": 520024,
+      "resource": "cooldown",
+      "reduction": 17920.0,
       "target": "dummy",
-      "setup_casts": [
-        520024
-      ],
-      "setup_wait_ms": 1600,
-      "phase_auras": [
+      "after_casts": [
         [
-          500149,
-          20,
-          "caster",
+          804584,
           "caster"
         ]
       ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 520024
-      },
-      "before_expected": 149400,
-      "expected": 134460.0,
-      "expected_ratio": 0.9,
-      "tolerance": 0.01,
-      "wait_ms": 500,
-      "expire_ms": 61000,
-      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Valkyr's Calling (180000 ms cooldown) is cast first in both phases, then Dawn 804584 with 20 Solar Power 500149 (a precondition fixture by harness set_aura) activates Dawn; the remaining cooldown of Valkyr's Calling is read right after. The reading after the passive is learned is judged as a ratio of the reading before it (0.9, tolerance 0.01); the before reading must reach 149400. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Whether the 10% is of the remaining or of the full cooldown the tooltip does not say; the two differ by less than the tolerance here. Dawn lasts 60000 ms (DurationIndex 3) and the toggle of 804584 cancels it, so the pause between the phases is 61000 ms: the second phase starts without Dawn, as the first (the first run read Dawn gone after the second cast, a diagnostic probe, because the second cast cancelled the first phase's Dawn)."
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
+        }
+      ],
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Valkyr's Calling (cooldown 180000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Valkyr's Calling is attempted again 162330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 161830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 17840 ms at the Dawn cast) or of the full cooldown (18000 ms) the tooltip does not say; the stated cut is taken as their midpoint 17920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 707414,
       "name": "It's Always Sunny (Sunslam cooldown)",
-      "kind": "metric_delta",
+      "kind": "cost_gate",
       "variant": "sunslam",
       "label_suffix": "sunslam",
       "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
-      "trigger_spell": 804584,
-      "gate_spell": 707414,
+      "gated_spell": 805629,
+      "resource": "cooldown",
+      "reduction": 4420.0,
       "target": "dummy",
-      "setup_casts": [
-        805629,
-        804584
-      ],
-      "setup_wait_ms": 1600,
-      "phase_auras": [
+      "after_casts": [
         [
-          500149,
-          20,
-          "caster",
+          804584,
           "caster"
         ]
       ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 805629
-      },
-      "before_expected": 36000,
-      "expected": 32400.0,
-      "expected_ratio": 0.9,
-      "tolerance": 0.01,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (45000 ms cooldown) is cast first in both phases, then Dawn 804584 with 20 Solar Power 500149 (a precondition fixture by harness set_aura) activates Dawn; the remaining cooldown of Sunslam is read right after. The reading after the passive is learned is judged as a ratio of the reading before it (0.9, tolerance 0.01); the before reading must reach 36000. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Whether the 10% is of the remaining or of the full cooldown the tooltip does not say; the two differ by less than the tolerance here."
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
+        }
+      ],
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (cooldown 45000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Sunslam is attempted again 40830 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 40330 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 4340 ms at the Dawn cast) or of the full cooldown (4500 ms) the tooltip does not say; the stated cut is taken as their midpoint 4420 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
+      "arm_wait_ms": 25000
     },
     {
       "spell": 804269,
@@ -1328,7 +1303,7 @@
       "tolerance": 1.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "As attack_power, with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119, as the Solar Discernment entries measured): the gain is 1.25 x 167 = 208.75, so the 125% is of Intellect, not a flat value. Control: the phase without the passive."
+      "observe_source": "As attack_power, with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119, as the Solar Discernment entries measured): the gain is 1.25 x 167 = 208.75, so the 125% is of Intellect, not a flat value. Control: the phase without the passive. Reference search 2026-11-20: bindmysoul has no Solemn Priest entry (advancement.tsv lists the name only); coa-history spell 804269: 0 events in 186 logs; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 805816,
@@ -1518,7 +1493,7 @@
           23000
         ]
       },
-      "observe_source": "804405 DurationIndex 18 (20000 ms, $804405d). One real Illumination 500143 on the caster at 50% health with Faith learned at the start; the cast time is 2000 ms (CastingTimes 5), so Faith lands about 2000 ms after the cast starts (the first run, windows 19000..21000, still read the aura at 20818 ms). The aura 804405 is present when read 21000..21600 ms after the cast starts and gone when read 22400..23000 ms after it, that is about 19000..19600 and 20400..21000 ms after it landed: the duration lies between 19000 and 21000 plus the landing delay, inside 10% of 20000 (18000..22000) on both sides. Control (before): no cast, absent."
+      "observe_source": "804405 DurationIndex 18 (20000 ms, $804405d). One real Illumination 500143 on the caster at 50% health with Faith learned at the start; the cast time is 2000 ms (CastingTimes 5), so Faith lands about 2000 ms after the cast starts (the first run, windows 19000..21000, still read the aura at 20818 ms). The aura 804405 is present when read 21000..21600 ms after the cast starts and gone when read 22400..23000 ms after it, that is about 19000..19600 and 20400..21000 ms after it landed: the duration lies between 19000 and 21000 plus the landing delay, inside 10% of 20000 (18000..22000) on both sides. Control (before): no cast, absent. Reference search 2026-11-20: coa-history spell 707077: 0 events in 186 logs; Faith 804405 shows 6950 applications and 32671 refreshes in 25-26 logs, no duration reading taken from them; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 560859,
@@ -1694,7 +1669,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). The aura 804057 on the dummy (Harvest Golem 36, immunity set -93 = fear and horror only) is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it: the duration lies in 5500..6500, inside 10% of 6000 (5400..6600) on both sides. Control (before): no cast, absent.",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). The aura 804057 on the dummy (Harvest Golem 36, immunity set -93 = fear and horror only) is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it: the duration lies in 5500..6500, inside 10% of 6000 (5400..6600) on both sides. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "wait_ms": 5700,
       "expiry_wait_ms": 500,
       "after_expiry_expected": 0,
@@ -1729,7 +1704,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Brittlebones Skeleton 201 (type 6 Undead, immunity set -93 = fear and horror only): the aura 807778 is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it, inside 10% of 6000 on both sides. Control (before): no cast, absent.",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Brittlebones Skeleton 201 (type 6 Undead, immunity set -93 = fear and horror only): the aura 807778 is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it, inside 10% of 6000 on both sides. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "target_entry": 201,
       "wait_ms": 5700,
       "expiry_wait_ms": 500,
@@ -1765,7 +1740,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Imp 416 (type 3 Demon, no immunities): the aura 807778 is present 1000 ms after the cast. Control (before): no cast, absent.",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Imp 416 (type 3 Demon, no immunities): the aura 807778 is present 1000 ms after the cast. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "target_entry": 416,
       "wait_ms": 1000
     },
@@ -1789,7 +1764,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Control for the Undead and Demon clause: Kobold Vermin 6 (type 7 Humanoid, no immunities) is disarmed by the same cast (the disarm_humanoid entry) but the aura 807778 reads 0 1000 ms after it.",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Control for the Undead and Demon clause: Kobold Vermin 6 (type 7 Humanoid, no immunities) is disarmed by the same cast (the disarm_humanoid entry) but the aura 807778 reads 0 1000 ms after it. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "target_entry": 6,
       "wait_ms": 1000
     },
@@ -1813,7 +1788,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Kobold Vermin 6 (type 7 Humanoid): the disarm aura 804057 is present 1000 ms after the cast; the pairing arm of the humanoid_unaffected control. Control (before): no cast, absent.",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Kobold Vermin 6 (type 7 Humanoid): the disarm aura 804057 is present 1000 ms after the cast; the pairing arm of the humanoid_unaffected control. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "target_entry": 6,
       "wait_ms": 1000
     },
@@ -1837,7 +1812,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543 (Undead, level 34, creature_immunities -273, MechanicsMask 1234599606 = 0x24CB3F5B, which lists SILENCE and not DISARM; the first run used 11446 Gordok Spirit by a wrong join, its immunity set -96 is fear and horror only): the aura 804057 reads 0 1000 ms after the cast, while the same Undead type Brittlebones Skeleton 201, not silence immune, carries 807778 (undead_duration) and a disarm. Control arm: undead_duration and disarm_humanoid show the cast lands on enemies without the immunity.",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543 (Undead, level 34, creature_immunities -273, MechanicsMask 1234599606 = 0x24CB3F5B, which lists SILENCE and not DISARM; the first run used 11446 Gordok Spirit by a wrong join, its immunity set -96 is fear and horror only): the aura 804057 reads 0 1000 ms after the cast, while the same Undead type Brittlebones Skeleton 201, not silence immune, carries 807778 (undead_duration) and a disarm. Control arm: undead_duration and disarm_humanoid show the cast lands on enemies without the immunity. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "target_entry": 4543,
       "wait_ms": 1000
     },
@@ -1861,7 +1836,7 @@
       "expire_ms": 500,
       "gate_timing": "start",
       "trigger_only_after": true,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543, as silence_immune: the aura 807778 reads 0 1000 ms after the cast although it is an Undead (the control of undead_duration, 201, carries it).",
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543, as silence_immune: the aura 807778 reads 0 1000 ms after the cast although it is an Undead (the control of undead_duration, 201, carries it). Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "target_entry": 4543,
       "wait_ms": 1000
     },
@@ -1909,10 +1884,11 @@
       },
       "critical": false,
       "trials": 100,
-      "parts": 3,
+      "parts": 12,
       "cast_power": 1363,
-      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Treatment arm: Vindicator learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, Vindicator not learned. Ignoring 10% of 5528 armor leaves 4975.2: the mean hit ratio is (5528 + 5500) / (4975.2 + 5500) = 1.0528 (+5.28%, band 2 points).",
-      "cast_spell": 803913
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Treatment arm: Vindicator learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, Vindicator not learned. Ignoring 10% of 5528 armor leaves 4975.2: the mean hit ratio is (5528 + 5500) / (4975.2 + 5500) = 1.0528 (+5.28%). The band is that of the stated 10% (G-19: the larger of 5% of it and 2 points, 8% to 12%), mapped through the same formula: 8% gives (5528 + 5500) / (5085.76 + 5500) = 1.0418 (+4.18%) and 12% gives (5528 + 5500) / (4864.64 + 5500) = 1.0640 (+6.40%), so the judged band is +-1.1 points on +5.28% (band_points 1.1, the smaller side), and a server ignoring 5% (+2.57%) or 15% (+8.13%) lies outside it. The 99% half-width at 498 trials per arm was 0.87 points (prove1, 3 parts of 166), so about 1930 trials per arm give the 0.44 the pilot sizes to: 12 parts of 166. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence (\"ignores -10%\", the sign an export artefact); coa-history spell 704938: 0 events in 186 logs, 803913 Glorious Execution 929 casts in 6 logs, no armor figure; nothing found beyond the tooltip and the DBC.",
+      "cast_spell": 803913,
+      "band_points": 1.1
     },
     {
       "spell": 704938,
@@ -1950,7 +1926,7 @@
       "trials": 100,
       "parts": 3,
       "cast_power": 1363,
-      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Contrast arm of the Vow condition: Vindicator learned in the treatment arm, Vow of the Valkyr on the caster in neither arm; the hit must not change, expected mean ratio 1.0 (band 2 points).",
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Contrast arm of the Vow condition: Vindicator learned in the treatment arm, Vow of the Valkyr on the caster in neither arm; the hit must not change, expected mean ratio 1.0 (band 2 points). Reference search 2026-11-20: as ignores_armor; nothing found beyond the tooltip and the DBC.",
       "cast_spell": 803913
     },
     {
@@ -2031,7 +2007,7 @@
       "before_expected": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[1] SCHOOL_DAMAGE, BasePoints 50 (+1), RealPointsPerLevel 1.9, DieSides 1: $m2+$ppl2 = 136.5 at the reference level and spell power 0 (the tooltip reading of the reference character). The damage of 807175 on the dummy is read after one Horusath Blast, in a window of 1 around the stated 136.5 for the integer step; the control phase reads 0 (no Solar Concord, no Solar Flare). Reference search: the community snapshot reads 137 + 26% SP, nothing else found. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: 136.5 x 1.20 = 163.8, read as 163 (truncated).",
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[1] SCHOOL_DAMAGE, BasePoints 50 (+1), RealPointsPerLevel 1.9, DieSides 1: $m2+$ppl2 = 136.5 at the reference level and spell power 0 (the tooltip reading of the reference character). The damage of 807175 on the dummy is read after one Horusath Blast, in a window of 1 around the stated 136.5 for the integer step; the control phase reads 0 (no Solar Concord, no Solar Flare). Reference search: the community snapshot reads 137 + 26% SP, nothing else found. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: 136.5 x 1.20 = 163.8, read as 163 (truncated). Order of revision: the first run read 163 and 3283 against an expectation without the Sunrise factor; the x1.20 factor (500477 Effect[0] aura 79, BasePoints 19, from the DBC) was added to the expectation afterwards, from the DBC and not from the measured value.",
       "expected": 163.8,
       "after_at_least": 163,
       "after_at_most": 164
@@ -2080,7 +2056,7 @@
       "before_expected": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. As flare_damage at +10000 spell power (the player fixture, both phases): 136.5 + 0.26 x 10000 = 2736.5, the contrast that proves the $SP*0.26 term; the control phase reads 0. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: (136.5 + 2600) x 1.20 = 3283.8, read as 3283.",
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. As flare_damage at +10000 spell power (the player fixture, both phases): 136.5 + 0.26 x 10000 = 2736.5, the contrast that proves the $SP*0.26 term; the control phase reads 0. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: (136.5 + 2600) x 1.20 = 3283.8, read as 3283. Reference search 2026-11-20: bindmysoul Solar Concord text gives Solar Flare '137 + 26% SP Holyflame Damage ... reduces the target's chance to hit by -3% for 10 seconds' (the same figures, the sign an export artefact); coa-history spell 807175: 15499 SPELL_DAMAGE events in 29 logs, 3..3191, no hit-chance reading; nothing found beyond the tooltip and the DBC. Order of revision: the first run read 163 and 3283 against an expectation without the Sunrise factor; the x1.20 factor (500477 Effect[0] aura 79, BasePoints 19, from the DBC) was added to the expectation afterwards, from the DBC and not from the measured value.",
       "expected": 3283.8,
       "after_at_least": 3283,
       "after_at_most": 3284,
@@ -2130,7 +2106,7 @@
       "before_expected": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE, BasePoints -4 (+1 = -3, $s1 = 3). The live amount of effect 0 of the aura 807175 on the dummy is read after one Horusath Blast: -3 with Solar Concord, no aura (0) in the control phase. The amount is a read of the live aura, not of a hit roll.",
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE, BasePoints -4 (+1 = -3, $s1 = 3). The live amount of effect 0 of the aura 807175 on the dummy is read after one Horusath Blast: -3 with Solar Concord, no aura (0) in the control phase. The amount is a read of the live aura, not of a hit roll. Reference search 2026-11-20: bindmysoul Solar Concord text gives Solar Flare '137 + 26% SP Holyflame Damage ... reduces the target's chance to hit by -3% for 10 seconds' (the same figures, the sign an export artefact); coa-history spell 807175: 15499 SPELL_DAMAGE events in 29 logs, 3..3191, no hit-chance reading; nothing found beyond the tooltip and the DBC.",
       "expected": -3,
       "tolerance": 0.5,
       "measure_actor": "dummy"
@@ -2179,7 +2155,7 @@
       "before_expected": 0,
       "wait_ms": 9500,
       "expire_ms": 500,
-      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. 807175 DurationIndex 1 (10000 ms, $d of the spell 807175). The aura 807175 on the dummy is present when read 9200..9800 ms after the Horusath Blast cast and gone when read 10300..10900 ms after it, inside 10% of 10000 (9000..11000) on both sides; the control phase reads it absent.",
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. 807175 DurationIndex 1 (10000 ms, $d of the spell 807175). The aura 807175 on the dummy is present when read 9200..9800 ms after the Horusath Blast cast and gone when read 10300..10900 ms after it, inside 10% of 10000 (9000..11000) on both sides; the control phase reads it absent. Reference search 2026-11-20: bindmysoul Solar Concord text gives Solar Flare '137 + 26% SP Holyflame Damage ... reduces the target's chance to hit by -3% for 10 seconds' (the same figures, the sign an export artefact); coa-history spell 807175: 15499 SPELL_DAMAGE events in 29 logs, 3..3191, no hit-chance reading; nothing found beyond the tooltip and the DBC.",
       "expected": 1,
       "measure_actor": "dummy",
       "gate_timing": "start",
@@ -2271,7 +2247,7 @@
       "expected": 11282.5,
       "after_at_least": 11250,
       "after_at_most": 11315,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. As damage at +10000 spell power (player fixture, both phases): + 1.03734 x 10000 = 10373.4, so 11250.1..11314.1, read as 11250..11315; the contrast that proves the $spfi*1.03734 term. Control: no cast, 0.",
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. As damage at +10000 spell power (player fixture, both phases): + 1.03734 x 10000 = 10373.4, so 11250.1..11314.1, read as 11250..11315; the contrast that proves the $spfi*1.03734 term. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "player_spell_power": 10000
     },
     {
@@ -2310,7 +2286,7 @@
       "expected": 908.5,
       "after_at_least": 876,
       "after_at_most": 941,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. A second dummy (area1) stands 4 yd from the caster, nearer than the target dummy, inside the radius. At spell power 0 each hit reads its own roll: the enemy struck first takes the full 876.7..940.7 (read 876..941). The enemy struck second is read by second_enemy_primary: 0.85 of a roll, 745.2..799.6 (EffectDamageMultiplier[0] 0.85), below the first. The first-run reads at +20000 spell power (40940 on area1, 34748 on the target = 0.85 of 40880) showed the 0.85 step; the order of the two enemies is the engine's, not a claim of the tooltip. Control: no cast, 0.",
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. A second dummy (area1) stands 4 yd from the caster, nearer than the target dummy, inside the radius. At spell power 0 each hit reads its own roll: the enemy struck first takes the full 876.7..940.7 (read 876..941). The enemy struck second is read by second_enemy_primary: 0.85 of a roll, 745.2..799.6 (EffectDamageMultiplier[0] 0.85), below the first. The first-run reads at +20000 spell power (40940 on area1, 34748 on the target = 0.85 of 40880) showed the 0.85 step; the order of the two enemies is the engine's, not a claim of the tooltip. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "area_dummies": [
         4.0
       ]
@@ -2351,7 +2327,7 @@
       "expected": 772.4,
       "after_at_least": 745,
       "after_at_most": 800,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. The same cast as second_enemy, read on the target dummy (struck second): 0.85 x (876.7..940.7) = 745.2..799.6, read 745..800; the full roll would be at least 876, so a reading of 1.0 fails. Control: no cast, 0.",
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. The same cast as second_enemy, read on the target dummy (struck second): 0.85 x (876.7..940.7) = 745.2..799.6, read 745..800; the full roll would be at least 876, so a reading of 1.0 fails. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "area_dummies": [
         4.0
       ]
@@ -2392,7 +2368,7 @@
       "expected": 908.5,
       "after_at_least": 876,
       "after_at_most": 941,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Target Fire Elemental 575 (immunity set -300: school 0x4 FIRE and mechanics): Rapture still deals 876.7..940.7, read 876..941; the contrast (control) is Dawnsear 554406, a Fire spell without the attribute, which deals 0 to the same creature (immune_fire_control).",
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Target Fire Elemental 575 (immunity set -300: school 0x4 FIRE and mechanics): Rapture still deals 876.7..940.7, read 876..941; the contrast (control) is Dawnsear 554406, a Fire spell without the attribute, which deals 0 to the same creature (immune_fire_control). Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "target_entry": 575
     },
     {
@@ -2431,7 +2407,7 @@
       "expected": 0.0,
       "after_at_least": 0,
       "after_at_most": 0,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0.",
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "target_entry": 575
     },
     {
@@ -2472,7 +2448,7 @@
       "tolerance": 0.15,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Gavel of Light 800611 hits the dummy and the server copies a share of its damage to the caster as 707522 (AscensionSunClericAbilities.cpp:283-290): the share is the effect value of the passive 707521, BasePoints 49 + 1 = 50 ($707521s1, 'heal yourself equal to $707521s1% of the damage dealt'). Solemn Priest 804269 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) BasePoints 49 + 1 = 50 ($s2) on the class mask of 707521 (SpellFamilyFlags[0] 2097152): 'an additional 50% of its damage dealt', so 100% of the damage with the passive against 50% without. Both phases cast one Gavel of Light at the dummy with the caster at 50% health and +20000 attack power (a harness fixture) so that the hit is the same to 0.4% from one cast to the next (the weapon roll of 17..29 is lost against about 3400 of attack power (20000 / 14 x 2.4)); the first run, as a hit_ratio of the heals, could not read a heal on the caster (a hit_ratio reads the heals on the target of the cast). spell_heal_total sums every matching heal event since the scenario started (the leech_ratio note), so the after reading carries the before heal: (H + 2H) / H = 3.0, tolerance 0.15 (the 5-point band on +100%). Both phases carry the class tuning aura 887015 (-20% healing done) alike. Control: the phase without the passive."
+      "observe_source": "Gavel of Light 800611 hits the dummy and the server copies a share of its damage to the caster as 707522 (AscensionSunClericAbilities.cpp:283-290): the share is the effect value of the passive 707521, BasePoints 49 + 1 = 50 ($707521s1, 'heal yourself equal to $707521s1% of the damage dealt'). Solemn Priest 804269 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) BasePoints 49 + 1 = 50 ($s2) on the class mask of 707521 (SpellFamilyFlags[0] 2097152): 'an additional 50% of its damage dealt', so 100% of the damage with the passive against 50% without. Both phases cast one Gavel of Light at the dummy with the caster at 50% health and +20000 attack power (a harness fixture) so that the hit is the same to 0.4% from one cast to the next (the weapon roll of 17..29 is lost against about 3400 of attack power (20000 / 14 x 2.4)); the first run, as a hit_ratio of the heals, could not read a heal on the caster (a hit_ratio reads the heals on the target of the cast). spell_heal_total sums every matching heal event since the scenario started (the leech_ratio note), so the after reading carries the before heal: (H + 2H) / H = 3.0, tolerance 0.15 (the 5-point band on +100%). Both phases carry the class tuning aura 887015 (-20% healing done) alike. Control: the phase without the passive. Reference search 2026-11-20: bindmysoul has no Solemn Priest entry (advancement.tsv lists the name only); coa-history spell 804269: 0 events in 186 logs; nothing found beyond the tooltip and the DBC. Fixture 984954 ('Reg’s Test Aura') carries Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints 100 (+101% weapon crit), so every Gavel hit (800611, DmgClass 2, melee) is a critical strike in both phases; the heal is a share of the damage dealt, so the ratio of the two phases is unaffected."
     },
     {
       "spell": 807964,
@@ -2516,7 +2492,7 @@
       "tolerance": 0.15,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "807964 Soul of Light Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 99 (+1 = +100%) on the class mask word 2 = 536870912 = 807750's SpellFamilyFlags[2]: 807750 Effect[0] BasePoints 9 + 1 = 10 ($807750s1, 'heals the nearest nearby ally for $s1% of the value'). Vow of Light 807547 is cast on the caster in both phases; Light of the Naaru 41394 (1100 Holy) then hits the caster (50% health), and the Vow's copy heal 505197 (the script heals the nearest ally, the caster itself when alone: AscensionSunClericEvents.cpp:236-240, Amount(807750, 0, player) with the caster so spell mods apply) is read. spell_heal_total sums every heal event since the scenario started, so the second reading carries the first: (H + 2H) / H = 3.0 if the value is doubled, 2.0 if not (tolerance 0.15, the 5-point band on +100%). Both phases carry the class tuning aura 887015 alike. Crit forced out by 984954. Control: the phase without Soul of Light. Reference search: nothing found beyond the tooltip and the DBC."
+      "observe_source": "807964 Soul of Light Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 99 (+1 = +100%) on the class mask word 2 = 536870912 = 807750's SpellFamilyFlags[2]: 807750 Effect[0] BasePoints 9 + 1 = 10 ($807750s1, 'heals the nearest nearby ally for $s1% of the value'). Vow of Light 807547 is cast on the caster in both phases; Light of the Naaru 41394 (1100 Holy) then hits the caster (50% health), and the Vow's copy heal 505197 (the script heals the nearest ally, the caster itself when alone: AscensionSunClericEvents.cpp:236-240, Amount(807750, 0, player) with the caster so spell mods apply) is read. spell_heal_total sums every heal event since the scenario started, so the second reading carries the first: (H + 2H) / H = 3.0 if the value is doubled, 2.0 if not (tolerance 0.15, the 5-point band on +100%). Both phases carry the class tuning aura 887015 alike. Crit forced out by 984954. Control: the phase without Soul of Light. Reference search: nothing found beyond the tooltip and the DBC. Fixture 823764 ('beeg spellpen') carries a second effect, Effect[1] aura 108 ADD_PCT_MODIFIER SPELLMOD_EFFECT1 (MiscValue 3) +100% on family 33 mask word 2 0x20000000, which is Vow of Light 807750's value; it is not applied in this entry, and the entry must not carry it, or the doubling would be present in both phases."
     },
     {
       "spell": 300327,

@@ -132,7 +132,9 @@
     "clause": "Casting Sunslam now reduces the cooldown of Pendant of the Sun by $/1000;570145s2 sec.",
     "kind": "claim",
     "labels": [
-      "300318 behaviour_metric_delta cooldown"
+      "300318 cost_gate 680630 cooldown without",
+      "300318 cost_gate 680630 cooldown with",
+      "300318 cost_gate 680630 cooldown beyond"
     ]
   },
   {
@@ -2484,9 +2486,15 @@
     "clause": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
     "kind": "claim",
     "labels": [
-      "707414 behaviour_metric_delta radiance",
-      "707414 behaviour_metric_delta valkyrs_calling",
-      "707414 behaviour_metric_delta sunslam"
+      "707414 cost_gate 800054 radiance without",
+      "707414 cost_gate 800054 radiance with",
+      "707414 cost_gate 800054 radiance beyond",
+      "707414 cost_gate 520024 valkyrs_calling without",
+      "707414 cost_gate 520024 valkyrs_calling with",
+      "707414 cost_gate 520024 valkyrs_calling beyond",
+      "707414 cost_gate 805629 sunslam without",
+      "707414 cost_gate 805629 sunslam with",
+      "707414 cost_gate 805629 sunslam beyond"
     ]
   },
   {
@@ -2788,10 +2796,14 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Calm an enemy, disarming their melee and ranged weapons",
+        "claim": "Calm an enemy, disarming their melee weapons",
         "labels": [
           "804057 behaviour_metric_delta disarm_humanoid"
         ]
+      },
+      {
+        "claim": "and ranged weapons",
+        "labels": []
       },
       {
         "claim": "for $d",
@@ -3004,7 +3016,7 @@
         ]
       },
       {
-        "claim": "of your Intellect",
+        "claim": "melee attack power by $s1% of your Intellect",
         "labels": [
           "804269 behaviour_metric_delta attack_power_int"
         ]
@@ -3348,19 +3360,9 @@
     "spell": 805816,
     "clause": "and damage taken while below 35% health is reduced by $s1%.",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "damage taken while below 35% health is reduced by $s1%",
-        "labels": [
-          "805816 behaviour_hit_ratio below"
-        ]
-      },
-      {
-        "claim": "not reduced above 35% health (control)",
-        "labels": [
-          "805816 behaviour_hit_ratio above"
-        ]
-      }
+    "labels": [
+      "805816 behaviour_hit_ratio below",
+      "805816 behaviour_hit_ratio above"
     ]
   },
   {
@@ -3625,8 +3627,8 @@
       "806699 effect_value #0"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The proc is rolled only on an automatic melee hit (AscensionSunClericEvents.cpp:124, damage && automatic && Chance) and its only effect is RemoveSpellCooldown of Glorious Execution (Reduce, INT32_MAX). Design 1, a procs entry counting the marker 806700 over 170 landed swings, read 0 casts (the marker is never cast). Design 2, proc_reset and cooldown_reset_rate: proc_reset is refused (NotModelled: Glorious Execution has no plain power cost to read, and 806700 carries no SPELLMOD_COST), cooldown_reset_rate casts its trigger and an automatic-hit proc never rolls on a cast. No existing kind counts a cooldown clear from automatic attacks.",
+    "tool_gap": {
+      "reason": "The proc is rolled only on a landed automatic melee hit (AscensionSunClericEvents.cpp:124, damage && automatic && Chance) and its only effect is RemoveSpellCooldown of Glorious Execution, so the only behaviour read is whether a cast of Glorious Execution goes through before its cooldown has run. Tried: a procs entry counting the marker 806700 over 170 landed swings read 0 casts (the marker is never cast); proc_reset is refused (NotModelled: no plain power cost to read, no cost modifier on 806700); cooldown_reset_rate rolls its proc on a cast, not on an automatic hit. Not built: a swing-driven cooldown read of the shape cooldown_clear_time already has for minion events: cast Glorious Execution, let one automatic hit land (the harness counts melee_damage_count), attempt Glorious Execution once and read cast_failure (a cast goes through only after a reset, the arm without the talent is refused every time), repeated about 300 cycles per arm (G-20, $h = ProcChance 20). It needs a new kind and its seeded tests; this is a tool gap, not a final status.",
       "attempts": [
         {
           "agent": "sc-b2b (class 27 batch 2 chunk 2 author)",
@@ -3802,7 +3804,9 @@
       {
         "claim": "Reduces the cooldown of An'she's Blessing by $/1000;s1 sec",
         "labels": [
-          "807964 behaviour_metric_delta cooldown"
+          "807964 cost_gate 804058 cooldown without",
+          "807964 cost_gate 804058 cooldown with",
+          "807964 cost_gate 804058 cooldown beyond"
         ]
       },
       {

@@ -3895,7 +3895,7 @@ class HitRatioScenarioTests(unittest.TestCase):
         self.assertEqual(sized_behaviour(justice_entry(), {label: 37}), justice_entry())
 
 
-def hit_ratio_run(expected, control_hits, treatment_hits, minimum=1):
+def hit_ratio_run(expected, control_hits, treatment_hits, minimum=1, band_points=None):
     trials = len(control_hits)
     reads = {arm: [(f'{arm} {mark} total', f'{arm} {mark} count') for mark in ('start', *range(1, trials + 1))]
              for arm in ('control', 'treatment')}
@@ -3908,6 +3908,8 @@ def hit_ratio_run(expected, control_hits, treatment_hits, minimum=1):
             values[total_label], values[count_label] = total, count
     model = {'kind': 'hit_ratio', 'reads': reads, 'expected': expected, 'expected_bonus': (expected - 1) * 100,
              'trials': trials, 'trial_limit': 111, 'minimum_hits': minimum, 'metric': 'spell_damage_total'}
+    if band_points is not None:
+        model['band_points'] = band_points
     expectation = Expectation('label', BEHAVIOUR_HIT_RATIO, PIOUS_SWEEP, CHASTISE, None, str(expected),
                               'prose: "affected by Tranquil Circle"', model)
     return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
@@ -3933,6 +3935,29 @@ class JudgeHitRatioTests(unittest.TestCase):
         verdict = hit_ratio_run(1.20, control, [hit * 1.14 for hit in control])
         self.assertEqual(verdict.status, 'alert')
         self.assertAlmostEqual(verdict.measured, 14.0)
+
+    def test_band_points_narrow_the_band_to_the_stated_value(self):
+        control = control_hits(400)
+        wide = hit_ratio_run(1.20, control, [hit * 1.185 for hit in control])
+        narrow = hit_ratio_run(1.20, control, [hit * 1.185 for hit in control], band_points=1.0)
+        self.assertEqual(wide.status, 'ok')
+        self.assertEqual(narrow.status, 'alert')
+        self.assertEqual(narrow.detail['bonus']['band'], 1.0)
+        self.assertAlmostEqual(narrow.detail['bonus']['excluded_below'], 20.0 - 1.0 - narrow.detail['bonus']['half'])
+        self.assertIn('the band of the stated value', narrow.explanation)
+
+    def test_band_points_pass_a_reading_inside_the_narrowed_band(self):
+        control = control_hits(400)
+        verdict = hit_ratio_run(1.20, control, [hit * 1.195 for hit in control], band_points=1.0)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_band_points_must_narrow_the_two_point_band(self):
+        from behaviours import hit_ratio_band_points
+        self.assertIsNone(hit_ratio_band_points({'spell': 1}))
+        self.assertEqual(hit_ratio_band_points({'spell': 1, 'band_points': 1.1}), 1.1)
+        for points in (0, -1, 2, 2.5, '1', True):
+            with self.assertRaises(ValueError):
+                hit_ratio_band_points({'spell': 1, 'band_points': points})
 
     def test_the_old_five_percent_ratio_band_would_have_passed_the_seeded_server(self):
         self.assertLessEqual(abs(1.14 - 1.20), 0.05 * 1.20 + 1e-9)
@@ -6939,6 +6964,21 @@ class CostGateScenarioTests(unittest.TestCase):
     def test_entry_cast_auras_need_a_spell_auras_and_a_reason(self):
         for item in ({'spell': 680376, 'auras': [802272]}, {'spell': 680376, 'auras': [], 'reason': 'r'},
                      {'spell': '680376', 'auras': [802272], 'reason': 'r'}):
+            with self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, self.launcher_entry(cast_auras=[item]))
+
+    def test_entry_cast_auras_stacks_set_that_many_stacks_and_default_to_one(self):
+        item = {'spell': 680376, 'auras': [802272], 'stacks': 20, 'reason': 'r'}
+        steps = run.validate(behaviour_scenario(CLASS_FILE, self.launcher_entry(cast_auras=[item]))[0])['steps']
+        sets = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 802272]
+        self.assertEqual({step['stacks'] for step in sets}, {20})
+        steps = run.validate(behaviour_scenario(CLASS_FILE, self.launcher_entry())[0])['steps']
+        sets = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 802272]
+        self.assertEqual({step['stacks'] for step in sets}, {1})
+
+    def test_entry_cast_auras_stacks_must_be_a_positive_integer(self):
+        for stacks in (0, -1, '20', 2.5, True):
+            item = {'spell': 680376, 'auras': [802272], 'stacks': stacks, 'reason': 'r'}
             with self.assertRaises(ValueError):
                 behaviour_scenario(CLASS_FILE, self.launcher_entry(cast_auras=[item]))
 

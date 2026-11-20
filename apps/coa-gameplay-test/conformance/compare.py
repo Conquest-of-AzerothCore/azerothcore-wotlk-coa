@@ -4658,6 +4658,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
             bonus = stated_bonus(bonus, stated)
         if model.get('ratio_band'):
             bonus = replace(bonus, fixed_band=RELATIVE_BAND * float(model['expected']) * 100)
+        if model.get('band_points'):
+            bonus = replace(bonus, fixed_band=float(model['band_points']), band_note='the band of the stated value')
         status, reason, needed = bonus_status(bonus)
     exclusion_option = None if stepped or flat is not None or stated else model.get(control_excluded.NAME)
     exclusion = exclusion_option and control_excluded.exclusion_of(bonus, treatment, control, exclusion_option)
