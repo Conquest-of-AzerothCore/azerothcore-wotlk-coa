@@ -9,6 +9,18 @@
 namespace ManastormReleaseStage
 {
     constexpr uint32 AllReleased = RaidRelease::AllReleased;
+    constexpr uint32 MythicKarazhanCache = 1278085;
+    constexpr uint32 AscendedKarazhanCache = 1278086;
+
+    constexpr bool IsKarazhanCache(uint32 cacheItemEntry)
+    {
+        return cacheItemEntry == MythicKarazhanCache || cacheItemEntry == AscendedKarazhanCache;
+    }
+
+    inline bool IsBlockedKarazhanCache(uint32 cacheItemEntry)
+    {
+        return IsKarazhanCache(cacheItemEntry) && RaidRelease::ReleasedStage() < RaidRelease::StageKarazhan;
+    }
 
     struct CacheStage
     {
@@ -34,6 +46,8 @@ namespace ManastormReleaseStage
 
     constexpr uint32 RequiredStage(uint32 cacheItemEntry)
     {
+        if (IsKarazhanCache(cacheItemEntry))
+            return RaidRelease::StageKarazhan;
         if (cacheItemEntry == 1278051)
             return RaidRelease::StageHeroicDungeons;
         if (cacheItemEntry == 1278054 || cacheItemEntry == 1278059 || cacheItemEntry == 1278064 ||

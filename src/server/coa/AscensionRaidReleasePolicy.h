@@ -13,6 +13,7 @@ constexpr std::uint32_t MapBlackwingLair = 469;
 constexpr std::uint32_t MapRuinsOfAhnQiraj = 509;
 constexpr std::uint32_t MapTempleOfAhnQiraj = 531;
 constexpr std::uint32_t MapNaxxramas = 533;
+constexpr std::uint32_t MapKarazhan = 532;
 constexpr std::uint32_t MapSetis = 880;
 constexpr std::uint32_t MapAzuregos = 881;
 constexpr std::uint32_t MapLordKazzak = 882;
@@ -28,7 +29,8 @@ constexpr std::uint32_t StageOnyxiasLair = 5;
 constexpr std::uint32_t StageBlackwingLair = 6;
 constexpr std::uint32_t StageAhnQiraj = 7;
 constexpr std::uint32_t StageNaxxramas = 8;
-constexpr std::uint32_t AllReleased = StageNaxxramas;
+constexpr std::uint32_t StageKarazhan = 9;
+constexpr std::uint32_t AllReleased = StageKarazhan;
 
 constexpr std::uint32_t DungeonDifficultyHeroic = 1;
 constexpr std::uint32_t DungeonDifficultyMythic = 2;
@@ -39,7 +41,7 @@ struct RaidStage
     std::uint32_t stage;
 };
 
-constexpr std::array<RaidStage, 12> RaidStages = {{
+constexpr std::array<RaidStage, 13> RaidStages = {{
     { MapZulGurub, StageZulGurub },
     { MapSetis, StageZulGurub },
     { MapAzuregos, StageZulGurub },
@@ -51,7 +53,8 @@ constexpr std::array<RaidStage, 12> RaidStages = {{
     { MapOnyxiasLair, StageOnyxiasLair },
     { MapBlackwingLair, StageBlackwingLair },
     { MapRuinsOfAhnQiraj, StageAhnQiraj },
-    { MapTempleOfAhnQiraj, StageAhnQiraj }
+    { MapTempleOfAhnQiraj, StageAhnQiraj },
+    { MapKarazhan, StageKarazhan }
 }};
 
 constexpr bool IsRaidReleased(std::uint32_t mapId, std::uint32_t releasedStage)

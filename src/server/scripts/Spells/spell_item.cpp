@@ -4650,6 +4650,9 @@ class spell_item_trinket_stack : public AuraScript
 };
 
 using spell_item_lightning_capacitor = spell_item_trinket_stack<SPELL_LIGHTNING_CAPACITOR_STACK, SPELL_LIGHTNING_CAPACITOR_TRIGGER>;
+using spell_item_lightning_capacitor_heroic = spell_item_trinket_stack<SPELL_LIGHTNING_CAPACITOR_STACK, 337661>;
+using spell_item_lightning_capacitor_mythic = spell_item_trinket_stack<SPELL_LIGHTNING_CAPACITOR_STACK, 237661>;
+using spell_item_lightning_capacitor_ascended = spell_item_trinket_stack<SPELL_LIGHTNING_CAPACITOR_STACK, 437661>;
 using spell_item_thunder_capacitor = spell_item_trinket_stack<SPELL_THUNDER_CAPACITOR_STACK, SPELL_THUNDER_CAPACITOR_TRIGGER>;
 using spell_item_toc25_caster_trinket_normal = spell_item_trinket_stack<SPELL_TOC25_CASTER_TRINKET_NORMAL_STACK, SPELL_TOC25_CASTER_TRINKET_NORMAL_TRIGGER>;
 using spell_item_toc25_caster_trinket_heroic = spell_item_trinket_stack<SPELL_TOC25_CASTER_TRINKET_HEROIC_STACK, SPELL_TOC25_CASTER_TRINKET_HEROIC_TRIGGER>;
@@ -6192,6 +6195,9 @@ void AddSC_item_spell_scripts()
     RegisterSpellScript(spell_item_darkmoon_card_greatness);
     RegisterSpellScript(spell_item_death_choice);
     RegisterSpellScriptWithArgs(spell_item_lightning_capacitor, "spell_item_lightning_capacitor");
+    RegisterSpellScriptWithArgs(spell_item_lightning_capacitor_heroic, "spell_item_lightning_capacitor_heroic");
+    RegisterSpellScriptWithArgs(spell_item_lightning_capacitor_mythic, "spell_item_lightning_capacitor_mythic");
+    RegisterSpellScriptWithArgs(spell_item_lightning_capacitor_ascended, "spell_item_lightning_capacitor_ascended");
     RegisterSpellScriptWithArgs(spell_item_thunder_capacitor, "spell_item_thunder_capacitor");
     RegisterSpellScriptWithArgs(spell_item_toc25_caster_trinket_normal, "spell_item_toc25_caster_trinket_normal");
     RegisterSpellScriptWithArgs(spell_item_toc25_caster_trinket_heroic, "spell_item_toc25_caster_trinket_heroic");

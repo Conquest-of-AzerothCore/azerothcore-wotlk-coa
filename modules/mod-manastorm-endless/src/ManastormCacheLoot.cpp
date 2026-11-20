@@ -1,4 +1,5 @@
 #include "ManastormModuleConfig.h"
+#include "ManastormReleaseStage.h"
 #include "ManastormRewards.h"
 
 #include "GlobalScript.h"
@@ -233,6 +234,11 @@ namespace
             Item* item,
             SpellCastTargets const&) override
         {
+            if (player && item && ManastormReleaseStage::IsBlockedKarazhanCache(item->GetEntry()))
+            {
+                player->SendSystemMessage("This Manastorm Cache is not released yet.");
+                return true;
+            }
             if (player &&
                 item &&
                 player->IsAlive() &&
@@ -298,6 +304,9 @@ namespace
                 container->GetEntry() == 1278078) && entry->reference >= 9003601 && entry->reference <= 9003605;
             bool const naxxramasFamily = (container->GetEntry() == 1278079 || container->GetEntry() == 1278081 ||
                 container->GetEntry() == 1278083) && entry->reference >= 9003701 && entry->reference <= 9003706;
+            bool const karazhanFamily =
+                (container->GetEntry() == ManastormReleaseStage::MythicKarazhanCache && entry->reference == 9004001) ||
+                (container->GetEntry() == ManastormReleaseStage::AscendedKarazhanCache && entry->reference == 9004002);
             bool const rankedDungeonFamily = (container->GetEntry() == 1278059 || container->GetEntry() == 1278064 ||
                 container->GetEntry() == 1278073 || container->GetEntry() == 1278082) &&
                 entry->reference >= 9003801 && entry->reference <= 9003804;
@@ -306,7 +315,7 @@ namespace
                 container->GetEntry() == 1278084) && entry->reference >= 9003901 && entry->reference <= 9003905;
             if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily || blackwingLairFamily ||
                 ruinsOfAhnQirajFamily || templeOfAhnQirajFamily || naxxramasFamily || rankedDungeonFamily ||
-                laterMoltenCoreFamily || ascendedRaidFamily)
+                laterMoltenCoreFamily || ascendedRaidFamily || karazhanFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
@@ -667,6 +676,12 @@ namespace
 
         bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
         {
+            if (player && item && ManastormReleaseStage::IsBlockedKarazhanCache(item->GetEntry()))
+            {
+                player->SendSystemMessage("This Manastorm Cache is not released yet.");
+                return false;
+            }
+
             if (!item || (item->GetEntry() != 1478051 && item->GetEntry() != 1478052))
                 return true;
 

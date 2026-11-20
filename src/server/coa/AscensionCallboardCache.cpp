@@ -52,7 +52,7 @@ struct StagedCache
     uint32 cacheItemId;
 };
 
-std::array<StagedCache, 9> const CallboardTiers = {{
+std::array<StagedCache, 10> const CallboardTiers = {{
     { RaidRelease::StageHeroicDungeons, 1615001 },
     { RaidRelease::StageMythicDungeons, 1615002 },
     { RaidRelease::StageZulGurub, 1615003 },
@@ -61,7 +61,8 @@ std::array<StagedCache, 9> const CallboardTiers = {{
     { RaidRelease::StageBlackwingLair, 1615006 },
     { RaidRelease::StageAhnQiraj, 1615007 },
     { RaidRelease::StageAhnQiraj, 1615008 },
-    { RaidRelease::StageNaxxramas, 1615009 }
+    { RaidRelease::StageNaxxramas, 1615009 },
+    { RaidRelease::StageKarazhan, 1615014 }
 }};
 
 using CallboardPool = std::vector<AscensionCacheRewards::Reward>;
@@ -281,6 +282,11 @@ bool OpenCallboardCache(Player* player, Item* item)
         return false;
 
     player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+    if (CacheStage(cacheItemId) > HighestStage(item->GetEntry()))
+    {
+        ChatHandler(player->GetSession()).SendSysMessage("This Callboard Cache is not released yet.");
+        return true;
+    }
 
     AscensionCacheRewards::Reward reward;
     if (!PickReward(player, *pool, uint32(AscensionAverageItemLevel::Equipped(player)), reward))
@@ -306,7 +312,7 @@ uint32 QuestPoints(uint32 questId)
 
 std::vector<CacheTier> ReleasedCacheTiers()
 {
-    uint32 const stage = RaidRelease::ReleasedStage();
+    uint32 const stage = HighestStage(CallboardGeneric);
     std::vector<CacheTier> released;
     std::lock_guard<std::mutex> guard(g_poolLock);
     for (CacheTier const& tier : g_cacheTiers)

@@ -60,6 +60,7 @@ void AddSC_AscensionDungeonRelease();
 void AddSC_AscensionBattlegroundCatchUp();
 void AddSC_AscensionBattlegroundSpiritQueue();
 void AddSC_AscensionRaidRelease();
+void AddSC_AscensionKarazhanEffects();
 void AddSC_AscensionPvPVendorRelease();
 void AddSC_AscensionThreatRedirect();
 void AddSC_AscensionTalentDataProcs();
@@ -879,6 +880,7 @@ void AddCoAScripts()
     AddSC_AscensionBattlegroundCatchUp();
     AddSC_AscensionBattlegroundSpiritQueue();
     AddSC_AscensionRaidRelease();
+    AddSC_AscensionKarazhanEffects();
     AddSC_AscensionPvPVendorRelease();
     AddSC_AscensionThreatRedirect();
     AddSC_AscensionTalentDataProcs();
