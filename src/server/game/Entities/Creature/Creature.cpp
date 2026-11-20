@@ -16,6 +16,7 @@
  */
 
 #include "Creature.h"
+#include "AscensionBattlegroundCombat.h"
 #include "DungeonHealth.h"
 #include "BattlegroundMgr.h"
 #include "CellImpl.h"
@@ -3462,6 +3463,10 @@ uint8 Creature::GetLootSkillLevelFor(Player const* looter) const
 
 uint8 Creature::getLevelForTarget(WorldObject const* target) const
 {
+    if (target)
+        if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target->ToUnit()))
+            return top;
+
     if (target)
         if (Unit const* opponent = target->ToUnit())
             if (Player const* viewer = opponent->GetCharmerOrOwnerPlayerOrPlayerItself())

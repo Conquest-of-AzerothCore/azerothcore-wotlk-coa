@@ -6,7 +6,9 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <cmath>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <string_view>
 #include <vector>
@@ -38,13 +40,11 @@ namespace AscensionBattlegroundBracketsPolicy
     struct Lift
     {
         float health = 0.0f;
-        float mana = 0.0f;
-        std::array<float, 5> stats{};
+        float stamina = 0.0f;
 
         bool Empty() const
         {
-            return health == 0.0f && mana == 0.0f
-                && std::all_of(stats.begin(), stats.end(), [](float stat) { return stat == 0.0f; });
+            return health == 0.0f && stamina == 0.0f;
         }
     };
 
@@ -160,10 +160,56 @@ namespace AscensionBattlegroundBracketsPolicy
     {
         Lift lift;
         lift.health = Gain(own.health, target.health);
-        lift.mana = Gain(own.mana, target.mana);
-        for (std::size_t i = 0; i < lift.stats.size(); ++i)
-            lift.stats[i] = Gain(own.stats[i], target.stats[i]);
+        lift.stamina = Gain(own.stats[2], target.stats[2]);
         return lift;
+    }
+
+    inline std::uint32_t CappedLiftLevel(std::uint32_t level, std::uint32_t top, std::uint32_t maxLiftLevels)
+    {
+        std::uint32_t const capped = maxLiftLevels == 0 ? top : std::min(top, level + maxLiftLevels);
+        return std::max(capped, level);
+    }
+
+    inline float PlayerStaminaHealth(std::uint32_t stamina)
+    {
+        std::uint32_t const base = std::min<std::uint32_t>(stamina, 20);
+        std::uint32_t const extra = stamina > 20 ? stamina - 20 : 0;
+        return static_cast<float>(base + 10 * extra);
+    }
+
+    inline float OutputRatio(float ownHealth, float liftedHealth)
+    {
+        return ownHealth > 0.0f && liftedHealth > ownHealth ? liftedHealth / ownHealth : 1.0f;
+    }
+
+    template <typename Integer>
+    inline Integer SaturatedScale(Integer amount, float ratio)
+    {
+        double const scaled = std::round(static_cast<double>(amount) * static_cast<double>(ratio));
+        if (scaled >= static_cast<double>(std::numeric_limits<Integer>::max()))
+            return std::numeric_limits<Integer>::max();
+        if (scaled <= static_cast<double>(std::numeric_limits<Integer>::min()))
+            return std::numeric_limits<Integer>::min();
+        return static_cast<Integer>(scaled);
+    }
+
+    inline std::uint32_t ScaleAmount(std::uint32_t amount, float ratio)
+    {
+        return SaturatedScale(amount, ratio);
+    }
+
+    inline std::int32_t ScaleAmount(std::int32_t amount, float ratio)
+    {
+        return SaturatedScale(amount, ratio);
+    }
+
+    inline std::uint32_t KeptHealth(std::uint32_t health, std::uint32_t oldMax, std::uint32_t newMax)
+    {
+        if (oldMax == 0 || health == 0)
+            return health;
+        double const scaled = static_cast<double>(health) * static_cast<double>(newMax) / static_cast<double>(oldMax);
+        std::uint32_t const kept = static_cast<std::uint32_t>(std::lround(scaled));
+        return std::min(std::max(kept, 1u), newMax);
     }
 }
 

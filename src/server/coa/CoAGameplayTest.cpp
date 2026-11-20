@@ -7,6 +7,7 @@
 #include "AccountMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
+#include "AscensionBattlegroundCatchUp.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionItemScaling.h"
 #include "AscensionNativeItemScaling.h"
@@ -650,6 +651,26 @@ public:
     {
         CoAChatLog::Flush(true);
         CoAChatLog::SetEnabled(_original);
+    }
+
+private:
+    bool _original;
+};
+
+class BattlegroundKillXpConfig
+{
+public:
+    BattlegroundKillXpConfig() : _original(sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL))
+    {
+        sWorld->setBoolConfig(CONFIG_BG_XP_FOR_KILL, true);
+    }
+
+    BattlegroundKillXpConfig(BattlegroundKillXpConfig const&) = delete;
+    BattlegroundKillXpConfig& operator=(BattlegroundKillXpConfig const&) = delete;
+
+    ~BattlegroundKillXpConfig()
+    {
+        sWorld->setBoolConfig(CONFIG_BG_XP_FOR_KILL, _original);
     }
 
 private:
@@ -2167,6 +2188,8 @@ public:
             _twoSide.emplace(*twoSide);
         if (_scenario.get<bool>("chat_log", false))
             _chatLog.emplace();
+        if (_scenario.get<bool>("battleground_kill_xp", false))
+            _battlegroundKillXp.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
         {
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
@@ -3816,8 +3839,58 @@ private:
             ArenaTeamStats const& stats = team->GetStats();
             return metric == "arena_team_season_games" ? stats.SeasonGames : stats.SeasonWins;
         }
+        if (metric == "battleground_output_ratio")
+        {
+            Unit* subject = unit;
+            if (auto entry = step.get_optional<uint32>("entry"))
+            {
+                Player* owner = unit->ToPlayer();
+                Require(owner != nullptr, "Output ratio of an owned creature needs a player");
+                subject = GetOwnedCreature(owner, *entry);
+                Require(subject != nullptr, "Output ratio needs a present owned creature");
+            }
+            else if (step.get<bool>("pet", false))
+            {
+                Player* owner = unit->ToPlayer();
+                Require(owner != nullptr, "Output ratio of a pet needs a player");
+                subject = owner->GetPet();
+                Require(subject != nullptr, "Output ratio needs a present pet");
+            }
+            return AscensionBattlegroundCatchUp::OutputRatio(subject);
+        }
+        if (metric == "scaled_output")
+        {
+            SpellInfo const* info = nullptr;
+            if (spell)
+            {
+                info = sSpellMgr->GetSpellInfo(spell);
+                Require(info != nullptr, "Scaled output needs a known spell");
+            }
+            return AscensionBattlegroundCatchUp::ScaledOutput(unit, GetUnit(step.get<std::string>("target")),
+                step.get<uint32>("amount"), info, step.get<bool>("healing", false));
+        }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
+        if (metric == "level_for_target" || metric == "reward_level_for_target" ||
+            metric == "weapon_skill_for_target" || metric == "defense_skill_for_target")
+        {
+            Unit* other = GetUnit(step.get<std::string>("target"));
+            if (metric == "level_for_target")
+                return unit->getLevelForTarget(other);
+            if (metric == "reward_level_for_target")
+                return unit->getRewardLevelForTarget(other);
+            if (metric == "defense_skill_for_target")
+                return unit->GetDefenseSkillValue(other);
+            uint32 const hand = step.get<uint32>("hand", 0);
+            Require(hand <= RANGED_ATTACK, "Weapon skill metric needs hand 0, 1 or 2");
+            return unit->GetWeaponSkillValue(WeaponAttackType(hand), other);
+        }
+        if (metric == "honor_points")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Honor metric needs a player");
+            return player->GetHonorPoints();
+        }
         if (metric == "sent_level" || metric == "sent_max_health" || metric == "sent_faction")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -9119,6 +9192,7 @@ private:
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<ChatLogConfig> _chatLog;
+    std::optional<BattlegroundKillXpConfig> _battlegroundKillXp;
     std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;
