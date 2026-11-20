@@ -490,6 +490,140 @@
         802561
       ],
       "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); 680642 StackAmount 3 (Spell.dbc). Gavel of Wrath 802561 (rank 58, SpellFamilyName 33) cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crits without the passive, 0 stacks). Four forced crits: the stacks read 3, not 4 (the stated cap)."
+    },
+    {
+      "spell": 806123,
+      "name": "Solar Invigoration (allies take increased healing, Sunlight heals)",
+      "kind": "hit_ratio",
+      "variant": "healing_taken",
+      "label_suffix": "healing_taken",
+      "quote": "your allies take $s2% increased healing",
+      "expected": 1.2,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "casts": [
+          806123
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "806123 Effect[1] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 127, BasePoints 19 (20, $s2). The grouped ally's Illumination 500143 heals are read without and with a real cast of 806123 on the caster (the area aura reaches the ally), the ally held at 50% health; 20000 spell power on the caster (harness fixture) so the stat part dominates the die. Control arm: no cast.",
+      "cast_power": 1360,
+      "ally_distance": 5
+    },
+    {
+      "spell": 806123,
+      "name": "Solar Invigoration (lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "For $d,",
+      "trigger_spell": 806123,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "aura",
+      "fields": {
+        "spell": 806123
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 13800,
+      "expiry_wait_ms": 2800,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          13500,
+          14500
+        ],
+        "expired": [
+          16500,
+          17500
+        ]
+      },
+      "observe_source": "806123 DurationIndex 8 (15000 ms, $d). One real cast of 806123 on the caster: its aura is present when read 13500..14500 ms after the cast (game time) and gone when read 16500..17500 ms after it, so the duration lies between 13500 and 16500, within 10% of 15000 on both sides (the held / ends pair of the Crypt Plague ticks entry). Control (before): no cast, absent."
+    },
+    {
+      "spell": 806123,
+      "kind": "metric_delta",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_only_after": true,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invigoration (second damage 2.6 s later gives no Illumination)",
+      "variant": "icd_blocked",
+      "quote": "Can only occur once every 3 sec.",
+      "setup_casts": [
+        806123,
+        572801
+      ],
+      "setup_wait_ms": 2600,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 502429,
+        "target": "caster"
+      },
+      "expected": 1,
+      "label_suffix": "icd_blocked",
+      "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Gavel of Wrath 802561 at the dummy; control (before): the same Gavel without the aura. Horusath Blast 572801 then Gavel of Wrath 802561 (Gavels share a 5000 ms category cooldown, so another direct damage spell is the first) 2600 ms apart: one Illumination (the second is inside the 3 s gate, excluding a gate under 2.6 s)."
+    },
+    {
+      "spell": 806123,
+      "kind": "metric_delta",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_only_after": true,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invigoration (second damage 3.4 s later gives a second Illumination)",
+      "variant": "icd_open",
+      "quote": "Can only occur once every 3 sec.",
+      "setup_casts": [
+        806123,
+        572801
+      ],
+      "setup_wait_ms": 3400,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 502429,
+        "target": "caster"
+      },
+      "expected": 2,
+      "label_suffix": "icd_open",
+      "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Gavel of Wrath 802561 at the dummy; control (before): the same Gavel without the aura. Horusath Blast 572801 then Gavel of Wrath 802561 (Gavels share a 5000 ms category cooldown, so another direct damage spell is the first) 3400 ms apart: two Illuminations (excluding a gate over 3.4 s)."
     }
   ],
   "player_observations": [],

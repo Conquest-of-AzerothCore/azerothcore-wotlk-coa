@@ -3341,23 +3341,36 @@
     "spell": 806123,
     "clause": "For $d,",
     "labels": [
-      "806123 aura_duration_ms #0"
+      "806123 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 806123,
     "clause": "your allies take $s2% increased healing and their direct damage dealt now causes them to cast Illumination.",
-    "labels": [
-      "806123 effect_value e1 #1",
-      "806123 aura_amount e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your allies take $s2% increased healing",
+        "labels": [
+          "806123 behaviour_hit_ratio healing_taken"
+        ]
+      },
+      {
+        "claim": "their direct damage dealt now causes them to cast Illumination",
+        "labels": [
+          "806123 behaviour_metric_delta icd_open"
+        ]
+      }
+    ]
   },
   {
     "spell": 806123,
     "clause": "Can only occur once every 3 sec.",
-    "labels": [],
+    "labels": [
+      "806123 behaviour_metric_delta icd_blocked",
+      "806123 behaviour_metric_delta icd_open"
+    ],
     "kind": "claim"
   },
   {
