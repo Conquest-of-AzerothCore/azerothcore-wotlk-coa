@@ -2092,6 +2092,32 @@
       "spell": 800914,
       "equals": 1,
       "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client observed an Amulet cooldown clear",
+      "actor": "v",
+      "metric": "client_cooldown_clears",
+      "spell": 800914,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_go_count",
+      "spell": 800914,
+      "save_as": "amulet_go_count"
+    },
+    {
+      "action": "assert",
+      "label": "Every Amulet cast cleared its client cooldown",
+      "actor": "v",
+      "metric": "client_cooldown_clears",
+      "spell": 800914,
+      "ratio_to": "amulet_go_count",
+      "equals": 1,
+      "within_ms": 2000
     }
   ]
 }
