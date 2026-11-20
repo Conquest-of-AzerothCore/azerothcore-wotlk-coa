@@ -3937,7 +3937,7 @@ class JudgeHitRatioTests(unittest.TestCase):
         self.assertAlmostEqual(verdict.measured, 14.0)
 
     def test_band_points_narrow_the_band_to_the_stated_value(self):
-        control = control_hits(400)
+        control = control_hits(800)
         wide = hit_ratio_run(1.20, control, [hit * 1.185 for hit in control])
         narrow = hit_ratio_run(1.20, control, [hit * 1.185 for hit in control], band_points=1.0)
         self.assertEqual(wide.status, 'ok')
@@ -3947,7 +3947,7 @@ class JudgeHitRatioTests(unittest.TestCase):
         self.assertIn('the band of the stated value', narrow.explanation)
 
     def test_band_points_pass_a_reading_inside_the_narrowed_band(self):
-        control = control_hits(400)
+        control = control_hits(800)
         verdict = hit_ratio_run(1.20, control, [hit * 1.195 for hit in control], band_points=1.0)
         self.assertEqual(verdict.status, 'ok')
 
