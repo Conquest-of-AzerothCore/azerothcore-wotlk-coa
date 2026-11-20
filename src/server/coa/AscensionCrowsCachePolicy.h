@@ -103,6 +103,47 @@ constexpr bool InterruptOpening(bool moved, unsigned damage)
 {
     return moved || damage > 0;
 }
+
+constexpr float DefaultWallRange = 100.0f;
+
+enum class DropReason : unsigned
+{
+    Death,
+    Immunity,
+    LeftMode,
+    Logout,
+    LeftMap
+};
+
+constexpr bool WallPhase(Phase phase)
+{
+    return phase == Phase::Available || phase == Phase::Carried || phase == Phase::Dropped;
+}
+
+constexpr bool Walled(bool firstMercenary, bool secondMercenary, bool eitherNearCache)
+{
+    return firstMercenary != secondMercenary && eitherNearCache;
+}
+
+constexpr bool RefuseMovement(bool carrying, bool movementEffect, bool castByAnother)
+{
+    return carrying && movementEffect && !castByAnother;
+}
+
+constexpr bool ImmunityDrops(bool carrying, bool immunityAura, bool selfCast)
+{
+    return carrying && immunityAura && selfCast;
+}
+
+constexpr bool ModeDrops(bool carrying, bool highRisk, bool mercenary)
+{
+    return carrying && !(highRisk && mercenary);
+}
+
+constexpr bool LeftCacheMap(unsigned cacheMap, unsigned currentMap, bool instanceable)
+{
+    return cacheMap != currentMap || instanceable;
+}
 }
 
 #endif

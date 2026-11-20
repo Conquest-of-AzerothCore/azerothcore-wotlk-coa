@@ -402,6 +402,14 @@ CoA.Battleground.WideBrackets.Enable = 1
 
 CoA.Battleground.WideBrackets.Ranges = "10-29,30-49,50-59"
 
+#    CoA.Battleground.WideBrackets.MaxLiftLevels
+#        Description: Most levels the health lift and output scaling bridge for a player or pet below the
+#                     bracket top. Combat rolls still use the bracket top. Read at startup only.
+#        Default:     0 - (No cap)
+#                     N - (Lift to at most own level + N)
+
+CoA.Battleground.WideBrackets.MaxLiftLevels = 0
+
 ###################################################################################################
 # RATED SOLO ARENA
 #
@@ -1114,6 +1122,16 @@ CrowsCache.GoldenMarksOfWar = "10 10"
 #        Default:     400
 
 CrowsCache.BazaarTokens = 400
+
+#
+#    CrowsCache.WallRange
+#        Description: Yards around a Crow's Cache (chest, carrier or dropped cache) in which a
+#                     Mercenary for Hire! player and a player without it cannot attack, heal or
+#                     buff each other, also when grouped. Applies when either of the two is in range.
+#                     0 = no wall. Maximum 500.
+#        Default:     100
+
+CrowsCache.WallRange = 100
 CrowsCache.X = -7831
 CrowsCache.Y = -3465
 CrowsCache.Z = 56.87

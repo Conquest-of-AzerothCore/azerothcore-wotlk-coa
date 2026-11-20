@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionMercenary.h"
 #include "AscensionRulesets.h"
 #include "Battlefield.h"
 #include "DBCStores.h"
@@ -411,6 +412,11 @@ public:
             info->AttributesEx4 |= SPELL_ATTR4_ALLOW_ENETRING_ARENA;
     }
 };
+}
+
+bool AscensionMercenary::Active(Player const* player)
+{
+    return ActiveMercenary(player);
 }
 
 void AddSC_AscensionMercenary()

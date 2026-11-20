@@ -7,6 +7,7 @@
 #include "AccountMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
+#include "AscensionBattlegroundCatchUp.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionItemScaling.h"
 #include "AscensionNativeItemScaling.h"
@@ -651,6 +652,26 @@ public:
     {
         CoAChatLog::Flush(true);
         CoAChatLog::SetEnabled(_original);
+    }
+
+private:
+    bool _original;
+};
+
+class BattlegroundKillXpConfig
+{
+public:
+    BattlegroundKillXpConfig() : _original(sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL))
+    {
+        sWorld->setBoolConfig(CONFIG_BG_XP_FOR_KILL, true);
+    }
+
+    BattlegroundKillXpConfig(BattlegroundKillXpConfig const&) = delete;
+    BattlegroundKillXpConfig& operator=(BattlegroundKillXpConfig const&) = delete;
+
+    ~BattlegroundKillXpConfig()
+    {
+        sWorld->setBoolConfig(CONFIG_BG_XP_FOR_KILL, _original);
     }
 
 private:
@@ -2164,6 +2185,8 @@ public:
             _twoSide.emplace(*twoSide);
         if (_scenario.get<bool>("chat_log", false))
             _chatLog.emplace();
+        if (_scenario.get<bool>("battleground_kill_xp", false))
+            _battlegroundKillXp.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
         {
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
@@ -3775,6 +3798,19 @@ private:
             Require(item != nullptr, "LFG Need metric needs a known item");
             return player->CanRollForItemInLFG(item, player) == EQUIP_ERR_OK ? 1 : 0;
         }
+        if (metric == "battleground_status")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Battleground status metric needs a player");
+            Battleground const* battleground = player->GetBattleground();
+            return battleground ? double(battleground->GetStatus()) : -1;
+        }
+        if (metric == "arena_points")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Arena points metric needs a player");
+            return player->GetArenaPoints();
+        }
         if (metric == "in_arena")
         {
             Player* player = unit->ToPlayer();
@@ -3803,8 +3839,58 @@ private:
             ArenaTeamStats const& stats = team->GetStats();
             return metric == "arena_team_season_games" ? stats.SeasonGames : stats.SeasonWins;
         }
+        if (metric == "battleground_output_ratio")
+        {
+            Unit* subject = unit;
+            if (auto entry = step.get_optional<uint32>("entry"))
+            {
+                Player* owner = unit->ToPlayer();
+                Require(owner != nullptr, "Output ratio of an owned creature needs a player");
+                subject = GetOwnedCreature(owner, *entry);
+                Require(subject != nullptr, "Output ratio needs a present owned creature");
+            }
+            else if (step.get<bool>("pet", false))
+            {
+                Player* owner = unit->ToPlayer();
+                Require(owner != nullptr, "Output ratio of a pet needs a player");
+                subject = owner->GetPet();
+                Require(subject != nullptr, "Output ratio needs a present pet");
+            }
+            return AscensionBattlegroundCatchUp::OutputRatio(subject);
+        }
+        if (metric == "scaled_output")
+        {
+            SpellInfo const* info = nullptr;
+            if (spell)
+            {
+                info = sSpellMgr->GetSpellInfo(spell);
+                Require(info != nullptr, "Scaled output needs a known spell");
+            }
+            return AscensionBattlegroundCatchUp::ScaledOutput(unit, GetUnit(step.get<std::string>("target")),
+                step.get<uint32>("amount"), info, step.get<bool>("healing", false));
+        }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
+        if (metric == "level_for_target" || metric == "reward_level_for_target" ||
+            metric == "weapon_skill_for_target" || metric == "defense_skill_for_target")
+        {
+            Unit* other = GetUnit(step.get<std::string>("target"));
+            if (metric == "level_for_target")
+                return unit->getLevelForTarget(other);
+            if (metric == "reward_level_for_target")
+                return unit->getRewardLevelForTarget(other);
+            if (metric == "defense_skill_for_target")
+                return unit->GetDefenseSkillValue(other);
+            uint32 const hand = step.get<uint32>("hand", 0);
+            Require(hand <= RANGED_ATTACK, "Weapon skill metric needs hand 0, 1 or 2");
+            return unit->GetWeaponSkillValue(WeaponAttackType(hand), other);
+        }
+        if (metric == "honor_points")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Honor metric needs a player");
+            return player->GetHonorPoints();
+        }
         if (metric == "sent_level" || metric == "sent_max_health" || metric == "sent_faction")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -7772,6 +7858,18 @@ private:
             record.put("dungeon", dungeon);
             record.put("entry", (*finalEncounter)->creditEntry);
         }
+        else if (action == "end_battleground")
+        {
+            Battleground* battleground = player->GetBattleground();
+            Require(battleground != nullptr && !battleground->isArena(), "end_battleground needs a battleground");
+            Require(battleground->GetStatus() == STATUS_IN_PROGRESS, "The battleground is not in progress");
+            std::string const winner = step.get<std::string>("winner");
+            Require(winner == "alliance" || winner == "horde" || winner == "draw",
+                "end_battleground winner must be alliance, horde or draw");
+            battleground->EndBattleground(winner == "alliance" ? PVP_TEAM_ALLIANCE
+                : winner == "horde" ? PVP_TEAM_HORDE : PVP_TEAM_NEUTRAL);
+            record.put("winner", winner);
+        }
         else if (action == "encounter_start")
         {
             uint32 const entry = step.get<uint32>("boss_entry");
@@ -8468,11 +8566,29 @@ private:
         {
             Pet* pet = player->GetPet();
             Require(pet != nullptr, "Pet autocast request needs a current pet");
-            WorldPacket packet(CMSG_PET_SPELL_AUTOCAST, 13);
-            packet << pet->GetGUID() << spell << step.get<bool>("enabled");
-            WorldPackets::Pet::PetSpellAutocast request(std::move(packet));
-            request.Read();
-            player->GetSession()->HandlePetSpellAutocastOpcode(request);
+            bool const enabled = step.get<bool>("enabled");
+            if (step.get<std::string>("via", "autocast") == "set_action")
+            {
+                CharmInfo* charmInfo = pet->GetCharmInfo();
+                Require(charmInfo != nullptr, "Pet action bar request needs charm info");
+                uint32 slot = MAX_UNIT_ACTION_BAR_INDEX;
+                for (uint32 index = 0; index < MAX_UNIT_ACTION_BAR_INDEX; ++index)
+                    if (charmInfo->GetActionBarEntry(index)->GetAction() == spell)
+                        slot = index;
+                Require(slot < MAX_UNIT_ACTION_BAR_INDEX, "Pet action bar does not hold the spell");
+                WorldPacket packet(CMSG_PET_SET_ACTION, 16);
+                packet << pet->GetGUID() << slot
+                       << uint32(MAKE_UNIT_ACTION_BUTTON(spell, enabled ? ACT_ENABLED : ACT_DISABLED));
+                player->GetSession()->HandlePetSetAction(packet);
+            }
+            else
+            {
+                WorldPacket packet(CMSG_PET_SPELL_AUTOCAST, 13);
+                packet << pet->GetGUID() << spell << enabled;
+                WorldPackets::Pet::PetSpellAutocast request(std::move(packet));
+                request.Read();
+                player->GetSession()->HandlePetSpellAutocastOpcode(request);
+            }
         }
         else if (action == "trainer_buy")
         {
@@ -9071,6 +9187,7 @@ private:
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<ChatLogConfig> _chatLog;
+    std::optional<BattlegroundKillXpConfig> _battlegroundKillXp;
     std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;

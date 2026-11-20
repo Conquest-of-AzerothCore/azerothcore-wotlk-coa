@@ -4359,6 +4359,14 @@ bool Player::HasTalent(uint32 spell, uint8 spec) const
     return (itr != m_talents.end() && itr->second->State != PLAYERSPELL_REMOVED && itr->second->IsInSpec(spec));
 }
 
+bool Player::HasTalentOrTwin(uint32 spell, uint8 spec) const
+{
+    for (uint32 relative : sSpellMgr->GetSpellAndRelatives(spell))
+        if (HasTalent(relative, spec))
+            return true;
+    return false;
+}
+
 bool Player::HasStoredActiveSpell(uint32 spell) const
 {
     auto const itr = m_spells.find(spell);
@@ -6480,7 +6488,7 @@ void Player::RewardReputation(Unit* victim)
 
     if (Rep->RepFaction1 && (!Rep->TeamDependent || teamId == TEAM_ALLIANCE))
     {
-        float donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevelForTarget(this), static_cast<float>(Rep->RepValue1), ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
+        float donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getRewardLevelForTarget(this), static_cast<float>(Rep->RepValue1), ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
         sScriptMgr->OnPlayerGiveReputation(this, Rep->RepFaction1, donerep1, REPUTATION_SOURCE_KILL);
 
         FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
@@ -6492,7 +6500,7 @@ void Player::RewardReputation(Unit* victim)
 
     if (Rep->RepFaction2 && (!Rep->TeamDependent || teamId == TEAM_HORDE))
     {
-        float donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevelForTarget(this), static_cast<float>(Rep->RepValue2), ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
+        float donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getRewardLevelForTarget(this), static_cast<float>(Rep->RepValue2), ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
         sScriptMgr->OnPlayerGiveReputation(this, Rep->RepFaction2, donerep2, REPUTATION_SOURCE_KILL);
 
         FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
@@ -13682,7 +13690,7 @@ bool Player::isHonorOrXPTarget(Unit* victim) const
     // The level this character is fighting, not the object's own: a scaled creature is above their
     // gray level, so the abilities and scripts that ask "only to targets that grant experience or
     // honor" have to see the version they are actually killing.
-    uint8 v_level = victim->getLevelForTarget(this);
+    uint8 v_level = victim->getRewardLevelForTarget(this);
     uint8 k_grey  = Acore::XP::GetGrayLevel(GetLevel());
 
     // Victim level less gray level

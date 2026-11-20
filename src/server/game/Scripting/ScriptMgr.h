@@ -643,6 +643,7 @@ public: /* UnitScript */
     void OnSendAuraUpdate(Unit* target, Player* receiver, AuraApplication const* application, bool remove);
     bool IfNormalReaction(Unit const* unit, Unit const* target, ReputationRank& repRank);
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell);
+    bool CanUnitAssist(Unit const* assister, Unit const* target, SpellInfo const* spell);
     Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell);
     bool CanSetPhaseMask(Unit const* unit, uint32 newPhaseMask, bool update);
     bool IsCustomBuildValuesUpdate(Unit const* unit, uint8 updateType, ByteBuffer& fieldBuffer, Player const* target, uint16 index);

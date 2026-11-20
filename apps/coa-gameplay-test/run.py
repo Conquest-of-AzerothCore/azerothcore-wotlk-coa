@@ -77,8 +77,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
     'lfg_selected_dungeon_count', 'lfg_selected_dungeon', 'lfg_need_allowed',
     'map_id', 'instance_id', 'battleground_queued', 'battleground_invited_max_level',
-    'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
-    'battleground_team', 'team', 'name_query_race',
+    'in_arena', 'arena_points', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
+    'battleground_team', 'battleground_status', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
     'nearby_creature_sent_spellclick', 'nearby_creature_sent_gossip', 'nearby_creature_can_attack', 'nearby_creature_mount_display',
     'nearby_creature_display', 'nearby_creature_scale', 'nearby_creature_aura_count', 'nearby_creature_at_client',
@@ -90,6 +90,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z', 'object_scale',
     'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp', 'sent_visible_item',
+    'level_for_target', 'reward_level_for_target', 'weapon_skill_for_target', 'defense_skill_for_target',
+    'honor_points', 'battleground_output_ratio', 'scaled_output',
     'level_scaling_choice',
     'spell_mod_mutants',
     'sent_average_item_level', 'sent_average_item_level_count',
@@ -264,7 +266,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'rating', 'op', 'subclass', 'part',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
                  'min_distance', 'owner_display', 'creator_only', 'caster_entry', 'ranged_weapon_subclass',
-                 'sheath_state', 'skill',
+                 'sheath_state', 'skill', 'amount', 'healing',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
                  'type_mask', 'hit_mask', 'spell_type_mask', 'items',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
@@ -327,6 +329,7 @@ ACTIONS = {
     'lfg_set_roles': ({'actor', 'roles'}, {'actor', 'roles'}),
     'lfg_accept': ({'actor'}, {'actor'}),
     'lfg_final_credit': ({'actor'}, {'actor'}),
+    'end_battleground': ({'actor', 'winner'}, {'actor', 'winner'}),
     'encounter_credit': ({'actor', 'entry'}, {'actor', 'entry'}),
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
@@ -345,7 +348,7 @@ ACTIONS = {
     'stop_challenge': ({'actor', 'challenge'}, {'actor', 'challenge'}),
     'area_trigger': ({'actor', 'id'}, {'actor', 'id'}),
     'trainer_buy': ({'actor', 'spell'}, {'actor', 'spell', 'target'}),
-    'pet_autocast': ({'actor', 'spell', 'enabled'}, {'actor', 'spell', 'enabled'}),
+    'pet_autocast': ({'actor', 'spell', 'enabled'}, {'actor', 'spell', 'enabled', 'via'}),
     'pet_stance': ({'actor', 'stance'}, {'actor', 'stance'}),
     'gossip_select': ({'actor', 'option'}, {'actor', 'option', 'code', 'code_actor'}),
     'who': ({'actor'}, {'actor', 'target', 'race_mask', 'class_mask'}),
@@ -594,7 +597,7 @@ def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
-          'two_side', 'quest_log_size', 'chat_log'},
+          'two_side', 'quest_log_size', 'chat_log', 'battleground_kill_xp'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -604,6 +607,7 @@ def validate(scenario, clock=REAL_CLOCK):
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
     require(type(scenario.get('chat_log', False)) is bool, 'chat_log must be boolean')
+    require(type(scenario.get('battleground_kill_xp', False)) is bool, 'battleground_kill_xp must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'ptr_character_copy_interruption' in scenario:
         require(scenario.get('ptr_character_copy') is True,
@@ -817,6 +821,8 @@ def validate(scenario, clock=REAL_CLOCK):
             require(step['actor'] in player_ids, f'{where}: pet fixture needs a player')
         if action == 'pet_autocast':
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
+            require(step.get('via', 'autocast') in ('autocast', 'set_action'),
+                    f'{where}: via must be autocast or set_action')
         if action == 'spell_mod_mutant':
             validate_spell_mod_mutant(step, where, player_ids)
         if action == 'set_aura':
@@ -947,6 +953,9 @@ def validate(scenario, clock=REAL_CLOCK):
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
         if action == 'durability_loss':
             number(step['percent'], f'{where}.percent', 0.001, 100, False)
+        if action == 'end_battleground':
+            require(step['actor'] in player_ids, f'{where}: end_battleground needs a player')
+            require(step['winner'] in {'alliance', 'horde', 'draw'}, f'{where}: winner must be alliance, horde or draw')
         if action == 'set_level':
             number(step['value'], f'{where}.value', 1, 80, True)
         if action == 'set_reputation':
@@ -1151,6 +1160,24 @@ def validate(scenario, clock=REAL_CLOCK):
                           'sent_visible_item'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
+            if metric in {'level_for_target', 'reward_level_for_target', 'weapon_skill_for_target',
+                          'defense_skill_for_target'}:
+                require(step['actor'] in player_ids and step.get('target') in actor_ids,
+                        f'{where}: target combat metric needs a player and target')
+            if metric == 'weapon_skill_for_target':
+                number(step.get('hand', 0), f'{where}.hand', 0, 2, True)
+            if metric == 'honor_points':
+                require(step['actor'] in player_ids, f'{where}: honor metric needs a player')
+            if metric == 'battleground_output_ratio':
+                require(step['actor'] in player_ids, f'{where}: output ratio metric needs a player')
+                require(not ('pet' in step and 'entry' in step), f'{where}: pet and entry are exclusive')
+                if 'entry' in step:
+                    number(step['entry'], f'{where}.entry', 1, 2**31 - 1, True)
+            if metric == 'scaled_output':
+                require(step['actor'] in player_ids and step.get('target') in actor_ids,
+                        f'{where}: scaled output needs a player and target')
+                number(step.get('amount'), f'{where}.amount', 1, 2**31 - 1, True)
+                require(type(step.get('healing', False)) is bool, f'{where}.healing must be a boolean')
             if metric == 'sent_visible_item':
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'creature_query_rank', 'creature_query_quest_item'}:
@@ -1235,11 +1262,12 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'lfg_lock_status':
                 require(step['actor'] in player_ids, f'{where}: LFG lock metric needs a player')
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
-            if metric in {'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins'}:
+            if metric in {'in_arena', 'arena_points', 'arena_team_members', 'arena_team_season_games',
+                          'arena_team_season_wins'}:
                 require(step['actor'] in player_ids, f'{where}: arena metric needs a player')
             if metric in {'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins'}:
                 number(step.get('slot'), f'{where}.slot', 0, 2, True)
-            if metric in {'battleground_team', 'team', 'name_query_race'}:
+            if metric in {'battleground_team', 'battleground_status', 'team', 'name_query_race'}:
                 require(step['actor'] in player_ids, f'{where}: team metric needs a player')
             if metric == 'lfg_dungeon_disabled':
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
@@ -1321,7 +1349,8 @@ def validate(scenario, clock=REAL_CLOCK):
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',
                                                            'spell_energize_total',
                                                            'armor_reduced_damage', 'spell_effect_value',
-                                                           'spell_damage_done', 'script_melee_damage_dealt'}),
+                                                           'spell_damage_done', 'script_melee_damage_dealt',
+                                                           'battleground_output_ratio'}),
                             f'{where}: {key} only filters supported spell combat events')
                     require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'entry' in step:

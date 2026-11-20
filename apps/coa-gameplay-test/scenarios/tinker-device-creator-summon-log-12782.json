@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Tinker Spider Bomb and Firepot Drone carry their creator like a native summon (#12782)",
+  "contract": [
+    "#12782, #10267, #10271, #9792: Firepot Drone and Spider Bomb damage lands but never shows in Details,",
+    "Recount or floating combat text. #9511 gave the devices their owner (UNIT_FIELD_SUMMONEDBY), which did not",
+    "change the meters. A native summon also records the creator (UNIT_FIELD_CREATEDBY) and the summoning spell,",
+    "and the summon is logged to the client as a SPELL_SUMMON combat log event, which is how meters tie a",
+    "guardian's damage to its owner. The shared Tinker Summon() helper now does all three, as the Knight of",
+    "Xoroth summons do. The scenario observes the creator link: each built device must be counted by a",
+    "creator-only lookup for the Tinker. The combat log event and the client display are client-side and are",
+    "checked in game."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "distance": 20,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Build Spider Bomb"
+    },
+    {
+      "action": "assert",
+      "label": "Spider Bomb is built",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Spider Bomb carries a resolvable owner link (UNIT_FIELD_SUMMONEDBY) to the Tinker",
+      "actor": "tinker",
+      "metric": "owned_creature_display",
+      "entry": 226012,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "#12782: Spider Bomb records the Tinker as its creator",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "creator_only": true,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the device detonate and despawn before the next build",
+      "ms": 8000
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Build Firepot Drone"
+    },
+    {
+      "action": "assert",
+      "label": "Firepot Drone is built",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Firepot Drone carries a resolvable owner link (UNIT_FIELD_SUMMONEDBY) to the Tinker",
+      "actor": "tinker",
+      "metric": "owned_creature_display",
+      "entry": 226112,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "#12782: Firepot Drone records the Tinker as its creator",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "creator_only": true,
+      "equals": 1
+    }
+  ]
+}

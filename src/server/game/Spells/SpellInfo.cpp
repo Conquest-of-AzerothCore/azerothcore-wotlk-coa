@@ -2744,7 +2744,7 @@ void SpellInfo::_LoadImmunityInfo()
             }
             case SPELL_AURA_MECHANIC_IMMUNITY:
             {
-                switch (Id)
+                switch (sSpellMgr->GetSpellTwinSource(Id) == 19574 ? 19574 : Id)
                 {
                     case 34471: // The Beast Within
                     case 19574: // Bestial Wrath

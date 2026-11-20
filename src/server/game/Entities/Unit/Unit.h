@@ -1104,7 +1104,8 @@ public:
 
     // Unit level methods
     [[nodiscard]] uint8 GetLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
-    uint8 getLevelForTarget(WorldObject const* /*target*/) const override { return GetLevel(); }
+    uint8 getLevelForTarget(WorldObject const* target) const override;
+    [[nodiscard]] uint8 getRewardLevelForTarget(WorldObject const* target) const;
     void SetLevel(uint8 lvl, bool showLevelChange = true);
 
     // Health methods

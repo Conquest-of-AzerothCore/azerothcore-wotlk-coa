@@ -1,0 +1,716 @@
+{
+  "schema": 1,
+  "name": "Widened battleground fights roll at the bracket top while rewards keep the real level",
+  "contract": "Kills count once Warsong Gulch is in progress and the entry Honorless Target is gone, so the scenario waits for the status, gathers the players again because the match start sends each team to its base, and removes the aura. A level 12 Human Warrior fights two level 29 Orc Warriors in a Warsong Gulch of the 10-29 bracket; a level 29 ally queued third keeps both Orcs on the opposing team. Every combat roll between them uses the bracket top 29: level_for_target is 29 in both directions, the level 12 Warrior's weapon and defense skill against a player are at least 145 (5 x 29), and after it leaves level_for_target is 12 again and its weapon skill against a player is 60 (5 x 12). Rewards keep the real levels: reward_level_for_target is 12 for the level 12 Warrior against a level 29 player and 29 for the level 29 Warrior against the level 12 one. With Battleground.GiveXPForKills on, the level 12 Warrior killing a level 29 player gains experience (xp delta > 0, not computed from Acore::XP::BaseGain) and honor (honor_points delta > 0); the level 29 Warrior killing the level 12 Warrior, a gray target, gains no experience (xp delta 0) and no honor (honor_points delta 0). Honorless Target is removed from all four players before the snapshots, so the honor delta of 0 for the gray kill can fail and is due to the real-level gray rule alone. The 0 xp for the top Warrior killing the level 12 Warrior is the discriminating check: that kill is gray at real levels (12 against 29) but would pay experience at the combat level 29, so it proves rewards keep real levels; together with the reward_level_for_target assertions, xp delta >= 1 for the level 12 Warrior is enough and the exact Acore::XP::BaseGain value is left out because CoA experience rate modifiers make it fragile. Weapon and defense skill use max(current, 5 x top), keeping racial or above-level skill. Stealth detection is rolled at the stealthed unit's real level, because a stealth aura's strength follows that level and not the bracket top: Stealth 1784 (coa-dbc-viewer record: Effect[1] EffectApplyAuraName 16 SPELL_AURA_MOD_STEALTH, EffectBasePoints 4, EffectRealPointsPerLevel 4, SpellLevel 1) on the level 12 Warrior is worth 5 + 4 x 11 = 49. WorldObject::CanDetectStealthOf gives a detector 30 + 5 x (level - 1) points and 0.3 yards per point above the stealth value, plus its combat reach, capped at 30 yards for a player. At level 12 that is 30 + 55 - 49 = 36 points, 10.8 yards plus the 1.5 yard reach; at the bracket top 29 it would be 30 + 140 - 49 = 121 points, the 30 yard cap. The Orc Warrior top, with no stealth detection bonus, stands in front of low and faces it once the match is in progress, when the start area no longer recalls players: from 20 yards it does not detect low (can_detect 0, which the bracket top level would fail) and from 6 yards it does (can_detect 1).",
+  "timeout_ms": 240000,
+  "battleground_kill_xp": true,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "low",
+      "race": 1,
+      "class": 1,
+      "level": 12
+    },
+    {
+      "id": "top",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "top2",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low is invited to the 10-29 bracket",
+      "actor": "low",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top is invited to the 10-29 bracket",
+      "actor": "top",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "ally is invited to the 10-29 bracket",
+      "actor": "ally",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top2 is invited to the 10-29 bracket",
+      "actor": "top2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "low"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low enters Warsong Gulch",
+      "actor": "low",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top enters Warsong Gulch",
+      "actor": "top",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "ally"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "ally enters Warsong Gulch",
+      "actor": "ally",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top2"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top2 enters Warsong Gulch",
+      "actor": "top2",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "teleport",
+      "label": "low meets the others outdoors",
+      "actor": "low",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others outdoors",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "ally meets the others outdoors",
+      "actor": "ally",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others outdoors",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "low rolls against top at the bracket top 29",
+      "actor": "low",
+      "metric": "level_for_target",
+      "target": "top",
+      "equals": 29,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "top rolls against low at the bracket top 29",
+      "actor": "top",
+      "metric": "level_for_target",
+      "target": "low",
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "label": "low is rewarded against top at its real level 12",
+      "actor": "low",
+      "metric": "reward_level_for_target",
+      "target": "top",
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "top is rewarded against low at its real level 29",
+      "actor": "top",
+      "metric": "reward_level_for_target",
+      "target": "low",
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "label": "low has the level 29 weapon skill 5 x 29 against top, with no skill bonus in the fixture",
+      "actor": "low",
+      "metric": "weapon_skill_for_target",
+      "target": "top",
+      "hand": 0,
+      "equals": 145
+    },
+    {
+      "action": "assert",
+      "label": "low has the level 29 defense skill 5 x 29 against top, with no skill bonus in the fixture",
+      "actor": "low",
+      "metric": "defense_skill_for_target",
+      "target": "top",
+      "equals": 145
+    },
+    {
+      "action": "assert",
+      "label": "low's Fire spells meet no level-based resistance on top, with or without ClassicPlus.CombatRules",
+      "actor": "low",
+      "metric": "spell_resist_chance",
+      "target": "top",
+      "school": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch is in progress, where kills count",
+      "actor": "low",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "teleport",
+      "label": "low meets the others again once the match starts",
+      "actor": "low",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others again once the match starts",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "ally meets the others again once the match starts",
+      "actor": "ally",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others again once the match starts",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "low enters Stealth",
+      "actor": "low",
+      "spell": 1784,
+      "stacks": 1
+    },
+    {
+      "action": "teleport",
+      "label": "top stands 20 yards from low and faces it",
+      "actor": "top",
+      "map": 489,
+      "x": 1284.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "top is 20 yards from low",
+      "actor": "top",
+      "metric": "distance_2d",
+      "target": "low",
+      "min": 18,
+      "max": 22
+    },
+    {
+      "action": "assert",
+      "label": "top does not detect the stealthed level 12 low from 20 yards",
+      "actor": "top",
+      "metric": "can_detect",
+      "target": "low",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top stands 6 yards from low and faces it",
+      "actor": "top",
+      "map": 489,
+      "x": 1298.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "top is 6 yards from low",
+      "actor": "top",
+      "metric": "distance_2d",
+      "target": "low",
+      "min": 4,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "top detects the stealthed low from 6 yards",
+      "actor": "top",
+      "metric": "can_detect",
+      "target": "low",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "low leaves Stealth",
+      "actor": "low",
+      "spell": 1784,
+      "stacks": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top returns to the others",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "low loses the entry Honorless Target",
+      "actor": "low",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top loses the entry Honorless Target",
+      "actor": "top",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "ally loses the entry Honorless Target",
+      "actor": "ally",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top2 loses the entry Honorless Target",
+      "actor": "top2",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "xp",
+      "save_as": "low_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "honor_points",
+      "save_as": "low_honor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "xp",
+      "save_as": "top_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "honor_points",
+      "save_as": "top_honor"
+    },
+    {
+      "action": "set_health",
+      "actor": "top2",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "low",
+      "target": "top2"
+    },
+    {
+      "action": "assert",
+      "label": "low kills top2",
+      "actor": "top2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "low gains experience for the level 29 kill",
+      "actor": "low",
+      "metric": "xp",
+      "relative_to": "low_xp",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "low gains honor for the level 29 kill",
+      "actor": "low",
+      "metric": "honor_points",
+      "relative_to": "low_honor",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "low",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "top",
+      "target": "low"
+    },
+    {
+      "action": "assert",
+      "label": "top kills low",
+      "actor": "low",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top gains no experience for a level 12 kill",
+      "actor": "top",
+      "metric": "xp",
+      "relative_to": "top_xp",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "top is still level 29, so the experience bar did not wrap",
+      "actor": "top",
+      "metric": "level",
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "label": "top gains no honor for a level 12 kill",
+      "actor": "top",
+      "metric": "honor_points",
+      "relative_to": "top_honor",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low leaves Warsong Gulch",
+      "actor": "low",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "low rolls against top at its own level 12 after leaving",
+      "actor": "low",
+      "metric": "level_for_target",
+      "target": "top",
+      "equals": 12,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "low has the level 12 weapon skill after leaving",
+      "actor": "low",
+      "metric": "weapon_skill_for_target",
+      "target": "top",
+      "hand": 0,
+      "equals": 60
+    }
+  ]
+}

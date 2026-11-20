@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Wisdomball maps are always Normal: a level-60 player on Heroic or Mythic still gets the questline's Regret's Chasm (Rexxar report 2026-11-18)",
+  "contract": [
+    "Map 933 Regret's Chasm has Normal, Heroic and Mythic rows (MapDifficulty 435-437); every questline spawn is Normal only",
+    "(spawnMask 1). A player who selected Heroic or Mythic used to get an empty Heroic/Mythic instance.",
+    "DISCRIMINATING: after selecting Heroic (p) or Mythic (q) and teleporting in, the instance is Normal (map_difficulty 0)",
+    "and Khadgar 9417003 stands at the landing."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8996.0, "y": 853.5, "z": 29.62, "o": 3.8 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 },
+    { "id": "q", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "world phase 1 (p)", "actor": "p", "value": 1 },
+    { "action": "set_phase", "label": "world phase 1 (q)", "actor": "q", "value": 1 },
+    { "action": "prepare_quest", "label": "SETUP p: Hold the Anchors complete", "actor": "p", "quest": 9417110 },
+    { "action": "reward_quest", "label": "SETUP p: Hold the Anchors turned in (Act III phase on map 933)", "actor": "p", "quest": 9417110 },
+    { "action": "prepare_quest", "label": "SETUP q: Hold the Anchors complete", "actor": "q", "quest": 9417110 },
+    { "action": "reward_quest", "label": "SETUP q: Hold the Anchors turned in", "actor": "q", "quest": 9417110 },
+
+    { "action": "dungeon_difficulty_packet", "label": "p selects Heroic", "actor": "p", "value": 1 },
+    { "action": "dungeon_difficulty_packet", "label": "q selects Mythic", "actor": "q", "value": 2 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "teleport", "label": "p into Regret's Chasm at the landing", "actor": "p", "map": 933, "x": -11359.0, "y": -3072.9, "z": 4.55, "o": 3.38, "ignore_access": true },
+    { "action": "teleport", "label": "q into Regret's Chasm at the landing", "actor": "q", "map": 933, "x": -11359.0, "y": -3072.9, "z": 4.55, "o": 3.38, "ignore_access": true },
+    { "action": "assert", "label": "p is on map 933", "actor": "p", "metric": "map_id", "equals": 933, "within_ms": 15000 },
+    { "action": "assert", "label": "q is on map 933", "actor": "q", "metric": "map_id", "equals": 933, "within_ms": 15000 },
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "assert", "label": "DISCRIMINATING: p's instance is Normal", "actor": "p", "metric": "map_difficulty", "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: q's instance is Normal", "actor": "q", "metric": "map_difficulty", "equals": 0 },
+    { "action": "assert", "label": "Khadgar is at the landing for p", "actor": "p", "metric": "nearest_creature_distance", "entry": 9417003, "min": 0, "max": 20 },
+    { "action": "assert", "label": "Khadgar is at the landing for q", "actor": "q", "metric": "nearest_creature_distance", "entry": 9417003, "min": 0, "max": 20 }
+  ]
+}

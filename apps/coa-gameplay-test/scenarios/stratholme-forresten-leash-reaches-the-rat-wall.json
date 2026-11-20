@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Hearthsinger Forresten can be pulled behind the rat wall on Mythic without resetting",
+  "contract": [
+    "Mythic+ groups pull Hearthsinger Forresten (10558), who spawns on Mythic only, behind the wall where the rats come in,",
+    "about 65 yards from his spawn (#12636). His Heroic and Mythic leash circle is 70 yards, so he stays in the fight there."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 329,
+      "x": 3678.0,
+      "y": -3332.5,
+      "z": 124.9,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p is in a Mythic Stratholme",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "forresten",
+      "entry": 10558,
+      "distance": 2
+    },
+    {
+      "action": "attack_nearby",
+      "label": "p hits Forresten",
+      "actor": "p",
+      "entry": 10558,
+      "radius": 10,
+      "damage_pct": 5
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "forresten"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Forresten is in combat",
+      "actor": "forresten",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p backs off west, step 1",
+      "actor": "p",
+      "dx": -16.0,
+      "dy": 0.8
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "relocate",
+      "label": "p backs off west, step 2",
+      "actor": "p",
+      "dx": -16.0,
+      "dy": 0.8
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "relocate",
+      "label": "p backs off west, step 3",
+      "actor": "p",
+      "dx": -16.0,
+      "dy": 0.8
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Forresten follows p, more than 20 yards from where he was pulled",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 10558,
+      "min_home_distance": 20,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "label": "p backs off west, step 4",
+      "actor": "p",
+      "dx": -16.0,
+      "dy": 0.8
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Forresten keeps fighting p there",
+      "actor": "forresten",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Forresten stays visible",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10558,
+      "equals": 1
+    }
+  ]
+}

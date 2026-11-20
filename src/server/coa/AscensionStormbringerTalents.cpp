@@ -389,6 +389,44 @@ class spell_ascension_stormbringer_cooldown_reduction : public SpellScript
     }
 };
 
+class spell_ascension_stormbringer_waterfall : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_stormbringer_waterfall);
+
+    bool Load() override
+    {
+        return GetCaster()->IsPlayer() && GetCaster()->getClass() == CLASS_STORMBRINGER;
+    }
+
+    void Reduce(SpellEffIndex index)
+    {
+        PreventHitDefaultEffect(index);
+        Player* player = GetHitPlayer();
+        int32 const delta = GetEffectValue();
+        if (index != EFFECT_0 || !player || delta >= 0)
+            return;
+        uint32 const family = GetSpellInfo()->SpellFamilyName;
+        std::vector<uint32> cooldowns;
+        for (auto const& entry : player->GetSpellCooldownMap())
+            if (SpellInfo const* info = sSpellMgr->GetSpellInfo(entry.first))
+                if (info->SpellFamilyName == family)
+                    cooldowns.push_back(entry.first);
+        for (uint32 spell : cooldowns)
+        {
+            if (uint64(-int64(delta)) >= player->GetSpellCooldownDelay(spell))
+                player->RemoveSpellCooldown(spell, true);
+            else
+                player->ModifySpellCooldown(spell, delta);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_stormbringer_waterfall::Reduce,
+            EFFECT_ALL, SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN);
+    }
+};
+
 class aura_ascension_barometric_pressure : public AuraScript
 {
     PrepareAuraScript(aura_ascension_barometric_pressure);
@@ -662,6 +700,7 @@ void AddSC_AscensionStormbringerTalents()
     new stormbringer_pulse_conversion();
     new stormbringer_resource_contracts();
     RegisterSpellScript(spell_ascension_stormbringer_cooldown_reduction);
+    RegisterSpellScript(spell_ascension_stormbringer_waterfall);
     RegisterSpellScript(spell_ascension_stormbringer_aether_current);
     RegisterSpellScript(aura_ascension_barometric_pressure);
     RegisterSpellScript(aura_ascension_electrical_charge);
