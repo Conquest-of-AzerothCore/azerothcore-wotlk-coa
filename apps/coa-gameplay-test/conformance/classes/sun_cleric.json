@@ -48,7 +48,9 @@
   },
   "log_queries": {},
   "off_hand_weapons": [],
-  "known_auras": [],
+  "known_auras": [
+    887015
+  ],
   "probe_auras": [
     49152
   ],
