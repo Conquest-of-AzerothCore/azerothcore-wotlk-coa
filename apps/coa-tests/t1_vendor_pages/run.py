@@ -83,17 +83,17 @@ int main() {
     Player player;
     Creature creature;
     assert(script.OnGossipHello(&player, &creature));
-    assert(player.actions.size() == 17);
-    std::array<uint32, 17> expected = {91000101,91000102,91000103,91000104,91000105,91000106,91000107,91000108,
-        91000005,91000006,91000007,91000008,91000009,91000010,91000011,91000012,91000013};
+    assert(player.actions.size() == 21);
+    std::array<uint32, 21> expected = {91000101,91000102,91000103,91000104,91000105,91000106,91000107,91000108,
+        91000109,91000110,91000111,91000112,91000113,91000114,91000115,91000116,91000009,91000010,91000011,91000012,91000013};
     for (uint32 i = 0; i < expected.size(); ++i) {
         script.OnGossipHello(&player, &creature);
         assert(player.actions[i] == i + 1);
-        if (i < 8) assert(player.labels[i].find(i % 2 ? "Part 2" : "Part 1") != std::string::npos);
+        if (i < 16) assert(player.labels[i].find(i % 2 ? "Part 2" : "Part 1") != std::string::npos);
         script.OnGossipSelect(&player, &creature, 0, player.actions[i]);
         assert(player.session.inventory == expected[i]);
     }
-    for (uint32 action : {0u, 18u, 0xFFFFFFFFu}) {
+    for (uint32 action : {0u, 22u, 0xFFFFFFFFu}) {
         player.session.inventory = 0;
         script.OnGossipSelect(&player, &creature, 0, action);
         assert(player.session.inventory == 0);
@@ -107,4 +107,4 @@ with tempfile.TemporaryDirectory(prefix="coa-tier-vendor-") as directory:
     subprocess.run(["g++", "-std=c++20", "-Wall", "-Wextra", "-Werror", "-fsanitize=undefined",
                     str(target / "check.cpp"), "-o", str(target / "check")], check=True)
     subprocess.run([str(target / "check")], check=True)
-print("PASS: all 17 gossip actions open the intended inventory; T2/T3 preserved and invalid actions ignored")
+print("PASS: all 21 gossip actions open the intended inventory; T1/T2 split pages and T3 preserved and invalid actions ignored")
