@@ -261,9 +261,9 @@ void Expose(Player* player, uint32 stacks, bool molt)
     uint32 healedStacks = applied > current ? applied - current : (molt ? 0 : 1);
     if (healedStacks && player->HasAura(CharmOfWarding))
     {
-        SpellInfo const* talent = sSpellMgr->GetSpellInfo(CharmOfWarding);
+        SpellInfo const* logged = sSpellMgr->GetSpellInfo(ExposedFleshHeal);
         HealInfo heal(player, player, player->CountPctFromMaxHealth(healedStacks * Amount(CharmOfWarding)),
-            talent, talent->GetSchoolMask());
+            logged, logged->GetSchoolMask());
         player->HealBySpell(heal);
     }
     if (!molt)
