@@ -52,6 +52,19 @@ int main()
     assert(settings.health.maps.size() == 5 && settings.damage.maps.empty());
     assert(Formula::Of("level +").Text() == "1" && Near(Formula::Of("level +").Evaluate(30), 1.0f));
 
+    assert(Scaled(27750, NaxxramasSpellMultiplier(16028, 41926, 0)) == 18870);
+    assert(Scaled(32250, NaxxramasSpellMultiplier(16028, 41926, 3)) == 32250);
+    assert(Scaled(10000, NaxxramasSpellMultiplier(15990, 28478, 0)) == 7000);
+    assert(Scaled(13000, NaxxramasSpellMultiplier(15990, 350266, 2)) == 10140);
+    assert(Scaled(5000, NaxxramasSpellMultiplier(15990, 28479, 1)) == 2950);
+    assert(Scaled(6500, NaxxramasSpellMultiplier(15990, 350267, 3)) == 4290);
+    assert(Scaled(125, NaxxramasSpellMultiplier(15989, 55799, 1)) == 175);
+    assert(Scaled(250, NaxxramasSpellMultiplier(15989, 350268, 2)) == 225);
+    assert(NaxxramasSpellMultiplier(15990, 27812, 0) == 1.0f);
+    assert(NaxxramasSpellMultiplier(15989, 28524, 0) == 1.0f);
+    assert(NaxxramasSpellMultiplier(15928, 41926, 0) == 1.0f);
+    assert(NaxxramasSpellMultiplier(16028, 41926, 4) == 1.0f);
+
     assert(Scaled(1000, 2.5f) == 2500);
     assert(Scaled(155, 2.2f) == 341);
     assert(Scaled(1, 0.1f) == 1);

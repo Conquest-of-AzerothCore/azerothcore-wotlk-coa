@@ -2,7 +2,9 @@
 #ifndef COA_CREATURE_SCALING_POLICY_H
 #define COA_CREATURE_SCALING_POLICY_H
 
+#include <array>
 #include <cctype>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
@@ -357,6 +359,31 @@ inline void ScaleRange(float& minDamage, float& maxDamage, float multiplier, flo
         minDamage = average * 2.0f / (1.0f + spread);
         maxDamage = minDamage * spread;
     }
+}
+
+inline constexpr float NaxxramasSpellMultiplier(std::uint32_t creature, std::uint32_t spell, std::size_t mode)
+{
+    struct SpellBudget
+    {
+        std::uint32_t creature;
+        std::uint32_t spell;
+        std::uint32_t alternateRank;
+        std::array<float, 4> multiplier;
+    };
+
+    constexpr SpellBudget budgets[] = {
+        { 16028, 41926, 41926, { 0.68f, 0.76f, 0.86f, 1.00f } },
+        { 15990, 28478, 350266, { 0.70f, 0.82f, 0.78f, 0.90f } },
+        { 15990, 28479, 350267, { 0.48f, 0.59f, 0.55f, 0.66f } },
+        { 15989, 55799, 350268, { 1.00f, 1.40f, 0.90f, 1.10f } },
+    };
+
+    for (SpellBudget const& budget : budgets)
+        if (budget.creature == creature && (budget.spell == spell || budget.alternateRank == spell) &&
+            mode < budget.multiplier.size())
+            return budget.multiplier[mode];
+
+    return 1.0f;
 }
 
 inline std::uint32_t Scaled(std::uint32_t value, float multiplier)
