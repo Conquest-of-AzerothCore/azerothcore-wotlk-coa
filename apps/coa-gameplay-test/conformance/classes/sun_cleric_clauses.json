@@ -933,7 +933,7 @@
         ]
       }
     ],
-    "reason": "Counted pair 20261120-210030 / next run (see report), build 8f46b717, no flip; control = no cast. Mercy self-cast. Nothing found in references beyond the server DBC."
+    "reason": "Counted pair 20261120-210030 / 20261120-210106, build 8f46b717, no flip; control = no cast. Mercy self-cast. Nothing found in references beyond the server DBC."
   },
   {
     "spell": 520024,
@@ -2289,7 +2289,7 @@
         ]
       }
     ],
-    "reason": "Counted pair 20261120-205301 / next run, build 8f46b717; control = 0 events before the learn. Nothing found in references beyond the server DBC."
+    "reason": "Counted pair 20261120-205301 / 20261120-205338, build 8f46b717; control = 0 events before the learn. Nothing found in references beyond the server DBC."
   },
   {
     "spell": 704929,
