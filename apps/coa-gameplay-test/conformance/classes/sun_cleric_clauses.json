@@ -2267,10 +2267,22 @@
   {
     "spell": 704929,
     "clause": "Dawnbreak now unleashes a burst of holy energy after a $704930d delay,",
-    "labels": [
-      "704929 spell_duration 704930 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "unleashes a burst of holy energy: no damage event before 0.95 s",
+        "labels": [
+          "704929 behaviour_metric_delta delay_held"
+        ]
+      },
+      {
+        "claim": "after a 1 s delay: the burst has landed by 1.15 s",
+        "labels": [
+          "704929 behaviour_metric_delta delay_done"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261120-205301 / next run, build 8f46b717; control = 0 events before the learn. Nothing found in references beyond the server DBC."
   },
   {
     "spell": 704929,

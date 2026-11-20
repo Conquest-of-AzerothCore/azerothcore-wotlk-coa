@@ -418,51 +418,44 @@
     {
       "spell": 704929,
       "kind": "metric_delta",
+      "quote": "after a $704930d delay",
       "trigger_spell": 800654,
       "target": "dummy",
       "cast_power": 1000,
       "expire_ms": 500,
-      "quote": "after a $704930d delay",
-      "name": "Solar Eclipse delay",
-      "variant": "delay",
-      "label_suffix": "delay",
-      "metric": "event_first_ms",
+      "metric": "spell_damage_count",
       "fields": {
-        "stream": "spell_damage",
         "spell": 704931,
-        "caster": "caster",
-        "target": "dummy",
-        "since_spell": 800654
+        "target": "dummy"
       },
-      "expected": 1000,
       "before_expected": 0,
-      "tolerance": 60,
-      "wait_ms": 2500,
-      "observe_source": "704929 Effect[0] aura 42 triggers 704930 (Solar Eclipse): DurationIndex 36 (1000 ms, $704930d); AscensionSunClericAuras.cpp:184-185 casts 704931 when 704930 expires. The first 704931 damage event on the dummy is read from the Dawnbreak 800654 cast: 1000 ms within 60 ms, which excludes 900 and 1100 ms. Control: no 704931 damage before the learn (before 0 is the missing-event reading)."
+      "name": "Solar Eclipse (no burst at 950 ms)",
+      "variant": "delay_held",
+      "label_suffix": "delay_held",
+      "expected": 0,
+      "wait_ms": 950,
+      "observe_source": "704929 Effect[0] aura 42 triggers 704930 (Solar Eclipse), DurationIndex 36 = 1000 ms ($704930d); AscensionSunClericAuras.cpp:184-185 casts the burst 704931 when it expires. Damage events of 704931 on the dummy 950 ms after the instant Dawnbreak 800654 cast: 0 (the delay is above 0.95 s, excludes 900 ms, -10%). Before the learn: 0."
     },
     {
       "spell": 704929,
       "kind": "metric_delta",
+      "quote": "after a $704930d delay",
       "trigger_spell": 800654,
       "target": "dummy",
       "cast_power": 1000,
       "expire_ms": 500,
-      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
-      "name": "Solar Eclipse damage",
-      "variant": "damage",
-      "label_suffix": "damage",
-      "metric": "spell_damage_total",
+      "metric": "spell_damage_count",
       "fields": {
         "spell": 704931,
-        "target": "dummy",
-        "critical": false
+        "target": "dummy"
       },
-      "expected": 29.5,
-      "after_at_least": 29,
-      "after_at_most": 30,
       "before_expected": 0,
-      "wait_ms": 2500,
-      "observe_source": "704931 Effect[1] SCHOOL_DAMAGE, EffectBasePoints 21 + 1, EffectDieSides 2: $704931m2 = 22 to 23 at the client level reading of the tooltip (29 resolved with the reference stats: 22 + AP 70 x 0.1 = 29); spell power 0 so the $sph term is 0. Non-critical hit read on the dummy 2500 ms after the Dawnbreak cast: [29, 30] in the tooltip's own reading. Control: 0 before the learn."
+      "name": "Solar Eclipse (burst by 1150 ms)",
+      "variant": "delay_done",
+      "label_suffix": "delay_done",
+      "expected": 1,
+      "wait_ms": 1150,
+      "observe_source": "Same events 1150 ms after the cast: exactly 1 (the delay is at most 1.15 s, excludes 1100 ms, +10%). Before the learn: 0."
     }
   ],
   "player_observations": [],
