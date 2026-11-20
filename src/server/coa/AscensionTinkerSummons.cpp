@@ -207,7 +207,7 @@ void Overcharge(Player* player, Creature* device)
     for (Unit* ally : Allies(player,device,entry == 50037 || entry == 500360 || entry == 500361 ? 15 : Radius(706829)))
     {
         if (entry == 50037)
-            Cast(player,ally,560710);
+            Cast(device,ally,560710);
         else if (entry == 500360)
             Mana(ally,CalculatePct(ally->GetMaxPower(POWER_MANA),Amount(560753)),player);
         else if (entry == 500361)
