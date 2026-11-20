@@ -1047,6 +1047,55 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (mana per tick)",
+      "kind": "metric_delta",
+      "variant": "mana_tick",
+      "label_suffix": "mana_tick",
+      "quote": "and 1% of your maximum mana every 10 sec for 5 min.",
+      "trigger_spell": 804247,
+      "gate_spell": 300357,
+      "target": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1119,
+      "expected": 1148,
+      "observe_source": "Bless 804247 costs ManaCostPercentage 20 of BaseMana 1363 (player_class_stats class 27 level 60) = 272, instant; Effect[0] aura 227 every 10000 ms triggers 805360; AscensionSunClericAuras.cpp:220-226 adds CalculatePct(max mana, Amount(805360,1)) on the caster's own tick, doubled while 300357 (Lead Me Not Astray, 'Doubles the healing done and mana restored by Bless') is known. Maximum mana read with the max_power metric: 2868. Mana set to 1363 with regeneration off, Bless cast on the caster, read 10500 ms later (one tick); 300357 learned between the phases. Expected from the streamed text, 1% of 2868 = 28 per tick (1119), doubled 57 (1148). Effective data: the spell_dbc row 805360 (rev_20261015_05_sun_cleric_bless_mana.sql) has EffectBasePoints_2 = 1, so CalcValue is 2 (Spell.dbc 805360 has 4, value 5)."
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (health per tick)",
+      "kind": "metric_delta",
+      "variant": "health_tick",
+      "label_suffix": "health_tick",
+      "quote": "Bless yourself and an ally, restoring 5% of their maximum health",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health_pct": 50,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 1790,
+      "expected": 5500,
+      "observe_source": "Bless 804247 Effect[0] aura 227 every 10000 ms triggers 805360; AscensionSunClericAuras.cpp:208-212 heals Copy(player, target, 707522, CalculatePct(target max health, effect 0 amount)). Before (control): no cast, caster at full natural health, read 10500 ms later = 1790 (player_class_stats BaseHP 1410 + stamina 56 -> 20 + (56-20) x 10 = 380). After: caster health held at 50% of the 10000 fixture = 5000, regeneration off, Bless cast on the caster, read 10500 ms later (one tick): 5000 + 5% of 10000 = 5500 from the tooltip. Whether the class tuning aura 887015 (-20% healing done) also scales this percent heal is read from the measured amount."
+    },
+    {
+      "spell": 804247,
+      "name": "Bless single ally limit",
+      "kind": "single_target",
+      "quote": "Can only affect 1 ally at a time.",
+      "observe_source": "Bless 804247 is cast on a first grouped ally, then on a second: the aura must leave the first ally and sit on the second, as for any single-target aura."
     }
   ],
   "player_observations": [],
