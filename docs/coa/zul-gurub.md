@@ -336,6 +336,8 @@ to it in the log.
       the Delusions vision 2118511, and loses sight once the vision ends, because a controlled unit detects with
       its owner's detection (`WorldObject::CanDetect`). A Warlock's Imp and a Mage's Mirror Images in one grouped
       instance prove it, each only for its own cursed owner; the CoA hounds and Necromancer minions are guardians
-      with an owner too (summon properties 61 and 64). Uncertain expectation: the tester's report that pet classes
+      with an owner too (summon properties 61 and 64). Observation, not changed: the Witch Hunter hound (50224)
+      keeps an attack it already started on a shade after its owner's vision ends, because its AI never drops a
+      victim it can no longer see. Uncertain expectation: the tester's report that pet classes
       (Farstrider Ranger, Wildwalker Primalist, Houndmaster Witch Hunter, Necromancer) could not help; the tester is
       asked which pet failed and whether its owner was cursed.
