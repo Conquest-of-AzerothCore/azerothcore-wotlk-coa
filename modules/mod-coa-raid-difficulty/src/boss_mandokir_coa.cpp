@@ -98,6 +98,7 @@
 #include "SpellScriptLoader.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+#include "zg_coa_leash.h"
 
 #include <list>
 
@@ -244,7 +245,9 @@ namespace
         boss_mandokir_coa(Creature* creature) : BossAI(creature, DATA_MANDOKIR),
             _baseScale(creature->GetNativeObjectScale()),
             _growthPerKill(sSpellMgr->AssertSpellInfo(SPELL_STOCK_LEVEL_UP)->Effects[EFFECT_1].CalcValue() / 100.0f)
-        { }
+        {
+            SetBoundary(coa_zg::LeashFor(DATA_MANDOKIR));
+        }
 
         void Reset() override
         {
