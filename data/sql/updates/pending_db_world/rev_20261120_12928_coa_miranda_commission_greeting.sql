@@ -29,7 +29,8 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (14, 3461, 4213, 0, 1, 8, 0, 5405, 0, 0, 0, 0, 0, '', 'Miranda - greeting 4213 - Horde Commission rewarded'),
 (14, 3461, 4213, 0, 2, 8, 0, 5503, 0, 0, 0, 0, 0, '', 'Miranda - greeting 4213 - Commission rewarded');
 
-DELETE FROM `npc_vendor` WHERE (`entry` = 11536 AND `item` = 46517) OR (`entry` = 12944 AND `item` = 46519);
+DELETE FROM `npc_vendor` WHERE `ExtendedCost` = 0
+    AND ((`entry` = 11536 AND `item` = 46517) OR (`entry` = 12944 AND `item` = 46519));
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 (11536, 0, 46517, 0, 0, 0, 0),
 (12944, 0, 46519, 0, 0, 0, 0);
