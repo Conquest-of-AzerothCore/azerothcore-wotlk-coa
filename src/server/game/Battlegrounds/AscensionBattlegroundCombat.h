@@ -10,6 +10,7 @@ class Unit;
 namespace AscensionBattlegroundCombat
 {
     uint8 SharedTopLevel(Unit const* self, Unit const* other);
+    uint8 StealthDetectionLevel(Unit const* detector, Unit const* stealthed);
 }
 
 #endif

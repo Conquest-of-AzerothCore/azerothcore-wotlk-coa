@@ -31,4 +31,9 @@ namespace AscensionBattlegroundCombat
         return static_cast<uint8>(
             AscensionBattlegroundBrackets::WidenedMaxLevel(battleground->GetMapId(), battleground->GetBracketId()));
     }
+
+    uint8 StealthDetectionLevel(Unit const* detector, Unit const* stealthed)
+    {
+        return SharedTopLevel(detector, stealthed) ? stealthed->GetLevel() : 0;
+    }
 }
