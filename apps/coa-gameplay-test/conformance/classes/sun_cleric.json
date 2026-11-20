@@ -1234,9 +1234,13 @@
       "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
       "gated_spell": 805629,
       "resource": "cooldown",
-      "reduction": 4420.0,
+      "reduction": 4340.0,
       "target": "dummy",
       "after_casts": [
+        [
+          804584,
+          "caster"
+        ],
         [
           804584,
           "caster"
@@ -1254,8 +1258,8 @@
           "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
         }
       ],
-      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (cooldown 45000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Sunslam is attempted again 40830 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 40330 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 4340 ms at the Dawn cast) or of the full cooldown (4500 ms) the tooltip does not say; the stated cut is taken as their midpoint 4420 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
-      "arm_wait_ms": 25000
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (cooldown 45000 ms) is cast with the Dawn state aura 807440 present (Sunslam is refused without it, AscensionSunClericAbilities.cpp:90, so the harness sets it before each Sunslam cast), then Dawn 804584 is cast twice at the caster, 1600 ms and 3200 ms after it, with 20 Solar Power each time (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it): the first cast finds Dawn present and cancels it, the second activates it (AscensionSunClericAbilities.cpp:417-423) and applies the cut. Sunslam is attempted again 40910 ms after its cast (4340 ms less than its cooldown plus 250 ms): refused without the passive (control arm), accepted with it, and refused again 40410 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 4180 ms at the second Dawn cast) or of the full cooldown (4500 ms) the tooltip does not say; the stated cut is taken as their midpoint 4340 ms with a margin of 250 ms (6% of 4340 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
+      "after_cast_gap_ms": 1600
     },
     {
       "spell": 804269,
