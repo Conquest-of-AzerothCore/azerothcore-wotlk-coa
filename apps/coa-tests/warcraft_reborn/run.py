@@ -339,7 +339,7 @@ int main(int, char** argv)
         "Reborn Bear and Dire Bear Form are namesakes, not twins, of the forms stock Swipe, Enrage and Bash require");
     Check(twinned(19574, 1119574) && twinned(34692, 1134692) && namesake(34471, 1134471) && twinned(33206, 1133206) &&
             twinned(47585, 1147585) && twinned(47788, 1147788) && twinned(53385, 1153385) &&
-            twinned(53583, 1153583) && twinned(54037, 1154037) && twinned(54038, 1154038) &&
+            twinned(53583, 1153583) && namesake(54428, 1154428) && twinned(54037, 1154037) && twinned(54038, 1154038) &&
             twinned(63410, 1163410) && twinned(63411, 1163411) && twinned(53511, 1153511) &&
             twinned(53512, 1153512) && twinned(60096, 1160096) && twinned(60097, 1160097) &&
             twinned(49016, 1149016) && twinned(49036, 1149036) && twinned(49032, 1149032) &&
@@ -585,10 +585,14 @@ def check_class_spell_bindings(dbc):
     return ok
 
 
+EBON_PLAGUE_BRANCH = ("src/server/game/Spells/Auras/SpellAuras.cpp",
+                      "// Ebon Plaguebringer - end search if found", "// Unholy blight", [
+                          "if (aurEff) { uint32 spellId = 0; switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))",
+                          "if (spellId) caster->CastSpell(target, "
+                          "sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()), true, 0, GetEffect(0));"])
+
 TALENT_COPY_SITES = {
     "src/server/game/Spells/Auras/SpellAuras.cpp": [
-        "switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))",
-        "caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()), true, 0, GetEffect(0));",
         "if (!player->HasSpellCooldown(GetId()))",
         "switch (sSpellMgr->GetSpellTwinSource(GetId()) == 19574 ? 19574 : GetId())",
         "owner->HasAuraOrTwin(34692)", "sSpellMgr->GetSpellTwinFor(34471, GetId())"],
@@ -599,7 +603,7 @@ TALENT_COPY_SITES = {
         "sSpellMgr->GetSpellTwinFor(60096, GetId())", "sSpellMgr->GetSpellTwinFor(60097, GetId())"],
     "src/server/game/Entities/Unit/Unit.cpp": [
         "GetAuraEffectOfRankedSpellOrTwin(49036, EFFECT_0)", "ToPlayer()->HasSpellOrTwin(53583)",
-        "switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id))"],
+        "switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id) == 54428 ? 54428 : spellInfo->Id)"],
     "src/server/game/Spells/SpellEffects.cpp": [
         "sSpellMgr->GetSpellTwinSource(aurEff->GetId()) == 54037 ? 4 : 8",
         "switch (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 53385 ? 53385 : m_spellInfo->Id)"],
@@ -610,12 +614,26 @@ TALENT_COPY_SITES = {
 }
 
 
+def collapse_whitespace(text):
+    return " ".join(text.split())
+
+
+def source_branch(path, start, end):
+    text = collapse_whitespace((ROOT / path).read_text(encoding="utf-8"))
+    begin = text.find(start)
+    finish = text.find(end, begin) if begin >= 0 else -1
+    return text[begin:finish] if finish >= 0 else ""
+
+
 def check_talent_copy_sites():
     missing = [f"{path}: {needle}" for path, needles in TALENT_COPY_SITES.items()
                for needle in needles
-               if re.sub(r"\s+", "", needle) not in re.sub(r"\s+", "", (ROOT / path).read_text(encoding="utf-8"))]
+               if needle not in collapse_whitespace((ROOT / path).read_text(encoding="utf-8"))]
+    path, start, end, needles = EBON_PLAGUE_BRANCH
+    branch = source_branch(path, start, end)
+    missing += [f"{path} (Ebon Plague branch): {needle}" for needle in needles if needle not in branch]
     print(f"{'PASS' if not missing else 'FAIL'}: stock special cases for Ebon Plague, Crypt Fever, Hysteria, Epidemic, "
-          "Feeding Frenzy, Improved Barkskin, Improved Felhunter, Guarded by the Light, The Beast Within, "
+          "Feeding Frenzy, Improved Barkskin, Improved Felhunter, Guarded by the Light, Divine Plea, The Beast Within, "
           "Bestial Wrath, Pain Suppression, Dispersion, Guardian Spirit and Divine Storm also match the Reborn copies")
     for line in missing:
         print("  missing", line)
