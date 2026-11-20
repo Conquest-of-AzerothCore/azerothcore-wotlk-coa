@@ -127,6 +127,7 @@ public:
             return;
         if (Aura* dawn = player->GetAura(Dawn))
         {
+            spell->m_appliedMods.erase(dawn);
             spell->SetScriptValue(DawnCast, 1);
             if (!State(player).timers.HasTimeUntilEvent(Dawn))
             {
