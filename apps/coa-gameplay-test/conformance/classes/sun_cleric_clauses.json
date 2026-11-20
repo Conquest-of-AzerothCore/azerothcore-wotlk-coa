@@ -87,10 +87,23 @@
   {
     "spell": 300314,
     "clause": "While above 80% health you now deal $301341s1% increased damage and healing.",
-    "labels": [
-      "300314 effect_value 301341e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "you now deal $301341s1% increased damage",
+        "labels": [
+          "300314 effect_value 301341e0 #0"
+        ]
+      },
+      {
+        "claim": "and healing",
+        "labels": []
+      },
+      {
+        "claim": "While above 80% health",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300315,
@@ -544,10 +557,19 @@
   {
     "spell": 301239,
     "clause": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
-    "labels": [
-      "301239 effect_value 302896e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health",
+        "labels": [
+          "301239 effect_value 302896e0 #0"
+        ]
+      },
+      {
+        "claim": "and mana",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 301256,
@@ -1100,10 +1122,23 @@
   {
     "spell": 560857,
     "clause": "Increases your damage and healing by $s1% against targets below 35% health.",
-    "labels": [
-      "560857 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your damage by $s1%",
+        "labels": [
+          "560857 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and healing by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "against targets below 35% health",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 560857,
@@ -1117,10 +1152,19 @@
   {
     "spell": 560859,
     "clause": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-    "labels": [
-      "560859 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cast time of Dawnsear and Sunflare by $s1%",
+        "labels": [
+          "560859 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and mana cost by $s1%",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 560861,
@@ -1225,10 +1269,19 @@
   {
     "spell": 561329,
     "clause": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-    "labels": [
-      "561329 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cast time of Dawnsear and Sunflare by $s1%",
+        "labels": [
+          "561329 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and mana cost by $s1%",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 570027,
@@ -1331,10 +1384,19 @@
   {
     "spell": 582832,
     "clause": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
-    "labels": [
-      "582832 effect_value 582837e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Melee critical strikes increase your haste by $582837s1% per stack",
+        "labels": [
+          "582832 effect_value 582837e0 #0"
+        ]
+      },
+      {
+        "claim": "and healing done by $582837s1% per stack",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 582832,
@@ -1509,11 +1571,25 @@
   {
     "spell": 680641,
     "clause": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
-    "labels": [
-      "680641 effect_value 524859e0 #3",
-      "680641 spell_duration 524859 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Consuming the stacks increases your movement speed by $524859s1%",
+        "labels": [
+          "680641 effect_value 524859e0 #3"
+        ]
+      },
+      {
+        "claim": "and critical block chance by $524859s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $524859d",
+        "labels": [
+          "680641 spell_duration 524859 #4"
+        ]
+      }
+    ]
   },
   {
     "spell": 680643,
@@ -1569,11 +1645,25 @@
   {
     "spell": 680648,
     "clause": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d,",
-    "labels": [
-      "680648 effect_value 681254e0 #0",
-      "680648 spell_duration 681254 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Expending Angelic Presence increases your critical strike chance by $681254s1%",
+        "labels": [
+          "680648 effect_value 681254e0 #0"
+        ]
+      },
+      {
+        "claim": "and healing by $681254s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $681254d",
+        "labels": [
+          "680648 spell_duration 681254 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 680648,
@@ -2216,10 +2306,19 @@
   {
     "spell": 706735,
     "clause": "Increases your Holy and Physical damage and healing done by $s1%.",
-    "labels": [
-      "706735 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Holy and Physical damage by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "and healing done by $s1%",
+        "labels": [
+          "706735 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707072,
@@ -2360,10 +2459,19 @@
   {
     "spell": 707770,
     "clause": "Increases your Holy and Physical damage and healing done by $s1%.",
-    "labels": [
-      "707770 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Holy and Physical damage by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "and healing done by $s1%",
+        "labels": [
+          "707770 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707771,
@@ -3428,10 +3536,19 @@
   {
     "spell": 807963,
     "clause": "Increases the healing done and reduces the mana cost of Radiant Cascade by $s1%.",
-    "labels": [
-      "807963 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the healing done of Radiant Cascade by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "and reduces the mana cost of Radiant Cascade by $s1%",
+        "labels": [
+          "807963 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 807964,
