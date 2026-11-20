@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+/* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionBattlegroundBrackets.h"
 #include "AscensionBattlegroundBracketsPolicy.h"
@@ -98,6 +98,7 @@ float PlayerOutputHealth(Policy::LevelValues const& values)
 {
     return static_cast<float>(values.health) + Policy::PlayerStaminaHealth(values.stats[STAT_STAMINA]);
 }
+
 uint32 LiftTargetLevel(Player const* player)
 {
     Map const* map = player->FindMap();
@@ -198,7 +199,7 @@ public:
         AscensionBattlegroundBrackets::Configure(
             sConfigMgr->GetOption<bool>("CoA.Battleground.WideBrackets.Enable", true),
             sConfigMgr->GetOption<std::string>("CoA.Battleground.WideBrackets.Ranges", "10-29,30-49,50-59"));
-        MaxLiftLevels = sConfigMgr->GetOption<uint32>("CoA.Battleground.WideBrackets.MaxLiftLevels", 0);
+        MaxLiftLevels = uint32(std::max<int32>(sConfigMgr->GetOption<int32>("CoA.Battleground.WideBrackets.MaxLiftLevels", 0), 0));
     }
 };
 
@@ -270,40 +271,7 @@ public:
         RefreshPetLift(pet);
     }
 };
-}
 
-namespace AscensionBattlegroundCatchUp
-{
-    float OutputRatio(Unit const* unit)
-    {
-        if (!unit)
-            return 1.0f;
-
-        if (AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey))
-            return applied->ratio;
-
-        Unit const* owner = unit->GetCharmerOrOwner();
-        AppliedLift const* ownerLift = owner ? owner->CustomData.Get<AppliedLift>(LiftKey) : nullptr;
-        return ownerLift ? ownerLift->ratio : 1.0f;
-    }
-
-    uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing)
-    {
-        if (!source || !target || amount == 0 || AscensionBattlegroundCombat::SharedTopLevel(source, target) == 0)
-            return amount;
-
-        if (spell && spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
-            return amount;
-
-        if (source->IsHostileTo(target) == healing)
-            return amount;
-
-        return Policy::ScaleAmount(amount, OutputRatio(source));
-    }
-}
-
-namespace
-{
 int32 ScaledSigned(Unit const* source, Unit const* target, int32 amount, SpellInfo const* spell, bool healing)
 {
     if (amount <= 0)
@@ -350,9 +318,43 @@ public:
         if (type != SPELL_AURA_SCHOOL_ABSORB && type != SPELL_AURA_MANA_SHIELD)
             return;
 
-        amount = ScaledSigned(caster, effect->GetBase()->GetUnitOwner(), amount, effect->GetSpellInfo(), true);
+        WorldObject* const owner = effect->GetBase()->GetOwner();
+        amount = ScaledSigned(caster, owner ? owner->ToUnit() : nullptr, amount, effect->GetSpellInfo(), true);
     }
 };
+}
+
+namespace AscensionBattlegroundCatchUp
+{
+float OutputRatio(Unit const* unit)
+{
+    if (!unit)
+        return 1.0f;
+
+    if (AppliedLift const* applied = unit->CustomData.Get<AppliedLift>(LiftKey))
+        return applied->ratio;
+
+    Unit const* owner = unit->GetCharmerOrOwner();
+    AppliedLift const* ownerLift = owner ? owner->CustomData.Get<AppliedLift>(LiftKey) : nullptr;
+    return ownerLift ? ownerLift->ratio : 1.0f;
+}
+
+uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, SpellInfo const* spell, bool healing)
+{
+    if (!source || !target || amount == 0 || AscensionBattlegroundCombat::SharedTopLevel(source, target) == 0)
+        return amount;
+
+    if (spell && spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
+        return amount;
+
+    if (healing && spell && (spell->HasEffect(SPELL_EFFECT_HEALTH_LEECH) || spell->HasAura(SPELL_AURA_PERIODIC_LEECH)))
+        return amount;
+
+    if (source->IsHostileTo(target) == healing)
+        return amount;
+
+    return Policy::ScaleAmount(amount, OutputRatio(source));
+}
 }
 
 void AddSC_AscensionBattlegroundCatchUp()

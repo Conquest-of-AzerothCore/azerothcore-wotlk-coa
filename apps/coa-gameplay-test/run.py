@@ -1172,10 +1172,13 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'battleground_output_ratio':
                 require(step['actor'] in player_ids, f'{where}: output ratio metric needs a player')
                 require(not ('pet' in step and 'entry' in step), f'{where}: pet and entry are exclusive')
+                if 'entry' in step:
+                    number(step['entry'], f'{where}.entry', 1, 2**31 - 1, True)
             if metric == 'scaled_output':
                 require(step['actor'] in player_ids and step.get('target') in actor_ids,
                         f'{where}: scaled output needs a player and target')
                 number(step.get('amount'), f'{where}.amount', 1, 2**31 - 1, True)
+                require(type(step.get('healing', False)) is bool, f'{where}.healing must be a boolean')
             if metric == 'sent_visible_item':
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'creature_query_rank', 'creature_query_quest_item'}:
