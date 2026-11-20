@@ -86,11 +86,6 @@
         "spell": 806060
       },
       "trigger_text": "Damage dealt by Radiant Flame",
-      "trigger_spells": [
-        806060,
-        807058
-      ],
-      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 PERIODIC_TRIGGER_SPELL_WITH_VALUE every 1000 ms triggers 807058, a school damage spell; 806060 itself deals no damage. Each landed 807058 hit on the dummy rolls Chance(player, 300369) once (AscensionSunClericEvents.cpp:115, case 300369 requires damage and info->Id == 807058). A trial is one 807058 hit; the residual failure probability is set by the pilot sizing of the prove runner.",
       "event_metric": "spell_damage_count",
       "proc_spell": 807175,
       "proc_spell_source": "AscensionSunClericEvents.cpp:250: case 300369 casts Solar Flare 807175 at the target; the tooltip names Solar Flare",
@@ -105,7 +100,20 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0,
-      "base_mana_per_attempt": true
+      "base_mana_per_attempt": true,
+      "trial_readings": [
+        {
+          "name": "Radiant Flame hits",
+          "meaning": "each landed 807058 hit rolls Chance(player, 300369) once (AscensionSunClericEvents.cpp:115); Radiant Flame 806060 Effect[0] aura 227 every 1000 ms triggers 807058 and 806060 itself deals no damage",
+          "adds": [
+            {
+              "metric": "spell_damage_count",
+              "spell": 807058
+            }
+          ],
+          "minus_events": false
+        }
+      ]
     },
     {
       "aura": 704908,
