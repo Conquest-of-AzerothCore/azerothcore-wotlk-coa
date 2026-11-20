@@ -55,7 +55,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             Spell const* proc = event.GetProcSpell();
             SpellInfo const* trigger = proc ? proc->GetTriggeredByAuraSpellInfo() : nullptr;
             if (trigger && trigger->Id != 805629 && trigger->Id != 807970 && trigger->Id != 807971 &&
-                trigger->Id != 807972 && trigger->Id != 807973 && trigger->Id != 807974)
+                trigger->Id != 807972 && trigger->Id != 807973 && trigger->Id != 807974 && !Named(trigger, 806060))
                 for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                     if ((trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL ||
                          trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE) &&
@@ -165,7 +165,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
             bool automatic = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
             bool compatible = id != 807749 || !automatic;
             if (fulfillment && compatible)
-                Fulfill(player, spell, raw && raw->GetSpellInfo()->Id == 805639 ? raw : spell, target);
+                Fulfill(player, spell, raw && (raw->GetSpellInfo()->Id == 805639 || raw->GetSpellInfo()->Id == 807058) ?
+                    raw : spell, target);
             if (!State(player).dawnEvent)
             {
                 int32 gain = (id == 803489) ? 2 : (id == 803719 || (id == 807749 && !automatic)) ? 0 : 1;
