@@ -73,51 +73,54 @@ Policy::LevelValues PlayerLevelValues(Player const*, uint8 level)
 
 int main()
 {
-    Policy::Lift const large{200, 200, {}};
-    Policy::Lift const small{100, 100, {}};
+    Policy::Lift const large{200, 0};
+    Policy::Lift const small{100, 0};
     for (bool pet : {false, true})
     {
         Unit unit;
         unit.pet = pet;
         ApplyLift(&unit, large);
-        assert(unit.health == 100 && unit.powers[POWER_MANA] == 100);
+        assert(unit.health == 100);
         unit.SetHealth(250);
         unit.SetPower(POWER_MANA, 240);
         auto const powers = unit.powers;
         ApplyLift(&unit, large);
         assert(unit.health == 250 && unit.powers == powers);
         ApplyLift(&unit, small);
-        assert(unit.health == 200 && unit.powers[POWER_MANA] == 200);
+        assert(unit.health == 200 && unit.maxima[POWER_MANA] == 100);
         ApplyLift(&unit, large);
-        assert(unit.health == 200 && unit.powers[POWER_MANA] == 200);
+        assert(unit.health == 200);
         unit.SetHealth(0);
         ApplyLift(&unit, large);
         assert(unit.health == 0);
         unit.SetHealth(250);
         RemoveLift(&unit);
-        assert(unit.health == 100 && unit.powers[POWER_MANA] == 100);
+        assert(unit.health == 100);
         assert(!unit.CustomData.Get<AppliedLift>(LiftKey));
         ApplyLift(&unit, large);
         unit.SetHealth(250);
-        unit.SetPower(POWER_MANA, 250);
         ApplyLift(&unit, {});
-        assert(unit.health == 100 && unit.powers[POWER_MANA] == 100);
+        assert(unit.health == 100);
     }
 
+    Unit pet;
+    pet.pet = true;
+    ApplyLift(&pet, {0, 5});
+    assert(pet.stats[STAT_STAMINA] == 5.0f && pet.stats[STAT_STRENGTH] == 0.0f);
+    RemoveLift(&pet);
+    assert(pet.stats[STAT_STAMINA] == 0.0f);
+
     Player player;
-    player.maxHealth = player.maxima[POWER_MANA] = 120;
+    player.maxHealth = 120;
     RefreshPlayerLift(&player);
     player.level = 13;
     player.maxHealth += 10;
-    player.maxima[POWER_MANA] += 10;
     player.SetHealth(player.maxHealth);
-    player.SetPower(POWER_MANA, player.maxima[POWER_MANA]);
     RefreshPlayerLift(&player);
     assert(player.maxHealth == 290 && player.health == 290);
-    assert(player.maxima[POWER_MANA] == 290 && player.powers[POWER_MANA] == 290);
     RefreshPlayerLift(&player);
-    assert(player.health == 290 && player.powers[POWER_MANA] == 290);
+    assert(player.health == 290);
     player.level = 29;
     RefreshPlayerLift(&player);
-    assert(player.health == 130 && player.powers[POWER_MANA] == 130);
+    assert(player.health == 130);
 }

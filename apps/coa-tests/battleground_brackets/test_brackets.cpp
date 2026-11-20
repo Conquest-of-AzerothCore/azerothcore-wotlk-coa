@@ -1,5 +1,6 @@
 #include "../../../src/server/game/Battlegrounds/AscensionBattlegroundBracketsPolicy.h"
 #include <cassert>
+#include <cmath>
 #include <iostream>
 
 using namespace AscensionBattlegroundBracketsPolicy;
@@ -79,20 +80,62 @@ static void RejectsPartialRowsAndKeepsEmptyMaps()
     assert(single && SameRows(*single, { { 0, 10, 19 } }));
 }
 
-static void LiftsWarriorFromTwelveToTwentyNine()
+static LevelValues const HumanWarriorLevelTen = { 97, 0, { 33, 26, 31, 21, 23 } };
+static LevelValues const HumanWarriorLevelTwelve = { 109, 0, { 36, 28, 34, 21, 23 } };
+static LevelValues const HumanWarriorLevelTwentyNine = { 348, 0, { 60, 43, 56, 24, 30 } };
+static LevelValues const HumanWarriorLevelFiftyNine = { 1619, 0, { 118, 79, 108, 30, 44 } };
+
+static void LiftsWarriorHealthOnly()
 {
-    LevelValues const own = { 109, 0, { 36, 28, 34, 21, 23 } };
-    LevelValues const target = { 348, 0, { 60, 43, 56, 24, 30 } };
-    Lift const lift = LiftBetween(own, target);
-    assert(lift.health == 239.0f && lift.mana == 0.0f);
-    assert(lift.stats[0] == 24.0f && lift.stats[1] == 15.0f && lift.stats[2] == 22.0f);
-    assert(lift.stats[3] == 3.0f && lift.stats[4] == 7.0f);
+    Lift const lift = LiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwentyNine);
+    assert(lift.health == 239.0f && lift.stamina == 22.0f);
     assert(!lift.Empty());
-    Lift const reversed = LiftBetween(target, own);
-    assert(reversed.health == 0.0f && reversed.mana == 0.0f && reversed.Empty());
-    for (float stat : reversed.stats)
-        assert(stat == 0.0f);
-    assert(LiftBetween(own, own).Empty());
+    assert(LiftBetween(HumanWarriorLevelTwentyNine, HumanWarriorLevelTwelve).Empty());
+    assert(LiftBetween(HumanWarriorLevelTwelve, HumanWarriorLevelTwelve).Empty());
+}
+
+static void CapsLiftLevel()
+{
+    assert(CappedLiftLevel(12, 29, 0) == 29);
+    assert(CappedLiftLevel(12, 29, 5) == 17);
+    assert(CappedLiftLevel(12, 29, 40) == 29);
+    assert(CappedLiftLevel(10, 59, 0) == 59);
+    assert(CappedLiftLevel(29, 29, 3) == 29);
+}
+
+static void ComputesWarriorRatio()
+{
+    float const own = static_cast<float>(HumanWarriorLevelTwelve.health) + PlayerStaminaHealth(34);
+    float const top = static_cast<float>(HumanWarriorLevelTwentyNine.health) + PlayerStaminaHealth(56);
+    assert(own == 269.0f && top == 728.0f);
+    assert(std::abs(OutputRatio(own, top) - 728.0f / 269.0f) < 1e-6f);
+    assert(OutputRatio(728.0f, 269.0f) == 1.0f);
+    assert(OutputRatio(0.0f, 728.0f) == 1.0f);
+    assert(PlayerStaminaHealth(15) == 15.0f);
+}
+
+static void BridgesFortyNineLevels()
+{
+    float const own = static_cast<float>(HumanWarriorLevelTen.health)
+        + PlayerStaminaHealth(HumanWarriorLevelTen.stats[2]);
+    float const top = static_cast<float>(HumanWarriorLevelFiftyNine.health)
+        + PlayerStaminaHealth(HumanWarriorLevelFiftyNine.stats[2]);
+    float const ratio = OutputRatio(own, top);
+    assert(ratio > 1.0f && std::isfinite(ratio));
+    assert(ScaleAmount(4000000000u, ratio) == UINT32_MAX);
+    assert(ScaleAmount(std::int32_t(2000000000), ratio) == INT32_MAX);
+    assert(ScaleAmount(1000u, 1.0f) == 1000u);
+    assert(ScaleAmount(1000u, 728.0f / 269.0f) == 2706u);
+}
+
+static void KeepsHealthShare()
+{
+    assert(KeptHealth(269, 269, 728) == 728);
+    assert(KeptHealth(0, 269, 728) == 0);
+    assert(KeptHealth(1, 728, 269) == 1);
+    assert(KeptHealth(364, 728, 269) == 135);
+    assert(KeptHealth(100, 0, 728) == 100);
+    assert(KeptHealth(728, 728, 269) == 269);
 }
 
 int main()
@@ -103,6 +146,10 @@ int main()
     WidensMapStartingAtTwenty();
     RejectsMapsThatGiveOneRangeDifferentIds();
     RejectsPartialRowsAndKeepsEmptyMaps();
-    LiftsWarriorFromTwelveToTwentyNine();
+    LiftsWarriorHealthOnly();
+    CapsLiftLevel();
+    ComputesWarriorRatio();
+    BridgesFortyNineLevels();
+    KeepsHealthShare();
     std::cout << "Battleground wide bracket policy checks passed\n";
 }

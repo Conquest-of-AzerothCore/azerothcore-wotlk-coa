@@ -31,22 +31,17 @@ void RaiseCreateStat(Unit* unit, Stats stat, float amount)
 
 void HandleLiftModifiers(Unit* unit, Policy::Lift const& lift, bool apply)
 {
-    for (std::size_t stat = 0; stat < lift.stats.size(); ++stat)
+    if (lift.stamina != 0.0f)
     {
-        if (lift.stats[stat] == 0.0f)
-            continue;
-
         if (unit->IsPet())
-            RaiseCreateStat(unit, Stats(stat), apply ? lift.stats[stat] : -lift.stats[stat]);
+            RaiseCreateStat(unit, STAT_STAMINA, apply ? lift.stamina : -lift.stamina);
         else
-            unit->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + stat), BASE_VALUE, lift.stats[stat], apply);
+            unit->HandleStatFlatModifier(UnitMods(int(UNIT_MOD_STAT_START) + int(STAT_STAMINA)), BASE_VALUE, lift.stamina,
+                apply);
     }
 
     if (lift.health != 0.0f)
         unit->HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, lift.health, apply);
-
-    if (lift.mana != 0.0f)
-        unit->HandleStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, lift.mana, apply);
 }
 
 void RemoveLift(Unit* unit)
