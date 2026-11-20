@@ -1,0 +1,236 @@
+{
+  "schema": 2,
+  "name": "Karazhan phase gate, personal unlock and bot exemption",
+  "contract": [
+    "Phase 8 closes Karazhan even to bots; phase 9 admits an unattuned bot.",
+    "A non-bot needs both the rewarded attunement quest and a subsequent actual raid boss kill.",
+    "The newly earned unlock survives logout and login."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8826.9,
+    "y": 632.397,
+    "z": 93.8
+  },
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "bot",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "bot": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "bot",
+      "raid": true
+    },
+    {
+      "action": "set_phase",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "console",
+      "command": "raidphase set 8",
+      "restore": "raidphase clear"
+    },
+    {
+      "action": "teleport",
+      "actor": "bot",
+      "map": 532,
+      "x": -11100,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0.577268
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "command": "raidphase set 9"
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 532,
+      "x": -11100,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0.577268
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "bot",
+      "map": 532,
+      "x": -11100,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0.577268
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "map_id",
+      "equals": 532
+    },
+    {
+      "action": "teleport",
+      "actor": "bot",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "leader",
+      "quest": 9837
+    },
+    {
+      "action": "reward_quest",
+      "actor": "leader",
+      "quest": 9837
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "quest_rewarded",
+      "quest": 9837,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 532,
+      "x": -11100,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0.577268
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 533,
+      "x": 3783.2727,
+      "y": -5062.6973,
+      "z": 141.7176,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 533
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 15990,
+      "kill": true,
+      "radius": 90
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "leader"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 532,
+      "x": -11100,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0.577268
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 532
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "name": "Karazhan Callboard rewards stay one raid stage behind",
+  "contract": [
+    "With PreviousStageOnly enabled and phase 9 released, the progress bar pays a Naxxramas cache even at Karazhan item level.",
+    "A saved Karazhan Callboard cache cannot be opened while it is above the cap."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "console",
+      "command": "raidphase set 9",
+      "restore": "raidphase clear"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "hero",
+      "source": "core.callboard.itemlevel",
+      "index": 0,
+      "value": 92
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "hero",
+      "source": "core.callboard.itemlevel",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "hero",
+      "source": "core.callboard.points",
+      "index": 0,
+      "value": 125
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18034
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18034
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615009,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615014,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1615014
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 1615014
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615014,
+      "equals": 1
+    }
+  ]
+}

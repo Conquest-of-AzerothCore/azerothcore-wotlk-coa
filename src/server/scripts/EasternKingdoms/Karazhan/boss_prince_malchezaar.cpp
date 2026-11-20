@@ -16,11 +16,14 @@
  */
 
 #include "CreatureScript.h"
+#include "Map.h"
+#include "Player.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "karazhan.h"
+#include <array>
 
 enum PrinceSay
 {
@@ -96,6 +99,7 @@ struct boss_malchezaar : public BossAI
 
     void Reset() override
     {
+        EnfeebleResetHealth();
         Initialize();
         _Reset();
 
@@ -148,6 +152,7 @@ struct boss_malchezaar : public BossAI
 
     void JustDied(Unit* /*killer*/) override
     {
+        EnfeebleResetHealth();
         _JustDied();
         Talk(SAY_DEATH);
     }
@@ -163,11 +168,6 @@ struct boss_malchezaar : public BossAI
             relay->CastSpell(infernal, SPELL_INFERNAL_RELAY);
             summons.Summon(infernal);
         }
-    }
-
-    bool MaxSpawns(std::list<Creature*> spawns)
-    {
-        return spawns.size() == 0;
     }
 
     Creature* PickTarget(std::list<Creature*> pickList)
@@ -211,7 +211,7 @@ struct boss_malchezaar : public BossAI
             context.Repeat(30s);
         }).Schedule(40s, [this](TaskContext context)
         {
-            if (!MaxSpawns(infernalTargets)) // only spawn infernal when the area is not full
+            if (!infernalTargets.empty() && !relays.empty())
             {
                 Talk(SAY_SUMMON);
                 if (Creature* infernalRelayOne = relays.back())
@@ -234,7 +234,10 @@ struct boss_malchezaar : public BossAI
                     }
                 }
             }
-            context.Repeat(_phase == PHASE_THREE ? 15s : 45s);
+            constexpr std::array<Seconds, MAX_RAID_DIFFICULTY> infernalIntervals{45s, 40s, 30s, 20s};
+            uint8 const mode = me->GetMap()->GetSpawnMode();
+            Seconds const interval = mode < infernalIntervals.size() ? infernalIntervals[mode] : infernalIntervals.front();
+            context.Repeat(_phase == PHASE_THREE ? 15s : interval);
         }).Schedule(20s, [this](TaskContext context)
         {
             DoCastVictim(SPELL_SHADOW_WORD_PAIN);
@@ -247,7 +250,7 @@ struct boss_malchezaar : public BossAI
     {
         if (spell->Id == SPELL_ENFEEBLE)
         {
-            _enfeebleTargets[target->GetGUID()] = target->GetHealth();
+            _enfeebleTargets.try_emplace(target->GetGUID(), target->GetHealth());
             target->SetHealth(1);
         }
     }
@@ -372,19 +375,15 @@ class spell_malchezaar_enfeeble : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-        uint8 maxSize = 5;
         Unit* caster = GetCaster();
 
         targets.remove_if([caster](WorldObject const* target) -> bool
         {
-            // Should not target current victim.
-            return caster->GetVictim() == target;
+            Player const* player = target->ToPlayer();
+            return !player || player->IsGameMaster() || !player->IsAlive() || caster->GetVictim() == target;
         });
 
-        if (targets.size() > maxSize)
-        {
-            Acore::Containers::RandomResize(targets, maxSize);
-        }
+        Acore::Containers::RandomResize(targets, (targets.size() + 1) / 2);
     }
 
     void Register() override

@@ -5,11 +5,13 @@
 #include "ChatCommand.h"
 #include "CommandScript.h"
 #include "Config.h"
+#include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GlobalScript.h"
 #include "Language.h"
 #include "LFGMgr.h"
+#include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "PlayerScript.h"
@@ -25,9 +27,18 @@ namespace
 {
 constexpr uint32 WorldStateStageOverride = 20120;
 constexpr uint32 WorldStateReleasedStage = 20121;
+constexpr uint32 KelThuzad = 15990;
+constexpr uint32 ReturnToKhadgar = 9837;
+constexpr char KarazhanUnlockSetting[] = "core.coa.karazhan";
 
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
+
+bool HasKarazhanUnlock(Player const* player)
+{
+    PlayerSettingVector const* settings = player->FindPlayerSettings(KarazhanUnlockSetting);
+    return settings && !settings->empty() && settings->front().IsEnabled();
+}
 
 void RefreshDungeonFinderLocks()
 {
@@ -65,6 +76,7 @@ char const* StageName(uint32 stage)
         case RaidRelease::StageBlackwingLair: return "Blackwing Lair";
         case RaidRelease::StageAhnQiraj: return "Ruins of Ahn'Qiraj and Temple of Ahn'Qiraj";
         case RaidRelease::StageNaxxramas: return "Naxxramas";
+        case RaidRelease::StageKarazhan: return "Karazhan";
         default: return "";
     }
 }
@@ -109,11 +121,55 @@ public:
             released = RaidRelease::IsDungeonDifficultyReleased(difficulty, g_raidReleaseStage);
         }
 
-        if (released)
+        if (!released)
+        {
+            player->GetSession()->SendAreaTriggerMessage(LANG_INSTANCE_CLOSED);
+            return false;
+        }
+
+        if (entry->MapID != RaidRelease::MapKarazhan || player->GetSession()->IsBot())
             return true;
 
-        player->GetSession()->SendAreaTriggerMessage(LANG_INSTANCE_CLOSED);
-        return false;
+        if (!player->GetQuestRewardStatus(ReturnToKhadgar))
+        {
+            player->GetSession()->SendAreaTriggerMessage("Complete Return to Khadgar to enter Karazhan.");
+            return false;
+        }
+
+        if (!HasKarazhanUnlock(player))
+        {
+            player->GetSession()->SendAreaTriggerMessage("Defeat Kel'Thuzad in Naxxramas to enter Karazhan.");
+            return false;
+        }
+
+        return true;
+    }
+};
+
+class ascension_karazhan_unlock : public GlobalScript
+{
+public:
+    ascension_karazhan_unlock()
+        : GlobalScript("ascension_karazhan_unlock", { GLOBALHOOK_ON_AFTER_UPDATE_ENCOUNTER_STATE }) { }
+
+    void OnAfterUpdateEncounterState(Map* map, EncounterCreditType type, uint32 creditEntry, Unit* source,
+        Difficulty, DungeonEncounterList const*, uint32, bool updated) override
+    {
+        if (!updated || !source || map->GetId() != RaidRelease::MapNaxxramas ||
+            type != ENCOUNTER_CREDIT_KILL_CREATURE || creditEntry != KelThuzad)
+            return;
+
+        for (auto const& reference : map->GetPlayers())
+        {
+            Player* player = reference.GetSource();
+            if (!player || player->GetSession()->IsBot() || !player->IsAtGroupRewardDistance(source) ||
+                HasKarazhanUnlock(player))
+                continue;
+
+            player->UpdatePlayerSetting(KarazhanUnlockSetting, 0, 1);
+            CharacterDatabase.Execute(PlayerSettingsStore::PrepareReplaceStatement(player->GetGUID().GetCounter(),
+                KarazhanUnlockSetting, *player->FindPlayerSettings(KarazhanUnlockSetting)));
+        }
     }
 };
 
@@ -196,6 +252,7 @@ void AddSC_AscensionRaidRelease()
 {
     new ascension_raid_release_config();
     new ascension_raid_release_player();
+    new ascension_karazhan_unlock();
     new ascension_dungeon_finder_release_locks();
     new ascension_raid_release_commands();
 }
