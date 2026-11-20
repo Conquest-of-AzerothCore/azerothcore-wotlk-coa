@@ -4,7 +4,8 @@
   "contract": [
     "The native raid difficulty packet selects the real Karazhan instance mode.",
     "With two fixtures, Prince uses the ten-effective-player flex floor.",
-    "A native creature kill and corpse loot window expose the mode-specific global helm token."
+    "A native creature kill and corpse loot window expose the mode-specific global helm token.",
+    "The map-wide trash health increase also applies to the Spectral Charger."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -59,6 +60,27 @@
       "action": "teleport",
       "actor": "leader",
       "map": 532,
+      "x": -11108.9,
+      "y": -1942.14,
+      "z": 49.9725,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "nearby_creature_max_health",
+      "entry": 15547,
+      "min": 375700,
+      "max": 375720
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 532,
       "x": -10959.2,
       "y": -2021.73,
       "z": 275.443,
@@ -86,7 +108,9 @@
       "actor": "leader",
       "metric": "nearby_creature_max_health",
       "entry": 15690,
-      "equals": 19976730
+      "min": 66142304,
+      "max": 66142336,
+      "label": "Allow rounding from the float health modifier"
     },
     {
       "action": "attack_nearby",

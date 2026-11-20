@@ -86,9 +86,9 @@
       "actor": "leader",
       "metric": "nearby_creature_max_health",
       "entry": 15690,
-      "min": 46346006,
-      "max": 46346014,
-      "label": "Allow four health points for float rounding"
+      "min": 153450164,
+      "max": 153450196,
+      "label": "Allow rounding from the float health modifier"
     },
     {
       "action": "attack_nearby",
