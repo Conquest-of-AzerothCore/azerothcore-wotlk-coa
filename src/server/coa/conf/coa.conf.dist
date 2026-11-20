@@ -410,7 +410,7 @@ CoA.Battleground.WideBrackets.Ranges = "10-29,30-49,50-59"
 
 #    CoA.Battleground.WideBrackets.MaxLiftLevels
 #        Description: Most levels the health lift and output scaling bridge for a player or pet below the
-#                     bracket top. Combat rolls still use the bracket top.
+#                     bracket top. Combat rolls still use the bracket top. Read at startup only.
 #        Default:     0 - (No cap)
 #                     N - (Lift to at most own level + N)
 

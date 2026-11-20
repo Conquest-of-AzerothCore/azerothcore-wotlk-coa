@@ -1,9 +1,20 @@
 #include "POLICY_HEADER"
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <cstdint>
 #include <memory>
+#include <cstdlib>
+#include <iostream>
+
+#define CHECK(condition) \
+    do \
+    { \
+        if (!(condition)) \
+        { \
+            std::cerr << __FILE__ << ':' << __LINE__ << ": " << #condition << '\n'; \
+            std::exit(1); \
+        } \
+    } while (false)
 
 using uint8 = std::uint8_t;
 using uint32 = std::uint32_t;
@@ -83,67 +94,67 @@ int main()
         unit.SetPower(POWER_MANA, 40);
         auto const powers = unit.powers;
         ApplyLift(&unit, large, 2.0f);
-        assert(unit.maxHealth == 300 && unit.health == 300);
-        assert(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 2.0f);
-        assert(unit.powers == powers && unit.maxima[POWER_MANA] == 100);
+        CHECK(unit.maxHealth == 300 && unit.health == 300);
+        CHECK(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 2.0f);
+        CHECK(unit.powers == powers && unit.maxima[POWER_MANA] == 100);
         RemoveLift(&unit);
-        assert(unit.maxHealth == 100 && unit.health == 100);
-        assert(!unit.CustomData.Get<AppliedLift>(LiftKey));
+        CHECK(unit.maxHealth == 100 && unit.health == 100);
+        CHECK(!unit.CustomData.Get<AppliedLift>(LiftKey));
 
         unit.SetHealth(50);
         ApplyLift(&unit, large, 2.0f);
-        assert(unit.health == 150);
+        CHECK(unit.health == 150);
         ApplyLift(&unit, small, 1.5f);
-        assert(unit.maxHealth == 200 && unit.health == 100);
-        assert(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 1.5f);
+        CHECK(unit.maxHealth == 200 && unit.health == 100);
+        CHECK(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 1.5f);
         ApplyLift(&unit, large, 2.0f);
-        assert(unit.health == 150);
+        CHECK(unit.health == 150);
         RemoveLift(&unit);
-        assert(unit.health == 50 && unit.powers == powers);
+        CHECK(unit.health == 50 && unit.powers == powers);
 
         unit.SetHealth(0);
         ApplyLift(&unit, large, 2.0f);
-        assert(unit.health == 0);
+        CHECK(unit.health == 0);
         RemoveLift(&unit);
-        assert(unit.health == 0);
+        CHECK(unit.health == 0);
 
         unit.SetHealth(1);
         ApplyLift(&unit, large, 2.0f);
-        assert(unit.health == 3);
+        CHECK(unit.health == 3);
         unit.SetHealth(1);
         RemoveLift(&unit);
-        assert(unit.health == 1);
+        CHECK(unit.health == 1);
 
         unit.SetHealth(100);
         ApplyLift(&unit, large, 2.0f);
         ApplyLift(&unit, {}, 1.0f);
-        assert(unit.maxHealth == 100 && unit.health == 100);
-        assert(!unit.CustomData.Get<AppliedLift>(LiftKey));
+        CHECK(unit.maxHealth == 100 && unit.health == 100);
+        CHECK(!unit.CustomData.Get<AppliedLift>(LiftKey));
     }
 
     Unit pet;
     pet.pet = true;
     ApplyLift(&pet, {0, 5}, 1.0f);
-    assert(pet.stats[STAT_STAMINA] == 5.0f && pet.stats[STAT_STRENGTH] == 0.0f);
+    CHECK(pet.stats[STAT_STAMINA] == 5.0f && pet.stats[STAT_STRENGTH] == 0.0f);
     RemoveLift(&pet);
-    assert(pet.stats[STAT_STAMINA] == 0.0f);
+    CHECK(pet.stats[STAT_STAMINA] == 0.0f);
 
     Player player;
     player.maxHealth = 120;
     player.SetHealth(120);
     RefreshPlayerLift(&player);
-    assert(player.maxHealth == 290 && player.health == 290);
+    CHECK(player.maxHealth == 290 && player.health == 290);
     float const ratio = player.CustomData.Get<AppliedLift>(LiftKey)->ratio;
-    assert(ratio > 2.416f && ratio < 2.417f);
+    CHECK(ratio > 2.416f && ratio < 2.417f);
     player.SetHealth(145);
     player.level = 13;
     player.maxHealth += 10;
     RefreshPlayerLift(&player);
-    assert(player.maxHealth == 290 && player.health == 140);
+    CHECK(player.maxHealth == 290 && player.health == 140);
     RefreshPlayerLift(&player);
-    assert(player.health == 140);
+    CHECK(player.health == 140);
     player.level = 29;
     RefreshPlayerLift(&player);
-    assert(player.maxHealth == 130 && player.health == 63);
-    assert(!player.CustomData.Get<AppliedLift>(LiftKey));
+    CHECK(player.maxHealth == 130 && player.health == 63);
+    CHECK(!player.CustomData.Get<AppliedLift>(LiftKey));
 }

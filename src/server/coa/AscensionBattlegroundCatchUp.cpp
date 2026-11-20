@@ -44,8 +44,8 @@ void HandleLiftModifiers(Unit* unit, Policy::Lift const& lift, bool apply)
         if (unit->IsPet())
             RaiseCreateStat(unit, STAT_STAMINA, apply ? lift.stamina : -lift.stamina);
         else
-            unit->HandleStatFlatModifier(UnitMods(int(UNIT_MOD_STAT_START) + int(STAT_STAMINA)), BASE_VALUE, lift.stamina,
-                apply);
+            unit->HandleStatFlatModifier(UnitMods(int(UNIT_MOD_STAT_START) + int(STAT_STAMINA)), BASE_VALUE,
+                lift.stamina, apply);
     }
 
     if (lift.health != 0.0f)
@@ -156,7 +156,8 @@ void RefreshPetLift(Pet* pet)
     Player const* owner = pet->GetOwner();
     bool const combatPet = type == HUNTER_PET || type == SUMMON_PET;
     uint8 const level = pet->GetLevel();
-    uint32 const target = owner && combatPet ? Policy::CappedLiftLevel(level, LiftTargetLevel(owner), MaxLiftLevels) : 0;
+    uint32 const target =
+        owner && combatPet ? Policy::CappedLiftLevel(level, LiftTargetLevel(owner), MaxLiftLevels) : 0;
     bool const hunterStats = pet->IsHunterPet();
     uint32 const statsCreatureId = hunterStats ? 1 : pet->GetEntry();
     PetLevelInfo const* own = target > level ? sObjectMgr->GetPetLevelInfo(statsCreatureId, level) : nullptr;
@@ -199,7 +200,8 @@ public:
         AscensionBattlegroundBrackets::Configure(
             sConfigMgr->GetOption<bool>("CoA.Battleground.WideBrackets.Enable", true),
             sConfigMgr->GetOption<std::string>("CoA.Battleground.WideBrackets.Ranges", "10-29,30-49,50-59"));
-        MaxLiftLevels = uint32(std::max<int32>(sConfigMgr->GetOption<int32>("CoA.Battleground.WideBrackets.MaxLiftLevels", 0), 0));
+        MaxLiftLevels = uint32(std::max<int32>(
+            sConfigMgr->GetOption<int32>("CoA.Battleground.WideBrackets.MaxLiftLevels", 0), 0));
     }
 };
 
@@ -208,7 +210,8 @@ class ascension_battleground_catch_up_battleground : public AllBattlegroundScrip
 public:
     ascension_battleground_catch_up_battleground()
         : AllBattlegroundScript("ascension_battleground_catch_up_battleground",
-            {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER, ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_REMOVE_PLAYER_AT_LEAVE})
+            {ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER,
+                ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_REMOVE_PLAYER_AT_LEAVE})
     { }
 
     void OnBattlegroundAddPlayer(Battleground*, Player* player) override
@@ -345,6 +348,9 @@ uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, Spell
         return amount;
 
     if (spell && spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
+        return amount;
+
+    if (spell && spell->AscensionInheritsResolvedAmount)
         return amount;
 
     if (healing && spell && (spell->HasEffect(SPELL_EFFECT_HEALTH_LEECH) || spell->HasAura(SPELL_AURA_PERIODIC_LEECH)))
