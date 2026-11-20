@@ -368,20 +368,29 @@
     },
     {
       "action": "assert",
-      "label": "low has the level 29 weapon skill against top",
+      "label": "low has the level 29 weapon skill 5 x 29 against top, with no skill bonus in the fixture",
       "actor": "low",
       "metric": "weapon_skill_for_target",
       "target": "top",
       "hand": 0,
-      "min": 145
+      "equals": 145
     },
     {
       "action": "assert",
-      "label": "low has the level 29 defense skill against top",
+      "label": "low has the level 29 defense skill 5 x 29 against top, with no skill bonus in the fixture",
       "actor": "low",
       "metric": "defense_skill_for_target",
       "target": "top",
-      "min": 145
+      "equals": 145
+    },
+    {
+      "action": "assert",
+      "label": "low's Fire spells meet no level-based resistance on top, with or without ClassicPlus.CombatRules",
+      "actor": "low",
+      "metric": "spell_resist_chance",
+      "target": "top",
+      "school": 2,
+      "equals": 0
     },
     {
       "action": "assert",
@@ -548,6 +557,13 @@
       "metric": "xp",
       "relative_to": "top_xp",
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "top is still level 29, so the experience bar did not wrap",
+      "actor": "top",
+      "metric": "level",
+      "equals": 29
     },
     {
       "action": "assert",

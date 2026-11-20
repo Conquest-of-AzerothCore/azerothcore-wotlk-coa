@@ -68,6 +68,34 @@
       "save_as": "lock_health"
     },
     {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "max_power",
+      "save_as": "lock_mana",
+      "power": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "save_as": "imp_str",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "save_as": "imp_agi",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "lock",
+      "metric": "pet_max_power",
+      "save_as": "imp_mana",
+      "power": 0
+    },
+    {
       "action": "client_packet",
       "actor": "lock",
       "opcode": 750,
@@ -231,6 +259,42 @@
     },
     {
       "action": "assert",
+      "label": "Warlock maximum mana is not lifted",
+      "actor": "lock",
+      "metric": "max_power",
+      "relative_to": "lock_mana",
+      "equals": 0,
+      "power": 0
+    },
+    {
+      "action": "assert",
+      "label": "Imp Strength is not lifted",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_str",
+      "equals": 0,
+      "stat": 0
+    },
+    {
+      "action": "assert",
+      "label": "Imp Agility is not lifted",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_agi",
+      "equals": 0,
+      "stat": 1
+    },
+    {
+      "action": "assert",
+      "label": "Imp maximum mana is not lifted",
+      "actor": "lock",
+      "metric": "pet_max_power",
+      "relative_to": "imp_mana",
+      "equals": 0,
+      "power": 0
+    },
+    {
+      "action": "assert",
       "label": "The Imp output ratio is its pet_levelstats health ratio 591 / 184",
       "actor": "lock",
       "metric": "battleground_output_ratio",
@@ -353,6 +417,42 @@
       "relative_to": "imp_health",
       "equals": 0,
       "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Imp Strength is unchanged after leaving",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_str",
+      "equals": 0,
+      "stat": 0
+    },
+    {
+      "action": "assert",
+      "label": "Imp Agility is unchanged after leaving",
+      "actor": "lock",
+      "metric": "pet_stat",
+      "relative_to": "imp_agi",
+      "equals": 0,
+      "stat": 1
+    },
+    {
+      "action": "assert",
+      "label": "Imp maximum mana is unchanged after leaving",
+      "actor": "lock",
+      "metric": "pet_max_power",
+      "relative_to": "imp_mana",
+      "equals": 0,
+      "power": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warlock maximum mana is unchanged after leaving",
+      "actor": "lock",
+      "metric": "max_power",
+      "relative_to": "lock_mana",
+      "equals": 0,
+      "power": 0
     },
     {
       "action": "assert",

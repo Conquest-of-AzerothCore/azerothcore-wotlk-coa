@@ -139,9 +139,11 @@ static bool IsClassicPlusCombat(Unit const* attacker, Unit const* victim)
 
 // The level a creature is fought at by the character behind `opponent`: their own version of it when they have
 // one. Unlike getLevelForTarget it keeps a world boss's real level, which the stock armor and resistance formulas
-// read.
+// read. Two player-controlled units in a widened battleground fight at its top level, as in getLevelForTarget.
 static uint8 ShownCombatLevel(Unit const* unit, Unit const* opponent)
 {
+    if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(unit, opponent))
+        return top;
     if (Creature const* creature = unit->ToCreature())
         if (Player const* viewer = opponent ? opponent->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr)
             if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, creature))
