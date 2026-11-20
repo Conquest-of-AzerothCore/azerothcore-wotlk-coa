@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Widened battleground fights roll at the bracket top while rewards keep the real level",
-  "contract": "Kills count once Warsong Gulch is in progress and the entry Honorless Target is gone, so the scenario waits for the status, gathers the players again because the match start sends each team to its base, and removes the aura. A level 12 Human Warrior fights two level 29 Orc Warriors in a Warsong Gulch of the 10-29 bracket; a level 29 ally queued third keeps both Orcs on the opposing team. Every combat roll between them uses the bracket top 29: level_for_target is 29 in both directions, the level 12 Warrior's weapon and defense skill against a player are at least 145 (5 x 29), and after it leaves level_for_target is 12 again and its weapon skill against a player is 60 (5 x 12). Rewards keep the real levels: reward_level_for_target is 12 for the level 12 Warrior against a level 29 player and 29 for the level 29 Warrior against the level 12 one. With Battleground.GiveXPForKills on, the level 12 Warrior killing a level 29 player gains experience (xp delta > 0, not computed from Acore::XP::BaseGain) and honor (honor_points delta > 0); the level 29 Warrior killing the level 12 Warrior, a gray target, gains no experience (xp delta 0) and no honor (honor_points delta 0).",
+  "contract": "Kills count once Warsong Gulch is in progress and the entry Honorless Target is gone, so the scenario waits for the status, gathers the players again because the match start sends each team to its base, and removes the aura. A level 12 Human Warrior fights two level 29 Orc Warriors in a Warsong Gulch of the 10-29 bracket; a level 29 ally queued third keeps both Orcs on the opposing team. Every combat roll between them uses the bracket top 29: level_for_target is 29 in both directions, the level 12 Warrior's weapon and defense skill against a player are at least 145 (5 x 29), and after it leaves level_for_target is 12 again and its weapon skill against a player is 60 (5 x 12). Rewards keep the real levels: reward_level_for_target is 12 for the level 12 Warrior against a level 29 player and 29 for the level 29 Warrior against the level 12 one. With Battleground.GiveXPForKills on, the level 12 Warrior killing a level 29 player gains experience (xp delta > 0, not computed from Acore::XP::BaseGain) and honor (honor_points delta > 0); the level 29 Warrior killing the level 12 Warrior, a gray target, gains no experience (xp delta 0) and no honor (honor_points delta 0). Honorless Target is removed from all four players before the snapshots, so the honor delta of 0 for the gray kill can fail and is due to the real-level gray rule alone. The 0 xp for the top Warrior killing the level 12 Warrior is the discriminating check: that kill is gray at real levels (12 against 29) but would pay experience at the combat level 29, so it proves rewards keep real levels; together with the reward_level_for_target assertions, xp delta >= 1 for the level 12 Warrior is enough and the exact Acore::XP::BaseGain value is left out because CoA experience rate modifiers make it fragile. Weapon and defense skill use max(current, 5 x top), keeping racial or above-level skill.",
   "timeout_ms": 240000,
   "battleground_kill_xp": true,
   "location": {
@@ -437,15 +437,29 @@
     },
     {
       "action": "set_aura",
-      "label": "top2 loses the entry Honorless Target",
-      "actor": "top2",
+      "label": "low loses the entry Honorless Target",
+      "actor": "low",
       "spell": 2479,
       "stacks": 0
     },
     {
       "action": "set_aura",
-      "label": "low loses the entry Honorless Target",
-      "actor": "low",
+      "label": "top loses the entry Honorless Target",
+      "actor": "top",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "ally loses the entry Honorless Target",
+      "actor": "ally",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "top2 loses the entry Honorless Target",
+      "actor": "top2",
       "spell": 2479,
       "stacks": 0
     },
