@@ -3032,12 +3032,27 @@
   {
     "spell": 804751,
     "clause": "Become anointed by the light, summoning a blessed hammer that encircles you dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies every $t1 sec for $d.",
-    "labels": [
-      "804751 effect_value 804752e0 #0",
-      "804751 aura_amplitude_ms #1",
-      "804751 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "summoning a blessed hammer that encircles you dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+        "labels": [
+          "804751 behaviour_metric_delta first_tick"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "804751 behaviour_metric_delta two_ticks"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804751 behaviour_metric_delta whole_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 805267,
