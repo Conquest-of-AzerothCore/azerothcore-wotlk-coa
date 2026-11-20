@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Wailing Caverns: Mutanus and the Naralex event adds scale on Heroic and Mythic (#11504)",
-  "contract": "#11504: Mutanus the Devourer (3654) and the creatures the Disciple of Naralex summons were barely scaled on Heroic and Mythic. Mutanus' templates 103654/203654 stayed at level 61 with the elite DamageModifier 1.34/1.74 (he hit for 142 on Heroic, Skum for 1929) and he had no coa_dungeon_health row (165k Heroic, 215k Mythic against 465k/605k for Skum). Deviate Moccasin (5762) and Nightmare Ectoplasm (5763) had no Heroic/Mythic templates. Now Mutanus is a level 63 boss with Skum's DamageModifier (17.56/37.87) and Lord Cobrahn's health (377077/490200: in a Mythic+ run of 2026-08-25 both took 2.56M damage); the Moccasin hits about 18% of Mutanus as in the logs (507/2883 and 727/4141), the Ectoplasm uses the Deviate Lasher values.",
+  "contract": "#11504: Mutanus the Devourer (3654) and the creatures the Disciple of Naralex summons were barely scaled on Heroic and Mythic. Mutanus' templates 103654/203654 stayed at level 61 with the elite DamageModifier 1.34/1.74 (he hit for 142 on Heroic, Skum for 1929) and he had no coa_dungeon_health row (165k Heroic, 215k Mythic against 465k/605k for Skum). Deviate Moccasin (5762) and Nightmare Ectoplasm (5763) had no Heroic/Mythic templates. Now Mutanus is a level 63 boss with Skum's DamageModifier (17.56/37.87) and Lord Cobrahn's health (377077/490200: in a Mythic+ run of 2026-08-25 both took 2.56M damage); the Moccasin hits about 18% of Mutanus as in the logs (507/2883 and 727/4141), the Ectoplasm hits like the Moccasin, as in the logs (530/530 and 570/727 median); a Deviate Viper hits about 1.5 times as hard (824, 1054).",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -129,6 +129,14 @@
       "equals": 60
     },
     {
+      "action": "assert",
+      "label": "Nightmare Ectoplasm hits like a Deviate Moccasin, as in the logs",
+      "actor": "ectoplasm1",
+      "metric": "weapon_damage_min",
+      "min": 270,
+      "max": 300
+    },
+    {
       "action": "ascension_dungeon_difficulty_packet",
       "actor": "mythic",
       "value": 2
@@ -227,6 +235,14 @@
       "actor": "ectoplasm2",
       "metric": "level",
       "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "Nightmare Ectoplasm hits like a Deviate Moccasin, as in the logs",
+      "actor": "ectoplasm2",
+      "metric": "weapon_damage_min",
+      "min": 690,
+      "max": 760
     }
   ]
 }

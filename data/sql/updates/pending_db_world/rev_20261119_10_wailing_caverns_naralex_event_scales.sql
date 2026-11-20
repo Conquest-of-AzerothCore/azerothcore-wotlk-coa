@@ -34,7 +34,7 @@ UPDATE `creature_template` SET `difficulty_entry_1` = 105762, `difficulty_entry_
 DELETE FROM `creature_template` WHERE `entry` = 105763;
 DROP TEMPORARY TABLE IF EXISTS `coa_copy_105763`;
 CREATE TEMPORARY TABLE `coa_copy_105763` AS SELECT * FROM `creature_template` WHERE `entry` = 5763;
-UPDATE `coa_copy_105763` SET `entry` = 105763, `difficulty_entry_1` = 0, `difficulty_entry_2` = 0, `difficulty_entry_3` = 0, `minlevel` = 60, `maxlevel` = 60, `DamageModifier` = 2.3, `AIName` = '', `ScriptName` = '';
+UPDATE `coa_copy_105763` SET `entry` = 105763, `difficulty_entry_1` = 0, `difficulty_entry_2` = 0, `difficulty_entry_3` = 0, `minlevel` = 60, `maxlevel` = 60, `DamageModifier` = 2.78, `AIName` = '', `ScriptName` = '';
 INSERT INTO `creature_template` SELECT * FROM `coa_copy_105763`;
 DROP TEMPORARY TABLE `coa_copy_105763`;
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 105763;
@@ -48,7 +48,7 @@ INSERT INTO `creature_template_resistance` (`CreatureID`, `School`, `Resistance`
 DELETE FROM `creature_template` WHERE `entry` = 205763;
 DROP TEMPORARY TABLE IF EXISTS `coa_copy_205763`;
 CREATE TEMPORARY TABLE `coa_copy_205763` AS SELECT * FROM `creature_template` WHERE `entry` = 5763;
-UPDATE `coa_copy_205763` SET `entry` = 205763, `difficulty_entry_1` = 0, `difficulty_entry_2` = 0, `difficulty_entry_3` = 0, `minlevel` = 60, `maxlevel` = 60, `DamageModifier` = 6.5, `AIName` = '', `ScriptName` = '';
+UPDATE `coa_copy_205763` SET `entry` = 205763, `difficulty_entry_1` = 0, `difficulty_entry_2` = 0, `difficulty_entry_3` = 0, `minlevel` = 60, `maxlevel` = 60, `DamageModifier` = 7.08, `AIName` = '', `ScriptName` = '';
 INSERT INTO `creature_template` SELECT * FROM `coa_copy_205763`;
 DROP TEMPORARY TABLE `coa_copy_205763`;
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 205763;
