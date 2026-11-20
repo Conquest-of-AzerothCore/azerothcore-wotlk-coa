@@ -1864,6 +1864,575 @@
       "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543, as silence_immune: the aura 807778 reads 0 1000 ms after the cast although it is an Undead (the control of undead_duration, 201, carries it).",
       "target_entry": 4543,
       "wait_ms": 1000
+    },
+    {
+      "spell": 704938,
+      "name": "Vindicator (10% of the armor ignored with Vow of the Valkyr)",
+      "kind": "hit_ratio",
+      "variant": "ignores_armor",
+      "label_suffix": "ignores_armor",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "expected": 1.0528,
+      "observe_spell": 800691,
+      "control": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "learn": [
+          704938
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Treatment arm: Vindicator learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, Vindicator not learned. Ignoring 10% of 5528 armor leaves 4975.2: the mean hit ratio is (5528 + 5500) / (4975.2 + 5500) = 1.0528 (+5.28%, band 2 points).",
+      "cast_spell": 803913
+    },
+    {
+      "spell": 704938,
+      "name": "Vindicator (no armor ignored without Vow of the Valkyr)",
+      "kind": "hit_ratio",
+      "variant": "vow_inactive",
+      "label_suffix": "vow_inactive",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "expected": 1.0,
+      "observe_spell": 800691,
+      "control": {
+        "auras": [],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          704938
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Contrast arm of the Vow condition: Vindicator learned in the treatment arm, Vow of the Valkyr on the caster in neither arm; the hit must not change, expected mean ratio 1.0 (band 2 points).",
+      "cast_spell": 803913
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (lasts 15 s)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "trigger_spell": 301266,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 301266
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          14200,
+          14800
+        ],
+        "expired": [
+          15300,
+          15900
+        ]
+      },
+      "observe_source": "301266 DurationIndex 8 (15000 ms, $d, Lasts $d.). One real cast of 301266 on the caster: its aura is present when read 14200..14800 ms after the cast (game time) and gone when read 15300..15900 ms after it, so the duration lies between 14200 and 15900, inside 10% of 15000 (13500..16500) on both sides. Control (before): no cast, absent. Reference search: the community snapshot repeats the tooltip (15 seconds), nothing else found."
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare damage)",
+      "kind": "metric_delta",
+      "variant": "flare_damage",
+      "label_suffix": "flare_damage",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[1] SCHOOL_DAMAGE, BasePoints 50 (+1), RealPointsPerLevel 1.9, DieSides 1: $m2+$ppl2 = 136.5 at the reference level and spell power 0 (the tooltip reading of the reference character). The damage of 807175 on the dummy is read after one Horusath Blast, in a window of 1 around the stated 136.5 for the integer step; the control phase reads 0 (no Solar Concord, no Solar Flare). Reference search: the community snapshot reads 137 + 26% SP, nothing else found. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: 136.5 x 1.20 = 163.8, read as 163 (truncated).",
+      "expected": 163.8,
+      "after_at_least": 163,
+      "after_at_most": 164
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "flare_damage_sp",
+      "label_suffix": "flare_damage_sp",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. As flare_damage at +10000 spell power (the player fixture, both phases): 136.5 + 0.26 x 10000 = 2736.5, the contrast that proves the $SP*0.26 term; the control phase reads 0. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: (136.5 + 2600) x 1.20 = 3283.8, read as 3283.",
+      "expected": 3283.8,
+      "after_at_least": 3283,
+      "after_at_most": 3284,
+      "player_spell_power": 10000
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare reduces the target's chance to hit)",
+      "kind": "metric_delta",
+      "variant": "flare_hit_chance",
+      "label_suffix": "flare_hit_chance",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 807175,
+        "effect": 0
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE, BasePoints -4 (+1 = -3, $s1 = 3). The live amount of effect 0 of the aura 807175 on the dummy is read after one Horusath Blast: -3 with Solar Concord, no aura (0) in the control phase. The amount is a read of the live aura, not of a hit roll.",
+      "expected": -3,
+      "tolerance": 0.5,
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare lasts 10 s)",
+      "kind": "metric_delta",
+      "variant": "flare_duration",
+      "label_suffix": "flare_duration",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": false,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807175,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. 807175 DurationIndex 1 (10000 ms, $d of the spell 807175). The aura 807175 on the dummy is present when read 9200..9800 ms after the Horusath Blast cast and gone when read 10300..10900 ms after it, inside 10% of 10000 (9000..11000) on both sides; the control phase reads it absent.",
+      "expected": 1,
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          9200,
+          9800
+        ],
+        "expired": [
+          10300,
+          10900
+        ]
+      }
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (damage to the target)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 908.5,
+      "after_at_least": 876,
+      "after_at_most": 941,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Spell power 0 (the reference character): the damage of 807372 on the dummy lies in 876.7 + 0..64 = 876.7..940.7, read as 876..941 for the integer steps. Control: no cast, 0. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 11282.5,
+      "after_at_least": 11250,
+      "after_at_most": 11315,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. As damage at +10000 spell power (player fixture, both phases): + 1.03734 x 10000 = 10373.4, so 11250.1..11314.1, read as 11250..11315; the contrast that proves the $spfi*1.03734 term. Control: no cast, 0.",
+      "player_spell_power": 10000
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (nearer enemy struck first, full damage)",
+      "kind": "metric_delta",
+      "variant": "second_enemy",
+      "label_suffix": "second_enemy",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 908.5,
+      "after_at_least": 876,
+      "after_at_most": 941,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. A second dummy (area1) stands 4 yd from the caster, nearer than the target dummy, inside the radius. At spell power 0 each hit reads its own roll: the enemy struck first takes the full 876.7..940.7 (read 876..941). The enemy struck second is read by second_enemy_primary: 0.85 of a roll, 745.2..799.6 (EffectDamageMultiplier[0] 0.85), below the first. The first-run reads at +20000 spell power (40940 on area1, 34748 on the target = 0.85 of 40880) showed the 0.85 step; the order of the two enemies is the engine's, not a claim of the tooltip. Control: no cast, 0.",
+      "area_dummies": [
+        4.0
+      ]
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (enemy struck second, less damage)",
+      "kind": "metric_delta",
+      "variant": "second_enemy_primary",
+      "label_suffix": "second_enemy_primary",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 772.4,
+      "after_at_least": 745,
+      "after_at_most": 800,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. The same cast as second_enemy, read on the target dummy (struck second): 0.85 x (876.7..940.7) = 745.2..799.6, read 745..800; the full roll would be at least 876, so a reading of 1.0 fails. Control: no cast, 0.",
+      "area_dummies": [
+        4.0
+      ]
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (pierces an immunity (fire-immune target))",
+      "kind": "metric_delta",
+      "variant": "immune_fire",
+      "label_suffix": "immune_fire",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 908.5,
+      "after_at_least": 876,
+      "after_at_most": 941,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Target Fire Elemental 575 (immunity set -300: school 0x4 FIRE and mechanics): Rapture still deals 876.7..940.7, read 876..941; the contrast (control) is Dawnsear 554406, a Fire spell without the attribute, which deals 0 to the same creature (immune_fire_control).",
+      "target_entry": 575
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (a fire spell without the attribute is stopped by the same immunity)",
+      "kind": "metric_delta",
+      "variant": "immune_fire_control",
+      "label_suffix": "immune_fire_control",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 0.0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0.",
+      "target_entry": 575
     }
   ],
   "player_observations": [],
