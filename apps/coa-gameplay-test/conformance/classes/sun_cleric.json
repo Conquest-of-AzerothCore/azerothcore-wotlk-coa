@@ -59,7 +59,37 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [],
+  "procs": [
+    {
+      "aura": 806021,
+      "name": "Searing Light",
+      "min_parts": 10,
+      "tooltip": "Casting |cffffffffDawnsear|r and |cffffffffSunflare|r now have a $h% chance to grant |cffffffffScorch Marks|r for $807059d.@s:807059:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 502396
+      },
+      "trigger_text": "Casting Dawnsear and Sunflare",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807059,
+      "proc_spell_source": "Cast(player, player, 807059) (AscensionSunClericAbilities.cpp:200-201, OnSpellCast for 500146/800231 with Chance(player, 806021)); Sunflare 502396 is a rank of 800231 (AscensionSpellProgressionData.h)",
+      "events_per_proc": 1,
+      "handler": "AscensionSunClericAbilities.cpp:200-201: a non-triggered cast of Dawnsear or Sunflare with Chance(player, 806021) (ProcChance 40, no internal cooldown) casts Scorch Marks 807059 on the caster. Trigger: Sunflare 502396, the one of the two casts with the shorter cast time. Residual failure probability of the pooled proof at most 0.1% per pair.",
+      "dbc": {
+        "806021": {
+          "ProcChance": 40,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "base_mana_per_attempt": true
+    }
+  ],
   "triggers": [],
   "talent_modifiers": [],
   "rotation": [],
@@ -384,6 +414,55 @@
       "before_expected": 0,
       "wait_ms": 19900,
       "observe_source": "Replenishment 1257670 is gone 16400 ms after the crit: its duration is below 16.4 s (excludes 16.5 s, +10%). With duration_held the duration lies in (14.5, 16.4] s around 15 s. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "quote": "after a $704930d delay",
+      "name": "Solar Eclipse delay",
+      "variant": "delay",
+      "label_suffix": "delay",
+      "metric": "event_first_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 704931,
+        "caster": "caster",
+        "target": "dummy",
+        "since_spell": 800654
+      },
+      "expected": 1000,
+      "before_expected": 0,
+      "tolerance": 60,
+      "wait_ms": 2500,
+      "observe_source": "704929 Effect[0] aura 42 triggers 704930 (Solar Eclipse): DurationIndex 36 (1000 ms, $704930d); AscensionSunClericAuras.cpp:184-185 casts 704931 when 704930 expires. The first 704931 damage event on the dummy is read from the Dawnbreak 800654 cast: 1000 ms within 60 ms, which excludes 900 and 1100 ms. Control: no 704931 damage before the learn (before 0 is the missing-event reading)."
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "name": "Solar Eclipse damage",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 29.5,
+      "after_at_least": 29,
+      "after_at_most": 30,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "704931 Effect[1] SCHOOL_DAMAGE, EffectBasePoints 21 + 1, EffectDieSides 2: $704931m2 = 22 to 23 at the client level reading of the tooltip (29 resolved with the reference stats: 22 + AP 70 x 0.1 = 29); spell power 0 so the $sph term is 0. Non-critical hit read on the dummy 2500 ms after the Dawnbreak cast: [29, 30] in the tooltip's own reading. Control: 0 before the learn."
     }
   ],
   "player_observations": [],
@@ -734,5 +813,10 @@
     "807972": "Valkyr",
     "807973": "Valkyr",
     "807974": "Valkyr"
+  },
+  "base_mana": {
+    "power": 0,
+    "value": 1363,
+    "source": "player_class_stats class 27 level 60 BaseMana 1363, read in acore_world of the in-RAM test MySQL (class 27, level 60); set before every cast of a rank hit scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
   }
 }
