@@ -426,7 +426,7 @@ void ApplyContracts(SpellInfo* info)
         SpellEffectInfo& cost = info->Effects[EFFECT_1];
         cost.Effect = SPELL_EFFECT_APPLY_AURA;
         cost.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-        cost.BasePoints = -5;
+        cost.BasePoints = -50;
         cost.DieSides = 0;
         cost.MiscValue = SPELLMOD_COST;
         cost.SpellClassMask = flag96(0, 256, 0);
