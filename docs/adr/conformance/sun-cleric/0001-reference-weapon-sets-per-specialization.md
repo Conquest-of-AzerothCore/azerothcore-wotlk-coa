@@ -84,11 +84,12 @@ Sources read on 2026-11-20:
   wear the default set.
 - Effects of 707072 (Spell.dbc), and how each one is declared:
   - effect 155, Titan Grip: it can cast the penalty aura 49152 (-10% physical damage done), which
-    `UpdateTitansGrip` removes when the player has Valkyr's Grip. 49152 is in `probe_auras`: every run reads whether it is on the character
-    without judging it, and the Valkyr reading shows it absent.
+    `UpdateTitansGrip` removes when the player has Valkyr's Grip. 49152 is in `probe_auras`: every run reads
+    whether it is on the character without judging it, and the Valkyr reading shows it absent. A first try listed it
+    in `known_auras`, which expects the aura present, and raised 288 false alerts (pair 20261120-203619 / -203828).
   - effect 40, Dual Wield: it allows the off-hand attacks of the set.
   - aura 333, hit chance (`StatSystem.cpp:1031-1043`): the reference ratings already cap hit (10000 rating), so it
     changes no measured value.
 - Valkyr-set naked reading 20261120-203401: both 2529 equipped, attack power 70, ranged attack power 25, stats
-  40/35/56/119/128, skill 55 300, `known_aura 49152` 0 (absent). The stats are those of the default set, so
+  40/35/56/119/128, skill 55 300, aura 49152 read 0 (absent). The stats are those of the default set, so
   `reference_stats` is unchanged.
