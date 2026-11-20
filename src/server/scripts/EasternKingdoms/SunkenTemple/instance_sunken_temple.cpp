@@ -128,7 +128,7 @@ public:
             if (creature->IsAlive() && creature->GetSpawnId() && creature->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && creature->GetEntry() != NPC_SHADE_OF_ERANIKUS)
                 _dragonkinList.push_back(creature->GetGUID());
 
-            // The creatures the Avatar of Hakkar event summons fixate on the player who started it.
+            // The creatures the Avatar of Hakkar event summons attack the player who started it on spawn.
             switch (creature->GetEntry())
             {
                 case NPC_HAKKARI_BLOODKEEPER:
@@ -158,7 +158,6 @@ public:
                 return;
 
             creature->EngageWithTarget(activator);
-            creature->GetThreatMgr().FixateTarget(activator);
             creature->AI()->AttackStart(activator);
         }
 

@@ -1,0 +1,399 @@
+{
+  "schema": 1,
+  "name": "Crow's Cache: the carrier cannot stealth, vanish or blink, and a mount adds no speed",
+  "contract": "Issue #12720: a carrier used Vanish to leave the fight. Crow's Spite (1005000) says the carrier cannot cast Stealth or Invisibility and that mounts no longer increase movement speed. An Undead High-Risk Mercenary mage learns Stealth (1784, applies stealth directly), Vanish (1856, whose only effects trigger other spells, one of them the stealth 11327), Blink (1953, a leap) and Brown Horse (458). The spell ids were read from the CoA Spell.dbc; the report names only 'vanish', so the stock Vanish stands for it. Controls before the claim: Stealth and Vanish apply their stealth, Blink is cast, and the mounted run speed is at least 1.3 times the speed on foot. After the ten-second claim at the Thousand Needles cache: Stealth, Vanish and Blink are refused and leave no stealth aura, a stealth aura forced on from outside is stripped, the speed on foot is 0.7 of the unslowed speed (the 30% of Crow's Spite), the mount can be summoned but the mounted speed equals the speed on foot, and the cache stays with the carrier. Nothing is probabilistic. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 with released Heroic Bloodforged rewards and automatic cycles deferred.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "carrier",
+      "race": 5,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -5805.16,
+    "y": -3899.4,
+    "z": -95.32,
+    "o": 3.2
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "carrier",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "carrier",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "carrier",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "carrier takes up Mercenary for Hire!",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "carrier",
+      "spell": 1784
+    },
+    {
+      "action": "learn",
+      "actor": "carrier",
+      "spell": 1856
+    },
+    {
+      "action": "learn",
+      "actor": "carrier",
+      "spell": 1953
+    },
+    {
+      "action": "learn",
+      "actor": "carrier",
+      "spell": 458
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 1784
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the cache Stealth works",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 1784,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1784,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 1856
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the cache Vanish applies its triggered stealth 11327",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 11327,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 11327,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1784,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "carrier",
+      "spell": 1856
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "carrier",
+      "spell": 1784
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 1953
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the cache Blink is cast",
+      "actor": "carrier",
+      "metric": "spell_go_count",
+      "spell": 1953,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "carrier",
+      "spell": 1953
+    },
+    {
+      "action": "snapshot",
+      "actor": "carrier",
+      "metric": "run_speed_rate",
+      "save_as": "on_foot"
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 458
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Brown Horse is mounted",
+      "actor": "carrier",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and without the cache it is faster than walking",
+      "actor": "carrier",
+      "metric": "run_speed_rate",
+      "ratio_to": "on_foot",
+      "min": 1.3
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "carrier"
+    },
+    {
+      "action": "teleport",
+      "actor": "carrier",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Arrive at the cache point",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "crows needles 3"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The cache appears",
+      "actor": "carrier",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "carrier",
+      "entry": 994311
+    },
+    {
+      "action": "wait",
+      "label": "Let the ten-second claim finish",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "The carrier holds the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "and is under Crow's Spite",
+      "actor": "carrier",
+      "metric": "aura_stacks",
+      "spell": 1005000,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 1784
+    },
+    {
+      "action": "assert",
+      "label": "Carrying the cache, Stealth is refused",
+      "actor": "carrier",
+      "metric": "cast_failure",
+      "spell": 1784,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and no stealth is applied",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 1784,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 1856
+    },
+    {
+      "action": "assert",
+      "label": "Vanish, which only triggers its stealth, is refused too",
+      "actor": "carrier",
+      "metric": "cast_failure",
+      "spell": 1856,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its stealth 11327 is not applied",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 11327,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 11327,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "A stealth aura that lands from another source is stripped",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 11327,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 1953
+    },
+    {
+      "action": "assert",
+      "label": "Blink is refused",
+      "actor": "carrier",
+      "metric": "cast_failure",
+      "spell": 1953,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "carrier",
+      "metric": "run_speed_rate",
+      "save_as": "spite_on_foot"
+    },
+    {
+      "action": "assert",
+      "label": "Crow's Spite slows the carrier on foot",
+      "actor": "carrier",
+      "metric": "run_speed_rate",
+      "ratio_to": "on_foot",
+      "min": 0.69,
+      "max": 0.71
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 458
+    },
+    {
+      "action": "assert",
+      "label": "The carrier can still mount",
+      "actor": "carrier",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "but the mount adds no speed",
+      "actor": "carrier",
+      "metric": "run_speed_rate",
+      "ratio_to": "spite_on_foot",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "The cache is still carried after every attempt",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1
+    }
+  ]
+}

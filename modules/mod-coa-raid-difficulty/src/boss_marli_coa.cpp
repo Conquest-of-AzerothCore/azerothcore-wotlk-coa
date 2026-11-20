@@ -91,6 +91,7 @@
 #include "zg_coa_common.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <list>
@@ -192,6 +193,11 @@ namespace
     constexpr Milliseconds POISON_SHOCK_AFTER_EMERGE = 1800ms;
     constexpr Milliseconds HATCH_EVERY          = 30s;
     constexpr Seconds EGG_REFILL                = 30s;
+    constexpr std::array<Mechanics, 19> CROWD_CONTROL_MECHANICS = {
+        MECHANIC_CHARM, MECHANIC_DISORIENTED, MECHANIC_DISTRACT, MECHANIC_FEAR, MECHANIC_GRIP, MECHANIC_ROOT,
+        MECHANIC_SILENCE, MECHANIC_SLEEP, MECHANIC_SNARE, MECHANIC_STUN, MECHANIC_FREEZE, MECHANIC_KNOCKOUT,
+        MECHANIC_POLYMORPH, MECHANIC_BANISH, MECHANIC_SHACKLE, MECHANIC_TURN, MECHANIC_HORROR, MECHANIC_DAZE,
+        MECHANIC_SAPPED };
     constexpr float EGG_SEARCH_RANGE = 100.0f;
     constexpr float DRAIN_LIFE_RANGE = 100.0f;
     constexpr float DRAIN_LIFE_SPLASH_SHARE = 0.32f;
@@ -684,7 +690,8 @@ namespace
         float _huntThreat = 0.0f;
     };
 
-    // A Spider Egg never fights; it hatches only through Mar'li, once its Hatching is cast.
+    // A Spider Egg never fights and players cannot touch it until its Hatching starts; it hatches only
+    // through Mar'li, once that cast completes, and no crowd control holds it.
     struct npc_spider_egg_coa : public ScriptedAI
     {
         npc_spider_egg_coa(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()) { }
@@ -692,6 +699,9 @@ namespace
         void Reset() override
         {
             me->SetReactState(REACT_PASSIVE);
+            for (Mechanics mechanic : CROWD_CONTROL_MECHANICS)
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, mechanic, true);
+            Seal(true);
             _marli.Clear();
             _hatched = false;
         }
@@ -703,6 +713,7 @@ namespace
             if (id != DATA_HATCH_FOR_MARLI || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
             _marli = guid;
+            Seal(false);
             DoCastSelf(SPELL_HATCHING);
         }
 
@@ -710,6 +721,12 @@ namespace
         {
             if (spell->Id == SPELL_HATCHING)
                 _hatched = true;
+        }
+
+        void OnSpellFailed(SpellInfo const* spell) override
+        {
+            if (spell->Id == SPELL_HATCHING)
+                Seal(true);
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -737,6 +754,8 @@ namespace
         }
 
     private:
+        void Seal(bool sealed) { me->SetImmuneToPC(sealed); }
+
         InstanceScript* _instance;
         ObjectGuid _marli;
         bool _hatched = false;

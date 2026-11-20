@@ -82,6 +82,13 @@ source (`stat <n>` or `attack_power`), and whether the delta is judged (`judged`
 | 229 | `aoe_damage_taken {school}`, one per school of the mask | `ratio` |
 | 72 | `spell_power_cost` | `scale` |
 
+A flat `spell_cast_time_ms` probe (`add`) on a ranged target (DmgClass 3) also reads the caster's ranged attack time
+(`attack_time_ms` `hand: 2`) before and after the learn, and the model keeps the ranged weapon's base speed
+(`ranged_haste`). The engine applies the flat modifier first and the ranged haste after it
+(`Unit::ModSpellCastTime`), so the judge expects `(before / f_before + points) x f_after - before`, with `f` the read
+attack time over the base speed (ADR 0706). Other cast-time probes are unchanged. Witch Hunter: Heavy Crossbows
+503681 `e1 spell_cast_time_ms 681203`.
+
 The physical part of aura 79 enters the weapon damage (`Unit::UpdateDamagePctDoneMods`, `TOTAL_PCT` of the hand's
 damage modifier), and `Unit::MeleeDamageBonusDone` skips aura 79 for a physical school mask (`Unit.cpp:11419`):
 `melee_damage_done` stayed 800 → 800 with Serendipity 300929 learned, so the physical part is measured on

@@ -11,6 +11,11 @@ mutant is still active at the end. An entry may not set both `forced_roll` and `
 removed and the talent unlearned right after setup cast N (0-based), so the casts after it cannot roll the talent
 again. A release index the entry does not have is refused.
 
+The dict form may also name `"forced_percent": P` (ADR 0752), a whole percent in (0, 10000] that replaces the default
++1000% of the mutant, for a roll that +1000% leaves short of 100% (Witch Hunter Expert Killer 804404: 8% x 11 = 88%,
+so `forced_percent` 1200 gives 8% x 13 = 104%, every roll lands). The model then carries the percent; without it the
+scenario is unchanged.
+
 Named points: `fixtures` (the mutant and the release steps), `setup_cast_steps` (the release inside a phase) and
 `model(spec, value)` (the release label), merged into
 the expectation model by `metric_delta_options.option_model`.

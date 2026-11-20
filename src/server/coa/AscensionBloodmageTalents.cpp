@@ -19,6 +19,7 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include <algorithm>
+#include <cstdlib>
 #include <list>
 #include <utility>
 #include <limits>
@@ -85,6 +86,9 @@ enum BloodmageTalentSpells : uint32
     SPELL_ATHERANNS_ANGUISH_EXPLOSION = 680681,
     SPELL_NIGHT_STALKER_BUFF = 808013,
     SPELL_TRANSGRESSION = 801076,
+    SPELL_TRANSGRESSION_VAMPIRIC_FANG = 803551,
+    SPELL_TRANSGRESSION_SPIRIT_POWER = 801102,
+    SPELL_CRIMSON_TERROR = 560073,
     SPELL_VAMPIRIC_FEAST = 804934,
     SPELL_CARDIAC_ARREST_LEECH = 806946,
     SPELL_BLOOD_ORB_PERIODIC = 712418,
@@ -479,6 +483,13 @@ public:
         }
         if (aura->GetId() == SPELL_DARK_MARK)
             player->CastSpell(player, SPELL_DARK_MARK_AURA, true);
+        if ((aura->GetId() == SPELL_TRANSGRESSION || aura->GetId() == SPELL_TRANSGRESSION_VAMPIRIC_FANG) &&
+            aura->GetCasterGUID() == player->GetGUID() && player->HasAura(SPELL_CRIMSON_TERROR))
+            if (Aura* spiritPower = player->AddAura(SPELL_TRANSGRESSION_SPIRIT_POWER, player))
+            {
+                spiritPower->SetMaxDuration(aura->GetMaxDuration());
+                spiritPower->SetDuration(aura->GetDuration());
+            }
         if (IsCursedForm(aura->GetId()) && aura->GetCasterGUID() == player->GetGUID() &&
             player->HasAura(SPELL_GORE_TOME, player->GetGUID()))
             player->CastSpell(player, SPELL_GORE_TOME_WINDOW, true);
@@ -519,6 +530,8 @@ public:
         }
         if (aura->GetId() == SPELL_DARK_MARK)
             player->RemoveAurasDueToSpell(SPELL_DARK_MARK_AURA, player->GetGUID());
+        if (aura->GetId() == SPELL_TRANSGRESSION || aura->GetId() == SPELL_TRANSGRESSION_VAMPIRIC_FANG)
+            player->RemoveAurasDueToSpell(SPELL_TRANSGRESSION_SPIRIT_POWER, player->GetGUID());
         if (aura->GetId() == SPELL_NIGHTMARE_TALENT)
             player->RemoveAurasDueToSpell(SPELL_NIGHTMARE_BUFF);
         if (aura->GetId() == SPELL_HUNTER_AND_HUNTED)
@@ -724,8 +737,9 @@ class aura_ascension_bloodmage_thick_pelt : public AuraScript
 
     void Calculate(AuraEffect const*, int32& amount, bool&)
     {
-        Unit* caster = GetCaster();
-        amount = caster ? std::min(0, 15 - int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f)) : 0;
+        if (Unit* caster = GetCaster())
+            amount = -(std::abs(GetSpellInfo()->Effects[EFFECT_0].CalcValue()) +
+                int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f));
     }
 
     void Register() override

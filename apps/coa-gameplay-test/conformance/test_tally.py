@@ -153,6 +153,40 @@ class RecordDecisionTest(unittest.TestCase):
         self.assertEqual([row['key'] for row in result['gained']], ['0.0'])
         self.assertEqual((rows['26.0']['status'], rows['26.0']['basis']), (NOT_FINAL, 'carried'))
 
+    def held(self, held: dict, **fields) -> Decisions:
+        return Decisions(fields.get('candidates', {}), DECISIONS.rulings, fields.get('counted', frozenset()),
+                         DECISIONS.text_changed, held)
+
+    def test_a_held_part_at_status_1_in_the_record_does_not_count(self):
+        result = tally(pair_inputs('final16', self.held({'389.0': 'c10 C-1, fix not reviewed'})))
+        row = by_key(result)['389.0']
+        self.assertEqual((row['record_status'], row['status'], row['basis']), ('1', NOT_FINAL, 'held'))
+        self.assertEqual(row['detail'], 'held: c10 C-1, fix not reviewed')
+        self.assertEqual((result['final'], result['record_final']), (13, 14))
+        self.assertEqual([row['key'] for row in result['lost']], ['389.0'])
+        self.assertEqual(result['held'], [{'key': '389.0', 'why': 'c10 C-1, fix not reviewed'}])
+        self.assertIn('HELD 389.0 c10 C-1, fix not reviewed', tally_lines(result))
+        self.assertIn('Held: 389.0 (c10 C-1, fix not reviewed).', status_markdown(result, 't'))
+
+    def test_a_held_part_comes_before_a_ruling(self):
+        row = by_key(tally(pair_inputs('final16', self.held({'81.0': 'reopened'}))))['81.0']
+        self.assertEqual((row['status'], row['basis']), (NOT_FINAL, 'held'))
+
+    def test_no_held_part_leaves_the_tally_unchanged(self):
+        result = tally(pair_inputs('final16'))
+        self.assertEqual(result['rows'], recorded('final16'))
+        self.assertEqual(result['held'], [])
+        self.assertIn('Held: none.', status_markdown(result, 't'))
+
+    def test_a_held_key_naming_no_claim_stops_the_tally(self):
+        with self.assertRaisesRegex(TallyError, r"held keys that name no claim of this ledger: \['new 246.1'\]"):
+            tally(pair_inputs('final16', self.held({'new 246.1': 'c10 C-1'})))
+
+    def test_a_held_key_also_a_candidate_or_counted_stops_the_tally(self):
+        for fields in ({'candidates': {'0.0': 'entry'}}, {'counted': frozenset({'0.0'})}):
+            with self.assertRaisesRegex(TallyError, r"held keys also listed under candidates or counted: \['0.0'\]"):
+                tally(pair_inputs('final16', self.held({'0.0': 'fix not reviewed'}, **fields), self.record))
+
     def test_a_flipping_candidate_is_not_final(self):
         decisions = Decisions({'389.0': 'cycle 18 entry'}, DECISIONS.rulings, frozenset(), DECISIONS.text_changed)
         row = by_key(tally(pair_inputs('final15', decisions)))['389.0']
@@ -362,9 +396,11 @@ class DecisionFileTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'decisions.json'
             path.write_text(json.dumps({'candidates': {'1.0': 'why'}, 'rulings': {'2.0': {'status': 5, 'why': 'q'}},
-                                        'counted': ['3.0'], 'text_changed': ['4.0']}), encoding='utf-8')
+                                        'counted': ['3.0'], 'text_changed': ['4.0'],
+                                        'held': {'5.0': 'fix not reviewed'}}), encoding='utf-8')
             self.assertEqual(load_decisions(path), Decisions({'1.0': 'why'}, {'2.0': ('5', 'q')},
-                                                             frozenset({'3.0'}), frozenset({'4.0'})))
+                                                             frozenset({'3.0'}), frozenset({'4.0'}),
+                                                             {'5.0': 'fix not reviewed'}))
             for status in (6, 1, '1'):
                 path.write_text(json.dumps({'rulings': {'2.0': {'status': status}}}), encoding='utf-8')
                 with self.assertRaisesRegex(TallyError, 'status'):

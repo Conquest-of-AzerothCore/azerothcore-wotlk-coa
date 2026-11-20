@@ -11,18 +11,24 @@
  * the spirits and the speaker keep their stock scripts, with the spells of the
  * log. Up on the ledge he can be neither attacked nor selected until the
  * Speaker dies (live: he engaged 4.1-5.5s after the Speaker's death in 6 of 6
- * pulls).
+ * pulls); he engages the moment his ride down ends (tester video, 2026-11-15).
  *
- *   Berserker Charge  first 10s, every 25s   a random player out of his melee
- *                                            range he can see, knocked down;
+ *   Berserker Charge  first 10s, then 25s     he casts it himself (1s) at a
+ *                     and 50s apart in turn   random player out of his melee
+ *                     while Ohgan lives       range he can see, knocked down;
  *                                            the tank keeps his threat (the
  *                                            live log: 21 charges, never on
- *                                            his victim, 13 on ranged players)
+ *                                            his victim, 13 on ranged players);
+ *                                            a charge due while he rides
+ *                                            dismounts him first
  *   Whirlwind         as the charge lands     a 6s spin, 100% weapon damage
  *                                            (2118409) every second to all
  *                                            within 5 yards, 1-6s in (live
- *                                            logs); in the charge's place
- *                                            when no one stands out of melee
+ *                                            logs); every 25s in the
+ *                                            charge's place in the slot
+ *                                            between charges, once Ohgan is
+ *                                            dead or when no one stands out
+ *                                            of melee
  *   Mortal Strike     first 8s,  every 12s   the tank in melee range, -25%
  *                                            healing, stacks 3; it and
  *                                            Decapitate always hit (live:
@@ -42,6 +48,11 @@
  *                                            rarer than on the other bosses
  *   Level Up!         +4% damage for every player who dies near him
  *   Frenzy            when Ohgan dies
+ *   Mounted           from 55s, when Ohgan is within 15 yards: Mandokir sits
+ *                     on Ohgan's back (vehicle seat) with Mounted 2118412
+ *                     (+20% damage done, -20% taken) for 30s, while Ohgan
+ *                     carries him and fights with Mounted 2118411 on his
+ *                     rider's target; again 45s after he dismounts
  *   Bloodlord's Presence  at the pull, on enemies within 30 yards: no
  *                     durability loss; taken off when the fight ends
  *
@@ -51,9 +62,19 @@
  *     tooltip. These auras and Bloodlord's Presence are never logged (their
  *     spells are flagged so), which is why the log does not show them;
  *   - Bloodlord's Presence once at the pull; its aura lasts until removed;
- *   - he stands unmounted before the pull and Mounted (2118412) is never cast
- *     (tester and user, 2026-11-13); the log has Ohgan fighting on his own
- *     from the first second;
+ *   - he stands unmounted before the pull (tester and user, 2026-11-13);
+ *   - he mounts Ohgan in the fight, and both stay selectable and attackable
+ *     (tester video and user, 2026-11-15); he sits on Ohgan's back instead
+ *     of a second raptor (testers, 2026-11-16); the seat, vehicle 485 of
+ *     Zul'tore's Mount, is a stand-in, as no live log carries vehicle data;
+ *   - he charges on foot (user, 2026-11-16): in the live log of 2026-08-02
+ *     he casts all six charges himself while Ohgan keeps hitting his own
+ *     tank; they come 10.4s and 11.3s into the pulls, then 25s and 50s apart
+ *     in turn, and never once Ohgan is dead, while he whirls every 25s
+ *     throughout, so every third 25s slot is a Whirlwind alone;
+ *   - the first mount no earlier than 55s, the 15 yard reach and the 30s ride
+ *     come from the testers (video 28:07-28:40, 57s after the pull at
+ *     27:10); the 45s before he mounts again is estimated;
  *   - Ohgan runs in from the arena entrance at the pull (tester, live,
  *     2026-11-04); the spot, the gap in the chained spirits' ring on the
  *     north-west side, is estimated;
@@ -87,11 +108,12 @@ namespace
     enum Says
     {
         SAY_AGGRO       = 0,
-        SAY_DING_KILL   = 1,
         SAY_WATCH       = 2,
         SAY_OHGAN_DEAD  = 4,
         SAY_GRATS_JINDO = 0
     };
+
+    constexpr uint32 BROADCAST_TEXT_DING = 10505;
 
     enum Spells
     {
@@ -106,9 +128,12 @@ namespace
         SPELL_WHIRLWIND         = 2118408,
         SPELL_WHIRLWIND_HIT     = 2118409,
         SPELL_DECAPITATE        = 2118410,
+        SPELL_MOUNTED_MOUNT     = 2118411,
+        SPELL_MOUNTED_RIDER     = 2118412,
         SPELL_LEAP              = 2118413,
         SPELL_BLOODLORDS_PRESENCE = 2118415,
         SPELL_LEVEL_UP          = 2118416,
+        SPELL_STOCK_LEVEL_UP    = 24312,
         SPELL_FIRST_BLOOD       = 2118417,
         SPELL_KILLING_SPREE     = 2118418,
         SPELL_RAMPAGE           = 2118419,
@@ -134,6 +159,9 @@ namespace
         EVENT_EXECUTE,
         EVENT_CHECK_OHGAN,
         EVENT_FIERCE_BLOW,
+        EVENT_MOUNT,
+        EVENT_DISMOUNT,
+        EVENT_COMMAND_OHGAN,
     };
 
     enum Misc
@@ -141,16 +169,25 @@ namespace
         ACTION_REVIVE        = 2,
         GUID_SENTENCED       = 1,
         POINT_MANDOKIR_END   = 25,
+        POINT_MANDOKIR_FLOOR = 26,
         CHAINED_SPIRIT_COUNT = 20
     };
 
     constexpr uint8 MORTAL_WOUND_STACKS = 3;
     constexpr Milliseconds MANDOKIR_CHARGE_INTERVAL = 25s;
+    constexpr uint8 MANDOKIR_CHARGE_SLOTS = 3;
     constexpr Milliseconds MANDOKIR_CHARGE_LANDING_FALLBACK = 4s;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MIN = 30700ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MAX = 31600ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MIN = 22500ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MAX = 44s;
+    constexpr Milliseconds MANDOKIR_RIDE_DOWN_FALLBACK = 10s;
+    constexpr Milliseconds MANDOKIR_MOUNT_DURATION = 30s;
+    constexpr Milliseconds MANDOKIR_FIRST_MOUNT = 55s;
+    constexpr Milliseconds MANDOKIR_MOUNT_COOLDOWN = 45s;
+    constexpr float MANDOKIR_MOUNT_REACH = 15.0f;
+    constexpr uint32 OHGAN_VEHICLE = 485;
+    constexpr uint32 OHGAN_DESPAWN_OUT_OF_COMBAT_MS = 35000;
 
     Position const PosSummonChainedSpirits[CHAINED_SPIRIT_COUNT] =
     {
@@ -204,16 +241,23 @@ namespace
 
     struct boss_mandokir_coa : public BossAI
     {
-        boss_mandokir_coa(Creature* creature) : BossAI(creature, DATA_MANDOKIR) { }
+        boss_mandokir_coa(Creature* creature) : BossAI(creature, DATA_MANDOKIR),
+            _baseScale(creature->GetNativeObjectScale()),
+            _growthPerKill(sSpellMgr->AssertSpellInfo(SPELL_STOCK_LEVEL_UP)->Effects[EFFECT_1].CalcValue() / 100.0f)
+        { }
 
         void Reset() override
         {
             BossAI::Reset();
             _kills = 0;
+            me->SetObjectScale(_baseScale);
             _useExecute = false;
             _whirlwindOnLanding = false;
+            _chargeSlot = 0;
             _gazed.Clear();
             _reviveGUID.Clear();
+            Dismount();
+            _ohganGUID.Clear();
             RemovePresence();
 
             bool const waitingForSpeaker = me->GetPositionZ() > 140.0f;
@@ -242,6 +286,65 @@ namespace
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
 
+        void Engage()
+        {
+            events.CancelEvent(EVENT_STARTED);
+            SetUntouchable(false);
+            me->SetInCombatWithZone();
+        }
+
+        Creature* GetOhgan() const
+        {
+            Creature* ohgan = ObjectAccessor::GetCreature(*me, _ohganGUID);
+            return ohgan && ohgan->IsAlive() ? ohgan : nullptr;
+        }
+
+        void CommandOhgan(Creature* ohgan)
+        {
+            Unit* victim = me->GetVictim();
+            if (!victim || !ohgan->IsValidAttackTarget(victim))
+                return;
+            ohgan->GetThreatMgr().AddThreat(victim, 0.0f);
+            ohgan->GetThreatMgr().FixateTarget(victim);
+            if (ohgan->GetVictim() != victim && ohgan->IsAIEnabled)
+                ohgan->AI()->AttackStart(victim);
+        }
+
+        void MountOhgan(Creature* ohgan)
+        {
+            me->EnterVehicle(ohgan, 0);
+            if (me->GetVehicleBase() != ohgan)
+            {
+                events.ScheduleEvent(EVENT_MOUNT, 1s);
+                return;
+            }
+            DoCastSelf(SPELL_MOUNTED_RIDER, true);
+            ohgan->CastSpell(ohgan, SPELL_MOUNTED_MOUNT, true);
+            CommandOhgan(ohgan);
+            events.ScheduleEvent(EVENT_DISMOUNT, MANDOKIR_MOUNT_DURATION);
+            events.ScheduleEvent(EVENT_COMMAND_OHGAN, 1s);
+        }
+
+        void EndRide()
+        {
+            Dismount();
+            events.ScheduleEvent(EVENT_MOUNT, MANDOKIR_MOUNT_COOLDOWN);
+        }
+
+        void Dismount()
+        {
+            if (me->GetVehicle())
+                me->ExitVehicle();
+            me->RemoveAurasDueToSpell(SPELL_MOUNTED_RIDER);
+            events.CancelEvent(EVENT_DISMOUNT);
+            events.CancelEvent(EVENT_COMMAND_OHGAN);
+            if (Creature* ohgan = ObjectAccessor::GetCreature(*me, _ohganGUID))
+            {
+                ohgan->RemoveAurasDueToSpell(SPELL_MOUNTED_MOUNT);
+                ohgan->GetThreatMgr().ClearFixate();
+            }
+        }
+
         void RemovePresence()
         {
             me->GetMap()->DoForAllPlayers([](Player* player)
@@ -267,6 +370,7 @@ namespace
             GetCreatureListWithEntryInGrid(spirits, me, NPC_CHAINED_SPIRIT, 200.0f);
             for (Creature* spirit : spirits)
                 spirit->DespawnOrUnsummon();
+            Dismount();
             RemovePresence();
             instance->SetBossState(DATA_MANDOKIR, DONE);
             instance->SaveToDB();
@@ -280,13 +384,19 @@ namespace
             events.ScheduleEvent(EVENT_GAZE, 15s);
             events.ScheduleEvent(EVENT_CHECK_OHGAN, 1s);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_FIRST_MIN, MANDOKIR_FIERCE_BLOW_FIRST_MAX);
+            events.ScheduleEvent(EVENT_MOUNT, MANDOKIR_FIRST_MOUNT);
 
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             Talk(SAY_AGGRO);
             DoCastSelf(SPELL_BLOODLORDS_PRESENCE, true);
             Position entrance = PosArenaEntrance;
             me->UpdateGroundPositionZ(entrance.GetPositionX(), entrance.GetPositionY(), entrance.m_positionZ);
-            me->SummonCreature(NPC_OHGAN, entrance, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 35000);
+            if (TempSummon* ohgan = me->GetMap()->SummonCreature(NPC_OHGAN, entrance, nullptr,
+                OHGAN_DESPAWN_OUT_OF_COMBAT_MS, me, 0, OHGAN_VEHICLE))
+            {
+                ohgan->SetTempSummonType(TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
+                _ohganGUID = ohgan->GetGUID();
+            }
             for (Position const& pos : PosSummonChainedSpirits)
                 me->SummonCreature(NPC_CHAINED_SPIRIT, pos, TEMPSUMMON_CORPSE_DESPAWN);
             DoZoneInCombat();
@@ -301,8 +411,10 @@ namespace
             _reviveGUID = victim->GetGUID();
             RevivePlayer(victim, _reviveGUID);
 
-            AddStack(me, me, SPELL_LEVEL_UP);
+            DoCastSelf(SPELL_LEVEL_UP, true);
             ++_kills;
+            me->SetObjectScale(_baseScale * (1.0f + _growthPerKill * _kills));
+            me->Yell(BROADCAST_TEXT_DING);
             uint32 streak = 0;
             switch (_kills)
             {
@@ -316,7 +428,6 @@ namespace
             if (streak)
             {
                 DoCastSelf(streak, true);
-                Talk(SAY_DING_KILL);
                 if (_kills == 3)
                     if (Creature* jindo = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_JINDO)))
                         if (jindo->IsAlive())
@@ -332,13 +443,56 @@ namespace
                 _reviveGUID = guid;
         }
 
+        Unit* SelectChargeTarget()
+        {
+            bool const chargeSlot = _chargeSlot++ % MANDOKIR_CHARGE_SLOTS != MANDOKIR_CHARGE_SLOTS - 1;
+            if (!chargeSlot || !GetOhgan())
+                return nullptr;
+            return SelectTarget(SelectTargetMethod::Random, 0, [this](Unit const* u)
+            {
+                return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinLOSInMap(u);
+            });
+        }
+
+        void ChargeOrWhirl()
+        {
+            Unit* target = SelectChargeTarget();
+            if (!target)
+            {
+                DoCastSelf(SPELL_WHIRLWIND);
+                return;
+            }
+            if (me->GetVehicle())
+                EndRide();
+            if (me->CastSpell(target, SPELL_BERSERKER_CHARGE) != SPELL_CAST_OK)
+            {
+                DoCastSelf(SPELL_WHIRLWIND);
+                return;
+            }
+            _whirlwindOnLanding = true;
+            events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_CHARGE_LANDING_FALLBACK);
+        }
+
+        bool IsChargePending() const
+        {
+            return me->FindCurrentSpellBySpellId(SPELL_BERSERKER_CHARGE)
+                || me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == POINT_MOTION_TYPE;
+        }
+
+        void WhirlwindOnLanding()
+        {
+            if (!_whirlwindOnLanding)
+                return;
+            _whirlwindOnLanding = false;
+            events.CancelEvent(EVENT_WHIRLWIND);
+            DoCastSelf(SPELL_WHIRLWIND);
+        }
+
         void MovementInform(uint32 type, uint32 id) override
         {
-            if (type == POINT_MOTION_TYPE && (id == ::EVENT_CHARGE || id == EVENT_CHARGE_PREPATH) && _whirlwindOnLanding)
+            if (type == POINT_MOTION_TYPE && id == POINT_MANDOKIR_FLOOR)
             {
-                _whirlwindOnLanding = false;
-                events.CancelEvent(EVENT_WHIRLWIND);
-                DoCastSelf(SPELL_WHIRLWIND);
+                Engage();
                 return;
             }
 
@@ -411,21 +565,22 @@ namespace
                         {
                             if (instance->GetBossState(DATA_MANDOKIR) == SPECIAL)
                             {
-                                me->GetMotionMaster()->MovePoint(0, PosMandokir[1].m_positionX, PosMandokir[1].m_positionY, PosMandokir[1].m_positionZ);
-                                events.ScheduleEvent(EVENT_STARTED, 6s);
+                                me->GetMotionMaster()->MovePoint(POINT_MANDOKIR_FLOOR, PosMandokir[1].m_positionX,
+                                    PosMandokir[1].m_positionY, PosMandokir[1].m_positionZ);
+                                events.ScheduleEvent(EVENT_STARTED, MANDOKIR_RIDE_DOWN_FALLBACK);
                             }
                             else
                                 events.ScheduleEvent(EVENT_CHECK_START, 1s);
                         }
                         else if (eventId == EVENT_STARTED)
-                        {
-                            SetUntouchable(false);
-                            me->SetInCombatWithZone();
-                        }
+                            Engage();
                     }
                 }
                 return;
             }
+
+            if (_whirlwindOnLanding && !IsChargePending())
+                WhirlwindOnLanding();
 
             if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_CHARGING))
                 return;
@@ -435,22 +590,11 @@ namespace
                 switch (eventId)
                 {
                     case EVENT_BERSERKER_CHARGE:
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit const* u)
-                            {
-                                return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinLOSInMap(u);
-                            }))
-                        {
-                            _whirlwindOnLanding = true;
-                            DoCast(target, SPELL_BERSERKER_CHARGE);
-                            events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_CHARGE_LANDING_FALLBACK);
-                        }
-                        else
-                            DoCastSelf(SPELL_WHIRLWIND);
+                        ChargeOrWhirl();
                         events.ScheduleEvent(EVENT_BERSERKER_CHARGE, MANDOKIR_CHARGE_INTERVAL);
                         break;
                     case EVENT_WHIRLWIND:
-                        _whirlwindOnLanding = false;
-                        DoCastSelf(SPELL_WHIRLWIND);
+                        WhirlwindOnLanding();
                         break;
                     case EVENT_MORTAL_STRIKE:
                         if (me->GetVictim() && me->IsWithinMeleeRange(me->GetVictim()))
@@ -484,6 +628,8 @@ namespace
                     case EVENT_CHECK_OHGAN:
                         if (instance->GetBossState(DATA_OHGAN) == DONE)
                         {
+                            Dismount();
+                            events.CancelEvent(EVENT_MOUNT);
                             DoCastSelf(SPELL_FRENZY, true);
                             Talk(SAY_OHGAN_DEAD);
                         }
@@ -493,6 +639,29 @@ namespace
                     case EVENT_FIERCE_BLOW:
                         DoCastVictim(SPELL_FIERCE_BLOW);
                         events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_MIN, MANDOKIR_FIERCE_BLOW_MAX);
+                        break;
+                    case EVENT_MOUNT:
+                        if (me->GetVehicle())
+                            break;
+                        if (Creature* ohgan = GetOhgan(); ohgan && me->IsWithinDist(ohgan, MANDOKIR_MOUNT_REACH))
+                            MountOhgan(ohgan);
+                        else
+                            events.ScheduleEvent(EVENT_MOUNT, 1s);
+                        break;
+                    case EVENT_DISMOUNT:
+                        EndRide();
+                        break;
+                    case EVENT_COMMAND_OHGAN:
+                        if (Creature* ohgan = GetOhgan())
+                        {
+                            CommandOhgan(ohgan);
+                            events.ScheduleEvent(EVENT_COMMAND_OHGAN, 1s);
+                        }
+                        else
+                        {
+                            Dismount();
+                            events.ScheduleEvent(EVENT_MOUNT, 1s);
+                        }
                         break;
                     default:
                         break;
@@ -506,11 +675,15 @@ namespace
         }
 
     private:
-        uint8 _kills = 0;
+        float const _baseScale;
+        float const _growthPerKill;
+        uint32 _kills = 0;
         bool _useExecute = false;
         bool _whirlwindOnLanding = false;
+        uint8 _chargeSlot = 0;
         ObjectGuid _gazed;
         ObjectGuid _reviveGUID;
+        ObjectGuid _ohganGUID;
     };
 
     class mandokir_coa_menacing_gaze : public PlayerScript
@@ -546,8 +719,8 @@ namespace
         }
     };
 
-    // Whirlwind's periodic aura names no spell to trigger; its tooltip and the live logs show the 5-yard hit
-    // 2118409 once a second, 1 to 6 s into the spin.
+    // Whirlwind's periodic aura names 2118409, yet the stock trigger dealt no damage. Mandokir casts it on
+    // himself instead, so each tick hits everyone within 5 yards, once a second, 1 to 6 s into the spin.
     class spell_mandokir_coa_whirlwind : public AuraScript
     {
         PrepareAuraScript(spell_mandokir_coa_whirlwind);

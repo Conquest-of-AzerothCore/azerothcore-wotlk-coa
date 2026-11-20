@@ -1,7 +1,9 @@
 import math
 import unittest
 
-from mitigation import REFERENCE_TARGET, TargetProfile, expected_mitigation
+from mitigation import (MECHANIC_BLEED, REFERENCE_TARGET, SPELL_ATTR0_CU_IGNORE_ARMOR,
+                        SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS, SPELL_AURA_PERIODIC_DAMAGE,
+                        SPELL_EFFECT_SCHOOL_DAMAGE, ArmorFacts, TargetProfile, expected_mitigation, reduced_by_armor)
 
 PHYSICAL = 1
 HOLY = 2
@@ -81,6 +83,52 @@ class TargetMitigationTest(unittest.TestCase):
         target = TargetProfile(entry=1, level=60, armor=0, resistances={HOLY: 1000})
         model = expected_mitigation(PHYSICAL | HOLY, target, 60)
         self.assertEqual((model.mean, model.variance), (1.0, 0.0))
+
+
+
+BLEED = 1 << MECHANIC_BLEED
+APPLY_AURA = 6
+WEAPON_PERCENT_DAMAGE = 31
+
+
+class ArmorEligibilityTest(unittest.TestCase):
+    def armored(self, spell=None, school=PHYSICAL):
+        return expected_mitigation(school, REFERENCE_TARGET, 60, spell=spell).mean
+
+    def test_a_physical_spell_without_attributes_is_reduced_by_armor_as_before(self):
+        plain = ArmorFacts(effect=SPELL_EFFECT_SCHOOL_DAMAGE)
+        self.assertTrue(reduced_by_armor(PHYSICAL, plain))
+        self.assertTrue(reduced_by_armor(PHYSICAL))
+        self.assertEqual(self.armored(plain), self.armored())
+        self.assertLess(self.armored(), 1.0)
+
+    def test_the_ignore_armor_custom_attribute_skips_armor_on_direct_and_periodic_damage(self):
+        for periodic in (False, True):
+            spell = ArmorFacts(custom_attributes=SPELL_ATTR0_CU_IGNORE_ARMOR, periodic=periodic)
+            self.assertFalse(reduced_by_armor(PHYSICAL, spell))
+            self.assertEqual(self.armored(spell), 1.0)
+
+    def test_ignore_damage_taken_modifiers_skips_armor_on_the_direct_path_only(self):
+        direct = ArmorFacts(attributes_ex4=SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS)
+        periodic = ArmorFacts(attributes_ex4=SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS, periodic=True,
+                              effect=APPLY_AURA, aura=SPELL_AURA_PERIODIC_DAMAGE)
+        self.assertEqual(self.armored(direct), 1.0)
+        self.assertEqual(self.armored(periodic), self.armored())
+
+    def test_a_bleed_tick_skips_armor_and_a_direct_bleed_hit_does_not(self):
+        tick = ArmorFacts(periodic=True, effect=APPLY_AURA, aura=SPELL_AURA_PERIODIC_DAMAGE, mechanic_mask=BLEED)
+        direct = ArmorFacts(effect=SPELL_EFFECT_SCHOOL_DAMAGE, mechanic_mask=BLEED)
+        other_effect = ArmorFacts(periodic=True, effect=WEAPON_PERCENT_DAMAGE, mechanic_mask=BLEED)
+        self.assertEqual(self.armored(tick), 1.0)
+        self.assertEqual(self.armored(direct), self.armored())
+        self.assertEqual(self.armored(other_effect), self.armored())
+
+    def test_other_custom_bits_keep_armor_and_magic_never_uses_it(self):
+        self.assertTrue(reduced_by_armor(PHYSICAL, ArmorFacts(custom_attributes=~SPELL_ATTR0_CU_IGNORE_ARMOR
+                                                                                & 0xFFFFFFFF)))
+        self.assertFalse(reduced_by_armor(HOLY, ArmorFacts()))
+        self.assertEqual(self.armored(ArmorFacts(custom_attributes=SPELL_ATTR0_CU_IGNORE_ARMOR), HOLY),
+                         self.armored(None, HOLY))
 
 
 if __name__ == '__main__':

@@ -11,6 +11,12 @@ CLASSIC_MAX_PLAYER_LEVEL = 60
 CLASSIC_MAX_CREATURE_LEVEL = 63
 MAX_ARMOR_REDUCTION = 0.75
 
+SPELL_ATTR0_CU_IGNORE_ARMOR = 0x00008000
+SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS = 0x00000100
+SPELL_EFFECT_SCHOOL_DAMAGE = 2
+SPELL_AURA_PERIODIC_DAMAGE = 3
+MECHANIC_BLEED = 15
+
 
 @dataclass(frozen=True)
 class TargetProfile:
@@ -25,6 +31,30 @@ class MitigationModel:
     mean: float
     variance: float
     resist_shares: tuple[float, ...] = ()
+
+
+@dataclass(frozen=True)
+class ArmorFacts:
+    custom_attributes: int = 0
+    attributes_ex4: int = 0
+    periodic: bool = False
+    effect: int = 0
+    aura: int = 0
+    mechanic_mask: int = 0
+
+
+def reduced_by_armor(school: int, spell: ArmorFacts | None = None) -> bool:
+    if not school & PHYSICAL_SCHOOL_MASK:
+        return False
+    if spell is None:
+        return True
+    if not spell.periodic and spell.attributes_ex4 & SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS:
+        return False
+    if spell.custom_attributes & SPELL_ATTR0_CU_IGNORE_ARMOR:
+        return False
+    bleeding = spell.mechanic_mask & (1 << MECHANIC_BLEED)
+    return not (spell.periodic and bleeding and (spell.aura == SPELL_AURA_PERIODIC_DAMAGE
+                                                  or spell.effect == SPELL_EFFECT_SCHOOL_DAMAGE))
 
 
 REFERENCE_TARGET = TargetProfile(entry=36, level=60, armor=528, resistances={})
@@ -60,8 +90,11 @@ def partial_resist_shares(average: float) -> list[float]:
     return shares
 
 
-def expected_mitigation(school: int, target: TargetProfile, caster_level: int, penetration: int = 0) -> MitigationModel:
+def expected_mitigation(school: int, target: TargetProfile, caster_level: int, penetration: int = 0,
+                        spell: ArmorFacts | None = None) -> MitigationModel:
     if school & PHYSICAL_SCHOOL_MASK:
+        if not reduced_by_armor(school, spell):
+            return MitigationModel(mean=1.0, variance=0.0)
         return MitigationModel(mean=1.0 - armor_reduction(target.armor, caster_level, target.level), variance=0.0)
     if not any(school & bit for bit in MAGIC_SCHOOL_BITS):
         raise ValueError(f'school mask {school} names no spell school')

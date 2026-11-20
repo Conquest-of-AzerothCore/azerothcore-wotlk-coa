@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Shadewell: Brenric stands on the barn floor, not in it (#12685)",
+  "contract": "Brenric 164151 (guid 9960591) stands inside the Shadewell Barn.wmo. His live-capture z 334.481 was 0.255 yd below the barn floor, 334.736 by the server vmap at his X/Y (the same ray gives 334.715 at the reporter's position, reported z 334.714, and 334.776 under Orwin, spawned at 334.774), so his feet sank into the floor. Expected: he rests on the floor, a ground gap near 0 that the old z (-0.255) fails.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 25 } ],
+  "location": { "map": 0, "x": -8067.48, "y": -153.865, "z": 334.714, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Brenric rests on the barn floor, not 0.25 yd under it",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 9960591, "spawn_type": "creature", "min": -0.05, "max": 0.1
+    }
+  ]
+}

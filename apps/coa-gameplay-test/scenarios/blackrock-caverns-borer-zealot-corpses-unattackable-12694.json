@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: the decorative Obsidian Borer and Zealot corpses cannot be attacked (#12694)",
+  "contract": "Report #12694: after the adds in Beauty's lair, the player stayed in combat and could not leave the dungeon. The decorative corpses there carry Permanent Feign Death 29266 but feign death does not make a creature unattackable, so attacking one (a cleave or an area spell is enough) left the player in combat with it. #11373 flagged the Twilight Element Warden corpses 6450150-6450153 but left the Twilight Obsidian Borer corpse 6450168 in the same lair and the Twilight Zealot corpses 6450097-6450101 attackable. Each now carries UNIT_FLAG_NON_ATTACKABLE (2); entries 40019 and 39990 are also the live trash elsewhere, which stays attackable (live borer 6450172, live zealot 6450102).",
+  "timeout_ms": 60000,
+  "location": { "map": 645, "x": 134.0, "y": 588.0, "z": 76.5, "o": 0, "ignore_access": true },
+  "players": [
+    { "id": "p", "race": 1, "class": 15, "level": 36 }
+  ],
+  "steps": [
+    { "action": "assert", "label": "CONTROL: the player is inside Blackrock Caverns", "actor": "p", "metric": "map_id", "equals": 645 },
+    { "action": "set_phase", "label": "The player joins world phase 1, where the dungeon spawns live", "actor": "p", "value": 1 },
+    { "action": "assert", "label": "The borer corpse 6450168 is loaded beside the player", "actor": "p", "metric": "nearby_creature_count", "entry": 40019, "min": 1, "within_ms": 10000 },
+    { "action": "wait", "label": "Let the spawn addon auras apply", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the player cannot attack the borer corpse in Beauty's lair", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 40019, "equals": 0 },
+    { "action": "teleport", "label": "The player walks to the zealot corpse 6450097", "actor": "p", "map": 645, "x": 472.0, "y": 905.0, "z": 166.0 },
+    { "action": "assert", "label": "The zealot corpse is loaded beside the player", "actor": "p", "metric": "nearby_creature_count", "entry": 39990, "min": 1, "within_ms": 10000 },
+    { "action": "wait", "label": "Let the spawn addon auras apply", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the player cannot attack the zealot corpse", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 39990, "equals": 0 },
+    { "action": "teleport", "label": "The player walks to the live borer 6450172", "actor": "p", "map": 645, "x": 204.0, "y": 622.0, "z": 80.0 },
+    { "action": "assert", "label": "CONTROL: the player can attack the live borer", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 40019, "equals": 1, "within_ms": 5000 },
+    { "action": "teleport", "label": "The player walks to the live zealot 6450102", "actor": "p", "map": 645, "x": 549.0, "y": 897.0, "z": 155.5 },
+    { "action": "assert", "label": "CONTROL: the player can attack the live zealot", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 39990, "equals": 1, "within_ms": 5000 }
+  ]
+}

@@ -1,12 +1,15 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, in the charge's place when nobody is out of melee",
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, on foot and on Ohgan's back alike",
   "contract": [
     "The live CoA combat log of 2026-08-02 (Normal kill) shows Mandokir's (11382) Whirlwind (2118408) every",
     "25.0-25.2 s, also in cycles where he charges nobody; with a charge target it begins as the charge lands",
-    "(tester, 2026-11-04). With nobody out of melee he whirls in the charge's place, 10 s into the fight, so its",
-    "3 s cast ends by 14.5 s; the timer of the previous script began it at 12 s. An older script whirled twice per",
-    "25 s cycle. The hero stands in melee and stops attacking, so there is no charge target and no gaze punishment."
+    "(tester, 2026-11-04). His charges come 10.4 s into the pull, then 25 and 50 s apart in turn, so every",
+    "third 25 s slot is a Whirlwind alone (user decision 2026-11-16, charges on foot). With nobody out of",
+    "melee every slot is a Whirlwind (3 s cast): about 10 and 35 s in on foot, and about 60 s in on Ohgan's",
+    "back, since he mounts from 55 s. The third slot is the Whirlwind-only one, so a script that skipped it",
+    "would whirl only twice; an older script whirled twice per 25 s cycle. The hero stands in melee in the",
+    "arena and stops attacking, so there is no charge target and no gaze punishment."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -38,12 +41,13 @@
     },
     {
       "action": "teleport",
+      "label": "Into Mandokir's arena, 30 yards in from the entrance",
       "actor": "tank",
       "map": 309,
-      "x": -12326.5,
-      "y": -1577.11,
-      "z": 133.588,
-      "o": 4.817,
+      "x": -12246.7,
+      "y": -1924.7,
+      "z": 131.5,
+      "o": 0.0,
       "ignore_access": true
     },
     {
@@ -89,13 +93,13 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the first Whirlwind begins in the charge's place, 10 s into the fight",
+      "label": "the first Whirlwind comes about 10 s in, in the first charge's place",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
       "spell": 2118408,
       "min": 1,
-      "within_ms": 14500
+      "within_ms": 15000
     },
     {
       "action": "wait",
@@ -104,7 +108,7 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: only one Whirlwind in the first 25 s cycle",
+      "label": "DISCRIMINATING: only one Whirlwind in the first 25 s slot",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
@@ -113,13 +117,57 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the next Whirlwind comes 25 s after the first, with nobody charged",
+      "label": "the second Whirlwind comes 25 s after the first",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
       "spell": 2118408,
       "min": 2,
       "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both on foot",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: he mounts Ohgan from 55 s",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the third, Whirlwind-only slot comes 25 s after the second",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "min": 3,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: he whirled on Ohgan's back",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: one Whirlwind per slot, no more",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "equals": 3
     },
     {
       "action": "assert",

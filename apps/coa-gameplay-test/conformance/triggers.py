@@ -20,6 +20,7 @@ COOLDOWN_GATE_ARMS = ('without', 'with')
 DURATION_DELTA_KIND = 'duration_delta'
 DURATION_CHECK = 'trigger_duration_delta'
 MAGNITUDE_RATIO_KIND = 'magnitude_ratio'
+SINGLE_SWING_WINDOW_MS = 50
 MAGNITUDE_CHECK = 'trigger_magnitude_ratio'
 SELF_TRIGGER_KIND = 'self_trigger'
 SELF_TRIGGER_CHECK = 'self_trigger_count'
@@ -33,7 +34,7 @@ MINION_TRIGGER_COUNT_METRICS = {'owned_creature_damage_total': frozenset({'owned
                                 'pet_melee_damage': frozenset({'pet_melee_hits', 'pet_melee_crits'})}
 MINION_TRIGGER_DEFAULT_COUNTS = {'owned_creature_damage_total': 'owned_creature_damage_count',
                                  'pet_melee_damage': 'pet_melee_hits'}
-MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_damage_total', 'spell_heal_total'})
+MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_damage_total', 'spell_heal_total', 'spell_energize_total'})
 MISSED_TRIGGER_RATE = 0.025
 FALSE_OK_RISK = 0.01
 TRIGGER_TRIALS = math.ceil(math.log(FALSE_OK_RISK) / math.log(1 - MISSED_TRIGGER_RATE))
@@ -44,6 +45,9 @@ PERIODIC = 'periodic'
 TAKEN_HIT = 'taken_hit'
 MINION = 'minion'
 MINION_ACTOR = 'minion'
+MINION_SUMMON_TARGETS = ('caster', 'dummy')
+MINION_AURA_OWNER = 'owner'
+MINION_GRANT_READ_MS = 500
 MINION_TRIAL_METRICS = frozenset({'pet_melee_crits', 'pet_melee_swings', 'owned_creature_damage_count'})
 MINION_OBSERVE_METRICS = frozenset({'spell_damage_count'})
 MINION_SETTLE_MS = 8000
@@ -58,8 +62,12 @@ DUAL_WIELD_FIELDS = (frozenset({'spell', 'off_hand_item', 'source'}),
                      frozenset({'known_spell', 'off_hand_item', 'source'}))
 PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
 TAKEN_HIT_TRIAL_METRICS = frozenset({'spell_damage_count'})
+AVOIDED = 'avoided'
+AVOIDED_TRIAL_METRIC = 'melee_attacks_taken'
+AVOIDED_VICTIM_STATES = {'dodged': 2, 'parried': 3}
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
-                PERIODIC: PERIODIC_TRIAL_METRICS, TAKEN_HIT: TAKEN_HIT_TRIAL_METRICS, MINION: MINION_TRIAL_METRICS}
+                PERIODIC: PERIODIC_TRIAL_METRICS, TAKEN_HIT: TAKEN_HIT_TRIAL_METRICS, MINION: MINION_TRIAL_METRICS,
+                AVOIDED: frozenset({AVOIDED_TRIAL_METRIC})}
 TRIGGER_RULE = (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials, '
                 f'no event in the {BASELINE_ATTEMPTS} baseline attempts without the passive')
 
@@ -297,9 +305,13 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} casts at {trigger.get("target")!r}, not one of {sorted(TRIGGER_TARGETS)}')
     if trigger['action'] == TAKEN_HIT and not trigger.get('striker_entry', 0) > 0:
         raise ValueError(f'Trigger {aura} taken_hit action needs a positive striker_entry')
+    if trigger['action'] == AVOIDED and not (trigger.get('striker_entry', 0) > 0 and trigger.get('swing_ms', 0) > 0):
+        raise ValueError(f'Trigger {aura} avoided action needs a positive striker_entry and swing_ms')
     if trigger['action'] == PERIODIC and trigger.get('amplitude_ms', 0) <= 0:
         raise ValueError(f'Trigger {aura} periodic action needs a positive amplitude_ms')
     if trigger['action'] == MINION:
+        if any('grant_cast' in fixture for fixture in entry.get('minion_auras', [])):
+            raise ValueError(f'Trigger {aura} minion aura grant_cast is read by the proc_rate kind only')
         checked_minion_trigger(aura, trigger, entry)
     elif entry.get('minion_auras') or entry.get('target_auras') or entry.get('observe_actor') == MINION_ACTOR:
         raise ValueError(f'Trigger {aura} names a minion without a minion action')
@@ -312,8 +324,8 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Unknown observe actor {entry.get("observe_actor")!r} of trigger {aura}')
     if not (0 < entry['per_trigger'] <= 1 or (isinstance(entry['per_trigger'], int) and entry['per_trigger'] > 1)):
         raise ValueError(f'Trigger {aura} has {entry["per_trigger"]} events per trigger')
-    if entry.get('attempt_auras') and trigger['action'] != CAST:
-        raise ValueError(f'Trigger {aura} sets attempt auras without a cast before which to set them')
+    if entry.get('attempt_auras') and trigger['action'] not in (CAST, ATTACK):
+        raise ValueError(f'Trigger {aura} sets attempt auras without a cast or swing before which to set them')
     if entry.get('ally_health_pct') is not None and trigger.get('target') != ALLY:
         raise ValueError(f'Trigger {aura} sets the ally health without a cast at an ally')
     if entry.get('restore_charges') and trigger['action'] != CAST:
@@ -357,16 +369,25 @@ def checked_minion_trigger(aura: int, trigger: dict, entry: dict) -> None:
             raise ValueError(f'Trigger {aura} minion action needs a positive integer {field}')
     if not trigger.get('swing_source'):
         raise ValueError(f'Trigger {aura} minion action needs the source of its swing_ms')
+    if type(trigger.get('pet_attack', False)) is not bool:
+        raise ValueError(f'Trigger {aura} minion pet_attack is a boolean, not {trigger["pet_attack"]!r}')
+    if trigger.get('summon_target', MINION_SUMMON_TARGETS[0]) not in MINION_SUMMON_TARGETS:
+        raise ValueError(f'Trigger {aura} minion summon_target is one of {list(MINION_SUMMON_TARGETS)}, '
+                         f'not {trigger["summon_target"]!r}')
     if 'aura_settle_ms' in entry and (not isinstance(entry['aura_settle_ms'], int) or entry['aura_settle_ms'] <= 0
                                       or not entry.get('aura_settle_source')):
         raise ValueError(f'Trigger {aura} needs a positive integer aura_settle_ms with its aura_settle_source')
     if any(not isinstance(spell, int) for spell in trigger.get('learn', [])):
         raise ValueError(f'Trigger {aura} minion action has a non-integer learn spell')
     for aura_fixture in entry.get('minion_auras', []):
-        if set(aura_fixture) - {'spell', 'amount', 'source'} or not isinstance(aura_fixture.get('spell'), int) \
-                or not aura_fixture.get('source'):
+        if set(aura_fixture) - {'spell', 'amount', 'source', 'caster', 'grant_cast'} \
+                or not isinstance(aura_fixture.get('spell'), int) or not aura_fixture.get('source') \
+                or aura_fixture.get('caster', MINION_AURA_OWNER) != MINION_AURA_OWNER:
             raise ValueError(f'Trigger {aura} minion aura is {{"spell": int, "amount": int (optional), '
+                             f'"caster": "{MINION_AURA_OWNER}" (optional), "grant_cast": int (optional), '
                              f'"source": text}}')
+        if 'grant_cast' in aura_fixture:
+            checked_minion_grant(aura, aura_fixture, entry)
     for aura_fixture in entry.get('target_auras', []):
         if set(aura_fixture) != {'spell', 'source'} or not isinstance(aura_fixture['spell'], int):
             raise ValueError(f'Trigger {aura} dummy aura is {{"spell": int, "source": text}}, set by the caster')
@@ -374,6 +395,40 @@ def checked_minion_trigger(aura: int, trigger: dict, entry: dict) -> None:
             and not 0 < entry.get('minion_aura_refresh_ms', 0):
         raise ValueError(f'Trigger {aura} sets minion auras or the caster health without a positive '
                          f'minion_aura_refresh_ms')
+
+
+def checked_minion_grant(aura: int, fixture: dict, entry: dict) -> None:
+    grant = fixture['grant_cast']
+    if isinstance(grant, bool) or not isinstance(grant, int) or grant <= 0:
+        raise ValueError(f'Trigger {aura} minion aura {fixture["spell"]} grant_cast is a positive spell id')
+    if 'amount' in fixture:
+        raise ValueError(f'Trigger {aura} minion aura {fixture["spell"]} is granted by a real {grant} cast, which '
+                         f'sets no amount')
+    held = [other for other in entry.get('minion_auras', []) + entry.get('target_auras', [])
+            if other is not fixture and other.get('spell') == fixture['spell']]
+    if held:
+        raise ValueError(f'Trigger {aura} minion aura {fixture["spell"]} asks for both a real {grant} grant and a '
+                         f'harness set_aura of it')
+    if not entry.get('minion_aura_refresh_ms', 0) > MINION_GRANT_READ_MS:
+        raise ValueError(f'Trigger {aura} minion aura {fixture["spell"]} granted by {grant} needs a '
+                         f'minion_aura_refresh_ms above its {MINION_GRANT_READ_MS} ms read')
+
+
+def minion_grant_label(fixture: dict, phase: str, index: int) -> str:
+    return f'{fixture["spell"]} grant {fixture["grant_cast"]} {phase}{index}'
+
+
+def minion_grants(entry: dict) -> list[dict]:
+    return [fixture for fixture in entry.get('minion_auras', []) if 'grant_cast' in fixture]
+
+
+def minion_grant_steps(entry: dict, fixture: dict, phase: str, index: int) -> list[dict]:
+    return power_steps(entry) + [
+        {'action': 'reset_cooldown', 'actor': CASTER, 'spell': fixture['grant_cast']},
+        {'action': 'cast', 'actor': CASTER, 'spell': fixture['grant_cast'], 'target': TARGET},
+        {'action': 'wait', 'label': f'{phase}grant {fixture["grant_cast"]} read', 'ms': MINION_GRANT_READ_MS},
+        measurement(minion_grant_label(fixture, phase, index), CASTER, 'owned_creature_count',
+                    entry=entry['trigger']['entry'], spell=fixture['spell'], caster=CASTER)]
 
 
 def power_steps(entry: dict) -> list[dict]:
@@ -411,19 +466,28 @@ def minion_setup_steps(class_file: dict, trigger: dict) -> list[dict]:
     facts = facts_of(records_of(class_file), trigger['spell'])
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in trigger.get('learn', [])]
     steps.append({'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']})
-    steps += cast_steps(facts, trigger['spell'], None, cast_interval(class_file, trigger['spell']), 1)
+    summon_target = TARGET if trigger.get('summon_target') == TARGET else None
+    steps += cast_steps(facts, trigger['spell'], summon_target, cast_interval(class_file, trigger['spell']), 1)
     steps.append({'action': 'assert', 'label': f'SETUP: the {trigger["entry"]} minion is raised', 'actor': CASTER,
                   'metric': 'owned_creature_count', 'entry': trigger['entry'], 'equals': 1,
                   'within_ms': MINION_SETTLE_MS})
     return steps
 
 
-def minion_aura_steps(entry: dict) -> list[dict]:
+def minion_command_note(trigger: dict) -> str:
+    return ((f'; {trigger["spell"]} is cast at the dummy' if trigger.get('summon_target') == TARGET else '')
+            + ('; the caster commands its pet to attack the dummy as the attempts start' if trigger.get('pet_attack')
+               else ''))
+
+
+def minion_aura_steps(entry: dict, phase: str = '', index: int = 0) -> list[dict]:
     owned = {'action': 'set_aura', 'actor': CASTER, 'owned_entry': entry['trigger']['entry']}
     held = {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER}
-    return ([step for fixture in entry.get('minion_auras', [])
-             for step in ({**owned, 'spell': fixture['spell'], 'stacks': 0},
-                          {**owned, 'spell': fixture['spell'], 'stacks': 1,
+    return ([step for fixture in minion_grants(entry) for step in minion_grant_steps(entry, fixture, phase, index)]
+            + [step for fixture in entry.get('minion_auras', []) if 'grant_cast' not in fixture
+             for cast_by in ({'caster': CASTER} if fixture.get('caster') == MINION_AURA_OWNER else {},)
+             for step in ({**owned, **cast_by, 'spell': fixture['spell'], 'stacks': 0},
+                          {**owned, **cast_by, 'spell': fixture['spell'], 'stacks': 1,
                            **({'amount': fixture['amount']} if 'amount' in fixture else {})})]
             + [step for fixture in entry.get('target_auras', [])
                for step in ({**held, 'spell': fixture['spell'], 'stacks': 0},
@@ -445,13 +509,17 @@ def minion_attempt_steps(entry: dict, wait_ms: int, phase: str) -> list[dict]:
     health = [fixture_health_step(CASTER, entry['caster_health_pct'])] \
         if entry.get('caster_health_pct') is not None else []
     steps = health + [{'action': 'attack', 'actor': CASTER, 'target': TARGET}]
-    remaining = wait_ms
+    if entry['trigger'].get('pet_attack'):
+        steps.append({'action': 'attack', 'actor': CASTER, 'target': TARGET, 'pet': True})
+    remaining, index = wait_ms, 0
+    spent = MINION_GRANT_READ_MS * len(minion_grants(entry))
     while remaining > 0:
         chunk = min(refresh, remaining)
         again = aura_recast_steps(entry) if recast and remaining < wait_ms else []
-        steps += again + health + minion_aura_steps(entry) + [{'action': 'wait', 'label': f'{phase}minion swings',
-                                                               'ms': chunk}]
+        swings = [{'action': 'wait', 'label': f'{phase}minion swings', 'ms': chunk - spent}] if chunk > spent else []
+        steps += again + health + minion_aura_steps(entry, phase, index) + swings
         remaining -= chunk
+        index += 1
     return steps + [{'action': 'stop_attack', 'actor': CASTER}]
 
 
@@ -469,6 +537,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
         return swing_interval(class_file, cooldown)
     if trigger['action'] == TAKEN_HIT:
         return max(cast_interval(class_file, trigger['spell'], cooldown), TAKEN_HIT_MIN_INTERVAL_MS)
+    if trigger['action'] == AVOIDED:
+        return trigger['swing_ms']
     facts = facts_of(records_of(class_file), trigger['spell'])
     if facts.passive:
         raise Unmodelled(f'trigger spell {trigger["spell"]} is passive')
@@ -551,11 +621,12 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
     if trigger['action'] == MINION:
         steps = minion_attempt_steps(entry, attempts * plan.attempt_ms, phase)
     elif trigger['action'] == ATTACK:
-        steps = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
-                 {'action': 'wait', 'label': f'{phase}swings', 'ms': attempts * plan.attempt_ms},
-                 {'action': 'stop_attack', 'actor': CASTER}]
+        steps = swing_steps(entry, attempts, plan.attempt_ms, f'{phase}swings')
     elif trigger['action'] == TAKEN_HIT:
         steps = [step for _ in range(attempts) for step in taken_hit_attempt(trigger, plan.attempt_ms)]
+    elif trigger['action'] == AVOIDED:
+        steps = avoided_engage_steps(phase) + [step for _ in range(attempts)
+                                               for step in avoided_attempt(plan.attempt_ms)]
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
         cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
@@ -569,10 +640,47 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
 
 
+def swing_steps(entry: dict, attempts: int, attempt_ms: int, label: str) -> list[dict]:
+    if not entry.get('attempt_auras'):
+        return [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                {'action': 'wait', 'label': label, 'ms': attempts * attempt_ms},
+                {'action': 'stop_attack', 'actor': CASTER}]
+    auras = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+             for aura in entry['attempt_auras']]
+    return [step for _ in range(attempts) for step in (
+        *auras, {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+        {'action': 'wait', 'label': f'{label} one swing', 'ms': SINGLE_SWING_WINDOW_MS},
+        {'action': 'stop_attack', 'actor': CASTER},
+        {'action': 'wait', 'label': f'{label} swing timer', 'ms': attempt_ms - SINGLE_SWING_WINDOW_MS})]
+
+
 def taken_hit_attempt(trigger: dict, attempt_ms: int) -> list[dict]:
     return [fixture_health_step(CASTER, TAKEN_HIT_HEALTH_PCT),
             {'action': 'cast', 'actor': STRIKER, 'spell': trigger['spell'], 'target': CASTER},
             {'action': 'wait', 'ms': attempt_ms}]
+
+
+def avoided_engage_steps(phase: str) -> list[dict]:
+    from behaviours import AVOIDING_ENGAGE_MS
+    return [{'action': 'attack', 'actor': CASTER, 'target': STRIKER},
+            {'action': 'wait', 'label': f'{phase}engage the striker', 'ms': AVOIDING_ENGAGE_MS},
+            {'action': 'stop_attack', 'actor': CASTER}]
+
+
+def avoided_attempt(attempt_ms: int) -> list[dict]:
+    from behaviours import AVOIDING_DODGE
+    return [fixture_health_step(CASTER, TAKEN_HIT_HEALTH_PCT),
+            {'action': 'set_aura', 'actor': CASTER, 'spell': AVOIDING_DODGE, 'stacks': 1},
+            {'action': 'wait', 'ms': attempt_ms}]
+
+
+def avoided_labels(trials_label: str) -> dict[str, str]:
+    return {outcome: trials_label if outcome == 'dodged' else f'{trials_label} {outcome}'
+            for outcome in AVOIDED_VICTIM_STATES}
+
+
+def avoided_fixture(class_file: dict, trigger: dict) -> dict:
+    return {**striker_fixture(class_file, trigger), 'reaction': 2}
 
 
 def away_control_label(aura: int) -> str:
@@ -591,6 +699,10 @@ def counts(entry: dict, trials_label: str, events_label: str) -> list[dict]:
     elif action == TAKEN_HIT:
         steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry), target=CASTER, caster=STRIKER,
                             trial_metric_fields=trial_metric_fields)]
+    elif action == AVOIDED:
+        steps = [measurement(label, CASTER, AVOIDED_TRIAL_METRIC, target=STRIKER,
+                             victim_state=AVOIDED_VICTIM_STATES[outcome])
+                 for outcome, label in avoided_labels(trials_label).items()]
     elif action == MINION:
         steps = [count_step(trials_label, entry['trial_metric'], 0, minion_entry=entry['trigger']['entry'])]
     else:
@@ -608,6 +720,9 @@ def trigger_rule(entry: dict) -> str:
     trigger = entry['trigger']
     if trigger['action'] == PERIODIC:
         trials = f'periodic ticks every {trigger["amplitude_ms"]} ms'
+    elif trigger['action'] == AVOIDED:
+        trials = (f'dodged and parried swings of the striker {trigger["striker_entry"]} at the caster, Evasion '
+                  f'refreshed every {trigger["swing_ms"]} ms')
     elif trigger['action'] == MINION:
         trials = (f'{entry["trial_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
                   f'attacking the dummy with the caster, {trigger["swing_ms"]} ms swings ({trigger["swing_source"]})')
@@ -616,6 +731,7 @@ def trigger_rule(entry: dict) -> str:
         trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else hand)
     fixtures = ''.join(f'; before each attempt aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
                        for aura in entry.get('attempt_auras', []))
+    fixtures += swing_note(entry)
     fixtures += ''.join(f'; {entry["aura"]} also learns {spell}' for spell in entry.get('co_learn', []))
     if entry.get('dual_wield'):
         dual_wield = entry['dual_wield']
@@ -721,6 +837,10 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
         scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
     if trigger['action'] == TAKEN_HIT:
         scenario['creatures'] = [striker_fixture(class_file, trigger)]
+    elif trigger['action'] == AVOIDED:
+        scenario['creatures'] = [avoided_fixture(class_file, trigger)]
+        scenario['contract'] += (f' An aggressive striker (creature {trigger["striker_entry"]}) swings at the caster, '
+                                 f'whom Evasion keeps dodging; every dodged or parried swing is a trial.')
     elif trigger['action'] in (ATTACK, MINION) or trigger.get('target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if trigger.get('target') == ALLY:
@@ -737,6 +857,9 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'internal_cooldown_ms': entry.get('internal_cooldown_ms', 0),
              'trial_attempts_factor': entry.get('trial_attempts_factor', 1),
              'periodic_initial_tick': entry.get('periodic_initial_tick', False), 'measurements': labels}
+    if trigger['action'] == AVOIDED:
+        model['measurements'] = {**labels, 'trials_parried': avoided_labels(labels['trials'])['parried'],
+                                 'baseline_trials_parried': avoided_labels(labels['baseline_trials'])['parried']}
     if entry.get('dual_wield'):
         model['dual_wield'] = dict(entry['dual_wield'])
     if trigger['action'] == MINION:
@@ -1226,7 +1349,8 @@ def magnitude_label(aura: int, suffix: str = '') -> str:
     return f'{aura} trigger_magnitude_ratio' + (f' {suffix}' if suffix else '')
 
 
-MAGNITUDE_OBSERVE_COUNT_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
+MAGNITUDE_OBSERVE_COUNT_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
+                                   'spell_energize_total': 'spell_energize_count'}
 
 
 def magnitude_measurement_labels(aura: int) -> dict[str, str]:
@@ -1267,11 +1391,23 @@ def magnitude_trigger_descriptor(entry: dict) -> str:
     return f'{entry["trigger_metric"]} of {trigger["spell"]}'
 
 
+def swing_note(entry: dict) -> str:
+    if entry['trigger']['action'] != ATTACK or not entry.get('attempt_auras'):
+        return ''
+    return (f'; each swing is its own attack started right after the auras are set and stopped '
+            f'{SINGLE_SWING_WINDOW_MS} ms later (the main hand swings at once on a ready timer; the off hand is '
+            f'delayed by half a swing at every attack start, so it never swings)')
+
+
 def magnitude_trigger_rule(entry: dict) -> str:
+    swung = swing_note(entry)
+    fixtures = ''.join(f'; before each swing aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
+                       for aura in entry.get('attempt_auras', [])) + swung if swung else ''
     return (f'mean {entry["observe_metric"]} of {entry["observe_spell"]} per its own event over '
             f'mean {magnitude_trigger_descriptor(entry)} per its own event, at least {TRIGGER_TRIALS} '
             f'{entry["observe_metric"]} events, matches {entry["expected_ratio"]:.3g} within tolerance '
-            f'("{entry["per_trigger_text"]}")' + (f'; {entry["expected_note"]}' if entry.get('expected_note') else ''))
+            f'("{entry["per_trigger_text"]}")' + (f'; {entry["expected_note"]}' if entry.get('expected_note') else '')
+            + fixtures)
 
 
 def magnitude_resisted_school(class_file: dict, entry: dict, cast_target: str | None) -> int:
@@ -1311,10 +1447,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
         steps += minion_attempt_steps(entry, attempts * plan.attempt_ms, f'{aura} magnitude ')
     else:
         cast_target = TARGET
-        steps = aura_steps(class_file, entry) + [
-                 {'action': 'attack', 'actor': CASTER, 'target': TARGET},
-                 {'action': 'wait', 'label': f'{aura} magnitude swings', 'ms': attempts * plan.attempt_ms},
-                 {'action': 'stop_attack', 'actor': CASTER}]
+        steps = aura_steps(class_file, entry) + swing_steps(entry, attempts, plan.attempt_ms,
+                                                             f'{aura} magnitude swings')
     steps.append({'action': 'wait', 'label': f'{aura} magnitude drain', 'ms': DRAIN_MS})
     if trigger['action'] == CAST:
         hit = entry.get('trial_spell', trigger['spell'])

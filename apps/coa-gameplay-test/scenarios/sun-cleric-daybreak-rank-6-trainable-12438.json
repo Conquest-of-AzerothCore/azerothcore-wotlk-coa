@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Daybreak rank 6 is trainable after rank 5 (#12438)",
+  "contract": [
+    "#12438: Daybreak rank 6 (572035) required 503625, a second 'Rank 6' record that is neither in SpellRank.dbc's",
+    "Daybreak ladder (500147, 502432, 502433, 503623, 503624, 572035) nor a SkillLineAbility row of the class, so a",
+    "level 60 Sun Cleric owning rank 5 (503624) saw rank 6 requiring rank 6 and could not train it. trainer_spell",
+    "(900027, 572035) and SpellbookOfferData now require 503624, as SpellRank.dbc and spell_ranks do. Both windows",
+    "that sell the rank must list 572035 as available (state 0): the Book of Ascension (built from SpellbookOfferData)",
+    "and the Northshire Sun Cleric trainer (50286, trainer 900027), and buying it from the trainer must teach it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "c", "race": 1, "class": 27, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "trainer", "owner": "c", "entry": 50286, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "money", "actor": "c", "copper": 500000, "label": "fixture: enough copper for the lesson" },
+    { "action": "learn", "actor": "c", "spell": 500147 },
+    { "action": "learn", "actor": "c", "spell": 502432 },
+    { "action": "learn", "actor": "c", "spell": 502433 },
+    { "action": "learn", "actor": "c", "spell": 503623 },
+    { "action": "learn", "actor": "c", "spell": 503624 },
+    { "action": "assert", "actor": "c", "metric": "knows_spell", "spell": 572035, "equals": 0,
+      "label": "SETUP: rank 6 is not known yet" },
+    { "action": "learn", "actor": "c", "spell": 97930 },
+    { "action": "cast", "actor": "c", "spell": 97930 },
+    { "action": "assert", "actor": "c", "metric": "owned_creature_count", "entry": 75115, "equals": 1,
+      "within_ms": 5000, "label": "SETUP: the Book of Ascension is out" },
+    { "action": "gossip_hello", "actor": "c", "label": "open the Book of Ascension" },
+    { "action": "assert", "actor": "c", "metric": "trainer_list_packets", "equals": 1,
+      "label": "SETUP: the book sent its window" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 572035, "equals": 0,
+      "label": "DISCRIMINATING: the book offers rank 6 to a rank 5 Sun Cleric" },
+    { "action": "gossip_hello", "actor": "c", "target": "trainer", "label": "right-click the Sun Cleric trainer" },
+    { "action": "gossip_select", "actor": "c", "option": 0, "label": "I seek training as a Sun Cleric." },
+    { "action": "assert", "actor": "c", "metric": "trainer_list_packets", "equals": 2,
+      "label": "SETUP: the trainer sent its window" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 572035, "equals": 0,
+      "label": "DISCRIMINATING: the trainer offers rank 6 to a rank 5 Sun Cleric" },
+    { "action": "trainer_buy", "actor": "c", "target": "trainer", "spell": 572035, "label": "buy rank 6" },
+    { "action": "assert", "actor": "c", "metric": "spellbook_buy_succeeded", "spell": 572035, "equals": 1,
+      "label": "the trainer granted rank 6" },
+    { "action": "assert", "actor": "c", "metric": "knows_spell", "spell": 572035, "equals": 1,
+      "label": "DISCRIMINATING: rank 6 is learned" }
+  ]
+}

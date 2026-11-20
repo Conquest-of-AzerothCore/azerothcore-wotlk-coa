@@ -15,6 +15,7 @@
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include <algorithm>
 #include <atomic>
 #include <vector>
 
@@ -24,6 +25,7 @@ constexpr uint32 ColdWeatherFlying = 54197;
 constexpr uint32 AshadarItemMount = 287665;
 constexpr uint32 AshadarMount = 917000;
 constexpr int32 BattlegroundGroundMountSpeed = 100;
+constexpr uint32 RunningWild = 800175;
 
 std::atomic<bool> legacyFlight{ false };
 
@@ -120,6 +122,15 @@ public:
     }
 };
 
+int32 RunningWildSpeed(Player const* player, SpellInfo const* spell)
+{
+    if (player->InBattleground() && !player->InArena())
+        return BattlegroundGroundMountSpeed;
+
+    return std::max(spell->Effects[EFFECT_0].CalcValue(),
+        GetRidingGroundMountSpeed(player->GetBaseSkillValue(SKILL_RIDING)));
+}
+
 class LearnedMountSpeed : public UnitScript
 {
 public:
@@ -128,6 +139,14 @@ public:
 
     void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount) override
     {
+        if (effect->GetId() == RunningWild && effect->GetEffIndex() == EFFECT_0)
+        {
+            if (Player* player = caster ? caster->ToPlayer() : nullptr)
+                if (effect->GetBase()->GetOwner() == player)
+                    amount = RunningWildSpeed(player, effect->GetSpellInfo());
+            return;
+        }
+
         AuraType const type = effect->GetAuraType();
         if (amount <= 0 ||
             (type != SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED && type != SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
@@ -190,6 +209,27 @@ bool CanFly(Player* player, SpellInfo const* mount)
 }
 }
 
+class RunningWildMountRules : public UnitScript
+{
+public:
+    RunningWildMountRules() : UnitScript("AscensionRunningWildMountRules", true, {UNITHOOK_ON_UPDATE_RUN_SPEED}) { }
+
+    void OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus) override
+    {
+        if (!unit->IsPlayer() || unit->IsMounted())
+            return;
+
+        AuraEffect const* runningWild = unit->GetAuraEffect(RunningWild, EFFECT_0);
+        if (!runningWild)
+            return;
+
+        mainSpeedMod = std::max(runningWild->GetAmount(),
+            unit->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED));
+        stackBonus = unit->GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
+        nonStackBonus = 1.0f + unit->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK) / 100.0f;
+    }
+};
+
 void AddSC_AscensionMountSpeed()
 {
     new FlightConfiguration();
@@ -197,4 +237,5 @@ void AddSC_AscensionMountSpeed()
     new MountFlightArea();
     new LearnedMountSpeed();
     new BattlegroundMountSpeed();
+    new RunningWildMountRules();
 }

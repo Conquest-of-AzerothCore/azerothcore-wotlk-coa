@@ -7,6 +7,8 @@
 #include "TaskScheduler.h"
 #include <list>
 #include <set>
+#include <utility>
+#include <vector>
 class Player;
 class Spell;
 class Unit;
@@ -30,6 +32,7 @@ struct CultistState
     TaskScheduler scheduler;
     ObjectGuid covenant, tentacle;
     std::set<ObjectGuid> summons, dashHits;
+    std::vector<std::pair<int32, uint32>> embodimentGrants;
     Position dashPrevious;
     uint32 dashMs = 0, shockInsanity = 0;
     uint64 sequence = 0;
@@ -58,6 +61,8 @@ void MarkVoidTouched(Player* player, Unit* healed);
 void SetHelper(Player* player, uint32 id, bool enabled);
 void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount);
 void Accumulate(Player* player, Unit* target, uint32 id, uint32 total);
+void GrantEmbodiment(Player* player, uint32 amount);
+void ExpireEmbodiment(Player* player, uint32 diff);
 void Summon(Player* player, uint32 entry, Position const& position, uint32 duration, Unit* target = nullptr,
     uint32 spellId = 0);
 void Command(Player* player, Unit* target, bool blast = false);

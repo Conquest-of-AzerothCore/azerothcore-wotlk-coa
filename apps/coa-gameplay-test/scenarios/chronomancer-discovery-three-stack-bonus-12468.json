@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "chronomancer-discovery-three-stack-bonus-12468",
+  "contract": [
+    "Discovery 500116 procs on Artificer's Wand and Wand of Time hits. EFFECT_0 adds a Discovery 704197 stack and",
+    "EFFECT_1 triggers the bonus Arcane hit 806201. The tooltip grants that hit only 'At 3 stacks, your next Wand of",
+    "Time or Artificer's Wand', which then consumes Discovery through Discovery Trigger 524963 (REMOVE_AURA 704197).",
+    "Before the fix every wand hit also fired 806201 and nothing removed the stacks (#12468). Three Artificer's Wand",
+    "561064 hits build three stacks with no bonus hit; the fourth hit deals exactly one 806201 hit and removes",
+    "Discovery; the fifth starts a new stack without another bonus hit. Hit rating makes every hit land."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "chronomancer", "item": 5069 },
+    { "action": "equip", "actor": "chronomancer", "item": 5069, "slot": 17 },
+    { "action": "learn", "actor": "chronomancer", "spell": 500116 },
+    { "action": "learn", "actor": "chronomancer", "spell": 561064 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 561064, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "First wand hit grants one Discovery stack",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 704197,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "chronomancer", "spell": 561064, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Second wand hit grants a second stack",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 704197,
+      "caster": "chronomancer",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "chronomancer", "spell": 561064, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Third wand hit grants a third stack",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 704197,
+      "caster": "chronomancer",
+      "equals": 3,
+      "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let any bonus projectile land", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "No Discovery bonus hit while building stacks",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 806201,
+      "target": "dummy",
+      "equals": 0
+    },
+    { "action": "cast", "actor": "chronomancer", "spell": 561064, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "The wand hit at three stacks deals the Discovery bonus hit",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 806201,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The bonus hit consumes Discovery",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 704197,
+      "caster": "chronomancer",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "chronomancer", "spell": 561064, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "The next wand hit starts a new stack",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 704197,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let any bonus projectile land", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "No further bonus hit after the stacks were consumed",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 806201,
+      "target": "dummy",
+      "equals": 1
+    }
+  ]
+}

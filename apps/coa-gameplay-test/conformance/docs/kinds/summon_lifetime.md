@@ -14,3 +14,15 @@ mutant at +1000%.
 `parts` (ADR 0546) pools one-tick parts for a talent whose forced roll stays below 100%: a part whose spawn window never
 shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
 33% per tick, 40 parts).
+`baseline_count` and `baseline_ms` (ADR 1003, provisional; opt-in, set together) serve a trigger that summons the same
+creature itself, for longer than the talent's creature lives (Kennel Master 706365 / 707891: Unleash the Hounds 807933
+summons 2 Lesser Shadow Hounds 50224 for 20000 ms, the talent one more for 15000 ms). The control must read exactly
+`baseline_count`; the scenario then waits until `baseline_ms` plus 1000 ms after the control cast and reads the count 0
+before the talent is learned, and reads 0 again right before the treatment cast (that read and the cast's game-time stamp
+open the spawn window). The talent's creature is present while the count reads `baseline_count + 1` and gone once it
+reads `baseline_count`; any other count in the end window, a baseline left after its expiry or a creature before the cast
+is `unmeasured`. An end window that reads `baseline_count + 1` throughout, or `baseline_count` from its first poll,
+bounds the lifetime on one side only (at least the last poll, or at most the first poll, from the spawn edge): it
+alerts when that bound lies wholly outside the band and is otherwise `unmeasured`, never `ok`. `roll_source` (only with a baseline)
+names the server line that rolls the talent outside the forcing modifier, cited in the contract; such entries pool
+`parts`.

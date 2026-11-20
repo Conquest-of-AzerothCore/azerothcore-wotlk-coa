@@ -1,5 +1,5 @@
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from pathlib import Path
 
@@ -23,6 +23,7 @@ class Decisions:
     rulings: dict
     counted: frozenset
     text_changed: frozenset
+    held: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -43,7 +44,7 @@ def load(path: Path):
 
 def load_decisions(path: Path | None) -> Decisions:
     document = load(path) if path else {}
-    unknown = set(document) - {'candidates', 'rulings', 'counted', 'text_changed'}
+    unknown = set(document) - {'candidates', 'rulings', 'counted', 'text_changed', 'held'}
     if unknown:
         raise TallyError(f'{path}: unknown decision fields {sorted(unknown)}')
     rulings = {}
@@ -53,7 +54,7 @@ def load_decisions(path: Path | None) -> Decisions:
                              f'status 1 comes only from a counted pair, through a candidate or the record')
         rulings[key] = (str(ruling['status']), ruling.get('why', ''))
     return Decisions(dict(document.get('candidates', {})), rulings, frozenset(document.get('counted', [])),
-                     frozenset(document.get('text_changed', [])))
+                     frozenset(document.get('text_changed', [])), dict(document.get('held', {})))
 
 
 def parts(row: dict) -> list:
@@ -190,6 +191,8 @@ def classify(rec: dict, prior: dict, new_runs, decisions: Decisions) -> tuple:
     flip_text = '; '.join(f"{flip['label']} {flip['statuses']}" for flip in rec['flips_in_pair'])
     flip_text += '; '.join(f"{flip['label']} record {flip['record']} pair {flip['pair']}"
                            for flip in rec['flips_vs_record'])
+    if key in decisions.held:
+        return NOT_FINAL, 'held', f'held: {decisions.held[key]}'
     if key in decisions.rulings:
         status, why = decisions.rulings[key]
         alerts = [label for label, found in label_statuses(new_runs, rec['labels']).items()
@@ -238,6 +241,12 @@ def check_decisions(keys: dict, record: dict, decisions: Decisions) -> None:
                | decisions.text_changed) - set(keys.values())
     if unknown:
         raise TallyError(f'decision keys that name no claim of this ledger: {sorted(unknown)}')
+    unknown_held = set(decisions.held) - set(keys.values())
+    if unknown_held:
+        raise TallyError(f'held keys that name no claim of this ledger: {sorted(unknown_held)}')
+    held_and_counted = set(decisions.held) & (set(decisions.candidates) | decisions.counted)
+    if held_and_counted:
+        raise TallyError(f'held keys also listed under candidates or counted: {sorted(held_and_counted)}')
     unruled = [record[place]['key'] for place in keys if place in record
                and record[place]['status'] in RULING_REQUIRED and record[place]['key'] not in decisions.rulings
                and record[place]['key'] not in decisions.candidates]
@@ -317,9 +326,14 @@ def summary(out: list, changed: set, decisions: Decisions, missing: list, record
         'gained': [row for row in out if row['record_status'] not in FINAL and row['status'] in FINAL],
         'candidates_not_final': [row for row in out if row['key'] in decisions.candidates
                                  and row['status'] not in FINAL],
+        'held': held_rows(out),
         'flips_in_pair': [row['key'] for row in out if row['flips_in_pair']],
         'flips_vs_record': [row['key'] for row in out if row['flips_vs_record']],
     }
+
+
+def held_rows(rows: list) -> list:
+    return [{'key': row['key'], 'why': row['detail'].removeprefix('held: ')} for row in rows if row['basis'] == 'held']
 
 
 def match_line(match: dict) -> str:
@@ -347,6 +361,7 @@ def tally_lines(result: dict) -> list:
               for row in result['gained']]
     lines += [f"CAND-NF {row['key']} {row['run1']} {row['run2']} {str(row['detail'])[:300]}"
               for row in result['candidates_not_final']]
+    lines += [f"HELD {row['key']} {row['why'][:200]}" for row in result['held']]
     lines += [f"FLIP {key}" for key in result['flips_in_pair']]
     lines += [f"FLIP-RECORD {key}" for key in result['flips_vs_record']]
     return lines
@@ -362,6 +377,7 @@ def status_markdown(result: dict, title: str) -> str:
                   f"{len(result['flips_vs_record'])}.", '']
     for heading, rows in (('Lost', result['lost']), ('Gained', result['gained'])):
         lines.append(f'{heading}: ' + (', '.join(row['key'] for row in rows) or 'none') + '.')
+    lines.append('Held: ' + ('; '.join(f"{row['key']} ({row['why']})" for row in result['held']) or 'none') + '.')
     lines += ['', '| Key | Spell | Status | Basis | Evidence | Record |', '|---|---:|---|---|---|---|']
     lines += [f"| {row['key']} | {row['spell']} | {row['status']} | {row['basis']} | {row['evidence']} | "
               f"{row['record_status']} |" for row in result['rows']]

@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar's bats and Sons come from the two platforms below his stairs",
+  "contract": [
+    "Round-10 testers (2026-11-16): every add of Hakkar (14834), the Sons of Hakkar (11357), Bloodseeker Bats",
+    "(11368) and Zulian Prowlers (15101), appeared on top of him; they belong on the platforms below the stairs,",
+    "read with .gps at -11839.239, -1699.5646, 40.74839 and -11733.223, -1696.5424, 40.7492. Taking turns between",
+    "the platforms is an estimate. A watcher stands on each platform, about 70 yards from Hakkar. When Hakkar takes",
+    "Hir'eek's Aspect (2118701) both watchers see a bat within 15 yards while none is within 15 yards of the hero",
+    "at Hakkar; 45 s into the pull the first Son comes on the first platform. On the old behaviour every add",
+    "appeared next to the hero and none on a platform."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "watcher1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "watcher2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "watcher1",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "watcher2",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "The heroes share one Zul'Gurub instance",
+      "actor": "hero",
+      "target": "watcher1"
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "watcher2"
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "label": "One watcher stands on the western platform",
+      "actor": "watcher1",
+      "map": 309,
+      "x": -11839.239,
+      "y": -1699.5646,
+      "z": 40.74839,
+      "o": 0.0688,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "label": "the other on the eastern platform",
+      "actor": "watcher2",
+      "map": 309,
+      "x": -11733.223,
+      "y": -1696.5424,
+      "z": 40.7492,
+      "o": 3.0859,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first watcher is in Zul'Gurub",
+      "actor": "watcher1",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second watcher is in Zul'Gurub",
+      "actor": "watcher2",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_phase",
+      "label": "See what Hakkar summons into the instance's own phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "watcher1",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "watcher2",
+      "value": 1
+    },
+    {
+      "action": "encounter_start",
+      "label": "Record the instance's boss states",
+      "actor": "hero",
+      "boss_entry": 14834,
+      "radius": 10
+    },
+    {
+      "action": "command",
+      "label": "The raid has killed Venoxis",
+      "actor": "hero",
+      "command": ".instance setbossstate 1 3"
+    },
+    {
+      "action": "command",
+      "label": "Mar'li",
+      "actor": "hero",
+      "command": ".instance setbossstate 2 3"
+    },
+    {
+      "action": "command",
+      "label": "Arlokk",
+      "actor": "hero",
+      "command": ".instance setbossstate 3 3"
+    },
+    {
+      "action": "command",
+      "label": "and Thekal; only Jeklik lives",
+      "actor": "hero",
+      "command": ".instance setbossstate 4 3"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: four High Priests are DONE before Hakkar comes",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "boss_state",
+      "state": "DONE",
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Pull Hakkar",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Hakkar below 85 %, his first drain step",
+      "actor": "hero",
+      "target": "hakkar",
+      "pct": 84
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar consumes the Avatar of Hir'eek and takes its Aspect",
+      "actor": "hakkar",
+      "metric": "aura",
+      "spell": 2118701,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: bats appear on the western platform",
+      "actor": "watcher1",
+      "metric": "nearest_creature_distance",
+      "entry": 11368,
+      "radius": 15,
+      "min": 0,
+      "max": 15,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and on the eastern platform",
+      "actor": "watcher2",
+      "metric": "nearest_creature_distance",
+      "entry": 11368,
+      "radius": 15,
+      "min": 0,
+      "max": 15,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no bat appears on top of Hakkar",
+      "actor": "hero",
+      "metric": "nearest_creature_distance",
+      "entry": 11368,
+      "radius": 15,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 45 s into the pull the first Son of Hakkar comes on the western platform",
+      "actor": "watcher1",
+      "metric": "nearest_creature_distance",
+      "entry": 11357,
+      "radius": 15,
+      "min": 0,
+      "max": 15,
+      "within_ms": 47000
+    }
+  ]
+}

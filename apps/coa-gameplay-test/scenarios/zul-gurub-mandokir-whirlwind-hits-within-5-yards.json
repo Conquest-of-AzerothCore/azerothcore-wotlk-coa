@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Zul'Gurub: Bloodlord Mandokir's Whirlwind hits players within 5 yards every second of the spin",
   "contract": [
-    "Whirlwind (2118408) is a 6 s spin whose periodic effect names no spell to trigger, so the spin hit nobody. Its",
+    "Whirlwind (2118408) is a 6 s spin whose periodic effect names 2118409, yet the spin hit nobody. Its",
     "tooltip and the live CoA combat logs (2026-08-02 Normal, Mythic) show the hit 2118409 (100 % weapon damage,",
     "5 yards) once a second, 1-6 s into the spin: about one melee hit per tick. The tank stands in melee and stops",
     "attacking, so the first spin comes 10 s into the fight in the charge's place and ends by about 20 s."

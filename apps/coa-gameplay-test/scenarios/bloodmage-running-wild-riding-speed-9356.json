@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Running Wild follows riding skill like a mount (#9356)",
+  "contract": [
+    "#9356 'BM Running Wild gives 100% move speed', whatever the riding skill. Running Wild 800175 effect 0 is",
+    "aura 31 MOD_INCREASE_SPEED with base 60; Running Wild (Journeyman) 520575 is a hidden Add Flat Modifier +40",
+    "on that effect. Decision for #9356: Running Wild follows riding skill as all other mounts do, with a 60%",
+    "floor. Without riding and with Apprentice Riding (skill 75) it gives 60%; Journeyman Riding (skill 150)",
+    "teaches 520575 and gives 100%; forgetting Journeyman Riding removes 520575 and drops back to 60%. The amount",
+    "updates while the aura is active. Riding ranks are taught and forgotten with learn and unlearn so the player",
+    "spell hooks run, as a trainer purchase does."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 34091,
+      "label": "fixture: forget riding rank 34091",
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 34090,
+      "label": "fixture: forget riding rank 34090",
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 33391,
+      "label": "fixture: forget riding rank 33391",
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 33388,
+      "label": "fixture: forget riding rank 33388",
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "skill_value",
+      "skill": 762,
+      "equals": 0,
+      "label": "SETUP: no riding skill is left"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800175,
+      "label": "learn Running Wild"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 520575,
+      "equals": 0,
+      "label": "without riding, Running Wild (Journeyman) is not taught"
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 800175,
+      "label": "run wild outdoors"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 800175,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Running Wild is active"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 800175,
+      "effect": 0,
+      "equals": 60,
+      "label": "without riding, Running Wild gives its 60% floor"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 1.599,
+      "max": 1.601,
+      "label": "without riding, the run speed rate is 1.6"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 33388,
+      "label": "learn Apprentice Riding"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "skill_value",
+      "skill": 762,
+      "equals": 75,
+      "label": "Apprentice Riding sets riding skill 75"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 520575,
+      "equals": 0,
+      "label": "Apprentice Riding does not teach Running Wild (Journeyman)"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 800175,
+      "effect": 0,
+      "equals": 60,
+      "label": "Apprentice Riding keeps Running Wild at 60%"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 1.599,
+      "max": 1.601,
+      "label": "Apprentice Riding keeps the run speed rate at 1.6"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 33391,
+      "label": "learn Journeyman Riding"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "skill_value",
+      "skill": 762,
+      "equals": 150,
+      "label": "Journeyman Riding sets riding skill 150"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 520575,
+      "equals": 1,
+      "label": "Journeyman Riding teaches Running Wild (Journeyman)"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 800175,
+      "effect": 0,
+      "equals": 100,
+      "within_ms": 2000,
+      "label": "Journeyman Riding raises the active Running Wild to 100%"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001,
+      "label": "Journeyman Riding doubles the run speed rate",
+      "within_ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 33391,
+      "label": "forget Journeyman Riding",
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "skill_value",
+      "skill": 762,
+      "equals": 75,
+      "label": "forgetting Journeyman Riding returns riding skill to 75"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 520575,
+      "equals": 0,
+      "label": "forgetting Journeyman Riding removes Running Wild (Journeyman)"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 800175,
+      "effect": 0,
+      "equals": 60,
+      "within_ms": 2000,
+      "label": "forgetting Journeyman Riding drops the active Running Wild to 60%"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 1.599,
+      "max": 1.601,
+      "label": "forgetting Journeyman Riding returns the run speed rate to 1.6",
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "b",
+      "spell": 800175,
+      "label": "stand up"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 800175,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Running Wild ended"
+    }
+  ]
+}

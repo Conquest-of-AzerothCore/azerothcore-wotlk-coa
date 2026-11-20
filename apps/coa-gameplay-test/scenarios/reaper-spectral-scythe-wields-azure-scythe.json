@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "The Spectral Scythe wields the Dream Raider's Azure Scythe",
+  "contract": [
+    "Spectral Scythe 250305 uses the live display 427586, an invisible stalker body, so on live only its weapon",
+    "shows: a floating blue scythe, the Dream Raider's Azure Scythe 574486 (Item.dbc display 143037, the live",
+    "appearance collection's item for that look). With no creature_equip_template row the summon held nothing and",
+    "was invisible. A summoned Scythe must carry item 574486 in its main-hand virtual item slot."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 5, "class": 30, "level": 45 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "reaper", "spell": 500484 },
+    { "action": "grant_resource", "actor": "reaper", "spell": 500363, "amount": 1 },
+    { "action": "cast", "label": "Spectral Scythe", "actor": "reaper", "spell": 500484 },
+    { "action": "assert", "label": "SETUP: the Spectral Scythe is summoned", "actor": "reaper", "metric": "owned_creature_count", "entry": 250305, "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The Scythe keeps its live invisible body", "actor": "reaper", "metric": "owned_creature_display", "entry": 250305, "equals": 427586 },
+    { "action": "assert", "label": "The Scythe wields the Dream Raider's Azure Scythe", "actor": "reaper", "metric": "owned_creature_virtual_item", "entry": 250305, "slot": 0, "equals": 574486 }
+  ]
+}

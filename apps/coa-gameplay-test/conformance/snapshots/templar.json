@@ -5,7 +5,7 @@
     "all": {
       "arguments": [],
       "files": {
-        "manifest.json": "34212d4db2b98b330dc9582e9348d0ec7e9492ca7778c68923172d64378939d1",
+        "manifest.json": "a090d759792694925713a0682fbacb345639378e51544c76fb4f10f1835aa95c",
         "scenarios/conformance-templar-behaviour-1397742-cast-applies-aura.json": "9878c434a2c4a03168049ae1b0631fe4da7f4a7016373eb7ad717654c112e8eb",
         "scenarios/conformance-templar-behaviour-1397742-metric-delta-combat.json": "74d6b75cd9da102bca64f091f38724d5931a9215bb711e28ec7086a3082735e5",
         "scenarios/conformance-templar-behaviour-1397742-metric-delta-copies-end.json": "234a64a7fb1e6e3013e3351f99708882be4b9006ae63d465877113e3ec407c1a",
@@ -1235,14 +1235,14 @@
         "scenarios/conformance-templar-behaviour-803219-taken-hit-copies.json": "87064458d908f9266e39d2234ca8b00264cad0e37d50e70b23e1812e1a4613a5",
         "scenarios/conformance-templar-behaviour-803792-charge-recharge.json": "0e3cd6dc9be0d0d21862b0c7e6cd24ba09a15658a8f7b59b3afa17d16b0bcc8c",
         "scenarios/conformance-templar-behaviour-803872-cast-applies-aura-dot.json": "7f1f5e13840412b466914b2bc0f8069db5cd7ff04ffbbfe7d202208e57bdf247",
-        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-all.json": "84a06ce6ea1ebb9d5fb167e859caed84b8d7068c5eda5a28f88236e81da5c041",
+        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-all.json": "c6815bdc6adcab6d06168bcaa1e77bdaad3e2de7f523105c45f8b53cc99b2cff",
         "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-cleave.json": "3714223315f57b28fe40f456b8963882b7f693dbab1f3baded7ab0c42175ada8",
         "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-condemn.json": "71dea047773fe9b33ff878c4331f0025fa7bff5a1f21f2c9161525615b0ca47f",
-        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-lunge-keeping-the-oath.json": "f478f822fc458ce74bd6b83794a012d8cd6cf7fbced9eb478c575c8abb0c53e4",
-        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-lunge.json": "53bea54757a4c012727b5135f007521fb7ca93b521794fa9e92c6d697b6c638f",
-        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-retribution.json": "97fe5028fc5d93ad1fbee19607fe4a3fc8e7caba99cb2b4cb304a64e597ddc4a",
+        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-lunge-keeping-the-oath.json": "2a7ad46ffa0c6d9060e3d8534716ecbd242d8bd3237b3a7ad2bec50eb00dfb40",
+        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-lunge.json": "087d3232ce5b545cf280e8e867b84b2c7ffc4a66fea99c33e044776340fc5fcf",
+        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-retribution.json": "916dbcc8fee2fb3a0636e04cf2d42598dbf1f92d083bf070d58b907d4fcb7536",
         "scenarios/conformance-templar-behaviour-803872-hit-ratio-oath-vindication.json": "25b2dd0106d4344214eb4f71bad8041eb87efc0d6e8127108c3d51dba9753c58",
-        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oaths.json": "92833479a24bbbd8e7c86b6858a18c807a0ba0690a1d620659edad7e22d040e8",
+        "scenarios/conformance-templar-behaviour-803872-hit-ratio-oaths.json": "a1da475aae217aa54bbe52b1ffbc3c9fea35dc7412cbbf0433d88f0b86595394",
         "scenarios/conformance-templar-behaviour-803872-metric-delta-crit-damage.json": "5197c82714bc0a8d4c4d58dcdb673d478db215ba5f6fb60fac802cda57560d86",
         "scenarios/conformance-templar-behaviour-803872-metric-delta-crit-ticks.json": "4b13b344a72cc349d93b969227160789d1e33bb5160c45b5fedb38f1a38901e9",
         "scenarios/conformance-templar-behaviour-803872-metric-delta-crit-zero-damage.json": "2737e97b74f5d4056a293f83edfd136d76d0921cdf625eba48adccd1e1f3e001",
@@ -2314,7 +2314,7 @@
         "--stack"
       ],
       "files": {
-        "manifest.json": "16a662eb4cfcb2f43a3119cfc633a124af511d837bdfff8d4f08f1359071f66a",
+        "manifest.json": "b89cc3eea1963e60fd387add06bbfec5144bfa77dfab2480d524125170a3c1b9",
         "scenarios/conformance-templar-stack-c0-base-pass-1.json": "f40650558452d311fbd0562a6584b53feb26bbf843b0fb944773c0a0ac7838d3",
         "scenarios/conformance-templar-stack-c0-base-pass-2.json": "e28bb9e77b8f8c8513dcb2270d1c3f9da99d32bb500d96cf2bbd44d2a2d8eb1e",
         "scenarios/conformance-templar-stack-c0-base-pass-3.json": "d96dc44c82164d1e5607c51b60237a0e4c68b1a779cf61d8e0189e76af15f818",

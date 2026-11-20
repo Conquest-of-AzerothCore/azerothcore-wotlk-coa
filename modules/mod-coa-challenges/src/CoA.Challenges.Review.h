@@ -544,6 +544,12 @@ void FailChallenge(Player* player, uint32 challengeID, uint32 level, uint32 deat
     ObjectGuid const& killerSource = ObjectGuid::Empty,
     KillerKind causeKind = KillerKind::Unknown, uint32 causeEntry = 0, std::string causeName = "");
 void FailSharedFate(Player* dead, uint32 challengeID);
+std::vector<Objective> TrackedObjectives(uint32 challengeID);
+std::string DescribeObjective(Objective const& o);
+bool CreditObjective(Player* player, uint32 challengeID, uint32 number, std::string& message);
+void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel);
+void ForgetFailureSnapshot(uint32 guid, uint32 challengeID);
+bool RestoreFailedChallenge(Player* player, uint32 challengeID, std::string& message);
 void FailSharedFateHolders(Group* group, ObjectGuid extraGuid);
 void HandlePlayerDeath(Player* player);
 uint32 CraftedItemRarity(SkillLineAbilityEntry const* ability);

@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Rhuna trains Leatherworking (#12751)",
+  "contract": "#12751 reported that Rhuna (41739), the 'Leatherworking Trainer' of her WDB row, offered only quests. A right click now shows the 'Train me.' option, which opens the Leatherworking trainer window (trainer 61) with Apprentice Leatherworking (2155, level 5) available at level 20.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "rhuna",
+      "owner": "p",
+      "entry": 41739,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "rhuna",
+      "label": "right-click the trainer"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "Train me.",
+      "equals": 1,
+      "label": "DISCRIMINATING: the training option (was quests only)"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0,
+      "label": "choose the training option"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "trainer_list_packets",
+      "equals": 1,
+      "label": "a trainer window is sent"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "trainer_window_state",
+      "spell": 2155,
+      "equals": 0,
+      "label": "Apprentice Leatherworking is offered and available at level 20"
+    }
+  ]
+}

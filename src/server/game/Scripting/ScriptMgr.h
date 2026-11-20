@@ -498,6 +498,13 @@ public: /* PlayerScript */
     bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& msg, Group* group);
     bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& msg, Guild* guild);
     bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& msg, Channel* channel);
+    void OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg);
+    void OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Player* receiver);
+    void OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Group* group);
+    void OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Guild* guild);
+    void OnPlayerAfterChat(Player* player, uint32 type, uint32 language, std::string const& msg, Channel* channel);
+    void OnPlayerAfterSendMail(Player* player, ObjectGuid receiverGuid, uint32 receiverAccount, std::string const& receiverName, uint32 mailId,
+        std::string const& subject, std::string const& body);
     void OnPlayerLearnTalents(Player* player, uint32 talentId, uint32 talentRank, uint32 spellid);
     void OnPlayerEnterCombat(Player* player, Unit* enemy);
     void OnPlayerLeaveCombat(Player* player);
@@ -620,6 +627,7 @@ public: /* UnitScript */
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo);
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage);
     void ModifyMeleeDamageRange(Unit* target, Unit* attacker, float& minDamage, float& maxDamage);
+    void OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus);
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo);
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* spellInfo,
         uint8 effectIndex, float& value);
@@ -635,6 +643,7 @@ public: /* UnitScript */
     void OnSendAuraUpdate(Unit* target, Player* receiver, AuraApplication const* application, bool remove);
     bool IfNormalReaction(Unit const* unit, Unit const* target, ReputationRank& repRank);
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell);
+    bool CanUnitAssist(Unit const* assister, Unit const* target, SpellInfo const* spell);
     Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell);
     bool CanSetPhaseMask(Unit const* unit, uint32 newPhaseMask, bool update);
     bool IsCustomBuildValuesUpdate(Unit const* unit, uint8 updateType, ByteBuffer& fieldBuffer, Player const* target, uint16 index);

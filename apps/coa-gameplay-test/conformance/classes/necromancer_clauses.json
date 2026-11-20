@@ -1442,11 +1442,12 @@
     "clause": "Damage taken may end the effect.",
     "labels": [
       "504489 behaviour_metric_delta damage_lands",
-      "504489 behaviour_metric_delta damage_ends",
+      "504489 behaviour_metric_delta damage_holds",
+      "504489 behaviour_metric_delta threshold",
       "504489 area_held behaviour_fixed_count"
     ],
     "kind": "claim",
-    "reason": "Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; fix F-b3b-1, Necromancer ADR 0011: the Mage hits the frozen target twice within 6000 ms and its freeze is gone; the dummy outside the Mage splash keeps its freeze 38500 ms (no-damage control); before the fix the freeze held to 38500 ms under the same hits (pairs prove-3 to prove-5, build 1f17eb215ef3)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "2026-11-18, #12435, owner ruling (Necromancer ADR 0082, superseding ADR 0011): the stock damage cap (1048 at level 60), all damage counting; damage_ends (any damage ends it) is replaced by damage_holds (the Mage's hits leave the freeze on) and threshold (583 leaves it on, 1138 to 1194 ends it); the pair below predates the change and needs a new measurement. Earlier: Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; fix F-b3b-1, Necromancer ADR 0011: the Mage hits the frozen target twice within 6000 ms and its freeze is gone; the dummy outside the Mage splash keeps its freeze 38500 ms (no-damage control); before the fix the freeze held to 38500 ms under the same hits (pairs prove-3 to prove-5, build 1f17eb215ef3)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504489,

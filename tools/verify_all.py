@@ -711,14 +711,21 @@ def reachable_sources(name, source, root):
     return texts
 
 
+def environment_value(environment, name):
+    if name in environment or not WINDOWS:
+        return environment.get(name)
+    folded = name.upper()
+    return next((value for key, value in environment.items() if key.upper() == folded), None)
+
+
 def compiler_problem(source, environment):
-    if 'VCToolsInstallDir' not in source or environment.get('VCToolsInstallDir'):
+    if 'VCToolsInstallDir' not in source or environment_value(environment, 'VCToolsInstallDir'):
         return None
     fallback = MSVC_LOOKUP if WINDOWS else PORTABLE_COMPILER
     if MSVC_REQUIREMENT.search(source) and not fallback.search(source):
         return 'requires the MSVC toolchain (VCToolsInstallDir is unset)'
     if WINDOWS:
-        compiler = environment.get('CXX') or 'cl.exe'
+        compiler = environment_value(environment, 'CXX') or 'cl.exe'
         if find_program(compiler, environment) is None:
             return f'requires the MSVC toolchain or {compiler} on PATH (VCToolsInstallDir is unset)'
     return None

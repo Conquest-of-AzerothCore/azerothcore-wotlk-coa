@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Lord Kazzak and The Will of Soggoth: their maps (882, 883) open with the Molten Core release stage",
+  "contract": [
+    "The Shrine of Lord Kazzak (280137, Tainted Scar) teleports the player who picks Challenge Kazzak to",
+    "Throne of the Doom Lord (882), a raid map. His map and Soggoth's raid map (883, The Will of Soggoth",
+    "64605 at 4410.5, 269.3, 78) open with Molten Core, like Korrim Snowgrave and Atal'zul: at release",
+    "stage 3 (Zul'Gurub) the shrine and a teleport to 883 leave the raid on map 0, at stage 4 both take",
+    "raid members to the boss maps. The case clears the stage override when it ends."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -11663.0,
+    "y": -2369.0,
+    "z": 1.0
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate1",
+      "label": "The raider leads a raid group, as his map takes only raids",
+      "loot_method": 0
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate2"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate3"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate4"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate5"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 280137,
+      "distance": 2
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm is at the Zul'Gurub release stage",
+      "command": "raidphase set 3",
+      "restore": "raidphase clear"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 280137
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at the Zul'Gurub stage his throne stays closed",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 883,
+      "x": 4410.5,
+      "y": 269.3,
+      "z": 78.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at the Zul'Gurub stage Soggoth's map stays closed",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm reaches the Molten Core release stage",
+      "command": "raidphase set 4"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 280137
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "At the Molten Core stage the shrine takes the raid leader to his throne",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 882,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 883,
+      "x": 4410.5,
+      "y": 269.3,
+      "z": 78.0
+    },
+    {
+      "action": "assert",
+      "label": "At the Molten Core stage the raid leader reaches Soggoth's map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 883,
+      "within_ms": 8000
+    },
+    {
+      "action": "console",
+      "label": "CLEANUP: the release stage returns to the configured one",
+      "command": "raidphase clear"
+    }
+  ]
+}

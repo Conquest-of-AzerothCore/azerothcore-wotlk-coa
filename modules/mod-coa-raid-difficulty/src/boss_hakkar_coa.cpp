@@ -60,6 +60,8 @@
  *     Orb of Corrupted Blood exists nowhere in the data).
  * The Heart is creature 92005, as in the log: the stock one (15069) despawns itself.
  * It appears inside his chest, 8 yards above him (tester, live), higher if anything grows him.
+ * His Sons, bats and prowlers come up the stairs from the two platforms below them, taking turns
+ * (round-10 tester positions; the turn order is an estimate).
  * Hakkar's Power keeps its damage and health but not its +20% size per living High Priest: his size
  * does not change while they live (round-7 tester, 2026-11-14).
  */
@@ -124,6 +126,8 @@ namespace
     enum Npcs
     {
         NPC_SON_OF_HAKKAR   = 11357,
+        NPC_BLOODSEEKER_BAT = 11368,
+        NPC_ZULIAN_PROWLER  = 15101,
         NPC_WORLD_TRIGGER   = 12999,
         NPC_HEART_OF_HAKKAR = 92005,
         NPC_AVATAR_OF_BETHEKK    = 666988,
@@ -146,6 +150,8 @@ namespace
         EVENT_SONS,
         EVENT_BERSERK,
         EVENT_FIERCE_BLOW,
+        EVENT_BLOODSEEKER_BATS,
+        EVENT_ZULIAN_PROWLERS,
     };
 
     enum Actions
@@ -163,6 +169,14 @@ namespace
     constexpr float HEART_HEIGHT         = 8.0f;
     constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
     constexpr int32 DRAIN_HEALTH_STEP    = 15;
+    constexpr uint8 BAT_WAVE             = 6;
+    constexpr uint8 PROWLER_WAVE         = 4;
+    constexpr Milliseconds ADD_WAVE_INTERVAL = 45s;
+    Position const ADD_PLATFORMS[] =
+    {
+        { -11839.239f, -1699.5646f, 40.74839f, 0.0688f },
+        { -11733.223f, -1696.5424f, 40.7492f, 3.0859f }
+    };
     constexpr std::array<uint32, 4> CORRUPTED_BLOOD_VARIANTS = { 2118601, 2118602, 2118603, 2118604 };
     constexpr std::array<uint32, 4> STRAIGHT_TO_THE_HEART = { 2107157, 2107158, 2107159, 2107160 };
 
@@ -214,6 +228,7 @@ namespace
             me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
             _undrained.clear();
             _drainsBegun = 0;
+            _sonsSummoned = 0;
             _siphoning = false;
             _pools.clear();
             _clock.Reset();
@@ -291,7 +306,25 @@ namespace
         {
             DoCastSelf(loa.aspect, true);
             if (loa.priest == DATA_ARLOKK)
+            {
                 DoCastSelf(SPELL_RAZOR_CLAWS, true);
+                _clock.ScheduleEvent(EVENT_ZULIAN_PROWLERS, 0ms);
+            }
+            else if (loa.priest == DATA_JEKLIK)
+                _clock.ScheduleEvent(EVENT_BLOODSEEKER_BATS, 0ms);
+        }
+
+        void SummonWave(uint32 entry, uint8 count)
+        {
+            for (uint8 i = 0; i < count; ++i)
+            {
+                Creature* add = me->SummonCreature(entry, ADD_PLATFORMS[i % std::size(ADD_PLATFORMS)],
+                    TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                if (!add)
+                    continue;
+                if (Unit* target = SelectTarget(SelectTargetMethod::Random))
+                    add->AI()->AttackStart(target);
+            }
         }
 
         void TakeConsumedAspects()
@@ -484,6 +517,14 @@ namespace
                     case EVENT_SIPHON_END:
                         EndSiphon();
                         break;
+                    case EVENT_BLOODSEEKER_BATS:
+                        SummonWave(NPC_BLOODSEEKER_BAT, BAT_WAVE);
+                        _clock.ScheduleEvent(EVENT_BLOODSEEKER_BATS, ADD_WAVE_INTERVAL);
+                        break;
+                    case EVENT_ZULIAN_PROWLERS:
+                        SummonWave(NPC_ZULIAN_PROWLER, PROWLER_WAVE);
+                        _clock.ScheduleEvent(EVENT_ZULIAN_PROWLERS, ADD_WAVE_INTERVAL);
+                        break;
                     default:
                         break;
                 }
@@ -537,11 +578,14 @@ namespace
                         events.ScheduleEvent(EVENT_BLOOD_SCYTHE, 15s);
                         break;
                     case EVENT_SONS:
-                        if (Creature* son = me->SummonCreature(NPC_SON_OF_HAKKAR, me->GetRandomNearPosition(25.0f),
+                    {
+                        Position const& platform = ADD_PLATFORMS[_sonsSummoned++ % std::size(ADD_PLATFORMS)];
+                        if (Creature* son = me->SummonCreature(NPC_SON_OF_HAKKAR, platform,
                             TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
                             son->SetInCombatWithZone();
                         events.ScheduleEvent(EVENT_SONS, 60s);
                         break;
+                    }
                     case EVENT_BERSERK:
                         DoCastSelf(IsAscended(me) ? SPELL_ASCENDED_BERSERK : SPELL_BERSERK, true);
                         break;
@@ -571,6 +615,7 @@ namespace
         }};
         std::vector<PriestLoa*> _undrained;
         uint8 _drainsBegun = 0;
+        uint8 _sonsSummoned = 0;
         EventMap _clock;
         bool _siphoning = false;
         ObjectGuid _heart;

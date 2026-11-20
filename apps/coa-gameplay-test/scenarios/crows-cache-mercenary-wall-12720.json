@@ -1,0 +1,595 @@
+{
+  "schema": 1,
+  "name": "Crow's Cache: next to the cache Mercenaries and other players cannot attack or heal each other",
+  "contract": "Issue #12720. Within CrowsCache.WallRange (100 yards) of a Crow's Cache, a Mercenary for Hire! player and a player without it cannot attack, heal or buff each other, also when grouped; Mercenaries keep fighting each other, and beyond that range Mercenary rules are unchanged. An Undead High-Risk Mercenary priest, an Orc High-Risk warrior without Mercenary for Hire! grouped with the priest as its escort, and an Orc High-Risk Mercenary warrior hunting them start in Elwynn Forest, where no cache of this or an earlier case can be near. Controls there: the hunter and the escort can attack each other, the two Mercenaries can attack each other, the priest's Lesser Heal (2050) lands on the escort, and the escort's Devotion Aura (465, a raid area aura) reaches the priest. They move to the Thousand Needles cache point and the chest appears: there the hunter and the escort cannot attack each other while the two Mercenaries still can, the Lesser Heal on the escort is refused and heals nothing, and Prayer of Healing (596) heals the priest but not the escort in its party. The escort's Devotion Aura leaves the priest and stays off while the escort keeps it. Prayer of Healing also has its control in Elwynn Forest, where it heals the escort. With the cache still standing, 300 yards away from it in Thousand Needles the hunter and the escort can attack each other again and the Devotion Aura returns, so the distance decides and not the map. Back in Elwynn Forest attacks and the heal work again. A player outside Mercenary mode cannot heal a Mercenary anywhere because Mercenaries are free-for-all flagged, so that direction needs no cache. Nothing is probabilistic: attack permission is read from the native target check and heals are counted from combat packets on a half-health target. Pets and effects already ticking when a player enters the range are not covered here. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 with released Heroic Bloodforged rewards and automatic cycles deferred.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "merc",
+      "race": 5,
+      "class": 5,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "hunter",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "escort",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "merc",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "hunter",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "escort",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "merc",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "merc",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "merc",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "merc",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "hunter",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "escort",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "escort",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "escort",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "escort",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 9930874
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "The priest takes up Mercenary for Hire!",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "and so does the hunting warrior",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "group",
+      "actor": "merc",
+      "target": "escort"
+    },
+    {
+      "action": "learn",
+      "actor": "merc",
+      "spell": 2050
+    },
+    {
+      "action": "learn",
+      "actor": "merc",
+      "spell": 596
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a cache a Mercenary can attack the High-Risk escort",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and the escort can attack that Mercenary",
+      "actor": "escort",
+      "metric": "can_attack",
+      "target": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mercenaries can attack each other",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "merc",
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "escort",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 2050,
+      "target": "escort"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a cache the Mercenary priest heals the escort in its party",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "escort",
+      "spell": 465
+    },
+    {
+      "action": "cast",
+      "actor": "escort",
+      "spell": 465
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a cache the escort's Devotion Aura reaches the Mercenary in its party",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "escort",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 596,
+      "target": "merc"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a cache Prayer of Healing heals the escort in the priest's party",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 596,
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "teleport",
+      "actor": "merc",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3901.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "escort",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Let all three arrive at the Thousand Needles cache point",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "merc",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "hunter",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "escort",
+      "value": 1
+    },
+    {
+      "action": "console",
+      "command": "crows needles 3"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The cache appears",
+      "actor": "merc",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Next to the cache a Mercenary cannot attack a player who is not a Mercenary",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "escort",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and that player cannot attack the Mercenary",
+      "actor": "escort",
+      "metric": "can_attack",
+      "target": "hunter",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mercenaries still attack each other next to the cache",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "merc",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "in both directions",
+      "actor": "merc",
+      "metric": "can_attack",
+      "target": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Next to the cache the escort's Devotion Aura leaves the Mercenary",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Give the aura several target updates to come back",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "and stays off",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "while the escort keeps its own aura",
+      "actor": "escort",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 2050,
+      "target": "escort"
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary's heal on the escort in its party is refused",
+      "actor": "merc",
+      "metric": "cast_failure",
+      "spell": 2050,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrongly accepted heal time to land",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "and heals nothing",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "escort",
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "merc",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
+      "action": "set_health",
+      "actor": "escort",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 596,
+      "target": "merc"
+    },
+    {
+      "action": "assert",
+      "label": "Prayer of Healing heals the Mercenary priest",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 596,
+      "target": "merc",
+      "equals": 2,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "but skips the injured escort in its party",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 596,
+      "target": "escort",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "merc",
+      "map": 1,
+      "x": -5505.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 1,
+      "x": -5505.16,
+      "y": -3901.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "escort",
+      "map": 1,
+      "x": -5505.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Let all three stand 300 yards from the cache, still in Thousand Needles",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "They stand together",
+      "actor": "merc",
+      "metric": "distance",
+      "target": "escort",
+      "max": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "300 yards from the cache, on the same map, a Mercenary can attack the escort again",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and the escort can attack back",
+      "actor": "escort",
+      "metric": "can_attack",
+      "target": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the escort's Devotion Aura reaches the Mercenary again while the cache still stands",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "merc",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "teleport",
+      "actor": "escort",
+      "map": 0,
+      "x": -9613.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "label": "Let all three return to Elwynn Forest, on another continent",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "They stand together again",
+      "actor": "merc",
+      "metric": "distance",
+      "target": "escort",
+      "max": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Far from the cache Mercenaries fight High-Risk players as before",
+      "actor": "hunter",
+      "metric": "can_attack",
+      "target": "escort",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "in both directions",
+      "actor": "escort",
+      "metric": "can_attack",
+      "target": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "merc",
+      "spell": 2050,
+      "target": "escort"
+    },
+    {
+      "action": "assert",
+      "label": "and the Mercenary priest heals the escort again",
+      "actor": "merc",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "escort",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "and the escort's Devotion Aura reaches the Mercenary again",
+      "actor": "merc",
+      "metric": "aura",
+      "spell": 465,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

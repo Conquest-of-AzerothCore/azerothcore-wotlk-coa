@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Blade of Faith's ticks gain 10% for each consumed Oath that adds nothing to them",
-  "contract": "Blade of Faith says \"Consumes your Oaths, dealing additional damage for each consumed.\" Righteous Lunge's and Retribution's Oaths carry only SPELLMOD_DAMAGE mods, which the periodic path never reads, so they added nothing to the ticks. The owner ruled +10% per such consumed Oath, a provisional value, additive (ADR 0289). Condemn and Vindication (+25% through aura 271) and Holy Cleave (+25 per tick) keep their own effects with no extra 10%. Each arm casts rank 9 (803880) at its own level 60 dummy with crit chance forced to 0 and the dummy's resistance removed, and reads the first tick against the no-Oath tick. Two stacks of the Lunge Oath count as two Oaths (x1.20). Under Keeping the Oath the Oath is held, not consumed, and the tick still gains 10%, mirroring the direct Oath Breakers. The dummies stand 11 yd apart, and the two arms with Holy Cleave's extra target come last, 15 yd from their neighbours and the Templar moves 3 yd from each in turn, so Holy Cleave's extra target cannot reach another arm's dummy. Absolute reads at level 60 (authoring run 20261112-081755): 191 with no Oath, 210 for Lunge, Retribution and Lunge under Keeping the Oath, 238 for Condemn and Vindication, 216 for Holy Cleave and 388 for all five.",
+  "name": "Blade of Faith's ticks gain 30% for each consumed Oath that adds nothing to them",
+  "contract": "Blade of Faith says \"Consumes your Oaths, dealing additional damage for each consumed.\" Righteous Lunge's and Retribution's Oaths carry only SPELLMOD_DAMAGE mods, which the periodic path never reads, so they added nothing to the ticks. ADR 0289 gave them a provisional +10% per consumed Oath; the owner ruled on 2026-11-18 (#12519, #12358) that each stack adds +30%, the Oath's own Effect[2] amount, additive (ADR 1010). Condemn and Vindication (+25% through aura 271) and Holy Cleave (+25 per tick) keep their own effects with no extra bonus. Each arm casts rank 9 (803880) at its own level 60 dummy with crit chance forced to 0 and the dummy's resistance removed, and reads the first tick against the no-Oath tick. Two stacks of the Lunge Oath count as two Oaths (x1.60); scenario templar-blade-of-faith-ten-oaths holds the ten-stack arms. Under Keeping the Oath the Oath is held, not consumed, and the tick still gains 30%, mirroring the direct Oath Breakers. The dummies stand 11 yd apart, and the two arms with Holy Cleave's extra target come last, 15 yd from their neighbours and the Templar moves 3 yd from each in turn, so Holy Cleave's extra target cannot reach another arm's dummy. Absolute reads at level 60 (authoring run 20261112-081755, before ADR 1010): 191 with no Oath, 238 for Condemn and Vindication, 216 for Holy Cleave. Expected under ADR 1010 (computed): about 248 for one Lunge or Retribution stack and about 517 for all five.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -257,15 +257,15 @@
     },
     {
       "action": "assert",
-      "label": "Oath: Righteous Lunge adds nothing through its data, so the tick gains 10%",
+      "label": "Oath: Righteous Lunge adds nothing through its data, so the tick gains 30%",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
       "target": "d_lunge",
       "critical": false,
       "ratio_to": "tick_none",
-      "min": 1.09,
-      "max": 1.11
+      "min": 1.29,
+      "max": 1.31
     },
     {
       "action": "relocate",
@@ -347,15 +347,15 @@
     },
     {
       "action": "assert",
-      "label": "Two stacks of Oath: Righteous Lunge count as two consumed Oaths: the tick gains 20%",
+      "label": "Two stacks of Oath: Righteous Lunge count as two consumed Oaths: the tick gains 60%",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
       "target": "d_lunge_two",
       "critical": false,
       "ratio_to": "tick_none",
-      "min": 1.19,
-      "max": 1.21
+      "min": 1.59,
+      "max": 1.61
     },
     {
       "action": "relocate",
@@ -437,15 +437,15 @@
     },
     {
       "action": "assert",
-      "label": "Oath: Retribution adds nothing through its data, so the tick gains 10%",
+      "label": "Oath: Retribution adds nothing through its data, so the tick gains 30%",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
       "target": "d_retribution",
       "critical": false,
       "ratio_to": "tick_none",
-      "min": 1.09,
-      "max": 1.11
+      "min": 1.29,
+      "max": 1.31
     },
     {
       "action": "relocate",
@@ -527,7 +527,7 @@
     },
     {
       "action": "assert",
-      "label": "Control: Oath: Vindication keeps its own +25% through aura 271 and gets no extra 10%",
+      "label": "Control: Oath: Vindication keeps its own +25% through aura 271 and gets no extra 30%",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
@@ -617,7 +617,7 @@
     },
     {
       "action": "assert",
-      "label": "Control: Oath: Condemn keeps its own +25% through aura 271 and gets no extra 10%",
+      "label": "Control: Oath: Condemn keeps its own +25% through aura 271 and gets no extra 30%",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
@@ -725,15 +725,15 @@
     },
     {
       "action": "assert",
-      "label": "Keeping the Oath 92109 held: the Lunge Oath is not consumed, and the tick still gains 10%, as a direct Breaker keeps its Oath bonus under it",
+      "label": "Keeping the Oath 92109 held: the Lunge Oath is not consumed, and the tick still gains 30%, as a direct Breaker keeps its Oath bonus under it",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
       "target": "d_keeping_the_oath",
       "critical": false,
       "ratio_to": "tick_none",
-      "min": 1.09,
-      "max": 1.11
+      "min": 1.29,
+      "max": 1.31
     },
     {
       "action": "relocate",
@@ -815,7 +815,7 @@
     },
     {
       "action": "assert",
-      "label": "Control: Oath: Holy Cleave keeps its own +25 per tick and gets no extra 10%",
+      "label": "Control: Oath: Holy Cleave keeps its own +25 per tick and gets no extra 30%",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
@@ -929,26 +929,26 @@
     },
     {
       "action": "assert",
-      "label": "All five Oaths: (191 + 25) x 1.20 x 1.50 / 191 = 2.0356",
+      "label": "All five Oaths: (191 + 25) x 1.60 x 1.50 / 191 = 2.7141",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
       "target": "d_all",
       "critical": false,
       "ratio_to": "tick_none",
-      "min": 2.02,
-      "max": 2.05
+      "min": 2.69,
+      "max": 2.73
     },
     {
       "action": "assert",
-      "label": "all: the all-Oaths tick reads 388 (216 x 1.20 = 259, then x 1.50)",
+      "label": "all: the all-Oaths tick reads about 517 (216 x 1.60 = 345, then x 1.50)",
       "actor": "templar",
       "metric": "spell_damage_total",
       "spell": 803880,
       "target": "d_all",
       "critical": false,
-      "min": 387,
-      "max": 389
+      "min": 515,
+      "max": 520
     }
   ]
 }

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Deluge triggers Conduction on the enemies it hits (#12687)",
+  "contract": [
+    "Every Deluge rank (806400, 807713-807717) reads 'Envelop enemies in the target area in water, dealing ... Frost",
+    "damage, triggering Conduction and reducing their attack power'. Conduction is 567560, a Frost direct-damage",
+    "spell on the target; the tooltip sets no condition on Conductive. Deluge's own effects are only damage and an",
+    "attack power debuff (806399), so nothing cast Conduction. A Stormbringer hit-result hook now casts it on each",
+    "enemy a non-triggered Deluge (family 22, SpellFamilyFlags1 bit 0x8000) damages. Brine 807105 is another",
+    "family-22 Frost hit without that bit and is the negative control. Deluge is instant and ground targeted, costs",
+    "50 Static (803102) and requires 'At Least 50 Static' (707050), so Static is set before each cast. Spell hit",
+    "rating forces every cast to land."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "storm", "race": 8, "class": 16, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "storm", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 807105 },
+    { "action": "learn", "actor": "storm", "spell": 807713 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+
+    { "action": "cast", "actor": "storm", "spell": 807105, "target": "enemy" },
+    { "action": "assert", "label": "SETUP: Brine hits the enemy",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 807105, "min": 1, "within_ms": 5000 },
+    { "action": "wait", "label": "Give a Conduction from Brine time to land", "ms": 1500 },
+    { "action": "assert", "label": "CONTROL: Brine does not trigger Conduction",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 567560, "equals": 0 },
+
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 600 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 807713, "target": "enemy",
+      "destination": { "x": -8917.41, "y": -115.853, "z": 82.3711 } },
+    { "action": "assert", "label": "SETUP: the Deluge cast was accepted",
+      "actor": "storm", "metric": "cast_failure", "spell": 807713, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Deluge damages the enemy",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 807713, "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: no Conductive stack is involved",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567559, "equals": 0 },
+    { "action": "assert", "label": "FIX: Deluge triggers Conduction on the enemy it hit",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 567560, "equals": 1, "within_ms": 1000 }
+  ]
+}

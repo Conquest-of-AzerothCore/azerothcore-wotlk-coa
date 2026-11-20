@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "The Honored Ancestor keeps the creature attack power of its level (#12357)",
+  "contract": [
+    "#7753 gave the Honored Ancestor 51265 (Ancestor's Call 804834), the Spectral Warden 100481 and the Spectral Scythe 250305 the",
+    "creature base damage and attack power of their level through PLAYERHOOK_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL. The hook's",
+    "UpdateAllStats then ran Guardian::UpdateAttackPowerAndDamage, which replaced the attack power base with 2 x Strength - 20:",
+    "24 for the guardian fallback Strength of 22 at every level. creature_classlevelstats class 1 gives damage_base 5.4601 and",
+    "attackpower 42 at level 12, 33.9625 and 252 at level 60; Guardian::UpdateDamagePhysical adds attack power / 14 x 2.0 s",
+    "(BaseAttackTime 2000) to the weapon minimum. The level-12 Blood Elf of the report and a level-60 Draenei check both levels.",
+    "This does not add any scaling with the owner's Agility or attack power: no source states its size."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "low",
+      "race": 10,
+      "class": 12,
+      "level": 12
+    },
+    {
+      "id": "high",
+      "race": 11,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "specialization",
+      "label": "Ancestry",
+      "actor": "low",
+      "id": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 804834
+    },
+    {
+      "action": "cast",
+      "label": "Ancestor's Call",
+      "actor": "low",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Honored Ancestor is summoned",
+      "actor": "low",
+      "metric": "owned_creature_count",
+      "entry": 51265,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: level 12 minimum weapon damage is 5.46 + 42 / 14 x 2 = 11.46, not 8.89 from 24 attack power",
+      "actor": "low",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 51265,
+      "min": 11.0,
+      "max": 12.0
+    },
+    {
+      "action": "specialization",
+      "label": "Ancestry",
+      "actor": "high",
+      "id": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "high",
+      "spell": 804834
+    },
+    {
+      "action": "cast",
+      "label": "Ancestor's Call",
+      "actor": "high",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Honored Ancestor is summoned",
+      "actor": "high",
+      "metric": "owned_creature_count",
+      "entry": 51265,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: level 60 minimum weapon damage is 33.96 + 252 / 14 x 2 = 69.96, not 37.39 from 24 attack power",
+      "actor": "high",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 51265,
+      "min": 69.0,
+      "max": 71.0
+    }
+  ]
+}

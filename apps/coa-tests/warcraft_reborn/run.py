@@ -337,6 +337,18 @@ int main(int, char** argv)
     Check(namesake(5487, 1105487) && namesake(9634, 1109634) && !twinned(5487, 1105487) && twinned(779, 1100779) &&
             twinned(5229, 1105229) && twinned(768, 1100768),
         "Reborn Bear and Dire Bear Form are namesakes, not twins, of the forms stock Swipe, Enrage and Bash require");
+    Check(twinned(19574, 1119574) && twinned(34692, 1134692) && namesake(34471, 1134471) && twinned(33206, 1133206) &&
+            twinned(47585, 1147585) && twinned(47788, 1147788) && twinned(53385, 1153385) &&
+            twinned(53583, 1153583) && namesake(54428, 1154428) && twinned(54037, 1154037) && twinned(54038, 1154038) &&
+            twinned(63410, 1163410) && twinned(63411, 1163411) && twinned(53511, 1153511) &&
+            twinned(53512, 1153512) && twinned(60096, 1160096) && twinned(60097, 1160097) &&
+            twinned(49016, 1149016) && twinned(49036, 1149036) && twinned(49032, 1149032) &&
+            twinned(49631, 1149631) && twinned(49632, 1149632) && namesake(51099, 1151099) &&
+            namesake(51160, 1151160) && namesake(51161, 1151161) && twinned(50508, 1150508) &&
+            twinned(50509, 1150509) && twinned(50510, 1150510) && twinned(51726, 1151726) &&
+            twinned(51734, 1151734) && twinned(51735, 1151735),
+        "the Reborn talent copies that stock special cases key on resolve to their stock talent, "
+        "and the spells those cases cast have Reborn twins");
 
     std::unordered_map<std::uint32_t, std::uint32_t> const stockSlam = { { 1464, 1464 }, { 8820, 1464 }, { 11604, 1464 },
         { 11605, 1464 }, { 25241, 1464 }, { 25242, 1464 }, { 47474, 1464 }, { 47475, 1464 } };
@@ -573,6 +585,61 @@ def check_class_spell_bindings(dbc):
     return ok
 
 
+EBON_PLAGUE_BRANCH = ("src/server/game/Spells/Auras/SpellAuras.cpp",
+                      "// Ebon Plaguebringer - end search if found", "// Unholy blight", [
+                          "if (aurEff) { uint32 spellId = 0; switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))",
+                          "if (spellId) caster->CastSpell(target, "
+                          "sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()), true, 0, GetEffect(0));"])
+
+TALENT_COPY_SITES = {
+    "src/server/game/Spells/Auras/SpellAuras.cpp": [
+        "if (!player->HasSpellCooldown(GetId()))",
+        "switch (sSpellMgr->GetSpellTwinSource(GetId()) == 19574 ? 19574 : GetId())",
+        "owner->HasAuraOrTwin(34692)", "sSpellMgr->GetSpellTwinFor(34471, GetId())"],
+    "src/server/game/Spells/Auras/SpellAuraEffects.cpp": [
+        "player->HasTalentOrTwin(63410, player->GetActiveSpec())",
+        "player->HasTalentOrTwin(63411, player->GetActiveSpec())",
+        "switch (sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id))",
+        "sSpellMgr->GetSpellTwinFor(60096, GetId())", "sSpellMgr->GetSpellTwinFor(60097, GetId())"],
+    "src/server/game/Entities/Unit/Unit.cpp": [
+        "GetAuraEffectOfRankedSpellOrTwin(49036, EFFECT_0)", "ToPlayer()->HasSpellOrTwin(53583)",
+        "switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id) == 54428 ? 54428 : spellInfo->Id)"],
+    "src/server/game/Spells/SpellEffects.cpp": [
+        "sSpellMgr->GetSpellTwinSource(aurEff->GetId()) == 54037 ? 4 : 8",
+        "switch (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 53385 ? 53385 : m_spellInfo->Id)"],
+    "src/server/game/Spells/Spell.cpp": [
+        "sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 19574)",
+        "sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 33206 && !m_caster->HasAuraOrTwin(63248)"],
+    "src/server/game/Spells/SpellInfo.cpp": ["switch (sSpellMgr->GetSpellTwinSource(Id) == 19574 ? 19574 : Id)"],
+}
+
+
+def collapse_whitespace(text):
+    return " ".join(text.split())
+
+
+def source_branch(path, start, end):
+    text = collapse_whitespace((ROOT / path).read_text(encoding="utf-8"))
+    begin = text.find(start)
+    finish = text.find(end, begin) if begin >= 0 else -1
+    return text[begin:finish] if finish >= 0 else ""
+
+
+def check_talent_copy_sites():
+    missing = [f"{path}: {needle}" for path, needles in TALENT_COPY_SITES.items()
+               for needle in needles
+               if needle not in collapse_whitespace((ROOT / path).read_text(encoding="utf-8"))]
+    path, start, end, needles = EBON_PLAGUE_BRANCH
+    branch = source_branch(path, start, end)
+    missing += [f"{path} (Ebon Plague branch): {needle}" for needle in needles if needle not in branch]
+    print(f"{'PASS' if not missing else 'FAIL'}: stock special cases for Ebon Plague, Crypt Fever, Hysteria, Epidemic, "
+          "Feeding Frenzy, Improved Barkskin, Improved Felhunter, Guarded by the Light, Divine Plea, The Beast Within, "
+          "Bestial Wrath, Pain Suppression, Dispersion, Guardian Spirit and Divine Storm also match the Reborn copies")
+    for line in missing:
+        print("  missing", line)
+    return not missing
+
+
 def check_twin_copies():
     missing = [f"{path}: {needle}" for path, needles in TWIN_COPIES.items()
                for needle in needles if needle not in (ROOT / path).read_text(encoding="utf-8")]
@@ -616,7 +683,8 @@ def main():
                        check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()) &
                        check_namesake_procs(args.dbc_dir.resolve()) & check_blazing_speed(args.dbc_dir.resolve()) &
                        check_trainer_seal_of_command(args.dbc_dir.resolve()))
-        twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
+        twins_ok = (check_twin_copies() & check_talent_copy_sites() &
+                    check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))
 

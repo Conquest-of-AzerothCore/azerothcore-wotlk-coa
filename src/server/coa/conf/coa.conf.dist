@@ -388,6 +388,35 @@ HighRisk.ResourceChance = 50
 HighRisk.GoldChance = 50
 
 ###################################################################################################
+# BATTLEGROUND BRACKETS
+#
+#    CoA.Battleground.WideBrackets.Enable
+#        Description: Merge the stock ten-level battleground brackets below level 60 into the wider
+#                     brackets of CoA.Battleground.WideBrackets.Ranges. Arenas and the brackets from
+#                     level 60 up keep their stock ranges. Read at startup only.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, stock brackets)
+
+CoA.Battleground.WideBrackets.Enable = 1
+
+#    CoA.Battleground.WideBrackets.Ranges
+#        Description: Comma-separated, ascending level ranges between 1 and 59. Each range must hold
+#                     whole stock brackets (10-19, 20-29, ...) and keep the same lead bracket on every
+#                     battleground. An invalid value logs an error and keeps the stock brackets. Read at
+#                     startup only.
+#        Default:     "10-29,30-49,50-59"
+
+CoA.Battleground.WideBrackets.Ranges = "10-29,30-49,50-59"
+
+#    CoA.Battleground.WideBrackets.MaxLiftLevels
+#        Description: Most levels the health lift and output scaling bridge for a player or pet below the
+#                     bracket top. Combat rolls still use the bracket top. Read at startup only.
+#        Default:     0 - (No cap)
+#                     N - (Lift to at most own level + N)
+
+CoA.Battleground.WideBrackets.MaxLiftLevels = 0
+
+###################################################################################################
 # RATED SOLO ARENA
 #
 #    RatedSoloArena.RoleBalanceWaitSeconds
@@ -1099,6 +1128,16 @@ CrowsCache.GoldenMarksOfWar = "10 10"
 #        Default:     400
 
 CrowsCache.BazaarTokens = 400
+
+#
+#    CrowsCache.WallRange
+#        Description: Yards around a Crow's Cache (chest, carrier or dropped cache) in which a
+#                     Mercenary for Hire! player and a player without it cannot attack, heal or
+#                     buff each other, also when grouped. Applies when either of the two is in range.
+#                     0 = no wall. Maximum 500.
+#        Default:     100
+
+CrowsCache.WallRange = 100
 CrowsCache.X = -7831
 CrowsCache.Y = -3465
 CrowsCache.Z = 56.87
@@ -1129,3 +1168,6 @@ XPHotspots.ActiveCount = 3
 XPHotspots.BuffSpell = 993945
 # Brand: a short label (32 characters at most, no "|") the client shows with the hotspots; empty = none.
 XPHotspots.Brand = ""
+
+CoA.ChatLog.Enable = 0
+CoA.ChatLog.KeepDays = 30

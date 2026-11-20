@@ -84,3 +84,34 @@ class RadiusEdgeTests(unittest.TestCase):
     def test_the_gate_cannot_be_learned_in_both_arms(self):
         with self.assertRaises(ValueError):
             self.built({**ENTRY, 'learn': [500331]})
+
+    def test_a_living_center_and_an_aura_read_move_the_layout(self):
+        entry = {**ENTRY, 'spell': 680238, 'label_suffix': 'radius_edge_stun', 'quote': 'within $681179a1 yds,',
+                 'gate_spell': 680238, 'cast_spell': 680238, 'cast_at': 'caster', 'hit_spell': 681179, 'radius': 3,
+                 'primary_yd': 4.0, 'center_reach': 1.275, 'hit_metric': 'aura', 'repeats': 1}
+        entry.pop('caster_entry')
+        entry.pop('setup_casts')
+        scenario, [expectation] = self.built(entry)
+        run.validate(scenario)
+        self.assertEqual([creature['distance'] for creature in scenario['creatures']], [4.0, 9.05, 10.05])
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'aura']
+        self.assertEqual({(step['actor'], step['spell']) for step in reads},
+                         {('primary', 681179), ('inside', 681179), ('outside', 681179)})
+        model = expectation.model
+        self.assertEqual((model['metric'], model['center_size'], model['center_struck']), ('aura', True, True))
+        values = {model['reach'][name]: 1.275 for name in model['reach']}
+        values.update({label: 83.5 for label in model['height'].values()})
+        values.update({model['distance']['inside']: 5.05, model['distance']['outside']: 6.05})
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+
+        def judged(control: dict, treatment: dict) -> str:
+            for arm, counts in (('control', control), ('treatment', treatment)):
+                for dummy, label in model['arms'][arm].items():
+                    values[label] = float(counts.get(dummy, 0))
+            return judge_behaviour(base, FakeRun(values), expectation).status
+
+        self.assertEqual(judged({}, {'primary': 1, 'inside': 1}), 'ok')
+        self.assertEqual(judged({}, {'primary': 1, 'inside': 1, 'outside': 1}), 'alert')
+        self.assertEqual(judged({}, {'inside': 1}), 'unmeasured')
+        self.assertEqual(judged({'inside': 1}, {'primary': 1, 'inside': 1}), 'alert')

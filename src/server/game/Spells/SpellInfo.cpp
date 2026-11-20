@@ -2744,7 +2744,7 @@ void SpellInfo::_LoadImmunityInfo()
             }
             case SPELL_AURA_MECHANIC_IMMUNITY:
             {
-                switch (Id)
+                switch (sSpellMgr->GetSpellTwinSource(Id) == 19574 ? 19574 : Id)
                 {
                     case 34471: // The Beast Within
                     case 19574: // Bestial Wrath
@@ -3106,7 +3106,13 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
         uint32 const firstRank = GetFirstRankSpell()->Id;
         tinkerShot = firstRank == 500549 || firstRank == 500235;
     }
-    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot &&
+    bool witchHunterShot = false;
+    if (SpellFamilyName == 21)
+    {
+        uint32 const firstRank = GetFirstRankSpell()->Id;
+        witchHunterShot = firstRank == 804179 || firstRank == 805754;
+    }
+    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot && !witchHunterShot &&
         (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
         castTime += 500;
 

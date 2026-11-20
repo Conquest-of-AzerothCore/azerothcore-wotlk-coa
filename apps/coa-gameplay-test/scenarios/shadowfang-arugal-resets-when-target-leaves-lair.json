@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Archmage Arugal resets when his target leaves his lair, on Normal",
+  "contract": [
+    "Archmage Arugal (4275) does not move in combat and reaches the whole lair from his desk, so his own leash never trips.",
+    "His leash has `target` set: when the player he attacks stands outside the lair polygon, he resets, on every difficulty.",
+    "The test pulls a summoned Arugal next to his spawn; it runs the same SmartAI and leash as his spawn.",
+    "p steps 36 yards west (still inside) and then 18 more, past the west edge of the lair polygon."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -76.0,
+      "y": 2152.0,
+      "z": 155.8,
+      "o": 3.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p is in a Normal Shadowfang Keep",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Shadowfang Keep is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "arugal",
+      "entry": 4275,
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "arugal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal is in combat",
+      "actor": "arugal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p steps 18 yards west, staying in combat",
+      "actor": "p",
+      "dx": -18.0
+    },
+    {
+      "action": "relocate",
+      "label": "p steps another 18 yards west, across the lair",
+      "actor": "p",
+      "dx": -18.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal stays in combat while p is inside the lair",
+      "actor": "arugal",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal is visible",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "label": "p steps 18 more yards west, out of the lair polygon",
+      "actor": "p",
+      "dx": -18.0
+    },
+    {
+      "action": "assert",
+      "label": "Arugal resets and vanishes once his target is outside the lair",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p leaves combat with him",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "He returns about 10 s after the reset",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "He is not in combat after returning",
+      "actor": "arugal",
+      "metric": "combat",
+      "equals": 0
+    }
+  ]
+}

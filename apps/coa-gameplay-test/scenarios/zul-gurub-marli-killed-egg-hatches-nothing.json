@@ -8,7 +8,8 @@
     "north; the lane has its own phase, so Mar'li (14510) sees only these two. Hatch Eggs (2118115) at 17 s",
     "makes both cast Hatching (2118119, 10 s). The hero kills the nearer egg mid-cast: 10 s later only the other",
     "egg has hatched, one spider; on the old behaviour the egg was an object nobody could attack. Egg health",
-    "follows live kills: 18,171 with 12 players on Normal (2026-08-02), 1,514 per player, so 15,140 alone."
+    "follows live kills: 18,171 with 12 players on Normal (2026-08-02), 1,514 per player, so 15,140 alone.",
+    "Round-8 tester (2026-11-15): an egg cannot be attacked until its own Hatching starts."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -85,11 +86,11 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the hero can attack the egg",
+      "label": "DISCRIMINATING: before its Hatching the egg is sealed to the hero",
       "actor": "tank",
       "metric": "nearby_creature_can_attack",
       "entry": 14915,
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "assert",
@@ -141,6 +142,14 @@
       "metric": "casting",
       "equals": 1,
       "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a Hatching egg is open to the hero",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14915,
+      "equals": 1
     },
     {
       "action": "wait",

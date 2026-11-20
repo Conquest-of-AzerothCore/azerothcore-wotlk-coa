@@ -20,7 +20,9 @@
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionResilientConstitution.h"
+#include "AscensionTankStances.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -137,9 +139,11 @@ static bool IsClassicPlusCombat(Unit const* attacker, Unit const* victim)
 
 // The level a creature is fought at by the character behind `opponent`: their own version of it when they have
 // one. Unlike getLevelForTarget it keeps a world boss's real level, which the stock armor and resistance formulas
-// read.
+// read. Two player-controlled units in a widened battleground fight at its top level, as in getLevelForTarget.
 static uint8 ShownCombatLevel(Unit const* unit, Unit const* opponent)
 {
+    if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(unit, opponent))
+        return top;
     if (Creature const* creature = unit->ToCreature())
         if (Player const* viewer = opponent ? opponent->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr)
             if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, creature))
@@ -2317,32 +2321,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                                !IsPlayer() && !ToCreature()->IsControlledByPlayer() && !victim->HasInArc(M_PI, this)
                                && (victim->IsPlayer() || !victim->ToCreature()->isWorldBoss()) && !victim->IsVehicle()))
     {
-        // -probability is between 0% and 40%
-        // 20% base chance
-        float Probability = 20.0f;
-
-        // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
-        if (victim->GetLevel() < 30)
-            Probability = 0.65f * victim->GetLevel() + 0.5f;
-
-        uint32 VictimDefense = victim->GetDefenseSkillValue();
-        uint32 VictimAuraDefense = -victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE) * 25;
-        uint32 AttackerMeleeSkill = GetUnitMeleeSkill();
-        if (Player const* viewer = victim->GetCharmerOrOwnerPlayerOrPlayerItself())
-            if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, ToCreature()))
-                AttackerMeleeSkill = view * 5;
-
-        // xinef: fix daze mechanics
-        float const chancePerSkillPoint = IsClassicPlusCombat(this, victim) ?
-            ClassicPlusCombat::DazeChancePerSkillPoint : 0.1428f;
-        Probability -= ((float)VictimDefense + (float)VictimAuraDefense - AttackerMeleeSkill) * chancePerSkillPoint;
-
-        if (Probability > 40.0f)
-            Probability = 40.0f;
-
         // Daze application
         if (sWorld->getBoolConfig(CONFIG_ENABLE_DAZE))
-            if (roll_chance_f(std::max(0.0f, Probability)))
+            if (roll_chance_f(GetMeleeDazeChance(victim)))
                 CastSpell(victim, 1604, true);
     }
 
@@ -4274,6 +4255,23 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, Spell const* spell, bool CanRef
     return SPELL_MISS_NONE;
 }
 
+uint8 Unit::getLevelForTarget(WorldObject const* target) const
+{
+    if (target)
+        if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target->ToUnit()))
+            return top;
+
+    return GetLevel();
+}
+
+uint8 Unit::getRewardLevelForTarget(WorldObject const* target) const
+{
+    if (target && AscensionBattlegroundCombat::SharedTopLevel(this, target->ToUnit()))
+        return GetLevel();
+
+    return getLevelForTarget(target);
+}
+
 uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 {
     if (IsPlayer())
@@ -4282,6 +4280,8 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
         uint32 value = (target && target->IsPlayer())
                        ? ToPlayer()->GetMaxSkillValue(SKILL_DEFENSE)
                        : ToPlayer()->GetSkillValue(SKILL_DEFENSE);
+        if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target))
+            value = std::max<uint32>(value, 5u * top);
         value += uint32(ToPlayer()->GetRatingBonusValue(CR_DEFENSE_SKILL));
         return value;
     }
@@ -4506,6 +4506,38 @@ int32 Unit::GetAscensionConditionalCombatModifier(Unit const* victim, SpellInfo 
     });
 }
 
+float Unit::GetMeleeDazeChance(Unit const* victim) const
+{
+    if (victim->HasAura(Ascension::TANK_STANCE_CRIT_REDUCTION_AURA))
+        return 0.0f;
+
+    // -probability is between 0% and 40%
+    // 20% base chance
+    float Probability = 20.0f;
+
+    // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
+    if (victim->GetLevel() < 30)
+        Probability = 0.65f * victim->GetLevel() + 0.5f;
+
+    uint32 VictimDefense = victim->GetDefenseSkillValue();
+    uint32 VictimAuraDefense = -victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE) * 25;
+    uint32 AttackerMeleeSkill = GetUnitMeleeSkill();
+    if (Creature const* attacker = ToCreature())
+        if (Player const* viewer = victim->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, attacker))
+                AttackerMeleeSkill = view * 5;
+
+    // xinef: fix daze mechanics
+    float const chancePerSkillPoint = IsClassicPlusCombat(this, victim) ?
+        ClassicPlusCombat::DazeChancePerSkillPoint : 0.1428f;
+    Probability -= ((float)VictimDefense + (float)VictimAuraDefense - AttackerMeleeSkill) * chancePerSkillPoint;
+
+    if (Probability > 40.0f)
+        Probability = 40.0f;
+
+    return std::max(0.0f, Probability);
+}
+
 float Unit::GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victim) const
 {
     float crit;
@@ -4589,8 +4621,14 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         if (attType != BASE_ATTACK && !item)
             return 0;
 
+        uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target);
+
         if (IsInFeralForm())
+        {
+            if (top)
+                return 5u * top;
             return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
+        }
 
         // weapon skill or (unarmed for base attack)
         uint32 skill = SKILL_UNARMED;
@@ -4601,6 +4639,8 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         value = (target && target->IsControlledByPlayer())
                 ? player->GetMaxSkillValue(skill)
                 : player->GetSkillValue(skill);
+        if (top)
+            value = std::max<uint32>(value, 5u * top);
         // Modify value from ratings
         value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL));
         switch (attType)
@@ -5081,6 +5121,10 @@ bool Unit::CanDefendDuringChannel(Unit const* attacker) const
 
     Spell* channel = GetCurrentSpell(CURRENT_CHANNELED_SPELL);
     Spell* generic = GetCurrentSpell(CURRENT_GENERIC_SPELL);
+    if (IsPlayer() && getClass() == CLASS_WITCH_HUNTER && channel && channel->IsChannelActive() &&
+        channel->getState() != SPELL_STATE_FINISHED && channel->GetSpellInfo()->Id == 805751 &&
+        (!generic || generic->getState() == SPELL_STATE_FINISHED))
+        return true;
     return IsPlayer() && getClass() == CLASS_DEMON_HUNTER && channel && channel->IsChannelActive() &&
         channel->getState() != SPELL_STATE_FINISHED && channel->GetSpellInfo()->Id == 800206 &&
         (!generic || generic->getState() == SPELL_STATE_FINISHED);
@@ -6998,7 +7042,7 @@ uint32 Unit::GetDiseasesByCaster(ObjectGuid casterGUID, uint8 mode)
                     uint32 countMin = aura->GetMaxDuration();
                     uint32 countMax = aura->GetSpellInfo()->GetMaxDuration() + 9000;
 
-                    if (AuraEffect const* epidemic = (*i)->GetCaster()->GetAuraEffectOfRankedSpell(49036, EFFECT_0))
+                    if (AuraEffect const* epidemic = (*i)->GetCaster()->GetAuraEffectOfRankedSpellOrTwin(49036, EFFECT_0))
                         countMax += epidemic->GetAmount();
 
                     if (countMin < countMax)
@@ -12163,6 +12207,9 @@ bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) co
     if (this == target)
         return true;
 
+    if (!sScriptMgr->CanUnitAssist(this, target, bySpell))
+        return false;
+
     // can't assist unattackable units or GMs
     if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
             || (target->IsPlayer() && target->ToPlayer()->IsGameMaster()))
@@ -12424,6 +12471,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                     stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
                     non_stack_bonus += GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK) / 100.0f;
                 }
+                sScriptMgr->OnUnitUpdateRunSpeed(this, main_speed_mod, stack_bonus, non_stack_bonus);
                 break;
             }
         case MOVE_SWIM:
@@ -14680,7 +14728,8 @@ void Unit::RestoreDisplayId()
     }
 
     // no auras found - set modelid to default
-    SetDisplayId(GetNativeDisplayId());
+    SetDisplayId(GetNativeDisplayId(), GetNativeObjectScale());
+    RecalculateObjectScale();
 }
 
 void Unit::AddComboPoints(Unit* target, int8 count)
@@ -18904,7 +18953,7 @@ void Unit::Whisper(uint32 textId, Player* target, bool isBossWhisper /*= false*/
 bool Unit::CanRestoreMana(SpellInfo const* spellInfo) const
 {
     // Aura of Despair exceptions
-    switch (spellInfo->Id)
+    switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id) == 54428 ? 54428 : spellInfo->Id)
     {
         case 16666: // Demonic Rune
         case 27869: // Dark Rune
@@ -18922,7 +18971,7 @@ bool Unit::CanRestoreMana(SpellInfo const* spellInfo) const
         case 68285: // Improved Leader of the Pack
             return true;
         case 54428: // Divine Plea - only with talent Guarded by the Light
-            return HasSpell(53583);
+            return IsPlayer() ? ToPlayer()->HasSpellOrTwin(53583) : HasSpell(53583);
         default:
             break;
     }

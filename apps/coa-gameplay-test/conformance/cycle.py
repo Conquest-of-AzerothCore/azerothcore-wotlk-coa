@@ -10,8 +10,8 @@ import subprocess
 import sys
 from typing import Callable, Sequence
 
-from tally import (FINAL, TallyError, TallyInputs, load_decisions, match_line, record_match, tally, tally_lines,
-                   tally_record_verdicts, verdict_line, write_status)
+from tally import (FINAL, TallyError, TallyInputs, held_rows, load_decisions, match_line, record_match, tally,
+                   tally_lines, tally_record_verdicts, verdict_line, write_status)
 
 STEPS = ('gate', 'digests', 'generate', 'source', 'runs', 'compare', 'audit', 'tally', 'refactor', 'archive',
          'checkpoint')
@@ -393,7 +393,12 @@ def step_gate(cycle: Cycle) -> None:
 
 
 def step_digests(cycle: Cycle) -> None:
+    from snapshots import GENERATIONS
     config = cycle.config
+    if config.class_id not in GENERATIONS:
+        note(cycle, 'digests', f'class {config.class_id} is not a finished class of snapshots.py: '
+                               f'its digests are not checked')
+        return
     command = 'write' if cycle.write_digests else 'check'
     must(cycle, 'digests', [*tool(config.worktree, 'snapshots.py'), command, '--class', config.class_id],
          config.worktree / CONFORMANCE)
@@ -864,6 +869,7 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'record_verdicts_acceptance': verdict_acceptance_note(config, verdicts),
         'lost': lost,
         'gained': [row['key'] for row in rows if row['key'] in now - before],
+        'held': held_rows(rows),
         'stamps': list(cycle.stamps),
         'record': {'name': config.record.name, 'stamps': list(config.record.stamps)},
         'build': config.build,
@@ -895,6 +901,10 @@ def verdict_markdown(verdicts: dict, acceptance: dict | None = None) -> str:
             f"{' ...' if verdicts['other'] > 10 else ''}")
 
 
+def held_markdown(held: list) -> str:
+    return '; '.join(f"{row['key']} ({row['why']})" for row in held) or 'none'
+
+
 def checkpoint_markdown(document: dict) -> str:
     total = document['total']
     share = f"{100.0 * document['count'] / total:.1f}%" if total else 'n/a'
@@ -912,6 +922,7 @@ def checkpoint_markdown(document: dict) -> str:
              f"- {match_markdown(document['record_scenarios'])}",
              f"- {verdict_markdown(document['record_verdicts'], document['record_verdicts_acceptance'])}",
              f"- Lost: {', '.join(document['lost']) or 'none'}; gained: {', '.join(document['gained']) or 'none'}",
+             f"- Held: {held_markdown(document['held'])}",
              f"- Stamps: {' / '.join(document['stamps']) or NOT_RECORDED}; record {document['record']['name']} "
              f"({' / '.join(document['record']['stamps']) or NOT_RECORDED})",
              f"- Build: {document['build']}; head {document['head']}",
@@ -928,6 +939,8 @@ def step_checkpoint(cycle: Cycle) -> None:
     (out / CHECKPOINT_MD).write_text(checkpoint_markdown(document), encoding='utf-8')
     note(cycle, 'checkpoint', f"{document['count']} / {document['total']}, delta {document['delta']:+d}")
     note(cycle, 'checkpoint', match_line(document['record_scenarios']))
+    if document['held']:
+        note(cycle, 'checkpoint', f"held: {held_markdown(document['held'])}")
     note(cycle, 'checkpoint', verdict_line(document['record_verdicts']))
 
 
