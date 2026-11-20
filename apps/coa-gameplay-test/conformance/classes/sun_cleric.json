@@ -129,6 +129,42 @@
       "fixture": {
         "attack_power": 20000
       }
+    },
+    {
+      "spell": 504070,
+      "name": "Grace (Dawnsear)",
+      "kind": "hit_ratio",
+      "variant": "dawnsear",
+      "label_suffix": "dawnsear",
+      "quote": "Increases the spell damage bonus of Dawnsear by $s1%",
+      "expected": 1.1831,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          504070
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "$s1 = 20 (504070 Effect[0] aura 107 on Dawnsear). Dawnsear 554406 Description: ${$m1+0+$spfi*0.765222}; $m1 = 668 + 1 .. 668 + 80 (EffectBasePoints 668, EffectDieSides 80): mean (669 + 748) / 2 = 708.5. With a spell power fixture of 10000 the coefficient part is 10000 x 0.765222 = 7652.22 and the bonus scales that part by 1.2: (708.5 + 7652.22 x 1.2) / (708.5 + 7652.22) = 1.1831. Control: Grace not learned. 823764 removes the dummy's magic resistance as in the Templar entries.",
+      "cast_power": 1000,
+      "critical": false
     }
   ],
   "player_observations": [],

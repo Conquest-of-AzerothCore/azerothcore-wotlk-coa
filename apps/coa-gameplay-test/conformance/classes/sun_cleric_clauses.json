@@ -799,10 +799,16 @@
   {
     "spell": 504070,
     "clause": "Increases the spell damage bonus of Dawnsear by $s1%",
-    "labels": [
-      "504070 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the spell damage bonus of Dawnsear by 20%",
+        "labels": [
+          "504070 behaviour_hit_ratio dawnsear"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261120-203153 / 20261120-203227, build 8f46b717, no flip; control arm = Grace not learned. Reference search: server DBC (Dawnsear 554406 Description coefficient 0.765222; measured level matches either 0.765222 or the server table's 1.0 inside the band); nothing else found."
   },
   {
     "spell": 504070,
