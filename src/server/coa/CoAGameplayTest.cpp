@@ -8498,11 +8498,29 @@ private:
         {
             Pet* pet = player->GetPet();
             Require(pet != nullptr, "Pet autocast request needs a current pet");
-            WorldPacket packet(CMSG_PET_SPELL_AUTOCAST, 13);
-            packet << pet->GetGUID() << spell << step.get<bool>("enabled");
-            WorldPackets::Pet::PetSpellAutocast request(std::move(packet));
-            request.Read();
-            player->GetSession()->HandlePetSpellAutocastOpcode(request);
+            bool const enabled = step.get<bool>("enabled");
+            if (step.get<std::string>("via", "autocast") == "set_action")
+            {
+                CharmInfo* charmInfo = pet->GetCharmInfo();
+                Require(charmInfo != nullptr, "Pet action bar request needs charm info");
+                uint32 slot = MAX_UNIT_ACTION_BAR_INDEX;
+                for (uint32 index = 0; index < MAX_UNIT_ACTION_BAR_INDEX; ++index)
+                    if (charmInfo->GetActionBarEntry(index)->GetAction() == spell)
+                        slot = index;
+                Require(slot < MAX_UNIT_ACTION_BAR_INDEX, "Pet action bar does not hold the spell");
+                WorldPacket packet(CMSG_PET_SET_ACTION, 16);
+                packet << pet->GetGUID() << slot
+                       << uint32(MAKE_UNIT_ACTION_BUTTON(spell, enabled ? ACT_ENABLED : ACT_DISABLED));
+                player->GetSession()->HandlePetSetAction(packet);
+            }
+            else
+            {
+                WorldPacket packet(CMSG_PET_SPELL_AUTOCAST, 13);
+                packet << pet->GetGUID() << spell << enabled;
+                WorldPackets::Pet::PetSpellAutocast request(std::move(packet));
+                request.Read();
+                player->GetSession()->HandlePetSpellAutocastOpcode(request);
+            }
         }
         else if (action == "trainer_buy")
         {

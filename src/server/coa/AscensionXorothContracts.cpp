@@ -81,6 +81,8 @@ void ApplyContracts(SpellInfo* info)
             info->ProcFlags = 0;
             info->ProcCharges = 0;
         }
+    if (Named(info, 800340))
+        info->AscensionFlatAfterWeaponPercent = true;
     if (id == 680197)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;

@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Stormbringer Air Elemental closes to melee when the action bar turns Windpelt off (#12871)",
+  "contract": [
+    "#12871 follow-up: the Air Elemental's chase range comes from Windpelt 806016 autocast, and the chase is",
+    "reissued whenever that autocast changes. Autocast changes reach the pet through two client paths:",
+    "CMSG_PET_SPELL_AUTOCAST (covered by stormbringer-air-elemental-holds-range-12871) and CMSG_PET_SET_ACTION,",
+    "the pet action bar. This scenario drives the action bar path. The target stands 20 yards from the stationary",
+    "Stormbringer, inside Windpelt's 30-yard range: with Windpelt on autocast the pet casts it while staying",
+    "within 6 yards of its owner. Turning Windpelt off through CMSG_PET_SET_ACTION mid-fight must reissue the",
+    "active chase at melee range, so the pet leaves its owner and closes on the target (more than 14 yards from",
+    "the owner)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 40,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 40,
+      "health": 10000000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804019
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804019
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Air Elemental is out",
+      "actor": "s",
+      "metric": "pet_entry",
+      "equals": 500941,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Air Elemental knows Windpelt",
+      "actor": "s",
+      "metric": "pet_knows_spell",
+      "spell": 806016,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "pet_autocast",
+      "actor": "s",
+      "spell": 806016,
+      "enabled": true,
+      "label": "Windpelt on autocast"
+    },
+    {
+      "action": "wait",
+      "label": "Let the pet settle beside its owner",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pet starts beside its owner, 20 yards from the target",
+      "actor": "s",
+      "metric": "pet_distance",
+      "max": 6
+    },
+    {
+      "action": "attack",
+      "actor": "s",
+      "target": "e",
+      "pet": true,
+      "label": "Send the Air Elemental to attack"
+    },
+    {
+      "action": "assert",
+      "label": "The Air Elemental casts Windpelt",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806016,
+      "pet": true,
+      "target": "e",
+      "min": 2,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "#12871: the target is in Windpelt range, so the pet never moved toward it",
+      "actor": "s",
+      "metric": "pet_distance",
+      "max": 6
+    },
+    {
+      "action": "pet_autocast",
+      "actor": "s",
+      "spell": 806016,
+      "enabled": false,
+      "via": "set_action",
+      "label": "Turn Windpelt autocast off from the pet action bar mid-fight"
+    },
+    {
+      "action": "assert",
+      "label": "The action bar toggle also reissues the chase, so the pet closes to melee",
+      "actor": "s",
+      "metric": "pet_distance",
+      "min": 14,
+      "within_ms": 8000
+    }
+  ]
+}

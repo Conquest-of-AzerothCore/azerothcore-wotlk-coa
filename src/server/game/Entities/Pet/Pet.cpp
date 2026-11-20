@@ -16,6 +16,7 @@
  */
 
 #include "Pet.h"
+#include "PetAI.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
 #include "CharmInfo.h"
@@ -2302,6 +2303,11 @@ void Pet::ToggleAutocast(SpellInfo const* spellInfo, bool apply)
             }
         }
     }
+
+    // CoA: Windpelt's autocast decides whether the Air Elemental chases to range or into melee
+    if (spellInfo->Id == COA_AIR_ELEMENTAL_WINDPELT && GetStockPetEntry(GetEntry()) == ENTRY_COA_AIR_ELEMENTAL)
+        if (PetAI* ai = dynamic_cast<PetAI*>(AI()))
+            ai->RefreshChaseRange();
 }
 
 bool Pet::IsPermanentPetFor(Player* owner) const
