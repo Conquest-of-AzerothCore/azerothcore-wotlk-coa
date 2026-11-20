@@ -3292,27 +3292,60 @@
   {
     "spell": 806021,
     "clause": "Casting Dawnsear and Sunflare now have a $h% chance to grant Scorch Marks for $807059d.",
-    "labels": [
-      "806021 effect_value #0",
-      "806021 spell_duration 807059 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "casting Sunflare has a 40% chance to grant Scorch Marks",
+        "labels": [
+          "806021 proc_rate"
+        ]
+      },
+      {
+        "claim": "casting Dawnsear has a 40% chance to grant Scorch Marks",
+        "labels": []
+      },
+      {
+        "claim": "Scorch Marks lasts 10 s",
+        "labels": [
+          "806021 behaviour_metric_delta scorch_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Duration pair 20261120-205725 / 20261120-205757 (Sun Ray 504764 grants Scorch Marks for real, control = no cast). Dawnsear half has no entry: two proc entries of one aura and proc spell share a label."
   },
   {
     "spell": 806021,
     "clause": "Your next Radiant Flame has no mana cost, ticks $s2% faster,",
-    "labels": [
-      "806021 effect_value 807059e1 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your next Radiant Flame has no mana cost",
+        "labels": [
+          "806021 behaviour_metric_delta free_cast"
+        ]
+      },
+      {
+        "claim": "ticks 50% faster",
+        "labels": [
+          "806021 behaviour_metric_delta faster_ticks"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261120-205725 / 20261120-205757, control = Radiant Flame without Scorch Marks. Scorch Marks granted by a real Sun Ray cast (a set_aura fixture reproduced the cost but not the duration). faster_ticks alert: median interval 985 / 969 ms against 1000 before, 500 expected: fix note in the report."
   },
   {
     "spell": 806021,
     "clause": "and its duration is reduced by $s1%.",
-    "labels": [
-      "806021 effect_value 807059e0 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "its duration is reduced by 50%",
+        "labels": [
+          "806021 behaviour_metric_delta shorter_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261120-205725 / 20261120-205757: Radiant Flame aura 3941 / 3941 ms without, 1944 / 1940 with Scorch Marks (real Sun Ray grant)."
   },
   {
     "spell": 806024,

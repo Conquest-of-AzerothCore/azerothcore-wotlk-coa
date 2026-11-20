@@ -456,6 +456,110 @@
       "expected": 1,
       "wait_ms": 1150,
       "observe_source": "Same events 1150 ms after the cast: exactly 1 (the delay is at most 1.15 s, excludes 1100 ms, +10%). Before the learn: 0."
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame costs no mana)",
+      "variant": "free_cast",
+      "label_suffix": "free_cast",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "before_expected": 660,
+      "expected": 919,
+      "observe_source": "Power set to 1000 before each cast, regeneration off. Without Scorch Marks Radiant Flame spends 25 x 1363 / 100 = 340 mana (660 left). With it, the setup Sun Ray 504764 (6% of base mana: 6 x 1363 / 100 = 81, 919 left) grants Scorch Marks for real, and Radiant Flame then costs nothing: 919. 807059 Effect[2] SPELLMOD op 14 -100% on Radiant Flame 806060 (class mask 134217728). Control = the before phase without Scorch Marks.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 5000,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame ticks 50% faster)",
+      "variant": "faster_ticks",
+      "label_suffix": "faster_ticks",
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 807058,
+        "caster": "caster",
+        "target": "dummy"
+      },
+      "cast_power": 1000,
+      "before_expected": 1000,
+      "expected": 500,
+      "tolerance": 50,
+      "observe_source": "Median interval between the damage events of 807058 (the trigger of 806060): 1000 ms without Scorch Marks, 500 ms with it (ticks 50% faster), within 50 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is set on the caster by the harness (precondition fixture, set_aura): the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 50,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame lasts 50% less)",
+      "variant": "shorter_duration",
+      "label_suffix": "shorter_duration",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 806060
+      },
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "before_expected": 3944,
+      "expected": 1944,
+      "tolerance": 100,
+      "observe_source": "Remaining duration of the Radiant Flame aura on the dummy 50 ms after the cast: 4000 - 50 without Scorch Marks, 2000 - 50 with it, within 100 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is set on the caster by the harness (precondition fixture, set_aura): the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "name": "Searing Light (Scorch Marks duration)",
+      "variant": "scorch_duration",
+      "label_suffix": "scorch_duration",
+      "trigger_spell": 504764,
+      "target": "dummy",
+      "cast_power": 1000,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 807059
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 9950,
+      "tolerance": 100,
+      "wait_ms": 50,
+      "expire_ms": 500,
+      "observe_source": "$807059d = 10000 ms. Sun Ray 504764 grants Scorch Marks 807059 on the caster by script (AscensionSunClericAbilities.cpp:215-216); the remaining duration on the caster 50 ms after the cast reads 9950 within 100 ms (excludes 10% either side). Control: no cast, no aura, 0. The 40% chance roll itself is the proc entry."
     }
   ],
   "player_observations": [],
