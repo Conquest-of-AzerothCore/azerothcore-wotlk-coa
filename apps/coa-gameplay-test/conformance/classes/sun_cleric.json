@@ -1047,6 +1047,823 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 570120,
+      "name": "Solar Might (Strength)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases your Strength and Intellect by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 570120,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 40,
+      "expected": 44.0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "570120 Solar Might: Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), Effect[1] the same with MiscValue 3 (Intellect), BasePoints 9 (+1 = 10, $s1). The caster's Strength read before and after the passive is learned (a real learn; the before arm is the control without it). Reference stat 0 40 (class file reference_stats), expected 40 x 1.10 = 44; tolerance 1 for the integer rounding of the stat read. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 570120,
+      "name": "Solar Might (Intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases your Strength and Intellect by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 570120,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 119,
+      "expected": 130.9,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "570120 Solar Might: Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), Effect[1] the same with MiscValue 3 (Intellect), BasePoints 9 (+1 = 10, $s1). The caster's Intellect read before and after the passive is learned (a real learn; the before arm is the control without it). Reference stat 3 119 (class file reference_stats), expected 119 x 1.10 = 130.9; tolerance 1 for the integer rounding of the stat read. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300327,
+      "name": "Swift Justice (melee haste)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 300327,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "expected": 2169.8113,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300327 Swift Justice Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 5 (+1 = 6, $s1). The main-hand attack time of the reference weapon 2027 (2300 ms, class file weapon) before and after the passive is learned: 2300 / 1.06 = 2169.8113 ms; tolerance 1 ms. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300327,
+      "name": "Swift Justice (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 300327,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.943396,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300327 Swift Justice Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 5 (+1 = 6, $s1). The caster's cast speed multiplier (UNIT_MOD_CAST_SPEED) before and after the passive is learned: 1 / 1.06 = 0.943396. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 807964,
+      "name": "Soul of Light (An'she's Blessing cooldown)",
+      "kind": "metric_delta",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of An'she's Blessing by $/1000;s1 sec",
+      "trigger_spell": 804058,
+      "gate_spell": 807964,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 804058
+      },
+      "before_expected": 120000,
+      "expected": 60000,
+      "expected_gain": -60000,
+      "tolerance": 600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807964 Soul of Light Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (cooldown), BasePoints -60001 (-60000 ms, $/1000;s1 = 60 s), class mask word 1 = 33554432 = An'she's Blessing 804058's SpellFamilyFlags[1] (RecoveryTime 180000). An'she's Blessing is cast in both phases and its remaining cooldown read right after; the gain is the difference of the two phases (-60000, tolerance 600), the before reading must reach 120000 so that no floor hides it. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300318,
+      "name": "Light's Blessing (Pendant of the Sun cooldown)",
+      "kind": "metric_delta",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Casting Sunslam now reduces the cooldown of Pendant of the Sun by $/1000;570145s2 sec.",
+      "trigger_spell": 805629,
+      "gate_spell": 300318,
+      "setup_casts": [
+        680630
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680630
+      },
+      "before_expected": 40000,
+      "expected": 30000,
+      "expected_gain": -10000,
+      "tolerance": 600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300318 Light's Blessing Effect[0] PROC_TRIGGER_SPELL 570145; 570145 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -10001 (-10000 ms, $/1000;570145s2 = 10 s), MiscValue 680630 Pendant of the Sun (RecoveryTime 60000). Pendant of the Sun is cast first in both phases, then Sunslam 805629; Pendant's remaining cooldown is read right after. The gain is the difference of the two phases (-10000, tolerance 600); the before reading must reach 40000. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Sunslam targets an enemy (a cast at the caster fails with reason 12, SPELL_FAILED_BAD_TARGETS, in the first run), so the trigger is cast at the dummy and Pendant of the Sun at the caster.",
+      "setup_target": "caster"
+    },
+    {
+      "spell": 707414,
+      "name": "It's Always Sunny (Radiance cooldown)",
+      "kind": "metric_delta",
+      "variant": "radiance",
+      "label_suffix": "radiance",
+      "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 707414,
+      "target": "dummy",
+      "setup_casts": [
+        800054
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 99600,
+      "expected": 89640.0,
+      "expected_ratio": 0.9,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Radiance (120000 ms cooldown) is cast first in both phases, then Dawn 804584 with 20 Solar Power 500149 (a precondition fixture by harness set_aura) activates Dawn; the remaining cooldown of Radiance is read right after. The reading after the passive is learned is judged as a ratio of the reading before it (0.9, tolerance 0.01); the before reading must reach 99600. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Whether the 10% is of the remaining or of the full cooldown the tooltip does not say; the two differ by less than the tolerance here. Dawn lasts 60000 ms (DurationIndex 3) and the toggle of 804584 cancels it, so the pause between the phases is 61000 ms: the second phase starts without Dawn, as the first (the first run read Dawn gone after the second cast, a diagnostic probe, because the second cast cancelled the first phase's Dawn)."
+    },
+    {
+      "spell": 707414,
+      "name": "It's Always Sunny (Valkyr's Calling cooldown)",
+      "kind": "metric_delta",
+      "variant": "valkyrs_calling",
+      "label_suffix": "valkyrs_calling",
+      "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 707414,
+      "target": "dummy",
+      "setup_casts": [
+        520024
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 520024
+      },
+      "before_expected": 149400,
+      "expected": 134460.0,
+      "expected_ratio": 0.9,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Valkyr's Calling (180000 ms cooldown) is cast first in both phases, then Dawn 804584 with 20 Solar Power 500149 (a precondition fixture by harness set_aura) activates Dawn; the remaining cooldown of Valkyr's Calling is read right after. The reading after the passive is learned is judged as a ratio of the reading before it (0.9, tolerance 0.01); the before reading must reach 149400. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Whether the 10% is of the remaining or of the full cooldown the tooltip does not say; the two differ by less than the tolerance here. Dawn lasts 60000 ms (DurationIndex 3) and the toggle of 804584 cancels it, so the pause between the phases is 61000 ms: the second phase starts without Dawn, as the first (the first run read Dawn gone after the second cast, a diagnostic probe, because the second cast cancelled the first phase's Dawn)."
+    },
+    {
+      "spell": 707414,
+      "name": "It's Always Sunny (Sunslam cooldown)",
+      "kind": "metric_delta",
+      "variant": "sunslam",
+      "label_suffix": "sunslam",
+      "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 707414,
+      "target": "dummy",
+      "setup_casts": [
+        805629,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 805629
+      },
+      "before_expected": 36000,
+      "expected": 32400.0,
+      "expected_ratio": 0.9,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (45000 ms cooldown) is cast first in both phases, then Dawn 804584 with 20 Solar Power 500149 (a precondition fixture by harness set_aura) activates Dawn; the remaining cooldown of Sunslam is read right after. The reading after the passive is learned is judged as a ratio of the reading before it (0.9, tolerance 0.01); the before reading must reach 36000. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC. Whether the 10% is of the remaining or of the full cooldown the tooltip does not say; the two differ by less than the tolerance here."
+    },
+    {
+      "spell": 804269,
+      "name": "Solemn Priest (melee attack power)",
+      "kind": "metric_delta",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "Increases your melee attack power by $s1% of your Intellect",
+      "trigger_spell": 804247,
+      "gate_spell": 804269,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 70,
+      "expected": 218.75,
+      "expected_gain": 148.75,
+      "tolerance": 1.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804269 Solemn Priest Effect[0] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 3 (Intellect), BasePoints 124 (+1 = 125, $s1). The caster's melee attack power before and after the passive is learned: reference attack power 70 (class file reference_stats), Intellect 119, gain 1.25 x 119 = 148.75; tolerance 1.5 for the integer rounding of the read. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC (the community snapshots carry the spell name only)."
+    },
+    {
+      "spell": 804269,
+      "name": "Solemn Priest (attack power follows Intellect)",
+      "kind": "metric_delta",
+      "variant": "attack_power_int",
+      "label_suffix": "attack_power_int",
+      "quote": "Increases your melee attack power by $s1% of your Intellect",
+      "trigger_spell": 804247,
+      "gate_spell": 804269,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 70,
+      "expected": 278.75,
+      "expected_gain": 208.75,
+      "tolerance": 1.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "As attack_power, with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119, as the Solar Discernment entries measured): the gain is 1.25 x 167 = 208.75, so the 125% is of Intellect, not a flat value. Control: the phase without the passive."
+    },
+    {
+      "spell": 805816,
+      "name": "Valkyrie's Watch (damage taken while below 35% health)",
+      "kind": "taken_hit",
+      "variant": "below",
+      "label_suffix": "below",
+      "judge": "damage_ratio",
+      "expected": 0.75,
+      "quote": "and damage taken while below 35% health is reduced by $s1%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 20,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805816 Valkyrie's Watch (a passive; Effect[0] SCHOOL_ABSORB dummied by AscensionSunClericContracts.cpp, BasePoints 24 (+1 = 25, $s1)). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the damage taken is judged against 0.75 (25% less). The caster holds 20% of 100000 health before every strike: 20000 health, already below 35%, 1100 damage leaves it below. Reference search: the community snapshot repeats the tooltip, nothing found on how the 35% threshold is read. The health the caster loses to each strike is read (health_loss), not the logged damage: the first run read 1100 logged in every arm, because the passive's OnDamage hook lowers the damage after the log is built.",
+      "health_loss": true
+    },
+    {
+      "spell": 805816,
+      "name": "Valkyrie's Watch (damage that would take you below 35% health)",
+      "kind": "taken_hit",
+      "variant": "crossing",
+      "label_suffix": "crossing",
+      "judge": "damage_ratio",
+      "expected": 0.75,
+      "quote": "Damage that would take you below 35% health",
+      "strike_spell": 41394,
+      "caster_health_pct": 35,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805816 Valkyrie's Watch (a passive; Effect[0] SCHOOL_ABSORB dummied by AscensionSunClericContracts.cpp, BasePoints 24 (+1 = 25, $s1)). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the damage taken is judged against 0.75. The caster holds 35% of 100000 health before every strike: 35% is 35000: at exactly 35000 health a 1100 strike leaves 33900, below the threshold, so the strike itself is reduced. Reference search: the community snapshot repeats the tooltip, nothing found on how the 35% threshold is read. The health the caster loses to each strike is read (health_loss), not the logged damage: the first run read 1100 logged in every arm, because the passive's OnDamage hook lowers the damage after the log is built.",
+      "health_loss": true
+    },
+    {
+      "spell": 805816,
+      "name": "Valkyrie's Watch (control: damage that stays above 35% health)",
+      "kind": "taken_hit",
+      "variant": "above",
+      "label_suffix": "above",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "and damage taken while below 35% health is reduced by $s1%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 60,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805816 Valkyrie's Watch (a passive; Effect[0] SCHOOL_ABSORB dummied by AscensionSunClericContracts.cpp, BasePoints 24 (+1 = 25, $s1)). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the damage taken is judged against 1.0 (no reduction). The caster holds 60% of 100000 health before every strike: 60000 health, a 1100 strike leaves it far above 35%, so the passive must not reduce it (the contrast arm of the threshold). Reference search: the community snapshot repeats the tooltip, nothing found on how the 35% threshold is read. The health the caster loses to each strike is read (health_loss), not the logged damage: the first run read 1100 logged in every arm, because the passive's OnDamage hook lowers the damage after the log is built.",
+      "health_loss": true
+    },
+    {
+      "spell": 707077,
+      "name": "Faith (target's Armor)",
+      "kind": "metric_delta",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
+      "trigger_spell": 500143,
+      "gate_spell": 707077,
+      "target": "caster",
+      "cast_power": 1360,
+      "caster_health_pct": 50,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 50,
+      "expected": 55,
+      "expected_ratio": 1.1,
+      "tolerance": 0.02,
+      "wait_ms": 2600,
+      "expire_ms": 23000,
+      "observe_source": "707077 Faith Effect[0] PROC_TRIGGER_SPELL 804405 (AscensionSunClericEvents.cpp:318 casts 804405 at the target of a direct heal); 804405 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints 9 (+1 = 10, $804405s1), target ally. Illumination 500143 (a direct heal) is cast on the caster at 50% health in both phases; 707077 is learned between them. The caster's armor is read after each phase and judged as a ratio of the first reading (1.10, tolerance 0.02 = the 2-point band); the before reading must reach 50. Control: the phase without the passive. Pause 21000 ms between the phases so that the aura of the first phase cannot leak. Reference search: the community snapshot repeats the tooltip, nothing else found. Illumination has a 2000 ms cast time (CastingTimes 5), so the heal and Faith land 2000 ms after the cast starts: the armor is read 2600 ms after it (the first run read at 500 ms, before the heal, 83 and 83)."
+    },
+    {
+      "spell": 707077,
+      "name": "Faith (lasts 20 s)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
+      "trigger_spell": 500143,
+      "gate_spell": 707077,
+      "target": "caster",
+      "cast_power": 1360,
+      "caster_health_pct": 50,
+      "metric": "aura",
+      "fields": {
+        "spell": 804405
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 21300,
+      "expiry_wait_ms": 1500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          21000,
+          21600
+        ],
+        "expired": [
+          22400,
+          23000
+        ]
+      },
+      "observe_source": "804405 DurationIndex 18 (20000 ms, $804405d). One real Illumination 500143 on the caster at 50% health with Faith learned at the start; the cast time is 2000 ms (CastingTimes 5), so Faith lands about 2000 ms after the cast starts (the first run, windows 19000..21000, still read the aura at 20818 ms). The aura 804405 is present when read 21000..21600 ms after the cast starts and gone when read 22400..23000 ms after it, that is about 19000..19600 and 20400..21000 ms after it landed: the duration lies between 19000 and 21000 plus the landing delay, inside 10% of 20000 (18000..22000) on both sides. Control (before): no cast, absent."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Dawnsear cast still running at 3090 ms)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_held",
+      "label_suffix": "dawnsear_held",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 3090,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          3085,
+          3140
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Dawnsear has a 3500 ms cast time (CastingTimes), 10% less is 3150 ms; the percent band (2 points) is 3080..3220 ms. The caster's cast is read still running at 3090 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 3500 ms). Still running at 3090 ms: the cast is longer than 3080 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Dawnsear cast done at 3210 ms)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_done",
+      "label_suffix": "dawnsear_done",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 3210,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          3200,
+          3220
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Dawnsear has a 3500 ms cast time (CastingTimes), 10% less is 3150 ms; the percent band (2 points) is 3080..3220 ms. The caster's cast is read finished at 3210 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 3500 ms). Finished by 3210 ms: the cast is shorter than 3220 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Sunflare cast still running at 1770 ms)",
+      "kind": "metric_delta",
+      "variant": "sunflare_held",
+      "label_suffix": "sunflare_held",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1770,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1765,
+          1810
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Sunflare has a 2000 ms cast time (CastingTimes), 10% less is 1800 ms; the percent band (2 points) is 1760..1840 ms. The caster's cast is read still running at 1770 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 2000 ms). Still running at 1770 ms: the cast is longer than 1760 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Sunflare cast done at 1830 ms)",
+      "kind": "metric_delta",
+      "variant": "sunflare_done",
+      "label_suffix": "sunflare_done",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1830,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1820,
+          1840
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Sunflare has a 2000 ms cast time (CastingTimes), 10% less is 1800 ms; the percent band (2 points) is 1760..1840 ms. The caster's cast is read finished at 1830 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 2000 ms). Finished by 1830 ms: the cast is shorter than 1840 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Dawnsear mana spent)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_cost",
+      "label_suffix": "dawnsear_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1158.55,
+      "expected": 1178.99,
+      "tolerance": 1.5,
+      "wait_ms": 4200,
+      "expire_ms": 4500,
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Dawnsear costs 15% of the class base mana 1363 (player_class_stats class 27 level 60 BaseMana), 204.45; 10% less is 184.005. Mana is set to 1363 before the cast, regeneration off, and read after the cast completes: 1158.55 without the passive (control phase), 1178.99 with it; tolerance 1.5 for the integer cost. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Sunflare mana spent)",
+      "kind": "metric_delta",
+      "variant": "sunflare_cost",
+      "label_suffix": "sunflare_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1226.7,
+      "expected": 1240.33,
+      "tolerance": 1.5,
+      "wait_ms": 2500,
+      "expire_ms": 4500,
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Sunflare costs 10% of the class base mana 1363 (player_class_stats class 27 level 60 BaseMana), 136.3; 10% less is 122.67. Mana is set to 1363 before the cast, regeneration off, and read after the cast completes: 1226.7 without the passive (control phase), 1240.33 with it; tolerance 1.5 for the integer cost. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (disarm lasts 6 s)",
+      "kind": "metric_delta",
+      "variant": "disarm_duration",
+      "label_suffix": "disarm_duration",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804057,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). The aura 804057 on the dummy (Harvest Golem 36, immunity set -93 = fear and horror only) is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it: the duration lies in 5500..6500, inside 10% of 6000 (5400..6600) on both sides. Control (before): no cast, absent.",
+      "wait_ms": 5700,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          5500,
+          5900
+        ],
+        "expired": [
+          6100,
+          6500
+        ]
+      }
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Undead pacified and rooted 6 s)",
+      "kind": "metric_delta",
+      "variant": "undead_duration",
+      "label_suffix": "undead_duration",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Brittlebones Skeleton 201 (type 6 Undead, immunity set -93 = fear and horror only): the aura 807778 is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it, inside 10% of 6000 on both sides. Control (before): no cast, absent.",
+      "target_entry": 201,
+      "wait_ms": 5700,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          5500,
+          5900
+        ],
+        "expired": [
+          6100,
+          6500
+        ]
+      }
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Demon pacified and rooted)",
+      "kind": "metric_delta",
+      "variant": "demon_effect",
+      "label_suffix": "demon_effect",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Imp 416 (type 3 Demon, no immunities): the aura 807778 is present 1000 ms after the cast. Control (before): no cast, absent.",
+      "target_entry": 416,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Humanoid not pacified)",
+      "kind": "metric_delta",
+      "variant": "humanoid_unaffected",
+      "label_suffix": "humanoid_unaffected",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Control for the Undead and Demon clause: Kobold Vermin 6 (type 7 Humanoid, no immunities) is disarmed by the same cast (the disarm_humanoid entry) but the aura 807778 reads 0 1000 ms after it.",
+      "target_entry": 6,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Humanoid disarmed)",
+      "kind": "metric_delta",
+      "variant": "disarm_humanoid",
+      "label_suffix": "disarm_humanoid",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804057,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Kobold Vermin 6 (type 7 Humanoid): the disarm aura 804057 is present 1000 ms after the cast; the pairing arm of the humanoid_unaffected control. Control (before): no cast, absent.",
+      "target_entry": 6,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (silence-immune enemy not affected)",
+      "kind": "metric_delta",
+      "variant": "silence_immune",
+      "label_suffix": "silence_immune",
+      "quote": "Enemies that are immune to silence effects cannot be affected by this.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804057,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543 (Undead, level 34, creature_immunities -273, MechanicsMask 1234599606 = 0x24CB3F5B, which lists SILENCE and not DISARM; the first run used 11446 Gordok Spirit by a wrong join, its immunity set -96 is fear and horror only): the aura 804057 reads 0 1000 ms after the cast, while the same Undead type Brittlebones Skeleton 201, not silence immune, carries 807778 (undead_duration) and a disarm. Control arm: undead_duration and disarm_humanoid show the cast lands on enemies without the immunity.",
+      "target_entry": 4543,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (silence-immune enemy not pacified)",
+      "kind": "metric_delta",
+      "variant": "silence_immune_pacify",
+      "label_suffix": "silence_immune_pacify",
+      "quote": "Enemies that are immune to silence effects cannot be affected by this.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543, as silence_immune: the aura 807778 reads 0 1000 ms after the cast although it is an Undead (the control of undead_duration, 201, carries it).",
+      "target_entry": 4543,
+      "wait_ms": 1000
     }
   ],
   "player_observations": [],
