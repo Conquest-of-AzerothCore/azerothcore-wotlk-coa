@@ -1564,7 +1564,8 @@
     "spell": 680641,
     "clause": "stacking up to $680642u times.",
     "labels": [
-      "680641 max_stacks 680642 #2"
+      "680641 behaviour_metric_delta stack_one",
+      "680641 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },

@@ -423,6 +423,73 @@
         "amount": 20000,
         "hit_arm": true
       }
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Gavel)",
+      "variant": "stack_one",
+      "label_suffix": "stack_one",
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); 680642 StackAmount 3 (Spell.dbc). Gavel of Wrath 802561 (rank 58, SpellFamilyName 33) cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crits without the passive, 0 stacks). One forced crit: 1 stack."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (four critical Gavels cap at three)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "expected": 3,
+      "setup_casts": [
+        802561,
+        802561,
+        802561
+      ],
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); 680642 StackAmount 3 (Spell.dbc). Gavel of Wrath 802561 (rank 58, SpellFamilyName 33) cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crits without the passive, 0 stacks). Four forced crits: the stacks read 3, not 4 (the stated cap)."
     }
   ],
   "player_observations": [],
