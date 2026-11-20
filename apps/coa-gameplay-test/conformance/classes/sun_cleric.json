@@ -48,8 +48,12 @@
   },
   "log_queries": {},
   "off_hand_weapons": [],
-  "known_auras": [],
-  "probe_auras": [],
+  "known_auras": [
+    887015
+  ],
+  "probe_auras": [
+    49152
+  ],
   "extra_spells": [],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
@@ -953,7 +957,6 @@
     "704942": "Valkyr",
     "704947": "Valkyr",
     "706735": "Blessings",
-    "707072": "Valkyr",
     "707077": "Blessings",
     "707078": "Seraphim",
     "707079": "Seraphim",
@@ -1030,5 +1033,10 @@
     "807972": "Valkyr",
     "807973": "Valkyr",
     "807974": "Valkyr"
+  },
+  "weapon_set_spells": {
+    "Valkyr": [
+      707072
+    ]
   }
 }
