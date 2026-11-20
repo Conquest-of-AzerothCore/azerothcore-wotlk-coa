@@ -1,9 +1,9 @@
 # Server-sent interface Lua
 
 Some features send interface Lua to the client: the Manastorm UI fixes and the Fel Commutation
-window at login (`Manastorm.ClientUIFixes`), and the Extra Quests window once a quest goes past the
-25-slot log (`Quests.LogSize`). Each builds an `AscensionClientLuaChunk` and calls `RunAscensionClientLua`
-(`src/server/coa/AscensionClientLua.{h,cpp}`).
+window at login (`Manastorm.ClientUIFixes`), the Extra Quests window once a quest goes past the
+25-slot log (`Quests.LogSize`), and the Stone of Retreat map buyer at login. Each builds an
+`AscensionClientLuaChunk` and calls `RunAscensionClientLua` (`src/server/coa/AscensionClientLua.{h,cpp}`).
 
 ## Only the hot-patch channel
 
@@ -13,7 +13,8 @@ and was triggered by completing a fake criterion of challenge 5 ("Partner Up!").
 gone: hot-patch clients refuse such rows, so on them it ran nothing and left a stray
 "Partner Up! <token> Completed!" banner. Clients without the channel, including the genuine
 Ascension DLL, receive no interface Lua, so the Fel Commutation window, the Manastorm UI fixes,
-the Extra Quests window and the Bazaar Token cap quest rewards are unavailable to them.
+the Extra Quests window, the Bazaar Token cap quest rewards and the Stone of Retreat map buyer
+are unavailable to them.
 
 The `RequirementTypeId` and `RequirementId` of a chunk are unused by the sender. The
 `.clientpush reqtype` GM command still sends a raw `0x5BC` formatter row on request,
