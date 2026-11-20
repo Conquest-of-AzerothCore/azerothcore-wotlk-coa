@@ -1096,6 +1096,77 @@
       "kind": "single_target",
       "quote": "Can only affect 1 ally at a time.",
       "observe_source": "Bless 804247 is cast on a first grouped ally, then on a second: the aura must leave the first ally and sit on the second, as for any single-target aura."
+    },
+    {
+      "spell": 707773,
+      "name": "Vindicator (armor ignored)",
+      "kind": "metric_delta",
+      "variant": "armor_ignore",
+      "label_suffix": "armor_ignore",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "trigger_spell": 800626,
+      "gate_spell": 707773,
+      "setup_actor_aura": 807749,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "armor_reduced_damage",
+      "fields": {
+        "spell": 800626,
+        "target": "dummy"
+      },
+      "before_expected": 913,
+      "expected": 929,
+      "tolerance": 1,
+      "observe_source": "Vindicator 707773 Effect[0] aura 107 SPELLMOD_FLAT, MiscValue 12 (SPELLMOD_IGNORE_ARMOR) on Glorious Execution 800626, BasePoints -21 (-20 as read), applied only while Vow of the Valkyr 807749 is active (AscensionSunClericRadiance.cpp:41-81). Glorious Execution 800626 is read with the engine's own Unit::CalcArmorReducedDamage (armor_reduced_damage, damage left of 1000 after armor) against the harness dummy; Vow of the Valkyr is raised by set_aura in both phases as a precondition fixture (the claim's subject is the armor ignore, not the Vow). The dummy's armor is not in the data, so the before read (913, the control without 707773) fixes it: damage left = 1/(1+t), t = 0.1 x armor / (8.5 x 64.5 + 40) at attacker level 60 (Unit.cpp:2536-2542), armor 557-564. Ignoring 20% leaves armor 446-451 and 929-930 of 1000; 15% would read 925 and 25% 933, outside the tolerance of 1."
+    },
+    {
+      "spell": 680618,
+      "name": "Gift of the Sun (Holy critical chance above 80% health)",
+      "kind": "metric_delta",
+      "variant": "above",
+      "label_suffix": "above",
+      "quote": "Increases your critical strike chance with Holy spells and abilities by $s1% on enemies above 80% health.",
+      "trigger_spell": 500154,
+      "gate_spell": 680618,
+      "target": "dummy",
+      "target_health_pct": 99,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 4.6781,
+      "expected": 54.6781,
+      "tolerance": 0.05,
+      "observe_source": "Gift of the Sun 680618 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, BasePoints 49 (50 as read), scripted in AscensionSunClericAbilities.cpp:163-164 and AscensionSunClericContracts.cpp:167. Horusath Blast 500154 (Holy) is read with the engine's own SpellDoneCritChance plus the script hook (spell_done_crit_chance_scripted) against the dummy, whose health is set to 99% before the read (the cast is made after the set, so the set only lowers). The before read is the control without 680618 and fixes the base chance of the reference character (4.6781); the claim is the difference of +50 above 80% health.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 680618,
+      "name": "Gift of the Sun (no bonus at or below 80% health)",
+      "kind": "metric_delta",
+      "variant": "below",
+      "label_suffix": "below",
+      "quote": "Increases your critical strike chance with Holy spells and abilities by $s1% on enemies above 80% health.",
+      "trigger_spell": 500154,
+      "gate_spell": 680618,
+      "target": "dummy",
+      "target_health_pct": 50,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 4.6781,
+      "expected": 4.6781,
+      "tolerance": 0.05,
+      "observe_source": "Gift of the Sun 680618 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, BasePoints 49 (50 as read), scripted in AscensionSunClericAbilities.cpp:163-164 and AscensionSunClericContracts.cpp:167. Horusath Blast 500154 (Holy) is read with the engine's own SpellDoneCritChance plus the script hook (spell_done_crit_chance_scripted) against the dummy, whose health is set to 50% before the read (the cast is made after the set, so the set only lowers). The before read is the control without 680618 and fixes the base chance of the reference character (4.6781); the claim is the difference of +50 is absent at 50% health, which is at or below 80%.",
+      "cast_in_before": false
     }
   ],
   "player_observations": [],
