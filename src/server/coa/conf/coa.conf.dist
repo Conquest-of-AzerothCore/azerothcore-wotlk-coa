@@ -55,8 +55,9 @@ CoA.LevelBoostNpc.RuneOfDescensionReward = 2000000
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
-# Realm Bound Bazaar Tokens from the Elite Warchest (2977351). The 1500 Bazaar Tokens (975001) it holds are
-# counted as a per-account reserve: purchases use the reserve first, and tokens can only be traded, mailed to
+# Realm Bound Bazaar Tokens from the Elite Warchest (2977351) and the Daily Login Reward. The 1500 Bazaar Tokens
+# (975001) the warchest holds and the reward's tokens are counted as a per-account reserve: purchases use the
+# reserve first, and tokens can only be traded, mailed to
 # another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
 # the account's own characters is free. Farmed tokens above the reserve stay tradeable.
 CoA.BazaarTokens.WarchestRealmBound = 1
