@@ -1445,7 +1445,8 @@
     "spell": 680618,
     "clause": "Increases your critical strike chance with Holy spells and abilities by $s1% on enemies above 80% health.",
     "labels": [
-      "680618 effect_value e0 #0"
+      "680618 behaviour_metric_delta above",
+      "680618 behaviour_metric_delta below"
     ],
     "kind": "claim"
   },
@@ -2529,7 +2530,7 @@
     "spell": 707773,
     "clause": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
     "labels": [
-      "707773 effect_value e0 #0"
+      "707773 behaviour_metric_delta armor_ignore"
     ],
     "kind": "claim"
   },
@@ -2739,7 +2740,9 @@
   {
     "spell": 804247,
     "clause": "Bless yourself and an ally, restoring 5% of their maximum health",
-    "labels": [],
+    "labels": [
+      "804247 behaviour_metric_delta health_tick"
+    ],
     "kind": "claim",
     "dbc_clause": "Bless yourself and an ally, restoring $s1% of their maximum health",
     "text_source": {
@@ -2756,7 +2759,9 @@
   {
     "spell": 804247,
     "clause": "and 1% of your maximum mana every 10 sec for 5 min.",
-    "labels": [],
+    "labels": [
+      "804247 behaviour_metric_delta mana_tick"
+    ],
     "kind": "claim",
     "dbc_clause": "and $s2% of your maximum mana every $t1 sec for $d.",
     "text_source": {
@@ -2773,7 +2778,9 @@
   {
     "spell": 804247,
     "clause": "Can only affect 1 ally at a time.",
-    "labels": [],
+    "labels": [
+      "804247 behaviour_single_target"
+    ],
     "kind": "claim",
     "text_source": {
       "table": "coa_client_spell_description",
