@@ -3041,6 +3041,18 @@
         ]
       },
       {
+        "claim": "the $AP*0.12 term of the damage",
+        "labels": [
+          "804751 behaviour_metric_delta tick_ap"
+        ]
+      },
+      {
+        "claim": "the $sph*0.22 term of the damage",
+        "labels": [
+          "804751 behaviour_metric_delta tick_sp"
+        ]
+      },
+      {
         "claim": "every $t1 sec",
         "labels": [
           "804751 behaviour_metric_delta two_ticks"

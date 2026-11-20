@@ -344,6 +344,85 @@
       "wait_ms": 15500,
       "expire_ms": 500,
       "observe_source": "804751 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000 ($t1), trigger 804752 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, TARGET_DEST_CASTER / TARGET_UNIT_DEST_AREA_ENEMY), DurationIndex 29 (12000 ms, $d). $804752m1 = BasePoints 4 + 1 = 5, per level 37.6 truncated to 37 at level 60 (SpellInfo.cpp:497), AP 70 x 0.12 = 8.4, spell power 0: 50.4, read as 50 after the int32 truncation of CalcValue (base pair verdict 804751 effect_value 804752e0 #0). One real cast of 804751 with the dummy 5 yd away, spell crit and spell penetration fixtures 984954 and 823764 on the caster (harness precondition fixtures): the damage of 804752 on the dummy read 15500 ms after the cast. Control (before): no cast, 0."
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (first tick at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "tick_ap",
+      "label_suffix": "tick_ap",
+      "quote": "dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2450,
+      "tolerance": 25,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "As first_tick with 20000 more attack power (player_attack_power, harness fixture): 42 (5 + 37) + int32(0.12 x (70 + 20000)) = 42 + 2408 = 2450, against 50 at the reference. Control (before): no cast, 0; the contrast on the same build is the first_tick entry at the reference attack power.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 804751,
+      "name": "Hammer of Kings (first tick at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "tick_sp",
+      "label_suffix": "tick_sp",
+      "quote": "dealing ${$804752m1+$804752ppl1+$AP*0.12+$sph*0.22} Holyfire Damage to nearby enemies",
+      "trigger_spell": 804751,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804752,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4450,
+      "tolerance": 45,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "As first_tick with 20000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 42 + int32(0.12 x 70) + int32(0.22 x 20000) = 42 + 8 + 4400 = 4450, against 50 at the reference. Control (before): no cast, 0; the contrast on the same build is the first_tick entry at spell power 0.",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      }
     }
   ],
   "player_observations": [],
