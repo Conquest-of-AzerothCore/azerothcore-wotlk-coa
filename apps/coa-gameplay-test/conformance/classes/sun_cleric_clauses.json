@@ -906,18 +906,28 @@
     "spell": 520647,
     "clause": "Allies that stand inside of it will divert $560347s1% of all damage taken to the caster,",
     "labels": [
-      "520647 effect_value 560347e0 #2"
+      "520647 behaviour_taken_hit divert"
     ],
     "kind": "claim"
   },
   {
     "spell": 520647,
     "clause": "and will be healed for ${$520648m1+$SP*0.425+$AP*0.125} every $T1 sec.",
-    "labels": [
-      "520647 effect_value 520648e0 #3",
-      "520647 aura_amplitude_ms #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and will be healed for ${$520648m1+$SP*0.425+$AP*0.125}",
+        "labels": [
+          "520647 effect_value 520648e0 #3"
+        ]
+      },
+      {
+        "claim": "every $T1 sec",
+        "labels": [
+          "520647 behaviour_metric_delta tick_count"
+        ]
+      }
+    ]
   },
   {
     "spell": 520647,

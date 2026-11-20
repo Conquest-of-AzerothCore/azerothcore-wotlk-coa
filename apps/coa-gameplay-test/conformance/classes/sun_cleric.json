@@ -624,6 +624,62 @@
       "expected": 2,
       "label_suffix": "icd_open",
       "observe_source": "806123 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionSunClericEvents.cpp:83-85, 338-340: the aura holder's direct damage that is not derived casts Illumination 502429 on itself and sets a 3000 ms gate). 502429 Effect[0] SPELL_EFFECT_HEAL, BasePoints 1228, DieSides 142, no per-level term at BaseLevel 60: m1 = 1229..1370, spell power 0. 806123 cast on the caster (the area aura reaches it) then Gavel of Wrath 802561 at the dummy; control (before): the same Gavel without the aura. Horusath Blast 572801 then Gavel of Wrath 802561 (Gavels share a 5000 ms category cooldown, so another direct damage spell is the first) 3400 ms apart: two Illuminations (excluding a gate over 3.4 s)."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (damage divert)",
+      "kind": "taken_hit",
+      "variant": "divert",
+      "label_suffix": "divert",
+      "judge": "absorb",
+      "quote": "Allies that stand inside of it will divert $560347s1% of all damage taken to the caster,",
+      "strike_spell": 41394,
+      "struck": "ally",
+      "transfer_spell": 560347,
+      "trials": 4,
+      "arms": [
+        {
+          "name": "control",
+          "absorb": "none",
+          "transfer_pct": 0
+        },
+        {
+          "name": "circle",
+          "opening_casts": [
+            [
+              520647,
+              "caster"
+            ]
+          ],
+          "absorb": "share",
+          "share_pct": 30,
+          "transfer_pct": 30
+        }
+      ],
+      "observe_source": "$560347s1 = 30 (560347 EffectBasePoints[0] 29 + 1). 520647 Effect[1] TRIGGER_SPELL 560347 on the caster with TARGET_DEST_DYNOBJ_ALLY: 560347 Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_PARTY, aura 81 SPELL_AURA_SPLIT_DAMAGE_PCT, MiscValue 127. As Gaze of the Black Knight 802138: Light of the Naaru 41394 strikes the grouped ally; the control arm has no circle (0 transferred), the circle arm has 520647 cast at the caster's position (the ally stands inside its 10 yd), and the caster must take floor(30% of the strike's damage plus absorbed amount) under 560347."
+    },
+    {
+      "spell": 520647,
+      "kind": "metric_delta",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Circle of Valor (ten heal ticks)",
+      "variant": "tick_count",
+      "label_suffix": "tick_count",
+      "quote": "every $T1 sec.",
+      "expected": 10,
+      "wait_ms": 16500,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, aura 23 PERIODIC_TRIGGER_SPELL every 1500 ms (EffectAmplitude, $T1), duration 15000 ms (DurationIndex 8, $d), radius index 13 (10 yd, $a1); it triggers 520648 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 49 + 1 = 50). $520648m1 = 50, AP 70 x 0.125 = 8.75, spell power 0: 58.75. One real cast of 520647 at the caster's position, the caster held at 30% health (the circle covers it); heals of 520648 on the caster read 16500 ms after the cast: 10 heal events (15000 / 1500), excluding a period or duration 10% off on either side (9 or 11 events).. Control (before): no cast, 0."
     }
   ],
   "player_observations": [],
