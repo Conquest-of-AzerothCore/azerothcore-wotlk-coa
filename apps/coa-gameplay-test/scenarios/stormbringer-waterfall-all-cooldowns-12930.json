@@ -11,9 +11,11 @@
     "damage class and periodic damage, still on critical hits only. Setup and timing follow",
     "stormbringer-fix-random-chance-procs-waterfall: a control Stormbringer without Waterfall starts the same",
     "Gust of Wind and Stormcloak 804833 cooldowns at the same moment, so elapsed time cancels out. Stormcloak (30",
-    "s, self-cast, off the global cooldown) is not one of the three named spells, so its 4-5 * 500 ms reduction",
-    "after four or five critical Shocks proves 'all'. Five Shocks with at least four Waterfall procs, as in the",
-    "#3638 scenario, because the taken-side crit roll is not a hard 100%."
+    "s, self-cast, off the global cooldown) is not one of the three named spells. Its cooldown only starts when",
+    "its 15 s buff ends (the first run read a placeholder cooldown until then and the reductions were lost), so",
+    "both casters cancel the buff straight after casting it, and its cooldown then runs normally, so its 4-5 *",
+    "500 ms reduction after four or five critical Shocks proves 'all'. Five Shocks with at least four Waterfall",
+    "procs, as in the #3638 scenario, because the taken-side crit roll is not a hard 100%."
   ],
   "timeout_ms": 180000,
   "players": [
@@ -136,6 +138,17 @@
       "metric": "cast_failure",
       "spell": 804833,
       "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Stormcloak's cooldown starts when its buff ends, so both casters drop it now",
+      "actor": "control",
+      "spell": 804833
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wf",
+      "spell": 804833
     },
     {
       "action": "wait",
