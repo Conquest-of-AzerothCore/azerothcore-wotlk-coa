@@ -161,7 +161,7 @@
         ]
       }
     ],
-    "reason": "Control arm in each entry (reading before the learn). Expected from Spell.dbc 300322 e0 aura 216 and e1 aura 192, 3 points each."
+    "reason": "Control arm in each entry (reading before the learn). Expected from Spell.dbc 300322 e0 aura 216 and e1 aura 192, 3 points each. Reference search: bindmysoul snapshot 'Increases your haste by 3%.', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip."
   },
   {
     "spell": 300323,
@@ -577,7 +577,7 @@
         "labels": []
       }
     ],
-    "reason": "Counted pair 20261120-204022 / 20261120-204110, build 8f46b717, no flip; control = passive not learned. Aura 163 read as whole crit hit (2.5x), as Chivalric 705272."
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = passive not learned. Aura 163 scales the whole crit hit (ratio 2.5, measured 2.4973 and 2.5007): that is the native code (Unit.cpp:10654-10663), which docs/coa/sun-cleric-completion.md:53 records as the choice ('native semantics for aura 163, no new total-critical-damage multiplier'); its wording 'critical-bonus-portion' does not describe that code, a bonus-only reading would give 1.5 instead of 2.5. The tooltip says 'critical damage dealt by 150%'. Reference search: coabuildhub 'by 150%', no semantics; Chivalric 705272 is the same aura read the same way. The allies part has no entry: metric_delta has no ally unit (shared tool)."
   },
   {
     "spell": 300943,
@@ -591,8 +591,9 @@
         ]
       },
       {
-        "claim": "per 5 sec",
+        "claim": "per 5 sec: no tick by 4.6 s, three ticks by 16 s (period in 4.6..5.33 s)",
         "labels": [
+          "300943 behaviour_metric_delta replenish_none",
           "300943 behaviour_metric_delta replenish_total"
         ]
       },
@@ -609,7 +610,7 @@
         ]
       }
     ],
-    "reason": "Counted pair 20261120-204022 / 20261120-204110; control = 0 before the learn. Embedded text of 1257670 (not in the 300943 description)."
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = 0 before the learn. The 5% and 15 s come from the embedded text of 1257670 through the @s:1257670:0@ pull of the 300943 description. Maximum mana 2868 derived from BaseMana 1363 + 20 + (119 - 20) x 15 (StatSystem.cpp:421-429). Reference search: coabuildhub states 'Restores 1% maximum mana every 5 sec ... 15 seconds' (an older state, G-9: our Spell.dbc says 5%, and 90283 live energize events of 1257670 in the combat logs, mean 299 and max 1340, cannot separate the two)."
   },
   {
     "spell": 301011,
@@ -734,7 +735,7 @@
     "spell": 301345,
     "clause": "Increases your mana by $s2% of your Intellect,",
     "kind": "claim",
-    "reason": "Control arm = reading before the learn. Expected gain 3 x Intellect 119 (class file stat 3) = 357. Reference search: nothing found beyond the server DBC.",
+    "reason": "Control arm = reading before the learn. Expected gain 3 x Intellect 119 (class file stat 3) = 357. Reference search: nothing found beyond the server DBC. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
     "labels": [
       "301345 behaviour_metric_delta max_mana"
     ]
@@ -763,7 +764,7 @@
         ]
       }
     ],
-    "reason": "Control arm = count and total 0 before the learn. 4% x (2868 + 357) = 129, the maximum mana being the reference character's fixture. Nothing found in references beyond the server DBC."
+    "reason": "Control arm = count and total 0 before the learn. 4% x (2868 + 357) = 129, the maximum mana being the reference character's fixture. Nothing found in references beyond the server DBC. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip. 2868 = 1363 + 20 + (119 - 20) x 15 (StatSystem.cpp:421-429)."
   },
   {
     "spell": 301817,
@@ -872,7 +873,7 @@
     "spell": 504070,
     "clause": "Increases the spell damage bonus of Dawnsear by $s1%",
     "kind": "claim",
-    "reason": "Counted pair 20261120-203153 / 20261120-203227, build 8f46b717, no flip; control arm = Grace not learned. Reference search: server DBC (Dawnsear 554406 Description coefficient 0.765222; measured level matches either 0.765222 or the server table's 1.0 inside the band); nothing else found.",
+    "reason": "Counted pair 20261120-203153 / 20261120-203227, build 8f46b717, no flip; control arm = Grace not learned. Reference search: server DBC (Dawnsear 554406 Description coefficient 0.765222; measured level matches either 0.765222 or the server table's 1.0 inside the band); nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
     "labels": [
       "504070 behaviour_hit_ratio dawnsear"
     ]
@@ -881,9 +882,10 @@
     "spell": 504070,
     "clause": "and Sunflare by $s2%.",
     "labels": [
-      "504070 effect_value e1 #1"
+      "504070 behaviour_hit_ratio sunflare"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = Grace not learned; spell power 10000, non-critical. Expected 1.0815 = (567.5 + 2750) / (567.5 + 2500): Sunflare m1 554..581 (EffectBasePoints 553, DieSides 28, BaseLevel 60) and the recorded local coefficient 0.25 SP (docs/coa/sun-cleric-completion.md:50). Reference search: nothing found for Sunflare's coefficient beyond that choice."
   },
   {
     "spell": 504248,
@@ -913,7 +915,8 @@
     "spell": 504848,
     "clause": "Grant mercy to an ally and up to 5 nearby allies,",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, no entry: metric_delta has no ally unit to read an effect on allies (shared tool, outside this author's files); the count of 5 nearby allies needs it too. Not given a final status."
   },
   {
     "spell": 504848,
@@ -921,7 +924,8 @@
     "labels": [
       "504848 effect_value 503650e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, data label only: periodic_dispel expects one removal per period and dispel_count has no no-cast control arm; no metric counts dispellable auras (earlier author's report, tool gaps). Not given a final status."
   },
   {
     "spell": 504848,
@@ -929,25 +933,25 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "repeating every 3 sec: one dispel by 2.65 s",
+        "claim": "repeating every 3 sec: one dispel by 2.75 s (period above 2.7 s)",
         "labels": [
           "504848 behaviour_metric_delta period_held"
         ]
       },
       {
-        "claim": "repeating every 3 sec: the second dispel by 3.35 s",
+        "claim": "repeating every 3 sec: the second dispel by 3.25 s (period at most 3.3 s)",
         "labels": [
           "504848 behaviour_metric_delta period_done"
         ]
       },
       {
-        "claim": "for 12 sec",
+        "claim": "for 12 sec: aura present at 11.0..11.6 s, gone at 12.4..13.0 s",
         "labels": [
-          "504848 behaviour_metric_delta duration"
+          "504848 behaviour_metric_delta duration_window"
         ]
       }
     ],
-    "reason": "Counted pair 20261120-210030 / 20261120-210106, build 8f46b717, no flip; control = no cast. Mercy self-cast. Nothing found in references beyond the server DBC."
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = no cast. Mercy self-cast. Reference search: nothing found beyond the server DBC."
   },
   {
     "spell": 520024,
@@ -1721,16 +1725,19 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "increases the critical damage of Gavels by 15%",
+        "claim": "increases the critical damage of Gavels by 15% (Gavel of Light, Grace and Wrath)",
         "labels": [
-          "680645 behaviour_hit_ratio crit_damage"
+          "680645 behaviour_hit_ratio crit_damage",
+          "680645 behaviour_hit_ratio crit_damage_grace",
+          "680645 behaviour_hit_ratio crit_damage_wrath"
         ]
       },
       {
         "claim": "Gavels are guaranteed to critically strike against Undead enemies",
         "labels": []
       }
-    ]
+    ],
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = passive not learned. Effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 (crit damage bonus): +15% of the bonus part, whole-hit ratio 1.075 (+7.5%); the Undead guarantee has no entry (crit_guarantee fires by auto-attack swings, a Gavel is a cast). Reference search: bindmysoul snapshot has the sentence, no figure; nothing else found."
   },
   {
     "spell": 680646,
@@ -2305,27 +2312,45 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "unleashes a burst of holy energy: no damage event before 0.95 s",
+        "claim": "unleashes a burst of holy energy: no damage event before 0.95 s (delay above 0.9 s)",
         "labels": [
           "704929 behaviour_metric_delta delay_held"
         ]
       },
       {
-        "claim": "after a 1 s delay: the burst has landed by 1.15 s",
+        "claim": "after a 1 s delay: the burst has landed by 1.05 s (delay at most 1.1 s)",
         "labels": [
           "704929 behaviour_metric_delta delay_done"
         ]
       }
     ],
-    "reason": "Counted pair 20261120-205301 / 20261120-205338, build 8f46b717; control = 0 events before the learn. Nothing found in references beyond the server DBC."
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = 0 events before the learn. Reference search: nothing found beyond the server DBC."
   },
   {
     "spell": 704929,
     "clause": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
-    "labels": [
-      "704929 effect_value 704931e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $704931m2 (55..56 at level 60) Holy damage",
+        "labels": [
+          "704929 behaviour_metric_delta damage"
+        ]
+      },
+      {
+        "claim": "+ $AP*0.1: 20000 more attack power adds 2007",
+        "labels": [
+          "704929 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "+ $sph*0.125: 10000 spell power adds 1250",
+        "labels": [
+          "704929 behaviour_metric_delta damage_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = 0 before the learn. $704931m2 = 21 + 33 (EffectRealPointsPerLevel 1.0 from BaseLevel 27) + (1..2) = 55..56 at level 60; the first probe read 56 and 1856 because the dummy's Holy resistance cut every hit by 10% ((55.5 + 7) x 0.9 = 56.25); with 823764 the hit reads [62, 63] and the contrast arms match. Reference search: nothing found beyond the server DBC."
   },
   {
     "spell": 704932,
@@ -2748,7 +2773,7 @@
     "spell": 504580,
     "clause": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
     "kind": "claim",
-    "reason": "Awaiting owner (status 5): a non-critical hit at the reference stats reads 251 against [214.689, 247.689] from the tooltip's formula; the server adds the shield block value (AscensionSunClericContracts.cpp:312) and the tooltip gives no coefficient for it. Evidence in the report."
+    "reason": "Awaiting owner (status 5), question in the report: damage = m1 207..240 + AP term 7 + the shield block value x 1.0 (AscensionSunClericContracts.cpp:311-312); the tooltip says 'scaling with your block value' with no coefficient. Pair 20261120-221023 / 20261120-221237 (the earlier pair 20261120-220241 / 20261120-220458, archive pair3-with-block-value-entries, holds the block_value reads: 11 = 1 + 40 x 0.5 - 10, and 1011 at +2000 Strength; the metric block_value has no coverage.py row, so no class-file entry keeps it): damage 246 and 253 against the tooltip's own [214, 247] and inside [225, 258] with the term; at +2000 Strength (block value 1011, attack power 4070) damage_block reads 1632 and 1642 against [1625, 1658] at 1.0 (0 would give [614, 647]). Reference search: bindmysoul and coabuildhub carry the same sentence (23 + 25% SP + 10% AP at rank 1, 'scaling with your block value'), no coefficient; 638 live Dawnbreak 504580 damage events in the combat logs, mean 1155, max 2467, gear unknown."
   },
   {
     "spell": 800764,
@@ -3223,7 +3248,7 @@
     "spell": 805301,
     "clause": "Ascend into a holy form, increasing your healing done by $s1%",
     "kind": "claim",
-    "reason": "Counted pair, build 8f46b717, no flip: healing +9.996% and +9.896% (99% intervals inside the 2-point band); control = no Holy Form; Holy Form cast for real before every heal. The pair stamps are in the report.",
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip: healing +9.931% and +9.973% (99% intervals inside the 2-point band); control = no Holy Form; Holy Form cast for real before every heal. Reference search: bindmysoul's Holy Form text adds 'Holy critical strike chance by 5%' that our Spell.dbc description lacks (another state, G-9); nothing on the 10%.",
     "labels": [
       "805301 behaviour_hit_ratio healing"
     ]
@@ -3232,16 +3257,17 @@
     "spell": 805301,
     "clause": "and reducing your threat generated by $s3%.",
     "kind": "claim",
-    "reason": "Data readback only: the caster's threat multiplier reads 1 before and 0.5 after the cast (threat_mult). Behaviour (threat per damage on the dummy) not proven: ratio design read 0.79 (the dummy's damage and threat accumulate over both phases), after-only design read 0.58-0.59 against 0.5 with an unmeasured Dawnsear baseline.",
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = threat_base (same Dawnsear cast without the form, 1.0056 and 1.0056 against 1.00718). With the form and spell power 10000 the threat per damage reads 0.5056 and 0.5056 against 0.50718: the damage threat is halved exactly. Cause of the first probe's 0.5817: Spell::HandleThreatSpells adds the cast's spell level (60) as flat threat with ignoreModifiers true (Spell.cpp:5737, 5765), so the ratio is 0.5 + 60/damage (60/734 = 0.0817), not 0.5. Reference search: bindmysoul 'reducing your threat generated by -50%', nothing else found.",
     "labels": [
-      "805301 behaviour_metric_delta threat_mult"
+      "805301 behaviour_metric_delta threat"
     ]
   },
   {
     "spell": 805301,
     "clause": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, no entry: Bless sets the blessed ally only for a target other than the caster (AscensionSunClericAuras.cpp:67) and metric_delta has no ally unit (shared tool). Not given a final status."
   },
   {
     "spell": 805301,
@@ -3249,7 +3275,8 @@
     "labels": [
       "805301 effect_value #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, data label only: the additional healing, its critical strike and The Redeemer proc depend on the Bless ally path of the clause above. Not given a final status."
   },
   {
     "spell": 805581,
@@ -3373,7 +3400,16 @@
         ]
       }
     ],
-    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Duration pair 20261120-205725 / 20261120-205757 (Sun Ray 504764 grants Scorch Marks for real, control = no cast). Dawnsear half has no entry: two proc entries of one aura and proc spell share a label."
+    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Duration pair 20261120-205725 / 20261120-205757 (Sun Ray 504764 grants Scorch Marks for real, control = no cast). Dawnsear half has no entry: two proc entries of one aura and proc spell share a label. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
+    "tool_gap": {
+      "reason": "the Dawnsear half needs a second proc entry of the same aura and proc spell; two proc entries share one label",
+      "attempts": [
+        {
+          "agent": "sc-b1a",
+          "report": ".agents/plans/sun-cleric-b1a/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 806021,
@@ -3383,7 +3419,7 @@
       {
         "claim": "your next Radiant Flame has no mana cost",
         "labels": [
-          "806021 behaviour_metric_delta free_cast"
+          "806021 behaviour_metric_delta free_gate"
         ]
       },
       {
@@ -3393,15 +3429,16 @@
         ]
       }
     ],
-    "reason": "Pair 20261120-205725 / 20261120-205757, control = Radiant Flame without Scorch Marks. Scorch Marks granted by a real Sun Ray cast (a set_aura fixture reproduced the cost but not the duration). faster_ticks alert: median interval 985 / 969 ms against 1000 before, 500 expected: fix note in the report."
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip, control = Radiant Flame without Scorch Marks (the before phase of each entry). Scorch Marks granted by a real Sun Ray 504764 cast (a set_aura fixture reproduced the cost but not the duration). Free cast: with the caster at 182 mana (regeneration off) Radiant Flame, which costs 340, casts 0 times without Scorch Marks and once with it (after the Sun Ray that grants the aura took 81); the free_cast readback (660 -> 919) stays in the class file as data. Ticks: median interval of the 807058 damage events since the last Radiant Flame cast, 1000 ms without and 500 ms with; the chunk's first reading (975 and 968 ms against 500) mixed both phases' events (no since_spell), so the fix note F1 is withdrawn: not a server defect. The aura's amplitude reads 500 ms with Scorch Marks (aura_amplitude_ms probe) and the damage events of the Scorch Marks phase number 5 against 5 over twice the time. Reference search: bindmysoul snapshot has the same words ('ticks -50% faster'), nothing else found."
   },
   {
     "spell": 806021,
     "clause": "and its duration is reduced by $s1%.",
     "kind": "claim",
-    "reason": "Pair 20261120-205725 / 20261120-205757: Radiant Flame aura 3941 / 3941 ms without, 1944 / 1940 with Scorch Marks (real Sun Ray grant).",
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip, control = Radiant Flame without Scorch Marks (the before phase of each entry). The Radiant Flame aura on the dummy is still present at 1.9 s with Scorch Marks and gone at 2.15 s, so its duration lies in (1.9, 2.15] s around 2000 ms (excludes 1.8 and 2.2 s); without Scorch Marks it is present at 2.15 s. Scorch Marks granted by a real Sun Ray 504764 cast. The shorter_duration readback (3947 / 1944 ms) stays in the class file as data. Reference search: nothing found beyond the tooltip.",
     "labels": [
-      "806021 behaviour_metric_delta shorter_duration"
+      "806021 behaviour_metric_delta shorter_held",
+      "806021 behaviour_metric_delta shorter_gone"
     ]
   },
   {

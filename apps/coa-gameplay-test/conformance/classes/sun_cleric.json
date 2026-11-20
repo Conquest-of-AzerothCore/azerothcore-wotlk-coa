@@ -168,7 +168,59 @@
       "critical": true,
       "force_crit": "melee",
       "trials": 40,
-      "expected_source": "$s2 = 15 (680645 Effect[1] aura 107 SPELLMOD op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Light 800611, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. Control: passive not learned.",
+      "expected_source": "$s2 = 15 (680645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Light 800611, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. Control: passive not learned.",
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      }
+    },
+    {
+      "spell": 680645,
+      "name": "Gavel of Grace critical damage",
+      "kind": "hit_ratio",
+      "variant": "crit_damage_grace",
+      "label_suffix": "crit_damage_grace",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "expected": 1.075,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680645
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "$s2 = 15 (680645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Grace 800614, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. The three scripted Gavels 800611, 800614 and 800617 (Gavel(), AscensionSunCleric.cpp:171-174) share SpellFamilyFlags[1] 32 and the one passive effect: each is tested (G-23). Control: passive not learned.",
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      }
+    },
+    {
+      "spell": 680645,
+      "name": "Gavel of Wrath critical damage",
+      "kind": "hit_ratio",
+      "variant": "crit_damage_wrath",
+      "label_suffix": "crit_damage_wrath",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "expected": 1.075,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680645
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "$s2 = 15 (680645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Wrath 800617, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. The three scripted Gavels 800611, 800614 and 800617 (Gavel(), AscensionSunCleric.cpp:171-174) share SpellFamilyFlags[1] 32 and the one passive effect: each is tested (G-23). Control: passive not learned.",
       "cast_power": 1000,
       "fixture": {
         "attack_power": 20000
@@ -211,6 +263,42 @@
       "critical": false
     },
     {
+      "spell": 504070,
+      "name": "Grace (Sunflare)",
+      "kind": "hit_ratio",
+      "variant": "sunflare",
+      "label_suffix": "sunflare",
+      "quote": "and Sunflare by $s2%.",
+      "expected": 1.0815,
+      "observe_spell": 502396,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          504070
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "$s2 = 10 (504070 Effect[1] aura 107 SPELLMOD op 24 on Sunflare, EffectBasePoints 9). Sunflare 502396 Effect[0]: EffectBasePoints 553, EffectDieSides 28, BaseLevel 60 (no per-level term at 60): m1 = 554..581, mean 567.5. The coefficient is the recorded local choice 'Sunflare uses the first recovered rank's 0.25 SP coefficient for all ranks' (docs/coa/sun-cleric-completion.md:50; AscensionSunClericData.h row 800231 sp 0.25), so with the spell power fixture 10000 the coefficient part is 2500 and the bonus scales it by 1.1: (567.5 + 2750) / (567.5 + 2500) = 1.0815. Control: Grace not learned. 823764 removes the dummy's magic resistance as in the Templar entries. Reference search: nothing found for Sunflare's coefficient beyond the recorded choice.",
+      "cast_power": 1000,
+      "critical": false
+    },
+    {
       "spell": 301345,
       "name": "Ancient Rites (maximum mana)",
       "kind": "metric_delta",
@@ -223,8 +311,8 @@
       "fields": {
         "power": 0
       },
-      "expected": 358,
-      "before_expected": 1,
+      "expected": 357,
+      "before_expected": 0,
       "expected_gain": 357,
       "wait_ms": 500,
       "expire_ms": 500,
@@ -247,7 +335,7 @@
       "expected": 129,
       "before_expected": 0,
       "wait_ms": 16000,
-      "observe_source": "301345 Effect[0] aura 227 periodic trigger, EffectBasePoints 3 + 1 = 4 (4%), EffectAmplitude 15000, triggers 301368 whose Effect[0] is ENERGIZE_PCT. One tick after 16000 ms: 4% of the maximum mana with the aura learned = 4% x (2868 + 357) = 129. 2868 is the maximum mana read before the learn by the regen_max_mana entry's twin (max_mana, run 20261120-203339) and 357 its proven gain: a fixture of the reference character, not a clause value. Control: nothing energized before the learn."
+      "observe_source": "301345 Effect[0] aura 227 periodic trigger, EffectBasePoints 3 + 1 = 4 (4%), EffectAmplitude 15000, triggers 301368 whose Effect[0] is ENERGIZE_PCT. One tick after 16000 ms: 4% of the maximum mana with the aura learned = 4% x (2868 + 357) = 129. 2868 = BaseMana 1363 (player_class_stats class 27 level 60, CoA.ClassLevelSixtyStats.Enable off) + 20 + (Intellect 119 - 20) x 15 (StatSystem.cpp:421-429). Control: nothing energized before the learn."
     },
     {
       "spell": 301345,
@@ -322,7 +410,7 @@
         "spell_power": 10000
       },
       "cast_power": 1000,
-      "expected_source": "$s2 = 150 (300943 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 149, EffectMiscValue 127 all schools, MiscValueB 2). Aura 163 scales the whole critical hit (Unit::SpellCriticalDamageBonus, passive-effects.md): ratio 1 + 150% = 2.5. Forced spell crits of Dawnsear 554406, critical hits only, spell power fixture 10000; control: passive not learned."
+      "expected_source": "$s2 = 150 (300943 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 149, EffectMiscValue 127 all schools, MiscValueB 2). Tooltip: 'Increases your critical damage dealt by 150%'; the reference snapshots (coabuildhub spells_master_index) carry the same sentence 'by 150%' with no semantics, nothing found on whole-hit against bonus-only. The recorded choice (docs/coa/sun-cleric-completion.md:53) is 'native semantics for aura 163, no new total-critical-damage multiplier invented'. Native here is Unit::SpellCriticalDamageBonus (Unit.cpp:10654-10663): crit_bonus = damage + damage/2 for a spell crit, AddPct(crit_bonus, 150) on that whole figure, then minus damage, so a crit hit of 1.5x becomes 3.75x and the ratio to the same crit without the aura is 2.5 (the Templar Chivalric 705272 reading). Forced spell crits of Dawnsear 554406, critical hits only, spell power fixture 10000; control: passive not learned."
     },
     {
       "spell": 300943,
@@ -364,7 +452,28 @@
       "expected": 143,
       "before_expected": 0,
       "wait_ms": 9100,
-      "observe_source": "1257670 Effect[0] aura 24 periodic energize, EffectBasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000 ms: one tick by 5600 ms energizes 5% of the maximum mana, 5 x 2868 / 100 = 143 (integer percent of the maximum mana 2868 read before the learn in the 301345 max_mana entry; fixture of the reference character). Control: 0 before the learn. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+      "observe_source": "1257670 Effect[0] aura 24 periodic energize, EffectBasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000 ms: one tick by 5600 ms energizes 5% of the maximum mana, 5 x 2868 / 100 = 143 (integer percent of the maximum mana; 2868 = BaseMana 1363 (player_class_stats class 27 level 60, CoA.ClassLevelSixtyStats.Enable off) + 20 + (Intellect 119 - 20) x 15 (StatSystem.cpp:421-429)). Control: 0 before the learn. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (no Replenishment tick by 4.6 s)",
+      "variant": "replenish_none",
+      "label_suffix": "replenish_none",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 0,
+      "before_expected": 0,
+      "wait_ms": 8100,
+      "observe_source": "No energize event of Replenishment 1257670 4600 ms after the crit: the period is above 4.6 s, so it excludes 4.5 s (-10% of 5 sec). With replenish_tick (one tick, 143, by 5600 ms) and replenish_total (429 = 3 ticks by 16000 ms, which a period of 5.5 s cannot give) the period lies in (4.6, 5.33] s. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
     },
     {
       "spell": 300943,
@@ -448,7 +557,7 @@
       "label_suffix": "delay_held",
       "expected": 0,
       "wait_ms": 950,
-      "observe_source": "704929 Effect[0] aura 42 triggers 704930 (Solar Eclipse), DurationIndex 36 = 1000 ms ($704930d); AscensionSunClericAuras.cpp:184-185 casts the burst 704931 when it expires. Damage events of 704931 on the dummy 950 ms after the instant Dawnbreak 800654 cast: 0 (the delay is above 0.95 s, excludes 900 ms, -10%). Before the learn: 0."
+      "observe_source": "704929 Effect[0] aura 42 triggers 704930 (Solar Eclipse), DurationIndex 36 = 1000 ms ($704930d); AscensionSunClericAuras.cpp:184-185 casts the burst 704931 when it expires. Damage events of 704931 on the dummy 950 ms after the instant Dawnbreak 800654 cast: 0 (the delay is above 0.95 s, so it excludes 900 ms, -10% of $704930d = 1000 ms). Before the learn: 0."
     },
     {
       "spell": 704929,
@@ -468,8 +577,8 @@
       "variant": "delay_done",
       "label_suffix": "delay_done",
       "expected": 1,
-      "wait_ms": 1150,
-      "observe_source": "Same events 1150 ms after the cast: exactly 1 (the delay is at most 1.15 s, excludes 1100 ms, +10%). Before the learn: 0."
+      "wait_ms": 1050,
+      "observe_source": "Same events 1050 ms after the instant Dawnbreak 800654 cast: exactly 1, so the delay is at most 1.05 s and excludes 1100 ms (+10% of $704930d = 1000 ms). Before the learn: 0."
     },
     {
       "spell": 806021,
@@ -503,6 +612,32 @@
       "quote": "chance to grant Scorch Marks for $807059d",
       "trigger_spell": 806060,
       "target": "dummy",
+      "wait_ms": 400,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame casts with no mana)",
+      "variant": "free_gate",
+      "label_suffix": "free_gate",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 806060
+      },
+      "cast_power": 182,
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "Radiant Flame 806060 costs 25% of base mana 1363 = 340; Sun Ray 504764, the real cast that grants Scorch Marks, costs 6% = 81. The caster's mana is set to 182 before each phase's casts (regeneration off): the before phase (no Sun Ray, no Scorch Marks) cannot pay 340 and casts 0 times; the after phase pays 81 for the Sun Ray, keeps about 101, and Radiant Flame goes through (1 cast of 806060 by the caster) because the next Radiant Flame has no mana cost. Control: the before phase.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
       "wait_ms": 5000,
       "expire_ms": 5000,
       "name": "Searing Light (Radiant Flame ticks 50% faster)",
@@ -513,13 +648,14 @@
         "stream": "spell_damage",
         "spell": 807058,
         "caster": "caster",
-        "target": "dummy"
+        "target": "dummy",
+        "since_spell": 806060
       },
       "cast_power": 1000,
       "before_expected": 1000,
       "expected": 500,
       "tolerance": 50,
-      "observe_source": "Median interval between the damage events of 807058 (the trigger of 806060): 1000 ms without Scorch Marks, 500 ms with it (ticks 50% faster), within 50 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is set on the caster by the harness (precondition fixture, set_aura): the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "observe_source": "Median interval between the damage events of 807058 on the dummy since the last cast of Radiant Flame 806060 (since_spell, so each phase reads its own events): 1000 ms without Scorch Marks, 500 ms with it (ticks 50% faster), within 50 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 on each of the three effects = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is granted to the caster by a real Sun Ray 504764 cast (setup_casts), no set_aura: the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
       "setup_casts": [
         504764
       ],
@@ -546,7 +682,59 @@
       "before_expected": 3944,
       "expected": 1944,
       "tolerance": 100,
-      "observe_source": "Remaining duration of the Radiant Flame aura on the dummy 50 ms after the cast: 4000 - 50 without Scorch Marks, 2000 - 50 with it, within 100 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is set on the caster by the harness (precondition fixture, set_aura): the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "observe_source": "Remaining duration of the Radiant Flame aura on the dummy 50 ms after the cast: 4000 - 50 without Scorch Marks, 2000 - 50 with it, within 100 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is granted to the caster by a real Sun Ray 504764 cast (setup_casts), no set_aura: the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 1900,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame still on at 1.9 s)",
+      "variant": "shorter_held",
+      "label_suffix": "shorter_held",
+      "metric": "aura",
+      "fields": {
+        "spell": 806060
+      },
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "before_expected": 1,
+      "expected": 1,
+      "observe_source": "Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -50% on class mask 134217728 gives 2000 ms), read 1900 ms after the cast: present with and without Scorch Marks, so the reduced duration is above 1.9 s and excludes 1.8 s (-10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts); control = the before phase without it.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 2150,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame gone by 2.15 s)",
+      "variant": "shorter_gone",
+      "label_suffix": "shorter_gone",
+      "metric": "aura",
+      "fields": {
+        "spell": 806060
+      },
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "before_expected": 1,
+      "expected": 0,
+      "observe_source": "Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -50% on class mask 134217728 gives 2000 ms), read 2150 ms after the cast: present without Scorch Marks (the 4000 ms control) and gone with it, so the reduced duration is at most 2.15 s and excludes 2.2 s (+10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts); control = the before phase without it.",
       "setup_casts": [
         504764
       ],
@@ -577,25 +765,36 @@
     },
     {
       "spell": 504848,
+      "name": "Mercy (aura lasts 12 s)",
       "kind": "metric_delta",
+      "variant": "duration_window",
+      "label_suffix": "duration_window",
       "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
       "trigger_spell": 504848,
       "target": "caster",
-      "cast_power": 1000,
-      "expire_ms": 500,
-      "name": "Mercy (duration)",
-      "variant": "duration",
-      "label_suffix": "duration",
-      "metric": "aura_duration_ms",
+      "metric": "aura",
       "fields": {
         "spell": 504848
       },
-      "cast_in_before": false,
       "before_expected": 0,
-      "expected": 11950,
-      "tolerance": 100,
-      "wait_ms": 50,
-      "observe_source": "504848 DurationIndex 29 = 12000 ms ($d). The remaining duration of Mercy on the caster 50 ms after a self cast reads 11950 within 100 ms (excludes 10% either side). Control: no cast, 0."
+      "expected": 1,
+      "wait_ms": 11300,
+      "expiry_wait_ms": 1300,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          11000,
+          11600
+        ],
+        "expired": [
+          12400,
+          13000
+        ]
+      },
+      "observe_source": "504848 DurationIndex 29 = 12000 ms ($d). One real self cast of 504848: its aura is present when read 11000..11600 ms after the cast (game time) and gone when read 12400..13000 ms after it, so the duration lies between 11000 and 13000 ms, inside 10% of 12000 (10800..13200) on both sides. Control (before): no cast, absent."
     },
     {
       "spell": 504848,
@@ -614,8 +813,8 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 2650,
-      "observe_source": "504848 Effect[0] aura 23 periodic trigger of 503650, EffectAmplitude 3000 ($t1 = 3 sec). Casts of 503650 counted 2650 ms after the self cast: 1 (the first tick at the application, none since: the period is above 2.65 s, excludes 2.7 s, -10%). Control: no cast, 0.",
+      "wait_ms": 2750,
+      "observe_source": "504848 Effect[0] aura 23 periodic trigger of 503650, EffectAmplitude 3000 ($t1 = 3 sec). Casts of 503650 counted 2750 ms after the self cast: 1 (the application cast only: the period is above 2.75 s, so it excludes 2.7 s, -10%). Control: no cast, 0.",
       "cast_in_before": false
     },
     {
@@ -635,8 +834,8 @@
       },
       "before_expected": 0,
       "expected": 2,
-      "wait_ms": 3350,
-      "observe_source": "Casts of 503650 counted 3350 ms after the self cast: 2 (the second tick has come: the period is at most 3.35 s, excludes 3.3 s, +10%). Each tick removes $503650s1 = 2 disease effects (the removal count is its own claim). Control: no cast, 0.",
+      "wait_ms": 3250,
+      "observe_source": "Casts of 503650 counted 3250 ms after the self cast: 2 (the second cast has come: the period is at most 3.25 s, so it excludes 3.3 s, +10%). Each cast removes $503650s1 = 2 disease effects (the removal count is its own claim). Control: no cast, 0.",
       "cast_in_before": false
     },
     {
@@ -1654,6 +1853,257 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Solar Eclipse (burst damage)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 62.5,
+      "after_at_least": 62,
+      "after_at_most": 63,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "704931 Effect[1] SCHOOL_DAMAGE: EffectBasePoints 21, EffectDieSides 2, EffectRealPointsPerLevel 1.0 from BaseLevel 27, MaxLevel 0 (no cap). At level 60 $704931m2 = 21 + 33 + (1..2) = 55..56 (per-level term truncated, SpellInfo.cpp:497). The tooltip adds $sph*0.125 = 0 at spell power 0 and $AP*0.1 = 7 at the reference attack power 70: [62, 63]. Non-critical hit read on the dummy 2500 ms after the instant Dawnbreak 800654 cast. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Solar Eclipse (burst damage at +20000 attack power)",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 2062.5,
+      "after_at_least": 2062,
+      "after_at_most": 2063,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "As damage with 20000 more attack power (player_attack_power, harness fixture): 55..56 + int(0.1 x (70 + 20000)) = 55..56 + 2007 = [2062, 2063], against [62, 63] at the reference attack power; the contrast on the same build is the damage entry. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Solar Eclipse (burst damage at +10000 spell power)",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 1312.5,
+      "after_at_least": 1312,
+      "after_at_most": 1313,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "As damage with 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 55..56 + 7 + 0.125 x 10000 = [1312, 1313], against [62, 63] at spell power 0; the contrast on the same build is the damage entry. 823764 removes the dummy's magic resistance. Control: 0 before the learn.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 241.5,
+      "after_at_least": 225,
+      "after_at_most": 258,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 204 + int(2 x 1.34444) + (1..34) = 207..240 at level 60 (rounding 3), the AP term 0.1 x 70 = 7, spell power 0, plus the block value 11 read in block_value at the server's coefficient 1.0 (the tooltip states none, see damage_block): [225, 258] for a non-critical hit. 823764 removes the dummy's magic resistance. Control: no cast, 0."
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage at +2000 Strength)",
+      "kind": "metric_delta",
+      "variant": "damage_block",
+      "label_suffix": "damage_block",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 1641.5,
+      "after_at_least": 1625,
+      "after_at_most": 1658,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          8118,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Strength 8118 effect 0 (aura 29, harness precondition fixture, amount 2000) takes Strength to 2040. Sun Cleric attack power = 2 x Strength - 10 = 4070 (StatSystem.cpp:532, reference 70 at Strength 40), block value = (1 + 2040 x 0.5 - 10) = 1011 (Player.cpp:5616). m1 = 207..240 (see damage), AP term 0.1 x 4070 = 407, spell power 0, and the block value at the coefficient the server uses, 1.0 (AscensionSunClericContracts.cpp:312): [207 + 407 + 1011, 240 + 407 + 1011] = [1625, 1658]. The tooltip gives no coefficient, so this entry measures that coefficient: 0 would read [614, 647]. Control: no cast, 0; the contrast on the same build is the damage entry at block value 11. The block values 11 and 1011 were read with the harness metric block_value (CoAGameplayTest.cpp:5114) in the counted pair 20261120-220241 / 20261120-220458 and equal these figures; the metric has no row in coverage.py METRIC_EVIDENCE (shared tool, source stage cross-class guard), so those two read entries are kept in the pair's archive only.",
+      "phase_aura_amounts": [
+        [
+          8118,
+          0,
+          2000
+        ]
+      ]
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (threat per damage, control without the form)",
+      "kind": "metric_delta",
+      "variant": "threat_base",
+      "label_suffix": "threat_base",
+      "quote": "increasing your healing done by $s1% and reducing your threat generated by $s3%",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.00718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Control: Dawnsear 554406 without Holy Form, one phase, spell power 10000. Threat of one hit = damage x 1 (school modifier 1) + the flat initial threat of the cast, the spell level 60 (Spell::HandleThreatSpells, Spell.cpp:5737, added with ignoreModifiers true, Spell.cpp:5765). Damage mean 708.5 + 10000 x 0.765222 = 8360.7 (Description ${$m1+0+$spfi*0.765222}): 1 + 60 / 8360.7 = 1.00718.",
+      "cast_in_before": false,
+      "player_spell_power": 10000
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (threat generated)",
+      "kind": "metric_delta",
+      "variant": "threat",
+      "label_suffix": "threat",
+      "quote": "increasing your healing done by $s1% and reducing your threat generated by $s3%",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_only_after": false,
+      "setup_wait_ms": 1600,
+      "cast_power": 1000,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0.50718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "$s3 = 50 (805301 Effect[2] aura 10 SPELL_AURA_MOD_THREAT, EffectBasePoints -51 + 1 = -50, EffectMiscValue 127): the threat of the damage x 0.5 (Dawnsear is Fire, school mask 4, included in misc 127; ThreatManager.cpp:750). A real Holy Form 805301 cast on the caster before Dawnsear 554406 with spell power 10000, one phase. The flat initial threat of the cast (spell level 60, Spell.cpp:5737) is added with ignoreModifiers true (Spell.cpp:5765) and is not halved, so threat per damage = 0.5 + 60 / 8360.7 = 0.50718 (damage mean 708.5 + 10000 x 0.765222). Control: threat_base (same cast without the form, 1.00718) in the same pair. The first probe of the chunk (spell power 0, damage about 740) read 0.5817 against 0.5 = 0.5 + 60 / 734: the flat 60 share.",
+      "cast_in_before": false,
+      "player_spell_power": 10000,
+      "setup_in_before": true
     }
   ],
   "player_observations": [],
@@ -2007,7 +2457,7 @@
   "base_mana": {
     "power": 0,
     "value": 1363,
-    "source": "player_class_stats class 27 level 60 BaseMana 1363, read in acore_world of the in-RAM test MySQL (class 27, level 60); set before every cast of a rank hit scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
+    "source": "player_class_stats class 27 level 60 BaseMana 1363, read in acore_world of the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable unset, default 0; enabled it is 1814, rev_20261105_95_coa_class_level_sixty_stats.sql:64); set before every cast of a rank hit scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
   },
   "weapon_set_spells": {
     "Valkyr": [
