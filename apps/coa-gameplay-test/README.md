@@ -391,7 +391,8 @@ runs such a case exclusively because the setting is process-global. Optional
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
 `AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional `chat_log: true`
 turns `CoA.ChatLog.Enable` on for that case and back to the configured state when it ends, and is likewise run
-exclusively. Optional
+exclusively. Optional `battleground_kill_xp: true` turns `Battleground.GiveXPForKills` on for that case in the same
+way, and is likewise run exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
 the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
@@ -1198,6 +1199,10 @@ before a player update, then leaves subsequent assertions to verify the queued c
 It tests dispatch and deferral, not a real socket, packet delivery, or every possible concurrent schedule.
 
 `view_level` takes a player `actor` and unit `target` and queries the target-relative combat level.
+`level_for_target` and `reward_level_for_target` take the same arguments and return the level the actor rolls
+against the target and the level its rewards use; `defense_skill_for_target` returns the actor's defense skill against
+the target and `weapon_skill_for_target` its weapon skill (optional `hand` 0 main, 1 off, 2 ranged, default 0).
+`honor_points` takes a player `actor` and returns its honor points.
 `sent_level`, `sent_max_health` and `sent_faction` (the faction template) use the same fields and observe
 values-only object updates emitted to the socketless session. They return zero until the corresponding field has been observed; they do not
 force updates or inspect client rendering. `sent_free_for_all_pvp` takes the same `actor` and `target` and returns 1

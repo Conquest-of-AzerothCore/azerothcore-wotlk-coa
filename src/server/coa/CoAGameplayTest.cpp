@@ -656,6 +656,26 @@ private:
     bool _original;
 };
 
+class BattlegroundKillXpConfig
+{
+public:
+    BattlegroundKillXpConfig() : _original(sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL))
+    {
+        sWorld->setBoolConfig(CONFIG_BG_XP_FOR_KILL, true);
+    }
+
+    BattlegroundKillXpConfig(BattlegroundKillXpConfig const&) = delete;
+    BattlegroundKillXpConfig& operator=(BattlegroundKillXpConfig const&) = delete;
+
+    ~BattlegroundKillXpConfig()
+    {
+        sWorld->setBoolConfig(CONFIG_BG_XP_FOR_KILL, _original);
+    }
+
+private:
+    bool _original;
+};
+
 class QuestLogSizeConfig
 {
 public:
@@ -2167,6 +2187,8 @@ public:
             _twoSide.emplace(*twoSide);
         if (_scenario.get<bool>("chat_log", false))
             _chatLog.emplace();
+        if (_scenario.get<bool>("battleground_kill_xp", false))
+            _battlegroundKillXp.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
         {
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
@@ -3818,6 +3840,26 @@ private:
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
+        if (metric == "level_for_target" || metric == "reward_level_for_target" ||
+            metric == "weapon_skill_for_target" || metric == "defense_skill_for_target")
+        {
+            Unit* other = GetUnit(step.get<std::string>("target"));
+            if (metric == "level_for_target")
+                return unit->getLevelForTarget(other);
+            if (metric == "reward_level_for_target")
+                return unit->getRewardLevelForTarget(other);
+            if (metric == "defense_skill_for_target")
+                return unit->GetDefenseSkillValue(other);
+            uint32 const hand = step.get<uint32>("hand", 0);
+            Require(hand <= RANGED_ATTACK, "Weapon skill metric needs hand 0, 1 or 2");
+            return unit->GetWeaponSkillValue(WeaponAttackType(hand), other);
+        }
+        if (metric == "honor_points")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Honor metric needs a player");
+            return player->GetHonorPoints();
+        }
         if (metric == "sent_level" || metric == "sent_max_health" || metric == "sent_faction")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -9119,6 +9161,7 @@ private:
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<ChatLogConfig> _chatLog;
+    std::optional<BattlegroundKillXpConfig> _battlegroundKillXp;
     std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;

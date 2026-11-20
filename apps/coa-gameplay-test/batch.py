@@ -1208,6 +1208,7 @@ def run_batch(args, directory=catalog.DIRECTORY):
                               or case.scenario.get('ptr_character_copy', False)
                               or 'vanity_ownership' in case.scenario or 'two_side' in case.scenario
                               or 'quest_log_size' in case.scenario or case.scenario.get('chat_log', False)
+                              or case.scenario.get('battleground_kill_xp', False)
                               or (not case.exploratory and case.key in exclusive) or case.hour is not None)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,596 @@
+{
+  "schema": 1,
+  "name": "Widened battleground fights roll at the bracket top while rewards keep the real level",
+  "contract": "Kills count once Warsong Gulch is in progress and the entry Honorless Target is gone, so the scenario waits for the status, gathers the players again because the match start sends each team to its base, and removes the aura. A level 12 Human Warrior fights two level 29 Orc Warriors in a Warsong Gulch of the 10-29 bracket; a level 29 ally queued third keeps both Orcs on the opposing team. Every combat roll between them uses the bracket top 29: level_for_target is 29 in both directions, the level 12 Warrior's weapon and defense skill against a player are at least 145 (5 x 29), and after it leaves level_for_target is 12 again and its weapon skill against a player is 60 (5 x 12). Rewards keep the real levels: reward_level_for_target is 12 for the level 12 Warrior against a level 29 player and 29 for the level 29 Warrior against the level 12 one. With Battleground.GiveXPForKills on, the level 12 Warrior killing a level 29 player gains experience (xp delta > 0, not computed from Acore::XP::BaseGain) and honor (honor_points delta > 0); the level 29 Warrior killing the level 12 Warrior, a gray target, gains no experience (xp delta 0) and no honor (honor_points delta 0).",
+  "timeout_ms": 240000,
+  "battleground_kill_xp": true,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "low",
+      "race": 1,
+      "class": 1,
+      "level": 12
+    },
+    {
+      "id": "top",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "top2",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low is invited to the 10-29 bracket",
+      "actor": "low",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top is invited to the 10-29 bracket",
+      "actor": "top",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "ally is invited to the 10-29 bracket",
+      "actor": "ally",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top2 is invited to the 10-29 bracket",
+      "actor": "top2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "low"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low enters Warsong Gulch",
+      "actor": "low",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top enters Warsong Gulch",
+      "actor": "top",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "ally"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "ally enters Warsong Gulch",
+      "actor": "ally",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "top2"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top2 enters Warsong Gulch",
+      "actor": "top2",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "teleport",
+      "label": "low meets the others outdoors",
+      "actor": "low",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others outdoors",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "ally meets the others outdoors",
+      "actor": "ally",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others outdoors",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "low rolls against top at the bracket top 29",
+      "actor": "low",
+      "metric": "level_for_target",
+      "target": "top",
+      "equals": 29,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "top rolls against low at the bracket top 29",
+      "actor": "top",
+      "metric": "level_for_target",
+      "target": "low",
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "label": "low is rewarded against top at its real level 12",
+      "actor": "low",
+      "metric": "reward_level_for_target",
+      "target": "top",
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "top is rewarded against low at its real level 29",
+      "actor": "top",
+      "metric": "reward_level_for_target",
+      "target": "low",
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "label": "low has the level 29 weapon skill against top",
+      "actor": "low",
+      "metric": "weapon_skill_for_target",
+      "target": "top",
+      "hand": 0,
+      "min": 145
+    },
+    {
+      "action": "assert",
+      "label": "low has the level 29 defense skill against top",
+      "actor": "low",
+      "metric": "defense_skill_for_target",
+      "target": "top",
+      "min": 145
+    },
+    {
+      "action": "assert",
+      "label": "Warsong Gulch is in progress, where kills count",
+      "actor": "low",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "teleport",
+      "label": "low meets the others again once the match starts",
+      "actor": "low",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top meets the others again once the match starts",
+      "actor": "top",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "ally meets the others again once the match starts",
+      "actor": "ally",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "top2 meets the others again once the match starts",
+      "actor": "top2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "top2 loses the entry Honorless Target",
+      "actor": "top2",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "low loses the entry Honorless Target",
+      "actor": "low",
+      "spell": 2479,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "xp",
+      "save_as": "low_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "honor_points",
+      "save_as": "low_honor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "xp",
+      "save_as": "top_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "honor_points",
+      "save_as": "top_honor"
+    },
+    {
+      "action": "set_health",
+      "actor": "top2",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "low",
+      "target": "top2"
+    },
+    {
+      "action": "assert",
+      "label": "low kills top2",
+      "actor": "top2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "low gains experience for the level 29 kill",
+      "actor": "low",
+      "metric": "xp",
+      "relative_to": "low_xp",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "low gains honor for the level 29 kill",
+      "actor": "low",
+      "metric": "honor_points",
+      "relative_to": "low_honor",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "low",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "top",
+      "target": "low"
+    },
+    {
+      "action": "assert",
+      "label": "top kills low",
+      "actor": "low",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top gains no experience for a level 12 kill",
+      "actor": "top",
+      "metric": "xp",
+      "relative_to": "top_xp",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "top gains no honor for a level 12 kill",
+      "actor": "top",
+      "metric": "honor_points",
+      "relative_to": "top_honor",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "low",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "low leaves Warsong Gulch",
+      "actor": "low",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "low rolls against top at its own level 12 after leaving",
+      "actor": "low",
+      "metric": "level_for_target",
+      "target": "top",
+      "equals": 12,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "low has the level 12 weapon skill after leaving",
+      "actor": "low",
+      "metric": "weapon_skill_for_target",
+      "target": "top",
+      "hand": 0,
+      "equals": 60
+    }
+  ]
+}

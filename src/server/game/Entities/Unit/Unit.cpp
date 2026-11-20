@@ -20,6 +20,7 @@
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
+#include "AscensionBattlegroundCombat.h"
 #include "AscensionResilientConstitution.h"
 #include "AscensionTankStances.h"
 #include "Battlefield.h"
@@ -4252,6 +4253,23 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, Spell const* spell, bool CanRef
     return SPELL_MISS_NONE;
 }
 
+uint8 Unit::getLevelForTarget(WorldObject const* target) const
+{
+    if (target)
+        if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target->ToUnit()))
+            return top;
+
+    return GetLevel();
+}
+
+uint8 Unit::getRewardLevelForTarget(WorldObject const* target) const
+{
+    if (target && AscensionBattlegroundCombat::SharedTopLevel(this, target->ToUnit()))
+        return GetLevel();
+
+    return getLevelForTarget(target);
+}
+
 uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 {
     if (IsPlayer())
@@ -4260,6 +4278,8 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
         uint32 value = (target && target->IsPlayer())
                        ? ToPlayer()->GetMaxSkillValue(SKILL_DEFENSE)
                        : ToPlayer()->GetSkillValue(SKILL_DEFENSE);
+        if (uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target))
+            value = std::max<uint32>(value, 5u * top);
         value += uint32(ToPlayer()->GetRatingBonusValue(CR_DEFENSE_SKILL));
         return value;
     }
@@ -4599,8 +4619,14 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         if (attType != BASE_ATTACK && !item)
             return 0;
 
+        uint8 const top = AscensionBattlegroundCombat::SharedTopLevel(this, target);
+
         if (IsInFeralForm())
+        {
+            if (top)
+                return 5u * top;
             return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
+        }
 
         // weapon skill or (unarmed for base attack)
         uint32 skill = SKILL_UNARMED;
@@ -4611,6 +4637,8 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         value = (target && target->IsControlledByPlayer())
                 ? player->GetMaxSkillValue(skill)
                 : player->GetSkillValue(skill);
+        if (top)
+            value = std::max<uint32>(value, 5u * top);
         // Modify value from ratings
         value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL));
         switch (attType)
