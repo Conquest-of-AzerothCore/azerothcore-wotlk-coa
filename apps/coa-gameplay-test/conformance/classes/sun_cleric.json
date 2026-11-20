@@ -2433,6 +2433,113 @@
       "after_at_most": 0,
       "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0.",
       "target_entry": 575
+    },
+    {
+      "spell": 804269,
+      "name": "Solemn Priest (Gavel of Light heals twice as much)",
+      "kind": "metric_delta",
+      "variant": "gavel_heal",
+      "label_suffix": "gavel_heal",
+      "quote": "and causes Gavel of Light to heal you for an additional $s2% of its damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 804269,
+      "target": "dummy",
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 100,
+      "expected": 300,
+      "expected_ratio": 3.0,
+      "tolerance": 0.15,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Gavel of Light 800611 hits the dummy and the server copies a share of its damage to the caster as 707522 (AscensionSunClericAbilities.cpp:283-290): the share is the effect value of the passive 707521, BasePoints 49 + 1 = 50 ($707521s1, 'heal yourself equal to $707521s1% of the damage dealt'). Solemn Priest 804269 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) BasePoints 49 + 1 = 50 ($s2) on the class mask of 707521 (SpellFamilyFlags[0] 2097152): 'an additional 50% of its damage dealt', so 100% of the damage with the passive against 50% without. Both phases cast one Gavel of Light at the dummy with the caster at 50% health and +20000 attack power (a harness fixture) so that the hit is the same to 0.4% from one cast to the next (the weapon roll of 17..29 is lost against about 3400 of attack power (20000 / 14 x 2.4)); the first run, as a hit_ratio of the heals, could not read a heal on the caster (a hit_ratio reads the heals on the target of the cast). spell_heal_total sums every matching heal event since the scenario started (the leech_ratio note), so the after reading carries the before heal: (H + 2H) / H = 3.0, tolerance 0.15 (the 5-point band on +100%). Both phases carry the class tuning aura 887015 (-20% healing done) alike. Control: the phase without the passive."
+    },
+    {
+      "spell": 807964,
+      "name": "Soul of Light (Vow of Light value doubled)",
+      "kind": "metric_delta",
+      "variant": "vow_value",
+      "label_suffix": "vow_value",
+      "quote": "and the value of Vow of Light is doubled.",
+      "trigger_spell": 804247,
+      "gate_spell": 807964,
+      "target": "caster",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 41394,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 505197,
+        "target": "caster"
+      },
+      "before_expected": 50,
+      "expected": 150,
+      "expected_ratio": 3.0,
+      "tolerance": 0.15,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "807964 Soul of Light Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 99 (+1 = +100%) on the class mask word 2 = 536870912 = 807750's SpellFamilyFlags[2]: 807750 Effect[0] BasePoints 9 + 1 = 10 ($807750s1, 'heals the nearest nearby ally for $s1% of the value'). Vow of Light 807547 is cast on the caster in both phases; Light of the Naaru 41394 (1100 Holy) then hits the caster (50% health), and the Vow's copy heal 505197 (the script heals the nearest ally, the caster itself when alone: AscensionSunClericEvents.cpp:236-240, Amount(807750, 0, player) with the caster so spell mods apply) is read. spell_heal_total sums every heal event since the scenario started, so the second reading carries the first: (H + 2H) / H = 3.0 if the value is doubled, 2.0 if not (tolerance 0.15, the 5-point band on +100%). Both phases carry the class tuning aura 887015 alike. Crit forced out by 984954. Control: the phase without Soul of Light. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300327,
+      "name": "Swift Justice (ranged haste)",
+      "kind": "metric_delta",
+      "variant": "ranged_haste",
+      "label_suffix": "ranged_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 300327,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 2
+      },
+      "before_expected": 1000,
+      "expected": 943.3962,
+      "tolerance": 0.001,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "300327 Swift Justice Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 5 (+1 = 6, $s1). The ranged attack time (hand 2) is read after a Dawnsear 554406 cast, before and after the passive is learned, and judged as a ratio: 1 / 1.06 = 0.9434 (tolerance 0.001); the before reading must reach 1000. The first run read 2000 ms then 1886.79 ms, the ratio 0.9434: the ranged timer reads 2000 ms in this phase (the class file's wand 477 has delay 1800 ms in item_template; the read does not show it, so no base value is claimed). Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC.",
+      "expected_ratio": 0.9434
     }
   ],
   "player_observations": [],

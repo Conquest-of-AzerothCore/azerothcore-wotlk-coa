@@ -130,10 +130,10 @@
   {
     "spell": 300318,
     "clause": "Casting Sunslam now reduces the cooldown of Pendant of the Sun by $/1000;570145s2 sec.",
+    "kind": "claim",
     "labels": [
-      "300318 effect_value 570145e1 #0"
-    ],
-    "kind": "claim"
+      "300318 behaviour_metric_delta cooldown"
+    ]
   },
   {
     "spell": 300321,
@@ -178,10 +178,27 @@
   {
     "spell": 300327,
     "clause": "Increases your haste by $s1%.",
-    "labels": [
-      "300327 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your spell haste by $s1%",
+        "labels": [
+          "300327 behaviour_metric_delta spell_haste"
+        ]
+      },
+      {
+        "claim": "melee haste",
+        "labels": [
+          "300327 behaviour_metric_delta melee_haste"
+        ]
+      },
+      {
+        "claim": "ranged haste",
+        "labels": [
+          "300327 behaviour_metric_delta ranged_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 300329,
@@ -609,27 +626,48 @@
   {
     "spell": 301266,
     "clause": "Lasts $d.",
+    "kind": "claim",
     "labels": [
-      "301266 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+      "301266 behaviour_metric_delta duration"
+    ]
   },
   {
     "spell": 301266,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
-    "labels": [
-      "301266 effect_value 807175e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m2+$ppl2} Holyflame Damage",
+        "labels": [
+          "301266 behaviour_metric_delta flare_damage"
+        ]
+      },
+      {
+        "claim": "$SP*0.26",
+        "labels": [
+          "301266 behaviour_metric_delta flare_damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 301266,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
-    "labels": [
-      "301266 effect_value 807175e0 #2",
-      "301266 spell_duration 807175 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the target's chance to hit by $s1%",
+        "labels": [
+          "301266 behaviour_metric_delta flare_hit_chance"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "301266 behaviour_metric_delta flare_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 301267,
@@ -1184,12 +1222,18 @@
       {
         "claim": "Reduces the cast time of Dawnsear and Sunflare by $s1%",
         "labels": [
-          "560859 effect_value e0 #0"
+          "560859 behaviour_metric_delta dawnsear_held",
+          "560859 behaviour_metric_delta dawnsear_done",
+          "560859 behaviour_metric_delta sunflare_held",
+          "560859 behaviour_metric_delta sunflare_done"
         ]
       },
       {
         "claim": "and mana cost by $s1%",
-        "labels": []
+        "labels": [
+          "560859 behaviour_metric_delta dawnsear_cost",
+          "560859 behaviour_metric_delta sunflare_cost"
+        ]
       }
     ]
   },
@@ -1321,10 +1365,21 @@
   {
     "spell": 570120,
     "clause": "Increases your Strength and Intellect by $s1%.",
-    "labels": [
-      "570120 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength",
+        "labels": [
+          "570120 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and Intellect by $s1%",
+        "labels": [
+          "570120 behaviour_metric_delta intellect"
+        ]
+      }
+    ]
   },
   {
     "spell": 570223,
@@ -2280,10 +2335,11 @@
   {
     "spell": 704938,
     "clause": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+    "kind": "claim",
     "labels": [
-      "704938 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "704938 behaviour_hit_ratio ignores_armor",
+      "704938 behaviour_hit_ratio vow_inactive"
+    ]
   },
   {
     "spell": 704941,
@@ -2366,11 +2422,21 @@
   {
     "spell": 707077,
     "clause": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
-    "labels": [
-      "707077 effect_value 804405e0 #0",
-      "707077 spell_duration 804405 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Direct healing done now increases the target's Armor by $804405s1%",
+        "labels": [
+          "707077 behaviour_metric_delta armor"
+        ]
+      },
+      {
+        "claim": "for $804405d",
+        "labels": [
+          "707077 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 707078,
@@ -2416,10 +2482,12 @@
   {
     "spell": 707414,
     "clause": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+    "kind": "claim",
     "labels": [
-      "707414 effect_value 712380e0 #0"
-    ],
-    "kind": "claim"
+      "707414 behaviour_metric_delta radiance",
+      "707414 behaviour_metric_delta valkyrs_calling",
+      "707414 behaviour_metric_delta sunslam"
+    ]
   },
   {
     "spell": 707433,
@@ -2717,24 +2785,51 @@
   {
     "spell": 804057,
     "clause": "Calm an enemy, disarming their melee and ranged weapons for $d.",
-    "labels": [
-      "804057 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Calm an enemy, disarming their melee and ranged weapons",
+        "labels": [
+          "804057 behaviour_metric_delta disarm_humanoid"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804057 behaviour_metric_delta disarm_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 804057,
     "clause": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
-    "labels": [
-      "804057 spell_duration 807778 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "If your target is an Undead or Demon, they are also unable to attack or move",
+        "labels": [
+          "804057 behaviour_metric_delta undead_duration",
+          "804057 behaviour_metric_delta demon_effect",
+          "804057 behaviour_metric_delta humanoid_unaffected"
+        ]
+      },
+      {
+        "claim": "for $807778d",
+        "labels": [
+          "804057 behaviour_metric_delta undead_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 804057,
     "clause": "Enemies that are immune to silence effects cannot be affected by this.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "804057 behaviour_metric_delta silence_immune",
+      "804057 behaviour_metric_delta silence_immune_pacify"
+    ]
   },
   {
     "spell": 804247,
@@ -2900,18 +2995,29 @@
   {
     "spell": 804269,
     "clause": "Increases your melee attack power by $s1% of your Intellect",
-    "labels": [
-      "804269 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your melee attack power by $s1%",
+        "labels": [
+          "804269 behaviour_metric_delta attack_power"
+        ]
+      },
+      {
+        "claim": "of your Intellect",
+        "labels": [
+          "804269 behaviour_metric_delta attack_power_int"
+        ]
+      }
+    ]
   },
   {
     "spell": 804269,
     "clause": "and causes Gavel of Light to heal you for an additional $s2% of its damage dealt.",
+    "kind": "claim",
     "labels": [
-      "804269 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "804269 behaviour_metric_delta gavel_heal"
+    ]
   },
   {
     "spell": 804339,
@@ -3233,16 +3339,29 @@
   {
     "spell": 805816,
     "clause": "Damage that would take you below 35% health",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "805816 behaviour_hit_ratio crossing"
+    ]
   },
   {
     "spell": 805816,
     "clause": "and damage taken while below 35% health is reduced by $s1%.",
-    "labels": [
-      "805816 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "damage taken while below 35% health is reduced by $s1%",
+        "labels": [
+          "805816 behaviour_hit_ratio below"
+        ]
+      },
+      {
+        "claim": "not reduced above 35% health (control)",
+        "labels": [
+          "805816 behaviour_hit_ratio above"
+        ]
+      }
+    ]
   },
   {
     "spell": 806021,
@@ -3447,10 +3566,42 @@
   {
     "spell": 807372,
     "clause": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
-    "labels": [
-      "807372 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0} Fire damage to them",
+        "labels": [
+          "807372 behaviour_metric_delta damage"
+        ]
+      },
+      {
+        "claim": "$spfi*1.03734",
+        "labels": [
+          "807372 behaviour_metric_delta damage_sp"
+        ]
+      },
+      {
+        "claim": "and nearby enemies",
+        "labels": [
+          "807372 behaviour_metric_delta second_enemy",
+          "807372 behaviour_metric_delta second_enemy_primary"
+        ]
+      },
+      {
+        "claim": "piercing all immunities",
+        "labels": [
+          "807372 behaviour_metric_delta immune_fire",
+          "807372 behaviour_metric_delta immune_fire_control"
+        ]
+      },
+      {
+        "claim": "but dealing less damage with each enemy struck",
+        "labels": [
+          "807372 behaviour_metric_delta second_enemy",
+          "807372 behaviour_metric_delta second_enemy_primary"
+        ]
+      }
+    ]
   },
   {
     "spell": 806479,
@@ -3637,9 +3788,20 @@
   {
     "spell": 807964,
     "clause": "Reduces the cooldown of An'she's Blessing by $/1000;s1 sec and the value of Vow of Light is doubled.",
-    "labels": [
-      "807964 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of An'she's Blessing by $/1000;s1 sec",
+        "labels": [
+          "807964 behaviour_metric_delta cooldown"
+        ]
+      },
+      {
+        "claim": "and the value of Vow of Light is doubled",
+        "labels": [
+          "807964 behaviour_metric_delta vow_value"
+        ]
+      }
+    ]
   }
 ]
