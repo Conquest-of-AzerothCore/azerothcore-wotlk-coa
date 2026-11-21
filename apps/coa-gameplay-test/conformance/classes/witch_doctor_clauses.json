@@ -7961,30 +7961,11 @@
     "spell": 504608,
     "clause": "Curse an enemy, dealing ${$m2+$sps*0.08+$RAP*.1} Shadow damage",
     "labels": [
-      "504608 effect_value e1 #0"
+      "504608 effect_value e1 #0",
+      "504608 hit_mean"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The direct hit of Hex of Malice 504608 (Effect[1] SCHOOL_DAMAGE) shares the spell with a periodic effect, so the generated hit_mean refuses it (\"effects of several hit models: [periodic_damage, school]\", unmodelled in both final06 runs). A metric_delta read of the direct hit would be a hit_mean over a spell_damage_total with an after_at_least range at a set spell power (the Harvest Plague 583256 shape); not built here, a numeric formula of a few damage points (152.74 against the die 145 + 15 and the term 0.08 x spell power + 0.1 x ranged attack power). Tool note T-b13-6: hit_mean for a spell with a school and a periodic effect, reading the school effect only.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B7",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle7/author-B7-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#fix-round"
-        },
-        {
-          "agent": "cycle7/author-B7-fix2",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#fix-round-2"
-        },
-        {
-          "agent": "cycle9/author-B13",
-          "report": ".agents/plans/witch-doctor-conformance/cycle9/author-B13.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "The direct hit is judged by 504608 hit_mean since the cycle 10 tool build: the class file's rank_hit_effects names Effect[1] SCHOOL_DAMAGE for hit_mean and Effect[0] PERIODIC_DAMAGE for periodic_total (the Witch Hunter 501349 precedent), so the hit scenario reads only the direct hits (harness periodic false filter) against ${$m2+$sps*0.08+$RAP*.1}; the ticks are read by the periodic_total scenario (label 504608 effect_value #1) with the periodic true filter. Tool note T-b13-6 needed no new code."
   },
   {
     "spell": 504608,
@@ -7996,7 +7977,8 @@
         "claim": "and an additional $o1 Shadow damage",
         "labels": [
           "504608 behaviour_metric_delta tick",
-          "504608 behaviour_metric_delta total_ticks"
+          "504608 behaviour_metric_delta total_ticks",
+          "504608 effect_value #1"
         ]
       },
       {
@@ -8009,7 +7991,7 @@
         ]
       }
     ],
-    "reason": "The former label 504608 effect_value #1 (the total $o1, unmodelled: no value scenario for a periodic total) is dropped: the total is the tick (159.06 within 8, tick) times the number of ticks the cast gives over 24 s (7 at 23.4 s and 8 at 24.6 s, total_ticks), 8 x 159.06 = 1272.5, $o1 = 1272.46."
+    "reason": "The total is the tick (159.06 within 8, tick) times the number of ticks the cast gives over 24 s (7 at 23.4 s and 8 at 24.6 s, total_ticks), 8 x 159.06 = 1272.5, $o1 = 1272.46. Since the cycle 10 tool build the label 504608 effect_value #1 is the periodic_total scenario of the rank_hit_effects split (the ticks of Effect[0] read with the periodic true filter against $o1) and is linked again; it was dropped while it was unmodelled."
   },
   {
     "spell": 504608,

@@ -23973,5 +23973,12 @@
       "effect": 2,
       "reason": "AscensionWitchDoctorCompletion.cpp:372-375 sets Effect = 0 on every non-aura effect of Mojo: Frog Shrooms (effects 0 and 2)"
     }
-  ]
+  ],
+  "rank_hit_effects": {
+    "504608": {
+      "hit_mean": 1,
+      "periodic_total": 0,
+      "source": "DBC 504608 (Hex of Malice, the rank-58 top rank of 801693) Effect[1] 2 SCHOOL_DAMAGE owns $m2 of the direct hit ${$m2+$sps*0.08+$RAP*.1} (BasePoints 145, DieSides 15, per level 1.02); Effect[0] 6 with EffectApplyAuraName[0] 3 PERIODIC_DAMAGE, EffectAmplitude[0] 3000, owns $o1 of the periodic total; the direct hit is read with the harness periodic false filter, the ticks with periodic true (the Witch Hunter 501349 precedent)"
+    }
+  }
 }
