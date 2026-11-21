@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "X-53 Touring Rocket and Farseer's Raging Tempest mount in Stormwind (#11927, #12020, #12023)",
+  "contract": [
+    "Two reports (#11927, #12020): X-53 Touring Rocket 75973 is refused in Stormwind (\"Can't use that here\").",
+    "#12023: Farseer's - Raging Tempest (Fire) 530453 does not mount either. Expected for a level 60 rider with",
+    "Riding 150 at the Stormwind bank (-8697.7,479.9,95.4): each spell mounts the rider (mount display set)."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8697.71, "y": 479.867, "z": 95.3789, "o": 0},
+  "players": [
+    {"id": "rocket", "race": 1, "class": 25, "level": 60},
+    {"id": "tempest", "race": 1, "class": 25, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 2000},
+    {"action": "set_skill", "actor": "rocket", "skill": 762, "value": 150, "maximum": 150},
+    {"action": "set_skill", "actor": "tempest", "skill": 762, "value": 150, "maximum": 150},
+    {"action": "learn", "actor": "rocket", "spell": 75973},
+    {"action": "learn", "actor": "tempest", "spell": 530453},
+    {"action": "cast", "actor": "rocket", "spell": 75973},
+    {"action": "cast", "actor": "tempest", "spell": 530453},
+    {"action": "assert", "label": "X-53 is not refused", "actor": "rocket", "metric": "cast_failure", "spell": 75973,
+     "equals": 0, "within_ms": 4000},
+    {"action": "assert", "label": "Raging Tempest is not refused", "actor": "tempest", "metric": "cast_failure",
+     "spell": 530453, "equals": 0, "within_ms": 4000},
+    {"action": "wait", "label": "Both mounts have a cast time", "ms": 2500},
+    {"action": "assert", "label": "the rider sits on the X-53", "actor": "rocket", "metric": "mount_display_id",
+     "min": 1},
+    {"action": "assert", "label": "the rider sits on the Raging Tempest", "actor": "tempest",
+     "metric": "mount_display_id", "min": 1}
+  ]
+}

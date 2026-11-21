@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "name": "Manastorm: a group member who leaves the run loses the gadget buffs (#11363)",
+  "contract": [
+    "Player report (#11363): Manastorm gadget buffs stayed on players after they left the run. The solo case is",
+    "manastorm-leave-clears-gadget-buffs-11363. A group member leaves through LeaveRunMember instead, which now",
+    "keeps the gadget auras until the return teleport succeeds, so a failed teleport rolls the member back with the",
+    "buffs intact. This Duo case covers the successful path: n2 casts Long Haul Liquid (293453) inside the run,",
+    "leaves through the native leave request (1637) and must lose the aura while keeping an ordinary buff (Arcane",
+    "Intellect 1459). n1 stays in the run, so the run itself does not end."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n1",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "n2",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n2",
+      "spell": 293453
+    },
+    {
+      "action": "client_packet",
+      "label": "n2 slots Long Haul Liquid in loadout slot 0",
+      "actor": "n2",
+      "opcode": 1673,
+      "early": false,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "u32": 293453
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2's loadout request is accepted",
+      "actor": "n2",
+      "metric": "server_packet_contains",
+      "opcode": 1674,
+      "text": "SET_MANASTORM_LOADOUT_OK",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Give n2 an ordinary saved buff as the control",
+      "actor": "n2",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "group",
+      "label": "n2 joins n1's group so the run starts in Duo mode",
+      "actor": "n1",
+      "target": "n2"
+    },
+    {
+      "action": "command",
+      "actor": "n1",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "n1 entered the private Manastorm instance",
+      "actor": "n1",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "n2 entered the private Manastorm instance",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "n2 casts Long Haul Liquid inside the run",
+      "actor": "n2",
+      "spell": 293453
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 has the Long Haul Liquid aura",
+      "actor": "n2",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "n2 leaves the run through the native leave request",
+      "actor": "n2",
+      "opcode": 1637,
+      "early": false
+    },
+    {
+      "action": "assert",
+      "label": "n2 left the private instance",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the group run removes n2's Long Haul Liquid aura",
+      "actor": "n2",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n2 keeps the ordinary buff",
+      "actor": "n2",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n1 is still in the run, so n2 left as a member and the run did not end",
+      "actor": "n1",
+      "metric": "private_instance",
+      "equals": 1
+    }
+  ]
+}

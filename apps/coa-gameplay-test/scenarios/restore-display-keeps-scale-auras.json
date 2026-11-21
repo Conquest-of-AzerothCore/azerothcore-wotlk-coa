@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "A creature keeps its scale auras when a transform ends",
+  "contract": [
+    "Unit::RestoreDisplayId puts a creature back on its native model at its native scale. A scale aura on it, such as",
+    "Tiny 80087 (-90 %), must stay in effect when a transform such as Polymorph 118 ends; before, the restore set the",
+    "scale to the native value alone and dropped the aura's part."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0},
+  "players": [{"id": "hero", "race": 1, "class": 1, "level": 60}],
+  "creatures": [{"id": "mob", "owner": "hero", "entry": 4295, "distance": 4, "faction": 35, "level": 60}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"label": "CONTROL: the creature stands at scale 1", "action": "assert", "actor": "mob", "metric": "object_scale",
+     "min": 0.99, "max": 1.01},
+    {"action": "set_aura", "actor": "hero", "target": "mob", "spell": 80087, "stacks": 1},
+    {"label": "CONTROL: Tiny shrinks it to 0.1", "action": "assert", "actor": "mob", "metric": "object_scale",
+     "min": 0.09, "max": 0.11},
+    {"action": "set_aura", "actor": "hero", "target": "mob", "spell": 118, "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "target": "mob", "spell": 118, "stacks": 0},
+    {"label": "DISCRIMINATING: after the Polymorph ends it is still at 0.1", "action": "assert", "actor": "mob",
+     "metric": "object_scale", "min": 0.09, "max": 0.11}
+  ]
+}

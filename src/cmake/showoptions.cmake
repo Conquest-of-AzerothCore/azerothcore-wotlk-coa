@@ -26,7 +26,6 @@ if( UNIX )
 endif()
 
 message("* Install configs to              : ${CONF_DIR}")
-add_definitions(-D_CONF_DIR=$<1:"${CONF_DIR}">)
 
 message("")
 

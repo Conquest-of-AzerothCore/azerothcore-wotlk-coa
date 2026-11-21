@@ -33,6 +33,11 @@ Manastorm.WeeklyCacheLockout.Limit = 5
 # Individual progression affixes still require their matching native unlock/toast; those depths are unchanged.
 Manastorm.AffixMinimumLevel = 50
 
+# Multiplies all Manastorm experience: stage creature kill XP (after the depth/native modifiers) and the
+# floor completion XP earned from now on. 0.3 grants 30% (a 70% reduction), 1.0 the full amount, 0 none.
+# Negative or invalid values log an error and fall back to 0.3. Reloadable.
+Manastorm.ExperienceRate = 0.3
+
 # 1 = caches follow Ascension.CallboardCache.ReleaseStage in coa.conf:
 # 0 Normal Dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Zul'Gurub, 4 Molten Core ... 8 Naxxramas.
 # A closed cache tier falls back to the highest eligible lower bracket; DB depth/unlock requirements still apply.
@@ -61,13 +66,14 @@ Manastorm.Objective.NativeHighlight = 0
 # AscensionCompat.Enable / remote-client admission remain core connection settings.
 
 # Client UI fixes pushed as Lua 5 seconds after login (Mode 2 only, no client files).
+# Only clients with the hot-patch channel (docs/coa/client-hot-patch.md) receive them.
 # Bitmask, 0 = off and the stock client UI is left unchanged:
 #   1 = the group finder keybind also opens inside a Manastorm run
 #   2 = reward icons anchor below the Potential Rewards divider
 #   4 = the queue panel handles an empty enterable-level list and uncached reward items
 #   8 = the loadout flyout hides when there are no loadout spells
 #  15 = all of the above
-# A /reload drops them until the next login.
+# The client reruns them after a /reload.
 Manastorm.ClientUIFixes = 0
 
 # Native Mobility covers all 36 listed class spell families automatically in Mode 2.

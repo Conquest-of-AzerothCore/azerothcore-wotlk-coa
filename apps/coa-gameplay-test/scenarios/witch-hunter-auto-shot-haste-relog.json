@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Auto Shot's +15% ranged attack speed survives relogs, login hooks and reconnects (O-21)",
+  "contract": "Auto Shot 75 reads 'Increases your ranged Attack Speed by 15%.' for a holder of 552011, which the live baseline grants to the Witch Hunter (owner ruling O-21, mentor D-127). Witch Hunter code applies it through Unit::ApplyAttackTimePercentMod(RANGED_ATTACK, 15, apply), the call an aura 140 of amount 15 makes, so the ranged base attack time (UNIT_FIELD_BASEATTACKTIME + 2) is the weapon delay x 100 / 115. A CustomData flag makes the sync idempotent on login, learn and forget. Every assert window is the expected value +-1 ms; it excludes the lost bonus (the weapon delay) and a doubled bonus (delay x (100 / 115)^2 = delay / 1.3225). Weapon delays: Old Blunderbuss 2508 2300 ms, Light Crossbow 15807 2500 ms, Heavy Crossbow 15809 2800 ms (item_template delay). The bonus must hold once after two relogs (native save and login), a replayed login hook on the same Player and a reconnect to the character in the world (no hook); forgetting Auto Shot removes it and learning it again restores it.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "gun",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "xbow",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Guns skill",
+      "actor": "gun",
+      "spell": 266
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill",
+      "actor": "gun",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "gun",
+      "item": 2508
+    },
+    {
+      "action": "equip",
+      "actor": "gun",
+      "item": 2508,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "label": "Guns skill",
+      "actor": "xbow",
+      "spell": 266
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill",
+      "actor": "xbow",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "xbow",
+      "item": 15809
+    },
+    {
+      "action": "equip",
+      "actor": "xbow",
+      "item": 15809,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Gun after setup: 2300 x 100 / 115 = 2000.00 ms (lost: 2300, doubled: 1739.13)",
+      "actor": "gun",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crossbow after setup: 2800 x 100 / 115 = 2434.78 ms (lost: 2800, doubled: 2117.20)",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "label": "First relog",
+      "actor": "gun"
+    },
+    {
+      "action": "relog",
+      "label": "First relog",
+      "actor": "xbow"
+    },
+    {
+      "action": "assert",
+      "label": "Gun after the first relog: 2300 x 100 / 115 = 2000.00 ms (lost: 2300, doubled: 1739.13)",
+      "actor": "gun",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crossbow after the first relog: 2800 x 100 / 115 = 2434.78 ms (lost: 2800, doubled: 2117.20)",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "label": "Second relog",
+      "actor": "gun"
+    },
+    {
+      "action": "relog",
+      "label": "Second relog",
+      "actor": "xbow"
+    },
+    {
+      "action": "assert",
+      "label": "Gun after the second relog: 2300 x 100 / 115 = 2000.00 ms (lost: 2300, doubled: 1739.13)",
+      "actor": "gun",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crossbow after the second relog: 2800 x 100 / 115 = 2434.78 ms (lost: 2800, doubled: 2117.20)",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    },
+    {
+      "action": "login_hooks",
+      "label": "Replay the login hooks on the same Player",
+      "actor": "gun"
+    },
+    {
+      "action": "login_hooks",
+      "label": "Replay the login hooks on the same Player",
+      "actor": "xbow"
+    },
+    {
+      "action": "assert",
+      "label": "Gun after a replayed login hook: 2300 x 100 / 115 = 2000.00 ms (lost: 2300, doubled: 1739.13)",
+      "actor": "gun",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crossbow after a replayed login hook: 2800 x 100 / 115 = 2434.78 ms (lost: 2800, doubled: 2117.20)",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    },
+    {
+      "action": "reconnect",
+      "label": "Reconnect to the character still in the world",
+      "actor": "gun"
+    },
+    {
+      "action": "reconnect",
+      "label": "Reconnect to the character still in the world",
+      "actor": "xbow"
+    },
+    {
+      "action": "assert",
+      "label": "Gun after a reconnect: 2300 x 100 / 115 = 2000.00 ms (lost: 2300, doubled: 1739.13)",
+      "actor": "gun",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crossbow after a reconnect: 2800 x 100 / 115 = 2434.78 ms (lost: 2800, doubled: 2117.20)",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "label": "Forget Auto Shot",
+      "actor": "xbow",
+      "spell": 75
+    },
+    {
+      "action": "assert",
+      "label": "Without Auto Shot the crossbow swings at its delay, 2800 ms",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2799,
+      "max": 2801,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Auto Shot again",
+      "actor": "xbow",
+      "spell": 75
+    },
+    {
+      "action": "assert",
+      "label": "With Auto Shot again: 2800 x 100 / 115 = 2434.78 ms",
+      "actor": "xbow",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+CREATE TABLE IF NOT EXISTS `coa_client_world_map_area` (
+  `ID` INT NOT NULL,
+  `MapID` INT NOT NULL DEFAULT 0,
+  `AreaID` INT NOT NULL DEFAULT 0,
+  `AreaName` VARCHAR(100) NOT NULL DEFAULT '',
+  `LocLeft` FLOAT NOT NULL DEFAULT 0,
+  `LocRight` FLOAT NOT NULL DEFAULT 0,
+  `LocTop` FLOAT NOT NULL DEFAULT 0,
+  `LocBottom` FLOAT NOT NULL DEFAULT 0,
+  `DisplayMapID` INT NOT NULL DEFAULT -1,
+  `DefaultDungeonFloor` INT NOT NULL DEFAULT 0,
+  `ParentWorldMapID` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `coa_client_world_map_overlay` (
+  `ID` INT NOT NULL,
+  `MapAreaID` INT NOT NULL DEFAULT 0,
+  `AreaID_1` INT NOT NULL DEFAULT 0,
+  `AreaID_2` INT NOT NULL DEFAULT 0,
+  `AreaID_3` INT NOT NULL DEFAULT 0,
+  `AreaID_4` INT NOT NULL DEFAULT 0,
+  `MapPointX` INT NOT NULL DEFAULT 0,
+  `MapPointY` INT NOT NULL DEFAULT 0,
+  `TextureName` VARCHAR(100) NOT NULL DEFAULT '',
+  `TextureWidth` INT NOT NULL DEFAULT 0,
+  `TextureHeight` INT NOT NULL DEFAULT 0,
+  `OffsetX` INT NOT NULL DEFAULT 0,
+  `OffsetY` INT NOT NULL DEFAULT 0,
+  `HitRectTop` INT NOT NULL DEFAULT 0,
+  `HitRectLeft` INT NOT NULL DEFAULT 0,
+  `HitRectBottom` INT NOT NULL DEFAULT 0,
+  `HitRectRight` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DELETE FROM `coa_client_world_map_area` WHERE `ID` IN (3044);
+INSERT INTO `coa_client_world_map_area` (`ID`, `MapID`, `AreaID`, `AreaName`, `LocLeft`, `LocRight`, `LocTop`, `LocBottom`, `DisplayMapID`, `DefaultDungeonFloor`, `ParentWorldMapID`) VALUES
+(3044, 4418, 36, 'Alterac', 783, -2016, 1500, -366, -1, 0, 0);
+
+DELETE FROM `coa_client_world_map_overlay` WHERE `ID` IN (2964, 2965, 2966, 2967, 2968, 2969, 2970, 2971, 2972, 2973, 2974, 2975, 2976, 2977, 2978);
+INSERT INTO `coa_client_world_map_overlay` (`ID`, `MapAreaID`, `AreaID_1`, `AreaID_2`, `AreaID_3`, `AreaID_4`, `MapPointX`, `MapPointY`, `TextureName`, `TextureWidth`, `TextureHeight`, `OffsetX`, `OffsetY`, `HitRectTop`, `HitRectLeft`, `HitRectBottom`, `HitRectRight`) VALUES
+(2964, 3044, 1684, 3486, 0, 0, 0, 0, 'CHILLWINDPOINT', 350, 370, 626, 253, 330, 730, 560, 915),
+(2965, 3044, 1679, 0, 0, 0, 0, 0, 'CORRAHNSDAGGER', 195, 288, 399, 380, 495, 435, 625, 530),
+(2966, 3044, 282, 283, 0, 0, 0, 0, 'CRUSHRIDGEHOLD', 280, 240, 334, 162, 215, 435, 345, 535),
+(2967, 3044, 279, 0, 0, 0, 0, 0, 'DALARAN', 300, 300, 26, 262, 360, 75, 520, 230),
+(2968, 3044, 1682, 0, 0, 0, 0, 0, 'DANDREDSFOLD', 285, 230, 276, 0, 70, 370, 160, 440),
+(2969, 3044, 1357, 0, 0, 0, 0, 0, 'GALLOWSCORNER', 200, 200, 406, 279, 355, 460, 430, 545),
+(2970, 3044, 1677, 0, 0, 0, 0, 0, 'GAVINSNAZE', 160, 175, 225, 478, 525, 270, 620, 345),
+(2971, 3044, 1683, 0, 0, 0, 0, 0, 'GROWLESSCAVE', 190, 170, 317, 372, 420, 345, 505, 450),
+(2972, 3044, 278, 0, 0, 0, 0, 0, 'LORDAMEREINTERNMENTCAMP', 330, 265, 44, 403, 525, 160, 610, 250),
+(2973, 3044, 1681, 0, 0, 0, 0, 0, 'MISTYSHORE', 220, 280, 196, 131, 190, 220, 315, 345),
+(2974, 3044, 281, 0, 0, 0, 0, 0, 'RUINSOFALTERAC', 255, 255, 270, 197, 295, 330, 420, 470),
+(2975, 3044, 1678, 0, 0, 0, 0, 0, 'SOFERASNAZE', 255, 320, 462, 307, 415, 540, 505, 630),
+(2976, 3044, 280, 0, 0, 0, 0, 0, 'STRAHNBRAD', 370, 300, 549, 105, 255, 570, 350, 700),
+(2977, 3044, 1680, 0, 0, 0, 0, 0, 'THEHEADLAND', 165, 197, 314, 471, 545, 345, 660, 435),
+(2978, 3044, 284, 0, 0, 0, 0, 0, 'THEUPLANDS', 235, 200, 462, 77, 120, 500, 245, 630);

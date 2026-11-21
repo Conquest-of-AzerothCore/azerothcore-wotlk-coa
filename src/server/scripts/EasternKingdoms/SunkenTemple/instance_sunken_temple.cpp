@@ -128,7 +128,7 @@ public:
             if (creature->IsAlive() && creature->GetSpawnId() && creature->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && creature->GetEntry() != NPC_SHADE_OF_ERANIKUS)
                 _dragonkinList.push_back(creature->GetGUID());
 
-            // The creatures the Avatar of Hakkar event summons fixate on the player who started it.
+            // The creatures the Avatar of Hakkar event summons attack the player who started it on spawn.
             switch (creature->GetEntry())
             {
                 case NPC_HAKKARI_BLOODKEEPER:
@@ -158,7 +158,6 @@ public:
                 return;
 
             creature->EngageWithTarget(activator);
-            creature->GetThreatMgr().FixateTarget(activator);
             creature->AI()->AttackStart(activator);
         }
 
@@ -349,6 +348,13 @@ public:
                 case DATA_AWAKEN_SOULFLAYER:
                     AwakenSoulflayer();
                     return;
+                case DATA_SANCTUM_DRAGONS:
+                    if (!AreSanctumDragonsReleased())
+                    {
+                        _eranikusWardensKilled |= SanctumDragonsReleased;
+                        ReleaseSanctumDragons();
+                    }
+                    break;
                 case DATA_DEFENDER_KILLED:
                     ++_defendersKilled;
                     if (_defendersKilled == DEFENDERS_COUNT)
@@ -390,6 +396,8 @@ public:
                     return _statuePhase;
                 case DATA_DEFENDER_KILLED:
                     return DEFENDERS_COUNT;
+                case DATA_SANCTUM_DRAGONS:
+                    return AreSanctumDragonsReleased() ? 1 : 0;
                 case TYPE_ATAL_ALARION:
                 case TYPE_JAMMAL_AN:
                 case TYPE_HAKKAR_EVENT:

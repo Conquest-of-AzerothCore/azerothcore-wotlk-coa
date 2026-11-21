@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "Gameplay fixtures: min_level_armor pins a ranged template's armor to its lowest level",
+  "contract": [
+    "Harvest Golem 36 has minlevel 11 and maxlevel 12, so each spawn rolls level 11 or 12 and native armor 528 or 562",
+    "(creature_classlevelstats class 1 basearmor times ArmorModifier 1). With min_level_armor every level-60 fixture",
+    "must read the level-11 armor 528 after SetLevel; all eleven reading 528 by chance alone has probability 0.5^11.",
+    "The control, Zulian Cub 11360 (minlevel = maxlevel = 60, ArmorModifier 1.1, basearmor 3750 at level 60), carries",
+    "the field too and must keep its native armor ceil(3750 x 1.1) = 4125: a fixed-level template does not move."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem6",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem7",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem8",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem9",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem10",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "golem11",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    },
+    {
+      "id": "control",
+      "owner": "caster",
+      "entry": 11360,
+      "level": 60,
+      "faction": 14,
+      "distance": 5,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "golem1",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem2",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem3",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem4",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem5",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem6",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem7",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem8",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem9",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem10",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "golem11",
+      "metric": "armor",
+      "equals": 528
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "armor",
+      "equals": 4125
+    }
+  ]
+}

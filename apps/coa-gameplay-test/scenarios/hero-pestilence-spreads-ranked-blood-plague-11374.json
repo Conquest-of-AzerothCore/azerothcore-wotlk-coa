@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Pestilence spreads the Blood Plague rank the target carries (#11374)",
+  "contract": [
+    "SpellRank.dbc loads Blood Plague as a chain (55078, then 61951 to 61961), and each Plague Strike rank applies its",
+    "own rank: Plague Strike rank 5 46498 applies Blood Plague 61954. Pestilence 50842 spreads the caster's diseases",
+    "from its target to enemies within 10 yards. A WildCard Hero who infects d1 with Plague Strike 46498 and Icy Touch",
+    "45477 (Frost Fever 55095) and then casts Pestilence on d1 gives d2, 2 yards from d1, Blood Plague 61954 and Frost",
+    "Fever 55095 from the Hero, and not Blood Plague rank 1 55078. The 10000 hit and expertise ratings remove misses,",
+    "dodges and parries, so every cast lands."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 10, "level": 36, "allow_regeneration": false, "spell_hit_rating": 10000,
+     "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "d1", "owner": "p", "entry": 36, "level": 36, "health": 1000000, "distance": 2, "reaction": 0,
+     "stationary": true},
+    {"id": "d2", "owner": "p", "entry": 36, "level": 36, "health": 1000000, "distance": 4, "reaction": 0,
+     "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "p", "spell": 201},
+    {"action": "add_item", "actor": "p", "item": 25},
+    {"action": "equip", "actor": "p", "item": 25, "slot": 15},
+    {"action": "learn", "actor": "p", "spell": 46498},
+    {"action": "learn", "actor": "p", "spell": 45477},
+    {"action": "learn", "actor": "p", "spell": 50842},
+    {"action": "wait", "ms": 11000},
+    {"action": "cast", "actor": "p", "spell": 46498, "target": "d1"},
+    {"action": "assert", "label": "Plague Strike rank 5 applies Blood Plague 61954", "actor": "d1", "metric": "aura",
+     "spell": 61954, "caster": "p", "equals": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "actor": "p", "spell": 45477, "target": "d1"},
+    {"action": "assert", "label": "Icy Touch applies Frost Fever", "actor": "d1", "metric": "aura", "spell": 55095,
+     "caster": "p", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "d2 starts without Blood Plague", "actor": "d2", "metric": "aura", "spell": 61954,
+     "caster": "p", "equals": 0},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "actor": "p", "spell": 50842, "target": "d1"},
+    {"action": "assert", "label": "CONTROL: Pestilence spreads Frost Fever", "actor": "d2", "metric": "aura",
+     "spell": 55095, "caster": "p", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: Pestilence spreads the Blood Plague rank d1 carries",
+     "actor": "d2", "metric": "aura", "spell": 61954, "caster": "p", "equals": 1},
+    {"action": "assert", "label": "Pestilence does not apply Blood Plague rank 1", "actor": "d2", "metric": "aura",
+     "spell": 55078, "caster": "p", "equals": 0}
+  ]
+}

@@ -35,6 +35,7 @@ struct Service
     std::map<uint32, VanityInfo> _vanityItems{
         {97393, {92453, VANITY_CATEGORY_COMPANIONS}},
         {99999, {12345, VANITY_CATEGORY_COMPANIONS}}};
+    static bool IsBrokenCompanionSpell(uint32) { return false; }
     COMPANION_METHOD
 };
 void Require(bool value) { if (!value) throw std::runtime_error("companion ownership assertion failed"); }

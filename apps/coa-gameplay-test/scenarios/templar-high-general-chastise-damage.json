@@ -1,0 +1,774 @@
+{
+  "schema": 1,
+  "name": "High General doubles the direct damage of the Chastise that consumes Scarlet Champion",
+  "contract": "High General 524617 reads 'Your next Chastise consumes all stacks of Scarlet Champion to deal $s1% increased direct damage, and be guaranteed to critically strike.' The server DBC gives e0 BasePoints 99, DieSides 1, so $s1 = 100 and the consuming Chastise 803157 deals x2.0. Two level 60 Templars with forced critical strikes each cast Chastise eight times at their own level 60 dummy with one Oath Chain 704576 stack, which Chastise requires, and 5 stacks of Scarlet Champion 805416; only one also holds High General before each cast. Both hold beeg spellpen 823764, whose ToolTip reads '$s1 $s2' over an empty Description (e0 aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, permanent), so Unit::GetEffectiveResistChance clamps the dummy's Holy resistance to 0 and no hit is partially resisted: the resisted amount of every Chastise log is 0 in both arms. Both totals hold the stacks' Holy damage bonus, which applies at launch before the stacks are consumed, so the critical-strike totals compare 2.0 (1.9-2.1); the former x1.5 gives 1.5.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "spell_crit_rating": 100000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "general",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "spell_crit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_general",
+      "owner": "general",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "add_item",
+      "actor": "general",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "general",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803157,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 805416,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 524617,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "general",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "general",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "general",
+      "spell": 803157,
+      "target": "dummy_general"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Chastise hits land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "High General is consumed by Chastise",
+      "actor": "general",
+      "metric": "aura",
+      "spell": 524617,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "High General's Chastise consumes all stacks of Scarlet Champion",
+      "actor": "general",
+      "metric": "aura",
+      "spell": 805416,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Champion stays without High General",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 805416,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Every control Chastise lands as a critical strike",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 803157,
+      "target": "dummy_control",
+      "critical": true,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No control Chastise lands without a critical strike",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 803157,
+      "target": "dummy_control",
+      "critical": false,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every general Chastise lands as a critical strike",
+      "actor": "general",
+      "metric": "spell_damage_count",
+      "spell": 803157,
+      "target": "dummy_general",
+      "critical": true,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No general Chastise lands without a critical strike",
+      "actor": "general",
+      "metric": "spell_damage_count",
+      "spell": 803157,
+      "target": "dummy_general",
+      "critical": false,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every control Chastise leaves a damage log",
+      "actor": "control",
+      "metric": "spell_log_count",
+      "spell": 803157,
+      "target": "dummy_control",
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No control Chastise is partially resisted",
+      "actor": "control",
+      "metric": "spell_resist_total",
+      "spell": 803157,
+      "target": "dummy_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every general Chastise leaves a damage log",
+      "actor": "general",
+      "metric": "spell_log_count",
+      "spell": 803157,
+      "target": "dummy_general",
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No general Chastise is partially resisted",
+      "actor": "general",
+      "metric": "spell_resist_total",
+      "spell": 803157,
+      "target": "dummy_general",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 803157,
+      "target": "dummy_control",
+      "critical": true,
+      "save_as": "control_crits"
+    },
+    {
+      "action": "assert",
+      "label": "High General's Chastise deals 100% increased direct damage",
+      "actor": "general",
+      "metric": "spell_damage_total",
+      "spell": 803157,
+      "target": "dummy_general",
+      "critical": true,
+      "ratio_to": "control_crits",
+      "min": 1.9,
+      "max": 2.1
+    }
+  ]
+}

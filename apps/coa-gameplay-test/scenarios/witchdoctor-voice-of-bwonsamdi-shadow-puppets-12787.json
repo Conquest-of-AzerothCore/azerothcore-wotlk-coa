@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Voice of Bwonsamdi explodes on Shadow Puppet hits (#12787)",
+  "contract": [
+    "#12787: Shadow Puppets did not trigger Voice of Bwonsamdi. Voice 801716 reads 'Dealing periodic damage",
+    "unleashes a trapped voodoo spirit at enemies', and Shadow Puppets 500015 is a periodic aura whose ticks fire",
+    "Shadow Puppet 802745 at the target every 750 ms. The server sends those bolts as direct magic-class damage,",
+    "so Voice's periodic-only proc flags never saw them. With Voice active and nothing else dealing damage, the",
+    "Witch Doctor must deal Trapped Spirits 504452 damage to the target after Shadow Puppets lands. Before Shadow",
+    "Puppets there is no 504452 damage, so the explosions come from the puppet hits."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wd",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wd",
+      "entry": 36,
+      "level": 60,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 500015
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 801716
+    },
+    {
+      "action": "cast",
+      "label": "Voice of Bwonsamdi",
+      "actor": "wd",
+      "spell": 801716,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "label": "Voice of Bwonsamdi is active",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 801716,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Control: no Trapped Spirits damage before Shadow Puppets",
+      "actor": "wd",
+      "metric": "spell_damage_count",
+      "spell": 504452,
+      "target": "e",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Puppets",
+      "actor": "wd",
+      "spell": 500015,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "The puppet bolts hit the target",
+      "actor": "wd",
+      "metric": "spell_damage_count",
+      "spell": 802745,
+      "target": "e",
+      "min": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "#12787: the puppet hits unleash Trapped Spirits",
+      "actor": "wd",
+      "metric": "spell_damage_count",
+      "spell": 504452,
+      "target": "e",
+      "min": 1,
+      "within_ms": 4500
+    }
+  ]
+}

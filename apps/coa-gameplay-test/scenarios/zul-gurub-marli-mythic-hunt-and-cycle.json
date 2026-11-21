@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Mythic Mar'li hunts for 21 s after her Burrow and burrows every 58 s",
+  "contract": [
+    "In the CoA Mythic log of 2026-08-04 Mar'li's (14510) spider cycle of Web Spray, Burrow (2118140) and Poison",
+    "Shock (2118145) comes every 58.5 s, against 45-46 s in the Normal logs, and Bronzebeard Ascended of 2025-12-21",
+    "gives 56-58 s; the round-5 change uses 58 s on Mythic and Ascended. Poison Shock starts about 1.8 s after she",
+    "comes up (both logs), and on Mythic she then stays on non-tanks for 12-19 s before the tank gets her back.",
+    "The hunt therefore lasts 21 s from the emerge on Mythic and Ascended (Normal and Heroic keep the tester's 8 s).",
+    "A Mythic group of a tank and an archer about 30 yards away fights her. After the first Burrow she must come up",
+    "on the archer with Menacing Gaze (2118141), cast Poison Shock, still hold the archer 12 s after coming up",
+    "(the 8 s hunt would be over), let go and return to the tank, and not burrow again before 50 s have passed",
+    "since the first Burrow, then burrow again within 62 s."
+  ],
+  "timeout_ms": 200000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 2,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "archer",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "tank",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "archer"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "archer",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is in Zul'Gurub on Mythic",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14510,
+      "as": "marli",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages Mar'li",
+      "actor": "tank",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "The tank builds threat",
+      "ms": 4000
+    },
+    {
+      "action": "attack",
+      "label": "The archer hits her too",
+      "actor": "archer",
+      "target": "marli"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "archer"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Mar'li below half health",
+      "actor": "tank",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights in her spider form",
+      "actor": "marli",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "relocate",
+      "label": "The archer steps back about 15 yards",
+      "actor": "archer",
+      "dx": -10.15,
+      "dy": -12.955,
+      "dz": -0.665
+    },
+    {
+      "action": "relocate",
+      "label": "and about 15 more",
+      "actor": "archer",
+      "dx": -10.15,
+      "dy": -12.955,
+      "dz": -0.665
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the archer is the one farther from her",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "marli",
+      "min": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank holds her before she burrows",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li burrows 20.5 s into her spider form",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118140,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: under ground she shows the Hide Body display",
+      "actor": "marli",
+      "metric": "display_id",
+      "equals": 22452,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she comes up gazing at the farthest player",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and attacks the archer, not the tank with more threat",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "archer",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank carries no gaze",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she casts Poison Shock after coming up",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118145,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "About 12 s pass since she came up",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she is still on the archer after the 8 s hunt of Normal",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "archer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: who still carries the gaze",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the gaze ends 21 s after she came up",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 0,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and she returns to the tank",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "About 50 s pass since the first Burrow",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no second Burrow on the 45 s cycle of Normal",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118140,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second Burrow comes on the 58 s cycle",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118140,
+      "min": 2,
+      "within_ms": 14000
+    }
+  ]
+}

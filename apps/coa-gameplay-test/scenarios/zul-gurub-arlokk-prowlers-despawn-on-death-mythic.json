@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk's Zulian Prowlers leave when she dies on Mythic",
+  "contract": [
+    "The round-6 tester (Mythic): Arlokk's adds do not die after her death. On live every Zulian Prowler (15101)",
+    "still up when she dies stops acting at once and never logs a death (six pulls, Normal, Mythic and Ascended):",
+    "they despawn. The panther triggers (15091) summon the prowlers, so her own summon list never holds them.",
+    "Here a warrior hero pulls Arlokk at the Zul'Gurub entrance on Mythic, two prowlers without a summoner join",
+    "her, and she is killed: no prowler may be left within 60 yards shortly after her death."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Mythic",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk before she walks back to her temple",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "summon",
+      "label": "A prowler from a panther trigger, not owned by Arlokk",
+      "actor": "hero",
+      "entry": 15101,
+      "as": "prowler_one",
+      "distance": 6,
+      "unowned": true
+    },
+    {
+      "action": "summon",
+      "label": "A second prowler, not owned by Arlokk",
+      "actor": "hero",
+      "entry": 15101,
+      "as": "prowler_two",
+      "distance": 8,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both prowlers are up",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15101,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Arlokk",
+      "actor": "hero",
+      "entry": 14515,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk is dead",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14515,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no prowler is left after her death",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15101,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Claws of Hell refreshes Unleash Apocalypse through Flames of Xoroth and Hellrider (#12134)",
+  "contract": "Claws of Hell 805706 reads 'When you spend at least 4 Demonfire stacks you now refresh the duration of your Unleash Apocalypse on the target.' Unleash Apocalypse 560817 lasts 8 s (DurationIndex 31). Flames of Xoroth (802411 at level 20) hits a cone (TARGET_UNIT_CONE_ENEMY_24) and Hellrider 803889 is a self buff, so neither cast keeps an explicit unit target; for them the target is the knight's current selection. The dummy carries the knight's Unleash Apocalypse and stays selected. A Flames of Xoroth that spends 3 Demonfire leaves the shortened aura alone; one that spends 4 refreshes it to its full 8 s, and so does a 4-stack Hellrider. Spell hit rating 10000 keeps a miss from refunding the Demonfire.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 20, "spell_hit_rating": 10000, "melee_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 20, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 802411 },
+    { "action": "learn", "actor": "knight", "spell": 803889 },
+    { "action": "learn", "actor": "knight", "spell": 805706 },
+    { "action": "set_aura", "actor": "knight", "spell": 805706, "stacks": 1, "label": "Force the Claws of Hell passive aura" },
+    { "action": "select", "actor": "knight", "target": "dummy" },
+    { "action": "set_aura", "actor": "knight", "target": "dummy", "caster": "knight", "spell": 560817, "stacks": 1, "label": "The knight's Unleash Apocalypse on the dummy" },
+    { "action": "assert", "label": "SETUP: Unleash Apocalypse starts at 8 s", "actor": "dummy", "metric": "aura_duration_ms", "spell": 560817, "caster": "knight", "min": 7500, "max": 8000 },
+    { "action": "wait", "label": "Let the aura run down", "ms": 3000 },
+
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 3, "label": "Three Demonfire stacks" },
+    { "action": "cast_no_target", "label": "Flames of Xoroth spending 3 Demonfire", "actor": "knight", "spell": 802411 },
+    { "action": "assert", "label": "SETUP: Flames of Xoroth hit the dummy", "actor": "knight", "metric": "spell_damage_count", "spell": 802411, "target": "dummy", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: 3 Demonfire does not refresh Unleash Apocalypse", "actor": "dummy", "metric": "aura_duration_ms", "spell": 560817, "caster": "knight", "max": 5500 },
+
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 4, "label": "Four Demonfire stacks" },
+    { "action": "cast_no_target", "label": "Flames of Xoroth spending 4 Demonfire", "actor": "knight", "spell": 802411 },
+    { "action": "assert", "label": "SETUP: the second Flames of Xoroth hit the dummy", "actor": "knight", "metric": "spell_damage_count", "spell": 802411, "target": "dummy", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Flames of Xoroth with 4 Demonfire refreshes Unleash Apocalypse", "actor": "dummy", "metric": "aura_duration_ms", "spell": 560817, "caster": "knight", "min": 7000, "max": 8000 },
+
+    { "action": "wait", "label": "Let the aura run down again", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Unleash Apocalypse is short again", "actor": "dummy", "metric": "aura_duration_ms", "spell": 560817, "caster": "knight", "max": 5500 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 4, "label": "Four Demonfire stacks" },
+    { "action": "cast_no_target", "label": "Hellrider spending 4 Demonfire", "actor": "knight", "spell": 803889 },
+    { "action": "assert", "label": "SETUP: Hellrider is active", "actor": "knight", "metric": "aura", "spell": 803889, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Hellrider with 4 Demonfire refreshes Unleash Apocalypse on the selected target", "actor": "dummy", "metric": "aura_duration_ms", "spell": 560817, "caster": "knight", "min": 7000, "max": 8000 }
+  ]
+}

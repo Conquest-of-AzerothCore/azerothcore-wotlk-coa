@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Mandokir's Decapitate and Mortal Strike cannot be dodged or parried",
+  "contract": [
+    "In the live logs Mandokir's (11382) Decapitate (2118410) landed 12 of 12 and the hit of his Mortal Strike",
+    "(2118402) about 123 of 123, with no dodge, parry or miss, while the same tanks dodged about 45 % of his",
+    "swings. The DBC flags neither spell as unavoidable, so the server rolled dodge and parry for both. The hero",
+    "faces a level-63 attacker and carries Evasion (5277). The native melee spell roll is sampled 512 times: an",
+    "ordinary melee spell (Heroic Strike, 78) is dodged or parried, while Decapitate and Mortal Strike never are."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "attacker", "owner": "hero", "entry": 36, "level": 63, "faction": 14, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "teleport", "actor": "hero", "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0
+    },
+    { "action": "set_aura", "actor": "hero", "spell": 5277, "stacks": 1 },
+    {
+      "action": "assert", "label": "CONTROL: Evasion gives the hero a high dodge chance", "actor": "hero",
+      "metric": "dodge_chance", "min": 40
+    },
+    {
+      "action": "assert", "label": "CONTROL: an ordinary melee spell is dodged or parried", "actor": "attacker",
+      "metric": "avoidance_samples", "target": "hero", "spell": 78, "id": 5, "min": 100
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Decapitate is never dodged or parried", "actor": "attacker",
+      "metric": "avoidance_samples", "target": "hero", "spell": 2118410, "id": 5, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Mortal Strike is never dodged or parried", "actor": "attacker",
+      "metric": "avoidance_samples", "target": "hero", "spell": 2118402, "id": 5, "equals": 0
+    }
+  ]
+}

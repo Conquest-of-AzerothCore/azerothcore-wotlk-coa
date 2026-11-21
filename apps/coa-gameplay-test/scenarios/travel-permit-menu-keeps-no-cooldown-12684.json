@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Opening the Travel Permit menu without travelling leaves no cooldown (#12684)",
+  "contract": [
+    "Report #12684: right-clicking the Travel Permit 977028 to look at its destinations put it on its 5 minute",
+    "cooldown (item_template spellcooldown 300000 on spell 1001088) even when the player chose nothing. The",
+    "permit is destroyed by the teleport itself (item_ascension_travel_permit::OnGossipSelect), so the cooldown",
+    "can only ever block a player who opened the menu and closed it. The spell script now clears the spell's",
+    "cooldown once the menu is open. A level 1 Orc opens the menu: it lists the Horde starts, the permit",
+    "is still carried and has no cooldown, so a second use opens the menu again; choosing Durotar then",
+    "teleports to Kalimdor and consumes the permit."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "orc", "race": 2, "class": 20, "level": 1 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    { "action": "assert", "label": "SETUP: the Orc starts in the Eastern Kingdoms", "actor": "orc", "metric": "map_id", "equals": 0 },
+    { "action": "assert", "label": "SETUP: a level 1 character is granted one Travel Permit at login", "actor": "orc", "metric": "item_count", "item": 977028, "equals": 1, "within_ms": 2000 },
+    { "action": "use_item", "label": "The Orc opens the permit", "actor": "orc", "item": 977028, "spell": 1001088 },
+    { "action": "wait", "label": "Let the destination menu open", "ms": 2000 },
+    { "action": "assert", "label": "SETUP: the destination menu is open", "actor": "orc", "metric": "gossip_options", "min": 3 },
+    { "action": "assert", "label": "SETUP: the permit is still carried", "actor": "orc", "metric": "item_count", "item": 977028, "equals": 1 },
+    { "action": "assert", "label": "FIX: looking at the menu leaves no cooldown", "actor": "orc", "metric": "cooldown_ms", "spell": 1001088, "equals": 0 },
+
+    { "action": "use_item", "label": "The Orc opens the permit again", "actor": "orc", "item": 977028, "spell": 1001088 },
+    { "action": "wait", "label": "Let the destination menu open again", "ms": 2000 },
+    { "action": "assert", "label": "FIX: the second use is accepted", "actor": "orc", "metric": "cast_failure", "spell": 1001088, "equals": 0 },
+    { "action": "assert", "label": "FIX: the menu opens again", "actor": "orc", "metric": "gossip_options", "min": 3 },
+    { "action": "gossip_select", "label": "The Orc travels to Durotar", "actor": "orc", "option": 1 },
+    { "action": "assert", "label": "Travelling still teleports to Kalimdor", "actor": "orc", "metric": "map_id", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Travelling still consumes the permit", "actor": "orc", "metric": "item_count", "item": 977028, "equals": 0, "within_ms": 2000 }
+  ]
+}

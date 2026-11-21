@@ -52,10 +52,12 @@ enum UnitHook
     UNITHOOK_ON_SEND_AURA_UPDATE,
     UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE,
     UNITHOOK_CAN_UNIT_ATTACK,
+    UNITHOOK_CAN_UNIT_ASSIST,
     UNITHOOK_SPELL_MAGNET_TARGET,
     UNITHOOK_RESOLVE_SPELL_CAST,
     UNITHOOK_ON_HEALTH_CHANGED,
     UNITHOOK_MODIFY_MELEE_DAMAGE_RANGE,
+    UNITHOOK_ON_UPDATE_RUN_SPEED,
     UNITHOOK_END
 };
 
@@ -104,6 +106,10 @@ public:
     // Called with a melee swing's damage range before the roll
     virtual void ModifyMeleeDamageRange(Unit* /*target*/, Unit* /*attacker*/, float& /*minDamage*/, float& /*maxDamage*/) { }
 
+    // Called with the run speed modifiers before slows are applied
+    virtual void OnUnitUpdateRunSpeed(Unit* /*unit*/, int32& /*mainSpeedMod*/, float& /*stackBonus*/,
+        float& /*nonStackBonus*/) { }
+
     // Called when Spell Damage is being Dealt
     virtual void ModifySpellDamageTaken(Unit* /*target*/, Unit* /*attacker*/, int32& /*damage*/, SpellInfo const* /*spellInfo*/) { }
 
@@ -133,6 +139,8 @@ public:
 
     [[nodiscard]] virtual bool IfNormalReaction(Unit const* /*unit*/, Unit const* /*target*/, ReputationRank& /*repRank*/) { return true; }
     [[nodiscard]] virtual bool CanUnitAttack(Unit const* /*attacker*/, Unit const* /*target*/,
+        SpellInfo const* /*spell*/) { return true; }
+    [[nodiscard]] virtual bool CanUnitAssist(Unit const* /*assister*/, Unit const* /*target*/,
         SpellInfo const* /*spell*/) { return true; }
     virtual Unit* SpellMagnetTarget(Unit* /*attacker*/, Unit* /*victim*/, SpellInfo const* /*spell*/) { return nullptr; }
 

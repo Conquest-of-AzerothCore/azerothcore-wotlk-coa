@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Delusions vision alone lets its target see the Shade of Jin'do",
+  "contract": [
+    "The Shade of Jin'do (14986) hides under its own invisibility (24307). The Delusions vision (2118511)",
+    "now lets its carrier see the shade, so the curse needs no third debuff for it (testers 2026-11-16:",
+    "three Delusions debuffs, two in the live logs). The cursed player summons the shade in the fight, as",
+    "the hero does here; it stays hidden without the vision, shows while the hero carries it and hides",
+    "again once the vision ends, by expiry or dispel alike. Before this change the vision alone revealed",
+    "nothing, so the second assertion discriminates."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 309,
+    "x": -11515.8,
+    "y": -1275.48,
+    "z": 79.6621,
+    "o": 3.15905,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "label": "The hero summons a Shade of Jin'do",
+      "actor": "hero",
+      "entry": 14986,
+      "as": "shade",
+      "distance": 5
+    },
+    {
+      "action": "wait",
+      "label": "Let the shade take its invisibility",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shade carries its invisibility",
+      "actor": "shade",
+      "metric": "aura",
+      "spell": 24307,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shade is hidden without the vision",
+      "actor": "hero",
+      "metric": "can_detect",
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Give the hero the Delusions vision",
+      "actor": "hero",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the vision reveals the shade",
+      "actor": "hero",
+      "metric": "can_detect",
+      "target": "shade",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the vision alone, without a third debuff",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 24306,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "End the vision",
+      "actor": "hero",
+      "spell": 2118511,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "the shade hides again once the vision ends",
+      "actor": "hero",
+      "metric": "can_detect",
+      "target": "shade",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

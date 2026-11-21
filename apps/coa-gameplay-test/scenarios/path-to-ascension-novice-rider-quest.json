@@ -5,7 +5,9 @@
     "Live CoA: the racial riding trainer offers 'Path to Ascension: Novice Rider' with the objective 'Learn how to ride and claim your first mount.' and the race's starter mount as its reward; the Path to Ascension book pays its own reward separately.",
     "Quests 4420430-4420439 (Tutorial.dbc 110-119, Human 110 -> 4420430) are ordinary quests: Novice Riding (33379) gives their kill credit 445303 and the turn-in gives the race's starter mount (Human: item 5656, mount spell 458).",
     "Tutorial 110 is verified once its quest is rewarded and the mount spell is known; its claim stays a separate reward.",
-    "Replaces the #6444 expectation that the quest is hidden: that held only while no trainer taught Novice Riding and the starter mount bridge was the tutorial's only mount source."
+    "Replaces the #6444 expectation that the quest is hidden: that held only while no trainer taught Novice Riding and the starter mount bridge was the tutorial's only mount source.",
+    "CoA.MaxRidingFromStart (default 1) grants every riding rank at login, and accepting the quest credits",
+    "a rider who already has Riding (762), so the rider forgets Riding before taking the quest."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -21,6 +23,14 @@
     {
       "action": "assert", "label": "The Orc variant is not offered to a Human",
       "actor": "rider", "metric": "quest_takeable", "quest": 4420431, "equals": 0
+    },
+    {
+      "action": "set_skill", "label": "Forget the riding granted at login", "actor": "rider", "skill": 762,
+      "value": 0, "maximum": 1
+    },
+    {
+      "action": "assert", "label": "The rider has no Riding skill",
+      "actor": "rider", "metric": "skill_value", "skill": 762, "equals": 0
     },
     { "action": "prepare_quest", "label": "Take the quest", "actor": "rider", "quest": 4420430, "complete": false },
     {

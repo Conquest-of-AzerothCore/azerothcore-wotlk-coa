@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "In Fear of Death world spawns in Tarren Mill keep their own guids and gossip credit (#12765, #12770, #12750)",
+  "contract": [
+    "Issues #12765 and #12770 report no credit from the Tarren Mill tower mages of quest 1377. The Hillsbrad restore",
+    "(rev_20261027_84) and the Defias Tower spawns (rev_20261103_00) both used creature guids 9950700-9950729: in",
+    "filename order the Defias replaced the 30 Hillsbrad spawns, in arrival order the Hillsbrad NPCs took the Defias",
+    "per-guid SmartAI, which replaces their entry GOSSIP_HELLO credit. rev_20261119_12765 moves the Hillsbrad spawns to",
+    "9951000-9951029 at the positions #9583 placed. Asteria 9951015, Morninglare 9951017, Lestern 9951018, Krenna 9951019",
+    "and Vorman 9951020 must load at those positions (0.5 yd), Defias Looter 9950717 and Trapper 9950720 must stay at",
+    "the Westfall tower, and talking to each world-spawned mage while 1377 is taken must credit its own objective",
+    "(RequiredNpcOrGo1-4) and complete the quest."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": 32.58, "y": -916.13, "z": 72.93, "o": 0},
+  "players": [
+    {"id": "p", "race": 5, "class": 1, "level": 38}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase", "actor": "p", "value": 1},
+    {"action": "wait", "label": "Let the tower spawns load", "ms": 2500},
+    {"action": "assert", "label": "DISCRIMINATING: Asteria the Soulcleaver 9951015 is spawned on the tower roof", "actor": "p", "metric": "spawn_distance", "guid": 9951015, "spawn_type": "creature", "x": 36.8, "y": -918.5, "z": 96.7, "max": 0.5},
+    {"action": "assert", "label": "DISCRIMINATING: Magister Morninglare 9951017 is spawned on the tower roof", "actor": "p", "metric": "spawn_distance", "guid": 9951017, "spawn_type": "creature", "x": 44.1, "y": -907.2, "z": 96.8, "max": 0.5},
+    {"action": "assert", "label": "DISCRIMINATING: Bergamont Lestern 9951018 is spawned in the tower", "actor": "p", "metric": "spawn_distance", "guid": 9951018, "spawn_type": "creature", "x": 27.9, "y": -911.3, "z": 62.4, "max": 0.5},
+    {"action": "assert", "label": "DISCRIMINATING: Shadowmage Krenna 9951019 is spawned in the tower", "actor": "p", "metric": "spawn_distance", "guid": 9951019, "spawn_type": "creature", "x": 26.0, "y": -931.7, "z": 88.1, "max": 0.5},
+    {"action": "assert", "label": "DISCRIMINATING: Shadowmage Vorman 9951020 is spawned in the tower", "actor": "p", "metric": "spawn_distance", "guid": 9951020, "spawn_type": "creature", "x": 31.5, "y": -905.5, "z": 72.7, "max": 0.5},
+    {"action": "assert", "label": "Defias Looter 9950717 stays inside the Westfall Defias Tower", "actor": "p", "metric": "spawn_distance", "guid": 9950717, "spawn_type": "creature", "x": -10249.897, "y": 1782.4937, "z": 39.45528, "max": 0.5},
+    {"action": "assert", "label": "Defias Trapper 9950720 stays outside the Westfall Defias Tower", "actor": "p", "metric": "spawn_distance", "guid": 9950720, "spawn_type": "creature", "x": -10231.011, "y": 1792.8549, "z": 37.00253, "max": 0.5},
+    {"action": "prepare_quest", "label": "Take In Fear of Death", "actor": "p", "quest": 1377, "complete": false},
+    {"action": "gossip_hello", "label": "Talk to the world-spawned Shadowmage Vorman", "actor": "p", "entry": 312405},
+    {"action": "assert", "label": "DISCRIMINATING: Vorman's objective is credited", "actor": "p", "metric": "quest_objective_count", "quest": 1377, "index": 2, "equals": 1, "within_ms": 3000},
+    {"action": "gossip_hello", "label": "Talk to the world-spawned Bergamont Lestern", "actor": "p", "entry": 312402},
+    {"action": "assert", "label": "DISCRIMINATING: Lestern's objective is credited", "actor": "p", "metric": "quest_objective_count", "quest": 1377, "index": 3, "equals": 1, "within_ms": 3000},
+    {"action": "gossip_hello", "label": "Talk to the world-spawned Shadowmage Krenna", "actor": "p", "entry": 312406},
+    {"action": "assert", "label": "DISCRIMINATING: Krenna's objective is credited", "actor": "p", "metric": "quest_objective_count", "quest": 1377, "index": 1, "equals": 1, "within_ms": 3000},
+    {"action": "gossip_hello", "label": "Talk to the world-spawned Magister Morninglare", "actor": "p", "entry": 312439},
+    {"action": "assert", "label": "DISCRIMINATING: Morninglare's objective is credited", "actor": "p", "metric": "quest_objective_count", "quest": 1377, "index": 0, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The four talks complete the quest", "actor": "p", "metric": "quest_status", "quest": 1377, "equals": 1, "within_ms": 3000}
+  ]
+}

@@ -37,7 +37,9 @@ def main():
     client = source('src/server/shared/DataStores/ClientDBC.cpp')
     crafting = method(source('src/server/game/Spells/SpellEffects.cpp'), 'void Spell::DoCreateItem(')
     assert crafting.index('StoreNewItem(') < crafting.index('sScriptMgr->OnPlayerCreateItem(player, pItem, addNumber);')
-    constants = ['APPEARANCE_CATEGORY_COUNT', 'SMSG_APPEARANCE_ADDED', 'SMSG_VANITY_COLLECTION_ADDED']
+    constants = ['APPEARANCE_CATEGORY_COUNT', 'SMSG_APPEARANCE_ADDED', 'SMSG_VANITY_COLLECTION_ADDED', 'REALM_TYPE_COUNT',
+                 'INCARNATION_KIND_FORM', 'INCARNATION_KIND_CREATURE', 'INCARNATION_KIND_HIDDEN_FORM',
+                 'VANITY_CATEGORY_CONSUMABLE']
     if 'APPEARANCE_CATEGORY_SHADOWHOUND' in compat:
         constants.append('APPEARANCE_CATEGORY_SHADOWHOUND')
     replacements = {
@@ -55,7 +57,8 @@ def main():
             (shared, 'enum SpellEffects'), (player_header, 'enum PlayerHook'),
             (player_header, 'enum class CoAProgressEvent'))),
         'RECORDS': '\n'.join(method(compat, signature) + ';' for signature in (
-            'struct AppearanceInfo', 'struct VanityInfo', 'struct PlayerCollectionState')),
+            'struct VanityPrice', 'struct AppearanceInfo', 'struct CosmeticPetCategory', 'struct IncarnationCategory',
+            'struct VanityInfo', 'struct PlayerCollectionState')),
         'CLIENT_DBC': '\n'.join(method(client, signature) for signature in (
             'uint32 ReadHeaderField(', 'std::string_view ClientDBC::Record::GetStringAt(',
             'bool ClientDBC::Load(', 'ClientDBC::Record ClientDBC::GetRecord(')),
@@ -69,6 +72,10 @@ def main():
         ('LOAD', 'bool LoadClientData()'), ('GET_STATE', 'std::shared_ptr<PlayerCollectionState> GetState('),
         ('OBTAINED', 'void OnItemObtained('), ('IS_EQUIPMENT', 'static bool IsEquipmentAppearance('),
         ('COLLECT_APPEARANCE', 'void CollectItemAppearance('), ('COLLECT_ITEM', 'void CollectItem('),
+        ('VANITY_FOR_PLAYER', '[[nodiscard]] static bool IsVanityItemForPlayer(Player const* player, VanityInfo const& vanity)'),
+        ('CONSUMABLE_VANITY', '[[nodiscard]] static bool IsConsumableVanityItem(VanityInfo const& vanity)'),
+        ('ITEM_ROW_ON_DEMAND', 'void SendWoodworkingItemAppearanceOnDemand('),
+        ('ITEM_ROW', 'static void SendWoodworkingItemAppearanceRow('),
         ('SEND_ADDED', 'void SendAppearanceAdded('),
     ):
         replacements[marker] = method(service, signature)

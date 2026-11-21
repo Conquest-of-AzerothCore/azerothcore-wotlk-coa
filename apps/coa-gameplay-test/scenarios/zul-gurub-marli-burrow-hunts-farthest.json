@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Mar'li comes up from her Burrow on the player farthest from her",
+  "name": "Zul'Gurub: High Priestess Mar'li comes up from her Burrow at the player farthest from her",
   "contract": [
     "The tester of 2026-11-04 (live): when Mar'li comes up from Burrow (2118140) she goes for the player farthest",
     "from her, not a random one, and stays fixed on them for 8 s. In her spider form Burrow is cast 20.5 s after the",
@@ -10,7 +10,9 @@
     "hunted, for the whole 8 s however much threat the tank holds, and return to the tank once they are over.",
     "The tester of 2026-11-08 (live): the hunt cannot be taunted, so the tank's Hand of Reckoning (62124) during it",
     "leaves her on the archer. Under ground she shows the Hide Body display 22452 (Burrow's misc value, creature",
-    "24417, as Kurinnaxx's Tunneling) and comes up in her spider display 15226 again."
+    "24417, as Kurinnaxx's Tunneling) and comes up in her spider display 15226 again. The tester of 2026-11-12:",
+    "she comes up at her fixated player, not where she burrowed, so the archer 30 yards off has her within 5 yards",
+    "the moment the gaze lands."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -209,6 +211,14 @@
       "spell": 2118141,
       "equals": 1,
       "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she comes up where the archer stands, not where she burrowed",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "marli",
+      "max": 5
     },
     {
       "action": "assert",

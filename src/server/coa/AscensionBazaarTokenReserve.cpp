@@ -3,6 +3,8 @@
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
+#include "Item.h"
+#include "Mail.h"
 #include "Player.h"
 #include "StringFormat.h"
 #include "WorldSession.h"
@@ -74,6 +76,22 @@ uint32 CountMail(std::string const& where)
         "JOIN `characters` c ON c.`guid` = m.`receiver` "
         "WHERE ii.`itemEntry` = {} AND {}", AscensionBazaarTokenReserve::TOKEN_ITEM, where));
 }
+
+uint32 CountOwnMail(Player* player)
+{
+    uint32 count = 0;
+    for (Mail const* mail : player->GetMails())
+    {
+        if (mail->state == MAIL_STATE_DELETED)
+            continue;
+
+        for (MailItemInfo const& info : mail->items)
+            if (Item* item = player->GetMItem(info.item_guid))
+                if (item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                    count += item->GetCount();
+    }
+    return count;
+}
 }
 
 bool AscensionBazaarTokenReserve::IsEnabled()
@@ -89,10 +107,15 @@ uint32 AscensionBazaarTokenReserve::GetReserve(uint32 accountId)
 
 void AscensionBazaarTokenReserve::AddReserve(Player* player, uint32 count)
 {
-    if (!player || !player->GetSession() || !count || !IsEnabled())
+    if (player && player->GetSession())
+        AddReserve(player->GetSession()->GetAccountId(), count);
+}
+
+void AscensionBazaarTokenReserve::AddReserve(uint32 accountId, uint32 count)
+{
+    if (!accountId || !count || !IsEnabled())
         return;
 
-    uint32 const accountId = player->GetSession()->GetAccountId();
     std::lock_guard<std::mutex> guard(reserveLock);
     Store(accountId, ReserveRef(accountId) + count);
 }
@@ -117,9 +140,9 @@ uint32 AscensionBazaarTokenReserve::CountAccountTokens(Player* player)
     uint32 const accountId = player->GetSession()->GetAccountId();
     uint32 const lowGuid = player->GetGUID().GetCounter();
 
-    return player->GetItemCount(TOKEN_ITEM, true)
-        + CountInventory(Acore::StringFormat("c.`account` = {} AND c.`guid` <> {}", accountId, lowGuid))
-        + CountMail(Acore::StringFormat("c.`account` = {}", accountId));
+    std::string const otherCharacters = Acore::StringFormat("c.`account` = {} AND c.`guid` <> {}", accountId, lowGuid);
+    return player->GetItemCount(TOKEN_ITEM, true) + CountOwnMail(player)
+        + CountInventory(otherCharacters) + CountMail(otherCharacters);
 }
 
 bool AscensionBazaarTokenReserve::CanGiveAway(Player* player, uint32 count)
@@ -142,8 +165,8 @@ void AscensionBazaarTokenReserve::SendRefusal(Player* player)
 
     uint32 const reserve = GetReserve(player->GetSession()->GetAccountId());
     ChatHandler(player->GetSession()).PSendSysMessage(
-        "{} of your Bazaar Tokens came from the Elite Warchest and are Realm Bound: spend them or mail them to your "
-        "own characters. Only the tokens above that amount can be given to other players.", reserve);
+        "{} of your Bazaar Tokens are Realm Bound: spend them or mail them to your own characters. Only the tokens "
+        "above that amount can be given to other players.", reserve);
 }
 
 AscensionBazaarTokenReserve::SpendScope::SpendScope(Player* player, uint32 itemEntry)

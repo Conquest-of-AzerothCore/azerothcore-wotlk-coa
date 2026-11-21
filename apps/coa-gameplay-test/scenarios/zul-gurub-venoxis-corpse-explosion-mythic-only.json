@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priest Venoxis casts Corpse Explosion on Mythic, not on Normal",
+  "contract": [
+    "Corpse Explosion (2118045) belongs to Mythic and Ascended only (round-5 tester: the Mythic and Ascended",
+    "mechanics). The live logs show its first cast 19.9-21.4 s after Poisonous Fangs (2118025), which starts",
+    "the snake form, so Venoxis (14507) casts it 20 s into his snake form, every 40 s after. A Normal and a",
+    "Mythic hero each fight one Venoxis alone, summoned at the entrance away from his avatar, so the snake form",
+    "(Aspect of Hethiss 2118023) comes at once at half health. The Mythic Venoxis casts it between 15 and",
+    "25 s into the form; the Normal one never does."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal hero is on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero is on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 14507,
+      "as": "venoxis_normal",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14507,
+      "as": "venoxis_mythic",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Normal Venoxis",
+      "actor": "normal",
+      "target": "venoxis_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Venoxis fights",
+      "actor": "venoxis_normal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "normal"
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Mythic Venoxis",
+      "actor": "mythic",
+      "target": "venoxis_mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Venoxis fights",
+      "actor": "venoxis_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the Normal Venoxis below half health",
+      "actor": "normal",
+      "entry": 14507,
+      "pct": 45
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the Mythic Venoxis below half health",
+      "actor": "mythic",
+      "entry": 14507,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Venoxis takes his snake form",
+      "actor": "venoxis_normal",
+      "metric": "aura",
+      "spell": 2118023,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Venoxis takes his snake form",
+      "actor": "venoxis_mythic",
+      "metric": "aura",
+      "spell": 2118023,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Corpse Explosion early in the snake form",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14507,
+      "spell": 2118045,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Fifteen of the 20 s pass",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: still none before 20 s",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14507,
+      "spell": 2118045,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Venoxis casts Corpse Explosion 20 s into his snake form",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14507,
+      "spell": 2118045,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Past the Normal Venoxis's 20 s mark too",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Venoxis still fights in his snake form",
+      "actor": "venoxis_normal",
+      "metric": "aura",
+      "spell": 2118023,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Venoxis never casts Corpse Explosion",
+      "actor": "normal",
+      "metric": "spell_go_count",
+      "entry": 14507,
+      "spell": 2118045,
+      "equals": 0
+    }
+  ]
+}

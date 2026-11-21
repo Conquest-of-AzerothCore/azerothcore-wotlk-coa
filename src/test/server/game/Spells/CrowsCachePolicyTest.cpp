@@ -1,13 +1,14 @@
 #include "AscensionCrowsCachePolicy.h"
 #include <gtest/gtest.h>
 
-TEST(CrowsCache, OnlyLivingHighRiskLevelSixtyPlayersCanClaim)
+TEST(CrowsCache, OnlyLivingHighRiskMercenariesAtLevelSixtyCanClaim)
 {
-    EXPECT_TRUE(CrowsCache::Eligible(60, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(59, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(61, true, true));
-    EXPECT_FALSE(CrowsCache::Eligible(60, false, true));
-    EXPECT_FALSE(CrowsCache::Eligible(60, true, false));
+    EXPECT_TRUE(CrowsCache::Eligible(60, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(59, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(61, true, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, false, true, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, true, false, true));
+    EXPECT_FALSE(CrowsCache::Eligible(60, true, true, false));
 }
 
 TEST(CrowsCache, OriginalChestRequiresCompletedCastButDeathDropIsInstant)
@@ -95,4 +96,50 @@ TEST(CrowsCache, StartsFromMythicDungeonsWithThreeRewards)
 TEST(CrowsCache, OpeningGivesFourHundredBazaarTokensByDefault)
 {
     EXPECT_EQ(CrowsCache::DefaultBazaarTokens, 400u);
+}
+
+TEST(CrowsCache, WallCoversChestCarriedAndDroppedOnly)
+{
+    using CrowsCache::Phase;
+    EXPECT_FALSE(CrowsCache::WallPhase(Phase::Schedule));
+    EXPECT_FALSE(CrowsCache::WallPhase(Phase::Warning));
+    EXPECT_TRUE(CrowsCache::WallPhase(Phase::Available));
+    EXPECT_TRUE(CrowsCache::WallPhase(Phase::Carried));
+    EXPECT_TRUE(CrowsCache::WallPhase(Phase::Dropped));
+}
+
+TEST(CrowsCache, WallSeparatesMercenariesFromOthersOnlyNearACache)
+{
+    EXPECT_TRUE(CrowsCache::Walled(true, false, true));
+    EXPECT_TRUE(CrowsCache::Walled(false, true, true));
+    EXPECT_FALSE(CrowsCache::Walled(true, false, false));
+    EXPECT_FALSE(CrowsCache::Walled(true, true, true));
+    EXPECT_FALSE(CrowsCache::Walled(false, false, true));
+}
+
+TEST(CrowsCache, CarrierCannotBlinkButCanBePulled)
+{
+    EXPECT_TRUE(CrowsCache::RefuseMovement(true, true, false));
+    EXPECT_FALSE(CrowsCache::RefuseMovement(true, true, true));
+    EXPECT_FALSE(CrowsCache::RefuseMovement(true, false, false));
+    EXPECT_FALSE(CrowsCache::RefuseMovement(false, true, false));
+}
+
+TEST(CrowsCache, OnlyTheCarriersOwnImmunityDropsTheCache)
+{
+    EXPECT_TRUE(CrowsCache::ImmunityDrops(true, true, true));
+    EXPECT_FALSE(CrowsCache::ImmunityDrops(true, true, false));
+    EXPECT_FALSE(CrowsCache::ImmunityDrops(true, false, true));
+    EXPECT_FALSE(CrowsCache::ImmunityDrops(false, true, true));
+}
+
+TEST(CrowsCache, LosingEitherModeOrLeavingTheMapDropsTheCache)
+{
+    EXPECT_FALSE(CrowsCache::ModeDrops(true, true, true));
+    EXPECT_TRUE(CrowsCache::ModeDrops(true, false, true));
+    EXPECT_TRUE(CrowsCache::ModeDrops(true, true, false));
+    EXPECT_FALSE(CrowsCache::ModeDrops(false, false, false));
+    EXPECT_FALSE(CrowsCache::LeftCacheMap(1, 1, false));
+    EXPECT_TRUE(CrowsCache::LeftCacheMap(1, 0, false));
+    EXPECT_TRUE(CrowsCache::LeftCacheMap(1, 1, true));
 }

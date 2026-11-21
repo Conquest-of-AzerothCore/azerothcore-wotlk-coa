@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "AscensionFreepick.h"
 #include <algorithm>
+#include <cmath>
 #include "Log.h"
 #include "ManastormReleaseStage.h"
 
@@ -12,6 +13,8 @@ namespace ManastormModuleConfig
     {
         bool enabled = true;
         uint8 affixMinimumLevel = 50;
+        constexpr double DefaultExperienceRate = 0.3;
+        double experienceRate = DefaultExperienceRate;
         bool weeklyCacheLockoutEnabled = true;
         uint32 weeklyCacheLockoutLimit = 5;
         bool coaLootModeEnabled = false;
@@ -48,6 +51,13 @@ namespace ManastormModuleConfig
         if (requestedLimit < 0 || requestedLimit > 255)
             LOG_ERROR("module.manastorm.endless", "Invalid Manastorm.WeeklyCacheLockout.Limit={}; "
                 "expected 0..255, using 5.", requestedLimit);
+        float const requestedRate =
+            sConfigMgr->GetOption<float>("Manastorm.ExperienceRate", float(DefaultExperienceRate));
+        bool const validRate = std::isfinite(requestedRate) && requestedRate >= 0.0f;
+        experienceRate = validRate ? double(requestedRate) : DefaultExperienceRate;
+        if (!validRate)
+            LOG_ERROR("module.manastorm.endless", "Invalid Manastorm.ExperienceRate={}; expected 0 or more, using {}.",
+                requestedRate, DefaultExperienceRate);
         uint32 const requestedMode = sConfigMgr->GetOption<uint32>("Manastorm.ClientMode", 2);
         followReleaseStage = sConfigMgr->GetOption<bool>("Manastorm.FollowReleaseStage", false);
         objectiveRaidSkull = sConfigMgr->GetOption<bool>("Manastorm.Objective.RaidSkull", true);
@@ -89,6 +99,8 @@ namespace ManastormModuleConfig
     {
         return affixMinimumLevel;
     }
+
+    double ExperienceRate() { return experienceRate; }
 
     bool Enabled()
     {

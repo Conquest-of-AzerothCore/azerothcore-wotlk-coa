@@ -99,6 +99,7 @@ class spell_ascension_travel_permit : public SpellScript
         Item* item = GetCastItem();
         if (!item || CheckTravel(player) != SPELL_CAST_OK)
             return;
+        player->RemoveSpellCooldown(GetSpellInfo()->Id, true);
         ClearGossipMenuFor(player);
         for (uint32 i = 0; i < Destinations.size(); ++i)
             if (IsOffered(player, Destinations[i]))

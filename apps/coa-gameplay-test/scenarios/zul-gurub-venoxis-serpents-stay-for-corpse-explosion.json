@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Parasitic Serpents stay until killed and Corpse Explosion bursts their corpses",
+  "contract": [
+    "Round-7 tester (2026-11-14): Venoxis's Parasitic Serpents (14884) vanished without being killed, so Corpse",
+    "Explosion (2118045) found nothing. The stock SmartAI proc Parasitic Serpent (23867 -> 23865) made each serpent",
+    "evade and despawn on its first melee hit. On Mythic the three serpents of an expired Parasitic Poison",
+    "(2118043, the Mythic tier of SpellDifficulty row 2338: 2118041-2118044) melee the hero and all stay alive;",
+    "one killed serpent leaves a corpse that the 20 s Corpse Explosion turns into an Acid Burst and an Acid Pool from",
+    "a trigger (12999), cast in Venoxis's name; on Mythic they hit the hero as their SpellDifficulty tiers (row 2339:",
+    "Acid Burst 2118078 -> 2118080; row 2340: Acid Pool 2118082 -> 2118084). The hero never carries the",
+    "stock 23865 bite. The survivors are counted before the next poison (every 15 s, 12 s long) breaks out."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is on Mythic",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14507,
+      "as": "venoxis",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Venoxis",
+      "actor": "hero",
+      "target": "venoxis"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis fights",
+      "actor": "venoxis",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Venoxis below half health",
+      "actor": "hero",
+      "entry": 14507,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis takes his snake form",
+      "actor": "venoxis",
+      "metric": "aura",
+      "spell": 2118023,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis casts Parasitic Poison",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14507,
+      "spell": 2118040,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Parasitic Poison lands on the hero",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118043,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the poison runs out",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118043,
+      "equals": 0,
+      "within_ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: three Parasitic Serpents break out of the hero",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14884,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill one serpent",
+      "actor": "hero",
+      "entry": 14884,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: two serpents are left",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14884,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis casts Corpse Explosion 20 s into his snake form",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14507,
+      "spell": 2118045,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the serpent corpse bursts into the Mythic Acid Burst on the hero",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "venoxis",
+      "spell": 2118080,
+      "target": "hero",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Acid Pool it leaves burns the hero",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "venoxis",
+      "spell": 2118084,
+      "target": "hero",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "The two serpents keep biting the hero until just before the next poison runs out",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both living serpents are still there",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14884,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the stock serpent bite never lands",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 23865,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the serpents still fight",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

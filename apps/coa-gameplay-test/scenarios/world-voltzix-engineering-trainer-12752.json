@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Voltzix Sprocketpop trains Engineering (#12752)",
+  "contract": "#12752 reported that Voltzix Sprocketpop (753524), the 'Engineering Trainer' of his WDB row, offered only quests. A right click now shows the 'Train me.' option, which opens the Engineering trainer window (trainer 92) with Apprentice Engineering (4039, level 5) available at level 20.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "voltzix",
+      "owner": "p",
+      "entry": 753524,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "voltzix",
+      "label": "right-click the trainer"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "Train me.",
+      "equals": 1,
+      "label": "DISCRIMINATING: the training option (was quests only)"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0,
+      "label": "choose the training option"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "trainer_list_packets",
+      "equals": 1,
+      "label": "a trainer window is sent"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "trainer_window_state",
+      "spell": 4039,
+      "equals": 0,
+      "label": "Apprentice Engineering is offered and available at level 20"
+    }
+  ]
+}

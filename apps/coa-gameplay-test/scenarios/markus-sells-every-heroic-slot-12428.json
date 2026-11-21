@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Markus sells Heroic Dungeon items for every slot at live prices, and the Mark of Triumph items at live prices",
+  "contract": "Markus (1414503) opens the Mark of Triumph list 9414500 from his first gossip option and a slot menu from his second; each slot opens 9414500 + slot. Live Markus lists Heroic Dungeon helms on six pages (52 items, 60 Marks each) and necks on three (21, 35 Marks each). Before this change Head, Neck, Chest, Wrists, Gloves, Rings and Trinkets were empty, so the slot menu had 9 entries plus Back, and every Heroic item cost 30. Prices by slot: head, shoulders, chest, pants 60; neck, rings, trinkets 35; back, wrists, gloves, belt, boots 30; main hand, off hand 40; two-hand, ranged 80. The Mark of Triumph page shows Centurion's Barbute for 85, Spellbound Demonic Rune for 80, Aegis of Defense for 65 and Lunar Splinter for 70; we sold them for 80, 60, 55 and 45. Menu icons are 48 px, raised 3 px to cover the gossip icon, and the two first options are epic purple.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "markus",
+      "owner": "buyer",
+      "entry": 1414503,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "markus",
+      "label": "Speak to Markus"
+    },
+    {
+      "action": "assert",
+      "label": "The Mark of Triumph option has a 48 px icon and epic purple text",
+      "actor": "buyer",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "|TInterface/ICONS/pvecurrency-valor:48:48:-26:3|t|r|cffa335eeMark of Triumph|r",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 0,
+      "label": "Open the Mark of Triumph items"
+    },
+    {
+      "action": "assert",
+      "label": "The Mark of Triumph list has its 36 items",
+      "actor": "buyer",
+      "metric": "vendor_items",
+      "equals": 36,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Centurion's Barbute costs 85 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 1414548,
+      "equals": 16085
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Spellbound Demonic Rune costs 80 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 1414516,
+      "equals": 16080
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Aegis of Defense costs 65 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 1414503,
+      "equals": 16065
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Lunar Splinter costs 70 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 1414559,
+      "equals": 16070
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "markus",
+      "label": "Speak to Markus again"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 1,
+      "label": "Open the Heroic Dungeon Items slot menu"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: all 16 slots are offered, plus Back",
+      "actor": "buyer",
+      "metric": "gossip_options",
+      "equals": 17
+    },
+    {
+      "action": "assert",
+      "label": "The first slot is Head, with a 48 px icon",
+      "actor": "buyer",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "|TInterface/ICONS/INV_Helmet_03:48:48:-26:3|t|rHead",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 0,
+      "label": "Open the Head list"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 52 Heroic Dungeon helms, six pages as on live",
+      "actor": "buyer",
+      "metric": "vendor_items",
+      "equals": 52,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Eye of Rend, a helm, costs 60 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 113507,
+      "equals": 16060
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "markus",
+      "label": "Speak to Markus for the necks"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 1,
+      "label": "Open the slot menu again"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 1,
+      "label": "Open the Neck list"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 21 Heroic Dungeon necks, three pages as on live",
+      "actor": "buyer",
+      "metric": "vendor_items",
+      "equals": 21,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Emberfury Talisman costs 35 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 112956,
+      "equals": 16035
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "markus",
+      "label": "Speak to Markus for the trinkets"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 1,
+      "label": "Open the slot menu once more"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 15,
+      "label": "Open the Trinkets list"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hand of Justice is on the Trinkets list for 35 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 214618,
+      "equals": 16035,
+      "within_ms": 3000
+    }
+  ]
+}

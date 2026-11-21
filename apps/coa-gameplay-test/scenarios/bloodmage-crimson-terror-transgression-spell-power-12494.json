@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "Crimson Terror makes Transgression grant 50% of Spirit as spell damage (#12494)",
+  "contract": [
+    "#12494 Crimson Terror 560073: 'Your Transgression now grants spell damage equal to 50% of your Spirit for the",
+    "duration.' The Transgression players cast is 801076 (or 803551 with Vampiric Fang); its effect 0 is a dummy",
+    "aura. Crimson Terror's +50 SPELLMOD_EFFECT1 (class mask 0,0,4) matches only 801102, a hidden Transgression",
+    "whose effect 0 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT against Spirit (MiscValueB 4), and nothing",
+    "applied 801102, so the talent never added spell power (bloodmage-crimson-terror-transgression checks only the",
+    "modified value of 801102). Expected: with Crimson Terror, casting Transgression applies 801102 at 50 for the",
+    "same duration, raising Shadow spell power; it ends when Transgression",
+    "runs out. Without the talent nothing is added."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    },
+    {
+      "id": "untalented",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 801076
+    },
+    {
+      "action": "learn",
+      "actor": "untalented",
+      "spell": 801076
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 560073
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_talented"
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 801076,
+      "label": "Transgression"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: talented is in Transgression",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 801076,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "untalented",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_untalented"
+    },
+    {
+      "action": "set_power",
+      "actor": "untalented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "untalented",
+      "spell": 801076,
+      "label": "Transgression"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: untalented is in Transgression",
+      "actor": "untalented",
+      "metric": "aura",
+      "spell": 801076,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Crimson Terror adds the Spirit spell damage buff",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 801102,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the buff is 50% of Spirit",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 801102,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shadow spell power rises",
+      "actor": "talented",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_talented",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "without Crimson Terror there is no buff",
+      "actor": "untalented",
+      "metric": "aura",
+      "spell": 801102,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "without Crimson Terror spell power is unchanged",
+      "actor": "untalented",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_untalented",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Transgression runs out (15 s, it cannot be cancelled)",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 801076,
+      "equals": 0,
+      "within_ms": 17000
+    },
+    {
+      "action": "assert",
+      "label": "the buff ends with Transgression",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 801102,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "spell power returns to its old value",
+      "actor": "talented",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_talented",
+      "equals": 0
+    }
+  ]
+}

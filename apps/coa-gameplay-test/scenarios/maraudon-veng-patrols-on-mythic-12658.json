@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "name": "Maraudon: Veng patrols Foulspore Cavern on Mythic (#12658)",
+  "contract": "#12658: Veng, The Fifth Kahn (13738), had no spawn, so the Mythic Orange Crystals wing missed one of its three bosses (DungeonEncounterExtra 2611, lfg 2716). Ascension logs show him fought in Foulspore Cavern right before Noxxion, with his kit (Shoot, Multi-Shot, Charge, Cut Down) and a bow and a one-hand axe. He replaces the friendly Spirit of Veng (12243) on Mythic and walks the same path (539700); Normal and Heroic keep the spirit. He says 'Your presence desecrates this sacred tomb!' on aggro and yells 'My wrath... never ends...' as he dies. He walks at normal walking speed (speed_walk 1, was 2.52) and uses his bow (Shoot, 2100156) only while his victim is 8-40 yards away; before, Shoot came every 3.7-4.2 s with the combat-move cast flag, so he stood and shot at the tank in melee. On Mythic he uses his own template 213738 (level 63) like the other Maraudon bosses; before, he fought with his level 47 values and hit for about a quarter of a Mythic boss. His hits are 25% below a regular Mythic boss's (Noxxion 213282, DamageModifier 37.87): DamageModifier 45.15 with his 1.258 s swing, 37.87 x 0.75 x 2000 / 1258.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "field",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 349,
+      "x": 1050.0,
+      "y": -405.0,
+      "z": -34.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maraudon on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Maraudon is spawned",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Veng walks his path in Foulspore Cavern on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 13738,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The friendly Spirit of Veng is not there on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 12243,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 13738,
+      "as": "veng",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "actor": "mythic",
+      "target": "veng"
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 13282,
+      "as": "noxxion",
+      "distance": 30
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Noxxion, a regular Mythic boss, hits for 4159 at least",
+      "actor": "noxxion",
+      "metric": "weapon_damage_min",
+      "min": 4150,
+      "max": 4170
+    },
+    {
+      "action": "assert",
+      "label": "Veng is level 63 on Mythic",
+      "actor": "veng",
+      "metric": "level",
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "label": "Veng keeps his fast swing",
+      "actor": "veng",
+      "metric": "attack_time_ms",
+      "equals": 1258
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Veng's hits are 25% below Noxxion's (3120)",
+      "actor": "veng",
+      "metric": "weapon_damage_min",
+      "min": 3100,
+      "max": 3140
+    },
+    {
+      "action": "assert",
+      "label": "Veng speaks when he is pulled",
+      "actor": "mythic",
+      "metric": "monster_chat_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: in melee Veng does not use his bow",
+      "actor": "veng",
+      "metric": "spell_cast_count",
+      "spell": 2100156,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "mythic",
+      "entry": 13738,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Veng shouts as he dies",
+      "actor": "mythic",
+      "metric": "monster_chat_count",
+      "min": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 349,
+      "x": 1050.0,
+      "y": -405.0,
+      "z": -34.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Maraudon on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1 on Heroic",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "On Heroic the Spirit of Veng walks the path as before",
+      "actor": "heroic",
+      "metric": "nearby_creature_count",
+      "entry": 12243,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Veng is a Mythic boss only",
+      "actor": "heroic",
+      "metric": "nearby_creature_count",
+      "entry": 13738,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "field",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "summon",
+      "actor": "field",
+      "entry": 13738,
+      "as": "archer",
+      "distance": 15
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "field",
+      "entry": 13738,
+      "damage_pct": 5,
+      "radius": 30
+    },
+    {
+      "action": "assert",
+      "label": "In the open, Veng opens the fight with his bow while his target is at range",
+      "actor": "archer",
+      "metric": "spell_cast_count",
+      "spell": 2100156,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

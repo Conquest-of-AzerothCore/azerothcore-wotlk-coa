@@ -65,6 +65,12 @@ void ScriptMgr::ModifyMeleeDamageRange(Unit* target, Unit* attacker, float& minD
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_MELEE_DAMAGE_RANGE, script->ModifyMeleeDamageRange(target, attacker, minDamage, maxDamage));
 }
 
+void ScriptMgr::OnUnitUpdateRunSpeed(Unit* unit, int32& mainSpeedMod, float& stackBonus, float& nonStackBonus)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_UPDATE_RUN_SPEED,
+        script->OnUnitUpdateRunSpeed(unit, mainSpeedMod, stackBonus, nonStackBonus));
+}
+
 void ScriptMgr::ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, script->ModifySpellDamageTaken(target, attacker, damage, spellInfo));
@@ -133,6 +139,11 @@ bool ScriptMgr::IfNormalReaction(Unit const* unit, Unit const* target, Reputatio
 bool ScriptMgr::CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(UnitScript, UNITHOOK_CAN_UNIT_ATTACK, !script->CanUnitAttack(attacker, target, spell));
+}
+
+bool ScriptMgr::CanUnitAssist(Unit const* assister, Unit const* target, SpellInfo const* spell)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS(UnitScript, UNITHOOK_CAN_UNIT_ASSIST, !script->CanUnitAssist(assister, target, spell));
 }
 
 Unit* ScriptMgr::SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell)

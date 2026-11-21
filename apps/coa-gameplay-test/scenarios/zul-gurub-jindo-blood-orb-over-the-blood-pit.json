@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Blood Orb floats over Jin'do's Blood Pit as a prop",
+  "contract": [
+    "On live a Blood Orb (92008, display 462101) floats over the Blood Pit next to Jin'do (11380) (tester video",
+    "round 8, CoA combat log 2026-08-24). A hero standing on the pit floor sees one orb with that display, high",
+    "above them, and cannot attack it. Its height, faction and flags are estimates. Round-10 testers asked for an",
+    "orb three times larger, so it has scale 3."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "label": "Into the Blood Pit",
+      "actor": "hero",
+      "map": 309,
+      "x": -11583.0,
+      "y": -1251.2,
+      "z": 77.63,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "label": "See the instance's own spawns",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "One Blood Orb is near the pit",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 92008,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "It shows the blood orb model",
+      "actor": "hero",
+      "metric": "nearby_creature_display",
+      "entry": 92008,
+      "equals": 462101
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it is three times its model's size (tester round 10)",
+      "actor": "hero",
+      "metric": "nearby_creature_scale",
+      "entry": 92008,
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it hovers high over the pit floor instead of falling to it",
+      "actor": "hero",
+      "metric": "nearby_creature_height",
+      "entry": 92008,
+      "target": "hero",
+      "min": 15,
+      "max": 25
+    },
+    {
+      "action": "assert",
+      "label": "The hero's client sees it",
+      "actor": "hero",
+      "metric": "nearby_creature_at_client",
+      "entry": 92008,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "It is a prop the hero cannot attack",
+      "actor": "hero",
+      "metric": "nearby_creature_can_attack",
+      "entry": 92008,
+      "equals": 0
+    }
+  ]
+}

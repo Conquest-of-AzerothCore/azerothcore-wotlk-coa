@@ -248,7 +248,6 @@ class spell_ascension_bloodmage_empowered : public SpellScript
         OnHit += SpellHitFn(spell_ascension_bloodmage_empowered::ModifyHit);
     }
 };
-constexpr uint32 EmpoweredIndicator = 524899;
 
 void SyncEmpoweredIndicator(Unit* unit)
 {

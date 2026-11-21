@@ -309,11 +309,10 @@ bool ManastormProgression::LoadSnapshot(
             "SELECT `best_completed_depth` "
             "FROM `character_manastorm_progress` "
             "WHERE `guid` = {} "
-            "AND `mode` = {} "
             "AND `track` = {} "
+            "ORDER BY `best_completed_depth` DESC "
             "LIMIT 1",
             characterGuid,
-            uint32(uint8(mode)),
             uint32(trackBit));
 
     if (progress)

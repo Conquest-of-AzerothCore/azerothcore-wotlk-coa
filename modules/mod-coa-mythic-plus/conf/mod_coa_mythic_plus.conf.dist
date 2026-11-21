@@ -165,7 +165,9 @@ MythicPlus.BossCastLog = 1
 #    MythicPlus.DisabledAffixes
 #    MythicPlus.AffixSubstitutes
 #        Description: Affixes left out of every week (MythicAffixes.dbc ids, space or comma separated).
-#                     Each takes the first substitute its row does not have yet. Empty keeps
+#                     Each takes the first substitute of its own tier (an affix the client also
+#                     lists from that keystone level in some week) that its week does not have
+#                     yet, and any substitute the week does not have when none fits. Empty keeps
 #                     Ascension's rotation. The server sends the changed MythicAffixes.dbc rows at
 #                     login, so the client shows the same affixes.
 #        Default:     "80087" (Tiny), "80046 80044 80026 80024 80032" (Horde, Avenger, Life Stealing,

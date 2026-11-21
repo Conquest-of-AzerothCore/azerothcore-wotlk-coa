@@ -204,9 +204,9 @@ class ThreadOutput:
         return getattr(self.stream, name)
 
 
-def validated(scenario, where):
+def validated(scenario, where, clock=REAL_CLOCK):
     try:
-        return run.validate(scenario)
+        return run.validate(scenario, clock)
     except (ValueError, KeyError, TypeError) as error:
         raise ValueError(f'{where}: {error}') from None
 
@@ -272,7 +272,7 @@ def clock_policy(directory=catalog.DIRECTORY):
     return exclusive
 
 
-def select_cases(values, directory=catalog.DIRECTORY, excluded=()):
+def select_cases(values, directory=catalog.DIRECTORY, excluded=(), clock=REAL_CLOCK):
     checks = catalog.bindings(directory)
     definitions = {row['id']: catalog.read_json(catalog.ROOT / row['path'])
                    for row in catalog.catalog(directory)}
@@ -293,7 +293,7 @@ def select_cases(values, directory=catalog.DIRECTORY, excluded=()):
         elif str(path.resolve()) not in sources:
             sources.add(str(path.resolve()))
             name = exploratory_key(path, exploratory.keys() | definitions.keys())
-            exploratory[name] = Case(name, validated(scenario, value), str(path.resolve()))
+            exploratory[name] = Case(name, validated(scenario, value, clock), str(path.resolve()))
     cases = [Case(key, validated(definitions[key], key)) for key in catalog.companion_cases(requested, checks)]
     cases.extend(exploratory.values())
     run.require(cases, 'No scenarios selected')
@@ -1196,7 +1196,7 @@ class Batch:
 
 def run_batch(args, directory=catalog.DIRECTORY):
     started = time.monotonic()
-    cases = select_cases(args.scenario, directory, getattr(args, 'skip_scenario', []))
+    cases = select_cases(args.scenario, directory, getattr(args, 'skip_scenario', []), args.clock)
     if args.clock == SIMULATED_CLOCK:
         exclusive = clock_policy(directory)
         for case in cases:
@@ -1207,7 +1207,8 @@ def run_batch(args, directory=catalog.DIRECTORY):
             case.exclusive = (world_phase or process_global or case.scenario.get('creature_scaling', False)
                               or case.scenario.get('ptr_character_copy', False)
                               or 'vanity_ownership' in case.scenario or 'two_side' in case.scenario
-                              or 'quest_log_size' in case.scenario
+                              or 'quest_log_size' in case.scenario or case.scenario.get('chat_log', False)
+                              or case.scenario.get('battleground_kill_xp', False)
                               or (not case.exploratory and case.key in exclusive) or case.hour is not None)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,261 @@
+{
+  "schema": 2,
+  "name": "Retribution strikes for 30% of the swing as Holy damage before monster resistance",
+  "contract": "Retribution 707391 reads 'Melee damage dealt now has a $h% chance to strike 2 additional times for $s1% of the damage dealt as Holy Damage.' The server DBC gives e0 BasePoints 29, DieSides 1, so $s1 = 30, and each strike is Retribution 525028, Holy, unable to crit. Monster linear resistance gives a creature level x 1 Holy resistance, 5 per percent: 0.2% average resist at level 1, 12% at level 60. Two level 60 Templars with a Walking Stick and forced melee critical strikes swing for 1100 s, one with open-world level scaling off at a level 1 dummy and one at a level 60 dummy. The mean strike over the mean main-hand swing is 0.295 (0.285-0.305) unresisted and 0.264 (0.252-0.276) after the level 60 dummy's resist; a strike exempt from resistance would give about 0.295 on both, a wrong fraction moves the unresisted ratio.",
+  "timeout_ms": 1200000,
+  "players": [
+    {
+      "id": "unresisted",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "resisted",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_unresisted",
+      "owner": "unresisted",
+      "entry": 36,
+      "level": 1,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "dummy_resisted",
+      "owner": "resisted",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "unresisted",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "unresisted",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "unresisted",
+      "skill": 136,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "unresisted",
+      "spell": 707391
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "unresisted",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "dummy_unresisted is fought at level 1",
+      "actor": "unresisted",
+      "metric": "view_level",
+      "target": "dummy_unresisted",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "resisted",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "resisted",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "resisted",
+      "skill": 136,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "resisted",
+      "spell": 707391
+    },
+    {
+      "action": "assert",
+      "label": "dummy_resisted is fought at level 60",
+      "actor": "resisted",
+      "metric": "view_level",
+      "target": "dummy_resisted",
+      "equals": 60
+    },
+    {
+      "action": "attack",
+      "actor": "unresisted",
+      "target": "dummy_unresisted"
+    },
+    {
+      "action": "attack",
+      "actor": "resisted",
+      "target": "dummy_resisted"
+    },
+    {
+      "action": "wait",
+      "label": "Swing at both dummies",
+      "ms": 1100000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "unresisted"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "resisted"
+    },
+    {
+      "action": "wait",
+      "label": "Let the last Retribution strikes land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "unresisted Retribution strikes give enough samples",
+      "actor": "unresisted",
+      "metric": "spell_damage_count",
+      "spell": 525028,
+      "target": "dummy_unresisted",
+      "min": 120
+    },
+    {
+      "action": "assert",
+      "label": "unresisted Retribution strikes never crit",
+      "actor": "unresisted",
+      "metric": "spell_damage_count",
+      "spell": 525028,
+      "target": "dummy_unresisted",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "unresisted",
+      "metric": "melee_damage_total",
+      "hand": 0,
+      "save_as": "unresisted_swing_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "unresisted",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "ratio_to": "unresisted_swing_total",
+      "save_as": "unresisted_swings_per_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "unresisted",
+      "metric": "spell_damage_count",
+      "spell": 525028,
+      "target": "dummy_unresisted",
+      "ratio_to": "unresisted_swings_per_damage",
+      "save_as": "unresisted_strikes_by_mean_swing"
+    },
+    {
+      "action": "assert",
+      "label": "unresisted mean Retribution strike over mean swing",
+      "actor": "unresisted",
+      "metric": "spell_damage_total",
+      "spell": 525028,
+      "target": "dummy_unresisted",
+      "ratio_to": "unresisted_strikes_by_mean_swing",
+      "min": 0.285,
+      "max": 0.305
+    },
+    {
+      "action": "assert",
+      "label": "resisted Retribution strikes give enough samples",
+      "actor": "resisted",
+      "metric": "spell_damage_count",
+      "spell": 525028,
+      "target": "dummy_resisted",
+      "min": 120
+    },
+    {
+      "action": "assert",
+      "label": "resisted Retribution strikes never crit",
+      "actor": "resisted",
+      "metric": "spell_damage_count",
+      "spell": 525028,
+      "target": "dummy_resisted",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "resisted",
+      "metric": "melee_damage_total",
+      "hand": 0,
+      "save_as": "resisted_swing_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "resisted",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "ratio_to": "resisted_swing_total",
+      "save_as": "resisted_swings_per_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "resisted",
+      "metric": "spell_damage_count",
+      "spell": 525028,
+      "target": "dummy_resisted",
+      "ratio_to": "resisted_swings_per_damage",
+      "save_as": "resisted_strikes_by_mean_swing"
+    },
+    {
+      "action": "assert",
+      "label": "resisted mean Retribution strike over mean swing",
+      "actor": "resisted",
+      "metric": "spell_damage_total",
+      "spell": 525028,
+      "target": "dummy_resisted",
+      "ratio_to": "resisted_strikes_by_mean_swing",
+      "min": 0.252,
+      "max": 0.276
+    }
+  ]
+}

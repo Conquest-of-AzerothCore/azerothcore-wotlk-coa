@@ -251,14 +251,29 @@ class BuildTests(WorkspaceTest):
         self.assertEqual(verify_all.readline_arguments('linux', (prefix,)), [])
         self.assertEqual(verify_all.readline_arguments('darwin', (workspace.base / 'absent',)), [])
 
-    def test_macos_configure_keeps_line_tables_with_a_level_every_compiler_accepts(self):
+    def test_macos_and_linux_configure_keep_line_tables_with_a_level_every_compiler_accepts(self):
         flags = '-O2 -g1 -DNDEBUG'
-        arguments = verify_all.line_table_debug_arguments('darwin')
-        self.assertEqual(arguments, [f'-DCMAKE_C_FLAGS_RELWITHDEBINFO={flags}',
-                                     f'-DCMAKE_CXX_FLAGS_RELWITHDEBINFO={flags}'])
-        self.assertFalse(any('-gline-tables-only' in argument for argument in arguments))
-        self.assertEqual(verify_all.line_table_debug_arguments('linux'), [])
+        for platform in ('darwin', 'linux'):
+            with self.subTest(platform=platform):
+                arguments = verify_all.line_table_debug_arguments(platform)
+                self.assertEqual(arguments, [f'-DCMAKE_C_FLAGS_RELWITHDEBINFO={flags}',
+                                             f'-DCMAKE_CXX_FLAGS_RELWITHDEBINFO={flags}'])
+                self.assertFalse(any('-gline-tables-only' in argument for argument in arguments))
         self.assertEqual(verify_all.line_table_debug_arguments('win32'), [])
+
+    def test_linux_configure_uses_game_unity_thin_archives_and_mold_when_present(self):
+        workspace = self.workspace()
+        thin = ['-DCMAKE_C_ARCHIVE_CREATE=<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>',
+                '-DCMAKE_C_ARCHIVE_APPEND=<CMAKE_AR> qT <TARGET> <LINK_FLAGS> <OBJECTS>',
+                '-DCMAKE_CXX_ARCHIVE_CREATE=<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>',
+                '-DCMAKE_CXX_ARCHIVE_APPEND=<CMAKE_AR> qT <TARGET> <LINK_FLAGS> <OBJECTS>']
+        without_mold = verify_all.linux_development_arguments(workspace.environment, 'linux')
+        self.assertEqual(without_mold, ['-DWITH_GAME_UNITY_BUILD=ON', *thin])
+        program(workspace.tools, 'mold')
+        self.assertEqual(verify_all.linux_development_arguments(workspace.environment, 'linux'),
+                         ['-DWITH_GAME_UNITY_BUILD=ON', *thin, '-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold'])
+        for platform in ('darwin', 'win32'):
+            self.assertEqual(verify_all.linux_development_arguments(workspace.environment, platform), [])
 
     def test_custom_cmake_arguments_replace_the_defaults(self):
         workspace = self.workspace(configured=False)
@@ -441,6 +456,7 @@ class HarnessClassificationTests(WorkspaceTest):
             self.assertEqual(classify(fallback, path)['status'], 'run')
             self.assertEqual(classify(unconditional, path)['status'], 'unavailable')
             self.assertEqual(classify(unconditional, {'VCToolsInstallDir': 'C:/VC'})['status'], 'run')
+            self.assertEqual(classify(unconditional, {'VCTOOLSINSTALLDIR': 'C:/VC'})['status'], 'run')
             self.assertIn('clang++ on PATH', classify(fallback, {'PATH': '', 'CXX': 'clang++'})['reason'])
         with patch.object(verify_all, 'WINDOWS', False):
             self.assertEqual([classify(source, {})['status'] for source in (unconditional, fallback)], ['run', 'run'])
@@ -817,6 +833,17 @@ class GameplayTests(WorkspaceTest):
         args = verify_all.parser().parse_args(['--scenario', str(SCENARIO)])
         self.assertEqual(verify_all.resolve_scenarios(args), ['frostbolt'])
 
+    def test_exploratory_files_beyond_the_real_clock_cap_need_the_simulated_clock(self):
+        workspace = self.workspace()
+        long = json.loads(SCENARIO.read_text(encoding='utf-8')) | {'contract': 'Long probe', 'timeout_ms': 1900000}
+        probe = write(workspace.base / 'long.json', json.dumps(long))
+        with patch.object(verify_all, 'load_catalog', return_value=fake_catalog()):
+            simulated = verify_all.parser().parse_args(['--scenario', str(probe)])
+            self.assertEqual(verify_all.resolve_scenarios(simulated), [str(probe.resolve())])
+            real = verify_all.parser().parse_args(['--gameplay-clock', 'real', '--scenario', str(probe)])
+            with self.assertRaisesRegex(ValueError, 'too large'):
+                verify_all.resolve_scenarios(real)
+
     def test_invalid_exploratory_scenario_files_are_rejected_before_any_stage(self):
         workspace = self.workspace()
         broken = write(workspace.base / 'broken.json', '{"name": "broken", ')
@@ -1169,6 +1196,17 @@ class SourceStageTests(WorkspaceTest):
                 self.assertEqual(arguments, ['tools/check_source.py', '--base', 'origin/main'] if context.base
                                  else ['tools/check_source.py', '--all'])
         self.assertIn('printed no JSON', summary['message'])
+
+    def test_the_conformance_rerun_listing_is_kept_in_the_source_summary(self):
+        workspace = self.workspace()
+        reruns = {'engine_files': ['src/server/game/Spells/Spell.cpp'], 'enforced': False, 'classes': []}
+        result = {'status': 'passed', 'selected_suites': [], 'conformance_reruns': reruns, 'results': [
+            {'command': ['python', '-B', 'tools/check_comments.py'], 'status': 'passed'}]}
+        with patch.object(verify_all, 'run_captured', return_value=verify_all.Outcome(0, json.dumps(result))):
+            context = workspace.context(base='origin/main')
+            status, summary = verify_all.stage_source(context, context.output / 'source.log')
+        self.assertEqual(status, 'passed')
+        self.assertEqual(summary['conformance_reruns'], reruns)
 
 
 class RegistrationTests(unittest.TestCase):

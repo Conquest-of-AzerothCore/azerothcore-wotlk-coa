@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <vector>
 
 namespace
 {
@@ -166,13 +167,16 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
         }
     }
 
-    void Apply(AuraEffect const* effect, AuraEffectHandleModes)
+    void Apply(AuraEffect const* effect, AuraEffectHandleModes mode)
     {
         if (!First(effect))
             return;
         Unit* owner = GetTarget();
         Player* player = Owner(owner);
         uint32 id = GetId();
+        if ((mode & AURA_EFFECT_HANDLE_REAL) &&
+            std::find(std::begin(WitchblightRanks), std::end(WitchblightRanks), id) != std::end(WitchblightRanks))
+            ClearWitchblightLaunches(owner);
         if (MainBrand(GetSpellInfo()))
         {
             std::vector<uint32> remove;
@@ -199,8 +203,6 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
                                     TRIGGERED_FULL_MASK);
         if (id == 504790 && player)
             player->UpdateSpeed(MOVE_RUN, true);
-        if (Family(GetSpellInfo(), 1, 4194304) && player)
-            player->RemoveAurasDueToSpell(706241);
         if (id == 805770)
             owner->ApplySpellImmune(id, IMMUNITY_SCHOOL, 126, true);
         if (id == 92091 && player)
@@ -247,8 +249,6 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
             owner->RemoveAurasDueToSpell(805766, GetCasterGUID());
         if (id == 504790)
             owner->UpdateSpeed(MOVE_RUN, true);
-        if (Family(GetSpellInfo(), 1, 4194304))
-            owner->RemoveAurasDueToSpell(706241);
         if (id == 805770)
             owner->ApplySpellImmune(id, IMMUNITY_SCHOOL, 126, false);
         if (!player)
@@ -308,10 +308,13 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
 
     bool Check(ProcEventInfo& event)
     {
+        Spell const* spell = event.GetProcSpell();
+        if (spell && PulseOfEffectNotLaunchedUnderWitchblight(spell, spell->GetSpellInfo(), GetTarget()))
+            return false;
         return event.GetActor() == GetTarget() &&
                (event.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_RANGED_AUTO_ATTACK |
                                        PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
-                                       PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_DONE_PERIODIC));
+                                       PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG));
     }
 
     void Proc(ProcEventInfo&)
@@ -395,14 +398,6 @@ class witch_hunter_state : public UnitScript
         if (!damage)
             return;
         if (attacker)
-            for (auto const& [key, application] : attacker->GetAppliedAuras())
-                if (Family(application->GetBase()->GetSpellInfo(), 1, 16384))
-                {
-                    application->GetBase()->Remove();
-                    damage = 0;
-                    return;
-                }
-        if (attacker)
             attacker->RemoveAurasDueToSpell(802281);
         Player* player = Owner(victim);
         if (player && player->HasAura(681173) && !player->HasSpellCooldown(681173) &&
@@ -425,8 +420,7 @@ class witch_hunter_state : public UnitScript
             if (!application->IsPositive() && application->GetBase()->GetSpellInfo()->Dispel == DISPEL_CURSE)
                 ++count;
         SpellInfo const* info = sSpellMgr->GetSpellInfo(704570);
-        int32 percent =
-            std::min(95, std::abs(info->Effects[EFFECT_0].CalcValue(player)) + 5 * int32(count > 0 ? count - 1 : 0));
+        int32 percent = std::min(95, std::abs(info->Effects[EFFECT_0].CalcValue(player)) + 5 * int32(count));
         CustomSpellValues values;
         values.AddSpellMod(SPELLVALUE_BASE_POINT0, -percent);
         values.AddSpellMod(SPELLVALUE_AURA_DURATION, info->GetDuration() + 2000 * count);

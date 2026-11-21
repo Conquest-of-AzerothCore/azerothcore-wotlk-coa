@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Infinite Guard doubles the applied Temporal Restoration and Temporal Swiftness auras (#11117, #10878)",
+  "contract": "Infinite Guard 574312 reads \"Increases the effectiveness of your Temporal Resilience, Temporal Swiftness, and Temporal Restoration spells by $s1%\"; Effect[0] is SPELL_AURA_ADD_PCT_MODIFIER with EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), +100%, on EffectSpellClassMask [0,0,0x04000000], which Temporal Restoration 680456 and Temporal Swiftness 680390 carry in SpellFamilyFlags[2] of SpellFamilyName 28. Spell.dbc authors Temporal Restoration Effect[0] SPELL_AURA_MOD_MANA_REGEN_FROM_STAT 25 (Spirit) and Effect[1] SPELL_AURA_MOD_MANA_REGEN_INTERRUPT 25, Temporal Swiftness Effect[0] SPELL_AURA_MOD_RATING_FROM_STAT 10 (Spirit) and Effect[1] SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL -25. Player::UpdateManaRegen reads the live aura amounts, so the value the server applies is the amount of the aura on the caster. A buff cast without the talent carries 25/25 and 10/-25; the same buff cast with the talent carries 50/50 and 20/-50.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 680456
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 680390
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 680456
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the Temporal Restoration aura gives 25% of Spirit as regen",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680456,
+      "caster": "chrono",
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the Temporal Restoration aura keeps 25% of regen in combat",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680456,
+      "caster": "chrono",
+      "effect": 1,
+      "equals": 25
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 680390
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the Temporal Swiftness aura gives 10% of Spirit as haste",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680390,
+      "caster": "chrono",
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the Temporal Swiftness aura cuts magic duration by 25%",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680390,
+      "caster": "chrono",
+      "effect": 1,
+      "equals": -25
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 680456,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 680390,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 574312
+    },
+    {
+      "action": "assert",
+      "label": "Infinite Guard self-applies its passive",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 574312,
+      "caster": "chrono",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 680456
+    },
+    {
+      "action": "assert",
+      "label": "With Infinite Guard, the Temporal Restoration aura gives 50% of Spirit as regen",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680456,
+      "caster": "chrono",
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "With Infinite Guard, the Temporal Restoration aura keeps 50% of regen in combat",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680456,
+      "caster": "chrono",
+      "effect": 1,
+      "equals": 50
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 680390
+    },
+    {
+      "action": "assert",
+      "label": "With Infinite Guard, the Temporal Swiftness aura gives 20% of Spirit as haste",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680390,
+      "caster": "chrono",
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "With Infinite Guard, the Temporal Swiftness aura cuts magic duration by 50%",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 680390,
+      "caster": "chrono",
+      "effect": 1,
+      "equals": -50
+    }
+  ]
+}

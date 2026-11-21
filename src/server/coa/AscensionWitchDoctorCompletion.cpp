@@ -217,6 +217,28 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[index].Amplitude = amplitude;
         info->Effects[index].TriggerSpell = 0;
     };
+    auto addStatPercent = [info](uint8 index, Stats stat)
+    {
+        SpellEffectInfo const& source = info->Effects[EFFECT_0];
+        SpellEffectInfo& added = info->Effects[index];
+        added.Effect = SPELL_EFFECT_APPLY_AURA;
+        added.ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
+        added.BasePoints = source.BasePoints;
+        added.DieSides = source.DieSides;
+        added.MiscValue = stat;
+        added.TargetA = source.TargetA;
+        added.TargetB = SpellImplicitTargetInfo();
+    };
+    if ((id == JujuInjection || id == JujuInjectionTwo) && !info->Effects[EFFECT_2].Effect &&
+        info->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) &&
+        info->Effects[EFFECT_0].MiscValue == STAT_AGILITY &&
+        info->Effects[EFFECT_1].IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) &&
+        info->Effects[EFFECT_1].MiscValue == STAT_INTELLECT)
+        addStatPercent(EFFECT_2, STAT_SPIRIT);
+    if (id == SpiritWardenBuff && !info->Effects[EFFECT_1].Effect &&
+        info->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) &&
+        info->Effects[EFFECT_0].MiscValue == STAT_SPIRIT)
+        addStatPercent(EFFECT_1, STAT_AGILITY);
     if (id == Shadowhunter)
         dummy(EFFECT_1);
     if (id == PuppeteersGrasp)
@@ -225,6 +247,12 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
         info->Effects[EFFECT_0].MiscValue == SPELLMOD_EFFECT3)
         info->Effects[EFFECT_0].SpellClassMask = flag96(512, 0, 0);
+    if (id == Seeker && info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+        info->Effects[EFFECT_0].MiscValue == SPELLMOD_COST)
+    {
+        info->Effects[EFFECT_0].SpellClassMask[0] |= 128;
+        info->Effects[EFFECT_0].SpellClassMask[1] |= 1048576;
+    }
     if (id == Mimic && info->Effects[EFFECT_2].Effect == SPELL_EFFECT_SUMMON)
         info->Effects[EFFECT_2].BasePoints = 1;
     if (Family(info, 0, 4))
@@ -281,7 +309,13 @@ void ApplyContracts(SpellInfo* info)
     if (IsJuju(info))
         info->Effects[EFFECT_1].Effect = 0;
     if (id == PuppetHit)
-        info->Effects[EFFECT_1].Effect = 0;
+    {
+        info->Effects[EFFECT_0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
+        info->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+        info->AttributesEx3 |= SPELL_ATTR3_NOT_A_PROC;
+        info->AttributesCu |= SPELL_ATTR0_CU_DIRECT_DAMAGE;
+        info->AttributesCu &= ~SPELL_ATTR0_CU_BINARY_SPELL;
+    }
     if (Family(info, 0, 8))
     {
         periodic(EFFECT_0, info->Effects[EFFECT_0].Amplitude);

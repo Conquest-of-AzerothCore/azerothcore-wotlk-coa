@@ -1944,8 +1944,8 @@ class spell_dk_pestilence : public SpellScript
         if (target != hitUnit)
         {
             // Blood Plague
-            if (target->GetAura(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
-                caster->CastSpell(hitUnit, SPELL_DK_BLOOD_PLAGUE, true);
+            if (Aura const* plague = target->GetAuraOfRankedSpell(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
+                caster->CastSpell(hitUnit, plague->GetId(), true);
 
             // Frost Fever
             if (target->GetAura(SPELL_DK_FROST_FEVER, caster->GetGUID()))
@@ -1955,7 +1955,7 @@ class spell_dk_pestilence : public SpellScript
         else if (caster->GetAuraOfRankedSpellOrTwin(SPELL_DK_GLYPH_OF_DISEASE))
         {
             // Blood Plague
-            if (Aura* disease = target->GetAura(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
+            if (Aura* disease = target->GetAuraOfRankedSpell(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
                 disease->RefreshDuration();
 
             // Frost Fever

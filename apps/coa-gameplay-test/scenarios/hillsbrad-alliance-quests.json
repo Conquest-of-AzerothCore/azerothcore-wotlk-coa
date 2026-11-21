@@ -1,0 +1,1822 @@
+{
+  "schema": 1,
+  "name": "Hillsbrad Alliance quests restored from Ascension can be taken, completed and rewarded",
+  "contract": "rev_20261027_84_coa_hillsbrad_restore.sql restores the Hillsbrad Foothills quests the server lacked, from the Ascension questcache.wdb captures and the client QuestSuperTrack data. This case covers the 35 quests of Southshore and the hills around it: each is taken natively from its giver, in chain order so every PrevQuestID gate applies, its objectives are fixture-completed (objective items are granted, kill and event credit is set), and it is handed in natively at its ender, which must reward it. A Letter for Juliette 1356 ends at the Hidden Altar 1000027, summoned beside the player.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -697.0,
+    "y": -462.4,
+    "z": 29.1,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon",
+      "label": "Archmage Ansirem Runeweaver stands beside the player",
+      "actor": "p",
+      "as": "n2543",
+      "entry": 2543,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Archaeologist Flagongut stands beside the player",
+      "actor": "p",
+      "as": "n2911",
+      "entry": 2911,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Thaisen stands beside the player",
+      "actor": "p",
+      "as": "n255279",
+      "entry": 255279,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Historian Wendell stands beside the player",
+      "actor": "p",
+      "as": "n512365",
+      "entry": 512365,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Marren Broanil stands beside the player",
+      "actor": "p",
+      "as": "n512367",
+      "entry": 512367,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Heath Verbose stands beside the player",
+      "actor": "p",
+      "as": "n512368",
+      "entry": 512368,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Edric Nethander stands beside the player",
+      "actor": "p",
+      "as": "n512376",
+      "entry": 512376,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Hunstman Verdan stands beside the player",
+      "actor": "p",
+      "as": "n512378",
+      "entry": 512378,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Priestess Helia stands beside the player",
+      "actor": "p",
+      "as": "n512383",
+      "entry": 512383,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Quartermaster Tillian stands beside the player",
+      "actor": "p",
+      "as": "n512387",
+      "entry": 512387,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Commander Theldan Wald stands beside the player",
+      "actor": "p",
+      "as": "n512391",
+      "entry": 512391,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Advisor Belview stands beside the player",
+      "actor": "p",
+      "as": "n512392",
+      "entry": 512392,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Thordak Runebarrel stands beside the player",
+      "actor": "p",
+      "as": "n512396",
+      "entry": 512396,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Edmund Crestfall stands beside the player",
+      "actor": "p",
+      "as": "n512400",
+      "entry": 512400,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Martha Livingston stands beside the player",
+      "actor": "p",
+      "as": "n512485",
+      "entry": 512485,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Romeno Livingston stands beside the player",
+      "actor": "p",
+      "as": "n991522",
+      "entry": 991522,
+      "distance": 3
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: a 16-slot bag for the rewards",
+      "actor": "p",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "label": "fixture: wear the bag",
+      "actor": "p",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1327 'Gray Bear Mastery' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1327,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1327 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1327,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1327's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1327
+    },
+    {
+      "action": "assert",
+      "label": "1327 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1327,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1327,
+      "reward": 0,
+      "label": "hand 1327 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1327 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1327,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1328 'Moss Creeper Mastery' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1328,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1328 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1328,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1328's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1328
+    },
+    {
+      "action": "assert",
+      "label": "1328 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1328,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1328,
+      "reward": 0,
+      "label": "hand 1328 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1328 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1328,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1329 'Gray Bear Mastery II' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1329,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1329 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1329,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1329's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1329
+    },
+    {
+      "action": "assert",
+      "label": "1329 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1329,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1329,
+      "reward": 0,
+      "label": "hand 1329 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1329 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1329,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1330 'Mountain Lion Mastery' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1330,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1330 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1330,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1330's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1330
+    },
+    {
+      "action": "assert",
+      "label": "1330 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1330,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1330,
+      "reward": 0,
+      "label": "hand 1330 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1330 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1330,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1331 'Mountain Lion Mastery II' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1331,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1331 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1331,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1331's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1331
+    },
+    {
+      "action": "assert",
+      "label": "1331 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1331,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1331,
+      "reward": 0,
+      "label": "hand 1331 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1331 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1331,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1332 'Moss Creeper Mastery II' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1332,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1332 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1332,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1332's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1332
+    },
+    {
+      "action": "assert",
+      "label": "1332 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1332,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1332,
+      "reward": 0,
+      "label": "hand 1332 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1332 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1332,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1333 'Gray Bear Mastery III' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1333,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1333 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1333,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1333's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1333
+    },
+    {
+      "action": "assert",
+      "label": "1333 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1333,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1333,
+      "reward": 0,
+      "label": "hand 1333 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1333 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1333,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1334 'Moss Creeper Mastery III' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1334,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1334 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1334,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1334's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1334
+    },
+    {
+      "action": "assert",
+      "label": "1334 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1334,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1334,
+      "reward": 0,
+      "label": "hand 1334 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1334 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1334,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1335 'Mountain Lion Mastery III' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1335,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1335 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1335,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1335's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1335
+    },
+    {
+      "action": "assert",
+      "label": "1335 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1335,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1335,
+      "reward": 0,
+      "label": "hand 1335 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1335 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1335,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1336 'Gray Bear Mastery IV' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 1336,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1336 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1336,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1336's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1336
+    },
+    {
+      "action": "assert",
+      "label": "1336 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1336,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1336,
+      "reward": 0,
+      "label": "hand 1336 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "1336 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1336,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1337 'Assault at Azurelode' from Commander Theldan Wald",
+      "actor": "p",
+      "quest": 1337,
+      "entry": 512391
+    },
+    {
+      "action": "assert",
+      "label": "1337 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1337,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1337's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1337
+    },
+    {
+      "action": "assert",
+      "label": "1337 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1337,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1337,
+      "reward": 0,
+      "label": "hand 1337 in at Commander Theldan Wald",
+      "entry": 512391
+    },
+    {
+      "action": "assert",
+      "label": "1337 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1337,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1343 'Reclaim Nethander Farm' from Edric Nethander",
+      "actor": "p",
+      "quest": 1343,
+      "entry": 512376
+    },
+    {
+      "action": "assert",
+      "label": "1343 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1343,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1343's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1343
+    },
+    {
+      "action": "assert",
+      "label": "1343 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1343,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1343,
+      "reward": 0,
+      "label": "hand 1343 in at Edric Nethander",
+      "entry": 512376
+    },
+    {
+      "action": "assert",
+      "label": "1343 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1343,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1345 'Flowers For The Dead' from Romeno Livingston",
+      "actor": "p",
+      "quest": 1345,
+      "entry": 991522
+    },
+    {
+      "action": "assert",
+      "label": "1345 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1345,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 8 objective item(s) 916102",
+      "actor": "p",
+      "item": 916102,
+      "count": 8
+    },
+    {
+      "action": "assert",
+      "label": "1345 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1345,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1345,
+      "reward": 0,
+      "label": "hand 1345 in at Romeno Livingston",
+      "entry": 991522
+    },
+    {
+      "action": "assert",
+      "label": "1345 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1345,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1346 'Too Close to the Dead' from Martha Livingston",
+      "actor": "p",
+      "quest": 1346,
+      "entry": 512485
+    },
+    {
+      "action": "assert",
+      "label": "1346 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1346,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1346 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1346,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1346,
+      "reward": 0,
+      "label": "hand 1346 in at Romeno Livingston",
+      "entry": 991522
+    },
+    {
+      "action": "assert",
+      "label": "1346 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1346,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1355 'A Tragic Farewell' from Romeno Livingston",
+      "actor": "p",
+      "quest": 1355,
+      "entry": 991522
+    },
+    {
+      "action": "assert",
+      "label": "1355 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1355,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1355's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1355
+    },
+    {
+      "action": "assert",
+      "label": "1355 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1355,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1355,
+      "reward": 0,
+      "label": "hand 1355 in at Romeno Livingston",
+      "entry": 991522
+    },
+    {
+      "action": "assert",
+      "label": "1355 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1355,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1356 'A Letter for Juliette' from Romeno Livingston",
+      "actor": "p",
+      "quest": 1356,
+      "entry": 991522
+    },
+    {
+      "action": "assert",
+      "label": "1356 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1356,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1356 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1356,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "the Hidden Altar 1000027",
+      "actor": "p",
+      "entry": 1000027
+    },
+    {
+      "action": "wait",
+      "label": "let the altar become ready",
+      "ms": 1000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1356,
+      "reward": 0,
+      "label": "hand 1356 in at the Hidden Altar",
+      "gameobject": 1000027
+    },
+    {
+      "action": "assert",
+      "label": "1356 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1356,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 100082 'Head of the Pack' from Edric Nethander",
+      "actor": "p",
+      "quest": 100082,
+      "entry": 512376
+    },
+    {
+      "action": "assert",
+      "label": "100082 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 100082,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 100082's kill, use or event objectives",
+      "actor": "p",
+      "quest": 100082
+    },
+    {
+      "action": "assert",
+      "label": "100082 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 100082,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 100082,
+      "reward": 0,
+      "label": "hand 100082 in at Edric Nethander",
+      "entry": 512376
+    },
+    {
+      "action": "assert",
+      "label": "100082 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 100082,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255020 'The Right Hands' from Thaisen",
+      "actor": "p",
+      "quest": 255020,
+      "entry": 255279
+    },
+    {
+      "action": "assert",
+      "label": "255020 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255020,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 1 objective item(s) 355079",
+      "actor": "p",
+      "item": 355079,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "255020 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255020,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255020,
+      "reward": 0,
+      "label": "hand 255020 in at Thaisen",
+      "entry": 255279
+    },
+    {
+      "action": "assert",
+      "label": "255020 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255020,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255021 'Schemes of the Syndicate' from Thaisen",
+      "actor": "p",
+      "quest": 255021,
+      "entry": 255279
+    },
+    {
+      "action": "assert",
+      "label": "255021 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255021,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 1 objective item(s) 355080",
+      "actor": "p",
+      "item": 355080,
+      "count": 1
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255021's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255021
+    },
+    {
+      "action": "assert",
+      "label": "255021 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255021,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255021,
+      "reward": 0,
+      "label": "hand 255021 in at Thaisen",
+      "entry": 255279
+    },
+    {
+      "action": "assert",
+      "label": "255021 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255021,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255049 'Dangerous Roads' from Marren Broanil",
+      "actor": "p",
+      "quest": 255049,
+      "entry": 512367
+    },
+    {
+      "action": "assert",
+      "label": "255049 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255049,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255049's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255049
+    },
+    {
+      "action": "assert",
+      "label": "255049 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255049,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255049,
+      "reward": 0,
+      "label": "hand 255049 in at Marren Broanil",
+      "entry": 512367
+    },
+    {
+      "action": "assert",
+      "label": "255049 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255049,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255107 'The Lost Paladin' from Heath Verbose",
+      "actor": "p",
+      "quest": 255107,
+      "entry": 512368
+    },
+    {
+      "action": "assert",
+      "label": "255107 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255107,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255107 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255107,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255107,
+      "reward": 0,
+      "label": "hand 255107 in at Edmund Crestfall",
+      "entry": 512400
+    },
+    {
+      "action": "assert",
+      "label": "255107 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255107,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 100083 'Escape with Edmund' from Edmund Crestfall",
+      "actor": "p",
+      "quest": 100083,
+      "entry": 512400
+    },
+    {
+      "action": "assert",
+      "label": "100083 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 100083,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 100083's kill, use or event objectives",
+      "actor": "p",
+      "quest": 100083
+    },
+    {
+      "action": "assert",
+      "label": "100083 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 100083,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 100083,
+      "reward": 0,
+      "label": "hand 100083 in at Heath Verbose",
+      "entry": 512368
+    },
+    {
+      "action": "assert",
+      "label": "100083 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 100083,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255140 'Blades Bathed in Light' from Priestess Helia",
+      "actor": "p",
+      "quest": 255140,
+      "entry": 512383
+    },
+    {
+      "action": "assert",
+      "label": "255140 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255140,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255140's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255140
+    },
+    {
+      "action": "assert",
+      "label": "255140 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255140,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255140,
+      "reward": 0,
+      "label": "hand 255140 in at Priestess Helia",
+      "entry": 512383
+    },
+    {
+      "action": "assert",
+      "label": "255140 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255140,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255141 'Stone for Southshore' from Quartermaster Tillian",
+      "actor": "p",
+      "quest": 255141,
+      "entry": 512387
+    },
+    {
+      "action": "assert",
+      "label": "255141 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255141,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 15 objective item(s) 355224",
+      "actor": "p",
+      "item": 355224,
+      "count": 15
+    },
+    {
+      "action": "assert",
+      "label": "255141 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255141,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255141,
+      "reward": 0,
+      "label": "hand 255141 in at Quartermaster Tillian",
+      "entry": 512387
+    },
+    {
+      "action": "assert",
+      "label": "255141 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255141,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255142 'Worried Minds Cannot Rest' from Advisor Belview",
+      "actor": "p",
+      "quest": 255142,
+      "entry": 512392
+    },
+    {
+      "action": "assert",
+      "label": "255142 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255142,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255142 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255142,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255142,
+      "reward": 0,
+      "label": "hand 255142 in at Archmage Ansirem Runeweaver",
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255142 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255142,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255143 'Containing the Crater' from Archmage Ansirem Runeweaver",
+      "actor": "p",
+      "quest": 255143,
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255143 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255143,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255143's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255143
+    },
+    {
+      "action": "assert",
+      "label": "255143 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255143,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255143,
+      "reward": 0,
+      "label": "hand 255143 in at Archmage Ansirem Runeweaver",
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255143 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255143,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255144 'Repairing the Ruins' from Archmage Ansirem Runeweaver",
+      "actor": "p",
+      "quest": 255144,
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255144 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255144,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255144's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255144
+    },
+    {
+      "action": "assert",
+      "label": "255144 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255144,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255144,
+      "reward": 0,
+      "label": "hand 255144 in at Archmage Ansirem Runeweaver",
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255144 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255144,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255145 'Unwanted Manifestations' from Archmage Ansirem Runeweaver",
+      "actor": "p",
+      "quest": 255145,
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255145 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255145,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255145's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255145
+    },
+    {
+      "action": "assert",
+      "label": "255145 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255145,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255145,
+      "reward": 0,
+      "label": "hand 255145 in at Archmage Ansirem Runeweaver",
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255145 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255145,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255146 'An Anxious Apprentice' from Archmage Ansirem Runeweaver",
+      "actor": "p",
+      "quest": 255146,
+      "entry": 2543
+    },
+    {
+      "action": "assert",
+      "label": "255146 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255146,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255146 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255146,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255146,
+      "reward": 0,
+      "label": "hand 255146 in at Advisor Belview",
+      "entry": 512392
+    },
+    {
+      "action": "assert",
+      "label": "255146 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255146,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255149 'Moss Creeper Mastery IV' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 255149,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "255149 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255149,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255149's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255149
+    },
+    {
+      "action": "assert",
+      "label": "255149 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255149,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255149,
+      "reward": 0,
+      "label": "hand 255149 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "255149 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255149,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255150 'The King of the Hills' from Hunstman Verdan",
+      "actor": "p",
+      "quest": 255150,
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "255150 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255150,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255150's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255150
+    },
+    {
+      "action": "assert",
+      "label": "255150 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255150,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255150,
+      "reward": 0,
+      "label": "hand 255150 in at Hunstman Verdan",
+      "entry": 512378
+    },
+    {
+      "action": "assert",
+      "label": "255150 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255150,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255151 'Dastardly Thieves' from Historian Wendell",
+      "actor": "p",
+      "quest": 255151,
+      "entry": 512365
+    },
+    {
+      "action": "assert",
+      "label": "255151 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255151,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 8 objective item(s) 355231",
+      "actor": "p",
+      "item": 355231,
+      "count": 8
+    },
+    {
+      "action": "assert",
+      "label": "255151 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255151,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255151,
+      "reward": 0,
+      "label": "hand 255151 in at Historian Wendell",
+      "entry": 512365
+    },
+    {
+      "action": "assert",
+      "label": "255151 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255151,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255152 'Preserving History' from Historian Wendell",
+      "actor": "p",
+      "quest": 255152,
+      "entry": 512365
+    },
+    {
+      "action": "assert",
+      "label": "255152 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255152,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255152 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255152,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255152,
+      "reward": 0,
+      "label": "hand 255152 in at Thordak Runebarrel",
+      "entry": 512396
+    },
+    {
+      "action": "assert",
+      "label": "255152 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255152,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255153 'Delivery to Menethil' from Thordak Runebarrel",
+      "actor": "p",
+      "quest": 255153,
+      "entry": 512396
+    },
+    {
+      "action": "assert",
+      "label": "255153 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255153,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255153 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255153,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255153,
+      "reward": 0,
+      "label": "hand 255153 in at Archaeologist Flagongut",
+      "entry": 2911
+    },
+    {
+      "action": "assert",
+      "label": "255153 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255153,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255154 'The Price of History' from Archaeologist Flagongut",
+      "actor": "p",
+      "quest": 255154,
+      "entry": 2911
+    },
+    {
+      "action": "assert",
+      "label": "255154 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255154,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255154 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255154,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255154,
+      "reward": 0,
+      "label": "hand 255154 in at Historian Wendell",
+      "entry": 512365
+    },
+    {
+      "action": "assert",
+      "label": "255154 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255154,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

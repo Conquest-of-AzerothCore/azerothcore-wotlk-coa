@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Vizier Form grants the polymorph immunity its tooltip promises (#12429)",
+  "contract": [
+    "#12429: Vizier Form (800912) says it makes you immune to polymorph effects, but its effects (auras 313, 36",
+    "and 286 in Spell.dbc) carry no mechanic immunity and aura_ascension_venomancer_lifecycle granted it only to",
+    "Weaver Form (#11699). Hex (11641) has Mechanic 17 (MECHANIC_POLYMORPH), so native Unit::IsImmunedToSpell",
+    "must report immunity while Vizier Form is active and stop reporting it once the form ends."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "v", "entry": 36, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 504798 },
+    { "action": "learn", "actor": "v", "spell": 800912 },
+    { "action": "assert", "label": "SETUP: Hex is not blocked before the form", "actor": "v", "metric": "spell_immune",
+      "spell": 11641, "effect": 0, "target": "enemy", "equals": 0 },
+    { "action": "cast", "actor": "v", "spell": 800912 },
+    { "action": "assert", "label": "SETUP: Vizier Form is active", "actor": "v", "metric": "aura",
+      "spell": 800912, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Hex is blocked in Vizier Form", "actor": "v",
+      "metric": "spell_immune", "spell": 11641, "effect": 0, "target": "enemy", "equals": 1 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cancel_aura", "actor": "v", "spell": 800912 },
+    { "action": "assert", "label": "SETUP: Vizier Form ended", "actor": "v", "metric": "aura",
+      "spell": 800912, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Hex is no longer blocked after the form", "actor": "v",
+      "metric": "spell_immune", "spell": 11641, "effect": 0, "target": "enemy", "equals": 0 }
+  ]
+}

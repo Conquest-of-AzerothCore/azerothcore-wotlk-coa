@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Chat log: delivered whispers are logged with their exact text, refused and addon whispers are not",
+  "contract": [
+    "With CoA.ChatLog.Enable on, a whisper that reaches its receiver writes one coa_chat_log row for the sender: type whisper, the receiver as target, and the text exactly as delivered, also with quotes, a backslash, percent and brace characters, an emoji, CJK text and an item link.",
+    "A whisper to a name nobody has writes no row, and an addon message (LANG_ADDON, hidden from players) writes no row.",
+    "The receiver's answer is a row of its own with the first sender as target.",
+    "Two-word names are written in full, up to 25 characters: a whisper from or to one names the whole name, and the text is the message without the quoted second word."
+  ],
+  "timeout_ms": 60000,
+  "chat_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "sender", "name": "Chatlogsend", "race": 1, "class": 1, "level": 20},
+    {"id": "friend", "name": "Chatlogfrnd", "race": 1, "class": 1, "level": 20},
+    {"id": "long", "name": "Chatlogtwoxy Secondnamexy", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "whisper", "label": "The sender whispers a text full of characters SQL and formatting care about", "actor": "sender", "to": "Chatlogfrnd", "text": "O'Neil \\ 100% {0} 🙂 你好 |cffffffff|Hitem:2447:0:0:0:0:0:0:0:20|h[Peacebloom]|h|r"},
+    {"action": "assert", "label": "The friend received it", "actor": "friend", "metric": "whispers_received", "from": "sender", "text": "O'Neil \\ 100% {0} 🙂 你好 |cffffffff|Hitem:2447:0:0:0:0:0:0:0:20|h[Peacebloom]|h|r", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "One whisper row with the friend as target and the exact text", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "friend", "chat_text": "O'Neil \\ 100% {0} 🙂 你好 |cffffffff|Hitem:2447:0:0:0:0:0:0:0:20|h[Peacebloom]|h|r", "equals": 1},
+    {"action": "whisper", "label": "A whisper to a name nobody has", "actor": "sender", "to": "Nosuchname", "text": "are you there"},
+    {"action": "addon_message", "label": "An addon message to the sender itself", "actor": "sender", "prefix": "COACHAT", "text": "x"},
+    {"action": "assert", "label": "Neither wrote a row", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 1},
+    {"action": "whisper", "label": "The friend answers", "actor": "friend", "to": "Chatlogsend", "text": "hi"},
+    {"action": "assert", "label": "The answer is the friend's row with the sender as target", "actor": "friend", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "sender", "chat_text": "hi", "equals": 1},
+    {"action": "assert", "label": "The sender's own name and the friend's are on its row", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "friend", "chat_name": "Chatlogsend", "chat_target_name": "Chatlogfrnd", "equals": 1},
+    {"action": "whisper", "label": "The sender whispers the two-word name, quoted", "actor": "sender", "to": "\"Chatlogtwoxy", "text": "Secondnamexy\" hello long"},
+    {"action": "assert", "label": "The long name received it", "actor": "long", "metric": "whispers_received", "from": "sender", "text": "hello long", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The row names the whole 25-character target and only the text", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "long", "chat_target_name": "Chatlogtwoxy Secondnamexy", "chat_text": "hello long", "equals": 1},
+    {"action": "whisper", "label": "The long name answers", "actor": "long", "to": "Chatlogsend", "text": "hello short"},
+    {"action": "assert", "label": "The row names the whole 25-character sender", "actor": "long", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "sender", "chat_name": "Chatlogtwoxy Secondnamexy", "chat_text": "hello short", "equals": 1}
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Spell modifier mutant owned by a harness dummy aura",
+  "contract": "The spell_mod_mutant action gives its player-scoped percent modifier an owner aura, Dummy Aura - Target: Any - Permanent 100523 (Spell.dbc on the server set: Effect[0] 6 with EffectApplyAuraName[0] 4, DurationIndex 21, ProcCharges 0, ProcFlags 0, SpellFamilyName 0, referenced by no script or CoA code), so Player::ApplyModToSpell can register it inside a spell. Sacred Restraint 102208 lasts 60000 ms (DurationIndex 3). A +100% duration mutant on 102208 is set before Testament of Strength 300514 is learned and cast; the cast applies 102208 through AscensionTemplarAbilities.cpp, inside a Spell, and the applied aura lasts 120000 ms. Removing the owner aura releases the modifier: the duration readback returns to 60000 ms and no mutant stays active.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "spell_mod_mutant",
+      "actor": "caster",
+      "spell": 102208,
+      "op": 1,
+      "percent": 100
+    },
+    {
+      "action": "assert",
+      "label": "One mutant is active",
+      "actor": "caster",
+      "metric": "spell_mod_mutants",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The owner aura is on the player",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 100523,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sacred Restraint duration readback is doubled",
+      "actor": "caster",
+      "metric": "spell_duration_ms",
+      "spell": 102208,
+      "equals": 120000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300514
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 300514,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "The cast applies Sacred Restraint for the doubled duration",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 102208,
+      "min": 115000,
+      "max": 120000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 100523,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Removing the owner aura releases the mutant",
+      "actor": "caster",
+      "metric": "spell_mod_mutants",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sacred Restraint duration readback is back to the DBC value",
+      "actor": "caster",
+      "metric": "spell_duration_ms",
+      "spell": 102208,
+      "equals": 60000
+    }
+  ]
+}

@@ -5,16 +5,19 @@
 #include "Creature.h"
 #include "GameObject.h"
 #include "GameObjectScript.h"
+#include "InstanceSaveMgr.h"
 #include "Item.h"
 #include "LootMgr.h"
 #include "Mail.h"
 #include "Map.h"
 #include "MapMgr.h"
+#include "Opcodes.h"
 #include "PlayerScript.h"
 #include "Player.h"
 #include "ScriptedGossip.h"
 #include "SetisLoot.h"
 #include "UnitScript.h"
+#include "WorldPacket.h"
 
 #include <cmath>
 #include <string>
@@ -157,10 +160,21 @@ namespace coa_world_boss_instance
                     loot->Process(boss->loot, LootTemplates_Creature, boss->GetLootMode(), looter, NORMAL_GROUP);
             }
             std::string const sender = _config.boss;
-            boss->GetMap()->DoForAllPlayers([&sender](Player* player)
+            InstanceMap* instance = boss->GetMap()->ToInstanceMap();
+            InstanceSave* save = instance ? sInstanceSaveMgr->GetInstanceSave(instance->GetInstanceId()) : nullptr;
+            boss->GetMap()->DoForAllPlayers([&sender, save](Player* player)
             {
-                if (player->IsGameMaster())
-                    return;
+                if (save)
+                {
+                    InstancePlayerBind* bind = sInstanceSaveMgr->PlayerGetBoundInstance(player->GetGUID(),
+                        save->GetMapId(), save->GetDifficulty());
+                    if (bind && bind->perm)
+                        return;
+                    WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
+                    data << uint32(0);
+                    player->SendDirectMessage(&data);
+                    sInstanceSaveMgr->PlayerBindToInstance(player->GetGUID(), save, true, player);
+                }
                 GiveOrMail(player, sender, ITEM_RUNE_OF_ASCENSION, RUNES);
                 GiveOrMail(player, sender, ITEM_BAZAAR_TOKEN, urand(TOKENS_MIN, TOKENS_MAX));
                 GiveOrMail(player, sender, ITEM_TREASURES_OF_AZEROTH, 1);

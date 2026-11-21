@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Guardian Honor and Greater Honor do not stack (#12508)",
+  "contract": [
+    "#12508: Honor and Greater Honor stack. Honor 300856 and its ranks 301228 to 301232 (single ally) and Greater",
+    "Honor 680280 (every party or raid member nearby) all give Strength through SPELL_AURA_MOD_STAT; rank 6 and",
+    "Greater Honor both give 77. Maintainer decision: Greater Honor is the convenience version that buffs the whole",
+    "group at once, so the two must not stack. They now share spell_group 2112508 with",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST, as AzerothCore does for Blessing of Might and Greater Blessing of",
+    "Might. Expected: Greater Honor replaces an equal rank 6 Honor, and a weaker rank 1 Honor cast afterwards does",
+    "not apply next to Greater Honor."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 301232
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 680280
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 300856
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 301232,
+      "target": "guardian",
+      "label": "Honor rank 6 on itself"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Honor rank 6 is applied",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 301232,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 680280,
+      "label": "Greater Honor"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Greater Honor is applied",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 680280,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Honor replaced Honor",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 301232,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 300856,
+      "target": "guardian",
+      "label": "Honor rank 1 on itself"
+    },
+    {
+      "action": "wait",
+      "label": "let the cast resolve",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the weaker Honor does not stack beside Greater Honor",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 300856,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Greater Honor stays",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 680280,
+      "equals": 1
+    }
+  ]
+}

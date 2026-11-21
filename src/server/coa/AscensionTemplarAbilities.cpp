@@ -1,5 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionTemplar.h"
+#include "Containers.h"
+#include "DBCStores.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -15,6 +17,19 @@
 namespace
 {
 using namespace AscensionTemplar;
+constexpr uint32 SPELL_DISCIPLINED_MIND_DISPEL = 525052;
+uint32 DispelCasts(uint32 rank)
+{
+    SpellEntry const* entry = sSpellStore.LookupEntry(rank);
+    if (!entry)
+        return 0;
+    uint32 casts = 0;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (entry->EffectApplyAuraName[i] == SPELL_AURA_PROC_TRIGGER_SPELL &&
+            entry->EffectTriggerSpell[i] == SPELL_DISCIPLINED_MIND_DISPEL)
+            ++casts;
+    return casts;
+}
 bool Selected(SpellInfo const* info, uint32 aura)
 {
     switch (aura)
@@ -49,6 +64,7 @@ bool RighteousTempest(SpellInfo const* info)
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_CAST = 4565;
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_IMPACT = 4566;
 constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
+constexpr uint32 SPELL_SACRED_RESTRAINT = 102208;
 constexpr uint32 selected[] = {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617};
 void ConsumeSelected(Player* player, Spell* spell)
 {
@@ -63,9 +79,19 @@ class templar_casts : public AllSpellScript
   public:
     templar_casts()
         : AllSpellScript("templar_casts",
-                         {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_CALCULATED_TARGET,
-                          ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_CALC_MAX_DURATION})
+                         {ALLSPELLHOOK_ON_SPELL_CHECK_CAST, ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST,
+                          ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_HIT_RESULT,
+                          ALLSPELLHOOK_ON_CALC_MAX_DURATION})
     {
+    }
+    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    {
+        Player* player = Owner(spell->GetCaster());
+        SpellInfo const* info = spell->GetSpellInfo();
+        if (!player || info->SpellFamilyName != 25 || spell->IsTriggered())
+            return;
+        if (info->Id == 562302 && !player->IsMounted())
+            result = SPELL_FAILED_ONLY_MOUNTED;
     }
     void OnCalcMaxDuration(Aura const* aura, int32& duration) override
     {
@@ -78,6 +104,9 @@ class templar_casts : public AllSpellScript
         Player* player = Owner(caster);
         if (!player || info->SpellFamilyName != 25)
             return;
+        if (info->Id == 801450 && player->GetWeaponForAttack(OFF_ATTACK, true))
+            if (AuraEffect const* impact = player->GetAuraEffect(705276, EFFECT_0))
+                spell->SetScriptWeaponDamageMultiplier(1.0f + float(impact->GetAmount()) / 100.0f);
         for (uint32 sid : selected)
             if ((!spell->IsTriggered() || info->Id == 801832) && Selected(info, sid))
                 if (Aura* aura = player->GetAura(sid))
@@ -107,6 +136,9 @@ class templar_casts : public AllSpellScript
         if (!player || !target)
             return;
         SpellInfo const* info = spell->GetSpellInfo();
+        if (info->Id == 561309 && target->GetCreatureType() != CREATURE_TYPE_UNDEAD &&
+            target->GetCreatureType() != CREATURE_TYPE_DEMON)
+            hit.missCondition = SPELL_MISS_IMMUNE;
         if (Named(info, 804929))
             spell->SetScriptValue(801832, 1);
         float factor = 1.0f;
@@ -121,7 +153,7 @@ class templar_casts : public AllSpellScript
             hit.crit = true;
         if (spell->GetScriptValue(524617) && spell->GetScriptValue(805416))
         {
-            factor *= 1.5f;
+            factor *= 1.0f + float(Amount(524617)) / 100.0f;
             hit.crit = true;
         }
         if (player->HasAura(300520) && target->HealthBelowPct(20) &&
@@ -176,7 +208,7 @@ class templar_casts : public AllSpellScript
             if (Named(info, 501562))
                 player->RemoveAurasDueToSpell(807764);
             if (player->HasAura(707606) && (Named(info, 501562) || Named(info, 803872)))
-                State(player).retribution = true;
+                GrantOath(player, 804924);
             talent(806273, 806353);
             if (player->HasAura(804927))
                 ReduceLibrams(player, std::abs(Amount(806106)));
@@ -208,15 +240,11 @@ class templar_casts : public AllSpellScript
         if (info->Id == 805417 && spell->GetScriptValue(806354))
             ReduceDebt(player, 100);
         if (info->Id == 560116 && player->HasAura(712678))
-            player->ModifySpellCooldown(info->Id, 5000);
+            player->ModifySpellCooldown(info->Id, Amount(712678, EFFECT_1));
         if (Libram(info) && player->HasAura(706468))
             ReduceDebt(player, 70);
         if (Named(info, 801448))
-        {
             talent(707364, 712378);
-            if (target && (player->HasAura(680399) || player->HasAura(681483)))
-                Cast(player, target, 525052);
-        }
         if (Named(info, 801165))
         {
             talent(705256, 681136);
@@ -249,9 +277,15 @@ class templar_casts : public AllSpellScript
         }
         if (Named(info, 804929) || info->Id == 807035)
             talent(806522, 806523);
-        if (Named(info, 801478) || info->Id == 801455 || info->Id == 1397742)
-            if (target || info->Id == 1397742)
+        if (Named(info, 801478) || info->Id == 801455 || info->Id == 1397742 || info->Id == 300514)
+            if (target || info->Id == 1397742 || info->Id == 300514)
                 Cast(player, target ? target : player, 102208);
+        if (Named(info, 801465) && target && target != player)
+        {
+            player->RemoveAurasDueToSpell(SPELL_SACRED_RESTRAINT);
+            if (player->IsFriendlyTo(target))
+                target->RemoveAurasDueToSpell(SPELL_SACRED_RESTRAINT);
+        }
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32 healing, bool) override
     {
@@ -262,6 +296,14 @@ class templar_casts : public AllSpellScript
         bool const hit = miss == SPELL_MISS_NONE;
         if (hit && healing && Named(info, 801448) && player->HasAura(524765))
             Cast(player, player, 524766);
+        if (hit && Named(info, 801448))
+            for (uint32 rank : {681483u, 680399u})
+                if (player->HasAura(rank))
+                {
+                    for (uint32 cast = DispelCasts(rank); cast; --cast)
+                        Cast(player, target, SPELL_DISCIPLINED_MIND_DISPEL);
+                    break;
+                }
         if (hit && damage && Named(info, 804929))
             Copy(player, player, 807414, damage);
         if (Named(info, 804929) && spell->GetScriptValue(801832))
@@ -330,7 +372,7 @@ class templar_casts : public AllSpellScript
                     Named(aura->GetSpellInfo(), 803872) && aura->GetCasterGUID() == player->GetGUID())
                 {
                     spell->SetScriptValue(804918, 1);
-                    Reduce(player, 806153, 4000);
+                    Reduce(player, 806153, std::abs(Amount(804918)));
                     break;
                 }
         if (info->Id == 805410 || Family(info, 0, 2))
@@ -403,8 +445,21 @@ class spell_ascension_templar_ability : public SpellScript
                 player->ModifySpellCooldown(pair.first, delta);
         }
     }
+    void CountPrimary(std::list<WorldObject*>& targets)
+    {
+        Unit* primary = GetExplTargetUnit();
+        if (!primary)
+            return;
+        targets.remove(primary);
+        if (uint32 const cap = GetSpellValue()->MaxAffectedTargets)
+            Acore::Containers::RandomResize(targets, cap - 1 +
+                GetCaster()->GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, GetSpellInfo()));
+    }
     void Register() override
     {
+        if (m_scriptSpellId == 561277 || m_scriptSpellId == 524740)
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                spell_ascension_templar_ability::CountPrimary, EFFECT_ALL, TARGET_UNIT_DEST_AREA_ENEMY);
         if (SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId); Named(info, 801448))
             OnEffectLaunchTarget +=
                 SpellEffectFn(spell_ascension_templar_ability::Launch, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);

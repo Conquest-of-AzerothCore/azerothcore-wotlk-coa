@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Grimtotem Marauders charge a victim 8-25 yd away (#12577)",
+  "contract": [
+    "Grimtotem Marauder 161809 carries the SmartAI range event 'Victim 8-25 yd - Cast Charge' (22120, 0-30 yd).",
+    "Its range sat in the timer parameters, so the range check was 0-0 yd and the Marauder only walked to its",
+    "victim. Expected: a hostile Marauder fixture 15 yd from a mage that hits it with Fireball casts Charge 22120",
+    "within 6 s; the broken row never casts it, because Charge cannot fire once the Marauder stands in melee."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -3331.8, "y": -766.0, "z": 52.5, "o": 0},
+  "players": [{"id": "mage", "race": 5, "class": 8, "level": 5}],
+  "creatures": [
+    {"id": "marauder", "owner": "mage", "entry": 161809, "faction": 14, "level": 5, "health": 100000,
+     "distance": 15, "reaction": 1}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: the Marauder stands 8-25 yd away", "actor": "mage", "metric": "distance",
+     "target": "marauder", "min": 10, "max": 20},
+    {"action": "learn", "actor": "mage", "spell": 133},
+    {"action": "cast", "label": "Fireball pulls the Marauder from range", "actor": "mage", "spell": 133,
+     "target": "marauder"},
+    {"action": "assert", "label": "SETUP: the Marauder is in combat", "actor": "marauder", "metric": "combat",
+     "equals": 1, "within_ms": 4000},
+    {"action": "assert", "label": "The Marauder casts Charge at its victim", "actor": "mage",
+     "metric": "spell_go_count", "entry": 161809, "spell": 22120, "min": 1, "within_ms": 6000}
+  ]
+}

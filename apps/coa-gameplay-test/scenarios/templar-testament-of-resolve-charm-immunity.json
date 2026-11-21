@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Templar: Testament of Resolve grants charm and mind-control immunity while it lasts",
+  "contract": "Testament of Resolve 804228 reads 'granting immunity to fear, charm, and horrify effects'. Owner ruling 2026-11-12 (Q2): charm means mind control, granted in Templar code. Its DBC grants fear (aura 147 mask 512) and horror (aura 77 MECHANIC_HORROR) only; aura_ascension_templar_lifecycle (rev_20261112_22) adds IMMUNITY_MECHANIC MECHANIC_CHARM and IMMUNITY_STATE SPELL_AURA_MOD_CHARM and SPELL_AURA_MOD_POSSESS on apply and removes them with the aura. Native immunity (spell_immune, no attack submitted) against Domination 37122 and Mind Control 605 from the dummy reads 0 before the cast, 1 while 804228 is up and 0 after its 10 s expiry; Fear 12096 (whole spell) and Psychic Horror 64044 effect 0 (aura 12, EffectMechanic 24; its effect 1 trigger has no immunity, so the whole spell never reads immune) follow the same pattern from the DBC effects, as the control.",
+  "timeout_ms": 40000,
+  "players": [
+    {
+      "id": "tp",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tp",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tp",
+      "spell": 804228
+    },
+    {
+      "action": "assert",
+      "label": "before Testament: charm (Domination, Mechanic 1, aura 6) 37122 immune 0",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 37122,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "before Testament: mind control (Mind Control, Mechanic 1, aura 2) 605 immune 0",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 605,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "before Testament: fear control 12096 immune 0",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 12096,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "before Testament: horror control 64044 effect 0 immune 0",
+      "actor": "tp",
+      "metric": "spell_effect_immune",
+      "spell": 64044,
+      "target": "dummy",
+      "equals": 0,
+      "effect": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "tp",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "tp",
+      "spell": 804228,
+      "target": "tp"
+    },
+    {
+      "action": "assert",
+      "label": "Testament of Resolve is cast",
+      "actor": "tp",
+      "metric": "cast_failure",
+      "spell": 804228,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Testament of Resolve is up",
+      "actor": "tp",
+      "metric": "aura",
+      "spell": 804228,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Testament up: charm (Domination, Mechanic 1, aura 6) 37122 immune 1",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 37122,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Testament up: mind control (Mind Control, Mechanic 1, aura 2) 605 immune 1",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 605,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Testament up: fear control 12096 immune 1",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 12096,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Testament up: horror control 64044 effect 0 immune 1",
+      "actor": "tp",
+      "metric": "spell_effect_immune",
+      "spell": 64044,
+      "target": "dummy",
+      "equals": 1,
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Testament of Resolve expires after 10 s",
+      "actor": "tp",
+      "metric": "aura",
+      "spell": 804228,
+      "equals": 0,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "after expiry: charm (Domination, Mechanic 1, aura 6) 37122 immune 0",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 37122,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "after expiry: mind control (Mind Control, Mechanic 1, aura 2) 605 immune 0",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 605,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "after expiry: fear control 12096 immune 0",
+      "actor": "tp",
+      "metric": "spell_immune",
+      "spell": 12096,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "after expiry: horror control 64044 effect 0 immune 0",
+      "actor": "tp",
+      "metric": "spell_effect_immune",
+      "spell": 64044,
+      "target": "dummy",
+      "equals": 0,
+      "effect": 0
+    }
+  ]
+}

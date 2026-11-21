@@ -1762,6 +1762,8 @@ public:
     void _removeTalentAurasAndSpells(uint32 spellId);
     void _addTalentAurasAndSpells(uint32 spellId);
     [[nodiscard]] bool HasTalent(uint32 spell_id, uint8 spec) const;
+    /// HasTalent that also matches a stock talent's twins and namesakes (SpellMgr::GetSpellAndRelatives)
+    [[nodiscard]] bool HasTalentOrTwin(uint32 spell_id, uint8 spec) const;
 
     [[nodiscard]] uint32 CalculateTalentsPoints() const;
     void SetBonusTalentCount(uint32 count) { m_extraBonusTalentCount = count; };
@@ -2002,6 +2004,7 @@ public:
     float GetManaBonusFromIntellect();
 
     bool UpdateStats(Stats stat) override;
+    [[nodiscard]] float GetExactStatValue(Stats stat) const;
     bool UpdateAllStats() override;
     void ApplySpellPenetrationBonus(int32 amount, bool apply);
     void UpdateResistances(uint32 school) override;
@@ -2177,6 +2180,50 @@ public:
         _scriptedPrivateOwner = owner.IsEmpty() ? GetGUID() : owner;
         _scriptedPrivateMembers = members;
         _scriptedPrivateMembers.insert(GetGUID());
+        _scriptedPrivateObserver = false;
+    }
+    // A game master who follows a player into an existing scripted private instance (.appear). The map
+    // admits the observer by this exact instance; the observer never joins the members its script tracks.
+    void PrepareScriptedPrivateObserver(uint32 mapId, uint32 instanceId, WorldLocation const& returnLocation,
+        ObjectGuid owner, bool databaseSpawns)
+    {
+        PrepareScriptedPrivateInstance(mapId, returnLocation, owner, {}, databaseSpawns);
+        _scriptedPrivateInstanceId = instanceId;
+        _scriptedPrivateObserver = true;
+    }
+    struct ScriptedPrivateObserverState
+    {
+        uint32 MapId = MAPID_INVALID;
+        uint32 InstanceId = 0;
+        WorldLocation Return;
+        ObjectGuid Owner;
+        bool DatabaseSpawns = false;
+    };
+    // The observed copy, put back when a later transfer is refused; empty while not observing.
+    Optional<ScriptedPrivateObserverState> GetScriptedPrivateObserverState() const
+    {
+        if (!_scriptedPrivateObserver)
+            return {};
+
+        return ScriptedPrivateObserverState{ _scriptedPrivateMapId, _scriptedPrivateInstanceId, _scriptedPrivateReturn,
+            _scriptedPrivateOwner, _scriptedPrivateDatabaseSpawns };
+    }
+    void RestoreScriptedPrivateObserver(Optional<ScriptedPrivateObserverState> const& state)
+    {
+        if (!state)
+        {
+            ClearScriptedPrivateInstance();
+            return;
+        }
+
+        PrepareScriptedPrivateObserver(state->MapId, state->InstanceId, state->Return, state->Owner,
+            state->DatabaseSpawns);
+    }
+    bool IsScriptedPrivateObserver() const { return _scriptedPrivateObserver; }
+    bool IsScriptedPrivateObserverOf(uint32 mapId, uint32 instanceId) const
+    {
+        return _scriptedPrivateObserver && instanceId &&
+            _scriptedPrivateMapId == mapId && _scriptedPrivateInstanceId == instanceId;
     }
     void SetScriptedPrivateInstanceId(uint32 id) { _scriptedPrivateInstanceId = id; }
     bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
@@ -2192,6 +2239,7 @@ public:
         _scriptedPrivateInstanceId = 0;
         _scriptedPrivateOwner.Clear();
         _scriptedPrivateMembers.clear();
+        _scriptedPrivateObserver = false;
     }
     [[nodiscard]] bool IsBeingTeleported() const { return mSemaphoreTeleport_Near != 0 || mSemaphoreTeleport_Far != 0; }
     [[nodiscard]] bool IsBeingTeleportedNear() const { return mSemaphoreTeleport_Near != 0; }
@@ -2744,6 +2792,7 @@ public:
 
     [[nodiscard]] float GetRealParry() const { return m_realParry; }
     [[nodiscard]] float GetRealDodge() const { return m_realDodge; }
+    void SetRealDodgeParryForTest(float dodge, float parry) { m_realDodge = dodge; m_realParry = parry; }
     // mt maps
     [[nodiscard]] PlayerTalentMap const& GetTalentMap() const { return m_talents; }
     [[nodiscard]] uint32 GetNextSave() const { return m_nextSave; }
@@ -2923,6 +2972,7 @@ protected:
     Difficulty _scriptedPrivateReturnRaidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
     ObjectGuid _scriptedPrivateOwner;
     std::set<ObjectGuid> _scriptedPrivateMembers;
+    bool _scriptedPrivateObserver = false;
     void _SaveInstanceTimeRestrictions(CharacterDatabaseTransaction trans);
     void _SavePlayerSettings(CharacterDatabaseTransaction trans);
     void UpdateAdditionalSaves(uint32 p_time);

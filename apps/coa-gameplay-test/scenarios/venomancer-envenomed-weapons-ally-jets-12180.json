@@ -1,0 +1,233 @@
+{
+  "schema": 2,
+  "name": "Venomancer Envenomed Weapons allies launch their own poison jets",
+  "contract": [
+    "Issue #12180: Envenomed Weapons 300855 gives each raid member a 5% chance on damage to launch Envenomed Weapons 803178, which the tooltip scales by 10% of spell power and 10% of attack power.",
+    "300855 is a plain applied aura (effect 6, target 56), so it stays on an ally whose Venomancer leaves for another map.",
+    "The ally launches the jet itself: its own spell power and attack power scale it, and the damage is its own. A warrior with +3000 attack power and one with +3000 spell power both read a jet 300 above a plain warrior.",
+    "With the Venomancer on Kalimdor, an envenomed warrior swings for fifteen minutes, about 300 damaging swings; at 5% that is about 15 jets of its own, and 3 to 40 bounds a failure below 0.01% at 280 swings."
+  ],
+  "timeout_ms": 1000000,
+  "players": [
+    {
+      "id": "venomancer",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "attack_power": 3000,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_power": 3000,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "ally1",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "distance": 3,
+      "health": 10000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "ally1"
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "ally2"
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "control"
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 300855
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 300855
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches ally1",
+      "actor": "ally1",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches ally2",
+      "actor": "ally2",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jet value for a warrior without bonus stats",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 803178,
+      "effect": 0,
+      "save_as": "jet_base"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally1's 3000 attack power adds 10% to its own poison jet",
+      "actor": "ally1",
+      "metric": "spell_effect_value",
+      "spell": 803178,
+      "effect": 0,
+      "relative_to": "jet_base",
+      "min": 297,
+      "max": 303
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally2's 3000 spell power adds 10% to its own poison jet",
+      "actor": "ally2",
+      "metric": "spell_effect_value",
+      "spell": 803178,
+      "effect": 0,
+      "relative_to": "jet_base",
+      "min": 297,
+      "max": 303
+    },
+    {
+      "action": "teleport",
+      "actor": "venomancer",
+      "map": 1,
+      "x": 2389.03,
+      "y": -6608.37,
+      "z": 125.192,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Venomancer is on Kalimdor",
+      "actor": "venomancer",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "ally1",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "ally1 swings for fifteen minutes",
+      "ms": 900000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally1"
+    },
+    {
+      "action": "wait",
+      "label": "Let the last poison jets land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "ally1 lands at least 280 damaging swings",
+      "actor": "ally1",
+      "metric": "melee_damage_count",
+      "min": 280
+    },
+    {
+      "action": "assert",
+      "label": "ally1 keeps Envenomed Weapons with its Venomancer away",
+      "actor": "ally1",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Damaging swings by ally1",
+      "actor": "ally1",
+      "metric": "melee_damage_count",
+      "save_as": "ally1_hits"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally1 launches its own poison jets while the Venomancer is on another map",
+      "actor": "ally1",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "min": 3,
+      "max": 40
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jets by ally1",
+      "actor": "ally1",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "save_as": "ally1_jets"
+    }
+  ]
+}

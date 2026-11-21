@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Each Knight of Xoroth Hellfire Imp puts its own Hellfire Imp aura on the knight (#12329)",
+  "contract": "Spell.dbc 805916 'Hellfire Imp' (visible, icon 54813, tooltip 'A Hellfire Imp is assisting you.') has AttributesEx3 SPELL_ATTR3_DOT_STACKING_RULE and three SPELL_EFFECT_APPLY_AREA_AURA_OWNER effects with a 100 yd radius: effect 0 dummy, effect 1 SPELLMOD_COST flat -150 on class mask word0 32768, effect 2 SPELLMOD_EFFECT1 +3 on Demonic Bulwark. Exiles DB lists 805916 as cast by creature 50301 (Hellfire Imp), so on Ascension every imp cast its own owner aura and the knight showed one Hellfire Imp icon per imp, which the report (website #248, Rexxar) describes. Expected: with one imp the knight carries a visible 805916 and no single stand-in aura 805965; a second imp adds a second 805916 application (the knight's applied auras grow by exactly 1); the summed cost modifier keeps its per-imp parity, so Call: Hellfire Abyssal (805074, the only family-23 spell with flag word0 32768, 100 Rage = 1000) costs 850 with one imp and 700 with two; once the imps expire (805966 lasts 12 sec) the aura is gone and the cost is 1000 again. Each Call: Hellfire Imp (804883) cast summons one imp.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 804883
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no imps are out yet",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Hellfire Imp aura without imps",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 805916,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Call: Hellfire Abyssal costs its full 100 Rage without imps",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 805074,
+      "equals": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp (first imp)",
+      "actor": "knight",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the knight has one imp",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the imp puts Hellfire Imp on the knight",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 805916,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Hellfire Imp aura shows as a buff icon",
+      "actor": "knight",
+      "metric": "aura_visible",
+      "spell": 805916,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: no single stand-in aura replaces the per-imp aura",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 805965,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: one imp lowers Call: Hellfire Abyssal by 15 Rage",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 805074,
+      "equals": 850,
+      "within_ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "applied_aura_count",
+      "save_as": "one_imp_auras"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight",
+      "spell": 804883
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp (second imp)",
+      "actor": "knight",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the knight has two imps",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the second imp adds its own Hellfire Imp aura",
+      "actor": "knight",
+      "metric": "applied_aura_count",
+      "relative_to": "one_imp_auras",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: two imps lower Call: Hellfire Abyssal by 30 Rage",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 805074,
+      "equals": 700,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the imps expire",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Hellfire Imp aura ends with the imps",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 805916,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: without imps Call: Hellfire Abyssal costs 100 Rage again",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 805074,
+      "equals": 1000,
+      "within_ms": 1500
+    }
+  ]
+}

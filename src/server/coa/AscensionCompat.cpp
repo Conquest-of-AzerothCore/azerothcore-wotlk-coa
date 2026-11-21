@@ -7,8 +7,6 @@
 #include "AccountMgr.h"
 #include "AscensionAetherialReliquary.h"
 #include "AscensionAccountProgress.h"
-#include "AscensionClientDbcStream.h"
-#include "AscensionDisplayPatch.h"
 #include "AscensionFelsworn.h"
 #include "AscensionHighRiskPolicy.h"
 #include "AscensionRemovedSpellActionBars.h"
@@ -56,6 +54,7 @@
 #include "AscensionAuraAmounts.h"
 #include "AscensionMountSpeed.h"
 #include "AscensionClientSpellPatches.h"
+#include "AscensionClientSpellRows.h"
 #include "DBCfmt.h"
 #include "AscensionClassTuning.h"
 #include "AscensionBarbarian.h"
@@ -187,6 +186,8 @@ constexpr std::size_t MAX_APPEARANCE_OUTFIT_NAME_BYTES = 64;
 constexpr std::size_t MAX_APPEARANCE_OUTFITS = 100;
 constexpr uint16 SMSG_CAN_SEE_APPEARANCES_INFO = 0x06A2;
 constexpr uint16 CMSG_SET_CAN_SEE_APPEARANCES = 0x06A3;
+constexpr uint16 CMSG_COLLECT_ITEM_APPEARANCE = 0x06EA;
+constexpr uint16 SMSG_COLLECT_ITEM_APPEARANCE_RESULT = 0x06EB;
 constexpr uint16 SMSG_VANITY_COLLECTION_INFO = 0x06F7;
 constexpr uint16 SMSG_VANITY_COLLECTION_ADDED = 0x06F8;
 
@@ -225,6 +226,8 @@ constexpr uint16 SMSG_PATCH_SPELL_SHAPESHIFT_FORM = 0x0949;
 constexpr uint16 SMSG_PATCH_CREATURE_MODEL_DATA = 0x0974;
 constexpr uint16 SMSG_PATCH_VEHICLE = 0x097A;
 constexpr uint16 SMSG_PATCH_VEHICLE_SEAT = 0x097B;
+constexpr uint16 SMSG_PATCH_WORLD_MAP_AREA = 0x09AA;
+constexpr uint16 SMSG_PATCH_WORLD_MAP_OVERLAY = 0x09AC;
 constexpr uint32 CUSTOM_DISPLAY_ID_FALLBACK_MIN = 652000;
 constexpr uint32 DISPLAY_PATCH_FALLBACK_DELAY_MS = 5000;
 
@@ -254,11 +257,12 @@ constexpr uint32 VANITY_FLAG_NOT_OFFERED = 0x8;
 constexpr uint8 REALM_TYPE_COUNT = 5;
 constexpr std::string_view VANITY_ITEM_LEARNED_EVENT = "ASCENSION_STORE_COLLECTION_ITEM_LEARNED";
 
-constexpr std::array<uint16, 9> QUEUED_EXTENSION_OPCODES = {
+constexpr std::array<uint16, 10> QUEUED_EXTENSION_OPCODES = {
     CMSG_APPLY_APPEARANCES, CMSG_SET_CAN_SEE_APPEARANCES,
     CMSG_EXTENSION_INITIALIZED, CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST,
     CMSG_SAVE_APPEARANCE_OUTFIT, CMSG_DELETE_APPEARANCE_OUTFIT,
-    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID};
+    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID,
+    CMSG_COLLECT_ITEM_APPEARANCE};
 
 constexpr uint16 CMSG_QUERY_VENDORED_ITEM_RECOVERY = 0x05DE;
 constexpr uint16 CMSG_RECOVER_VENDORED_ITEM = 0x05E0;
@@ -451,24 +455,6 @@ constexpr std::array<uint32, 18> BROKEN_COMPANION_SPELLS = {
 constexpr std::size_t COMPANION_SPELLS_PER_BATCH = 4;
 constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 
-enum AscensionItems : uint32
-{
-    ITEM_HEARTWOOD_KEY = 1041710,
-    ITEM_CUIRBOULLI_BOOTS = 2143,
-    ITEM_RED_RIBBONED_WRAPPING_PAPER = 5042,
-    ITEM_ASHEN_TABLET = 9302130
-};
-
-constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
-{
-    10521, 10522, 10523, 10524, 10525, 10526, 10527, 10528, 1041704
-};
-
-constexpr std::array<uint32, 8> GOBLIN_SALVAGE_QUEST_ITEMS =
-{
-    9707001, 9707002, 9707003, 9707004, 9707005, 9707006, 9707007, 9707008
-};
-
 constexpr std::array<uint32, 2> GOBLIN_SALVAGE_FIELD_TESTING_QUESTS = { 176003, 176013 };
 constexpr float GOBLIN_SALVAGE_FIELD_TESTING_LOOT_REACH = 10.0f;
 
@@ -501,7 +487,6 @@ enum class AscensionCompatConfig {
   CLIENT_BOOLEAN_CONFIGS,
   CLIENT_INTEGER_CONFIGS,
   SEND_DISPLAY_PATCHES,
-  CLIENT_DBC_DIRECTORY,
   COLLECTIONS_FOR_BOTS,
   RANDOM_BOT_ACCOUNT_PREFIX,
   STARTER_VANITY_ITEMS,
@@ -559,8 +544,6 @@ public:
                          "CoA.AutoProgression", false);
     SetConfigValue<bool>(AscensionCompatConfig::SEND_DISPLAY_PATCHES,
                          "CoA.SendDisplayPatches", true);
-    SetConfigValue<std::string>(AscensionCompatConfig::CLIENT_DBC_DIRECTORY,
-                                "CoA.ClientDbcDirectory", "");
   }
 };
 
@@ -1068,7 +1051,7 @@ public:
 
     learned += RestorePurchasedRanks(player);
     learned += SynchronizeTaughtAbilities(player);
-    learned += SynchronizeTalentReplacements(player);
+    SynchronizeTalentReplacements(player);
     RemoveAscensionPrimalistWeapons(player);
     SynchronizeAscensionRunemasterEchoes(player, GetActiveSpecialization(player));
 
@@ -1156,7 +1139,7 @@ public:
             if (entry.ClassId != player->getClass())
                 continue;
 
-            uint32 replacement = 0;
+            std::vector<uint32> reachedRanks;
             Aura const* aura = entry.RequiresAura ? player->GetAura(entry.ParentSpellId, player->GetGUID()) : nullptr;
             bool const parentOwned = entry.RequiresAura ?
                 aura && !aura->IsRemoved() && aura->GetStackAmount() >= entry.MinAuraStacks :
@@ -1168,25 +1151,44 @@ public:
                     continue;
                 candidates.insert(rank.SpellId);
                 if (allowed && rank.RequiredLevel <= player->GetLevel() && sSpellMgr->GetSpellInfo(rank.SpellId))
-                    replacement = rank.SpellId;
+                    reachedRanks.push_back(rank.SpellId);
             }
 
+            std::vector<uint32> activeOriginals;
             for (auto const& [id, spell] : player->GetSpellMap())
             {
                 if (sSpellMgr->GetFirstSpellInChain(id) != entry.OriginalSpellId)
                     continue;
                 replacements.try_emplace(id, 0);
-                if (replacement && player->HasActiveSpell(id))
-                    replacements[id] = replacement;
+                if (!reachedRanks.empty() && player->HasActiveSpell(id))
+                    activeOriginals.push_back(id);
             }
+
+            std::sort(activeOriginals.begin(), activeOriginals.end(), [](uint32 left, uint32 right)
+            {
+                return sSpellMgr->GetSpellRank(left) > sSpellMgr->GetSpellRank(right);
+            });
+            for (std::size_t index = 0; index < activeOriginals.size(); ++index)
+                replacements[activeOriginals[index]] =
+                    reachedRanks[reachedRanks.size() - 1 - std::min(index, reachedRanks.size() - 1)];
         }
+
+        std::vector<std::pair<uint32, uint32>> byRank(replacements.begin(), replacements.end());
+        std::stable_sort(byRank.begin(), byRank.end(), [](auto const& left, auto const& right)
+        {
+            return sSpellMgr->GetSpellRank(left.first) < sSpellMgr->GetSpellRank(right.first);
+        });
 
         std::set<uint32> desired;
         for (auto const& [id, replacement] : replacements)
         {
             if (replacement)
                 desired.insert(replacement);
-            if (player->GetTemporarySpellReplacement(id) != replacement)
+        }
+        for (auto const& [id, replacement] : byRank)
+        {
+            uint32 const current = player->GetTemporarySpellReplacement(id);
+            if (current != replacement && (!replacement || !desired.count(current)))
                 player->SetTemporarySpellReplacement(id, 0);
         }
 
@@ -1214,7 +1216,7 @@ public:
             }
         }
         bool barChanged = false;
-        for (auto const& [id, replacement] : replacements)
+        for (auto const& [id, replacement] : byRank)
         {
             player->SetTemporarySpellReplacement(id, replacement);
             if (!replacement)
@@ -4087,13 +4089,8 @@ public:
       return;
 
     PreparedPatchRows const &rows = GetPreparedPatchRows();
-    LOG_INFO("coa",
-             "Prepared {} CreatureModelData, {} CreatureDisplayInfo, {} ItemDisplayInfo, {} Item, "
-             "{} Spell, {} SuperTrack, {} QuestSuperTrack, {} SkillLineAbility and {} SpellShapeshiftForm "
-             "patch rows for the client stream",
-             rows.CreatureModels.size(), rows.CreatureDisplayIds.size(), rows.ItemDisplayInfos.size(),
-             rows.Items.size(), rows.Spells.size(), rows.SuperTracks.size(), rows.QuestSuperTracks.size(),
-             rows.SkillLineAbilities.size(), rows.ShapeshiftForms.size());
+    LOG_INFO("coa", "Prepared {} Spell rows for spell notices and {} race-restricted QuestSuperTrack rows",
+             rows.Spells.size(), rows.QuestSuperTracks.size());
     IndexClientSpells();
     IndexClientSpellRanks();
     IndexAdvancementEntryIds();
@@ -4106,9 +4103,6 @@ public:
     uint32 const guid = player->GetGUID().GetCounter();
     player->GetSession()->SetAscensionPatchStreamGuid(0);
     std::lock_guard lock(_mutex);
-    _sentItemRows.erase(guid);
-    _sentItemSpellRows.erase(guid);
-    _onDemandItemRows.erase(guid);
     _fallbackTimers[guid] = DISPLAY_PATCH_FALLBACK_DELAY_MS;
     std::lock_guard entries(_swapEntryMutex);
     _sentSwapEntries.erase(guid);
@@ -4116,67 +4110,28 @@ public:
 
   void OnPlayerLogout(Player *player) {
     uint32 const guid = player->GetGUID().GetCounter();
-    PatchRowTally onDemand;
+    if (WorldSession* session = player->GetSession())
+      session->SetAscensionPatchStreamGuid(0);
     {
-      if (WorldSession* session = player->GetSession())
-        session->SetAscensionPatchStreamGuid(0);
       std::lock_guard lock(_mutex);
-      _sentItemRows.erase(guid);
-      _sentItemSpellRows.erase(guid);
       _fallbackTimers.erase(guid);
-      if (auto node = _onDemandItemRows.extract(guid))
-        onDemand = node.mapped();
     }
-    {
-      std::lock_guard entries(_swapEntryMutex);
-      _sentSwapEntries.erase(guid);
-    }
-
-    if (onDemand.Rows || onDemand.SpellRows)
-      LOG_INFO("coa", "Streamed {} Item and {} linked Spell patch rows ({} bytes) on demand to {} during the session",
-               onDemand.Rows, onDemand.SpellRows, onDemand.Bytes, player->GetName());
+    std::lock_guard entries(_swapEntryMutex);
+    _sentSwapEntries.erase(guid);
   }
+
+    std::vector<WorldPacket> ClientFileSpellRows()
+    {
+        std::vector<WorldPacket> packets;
+        for (SpellPatchRow const& prepared : GetPreparedPatchRows().Spells)
+            if (std::optional<SpellPatchRow> const row = ClientSpellRow(prepared.Values[0]))
+                packets.push_back(BuildSpellRow(*row));
+        return packets;
+    }
 
     static std::unordered_set<uint32> OwnedItemIds(Player* player)
     {
         return CollectOwnedItemIds(player);
-    }
-
-    void SendItemRowOnDemand(Player* player, uint32 itemId)
-    {
-        if (!ReceivesPatchRows(player))
-            return;
-
-        PreparedPatchRows const& rows = GetPreparedPatchRows();
-        std::optional<ItemPatchRow> const row = FindItemRow(rows, itemId);
-        if (!row)
-            return;
-
-        PatchRowTally const sent = SendItemRows(player, rows, { *row });
-        if (!sent.Rows && !sent.SpellRows)
-            return;
-
-        std::lock_guard lock(_mutex);
-        _onDemandItemRows[player->GetGUID().GetCounter()].Add(sent);
-    }
-
-    void ResendSkillLineAbilityRows(Player* player, uint32 spellId)
-    {
-        if (!ReceivesPatchRows(player))
-            return;
-
-        for (SkillLineAbilityPatchRow const& row : GetPreparedPatchRows().SkillLineAbilities)
-            if (!spellId || row[2] == spellId)
-                SendSkillLineAbilityRow(player, row);
-    }
-
-    void SendLearnedRecipeItemRows(Player* player, uint32 spellId)
-    {
-        if (!player->IsInWorld())
-            return;
-
-        for (uint32 itemId : RegisteredCraftedItemIds(spellId))
-            SendItemRowOnDemand(player, itemId);
     }
 
     void SendSpellNoticeRow(Player* player, uint32 spellId, bool hidden)
@@ -4184,7 +4139,7 @@ public:
         if (!IsAscensionCustomClass(player) || !ReceivesPatchRows(player) || !player->IsInWorld())
             return;
 
-        std::optional<SpellPatchRow> row = ClientSpellRow(player, spellId);
+        std::optional<SpellPatchRow> row = ClientSpellRow(spellId);
         if (!row || (row->Values[SPELL_ATTRIBUTES_FIELD] & (SPELL_ATTR0_IS_TRADESKILL | SPELL_ATTR0_DO_NOT_DISPLAY)))
             return;
 
@@ -4199,7 +4154,7 @@ public:
             !ReceivesPatchRows(player) || !player->IsInWorld())
             return;
 
-        std::optional<SpellPatchRow> row = ClientSpellRow(player, spellId);
+        std::optional<SpellPatchRow> row = ClientSpellRow(spellId);
         if (!row || ClientRankNumber(row->Strings[SPELL_WIRE_RANK]) > 1)
             return;
 
@@ -4292,95 +4247,11 @@ public:
       if (player->GetSession()->GetAscensionPatchStreamGuid() == guid)
         return;
       player->GetSession()->SetAscensionPatchStreamGuid(guid);
-      _sentItemRows.erase(guid);
-      _sentItemSpellRows.erase(guid);
       _fallbackTimers.erase(guid);
     }
-    WorldSession* session = player->GetSession();
-    bool const sendSpellVisuals = !session->HasAscensionSpellVisualRows();
-    session->SetAscensionSpellVisualRows();
-
-    std::vector<ItemPatchRow> itemRows;
-    std::unordered_set<uint32> itemIds = CollectOwnedItemIds(player);
-    itemIds.merge(CollectKnownRecipeItemIds(player));
-    for (uint32 itemId : itemIds)
-        if (std::optional<ItemPatchRow> const row = FindItemRow(rows, itemId))
-            itemRows.push_back(*row);
-
-    uint32 const startTime = getMSTime();
-
-    std::size_t bytes = SendLoadingScreenRow(player);
-
-    for (CreatureModelPatchRow const &row : rows.CreatureModels)
-      bytes += SendCreatureModelRow(player, row);
-
-    uint32 sent = 0;
-    for (uint32 displayId : rows.CreatureDisplayIds) {
-      if (CreatureDisplayInfoEntry const *entry =
-              sCreatureDisplayInfoStore.LookupEntry(displayId)) {
-        auto const textures = rows.CreatureDisplayTextures.find(displayId);
-        bytes += SendDisplayInfoRow(player, *entry,
-            textures != rows.CreatureDisplayTextures.end() ? &textures->second : nullptr);
-        ++sent;
-      }
-    }
-
-    for (ItemDisplayInfoPatchRow const &row : rows.ItemDisplayInfos)
-      bytes += SendItemDisplayInfoRow(player, row);
-
-    PatchRowTally const sentItems = SendItemRows(player, rows, std::move(itemRows));
-    bytes += sentItems.Bytes;
-
-    uint32 sentSpells = sentItems.SpellRows;
-    for (SpellPatchRow const& row : rows.Spells)
-      if (!row.RequiresRegistration || Ascension::ClientSpellPatches::Instance().Contains(row.Values[0],
-          Ascension::ClientSpellPatches::Delivery::Login))
-      {
-        SpellPatchRow active = row;
-        ApplyServerSpellSelectors(active);
-        bytes += SendSpellRow(player, active);
-        ++sentSpells;
-      }
-
-    for (SuperTrackPatchRow const &row : rows.SuperTracks)
-      bytes += SendSuperTrackRow(player, row);
 
     for (QuestSuperTrackPatch const &patch : rows.QuestSuperTracks)
-      bytes += SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
-
-    if (sendSpellVisuals)
-    {
-      bytes += SendSpellVisualRows(player);
-      bytes += SendSoundEntryRows(player);
-    }
-
-    for (SkillLineAbilityPatchRow const& row : rows.SkillLineAbilities)
-        bytes += SendSkillLineAbilityRow(player, row);
-
-    for (ShapeshiftFormPatchRow const &row : rows.ShapeshiftForms)
-      bytes += SendShapeshiftFormRow(player, row);
-
-    for (VanityCollectionPatchRow const& row : rows.VanityCollections)
-      bytes += SendVanityCollectionRow(player, row);
-
-    for (VehicleSeatPatchRow const& row : rows.VehicleSeats)
-      bytes += SendVehicleSeatRow(player, row);
-
-    for (VehiclePatchRow const& row : rows.Vehicles)
-      bytes += SendVehicleRow(player, row);
-
-    LOG_INFO("coa",
-             "Streamed {} CreatureModelData, {} CreatureDisplayInfo, {} ItemDisplayInfo, {} of {} Item, "
-             "{} Spell, {} SuperTrack, {} QuestSuperTrack, {} SkillLineAbility, {} SpellShapeshiftForm, "
-             "{} VanityCollection, {} VehicleSeat and {} Vehicle patch rows ({} bytes) to {} in {} ms",
-             rows.CreatureModels.size(), sent, rows.ItemDisplayInfos.size(), sentItems.Rows,
-             rows.Items.size(), sentSpells, rows.SuperTracks.size(), rows.QuestSuperTracks.size(),
-             rows.SkillLineAbilities.size(), rows.ShapeshiftForms.size(), rows.VanityCollections.size(),
-             rows.VehicleSeats.size(), rows.Vehicles.size(), bytes,
-             player->GetName(), GetMSTimeDiffToNow(startTime));
-
-    if (!rows.ShapeshiftForms.empty() && player->GetShapeshiftForm() != FORM_NONE)
-      player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+      SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
   }
 
 private:
@@ -4390,17 +4261,6 @@ private:
            !player->GetSession()->IsBot();
   }
 
-  static constexpr std::size_t ITEM_DISPLAY_INFO_FIELD_COUNT = 25;
-  static constexpr std::array<uint8, 14> ITEM_DISPLAY_INFO_STRING_FIELDS = {
-      1, 2, 3, 4, 5, 6, 15, 16, 17, 18, 19, 20, 21, 22};
-
-  struct ItemDisplayInfoPatchRow {
-    std::array<uint32, ITEM_DISPLAY_INFO_FIELD_COUNT> Values{};
-    std::array<std::string, ITEM_DISPLAY_INFO_STRING_FIELDS.size()> Strings;
-  };
-
-  using ItemPatchRow = std::array<uint32, 8>;
-  using SuperTrackPatchRow = std::array<uint32, 8>;
   static constexpr uint32 QUEST_SUPER_TRACK_OBJECTIVE_COUNT = 4;
   static constexpr uint32 QUEST_SUPER_TRACK_NODES_PER_SLOT = 20;
   static constexpr uint32 QUEST_SUPER_TRACK_FIRST_NODE_FIELD = 2;
@@ -4432,62 +4292,6 @@ private:
     return row;
   }
 
-    static constexpr uint32 SKILL_LINE_ABILITY_DBC_FIELD_COUNT = 14;
-    using SkillLineAbilityPatchRow = std::array<uint32, SKILL_LINE_ABILITY_DBC_FIELD_COUNT>;
-
-  static constexpr uint32 SHAPESHIFT_FORM_DBC_FIELD_COUNT = 35;
-  static constexpr uint32 SHAPESHIFT_FORM_NAME_FIELD = 2;
-  static constexpr uint32 SHAPESHIFT_FORM_FIRST_NUMERIC_FIELD = 19;
-
-  struct ShapeshiftFormPatchRow {
-    std::array<uint32, 18> Values{};
-    std::string Name;
-  };
-
-  static constexpr uint32 VEHICLE_DBC_FIELD_COUNT = 40;
-  static constexpr uint32 VEHICLE_FIRST_STRING_FIELD = 29;
-  static constexpr uint32 VEHICLE_STRING_FIELD_COUNT = 4;
-  static constexpr uint32 VEHICLE_SEAT_DBC_FIELD_COUNT = 58;
-
-  struct VehiclePatchRow {
-    std::array<uint32, VEHICLE_DBC_FIELD_COUNT> Values{};
-    std::array<std::string, VEHICLE_STRING_FIELD_COUNT> Strings;
-  };
-
-  using VehicleSeatPatchRow = std::array<uint32, VEHICLE_SEAT_DBC_FIELD_COUNT>;
-
-  static constexpr uint32 VANITY_COLLECTION_DBC_FIELD_COUNT = 77;
-  static constexpr uint32 VANITY_COLLECTION_DESCRIPTION_FIELD = 42;
-  static constexpr uint32 VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD = 59;
-  static constexpr uint32 VANITY_COLLECTION_LEARNED_SPELL_FIELD = 76;
-
-  struct VanityCollectionPatchRow {
-    std::array<uint32, VANITY_COLLECTION_DBC_FIELD_COUNT> Values{};
-    std::string Artwork;
-    std::string Description;
-    std::string AdditionalText;
-  };
-
-  static constexpr uint32 CREATURE_MODEL_DATA_FIELD_COUNT = 28;
-  static constexpr uint32 CREATURE_MODEL_DATA_NAME_FIELD = 2;
-
-  struct CreatureModelPatchRow {
-    std::array<uint32, CREATURE_MODEL_DATA_FIELD_COUNT> Values{};
-    std::string ModelName;
-  };
-
-  struct PatchRowTally {
-    uint32 Rows = 0;
-    uint32 SpellRows = 0;
-    std::size_t Bytes = 0;
-
-    void Add(PatchRowTally const &other) {
-      Rows += other.Rows;
-      SpellRows += other.SpellRows;
-      Bytes += other.Bytes;
-    }
-  };
-
   static constexpr uint32 SPELL_DBC_FIELD_COUNT = 234;
   static constexpr uint32 SPELL_CLIENT_RECORD_DWORDS = 170;
   static constexpr uint32 LOCALIZED_STRING_DWORDS = 17;
@@ -4510,10 +4314,9 @@ private:
   static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
   static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
-  static constexpr std::array<uint32, 28> RANGED_PREPARATION_CLIENT_SPELLS = {
+  static constexpr std::array<uint32, 19> RANGED_PREPARATION_CLIENT_SPELLS = {
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
-      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870, 804179,
-      680256, 680257, 680258, 680259, 680260, 680261, 680262, 681203};
+      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
@@ -4540,26 +4343,13 @@ private:
   };
 
   struct PreparedPatchRows {
-    std::vector<uint32> CreatureDisplayIds;
-    std::vector<ItemDisplayInfoPatchRow> ItemDisplayInfos;
-    std::vector<ItemPatchRow> Items;
-    std::vector<std::size_t> ItemCapacityOrder;
-    std::unordered_set<uint32> SqlItemIds;
-    std::unordered_map<uint32, std::size_t> ItemRowIndexById;
     std::vector<SpellPatchRow> Spells;
     std::unordered_map<uint32, std::size_t> SpellRowIndexById;
-    std::vector<SuperTrackPatchRow> SuperTracks;
     std::vector<QuestSuperTrackPatch> QuestSuperTracks;
-    std::vector<SkillLineAbilityPatchRow> SkillLineAbilities;
-    std::vector<ShapeshiftFormPatchRow> ShapeshiftForms;
-    std::vector<CreatureModelPatchRow> CreatureModels;
-    std::vector<VanityCollectionPatchRow> VanityCollections;
-    std::vector<VehicleSeatPatchRow> VehicleSeats;
-    std::vector<VehiclePatchRow> Vehicles;
-    std::unordered_map<uint32, std::array<std::string, 4>> CreatureDisplayTextures;
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
+  static constexpr uint32 X53_TOURING_ROCKET_SUMMON = 75973;
   static constexpr std::size_t SWAP_ENTRY_ID_POOL = 4096;
   static constexpr uint8 CLIENT_AUTOPLACE_MAX_LEVEL = 10;
   static constexpr std::size_t SPELL_WIRE_RANK = 2;
@@ -4712,20 +4502,12 @@ private:
     return RawSpellRow(dword, text);
   }
 
-  std::optional<SpellPatchRow> ClientSpellRow(Player *player, uint32 spellId) {
+  std::optional<SpellPatchRow> ClientSpellRow(uint32 spellId) {
     PreparedPatchRows const &rows = GetPreparedPatchRows();
     if (auto const found = rows.SpellRowIndexById.find(spellId); found != rows.SpellRowIndexById.end())
     {
       SpellPatchRow const &prepared = rows.Spells[found->second];
-      bool streamed = !prepared.RequiresRegistration || Ascension::ClientSpellPatches::Instance().Contains(spellId,
-          Ascension::ClientSpellPatches::Delivery::Login);
-      if (!streamed)
-      {
-        std::lock_guard lock(_mutex);
-        auto const sent = _sentItemSpellRows.find(player->GetGUID().GetCounter());
-        streamed = sent != _sentItemSpellRows.end() && sent->second.contains(spellId);
-      }
-      if (streamed)
+      if (!prepared.RequiresRegistration || Ascension::ClientSpellPatches::Instance().Contains(spellId))
       {
         SpellPatchRow row = prepared;
         ApplyServerSpellSelectors(row);
@@ -4802,75 +4584,6 @@ private:
     return itemIds;
   }
 
-    static std::vector<uint32> RegisteredCraftedItemIds(uint32 spellId)
-    {
-        std::vector<uint32> itemIds;
-        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
-            for (SpellEffectInfo const& effect : spellInfo->Effects)
-                if (effect.Effect == SPELL_EFFECT_CREATE_ITEM &&
-                    Ascension::ClientItemPatches::Instance().Contains(effect.ItemType))
-                    itemIds.push_back(effect.ItemType);
-        return itemIds;
-    }
-
-    static std::unordered_set<uint32> CollectKnownRecipeItemIds(Player* player)
-    {
-        std::unordered_set<uint32> itemIds;
-        for (auto const& [spellId, spell] : player->GetSpellMap())
-            if (spell->State != PLAYERSPELL_REMOVED)
-                for (uint32 itemId : RegisteredCraftedItemIds(spellId))
-                    itemIds.insert(itemId);
-        return itemIds;
-    }
-
-    static std::optional<ItemPatchRow> FindItemRow(PreparedPatchRows const& rows, uint32 itemId)
-    {
-        if (rows.SqlItemIds.contains(itemId) && !Ascension::ClientItemPatches::Instance().Contains(itemId))
-            return std::nullopt;
-        if (auto const row = rows.ItemRowIndexById.find(itemId); row != rows.ItemRowIndexById.end())
-            return rows.Items[row->second];
-        return ItemScaling::ClientRow(itemId);
-    }
-
-    PatchRowTally SendItemRows(Player* player, PreparedPatchRows const& rows, std::vector<ItemPatchRow> itemRows)
-    {
-        PatchRowTally sent;
-        std::lock_guard lock(_mutex);
-        std::unordered_set<uint32>& sentItemRows = _sentItemRows[player->GetGUID().GetCounter()];
-        std::unordered_set<uint32>& sentItemSpellRows = _sentItemSpellRows[player->GetGUID().GetCounter()];
-        auto const sendItem = [&](ItemPatchRow const& row)
-        {
-            if (sentItemRows.insert(row[0]).second)
-            {
-                sent.Bytes += SendItemRow(player, row);
-                ++sent.Rows;
-            }
-        };
-        for (std::size_t index : rows.ItemCapacityOrder)
-            if (auto const capacity = FindItemRow(rows, rows.Items[index][0]))
-            {
-                sendItem(*capacity);
-                break;
-            }
-        for (ItemPatchRow const& row : itemRows)
-        {
-            if (ItemTemplate const* item = sObjectMgr->GetItemTemplate(row[0]))
-                for (auto const& spell : item->Spells)
-                    if (spell.SpellId > 0 && Ascension::ClientSpellPatches::Instance().Contains(spell.SpellId,
-                        Ascension::ClientSpellPatches::Delivery::Item))
-                        if (auto const found = rows.SpellRowIndexById.find(spell.SpellId);
-                            found != rows.SpellRowIndexById.end() && sentItemSpellRows.insert(spell.SpellId).second)
-                        {
-                            SpellPatchRow active = rows.Spells[found->second];
-                            ApplyServerSpellSelectors(active);
-                            sent.Bytes += SendSpellRow(player, active);
-                            ++sent.SpellRows;
-                        }
-            sendItem(row);
-        }
-        return sent;
-    }
-
   static std::size_t SendRowPacket(Player *player, WorldPacket const &packet) {
     player->GetSession()->SendPacket(&packet);
     return packet.size();
@@ -4882,197 +4595,18 @@ private:
       packet.append(reinterpret_cast<uint8 const *>(text.data()), text.size());
   }
 
-  std::size_t SendLoadingScreenRow(Player *player) const {
-    WorldPacket packet(SMSG_PATCH_LOADING_SCREENS, 24);
-    uint8 loadingScreenRow[16] = {};
-    packet.append(loadingScreenRow, sizeof(loadingScreenRow));
-    packet << uint32(0) << uint32(0);
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendDisplayInfoRow(Player *player,
-                                 CreatureDisplayInfoEntry const &entry,
-                                 std::array<std::string, 4> const *textures) const {
-    WorldPacket packet(SMSG_PATCH_CREATURE_DISPLAY_INFO, 80);
-
-    uint32 const soundId = 0;
-    uint8 displayRow[64] = {};
-    std::memcpy(displayRow + 0x00, &entry.Displayid, sizeof(uint32));
-    std::memcpy(displayRow + 0x04, &entry.ModelId, sizeof(uint32));
-    std::memcpy(displayRow + 0x08, &soundId, sizeof(uint32));
-    std::memcpy(displayRow + 0x0C, &entry.ExtendedDisplayInfoID, sizeof(uint32));
-    std::memcpy(displayRow + 0x10, &entry.scale, sizeof(float));
-    displayRow[0x14] = 255;
-
-    packet.append(displayRow, sizeof(displayRow));
-    for (uint8 stringIndex = 0; stringIndex < 4; ++stringIndex)
-    {
-      if (textures)
-        AppendSizedString(packet, (*textures)[stringIndex]);
-      else
-        packet << uint32(0);
-    }
-
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendCreatureModelRow(Player *player,
-                                   CreatureModelPatchRow const &row) const {
-    WorldPacket packet(SMSG_PATCH_CREATURE_MODEL_DATA,
-                       row.Values.size() * sizeof(uint32) + sizeof(uint32) + row.ModelName.size());
-    for (uint32 value : row.Values)
-      packet << value;
-    AppendSizedString(packet, row.ModelName);
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendItemDisplayInfoRow(Player *player,
-                                     ItemDisplayInfoPatchRow const &row) const {
-    WorldPacket packet(SMSG_PATCH_ITEM_DISPLAY_INFO, 160);
-    for (uint32 value : row.Values)
-      packet << value;
-    for (std::string const &text : row.Strings)
-      AppendSizedString(packet, text);
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendItemRow(Player *player, ItemPatchRow const &row) const {
-    WorldPacket packet(SMSG_PATCH_ITEM, row.size() * sizeof(uint32));
-    for (uint32 value : row)
-      packet << value;
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendSpellVisualRow(Player *player, uint16 opcode,
-                                 std::vector<uint32> const &values) const {
-    WorldPacket packet(opcode, values.size() * sizeof(uint32));
-    for (uint32 value : values)
-      packet << value;
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendSpellVisualRows(Player *player) const {
-    std::size_t bytes = 0;
-    uint32 visuals = 0, kits = 0, attaches = 0, effects = 0;
-
-    if (QueryResult result = WorldDatabase.Query(
-            "SELECT `ID`, `PrecastKit`, `CastKit`, `ImpactKit`, `StateKit`, `StateDoneKit`, `ChannelKit`, "
-            "`HasMissile`, `MissileModel`, `MissilePathType`, `MissileDestinationAttachment`, `MissileSound`, "
-            "`AnimEventSoundID`, `Flags`, `CasterImpactKit`, `TargetImpactKit`, `MissileAttachment`, "
-            "`MissileFollowGroundHeight`, `MissileFollowGroundDropSpeed`, `MissileFollowGroundApproach`, "
-            "`MissileFollowGroundFlags`, `MissileMotion`, `MissileTargetingKit`, `InstantAreaKit`, "
-            "`ImpactAreaKit`, `PersistentAreaKit`, `MissileCastOffsetX`, `MissileCastOffsetY`, "
-            "`MissileCastOffsetZ`, `MissileImpactOffsetX`, `MissileImpactOffsetY`, `MissileImpactOffsetZ` "
-            "FROM `spellvisual_dbc`"))
-    {
-      do {
-        Field *fields = result->Fetch();
-        std::vector<uint32> values(32);
-        for (uint32 i = 0; i < 26; ++i)
-          values[i] = fields[i].Get<uint32>();
-        for (uint32 i = 26; i < 32; ++i)
-          values[i] = std::bit_cast<uint32>(fields[i].Get<float>());
-        bytes += SendSpellVisualRow(player, SMSG_PATCH_SPELL_VISUAL, values);
-        ++visuals;
-      } while (result->NextRow());
-    }
-
-    if (QueryResult result = WorldDatabase.Query("SELECT * FROM `spellvisualkit_dbc`"))
-    {
-      do {
-        Field *fields = result->Fetch();
-        std::vector<uint32> values(38);
-        for (uint32 i = 0; i < 38; ++i)
-          values[i] = fields[i].Get<uint32>();
-        bytes += SendSpellVisualRow(player, SMSG_PATCH_SPELL_VISUAL_KIT, values);
-        ++kits;
-      } while (result->NextRow());
-    }
-
-    if (QueryResult result = WorldDatabase.Query(
-            "SELECT `ID`, `ParentSpellVisualKitID`, `SpellVisualEffectNameID`, `AttachmentID`, `OffsetX`, "
-            "`OffsetY`, `OffsetZ`, `Yaw`, `Pitch`, `Roll` FROM `spellvisualkitmodelattach_dbc`"))
-    {
-      do {
-        Field *fields = result->Fetch();
-        std::vector<uint32> values(10);
-        for (uint32 i = 0; i < 4; ++i)
-          values[i] = fields[i].Get<uint32>();
-        for (uint32 i = 4; i < 10; ++i)
-          values[i] = std::bit_cast<uint32>(fields[i].Get<float>());
-        bytes += SendSpellVisualRow(player, SMSG_PATCH_SPELL_VISUAL_KIT_MODEL_ATTACH, values);
-        ++attaches;
-      } while (result->NextRow());
-    }
-
-    if (QueryResult result = WorldDatabase.Query(
-            "SELECT `ID`, `Name`, `FilePath`, `Scale`, `Scale2`, `MinScale`, `MaxScale` "
-            "FROM `spellvisualeffectname_dbc`"))
-    {
-      do {
-        Field *fields = result->Fetch();
-        WorldPacket packet(SMSG_PATCH_SPELL_VISUAL_EFFECT_NAME, 28 + 64);
-        packet << uint32(fields[0].Get<uint32>());
-        AppendSizedString(packet, fields[1].Get<std::string>());
-        AppendSizedString(packet, fields[2].Get<std::string>());
-        for (uint32 i = 3; i < 7; ++i)
-          packet << fields[i].Get<float>();
-        bytes += SendRowPacket(player, packet);
-        ++effects;
-      } while (result->NextRow());
-    }
-
-    LOG_INFO("coa", "Streamed {} SpellVisual, {} SpellVisualKit, {} attach and {} effect rows to {}",
-             visuals, kits, attaches, effects, player->GetName());
-
-    return bytes;
-  }
-
-  std::size_t SendSoundEntryRows(Player *player) const {
-    constexpr uint32 SOUND_ID = 10045;
-
-    std::vector<uint32> values(30, 0);
-    values[0] = SOUND_ID;
-    values[1] = 1;
-    for (uint32 i = 13; i <= 22; ++i)
-      values[i] = 1;
-    values[24] = 1061997773;
-    values[26] = 1090519040;
-    values[27] = 1110704128;
-
-    std::vector<std::string> strings;
-    strings.emplace_back("FX_SHA_Whirlwind_Channel_02");
-    strings.emplace_back("fx_sha_whirlwind_channel_02.ogg");
-    strings.resize(11);
-    strings.emplace_back("Sound\\Spells");
-
-    WorldPacket packet(SMSG_PATCH_SOUND_ENTRIES, values.size() * sizeof(uint32) + 512);
-    for (uint32 value : values)
-      packet << value;
-    for (std::string const &text : strings)
-      AppendSizedString(packet, text);
-
-    LOG_INFO("coa", "Streamed custom tornado SoundEntries row {} ({} bytes) to {}", SOUND_ID, packet.size(),
-             player->GetName());
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendSpellRow(Player *player, SpellPatchRow const &row) const {
+  static WorldPacket BuildSpellRow(SpellPatchRow const &row) {
     WorldPacket packet(SMSG_PATCH_SPELL,
                        row.Values.size() * sizeof(uint32) + 1024);
     for (uint32 value : row.Values)
       packet << value;
     for (std::string const &text : row.Strings)
       AppendSizedString(packet, text);
-    return SendRowPacket(player, packet);
+    return packet;
   }
 
-  std::size_t SendSuperTrackRow(Player *player,
-                                SuperTrackPatchRow const &row) const {
-    WorldPacket packet(SMSG_PATCH_SUPER_TRACK, row.size() * sizeof(uint32));
-    for (uint32 value : row)
-      packet << value;
-    return SendRowPacket(player, packet);
+  std::size_t SendSpellRow(Player *player, SpellPatchRow const &row) const {
+    return SendRowPacket(player, BuildSpellRow(row));
   }
 
   std::size_t SendQuestSuperTrackRow(Player *player,
@@ -5081,269 +4615,6 @@ private:
     for (uint32 value : row)
       packet << value;
     return SendRowPacket(player, packet);
-  }
-
-    static std::size_t SendSkillLineAbilityRow(Player* player, SkillLineAbilityPatchRow const& row)
-    {
-        WorldPacket packet(SMSG_PATCH_SKILL_LINE_ABILITY, row.size() * sizeof(uint32));
-        for (uint32 value : row)
-            packet << value;
-        return SendRowPacket(player, packet);
-    }
-
-    static std::vector<SkillLineAbilityPatchRow> LoadSkillLineAbilityPatchRows()
-    {
-        std::vector<SkillLineAbilityPatchRow> rows;
-        PreparedQueryResult result = WorldDatabase.Query(
-            WorldDatabase.GetPreparedStatement(WORLD_SEL_CLIENT_SKILL_LINE_ABILITIES));
-        if (!result)
-            return rows;
-
-        std::map<uint32, uint32> skillLines;
-        do
-        {
-            Field const* fields = result->Fetch();
-            uint32 const id = fields[0].Get<uint32>();
-            uint32 const skillLine = fields[1].Get<uint32>();
-            if (sSkillLineStore.LookupEntry(skillLine))
-                skillLines[id] = skillLine;
-            else
-                LOG_ERROR("coa", "coa_client_skill_line_ability {} has unknown SkillLine {}", id, skillLine);
-        } while (result->NextRow());
-
-        for (auto skillLine = skillLines.begin(); skillLine != skillLines.end();)
-        {
-            SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(skillLine->first);
-            if (!entry || !entry->Spell)
-            {
-                LOG_ERROR("coa", "coa_client_skill_line_ability {} has no SkillLineAbility row", skillLine->first);
-                skillLine = skillLines.erase(skillLine);
-                continue;
-            }
-
-            SkillLineAbilityPatchRow& row = rows.emplace_back();
-            row[0] = entry->ID;
-            row[1] = skillLine->second;
-            row[2] = entry->Spell;
-            row[3] = entry->RaceMask;
-            row[4] = entry->ClassMask;
-            row[7] = entry->MinSkillLineRank;
-            row[8] = entry->SupercededBySpell;
-            row[9] = entry->AcquireMethod;
-            row[10] = entry->TrivialSkillLineRankHigh;
-            row[11] = entry->TrivialSkillLineRankLow;
-            skillLine = skillLines.erase(skillLine);
-        }
-        return rows;
-    }
-
-  std::size_t SendShapeshiftFormRow(Player *player,
-                                   ShapeshiftFormPatchRow const &row) const {
-    WorldPacket packet(SMSG_PATCH_SPELL_SHAPESHIFT_FORM,
-                       row.Values.size() * sizeof(uint32) + sizeof(uint32) + row.Name.size());
-    for (uint32 value : row.Values)
-      packet << value;
-    AppendSizedString(packet, row.Name);
-    return SendRowPacket(player, packet);
-  }
-
-  static std::size_t SendVanityCollectionRow(Player* player, VanityCollectionPatchRow const& row)
-  {
-    WorldPacket packet(SMSG_PATCH_VANITY_COLLECTION, VANITY_COLLECTION_DBC_FIELD_COUNT * sizeof(uint32) + 256);
-    for (uint32 field = 0; field < 3; ++field)
-      packet << row.Values[field];
-    packet << row.Artwork;
-    for (uint32 field = 4; field < VANITY_COLLECTION_DESCRIPTION_FIELD; ++field)
-      packet << row.Values[field];
-    packet << row.Description << row.AdditionalText;
-    packet << row.Values[VANITY_COLLECTION_LEARNED_SPELL_FIELD];
-    packet << "" << "" << "";
-    return SendRowPacket(player, packet);
-  }
-
-  static std::vector<VanityCollectionPatchRow> LoadVanityCollectionPatchRows() {
-    std::vector<VanityCollectionPatchRow> rows;
-    std::map<uint32, VanityPrice> prices = LoadVanityPrices();
-    if (prices.empty())
-      return rows;
-
-    ClientDBC vanity;
-    if (!vanity.Load(GetClientDBCPath("VanityCollection.dbc"), VANITY_COLLECTION_DBC_FIELD_COUNT))
-    {
-      LOG_ERROR("coa", "Cannot read the client VanityCollection.dbc; coa_client_vanity_collection rows are not streamed");
-      return rows;
-    }
-
-    for (uint32 index = 0; index < vanity.GetRecordCount(); ++index)
-    {
-      ClientDBC::Record const record = vanity.GetRecord(index);
-      auto const price = prices.find(record.GetUInt32(1));
-      if (price == prices.end())
-        continue;
-
-      VanityCollectionPatchRow &row = rows.emplace_back();
-      for (uint32 field = 0; field < VANITY_COLLECTION_DBC_FIELD_COUNT; ++field)
-        row.Values[field] = record.GetUInt32(field);
-      row.Values[4] = price->second.DonationPoints;
-      row.Values[5] = price->second.SeasonalPoints;
-      row.Values[6] = price->second.BazaarTokens;
-      row.Artwork = std::string(record.GetString(3));
-      row.Description = std::string(record.GetString(VANITY_COLLECTION_DESCRIPTION_FIELD));
-      row.AdditionalText = std::string(record.GetString(VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD));
-      prices.erase(price);
-    }
-
-    for (auto const &[itemId, price] : prices)
-      LOG_ERROR("coa", "coa_client_vanity_collection {} has no VanityCollection.dbc row", itemId);
-    return rows;
-  }
-
-  std::size_t SendVehicleRow(Player *player, VehiclePatchRow const &row) const {
-    std::size_t size = row.Values.size() * sizeof(uint32);
-    for (std::string const &text : row.Strings)
-      size += sizeof(uint32) + text.size();
-    WorldPacket packet(SMSG_PATCH_VEHICLE, size);
-    for (uint32 value : row.Values)
-      packet << value;
-    for (std::string const &text : row.Strings)
-      AppendSizedString(packet, text);
-    return SendRowPacket(player, packet);
-  }
-
-  std::size_t SendVehicleSeatRow(Player *player, VehicleSeatPatchRow const &row) const {
-    WorldPacket packet(SMSG_PATCH_VEHICLE_SEAT, row.size() * sizeof(uint32));
-    for (uint32 value : row)
-      packet << value;
-    return SendRowPacket(player, packet);
-  }
-
-  static uint32 DbcColumnWord(Field &field) {
-    switch (field.GetType())
-    {
-      case DatabaseFieldTypes::Float:
-      case DatabaseFieldTypes::Double:
-        return std::bit_cast<uint32>(field.Get<float>());
-      default:
-        return static_cast<uint32>(field.Get<int32>());
-    }
-  }
-
-  static std::vector<VehiclePatchRow> LoadVehiclePatchRows() {
-    std::vector<VehiclePatchRow> rows;
-    QueryResult result = WorldDatabase.Query("SELECT * FROM `vehicle_dbc` ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    if (result->GetFieldCount() != VEHICLE_DBC_FIELD_COUNT)
-    {
-      LOG_ERROR("coa", "vehicle_dbc has {} columns, expected {}; Vehicle rows are not streamed",
-                result->GetFieldCount(), VEHICLE_DBC_FIELD_COUNT);
-      return rows;
-    }
-
-    do {
-      Field *fields = result->Fetch();
-      VehiclePatchRow &row = rows.emplace_back();
-      for (uint32 column = 0; column < VEHICLE_DBC_FIELD_COUNT; ++column)
-      {
-        if (column >= VEHICLE_FIRST_STRING_FIELD &&
-            column < VEHICLE_FIRST_STRING_FIELD + VEHICLE_STRING_FIELD_COUNT)
-        {
-          if (!fields[column].IsNull())
-            row.Strings[column - VEHICLE_FIRST_STRING_FIELD] = fields[column].Get<std::string>();
-          continue;
-        }
-        row.Values[column] = DbcColumnWord(fields[column]);
-      }
-    } while (result->NextRow());
-    return rows;
-  }
-
-  static std::vector<VehicleSeatPatchRow> LoadVehicleSeatPatchRows() {
-    std::vector<VehicleSeatPatchRow> rows;
-    QueryResult result = WorldDatabase.Query("SELECT * FROM `vehicleseat_dbc` ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    if (result->GetFieldCount() != VEHICLE_SEAT_DBC_FIELD_COUNT)
-    {
-      LOG_ERROR("coa", "vehicleseat_dbc has {} columns, expected {}; VehicleSeat rows are not streamed",
-                result->GetFieldCount(), VEHICLE_SEAT_DBC_FIELD_COUNT);
-      return rows;
-    }
-
-    do {
-      Field *fields = result->Fetch();
-      VehicleSeatPatchRow &row = rows.emplace_back();
-      for (uint32 column = 0; column < VEHICLE_SEAT_DBC_FIELD_COUNT; ++column)
-        row[column] = DbcColumnWord(fields[column]);
-    } while (result->NextRow());
-    return rows;
-  }
-
-  static std::vector<ShapeshiftFormPatchRow> LoadShapeshiftFormPatchRows() {
-    std::vector<ShapeshiftFormPatchRow> rows;
-    QueryResult result = WorldDatabase.Query(
-        "SELECT `ID`, `BonusActionBar` FROM `coa_client_shapeshift_form` ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    std::map<uint32, uint32> bonusBars;
-    do {
-      Field const *fields = result->Fetch();
-      bonusBars[fields[0].Get<uint32>()] = fields[1].Get<uint32>();
-    } while (result->NextRow());
-
-    ClientDBC forms;
-    std::filesystem::path const serverDbc =
-        std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "SpellShapeshiftForm.dbc";
-    if (!forms.Load(serverDbc.string(), SHAPESHIFT_FORM_DBC_FIELD_COUNT))
-    {
-      LOG_ERROR("coa", "Cannot read {}; coa_client_shapeshift_form rows are not streamed", serverDbc.generic_string());
-      return rows;
-    }
-
-    for (uint32 index = 0; index < forms.GetRecordCount(); ++index)
-    {
-      ClientDBC::Record const record = forms.GetRecord(index);
-      auto const bonusBar = bonusBars.find(record.GetUInt32(0));
-      if (bonusBar == bonusBars.end())
-        continue;
-
-      ShapeshiftFormPatchRow &row = rows.emplace_back();
-      row.Values[0] = bonusBar->first;
-      row.Values[1] = bonusBar->second;
-      for (uint32 slot = 2; slot < row.Values.size(); ++slot)
-        row.Values[slot] = record.GetUInt32(SHAPESHIFT_FORM_FIRST_NUMERIC_FIELD + slot - 2);
-      row.Name = std::string(record.GetString(SHAPESHIFT_FORM_NAME_FIELD));
-      bonusBars.erase(bonusBar);
-    }
-
-    for (auto const &[form, bonusBar] : bonusBars)
-      LOG_ERROR("coa", "coa_client_shapeshift_form {} has no SpellShapeshiftForm.dbc row", form);
-    return rows;
-  }
-
-  static std::vector<SuperTrackPatchRow> LoadSuperTrackPatchRows() {
-    std::vector<SuperTrackPatchRow> rows;
-    QueryResult result = WorldDatabase.Query(
-        "SELECT `ID`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, "
-        "`Radius`, `NextID`, `Flags` FROM `coa_client_super_track` ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    do {
-      Field const *fields = result->Fetch();
-      SuperTrackPatchRow &row = rows.emplace_back();
-      row[0] = fields[0].Get<uint32>();
-      row[1] = fields[1].Get<uint32>();
-      for (uint8 index = 2; index < 6; ++index)
-        row[index] = std::bit_cast<uint32>(fields[index].Get<float>());
-      row[6] = fields[6].Get<uint32>();
-      row[7] = fields[7].Get<uint32>();
-    } while (result->NextRow());
-
-    return rows;
   }
 
   static std::vector<QuestSuperTrackPatch> LoadQuestSuperTrackPatchRows() {
@@ -5386,6 +4657,9 @@ private:
       rows.back().AllowableRaces[field] = fields[5].Get<uint32>();
     } while (result->NextRow());
 
+    std::erase_if(rows, [](QuestSuperTrackPatch const &patch) {
+      return std::ranges::all_of(patch.AllowableRaces, [](uint32 races) { return races == 0; });
+    });
     return rows;
   }
 
@@ -5393,240 +4667,13 @@ private:
     std::lock_guard lock(_cacheMutex);
     if (!_rowsPrepared)
     {
-      std::filesystem::path const clientDbcDirectory =
-          ResolveClientDbcDirectory();
-      _rows.CreatureDisplayIds = BuildDisplayPatchRows(clientDbcDirectory);
-      _rows.ItemDisplayInfos =
-          BuildItemDisplayInfoPatchRows(clientDbcDirectory);
-      _rows.Items = BuildItemPatchRows(clientDbcDirectory, _rows.SqlItemIds);
-      for (std::size_t index = 0; index < _rows.Items.size(); ++index)
-      {
-        _rows.ItemRowIndexById.emplace(_rows.Items[index][0], index);
-        _rows.ItemCapacityOrder.push_back(index);
-      }
-      std::sort(_rows.ItemCapacityOrder.begin(), _rows.ItemCapacityOrder.end(),
-          [this](std::size_t left, std::size_t right) { return _rows.Items[left][0] > _rows.Items[right][0]; });
       _rows.Spells = BuildSpellPatchRows();
       for (std::size_t index = 0; index < _rows.Spells.size(); ++index)
         _rows.SpellRowIndexById.emplace(_rows.Spells[index].Values[0], index);
-      _rows.SuperTracks = LoadSuperTrackPatchRows();
       _rows.QuestSuperTracks = LoadQuestSuperTrackPatchRows();
-      _rows.SkillLineAbilities = LoadSkillLineAbilityPatchRows();
-      _rows.ShapeshiftForms = LoadShapeshiftFormPatchRows();
-      _rows.VanityCollections = LoadVanityCollectionPatchRows();
-      _rows.VehicleSeats = LoadVehicleSeatPatchRows();
-      _rows.Vehicles = LoadVehiclePatchRows();
-      _rows.CreatureModels = BuildCreatureModelPatchRows();
-      _rows.CreatureDisplayTextures = LoadCreatureDisplayTextureRows();
       _rowsPrepared = true;
     }
     return _rows;
-  }
-
-  static std::filesystem::path ResolveClientDbcDirectory() {
-    std::string const configuredDirectory(
-        ascensionCompatConfig.GetConfigValue<std::string>(
-            AscensionCompatConfig::CLIENT_DBC_DIRECTORY));
-    if (!configuredDirectory.empty())
-      return configuredDirectory;
-    return std::filesystem::path(sWorld->GetDataPath()) / "dbc_clientset";
-  }
-
-  static std::optional<std::unordered_set<uint32>>
-  LoadDbcIds(std::filesystem::path const &path, uint32 minimumDWords) {
-    ClientDBC file;
-    if (!file.Load(path.string(), minimumDWords))
-      return std::nullopt;
-
-    std::unordered_set<uint32> ids;
-    ids.reserve(file.GetRecordCount());
-    for (uint32 row = 0; row < file.GetRecordCount(); ++row)
-      ids.insert(file.GetRecord(row).GetUInt32(0));
-    return ids;
-  }
-
-  static bool IsItemDisplayInfoStringField(uint8 field) {
-    return std::ranges::find(ITEM_DISPLAY_INFO_STRING_FIELDS, field) !=
-           ITEM_DISPLAY_INFO_STRING_FIELDS.end();
-  }
-
-  static std::vector<ItemDisplayInfoPatchRow>
-  BuildItemDisplayInfoPatchRows(std::filesystem::path const &clientDbcDirectory) {
-    std::vector<ItemDisplayInfoPatchRow> rows = LoadItemDisplayInfoPatchRows();
-
-    std::filesystem::path const clientDbc =
-        clientDbcDirectory / "ItemDisplayInfo.dbc";
-    std::optional<std::unordered_set<uint32>> const clientIds =
-        LoadDbcIds(clientDbc, ITEM_DISPLAY_INFO_FIELD_COUNT);
-    if (!clientIds)
-    {
-      LOG_WARN("coa",
-               "Client DBC copy {} is unavailable; streaming only the "
-               "itemdisplayinfo_dbc rows",
-               clientDbc.generic_string());
-      return rows;
-    }
-
-    std::unordered_set<uint32> overriddenIds;
-    for (ItemDisplayInfoPatchRow const &row : rows)
-      overriddenIds.insert(row.Values[0]);
-
-    ClientDBC serverDisplays;
-    std::filesystem::path const serverDbc =
-        std::filesystem::path(sWorld->GetDataPath()) / "dbc" /
-        "ItemDisplayInfo.dbc";
-    if (!serverDisplays.Load(serverDbc.string(), ITEM_DISPLAY_INFO_FIELD_COUNT))
-      return rows;
-
-    for (uint32 index = 0; index < serverDisplays.GetRecordCount(); ++index) {
-      ClientDBC::Record const record = serverDisplays.GetRecord(index);
-      uint32 const displayId = record.GetUInt32(0);
-      if (clientIds->contains(displayId) || overriddenIds.contains(displayId))
-        continue;
-
-      ItemDisplayInfoPatchRow &row = rows.emplace_back();
-      std::size_t stringIndex = 0;
-      for (uint8 field = 0; field < ITEM_DISPLAY_INFO_FIELD_COUNT; ++field) {
-        if (IsItemDisplayInfoStringField(field))
-          row.Strings[stringIndex++] = std::string(record.GetString(field));
-        else
-          row.Values[field] = record.GetUInt32(field);
-      }
-    }
-
-    return rows;
-  }
-
-  static std::vector<CreatureModelPatchRow> BuildCreatureModelPatchRows() {
-    constexpr uint32 CORRUPTED_GRINNING_REAVER_MODEL = 100161;
-    constexpr uint32 GRINNING_REAVER_SOUND = 2112;
-    std::vector<CreatureModelPatchRow> rows;
-    ClientDBC clientModels;
-    std::filesystem::path const clientDbc =
-        std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "CreatureModelData.dbc";
-    bool const fileLoaded = clientModels.Load(clientDbc.string(), CREATURE_MODEL_DATA_FIELD_COUNT);
-
-    std::unordered_set<uint32> fileModelIds;
-    for (uint32 index = 0; fileLoaded && index < clientModels.GetRecordCount(); ++index) {
-      ClientDBC::Record const record = clientModels.GetRecord(index);
-      uint32 const modelId = record.GetUInt32(0);
-      fileModelIds.insert(modelId);
-      CreatureModelDataEntry const *entry =
-          sCreatureModelDataStore.LookupEntry(modelId);
-      if (!entry)
-        continue;
-
-      std::array<std::pair<uint32, uint32>, 6> const serverFields = {{
-          {1, entry->Flags},
-          {4, std::bit_cast<uint32>(entry->Scale)},
-          {13, modelId == CORRUPTED_GRINNING_REAVER_MODEL
-                   ? GRINNING_REAVER_SOUND : record.GetUInt32(13)},
-          {14, std::bit_cast<uint32>(entry->CollisionWidth)},
-          {15, std::bit_cast<uint32>(entry->CollisionHeight)},
-          {16, std::bit_cast<uint32>(entry->MountHeight)}}};
-      auto const matchesClient = [&record](auto const &field) {
-        return record.GetUInt32(field.first) == field.second;
-      };
-      if (std::ranges::all_of(serverFields, matchesClient))
-        continue;
-
-      CreatureModelPatchRow &row = rows.emplace_back();
-      for (uint32 field = 0; field < CREATURE_MODEL_DATA_FIELD_COUNT; ++field)
-        if (field != CREATURE_MODEL_DATA_NAME_FIELD)
-          row.Values[field] = record.GetUInt32(field);
-      for (auto const &[field, value] : serverFields)
-        row.Values[field] = value;
-      row.ModelName = std::string(record.GetString(CREATURE_MODEL_DATA_NAME_FIELD));
-    }
-
-    QueryResult result = WorldDatabase.Query(
-        "SELECT `ID`, `Flags`, `ModelName`, `SizeClass`, `ModelScale`, `BloodID`, "
-        "`FootprintTextureID`, `FootprintTextureLength`, `FootprintTextureWidth`, "
-        "`FootprintParticleScale`, `FoleyMaterialID`, `FootstepShakeSize`, "
-        "`DeathThudShakeSize`, `SoundID`, `CollisionWidth`, `CollisionHeight`, "
-        "`MountHeight`, `GeoBoxMinX`, `GeoBoxMinY`, `GeoBoxMinZ`, `GeoBoxMaxX`, "
-        "`GeoBoxMaxY`, `GeoBoxMaxZ`, `WorldEffectScale`, `AttachedEffectScale`, "
-        "`MissileCollisionRadius`, `MissileCollisionPush`, `MissileCollisionRaise` "
-        "FROM `creaturemodeldata_dbc` ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    static constexpr std::array<uint32, 6> intFields = {0, 1, 3, 5, 6, 10};
-    do {
-      Field const *fields = result->Fetch();
-      if (fileModelIds.contains(fields[0].Get<uint32>()))
-        continue;
-
-      CreatureModelPatchRow &row = rows.emplace_back();
-      for (uint32 field = 0; field < CREATURE_MODEL_DATA_FIELD_COUNT; ++field) {
-        if (field == CREATURE_MODEL_DATA_NAME_FIELD)
-          row.ModelName = fields[field].Get<std::string>();
-        else if (std::ranges::find(intFields, field) != intFields.end() ||
-                 (field >= 11 && field <= 13))
-          row.Values[field] = static_cast<uint32>(fields[field].Get<int32>());
-        else
-          row.Values[field] = std::bit_cast<uint32>(fields[field].Get<float>());
-      }
-    } while (result->NextRow());
-
-    return rows;
-  }
-
-  static std::unordered_map<uint32, std::array<std::string, 4>> LoadCreatureDisplayTextureRows() {
-    std::unordered_map<uint32, std::array<std::string, 4>> rows;
-    QueryResult result = WorldDatabase.Query(
-        "SELECT `ID`, IFNULL(`TextureVariation_1`, ''), IFNULL(`TextureVariation_2`, ''), "
-        "IFNULL(`TextureVariation_3`, ''), IFNULL(`PortraitTextureName`, '') "
-        "FROM `creaturedisplayinfo_dbc` WHERE CONCAT(IFNULL(`TextureVariation_1`, ''), "
-        "IFNULL(`TextureVariation_2`, ''), IFNULL(`TextureVariation_3`, ''), "
-        "IFNULL(`PortraitTextureName`, '')) <> ''");
-    if (!result)
-      return rows;
-
-    do {
-      Field const *fields = result->Fetch();
-      std::array<std::string, 4> &textures = rows[fields[0].Get<uint32>()];
-      for (uint8 index = 0; index < 4; ++index)
-        textures[index] = fields[index + 1].Get<std::string>();
-    } while (result->NextRow());
-
-    return rows;
-  }
-
-  static std::vector<ItemPatchRow>
-  BuildItemPatchRows(std::filesystem::path const &clientDbcDirectory, std::unordered_set<uint32>& sqlIds) {
-    std::vector<ItemPatchRow> rows = LoadItemPatchRows(sqlIds);
-
-    std::filesystem::path const clientDbc = clientDbcDirectory / "Item.dbc";
-    std::optional<std::unordered_set<uint32>> const clientIds =
-        LoadDbcIds(clientDbc, std::tuple_size_v<ItemPatchRow>);
-    if (!clientIds)
-    {
-      LOG_WARN("coa",
-               "Client DBC copy {} is unavailable; streaming only the item_dbc "
-               "rows",
-               clientDbc.generic_string());
-      return rows;
-    }
-
-    std::unordered_set<uint32> overriddenIds;
-    for (ItemPatchRow const &row : rows)
-      overriddenIds.insert(row[0]);
-
-    for (uint32 itemId = 0; itemId < sItemStore.GetNumRows(); ++itemId) {
-      ItemEntry const *entry = sItemStore.LookupEntry(itemId);
-      if (!entry || clientIds->contains(itemId) ||
-          overriddenIds.contains(itemId) || sqlIds.contains(itemId))
-        continue;
-
-      rows.push_back({entry->ID, entry->ClassID, entry->SubclassID,
-                      static_cast<uint32>(entry->SoundOverrideSubclassID),
-                      static_cast<uint32>(entry->Material),
-                      entry->DisplayInfoID, entry->InventoryType,
-                      entry->SheatheType});
-    }
-
-    return rows;
   }
 
   static uint32 RangedPreparationCastTimeIndex(int32 base) {
@@ -5665,6 +4712,8 @@ private:
       row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
       row.Values[SPELL_ATTRIBUTES_FIELD + 5] = info->AttributesEx5;
     }
+    if (info->Id == X53_TOURING_ROCKET_SUMMON)
+      row.Values[SPELL_ATTRIBUTES_FIELD + 4] = info->AttributesEx4;
     if (info->Id == 805027 ||
         (info->Id >= 807938 && info->Id <= 807941))
     {
@@ -5686,8 +4735,11 @@ private:
       row.Strings[SPELL_WIRE_DESCRIPTION] = REPLENISHMENT_FIELD_DESCRIPTION;
     }
 
+    uint32 const firstRank = info->GetFirstRankSpell()->Id;
+    bool const witchHunterShot = info->SpellFamilyName == 21 && (firstRank == 804179 || firstRank == 805754);
     if ((info->Attributes & SPELL_ATTR0_USES_RANGED_SLOT) && !info->IsAutoRepeatRangedSpell() &&
-        info->CastTimeEntry && (info->CastTimeEntry->CastTime > 0 || !info->IsChanneled()))
+        !witchHunterShot && info->CastTimeEntry &&
+        (info->CastTimeEntry->CastTime > 0 || !info->IsChanneled()))
       if (uint32 const prepared = RangedPreparationCastTimeIndex(info->CastTimeEntry->CastTime))
         row.Values[SPELL_CAST_TIME_INDEX_FIELD] = prepared;
 
@@ -5760,7 +4812,7 @@ private:
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     Ascension::ClientSpellPatches::Instance().Register(TinkerReplenishmentFieldAura);
     for (uint32 const spellId : {801292u, 501836u, 501837u, 501838u, 501839u, 501840u, 574346u, 567543u, 567544u,
-        805027u, 807938u, 807939u, 807940u, 807941u})
+        805027u, 807938u, 807939u, 807940u, 807941u, X53_TOURING_ROCKET_SUMMON})
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     Ascension::ClientSpellPatches::Instance().Register(VAULT_CLIENT_SPELL);
     std::unordered_set<uint32> requested = Ascension::ClientSpellPatches::Instance().GetIds(true);
@@ -5795,11 +4847,11 @@ private:
       {
         ClientDBC::Record const record = spells.GetRecord(index);
         uint32 const id = record.GetUInt32(0);
+        uint32 const family = record.GetUInt32(SPELL_FAMILY_NAME_FIELD);
         uint32 const excludedAura =
             record.GetUInt32(SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD);
         uint32 const clientExcludedAura =
-            AscensionBloodmage::RuntimeExcludeCasterAuraSpell(
-                record.GetUInt32(SPELL_FAMILY_NAME_FIELD), excludedAura);
+            AscensionBloodmage::RuntimeExcludeCasterAuraSpell(family, excludedAura);
         bool const redirectsExclusion = clientExcludedAura != excludedAura;
         bool const restrictingFormGated =
             clientExcludedAura == AscensionBloodmage::CursedForm;
@@ -5807,12 +4859,20 @@ private:
         bool const raisesRankLevel =
             trainingLevel != rankTrainingLevels.end() &&
             record.GetUInt32(SPELL_LEVEL_FIELD) < trainingLevel->second;
+        bool redirectsEmpoweredGate = false;
+        if (family == AscensionBloodmage::BloodmageSpellFamily)
+          for (std::size_t const text : {SPELL_WIRE_DESCRIPTION, SPELL_WIRE_TOOLTIP})
+          {
+            std::string const raw(record.GetString(SPELL_WIRE_STRING_FIELDS[text]));
+            redirectsEmpoweredGate = redirectsEmpoweredGate ||
+                AscensionBloodmage::RuntimeEmpoweredDescription(family, raw) != raw;
+          }
 
         auto const overlay = overridden.find(id);
         auto const description = descriptions.find(id);
         if (overlay == overridden.end() && description == descriptions.end() &&
             !requested.contains(id) && !redirectsExclusion &&
-            !restrictingFormGated && !raisesRankLevel)
+            !restrictingFormGated && !raisesRankLevel && !redirectsEmpoweredGate)
           continue;
 
         std::size_t const rowIndex = overlay == overridden.end() ? rows.size() : overlay->second;
@@ -5855,6 +4915,8 @@ private:
           row.Values[SPELL_WIRE_SLOT(SPELL_LEVEL_FIELD)] = trainingLevel->second;
           Ascension::ClientSpellPatches::Instance().Register(id);
         }
+        if (redirectsEmpoweredGate)
+          Ascension::ClientSpellPatches::Instance().Register(id);
         requested.erase(id);
       }
     }
@@ -5879,6 +4941,9 @@ private:
     {
       if (auto const tier = blacksmithingTiers.find(row.Values[0]); tier != blacksmithingTiers.end())
         row.Strings[SPELL_WIRE_RANK] = tier->second;
+      uint32 const family = row.Values[SPELL_WIRE_SLOT(SPELL_FAMILY_NAME_FIELD)];
+      for (std::size_t const text : {SPELL_WIRE_DESCRIPTION, SPELL_WIRE_TOOLTIP})
+        row.Strings[text] = AscensionBloodmage::RuntimeEmpoweredDescription(family, row.Strings[text]);
       row.RequiresRegistration = !descriptionIds.contains(row.Values[0]);
     }
     return rows;
@@ -5912,111 +4977,7 @@ private:
     return descriptions;
   }
 
-  static std::vector<ItemDisplayInfoPatchRow> LoadItemDisplayInfoPatchRows() {
-    std::vector<ItemDisplayInfoPatchRow> rows;
-    QueryResult result = WorldDatabase.Query(
-        "SELECT `ID`, `ModelName_1`, `ModelName_2`, `ModelTexture_1`, "
-        "`ModelTexture_2`, `InventoryIcon_1`, `InventoryIcon_2`, "
-        "`GeosetGroup_1`, `GeosetGroup_2`, `GeosetGroup_3`, `Flags`, "
-        "`SpellVisualID`, `GroupSoundIndex`, `HelmetGeosetVis_1`, "
-        "`HelmetGeosetVis_2`, `Texture_1`, `Texture_2`, `Texture_3`, "
-        "`Texture_4`, `Texture_5`, `Texture_6`, `Texture_7`, `Texture_8`, "
-        "`ItemVisual`, `ParticleColorID` FROM `itemdisplayinfo_dbc` "
-        "ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    do {
-      Field const *fields = result->Fetch();
-      ItemDisplayInfoPatchRow &row = rows.emplace_back();
-      std::size_t stringIndex = 0;
-      for (uint8 field = 0; field < ITEM_DISPLAY_INFO_FIELD_COUNT; ++field) {
-        if (IsItemDisplayInfoStringField(field))
-          row.Strings[stringIndex++] = fields[field].Get<std::string>();
-        else
-          row.Values[field] = static_cast<uint32>(fields[field].Get<int32>());
-      }
-    } while (result->NextRow());
-
-    return rows;
-  }
-
-  static std::vector<ItemPatchRow> LoadItemPatchRows(std::unordered_set<uint32>& sqlIds) {
-    std::vector<ItemPatchRow> rows;
-    std::unordered_set<uint32> const requested = Ascension::ClientItemPatches::Instance().GetIds(true);
-    QueryResult result = WorldDatabase.Query(
-        "SELECT `ID`, `ClassID`, `SubclassID`, `Sound_Override_Subclassid`, "
-        "`Material`, `DisplayInfoID`, `InventoryType`, `SheatheType` "
-        "FROM `item_dbc` ORDER BY `ID`");
-    if (!result)
-      return rows;
-
-    do {
-      Field const *fields = result->Fetch();
-      uint32 const id = fields[0].Get<uint32>();
-      sqlIds.insert(id);
-      if (!requested.contains(id))
-        continue;
-      ItemPatchRow &row = rows.emplace_back();
-      for (std::size_t field = 0; field < row.size(); ++field)
-        row[field] = static_cast<uint32>(fields[field].Get<int32>());
-    } while (result->NextRow());
-
-    return rows;
-  }
-
-  std::vector<uint32>
-  BuildDisplayPatchRows(std::filesystem::path const &clientDbcDirectory) const {
-    std::filesystem::path const clientDbc =
-        clientDbcDirectory / "CreatureDisplayInfo.dbc";
-    std::optional<std::unordered_set<uint32>> clientDisplayIds =
-        LoadDbcIds(clientDbc, 16);
-    if (!clientDisplayIds)
-    {
-      std::filesystem::path const serverDbc =
-          std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "CreatureDisplayInfo.dbc";
-      clientDisplayIds = LoadDbcIds(serverDbc, 16);
-      if (clientDisplayIds)
-        LOG_INFO("coa",
-                 "Client DBC copy {} is unavailable; streaming the display ids "
-                 "missing from the server's own {}",
-                 clientDbc.generic_string(), serverDbc.generic_string());
-    }
-    bool const haveClientSet = clientDisplayIds.has_value();
-    if (!haveClientSet)
-    {
-      LOG_WARN("coa",
-               "Client DBC copy {} is unavailable; streaming every display id "
-               "at or above {} instead of the exact missing set",
-               clientDbc.generic_string(), CUSTOM_DISPLAY_ID_FALLBACK_MIN);
-    }
-
-    std::vector<uint32> rows;
-    for (uint32 displayId = 0;
-         displayId < sCreatureDisplayInfoStore.GetNumRows(); ++displayId) {
-      if (!sCreatureDisplayInfoStore.LookupEntry(displayId))
-        continue;
-
-      if (haveClientSet)
-      {
-        if (clientDisplayIds->contains(displayId))
-          continue;
-      }
-      else if (displayId < CUSTOM_DISPLAY_ID_FALLBACK_MIN)
-      {
-        continue;
-      }
-
-      rows.push_back(displayId);
-    }
-
-    return rows;
-  }
-
   std::mutex _mutex;
-  std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemRows;
-  std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemSpellRows;
-  std::unordered_map<uint32, PatchRowTally> _onDemandItemRows;
   std::unordered_map<uint32, uint32> _fallbackTimers;
 
   std::mutex _cacheMutex;
@@ -6087,7 +5048,11 @@ public:
 
   bool OwnsVanityItem(Player const* player, uint32 itemId) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
-    return state && state->OwnedVanityItems.contains(itemId);
+    if (!state || !state->OwnedVanityItems.contains(itemId))
+      return false;
+
+    auto vanity = _vanityItems.find(itemId);
+    return vanity == _vanityItems.end() || IsVanityItemForPlayer(player, vanity->second);
   }
 
   bool LoadClientData() {
@@ -6587,10 +5552,27 @@ public:
         406, 203954, 203955, 503515, 1903513, 2903513, 8210192, 8210195, 8210196,
         8210197, 8210198, 8210199, 8210200, 8210201, 8210202, 8210203, 8210250 };
 
-    [[nodiscard]] static bool IsWithheldVanityItem(uint32 itemId)
+    [[nodiscard]] bool IsBrokenCosmeticPetToken(uint32 itemId) const
     {
-        return !AscensionFreepick::RealmOffersMysticAltars() &&
-            std::find(MysticAltarVanityItems.begin(), MysticAltarVanityItems.end(), itemId) != MysticAltarVanityItems.end();
+        auto const token = _petTokens.find(itemId);
+        if (token == _petTokens.end())
+            return false;
+
+        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
+        if (!proto || proto->Class != ITEM_CLASS_MISC || proto->SubClass != ITEM_SUBCLASS_JUNK_PET)
+            return false;
+
+        CreatureTemplate const* creature =
+            sObjectMgr->GetCreatureTemplate(_appearances.at(token->second).CreatureEntry);
+        return !creature || !creature->IsTameable(true);
+    }
+
+    [[nodiscard]] bool IsWithheldVanityItem(uint32 itemId) const
+    {
+        bool const withheldAltar = !AscensionFreepick::RealmOffersMysticAltars() &&
+            std::find(MysticAltarVanityItems.begin(), MysticAltarVanityItems.end(), itemId) !=
+                MysticAltarVanityItems.end();
+        return withheldAltar || IsBrokenCosmeticPetToken(itemId);
     }
 
     [[nodiscard]] static bool IsBrokenCompanionSpell(uint32 spellId)
@@ -6829,7 +5811,7 @@ public:
       return;
 
     uint8 itemCategoryId = AppearanceCategoryForEquipmentSlot(slot);
-    if (itemCategoryId && state->CanSeeItemAppearances)
+    if (itemCategoryId)
     {
       uint32 appearanceId = state->ActiveAppearances[itemCategoryId];
       auto appearanceItr = _appearances.find(appearanceId);
@@ -6856,6 +5838,58 @@ public:
         PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + slot * 2, 0,
         static_cast<uint16>(effectItr->second.EnchantId));
   }
+
+    static bool IsVisibleItemEntryField(uint16 index)
+    {
+        return index >= PLAYER_VISIBLE_ITEM_1_ENTRYID &&
+            index < PLAYER_VISIBLE_ITEM_1_ENTRYID + EQUIPMENT_SLOT_END * 2 &&
+            (index - PLAYER_VISIBLE_ITEM_1_ENTRYID) % 2 == 0;
+    }
+
+    void ShowEquippedItemsToViewer(Player const* wearer, ByteBuffer& data, BuildValuesCachePosPointers const& pos,
+        Player* viewer)
+    {
+        std::shared_ptr<PlayerCollectionState> viewerState;
+        std::shared_ptr<PlayerCollectionState> wearerState;
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            uint16 const index = PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2;
+            auto const field = pos.other.find(index);
+            if (field == pos.other.end())
+                continue;
+            if (!viewerState && !(viewerState = GetState(viewer)))
+                return;
+            if (viewerState->CanSeeItemAppearances)
+                return;
+            if (!wearerState && !(wearerState = GetState(wearer)))
+                return;
+
+            uint8 const category = AppearanceCategoryForEquipmentSlot(slot);
+            Item const* item = wearer->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!category || !item)
+                continue;
+            auto const appearance = _appearances.find(wearerState->ActiveAppearances[category]);
+            if (appearance != _appearances.end() && appearance->second.SourceItem &&
+                appearance->second.SourceItem == wearer->GetUInt32Value(index))
+                data.put<uint32>(field->second, item->GetEntry());
+        }
+    }
+
+    void ResendVisibleItemsTo(Player* viewer)
+    {
+        auto const resend = [](Player* wearer)
+        {
+            for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+                if (wearer->GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2))
+                    wearer->ForceValuesUpdateAtIndex(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2);
+        };
+        resend(viewer);
+        viewer->GetMap()->DoForAllPlayers([viewer, &resend](Player* wearer)
+        {
+            if (wearer != viewer && viewer->HaveAtClient(wearer))
+                resend(wearer);
+        });
+    }
 
     uint32 GetAmmunitionDisplay(Player* player)
     {
@@ -7010,6 +6044,13 @@ public:
       ChatHandler(player->GetSession())
           .PSendSysMessage(
               "Vanity item {} is not present in this client build.", itemId);
+      return;
+    }
+
+    if (IsBrokenCosmeticPetToken(itemId))
+    {
+      ChatHandler(player->GetSession())
+          .SendSysMessage("That whistle is not available on this realm.");
       return;
     }
 
@@ -7845,6 +6886,7 @@ private:
             AscensionCollectibles::SigilVanityItems.end(), itemId)) &&
         _vanityItems.contains(itemId) &&
         !IsConsumableVanityItem(_vanityItems.at(itemId)) &&
+        IsVanityItemForPlayer(player, _vanityItems.at(itemId)) &&
         state.OwnedVanityItems.insert(itemId).second) {
       CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION);
       stmt->SetData(0, state.AccountId);
@@ -7871,6 +6913,26 @@ private:
     }
   }
 
+    bool HasItemAppearance(uint32 itemId) const
+    {
+        return _itemAppearances.contains(itemId) || _itemAppearances.contains(ItemScaling::BaseEntry(itemId));
+    }
+
+    void HandleCollectItemAppearance(Player* player, WorldPacket& packet)
+    {
+        ObjectGuid const itemGuid(packet.read<uint64>());
+        Item* item = player->GetItemByGuid(itemGuid);
+        std::shared_ptr<PlayerCollectionState> state = GetState(player);
+        if (!state || !item || !HasItemAppearance(item->GetEntry()))
+        {
+            SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_FAILED");
+            return;
+        }
+
+        CollectItem(player, *state, item->GetEntry(), true, item->IsSoulBound());
+        SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_OK");
+    }
+
   void HandleClientPacket(Player *player, WorldPacket &packet) {
     packet.rpos(0);
     try {
@@ -7886,6 +6948,9 @@ private:
         break;
       case CMSG_DELETE_APPEARANCE_OUTFIT:
         HandleDeleteOutfit(player, packet);
+        break;
+      case CMSG_COLLECT_ITEM_APPEARANCE:
+        HandleCollectItemAppearance(player, packet);
         break;
       case CMSG_INSPECT_CHARACTER_ADVANCEMENT:
         AscensionClassService::Instance().SendInspectResult(player, ObjectGuid(packet.read<uint64>()));
@@ -8103,6 +7168,7 @@ private:
                               canSeeItem ? 1 : 0, canSeeSpell ? 1 : 0);
 
     RefreshVisibleItems(player);
+    ResendVisibleItemsTo(player);
     RefreshIncarnations(player);
     SendAppearanceVisibility(player, *state);
   }
@@ -8139,6 +7205,11 @@ private:
         if ((vanity.Flags & VANITY_FLAG_NOT_OFFERED) || !(vanity.RealmTypeMask & GetRealmTypeMask()))
             return false;
 
+        return IsVanityItemForPlayer(player, vanity);
+    }
+
+    [[nodiscard]] static bool IsVanityItemForPlayer(Player const* player, VanityInfo const& vanity)
+    {
         uint32 const classIndex = player->getClass() - 1;
         if (vanity.ClassMask && (classIndex >= 64 || !(vanity.ClassMask & (uint64(1) << classIndex))))
             return false;
@@ -8374,17 +7445,34 @@ public:
             "Ascension_SeasonCollection", "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
+        auto replaceAll = [](std::string_view in, std::string_view from, std::string_view to)
+        {
+            std::string out(in);
+            for (size_t pos = out.find(from); pos != std::string::npos; pos = out.find(from, pos + to.size()))
+                out.replace(pos, from.size(), to);
+            return out;
+        };
+
         std::vector<std::string> names = session->GetClientAddonNames();
-        for (std::string_view addon : ascensionAddons)
+        auto addName = [&names](std::string const& addon)
+        {
             if (std::find(names.begin(), names.end(), addon) == names.end())
                 names.emplace_back(addon);
+        };
+        for (std::string_view addon : ascensionAddons)
+        {
+            addName(std::string(addon));
+            addName(replaceAll(addon, "Ascension", "Descension"));
+        }
 
         WorldPacket packet(SMSG_ASCENSION_SECURE_ADDONS, sizeof(uint32) + names.size() * 32);
         packet << uint32(names.size());
         for (std::string const& name : names)
         {
+            std::string const legacyName = replaceAll(name, "Descension", "Ascension");
             packet << name;
-            packet << uint8(name.starts_with("Blizzard_") || secureAscensionAddons.contains(name));
+            packet << uint8(name.starts_with("Blizzard_") || secureAscensionAddons.contains(name)
+                            || secureAscensionAddons.contains(legacyName));
         }
         session->SendPacket(&packet);
     }
@@ -8958,22 +8046,9 @@ class AscensionCompatServerScript : public ServerScript {
 public:
   AscensionCompatServerScript()
       : ServerScript("AscensionCompatServerScript",
-                     {SERVERHOOK_CAN_PACKET_RECEIVE_EARLY, SERVERHOOK_CAN_PACKET_RECEIVE,
-                         SERVERHOOK_CAN_PACKET_SEND})
+                     {SERVERHOOK_CAN_PACKET_RECEIVE_EARLY, SERVERHOOK_CAN_PACKET_RECEIVE})
   {
   }
-
-    bool CanPacketSend(WorldSession* session, WorldPacket const& packet) override
-    {
-        if (packet.GetOpcode() != SMSG_ITEM_QUERY_SINGLE_RESPONSE || packet.size() < sizeof(uint32))
-            return true;
-
-        Player* player = session ? session->GetPlayer() : nullptr;
-        if (player && player->IsInWorld() &&
-            ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
-            AscensionDisplayPatchService::Instance().SendItemRowOnDemand(player, packet.read<uint32>(0));
-        return true;
-    }
 
     [[nodiscard]] bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
     {
@@ -9118,9 +8193,6 @@ public:
       AscensionCollectionService& service = AscensionCollectionService::Instance();
       service.SendRealmInfo(session);
       service.SendSecureAddonList(session);
-      if (session && !session->IsBot() &&
-          ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::SEND_DISPLAY_PATCHES))
-        SendAscensionClientDbcStream(session);
     }
 
     uint32 firstOpcode = ascensionCompatConfig.GetConfigValue<uint32>(
@@ -9645,7 +8717,6 @@ public:
              PLAYERHOOK_ON_AFTER_SPEC_SLOT_CHANGED,
              PLAYERHOOK_ON_CREATE_INITIAL_ITEMS,
              PLAYERHOOK_ON_GET_AMMO_DISPLAY,
-             PLAYERHOOK_ON_AFTER_UPDATE_ATTACK_POWER_AND_DAMAGE,
              PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP,
              PLAYERHOOK_CAN_USE_ITEM,
              PLAYERHOOK_CHECK_ITEM_IN_SLOT_AT_LOAD_INVENTORY,
@@ -9733,13 +8804,6 @@ public:
             displayId = appearance;
             inventoryType = INVTYPE_AMMO;
         }
-    }
-
-    void OnPlayerAfterUpdateAttackPowerAndDamage(Player* player, float&, float&,
-        float& modifier, float&, bool ranged) override
-    {
-        if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
-            HandleAscensionBarbarianAttackPower(player, modifier, ranged);
     }
 
     void OnPlayerSendInitialPacketsBeforeAddToMap(Player* player, WorldPacket&) override
@@ -9892,9 +8956,6 @@ public:
             AscensionCompatConfig::ENABLED) &&
         AscensionClassService::Instance().AffectsProficiencies(spellId))
       AscensionClassService::Instance().SynchronizeProficiencies(player);
-
-    if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
-      AscensionDisplayPatchService::Instance().SendLearnedRecipeItemRows(player, spellId);
   }
 
     void OnPlayerLearnTrainerSpell(Player* player, Creature*, uint32 spellId) override
@@ -10020,7 +9081,6 @@ public:
   void OnPlayerStoreNewItem(Player *player, Item *item,
                             uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
-    SendObtainedItemPatchRow(player, item);
     if (item && player->IsInWorld())
       AscensionCollectionService::Instance().SendWoodworkingItemAppearanceOnDemand(player, item->GetEntry());
     if (item && player->IsInWorld() &&
@@ -10034,15 +9094,8 @@ public:
   void OnPlayerCreateItem(Player *player, Item *item,
                            uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
-    SendObtainedItemPatchRow(player, item);
     if (item && player->IsInWorld())
       AscensionCollectionService::Instance().SendWoodworkingItemAppearanceOnDemand(player, item->GetEntry());
-  }
-
-  static void SendObtainedItemPatchRow(Player *player, Item const *item) {
-    if (item && player->IsInWorld() &&
-        ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
-      AscensionDisplayPatchService::Instance().SendItemRowOnDemand(player, item->GetEntry());
   }
 
   Optional<bool> OnPlayerIsClass(Player const *player, Classes playerClass,
@@ -10181,7 +9234,21 @@ public:
             {UNITHOOK_ON_BLOCK,
              UNITHOOK_ON_PERIODIC_DAMAGE_RESULT,
              UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE,
-             UNITHOOK_ON_SEND_AURA_UPDATE, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM}) {}
+             UNITHOOK_ON_SEND_AURA_UPDATE, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM,
+             UNITHOOK_SHOULD_TRACK_VALUES_UPDATE_POS_BY_INDEX, UNITHOOK_ON_PATCH_VALUES_UPDATE}) {}
+
+    bool ShouldTrackValuesUpdatePosByIndex(Unit const* unit, uint8, uint16 index) override
+    {
+        return unit->IsPlayer() && AscensionCollectionService::IsVisibleItemEntryField(index);
+    }
+
+    void OnPatchValuesUpdate(Unit const* unit, ByteBuffer& data, BuildValuesCachePosPointers& pos,
+        Player* target) override
+    {
+        if (target && !pos.other.empty() && unit->IsPlayer() &&
+            ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+            AscensionCollectionService::Instance().ShowEquippedItemsToViewer(unit->ToPlayer(), data, pos, target);
+    }
 
     void OnUnitSetShapeshiftForm(Unit* unit, uint8) override
     {
@@ -10494,7 +9561,6 @@ public:
     bool dataLoaded =
         AscensionCollectionService::Instance().LoadClientData();
     AscensionDisplayPatchService::Instance().Initialize();
-    LoadAscensionClientDbcStream();
     AscensionResourceService::Instance().ValidateDefinitions();
     LOG_INFO("coa",
              "Ascension compatibility enabled; consuming extension opcodes "
@@ -11313,14 +10379,36 @@ class spell_ascension_stick_on_a_carrot : public AuraScript
     }
 };
 
+class spell_ascension_enchant_strider : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_enchant_strider);
+
+    static constexpr int32 SINGLE_TWO_HANDER_BONUS_PCT = 35;
+
+    void CalculateAmount(AuraEffect const*, int32& amount, bool&)
+    {
+        Player* player = GetUnitOwner()->ToPlayer();
+        if (!player)
+            return;
+
+        Item const* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if (mainHand && mainHand->GetTemplate()->InventoryType == INVTYPE_2HWEAPON &&
+            !player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            AddPct(amount, SINGLE_TWO_HANDER_BONUS_PCT);
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ascension_enchant_strider::CalculateAmount, EFFECT_0,
+            SPELL_AURA_MOD_STAT);
+    }
+};
+
 }
 
-namespace AscensionDisplayPatch
+std::vector<WorldPacket> AscensionClientFileSpellRows()
 {
-void ResendSkillLineAbilityRows(Player* player, uint32 spellId)
-{
-    AscensionDisplayPatchService::Instance().ResendSkillLineAbilityRows(player, spellId);
-}
+    return AscensionDisplayPatchService::Instance().ClientFileSpellRows();
 }
 
 AscensionVanityOwnership::TestOverride::TestOverride(bool unlockAll, std::string const& starterItems)
@@ -11643,14 +10731,6 @@ void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
 
 void AddAscensionCompatScripts() {
   MountDisplayFallback::Owner.store(&CollectionMountDisplay, std::memory_order_relaxed);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
-  Ascension::ClientItemPatches::Instance().Register(ITEM_ASHEN_TABLET);
-  for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
-    Ascension::ClientItemPatches::Instance().Register(itemId);
-  for (uint32 itemId : GOBLIN_SALVAGE_QUEST_ITEMS)
-    Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {
     config.Booleans.emplace_back("CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED", true);
     config.Booleans.emplace_back("CONFIG_THROWN_WEAPON_APPEARANCES_ENABLED",
@@ -11662,6 +10742,7 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_experience_potion);
   RegisterSpellScript(spell_ascension_vanity_use_restriction);
   RegisterSpellScript(spell_ascension_stick_on_a_carrot);
+  RegisterSpellScript(spell_ascension_enchant_strider);
   RegisterSpellScript(spell_ascension_local_mount);
   RegisterSpellScript(spell_ascension_specialization_slot);
   RegisterSpellScript(spell_ascension_masters_tome_specialization);

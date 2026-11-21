@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Keep Accelerating spreads Accelerated Recovery to a player, not a nearer friendly NPC (#10927, #12394)",
+  "contract": [
+    "Keep Accelerating 520042 reads \"Your Accelerated Recovery now also applies to a nearby target.\" Its helper",
+    "520118 (SPELL_EFFECT_ASCENSION_SPREAD_AURA, 40 yd, MaxTargets 1, trigger Accelerated Recovery 800857) carries",
+    "AttributesEx3 0x100 SPELL_ATTR3_ONLY_ON_PLAYER in Spell.dbc, as does Aeon of Resilience's bounce helper 560373.",
+    "SpreadRecovery picks the nearest valid assist target around the healed unit; it ignored the helper's player-only",
+    "attribute, so a friendly NPC, pet or guardian standing next to the healed player always took the copy.",
+    "Fixture: the Chronomancer heals itself with Accelerated Recovery 501777 (rank 7), a Stormwind-faction (12)",
+    "creature stands 3 yd away and an allied player 8 yd away. Expected: the player receives the Chronomancer's",
+    "501777 and the nearer creature never does."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "chronomancer", "race": 1, "class": 22, "level": 80},
+    {"id": "ally", "race": 1, "class": 1, "level": 80}
+  ],
+  "creatures": [
+    {"id": "npc", "owner": "chronomancer", "entry": 36, "faction": 12, "health": 100000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "teleport", "label": "Place the allied player 8 yd away", "actor": "ally", "map": 0,
+      "x": -8909.41, "y": -115.853, "z": 82.3711, "o": 3.1416},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "The friendly creature is nearer than the allied player", "actor": "chronomancer",
+      "metric": "distance", "target": "npc", "min": 2, "max": 4},
+    {"action": "assert", "label": "The allied player stands farther away", "actor": "chronomancer",
+      "metric": "distance", "target": "ally", "min": 6, "max": 10},
+    {"action": "learn", "actor": "chronomancer", "spell": 520042},
+    {"action": "learn", "actor": "chronomancer", "spell": 501777},
+    {"action": "assert", "label": "Keep Accelerating is active", "actor": "chronomancer", "metric": "aura",
+      "spell": 520042, "equals": 1, "within_ms": 2000},
+    {"action": "cast", "label": "Accelerated Recovery on the Chronomancer", "actor": "chronomancer", "spell": 501777},
+    {"action": "assert", "label": "The Chronomancer holds its own Accelerated Recovery", "actor": "chronomancer",
+      "metric": "aura", "spell": 501777, "caster": "chronomancer", "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The spread copy lands on the allied player", "actor": "ally", "metric": "aura",
+      "spell": 501777, "caster": "chronomancer", "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The nearer friendly creature never receives the copy", "actor": "npc",
+      "metric": "aura", "spell": 501777, "caster": "chronomancer", "equals": 0}
+  ]
+}

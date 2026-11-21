@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "Scholomance Heroic hits like the other Heroic dungeons (#10415)",
+  "contract": "#10415: Scholomance Heroic was about as hard as Mythic: its Heroic templates had a median DamageModifier of 13.19 for elites and 32.95 for bosses, against 4.27-4.69 and 14.5-18.9 in every other vanilla dungeon (Mythic elites in BRD, Stratholme, DM, Maraudon and Blackrock Spire: 10.7-13.7). Ascension's Mythic+ logs show the Scholomance bosses hitting like other dungeons' bosses (1276 against 1100-1250 median), and the ratios inside Scholomance match. The Heroic elites are scaled by 4.37 / 13.19 and the bosses by 17.56 / 32.95, which keeps those ratios; Doctor Theolen Krastinov (57.42, higher than his Mythic 12.6) gets 17.56 and the health of Lord Alexei Barov and The Ravenian (465,462 Heroic, 605,100 Mythic instead of 581,670 / 756,171; tester decision). Normal and Mythic are unchanged.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 289,
+      "x": 196.0,
+      "y": 125.0,
+      "z": 135.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Scholomance on Heroic",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 10489,
+      "as": "guard",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 1853,
+      "as": "gandling",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 11261,
+      "as": "krastinov",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 11622,
+      "as": "rattlegore",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Risen Guard hits like a Heroic elite elsewhere (Deviate Viper about 463)",
+      "actor": "guard",
+      "metric": "weapon_damage_min",
+      "min": 425,
+      "max": 440
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Darkmaster Gandling hits like a Heroic boss elsewhere (DamageModifier 17.56)",
+      "actor": "gandling",
+      "metric": "weapon_damage_min",
+      "min": 1780,
+      "max": 1810
+    },
+    {
+      "action": "assert",
+      "label": "Rattlegore stays about a third above the other Scholomance bosses, as in the logs",
+      "actor": "rattlegore",
+      "metric": "weapon_damage_min",
+      "min": 2370,
+      "max": 2405
+    },
+    {
+      "action": "assert",
+      "label": "Doctor Theolen Krastinov hits like the other Heroic bosses",
+      "actor": "krastinov",
+      "metric": "weapon_damage_min",
+      "min": 1435,
+      "max": 1460
+    },
+    {
+      "action": "assert",
+      "label": "Doctor Theolen Krastinov has the health of the other big Scholomance bosses",
+      "actor": "krastinov",
+      "metric": "max_health",
+      "equals": 465462
+    }
+  ]
+}

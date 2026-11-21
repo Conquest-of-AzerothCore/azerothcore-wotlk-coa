@@ -27,6 +27,7 @@ Read the relevant sections when needed for the work. Do not read every guide or 
 - Verification setup, stages, selection, outputs and gameplay queue-mode limits → `docs/coa/verification.md`
 - Writing or modifying C++ → `.agents/docs/cpp-guidelines.md`
   - Script work (under `src/server/scripts/`) → also `.agents/docs/cpp-scripts.md`
+- Class conformance work → `docs/coa/conformance-start-a-class.md`
 - Creating or modifying SQL → `.agents/docs/sql-guidelines.md`
   - SmartAI work (`smart_scripts` data) → also `.agents/docs/cpp-scripts.md`
 - Reviewing a changeset or PR → `.agents/docs/code-review.md`
@@ -43,6 +44,7 @@ Read the relevant sections when needed for the work. Do not read every guide or 
 - Spell/quest ranks, acquisition, expected behavior, execution paths and regression links →
   `apps/coa-mechanics/README.md` (compact mechanic maps)
 - Finding gameplay regression scenarios or checking recorded results → `apps/coa-gameplay-test/README.md`
+- Class conformance (tooltip → behaviour proof per class) → `docs/coa/class-conformance.md`
 - Scoped source checks (boundaries, registrations, tooling regressions) →
   `python -B tools/verify_all.py --stages source --base <ref>`; `report.json` and `source.log` list the suites
   it selected (`--plan` shows only the command).

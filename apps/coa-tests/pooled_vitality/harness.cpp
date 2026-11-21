@@ -1,12 +1,14 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cctype>
 #include <cmath>
 #include <cstdint>
 #include <initializer_list>
 #include <limits>
 #include <list>
 #include <map>
+#include <string>
 #include <tuple>
 #include <vector>
 using uint8 = std::uint8_t;

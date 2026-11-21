@@ -88,15 +88,15 @@ def main():
                                        'void OnPlayerUpdate(Player *player, uint32 diff) {')),
         ('HANDLE_CLIENT_PACKET', method(compat, 'void HandleClientPacket(Player *player')),
         ('CAN_PACKET_RECEIVE_EARLY', method(compat, 'bool CanPacketReceiveEarly(WorldSession *session')),
-        ('CAN_PACKET_SEND', method(compat, 'bool CanPacketSend(WorldSession* session')),
         ('POINT_SPEND', method_or(compat, 'void HandlePointSpendRequest(Player* player', '')),
         ('TOKEN_PURCHASE', 'void PurchaseVanityItemWithBazaarTokens(Player*, uint32) { }'
                            if 'void PurchaseVanityItemWithBazaarTokens(' in compat else ''),
         ('DELIVER_VANITY', method(compat, 'void DeliverVanityItem(Player *player, uint32 itemId)')),
         ('WITHHELD_VANITY', '\n'.join([
             (re.search(r'static constexpr std::array<uint32, \d+> MysticAltarVanityItems = [^;]+;', compat) or [''])[0],
-            method_or(compat, 'static bool IsWithheldVanityItem(uint32 itemId)',
-                      'static bool IsWithheldVanityItem(uint32) { return false; }'),
+            'bool IsBrokenCosmeticPetToken(uint32) const { return false; }',
+            method_or(compat, 'bool IsWithheldVanityItem(uint32 itemId)',
+                      'bool IsWithheldVanityItem(uint32) const { return false; }'),
         ])),
         ('BANK_VANITY', '\n'.join([re.search(r'static constexpr std::array<uint32, \d+> BankVanityItems = [^;]+;',
                                              compat)[0]] + [method(compat, signature) for signature in (

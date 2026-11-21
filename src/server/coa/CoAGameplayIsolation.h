@@ -9,6 +9,7 @@
 #include "Define.h"
 #include <cstddef>
 #include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -51,6 +52,18 @@ namespace CoAGameplay
     };
 
     std::string SubstituteLegacyNames(std::string_view text, std::map<char, std::string> const& names);
+
+    inline constexpr uint32 MaxGeneratedNameRetries = 8;
+
+    enum class CharacterCreateOutcome
+    {
+        Pending,
+        Created,
+        RetryWithNextName,
+        Refused
+    };
+
+    CharacterCreateOutcome CharacterCreateNext(std::optional<uint8> result, bool generatedName, uint32 retries);
 }
 
 #endif

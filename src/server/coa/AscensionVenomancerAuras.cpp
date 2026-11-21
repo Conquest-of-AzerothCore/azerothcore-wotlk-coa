@@ -31,7 +31,7 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
         uint32 id = GetId();
         Unit* target = GetTarget();
         GetAura()->SetScriptValue(Brood,++State(player).sequence);
-        if (id == Weaver)
+        if (id == Weaver || id == 800912)
             target->ApplySpellImmune(id,IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,true);
         if (id == 504737 || id == 505203 || id == 808083 || id == 504341)
         {
@@ -163,7 +163,7 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
         uint32 id = GetId();
         Unit* target = GetTarget();
         bool expired = GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE;
-        if (id == Weaver)
+        if (id == Weaver || id == 800912)
             target->ApplySpellImmune(id,IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,false);
         if (id == 681291 && expired && !GetAura()->GetScriptValue(681301))
         {

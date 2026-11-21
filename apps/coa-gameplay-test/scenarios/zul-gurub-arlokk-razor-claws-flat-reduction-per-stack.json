@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a flat damage-taken reduction lowers each Razor Claws stack once, not once per stack squared",
+  "contract": [
+    "Round-7 tester (2026-11-14, Mythic, M0 gear): Thick Pelt (556233, physical damage taken -354) nearly erased a",
+    "44-stack Razor Claws bleed (2118328, 213 per stack on Mythic). Unit::SpellDamageBonusTaken multiplied the flat",
+    "taken benefit by the stack count twice, once in the coefficient and once in the level factor, so the",
+    "reduction grew with the square of the stacks. A flat reduction now applies once per stack: a 44-stack tick",
+    "under Thick Pelt -354 takes exactly 44 times the one-stack tick (43.5-44.5 allows integer rounding), and the",
+    "one-stack tick is still reduced below its 213 base."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "The hero carries Thick Pelt at the tester's -354",
+      "actor": "hero",
+      "spell": 556233,
+      "stacks": 1,
+      "amount": -354
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thick Pelt lowers physical damage taken by 354",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": -354
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_taken",
+      "target": "hero",
+      "spell": 2118328,
+      "periodic": true,
+      "base": 213,
+      "stacks": 1,
+      "save_as": "one_stack"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thick Pelt reduces a one-stack Mythic bleed tick",
+      "actor": "hero",
+      "metric": "spell_damage_taken",
+      "target": "hero",
+      "spell": 2118328,
+      "periodic": true,
+      "base": 213,
+      "stacks": 1,
+      "min": 1,
+      "max": 212
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a 44-stack tick takes 44 one-stack ticks, not a stack-squared reduction",
+      "actor": "hero",
+      "metric": "spell_damage_taken",
+      "target": "hero",
+      "spell": 2118328,
+      "periodic": true,
+      "base": 213,
+      "stacks": 44,
+      "ratio_to": "one_stack",
+      "min": 43.5,
+      "max": 44.5
+    }
+  ]
+}

@@ -18,8 +18,6 @@
  *     forces are down. Finishing within 40 % / 55 % / 100 % of the limit gives
  *     +3 / +2 / +1 and that many caches; the new key points at a random
  *     dungeon.
- *  5. The key drops one level the moment a run starts and gets its new level
- *     at the end, so a run that is abandoned leaves a key one level lower.
  *
  * The first key: killing the final boss of a Mythic dungeon hands every
  * player without a keystone a random +1 key.
@@ -48,10 +46,14 @@
 #include "DungeonHealth.h"
 #include "ItemScript.h"
 #include "ScriptedGossip.h"
+#include <atomic>
 #include <cmath>
+#include "GameObject.h"
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Item.h"
+#include "LootMgr.h"
+#include "MiscScript.h"
 #include "LFGMgr.h"
 #include "Log.h"
 #include "Map.h"
@@ -197,8 +199,17 @@ namespace
     };
 
     std::recursive_mutex g_lock;
+    std::unordered_map<ObjectGuid, uint32> g_pendingKeystones;
+    std::atomic<bool> g_anyPendingKeystone { false };
+
+    void QueueKeystone(ObjectGuid owner, uint32 item)
+    {
+        g_pendingKeystones[owner] = item;
+        g_anyPendingKeystone = true;
+    }
     std::unordered_map<uint32, Run> g_runs;             // by instance id
     std::unordered_map<uint32, uint32> g_forces;        // creature entry -> enemy forces
+    std::unordered_map<uint32, uint32> g_wingCredit;
     std::vector<Reward> g_rewards;
     std::unordered_map<ObjectGuid, uint32> g_socketed;   // player -> keystone item used, waiting for Start
 
@@ -452,8 +463,12 @@ namespace
             return nullptr;
         uint32 const base = BaseEntry(creature->GetEntry());
         for (WingEncounter const& encounter : *list)
-            if (encounter.creature == base || encounter.creature == creature->GetEntry())
+        {
+            auto const credit = g_wingCredit.find(encounter.id);
+            uint32 const killed = credit != g_wingCredit.end() ? credit->second : encounter.creature;
+            if (killed == base || killed == creature->GetEntry())
                 return &encounter;
+        }
         return nullptr;
     }
 
@@ -1034,7 +1049,7 @@ namespace
         run.state = timed ? STATE_TIMED : STATE_OVERTIME;
         // Out of time: no cache and no coins.
         uint32 caches = upgrade;
-        uint32 newLevel = run.level + upgrade;
+        uint32 const newLevel = timed ? run.level + upgrade : std::max<uint32>(1, run.level - 1);
         float const timeLeft = limit && timed ? float(limit - run.elapsedMs) / limit : 0.0f;
         bool const firstTime = timed && run.level > GetBestLevel(run.owner);
         uint32 const bonusPercent = firstTime ? FirstTimeBonusPercent(timeLeft) : 0;
@@ -1047,6 +1062,9 @@ namespace
         CoAResurrectDeadPlayers(map);
         ClearRunSpawns(map);
         RefuseToFight(map);
+
+        uint32 const nextKey = RandomKeystone(newLevel);
+        bool ownerHere = false;
 
         ForEachPlayer(map, [&](Player* player)
         {
@@ -1068,17 +1086,24 @@ namespace
 
             if (player->GetGUID() == run.owner)
             {
-                // The key went down one level at the start; replace it with
-                // the new one, pointing at a random dungeon.
-                uint32 depleted = Data::Instance().GetKeystoneItem(run.lfgId, std::max<uint32>(1, run.level - 1));
-                uint32 next = RandomKeystone(newLevel);
-                if (next)
-                    ReplaceKeystone(player, depleted, next);
-                ChatHandler(player->GetSession()).PSendSysMessage(timed
-                    ? "Mythic+: keystone upgraded +{}, now level {}."
-                    : "Mythic+: out of time, keystone stays at level {}.", timed ? upgrade : newLevel, newLevel);
+                ownerHere = true;
+                if (!nextKey)
+                    ChatHandler(player->GetSession()).PSendSysMessage(
+                        "Mythic+: no dungeon has a level {} keystone, your keystone stays as it is.", newLevel);
+                else
+                {
+                    ReplaceKeystone(player, run.keystoneItem, nextKey);
+                    if (timed)
+                        ChatHandler(player->GetSession()).PSendSysMessage(
+                            "Mythic+: keystone upgraded +{}, now level {}.", upgrade, newLevel);
+                    else
+                        ChatHandler(player->GetSession()).PSendSysMessage(
+                            "Mythic+: out of time, keystone drops to level {}.", newLevel);
+                }
             }
         });
+        if (!ownerHere && nextKey)
+            QueueKeystone(run.owner, nextKey);
     }
 
     void CheckComplete(Map* map, Run& run)
@@ -1094,9 +1119,27 @@ namespace
         Complete(map, run);
     }
 
-    // The key bricks when anybody leaves the owner's group or the owner leaves
-    // the instance during the run: the timer stops, nothing is paid and the key
-    // keeps the level it lost at the start.
+    void Deplete(Run const& run)
+    {
+        if (uint32 const item = Data::Instance().GetKeystoneItem(run.lfgId, std::max<uint32>(1, run.level - 1)))
+            QueueKeystone(run.owner, item);
+    }
+
+    void ApplyDepletion(Player* player)
+    {
+        if (!g_anyPendingKeystone)
+            return;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        auto itr = g_pendingKeystones.find(player->GetGUID());
+        if (itr == g_pendingKeystones.end())
+            return;
+        uint32 const item = itr->second;
+        g_pendingKeystones.erase(itr);
+        g_anyPendingKeystone = !g_pendingKeystones.empty();
+        if (!CarriedKeystones(player).empty())
+            ReplaceKeystone(player, 0, item);
+    }
+
     void Brick(Map* map, Run& run)
     {
         bool const countdown = run.state == STATE_COUNTDOWN;
@@ -1105,6 +1148,7 @@ namespace
             : "Mythic+: the keystone's owner left, the keystone is depleted.";
         run.state = STATE_INACTIVE;
         ClearRunSpawns(map);
+        Deplete(run);
         LOG_INFO("module", "Mythic+: instance {} map {} +{} bricked after {} s: {}",
             run.instanceId, run.mapId, run.level, run.elapsedMs / 1000, message);
         ForEachPlayer(map, [&](Player* player)
@@ -1171,8 +1215,6 @@ namespace
         Ascension::BattleResurrection::StartMythicPlusRun(map);
         ScaleForces(map->GetId(), uint32(map->GetDifficulty()), run);
 
-        // The key loses a level now and gets its real new level at the end.
-        ReplaceKeystone(player, item, Data::Instance().GetKeystoneItem(run.lfgId, std::max<uint32>(1, run.level - 1)));
 
         for (auto const& [spawnId, creature] : map->GetCreatureBySpawnIdStore())
         {
@@ -1244,6 +1286,12 @@ namespace
                 g_forces[result->Fetch()[0].Get<uint32>()] = result->Fetch()[1].Get<uint32>();
             while (result->NextRow());
 
+        g_wingCredit.clear();
+        if (QueryResult result = WorldDatabase.Query("SELECT encounter, creature FROM coa_mythic_wing_credit"))
+            do
+                g_wingCredit[result->Fetch()[0].Get<uint32>()] = result->Fetch()[1].Get<uint32>();
+            while (result->NextRow());
+
         g_rewards.clear();
         if (QueryResult result = WorldDatabase.Query("SELECT level_min, level_max, item, count FROM coa_mythic_reward"))
             do
@@ -1252,8 +1300,8 @@ namespace
                 g_rewards.push_back({ f[0].Get<uint32>(), f[1].Get<uint32>(), f[2].Get<uint32>(), f[3].Get<uint32>() });
             } while (result->NextRow());
 
-        LOG_INFO("server.loading", ">> Mythic+: {} enemy forces values, {} cache rows",
-            uint32(g_forces.size()), uint32(g_rewards.size()));
+        LOG_INFO("server.loading", ">> Mythic+: {} enemy forces values, {} wing credits, {} cache rows",
+            uint32(g_forces.size()), uint32(g_wingCredit.size()), uint32(g_rewards.size()));
     }
 }
 
@@ -1419,11 +1467,35 @@ public:
     }
 };
 
+constexpr std::array<uint32, 13> MYTHICAL_BOON_ITEMS = { 2104920, 2104921, 2104922, 2104923, 2104925, 2104926, 2104927,
+    2104928, 2104929, 2104930, 2104931, 2104932, 2104935 };
+
+void RemoveBoonsOutsideDungeon(Player* player)
+{
+    Map* map = player->FindMap();
+    if (!map || map->IsDungeon() || !player->IsAlive())
+        return;
+    for (uint32 item : MYTHICAL_BOON_ITEMS)
+        if (uint32 const count = player->GetItemCount(item, true))
+            player->DestroyItemCount(item, count, true);
+}
+
 // Death takes the player affixes; a resurrection inside a running key brings them back.
 class coa_mythic_plus_player : public PlayerScript
 {
 public:
-    coa_mythic_plus_player() : PlayerScript("coa_mythic_plus_player", { PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_ON_LOGIN }) { }
+    coa_mythic_plus_player() : PlayerScript("coa_mythic_plus_player",
+        { PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_MAP_CHANGED }) { }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        RemoveBoonsOutsideDungeon(player);
+    }
+
+    void OnPlayerUpdate(Player* player, uint32) override
+    {
+        ApplyDepletion(player);
+    }
 
     // What Ascension's server told the client and this one would not otherwise: the strings for Mythic its
     // GlobalStrings lack, the champion count per dungeon, and the affix rows this realm changed
@@ -1431,6 +1503,7 @@ public:
     // AscensionDifficultyRelease.
     void OnPlayerLogin(Player* player) override
     {
+        RemoveBoonsOutsideDungeon(player);
         for (auto const& [id, key, text] : CLIENT_STRINGS)
         {
             WorldPacket data(SMSG_PATCH_GLOBAL_STRINGS, 32 + std::strlen(key) + std::strlen(text));
@@ -1467,12 +1540,60 @@ public:
 
     void OnPlayerResurrect(Player* player, float /*restorePercent*/, bool& /*applySickness*/) override
     {
+        RemoveBoonsOutsideDungeon(player);
         Map* map = player->FindMap();
         if (!map || !map->IsDungeon())
             return;
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         if (Run* run = RunFor(map); run && run->Active())
             ApplyPlayerAffixes(player, *run);
+    }
+};
+
+class coa_mythic_plus_chest_loot : public MiscScript
+{
+public:
+    coa_mythic_plus_chest_loot() : MiscScript("coa_mythic_plus_chest_loot", { MISCHOOK_ON_AFTER_LOOT_TEMPLATE_PROCESS })
+    { }
+
+    void OnAfterLootTemplateProcess(Loot* loot, LootTemplate const*, LootStore const& store, Player* owner, bool, bool,
+        uint16) override
+    {
+        if (!loot || !owner || &store != &LootTemplates_Gameobject
+            || !sConfigMgr->GetOption<bool>("MythicPlus.NoCreatureLoot", true))
+            return;
+        GameObject* chest = ObjectAccessor::GetGameObject(*owner, loot->sourceWorldObjectGUID);
+        if (!chest || chest->GetGoType() != GAMEOBJECT_TYPE_CHEST || IsGathered(chest))
+            return;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        Run const* run = RunFor(owner->GetMap());
+        if (!run || !run->Active())
+            return;
+        loot->items.clear();
+        loot->quest_items.clear();
+        loot->unlootedCount = 0;
+        loot->gold = 0;
+    }
+
+private:
+    static bool IsGathered(GameObject const* chest)
+    {
+        LockEntry const* lock = sLockStore.LookupEntry(chest->GetGOInfo()->GetLockId());
+        if (!lock)
+            return false;
+        for (uint8 i = 0; i < MAX_LOCK_CASE; ++i)
+            if (lock->Type[i] == LOCK_KEY_SKILL)
+                switch (lock->Index[i])
+                {
+                    case LOCKTYPE_PICKLOCK:
+                    case LOCKTYPE_HERBALISM:
+                    case LOCKTYPE_MINING:
+                    case LOCKTYPE_FISHING:
+                        return true;
+                    default:
+                        break;
+                }
+        return false;
     }
 };
 
@@ -1534,7 +1655,10 @@ public:
         Run* run = RunFor(map);
         // Mythical Boons (80215) exist only for a keystone.
         if (creature->GetEntry() == 80215)
+        {
             creature->SetVisible(run && run->Active());
+            creature->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
+        }
         if (run && run->Active())
             ApplyCreatureAffixes(creature, *run);
         if (run && Finished(*run))
@@ -1963,6 +2087,8 @@ namespace
     constexpr uint32 MARK_VENDOR = 9414500;           // Mark of Triumph items; + slot group: Heroic Dungeon items
     constexpr uint32 TEXT_EDRIM = 9416000;
     constexpr uint32 TEXT_MARKUS = 9414500;
+    constexpr uint32 MARKUS_ICON_SIZE = 48;
+    constexpr uint32 MARKUS_ICON_RISE = 3;
     constexpr uint32 RANDOMIZE_COST = 10 * GOLD;
 
     char const* const SLOT_NAMES[17] = { "", "Head", "Neck", "Shoulders", "Back", "Chest", "Wrists", "Main Hand",
@@ -1973,9 +2099,9 @@ namespace
 
     // Ascension menus paint their own icon into the option text, hanging over the row's left edge (as the Destiny
     // Weaver menus do): |TInterface/ICONS/<icon>:<size>:<size>:<shift>:0|t|r<label>.
-    std::string Opt(char const* icon, std::string const& label, uint32 size = 40)
+    std::string Opt(char const* icon, std::string const& label, uint32 size = 40, uint32 rise = 0)
     {
-        return Acore::StringFormat("|TInterface/ICONS/{}:{}:{}:-{}:0|t|r{}", icon, size, size, size / 2 + 2, label);
+        return Acore::StringFormat("|TInterface/ICONS/{}:{}:{}:-{}:{}|t|r{}", icon, size, size, size / 2 + 2, rise, label);
     }
 
     std::string ItemOpt(ItemTemplate const* proto, std::string const& label)
@@ -2392,8 +2518,10 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         ClearGossipMenuFor(player);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt("pvecurrency-valor", "Mark of Triumph"), 2, 0);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt("pvecurrency-valor", "Heroic Dungeon Items"), 1, 0);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+            Opt("pvecurrency-valor", "|cffa335eeMark of Triumph|r", MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 2, 0);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+            Opt("pvecurrency-valor", "|cffa335eeHeroic Dungeon Items|r", MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 1, 0);
         SendGossipMenuFor(player, TEXT_MARKUS, creature->GetGUID());
         return true;
     }
@@ -2405,7 +2533,8 @@ public:
         {
             for (uint32 slot = 1; slot <= 16; ++slot)
                 if (VendorItemData const* items = sObjectMgr->GetNpcVendorItemList(MARK_VENDOR + slot); items && !items->Empty())
-                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt(SLOT_ICONS[slot], SLOT_NAMES[slot]), 2, slot);
+                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+                        Opt(SLOT_ICONS[slot], SLOT_NAMES[slot], MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 2, slot);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, Opt("Spell_Shadow_Teleport", "Back"), 3, 0);
             SendGossipMenuFor(player, TEXT_MARKUS, creature->GetGUID());
             return true;
@@ -2453,8 +2582,6 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        static constexpr std::array<uint32, 13> BOONS = { 2104920, 2104921, 2104922, 2104923, 2104925, 2104926, 2104927,
-            2104928, 2104929, 2104930, 2104931, 2104932, 2104935 };
         CloseGossipMenuFor(player);
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         if (!InRunningKey(creature->GetMap()))
@@ -2462,9 +2589,8 @@ public:
         player->CastSpell(player, SPELL_MYTHICAL_BLESSING, true);
         for (Player* target : BoonTargets(player))
         {
-            uint32 const boon = BOONS[urand(0, BOONS.size() - 1)];
-            if (!target->AddItem(boon, 1))
-                target->SendItemRetrievalMail(boon, 1);
+            uint32 const boon = MYTHICAL_BOON_ITEMS[urand(0, MYTHICAL_BOON_ITEMS.size() - 1)];
+            target->AddItem(boon, 1);
         }
         creature->DespawnOrUnsummon(0ms, 7 * 24h);
         return true;
@@ -3190,6 +3316,7 @@ void AddCoaMythicPlusScripts()
     new coa_mythic_plus_map();
     new coa_mythic_plus_group();
     new coa_mythic_plus_creature();
+    new coa_mythic_plus_chest_loot();
     new coa_mythic_plus_player();
     new coa_mythic_plus_unit();
     new coa_mythic_plus_command();

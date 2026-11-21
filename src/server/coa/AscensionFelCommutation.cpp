@@ -718,11 +718,16 @@ public:
         if (!player)
             return false;
 
+        AscensionClientLuaRoute const route = GetAscensionClientLuaRoute(player->GetSession()->GetAccountId());
         RunWindowLua(player);
-        handler->PSendSysMessage(
-            "Sent the Fel Commutation window (SMSG 0x05BC row {}, 0x05B6 row {}). If "
-            "/dump FelCommutationFrame is nil, run /run ChallengeUtil.GetRequirementLocalization(\"{}\")",
-            WindowBootstrapRow, WindowRequirementRow, WindowBootstrapToken);
+        if (route == AscensionClientLuaRoute::HotPatch)
+            handler->PSendSysMessage("Sent the Fel Commutation window as hot patch {}; /hotpatch lists what the client ran.",
+                WindowBootstrapToken);
+        else if (route == AscensionClientLuaRoute::Queue)
+            handler->PSendSysMessage("Queued hot patch {} until the client announces the hot-patch channel.",
+                WindowBootstrapToken);
+        else
+            handler->PSendSysMessage("Hot patch {} not sent: this client has no hot-patch channel.", WindowBootstrapToken);
         return true;
     }
 

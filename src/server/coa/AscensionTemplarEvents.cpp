@@ -34,7 +34,8 @@ class aura_ascension_templar_event : public AuraScript
             return outgoing && damage && event.GetActionTarget() != player &&
                    (id != 801483 || !player->HasAura(801482));
         bool const legacyHeal = (id == 680397 || id == 705298) && info && info->Id == 707302;
-        if (State(player).event && !legacyHeal)
+        bool const consecratedZealotry = (id == 801441 || (id >= 803890 && id <= 803893)) && info && info->Id == 801450;
+        if (State(player).event && !legacyHeal && !consecratedZealotry)
             return false;
         if (id == 300513)
             return event.GetActor() == GetTarget() && damage && !periodic;
@@ -48,7 +49,7 @@ class aura_ascension_templar_event : public AuraScript
                    (event.GetDamageInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL) &&
                    (!event.GetActor()->IsCreature() || (!event.GetActor()->ToCreature()->IsDungeonBoss() &&
                                                         !event.GetActor()->ToCreature()->isWorldBoss()));
-        if (!outgoing || (Derived(info) && !legacyHeal))
+        if (!outgoing || (Derived(info) && !legacyHeal && !consecratedZealotry))
             return false;
         switch (id)
         {
@@ -71,9 +72,11 @@ class aura_ascension_templar_event : public AuraScript
         case 560648:
             return damage && melee && !periodic;
         case 680397:
-            return heal && !State(player).cooldowns.HasTimeUntilEvent(id);
+            return heal && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) &&
+                   !State(player).cooldowns.HasTimeUntilEvent(id);
         case 705298:
-            return heal && event.GetActionTarget() == player && !State(player).cooldowns.HasTimeUntilEvent(id);
+            return heal && event.GetActionTarget() == player && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) &&
+                   !State(player).cooldowns.HasTimeUntilEvent(id);
         case 801457:
             return heal && event.GetActionTarget() != player && player->IsInRaidWith(event.GetActionTarget());
         case 803158:
@@ -96,7 +99,7 @@ class aura_ascension_templar_event : public AuraScript
         case 801466:
         case 804932:
         case 806516:
-            return damage && !periodic && Ability(info);
+            return damage && !periodic && (Ability(info) || consecratedZealotry);
         default:
             return false;
         }
@@ -206,12 +209,9 @@ class aura_ascension_templar_event : public AuraScript
                 Cast(player, player, 807648);
             break;
         case 806516:
-            if (!player->HasAura(806517))
-            {
-                if (Aura* aura = player->GetAura(805390))
-                    aura->SetScriptValue(805390, std::max(0, aura->GetDuration()));
-                Cast(player, player, 805390);
-            }
+            if (Aura* aura = player->GetAura(805390))
+                aura->SetScriptValue(805390, std::max(0, aura->GetDuration()));
+            Cast(player, player, 805390);
             break;
         default:
             break;

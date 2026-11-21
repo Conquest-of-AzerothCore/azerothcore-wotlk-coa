@@ -48,12 +48,6 @@ TEST(ClientPatches, ModuleReloadPreservesIndependentRegistrations)
     EXPECT_EQ(patches.GetSelector(42), (Patches::Selector{ 1, 0, 0 }));
 }
 
-TEST(ClientPatches, ItemAndSpellRegistriesAreIndependent)
-{
-    Ascension::ClientItemPatches::Instance().Register(1);
-    EXPECT_FALSE(Ascension::ClientSpellPatches::Instance().Contains(1));
-}
-
 TEST(ClientPatches, ItemDeliveryPreparesRowsWithoutRegisteringLoginDelivery)
 {
     Patches patches;

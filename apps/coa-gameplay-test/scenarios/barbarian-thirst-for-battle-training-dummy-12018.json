@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Thirst for Battle restores Energy when Smash hits a training dummy (#12018)",
+  "contract": "Thirst for Battle (570236): 'Your Smash now regenerate 25% of your maximum Energy.' A level 60 Barbarian's Smash is rank 8 (501033, no power cost, requires the enrage aura state). The CoA hit hook casts 560463 (SPELL_EFFECT_ENERGIZE_PCT 25, Energy) when a Smash hits, but it required damage above 0. npc_training_dummy (32666, the capital-city Training Dummy) sets the damage it takes to 0 in DamageTaken, so Smash on a training dummy never restored Energy (#12018). With ordinary regeneration disabled and Energy set to 0 before each cast, the Energy afterwards divided by maximum Energy is the restored share: 0.25 when the talent works and 0 when it does not. The control hit on an ordinary creature (36) shows the normal path still gives the same 25%. Hit and expertise ratings remove misses, dodges and parries.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "barb",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "barb", "entry": 32666, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "mob", "owner": "barb", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "barb", "item": 25 },
+    { "action": "equip", "actor": "barb", "item": 25, "slot": 15 },
+    { "action": "learn", "actor": "barb", "spell": 501033 },
+    { "action": "learn", "actor": "barb", "spell": 570236 },
+    { "action": "assert", "label": "SETUP: Thirst for Battle (570236) is active", "actor": "barb", "metric": "aura", "spell": 570236, "equals": 1, "within_ms": 3000 },
+    { "action": "snapshot", "label": "Maximum Energy", "actor": "barb", "metric": "max_power", "power": 3, "save_as": "max_energy" },
+    { "action": "assert", "label": "SETUP: the Barbarian has an Energy pool", "actor": "barb", "metric": "max_power", "power": 3, "min": 100 },
+
+    { "action": "set_aura", "actor": "barb", "spell": 801761, "stacks": 1 },
+    { "action": "set_power", "actor": "barb", "power": 3, "value": 0 },
+    { "action": "cast", "actor": "barb", "spell": 501033, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Smash completed on the training dummy", "actor": "barb", "metric": "spell_cast_count", "spell": 501033, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Smash on a training dummy restores 25% of maximum Energy", "actor": "barb", "metric": "power", "power": 3, "ratio_to": "max_energy", "min": 0.24, "max": 0.26, "within_ms": 2000 },
+
+    { "action": "wait", "ms": 2000 },
+    { "action": "reset_cooldown", "actor": "barb", "spell": 501033 },
+    { "action": "set_aura", "actor": "barb", "spell": 801761, "stacks": 1 },
+    { "action": "set_power", "actor": "barb", "power": 3, "value": 0 },
+    { "action": "cast", "actor": "barb", "spell": 501033, "target": "mob" },
+    { "action": "assert", "label": "SETUP: Smash completed on the ordinary creature", "actor": "barb", "metric": "spell_cast_count", "spell": 501033, "min": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "Control: Smash on an ordinary creature restores 25% of maximum Energy", "actor": "barb", "metric": "power", "power": 3, "ratio_to": "max_energy", "min": 0.24, "max": 0.26, "within_ms": 2000 }
+  ]
+}
