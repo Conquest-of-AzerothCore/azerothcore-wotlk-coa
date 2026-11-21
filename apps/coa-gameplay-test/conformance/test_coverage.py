@@ -707,15 +707,17 @@ class EvidenceStatusTest(unittest.TestCase):
                 with mock.patch.dict(METRIC_EVIDENCE, unclassed, clear=True), self.assertRaises(EvidenceError):
                     evidence_of(clauses, [read])
 
-    def test_a_block_value_is_a_state_read_where_the_clause_promises_block(self):
+    def test_a_block_value_is_a_state_read_where_the_clause_promises_block_value(self):
         label = '1 behaviour_metric_delta block_value'
         metric = 'block_value'
         self.assertEqual(METRIC_EVIDENCE[metric], STATE)
         promised = [claim('Increases your shield block value by 30%', label)]
         unpromised = [claim('Increases your Holy damage by 5%', label)]
+        chance = [claim('Increases your chance to block by 5%', label)]
         learned = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
         self.assertEqual(evidence_of(promised, [learned])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of(unpromised, [learned])[0], [DATA])
+        self.assertEqual(evidence_of(chance, [learned])[0], [DATA])
         self.assertEqual(evidence_of(promised, [judged(label, BEHAVIOUR_METRIC_DELTA, metric)])[0], [DATA])
         with mock.patch.dict(METRIC_EVIDENCE, {metric: READBACK}):
             self.assertEqual(evidence_of(promised, [learned])[0], [DATA])

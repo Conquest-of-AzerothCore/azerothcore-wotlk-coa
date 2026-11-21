@@ -34,9 +34,10 @@ What each read observes:
 ## Decision
 
 `armor_reduced_damage`, `script_melee_damage_dealt` and `spell_done_crit_chance_scripted` are `READBACK`: each is a
-computation on a probe that no acting path consumed. `block_value` is `STATE` with the promise words `block`, the
-words of `block_chance`; a learned-contrast read proves a clause that promises block. No `CONTRAST_PROOF` row for
-`spell_done_crit_chance_scripted`: a learned-contrast read of it stays data. Such a row is a later, separate proposal
+computation on a probe that no acting path consumed. `block_value` is `STATE` with the promise words `block value`;
+a learned-contrast read proves a clause that promises block value, and never a block-chance clause (review I-1).
+No `CONTRAST_PROOF` row for `spell_done_crit_chance_scripted`: a learned-contrast read of it stays data. Such a row
+is a later, separate proposal
 (controller decision, mentor D-33).
 
 No existing row changes.
@@ -44,7 +45,8 @@ No existing row changes.
 ## Consequences
 
 - Tests (`test_coverage.py`, `EvidenceStatusTest`): `test_the_armor_script_melee_and_scripted_crit_probes_are_readbacks`
-  and `test_a_block_value_is_a_state_read_where_the_clause_promises_block`; each asserts the row's class, alerts when
-  the row is mutated to another class, and raises without the row.
+  and `test_a_block_value_is_a_state_read_where_the_clause_promises_block_value`; each asserts the row's class,
+  alerts when the row is mutated to another class, and raises without the row. The block-value test also keeps a
+  block-chance clause at data.
 - Generation is not touched: the finished classes' snapshot digests are unchanged.
 - Number provisional: shared ADRs are numbered at merge.

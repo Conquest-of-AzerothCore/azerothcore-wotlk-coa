@@ -456,7 +456,7 @@ STATE_PROMISES = {
     'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
     'power': rf'{POWER_WORDS}|\bcost', 'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
-    'block_chance': r'block', 'block_value': r'block',
+    'block_chance': r'block', 'block_value': r'block value',
     'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
     'ranged_taken_crit_chance': CRIT_WORDS, 'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
