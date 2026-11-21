@@ -8,11 +8,13 @@
     "(SpellDuration 21 after the class contract) with no AuraInterruptFlags and no dispel type, so nothing in",
     "Spell.dbc ties them to a silence. Expected: with Cauldron Brewer 92085 and Mixologist, brewing Jungle",
     "Shrooms then Bloodthistle keeps both, and a hostile Silence (15487, 5 sec) neither removes either ingredient",
-    "while it lasts nor after it ends. This scenario reproduces the report."
+    "while it lasts nor after it ends. This scenario reproduces the report. A second Witch Doctor brews the same",
+    "pair and is never silenced, as a control."
   ],
   "timeout_ms": 60000,
   "players": [
-    {"id": "doctor", "race": 1, "class": 13, "level": 80}
+    {"id": "doctor", "race": 1, "class": 13, "level": 80},
+    {"id": "control", "race": 1, "class": 13, "level": 80}
   ],
   "creatures": [
     {
@@ -23,17 +25,24 @@
   "steps": [
     {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
     {"action": "learn", "actor": "doctor", "spell": 92085},
+    {"action": "learn", "actor": "control", "spell": 92085},
     {"action": "learn", "actor": "doctor", "spell": 561069},
+    {"action": "learn", "actor": "control", "spell": 561069},
     {"action": "learn", "actor": "doctor", "spell": 801660},
+    {"action": "learn", "actor": "control", "spell": 801660},
     {"action": "learn", "actor": "doctor", "spell": 801664},
+    {"action": "learn", "actor": "control", "spell": 801664},
     {"action": "set_power", "actor": "doctor", "power": 0, "value": 2500},
+    {"action": "set_power", "actor": "control", "power": 0, "value": 2500},
     {"action": "cast", "label": "Brew Jungle Shrooms first", "actor": "doctor", "spell": 801660},
+    {"action": "cast", "label": "Brew Jungle Shrooms first (control)", "actor": "control", "spell": 801660},
     {
       "action": "assert", "label": "SETUP: Jungle Shrooms is brewed", "actor": "doctor", "metric": "aura",
       "spell": 801660, "equals": 1, "within_ms": 1500
     },
     {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
     {"action": "cast", "label": "Brew Bloodthistle second", "actor": "doctor", "spell": 801664},
+    {"action": "cast", "label": "Brew Bloodthistle second (control)", "actor": "control", "spell": 801664},
     {
       "action": "assert", "label": "SETUP: Bloodthistle is brewed", "actor": "doctor", "metric": "aura",
       "spell": 801664, "equals": 1, "within_ms": 1500
@@ -64,6 +73,18 @@
       "equals": 0, "within_ms": 6000
     },
     {"action": "wait", "label": "Let the Cauldron tick after the silence", "ms": 2000},
+    {
+      "action": "assert", "label": "SETUP: Mixologist is still active after the silence", "actor": "doctor",
+      "metric": "aura", "spell": 561069, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: without a silence both ingredients stay", "actor": "control",
+      "metric": "aura", "spell": 801664, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: without a silence Jungle Shrooms stays", "actor": "control",
+      "metric": "aura", "spell": 801660, "equals": 1
+    },
     {
       "action": "assert", "label": "#13071: the second ingredient survives the silence", "actor": "doctor",
       "metric": "aura", "spell": 801664, "equals": 1
