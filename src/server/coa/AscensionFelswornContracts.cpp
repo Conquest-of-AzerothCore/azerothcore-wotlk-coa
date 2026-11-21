@@ -68,6 +68,10 @@ void ApplyContracts(SpellInfo* info)
             if (info->Effects[0].Effect == SPELL_EFFECT_HEALTH_LEECH)
                 info->Effects[0].ValueMultiplier = 1;
         }
+    if (id == 804758 && !info->ProcFlags)
+        info->ProcFlags = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
+    if (id == 804766 && !info->TargetCreatureType)
+        info->TargetCreatureType = 1 << (CREATURE_TYPE_DEMON - 1);
     if (id == 804216)
     {
         info->DurationEntry = sSpellDurationStore.LookupEntry(1);
