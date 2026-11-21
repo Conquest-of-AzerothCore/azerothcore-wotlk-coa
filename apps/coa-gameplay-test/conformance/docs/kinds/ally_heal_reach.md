@@ -1,7 +1,8 @@
 # Ally heal reach (`behaviour_metric_delta`, `kind: "ally_heal_reach"`, ADR 1021, provisional)
 
 Ally players stand where an area, chain or branch heal decides who it reaches, and the caster's heals on each ally are
-read per window. `allies` lists up to 7 players (schema 1 holds 8 with the caster), each `{id, dx, dy}` in yards from
+read per window. `allies` lists up to 24 players (schema 1 holds 8 with the caster; more than 7 allies make the
+scenario schema 2, which holds 25, ADR 1122), each `{id, dx, dy}` in yards from
 the caster's spawn on the world axes (moved by `relocate` steps of at most 20 yd), `grouped` (true: joined to the
 caster's group, which script searches such as `Friendly()` need; false: a same-faction player outside the group) and
 an optional `health` with its `maximum` (both or neither, health below the maximum, regeneration off: a fixed health

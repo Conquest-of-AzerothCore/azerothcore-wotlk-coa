@@ -187,19 +187,27 @@ class AllyHealReachScenarioTests(unittest.TestCase):
         branch, _ = scenario_of(BRANCH_ENTRY)
         self.assertFalse(any(step.get('label') == 'ally_heal_reach end' for step in branch['steps']))
 
-    def test_more_than_seven_allies_is_refused_and_allies_past_a_party_are_named(self):
+    def test_seven_allies_keep_schema_one_and_allies_past_a_party_are_named(self):
         extra = [{'id': 'e', 'dx': -5, 'dy': 0}, {'id': 'f', 'dx': -5, 'dy': 5}]
         seven = {**BRANCH_ENTRY, 'allies': BRANCH_ENTRY['allies'] + extra}
         scenario, _ = scenario_of(seven)
         run.validate(scenario)
-        self.assertEqual(len(scenario['players']), 8)
+        self.assertEqual((scenario['schema'], len(scenario['players'])), (1, 8))
         self.assertIn('6 grouped allies exceed a party', scenario['contract'])
         self.assertIn("before it adds e", scenario['contract'])
         self.assertIn("['e', 'f']", scenario['contract'])
         branch, _ = scenario_of(BRANCH_ENTRY)
         self.assertNotIn('exceed a party', branch['contract'])
+
+    def test_more_than_seven_allies_use_schema_two_up_to_twenty_four(self):
+        allies = [{'id': f'a{index}', 'dx': 4 + index % 6, 'dy': index // 6} for index in range(24)]
+        entry = {**BRANCH_ENTRY, 'allies': allies, 'casts': [{**BRANCH_ENTRY['casts'][0], 'target': 'a0'}],
+                 'checks': [{**BRANCH_ENTRY['checks'][0], 'reference': 'a0', 'healed': ['a1'], 'unhealed': []}]}
+        scenario, _ = scenario_of(entry)
+        run.validate(scenario)
+        self.assertEqual((scenario['schema'], len(scenario['players'])), (2, 25))
         with self.assertRaises(ValueError):
-            scenario_of({**seven, 'allies': seven['allies'] + [{'id': 'g', 'dx': -5, 'dy': 10}]})
+            scenario_of({**entry, 'allies': allies + [{'id': 'a24', 'dx': -5, 'dy': 10}]})
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')

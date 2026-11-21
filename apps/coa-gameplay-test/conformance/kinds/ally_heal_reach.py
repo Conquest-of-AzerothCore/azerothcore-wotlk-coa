@@ -27,6 +27,7 @@ SPREAD_FLOOR = 10
 CONTROL, TREATMENT = 'control', 'treatment'
 DEFAULT_POLL_MS = 250
 MAXIMUM_ALLIES = 7
+MAXIMUM_RAID_ALLIES = 24
 PARTY_ALLIES = 4
 
 
@@ -145,8 +146,8 @@ def ally_heal_reach_spec(entry: dict) -> AllyHealReachSpec:
 
 def validate(spec: AllyHealReachSpec) -> None:
     ids = [ally.id for ally in spec.allies]
-    if not ids or len(ids) > MAXIMUM_ALLIES or len(set(ids)) != len(ids) or CASTER in ids:
-        raise ValueError(f'{spec.spell} {KIND} needs 1 to {MAXIMUM_ALLIES} allies with distinct ids other than '
+    if not ids or len(ids) > MAXIMUM_RAID_ALLIES or len(set(ids)) != len(ids) or CASTER in ids:
+        raise ValueError(f'{spec.spell} {KIND} needs 1 to {MAXIMUM_RAID_ALLIES} allies with distinct ids other than '
                          f'{CASTER!r}')
     for ally in spec.allies:
         if (ally.health is None) != (ally.maximum is None) or (ally.health is not None and
@@ -512,7 +513,7 @@ def ally_heal_reach_scenario(class_file: dict, spec: AllyHealReachSpec) -> tuple
     gate = (f' The control phase runs without {spec.gate_spell}; it is learned before the treatment phase.'
             if spec.gate_spell is not None else ' One treatment phase, no gate.')
     scenario = {
-        'schema': 1,
+        'schema': 1 if len(spec.allies) <= MAXIMUM_ALLIES else 2,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour ally heal reach',
         'contract': (f'Ally players placed from the caster: {layout}. Real casts per phase: {casts}. Every ally\'s '
                      f'heal count, total and effective total of {list(read_spells(spec))} from the caster are read at '
