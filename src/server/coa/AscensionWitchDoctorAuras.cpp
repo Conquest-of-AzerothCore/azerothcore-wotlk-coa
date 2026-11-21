@@ -295,7 +295,7 @@ class aura_ascension_witch_doctor_lifecycle : public AuraScript
             player->CastCustomSpell(EclipseHit, SPELLVALUE_BASE_POINT0, effect->GetAmount(), GetTarget(), true, nullptr,
                                     effect);
             uint32 hits = 0;
-            for (Unit* enemy : Nearby(GetTarget(), 10.0f))
+            for (Unit* enemy : Nearby(GetTarget(), Radius(EclipseSplash)))
                 if (enemy != GetTarget() && player->IsValidAttackTarget(enemy))
                 {
                     Copy(player, enemy, EclipseSplash, _splash);
