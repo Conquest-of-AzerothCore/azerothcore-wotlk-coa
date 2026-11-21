@@ -12,11 +12,12 @@
     "critical/non-critical ambiguity is removed. Resists are removed too: the test spell penetration aura 823764",
     "(-9999 target resistance) cancels the linear monster resistance, and the setup checks that the mob meets the",
     "ranger's Fire spells with no average resist (spell_resist_chance 0) and that the measured Fire Arrows had",
-    "nothing resisted or absorbed. The pair must then land between 29% and 30.5% (twice 15%, less integer",
-    "rounding); a doubled percentage (60%), a missing crit (15%) and a second Fire Arrows per stab all fail.",
-    "Before the fix no Fire Arrows followed the stab at all. The mob has 1,000,000 health so overkill never trims",
-    "the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, the ranger never attacks, so the Fire",
-    "Arrows can only come from the stab, and hit rating fixtures keep it from missing."
+    "nothing resisted or absorbed. The pair must then land between 20% and 30.5%: at most twice 15% (the critical",
+    "bonus can be trimmed by the target's crit damage reduction, so the floor sits well above the 15% of a",
+    "non-critical hit). A doubled percentage (about 60%), a missing critical (15%) and a second Fire Arrows per",
+    "stab all fail. Before the fix no Fire Arrows followed the stab at all. The mob has 1,000,000 health so",
+    "overkill never trims the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, the ranger never",
+    "attacks, so the Fire Arrows can only come from the stab, and hit rating fixtures keep it from missing."
   ],
   "timeout_ms": 120000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -91,9 +92,9 @@
       "save_as": "stab_total"
     },
     {
-      "action": "assert", "label": "#13043: that critical Fire Arrows deals twice 15% of the stab", "actor": "ranger",
-      "metric": "spell_damage_total", "spell": 681109, "target": "mob", "ratio_to": "stab_total", "min": 0.29,
-      "max": 0.305
+      "action": "assert", "label": "#13043: that critical Fire Arrows deals at most twice 15% of the stab",
+      "actor": "ranger", "metric": "spell_damage_total", "spell": 681109, "target": "mob", "ratio_to": "stab_total",
+      "min": 0.2, "max": 0.305
     }
   ]
 }
