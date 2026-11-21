@@ -42,9 +42,20 @@
       "metric": "melee_attacks_taken", "target": "mob", "min": 1, "within_ms": 15000
     },
     {
+      "action": "assert", "label": "SETUP: Quick-Witted is active", "actor": "ranger", "metric": "aura",
+      "spell": 704311, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Evasion raises the ranger's dodge chance", "actor": "ranger",
+      "metric": "dodge_chance", "min": 40
+    },
+    {
+      "action": "assert", "label": "SETUP: the ranger dodges one of the mob's swings", "actor": "ranger",
+      "metric": "melee_attacks_taken", "target": "mob", "victim_state": 2, "min": 1, "within_ms": 40000
+    },
+    {
       "action": "assert", "label": "SETUP: an avoided attack fires the Quick-Witted stab", "actor": "ranger",
-      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "periodic": false, "min": 1,
-      "within_ms": 40000
+      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "periodic": false, "min": 1, "within_ms": 5000
     },
     {
       "action": "assert", "label": "#13043: the stab adds the ranger's attack power to its damage", "actor": "ranger",
