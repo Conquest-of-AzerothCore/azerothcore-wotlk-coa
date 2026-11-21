@@ -1,0 +1,125 @@
+{
+  "schema": 2,
+  "name": "Naxxramas Heroic: Anub’Rekhan flex and tiered loot",
+  "contract": [
+    "Use the native raid difficulty packet, then inspect the corresponding real Naxxramas map.",
+    "Anub’Rekhan uses the ten-effective-player flex floor. Corpse loot includes the correct vendor token and level-60 gear.",
+    "This combat fixture bypasses access. The separate release and attunement scenario verifies native entry."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 2296.01,
+    "y": -5340.98,
+    "z": 90.8799
+  },
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "bot": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "member",
+      "raid": true,
+      "loot_method": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "member",
+      "value": 1
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_health",
+      "actor": "leader",
+      "value": 2000000000,
+      "maximum": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 533,
+      "x": 3298.0,
+      "y": -3476.3,
+      "z": 287.161,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1250
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 533,
+      "within_ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "nearby_creature_max_health",
+      "entry": 15956,
+      "min": 14666662,
+      "max": 14666678
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 15956,
+      "kill": true
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "leader",
+      "entry": 15956
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "loot_offered_item_count",
+      "item": 102262,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "loot_gear_item_level",
+      "min": 88,
+      "max": 94
+    }
+  ]
+}

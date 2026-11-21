@@ -106,16 +106,30 @@ namespace
         return DamageValue(target, attacker, &CreatureScaling::Settings::damage);
     }
 
+    float Level60NaxxramasSpellMultiplier(Unit const* attacker, SpellInfo const* spellInfo)
+    {
+        Creature const* creature = attacker ? attacker->ToCreature() : nullptr;
+        if (!spellInfo || !creature || creature->GetLevel() != 63 || creature->GetMapId() != RaidRelease::MapNaxxramas)
+            return 1.0f;
+
+        Map const* map = creature->FindMap();
+        if (!map || map->IsScriptedPrivateInstance() || !IsEligible(creature))
+            return 1.0f;
+
+        return CreatureScaling::NaxxramasSpellMultiplier(creature->GetEntry(), spellInfo->Id, map->GetSpawnMode());
+    }
+
     float SpellDamageMultiplier(Unit const* target, Unit const* attacker, SpellInfo const* spellInfo)
     {
+        float const encounterMultiplier = Level60NaxxramasSpellMultiplier(attacker, spellInfo);
         CreatureScaling::Context context;
         Creature const* creature = ScaledAttacker(target, attacker, context);
         if (!creature)
-            return 1.0f;
+            return encounterMultiplier;
         bool const weaponSpell = spellInfo && (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE ||
             spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED);
-        return CreatureScaling::SpellMultiplier(*Active(), context, creature->GetMapId(), creature->GetLevel(),
-            weaponSpell);
+        return encounterMultiplier * CreatureScaling::SpellMultiplier(*Active(), context, creature->GetMapId(),
+            creature->GetLevel(), weaponSpell);
     }
 
     template <typename T>

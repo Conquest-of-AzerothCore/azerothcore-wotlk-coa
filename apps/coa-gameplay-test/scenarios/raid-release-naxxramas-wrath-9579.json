@@ -1,70 +1,60 @@
 {
-  "schema": 1,
-  "name": "A level 80 character can enter Wrath Naxxramas below the Classic release ladder's final stage (#9579)",
+  "schema": 2,
+  "name": "Naxxramas requires phase 8 and the classic Argent Dawn attunement",
   "contract": [
-    "AscensionRaidReleasePolicy.h gates raids by map id. In the 3.3.5 client, map 533 is the Wrath 10/25-man",
-    "Naxxramas reached through the Dragonblight entrance; MapDifficulty.dbc exposes only its four Wrath raid",
-    "difficulties (0-3) for that map id, with no separate Classic 40-man mode. The ladder's Classic-tier gate",
-    "(StageNaxxramas, reached at Ascension.CallboardCache.ReleaseStage 8) must not close map 533, unlike before",
-    "the fix, while every other Wrath raid (here Ulduar, map 603) stays open at any stage, below or above it."
+    "A level-60 character without attunement stays outside at phase 8.",
+    "Archmage Angela Dosantos offers the original Exalted attunement to an eligible level-60 character.",
+    "The rewarded quest allows entry at phase 8, including after relog. Playerbots are exempt from the quest.",
+    "Phase 7 rejects both an attuned player and a playerbot."
   ],
-  "timeout_ms": 90000,
+  "timeout_ms": 120000,
   "location": {
     "map": 0,
-    "x": -8914.0,
-    "y": -133.0,
-    "z": 80.6
+    "x": 2296.01,
+    "y": -5340.98,
+    "z": 90.8799
   },
   "players": [
     {
-      "id": "hero",
+      "id": "leader",
       "race": 1,
       "class": 18,
-      "level": 80
+      "level": 60
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "bot": true
     }
   ],
   "steps": [
-    { "action": "wait", "label": "Let login settle", "ms": 2000 },
     {
-      "action": "teleport",
-      "label": "CONTROL: an unrelated Wrath raid is open at this low release stage",
-      "actor": "hero",
-      "map": 603,
-      "x": -914.041,
-      "y": -148.98,
-      "z": 463.137,
-      "o": 6.28
+      "action": "group",
+      "actor": "leader",
+      "target": "member",
+      "raid": true,
+      "loot_method": 0
     },
     {
-      "action": "assert",
-      "label": "CONTROL: Ulduar entry succeeds",
-      "actor": "hero",
-      "metric": "map_id",
-      "equals": 603,
-      "within_ms": 15000
+      "action": "set_phase",
+      "actor": "leader",
+      "value": 1
     },
     {
-      "action": "teleport",
-      "label": "Back to the starting spot before the discriminating attempt",
-      "actor": "hero",
-      "map": 0,
-      "x": -8914.0,
-      "y": -133.0,
-      "z": 80.6,
-      "o": 0
+      "action": "set_phase",
+      "actor": "member",
+      "value": 1
     },
     {
-      "action": "assert",
-      "label": "SETUP: back in Eastern Kingdoms",
-      "actor": "hero",
-      "metric": "map_id",
-      "equals": 0,
-      "within_ms": 15000
+      "action": "console",
+      "command": "raidphase set 8",
+      "restore": "raidphase clear"
     },
     {
       "action": "teleport",
-      "label": "DISCRIMINATING: enter Wrath Naxxramas through its Dragonblight entrance at the default low release stage",
-      "actor": "hero",
+      "actor": "leader",
       "map": 533,
       "x": 3005.68,
       "y": -3447.77,
@@ -72,12 +62,154 @@
       "o": 4.65
     },
     {
+      "action": "wait",
+      "ms": 650
+    },
+    {
       "action": "assert",
-      "label": "DISCRIMINATING: Naxxramas entry succeeds instead of staying closed",
-      "actor": "hero",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3500
+    },
+    {
+      "action": "teleport",
+      "actor": "member",
+      "map": 533,
+      "x": 3005.68,
+      "y": -3447.77,
+      "z": 293.93,
+      "o": 4.65
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "member",
       "metric": "map_id",
       "equals": 533,
-      "within_ms": 15000
+      "within_ms": 3500
+    },
+    {
+      "action": "teleport",
+      "actor": "member",
+      "map": 0,
+      "x": 2296.01,
+      "y": -5340.98,
+      "z": 90.8799,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "member",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3500
+    },
+    {
+      "action": "set_reputation",
+      "actor": "leader",
+      "id": 529,
+      "value": 42000
+    },
+    {
+      "action": "quest_accept",
+      "actor": "leader",
+      "quest": 9123,
+      "entry": 16116
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "leader",
+      "quest": 9123,
+      "entry": 16116,
+      "reward": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "quest_rewarded",
+      "quest": 9123,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "raidphase set 7"
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 533,
+      "x": 3005.68,
+      "y": -3447.77,
+      "z": 293.93,
+      "o": 4.65
+    },
+    {
+      "action": "teleport",
+      "actor": "member",
+      "map": 533,
+      "x": 3005.68,
+      "y": -3447.77,
+      "z": 293.93,
+      "o": 4.65
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "member",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3500
+    },
+    {
+      "action": "console",
+      "command": "raidphase set 8"
+    },
+    {
+      "action": "relog",
+      "actor": "leader"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 533,
+      "x": 3005.68,
+      "y": -3447.77,
+      "z": 293.93,
+      "o": 4.65
+    },
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "map_id",
+      "equals": 533,
+      "within_ms": 3500
     }
   ]
 }
