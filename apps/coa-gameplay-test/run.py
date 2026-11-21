@@ -107,7 +107,6 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'carried_pool_item_count', 'carried_variant_item_count', 'carried_statless_armor_count',
     'client_knows_spell', 'client_spellbook_copies', 'client_cooldown_ready', 'client_cooldown_clears',
     'client_cooldown_blocked_casts', 'initial_spells_at', 'learned_spell_at',
-    'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows',
@@ -150,7 +149,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spellbook_superseded_packets', 'spellbook_superseded_for', 'spellbook_loud_supersedes_for',
     'client_chat_lines_for', 'client_removals_keeping_buttons_for', 'client_placing_learns_for',
     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
-    'client_spell_row_restored',
+    'client_spell_row_restored', 'client_spell_row_contains', 'client_spell_row_u32',
     'spellbook_client_notable', 'spellbook_notify_id_mismatches',
     'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
     'spellbook_silent_buys', 'spellbook_multi_announced_buys',
@@ -1280,11 +1279,15 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'quest_query_text_contains':
                 require(isinstance(step.get('text'), str) and bool(step['text']),
                         f'{where}: quest_query_text_contains needs text')
+            if metric == 'client_spell_row_contains':
+                require(isinstance(step.get('text'), str) and bool(step['text']),
+                        f'{where}: client_spell_row_contains needs text')
+            if metric == 'client_spell_row_u32':
+                number(step.get('index'), f'{where}.index', 0, None, True)
             if metric.startswith('aura') or metric in {
                     'knows_spell', 'spell_rank', 'first_rank_spell', 'cooldown_ms', 'spell_cooldown_packet_ms', 'sent_aura_amount', 'global_cooldown_ms', 'spell_charges', 'cast_remaining_ms', 'has_talent',
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies', 'learned_spell_at',
                     'client_cooldown_ready', 'client_cooldown_clears', 'client_cooldown_blocked_casts',
-                    'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
                     'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'spell_power_cost',
                     'skill_line_for_spell',
@@ -1311,7 +1314,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     'spellbook_notify_id_mismatches', 'client_chat_lines_for',
                     'client_removals_keeping_buttons_for', 'client_placing_learns_for',
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
-                    'client_spell_row_restored'}:
+                    'client_spell_row_restored', 'client_spell_row_contains', 'client_spell_row_u32'}:
                 require('spell' in step, f'{where}: metric needs spell')
                 if metric == 'spell_id_for_difficulty':
                     require('target' in step, f'{where}: spell_id_for_difficulty needs a target')
@@ -1663,7 +1666,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'spellbook_superseded_for', 'spellbook_loud_supersedes_for', 'client_chat_lines_for',
                           'client_removals_keeping_buttons_for', 'client_placing_learns_for',
                           'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
-                          'client_spell_row_restored',
+                          'client_spell_row_restored', 'client_spell_row_contains', 'client_spell_row_u32',
                           'spellbook_client_notable',
                           'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
                           'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'skill_line_for_spell',

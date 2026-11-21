@@ -33,6 +33,7 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "AscensionCreaturePreset.h"
+#include "AscensionClientSpellRows.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "DynamicObject.h"
@@ -1131,8 +1132,6 @@ struct Actor
     std::map<uint32, uint32> supersededFor;
     std::set<uint32> clientSpells;
     std::map<uint32, uint32> clientSpellbookCopies;
-    std::map<uint32, uint32> skillLineAbilityRows;
-    std::map<uint32, uint32> skillLineAbilityAt;
     std::map<uint32, uint32> learnedSpellAt;
     uint32 initialSpellsAt = 0;
     std::map<uint32, bool> clientNotable;
@@ -1544,6 +1543,54 @@ std::unordered_map<uint32, uint32> const& NativeCustomAttrRowIds()
     return rowIds;
 }
 
+void RecordClientSpellRow(Actor& actor, WorldPacket const& packet)
+{
+    if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL &&
+        packet.size() >= (CoASpellbook::SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD + 1) * sizeof(uint32))
+    {
+        uint32 const streamedSpell = packet.read<uint32>(0);
+        uint32 const castTimeIndex = packet.read<uint32>(
+            CoASpellbook::SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD * sizeof(uint32));
+        if (SpellCastTimesEntry const* entry = sSpellCastTimesStore.LookupEntry(castTimeIndex))
+            actor.clientCastTimeMs[streamedSpell] = entry->CastTime > 0 ? uint32(entry->CastTime) : 0;
+        actor.clientAttributes[streamedSpell] = packet.read<uint32>(4 * sizeof(uint32));
+        actor.clientSpellTargets[streamedSpell] = packet.read<uint32>(16 * sizeof(uint32));
+    }
+
+    constexpr std::size_t SpellAttributesOffset = 4 * sizeof(uint32);
+    if (packet.size() >= SpellAttributesOffset + sizeof(uint32))
+    {
+        uint32 const spell = packet.read<uint32>(0);
+        actor.clientSpellHidden[spell] = (packet.read<uint32>(SpellAttributesOffset) &
+            (SPELL_ATTR0_IS_TRADESKILL | SPELL_ATTR0_DO_NOT_DISPLAY)) != 0;
+        auto& rows = actor.clientSpellRows[spell];
+        rows[0] = std::move(rows[1]);
+        rows[1].assign(reinterpret_cast<char const*>(packet.contents()), packet.size());
+        constexpr std::size_t SpellRecordBytes = 170 * sizeof(uint32);
+        constexpr uint32 RankString = 2;
+        std::size_t offset = SpellRecordBytes;
+        for (uint32 index = 0; index <= RankString && offset + sizeof(uint32) <= packet.size(); ++index)
+        {
+            uint32 const length = packet.read<uint32>(offset);
+            offset += sizeof(uint32);
+            if (index == RankString && offset + length <= packet.size())
+            {
+                uint32 rank = 0;
+                for (std::size_t at = offset; at < offset + length; ++at)
+                {
+                    char const character = char(packet.contents()[at]);
+                    if (character >= '0' && character <= '9')
+                        rank = rank * 10 + uint32(character - '0');
+                    else if (rank)
+                        break;
+                }
+                actor.clientSpellRank[spell] = rank;
+            }
+            offset += length;
+        }
+    }
+}
+
 void ObservePacket(Actor& actor, WorldPacket const& packet)
 {
     ObserveExtensionPacket(actor, packet);
@@ -1766,17 +1813,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
 
     ++actor.packetOrdinal;
 
-    if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL &&
-        packet.size() >= (CoASpellbook::SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD + 1) * sizeof(uint32))
-    {
-        uint32 const streamedSpell = packet.read<uint32>(0);
-        uint32 const castTimeIndex = packet.read<uint32>(
-            CoASpellbook::SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD * sizeof(uint32));
-        if (SpellCastTimesEntry const* entry = sSpellCastTimesStore.LookupEntry(castTimeIndex))
-            actor.clientCastTimeMs[streamedSpell] = entry->CastTime > 0 ? uint32(entry->CastTime) : 0;
-        actor.clientAttributes[streamedSpell] = packet.read<uint32>(4 * sizeof(uint32));
-        actor.clientSpellTargets[streamedSpell] = packet.read<uint32>(16 * sizeof(uint32));
-    }
+    if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL)
+        RecordClientSpellRow(actor, packet);
 
     if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL_CUSTOM_ATTR)
     {
@@ -1799,39 +1837,6 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         actor.notifiedAt.emplace(marked, actor.packetOrdinal);
     }
 
-    constexpr uint16 SmsgPatchSpell = 0x092A;
-    constexpr std::size_t SpellAttributesOffset = 4 * sizeof(uint32);
-    if (packet.GetOpcode() == SmsgPatchSpell && packet.size() >= SpellAttributesOffset + sizeof(uint32))
-    {
-        uint32 const spell = packet.read<uint32>(0);
-        actor.clientSpellHidden[spell] = (packet.read<uint32>(SpellAttributesOffset) &
-            (SPELL_ATTR0_IS_TRADESKILL | SPELL_ATTR0_DO_NOT_DISPLAY)) != 0;
-        auto& rows = actor.clientSpellRows[spell];
-        rows[0] = std::move(rows[1]);
-        rows[1].assign(reinterpret_cast<char const*>(packet.contents()), packet.size());
-        constexpr std::size_t SpellRecordBytes = 170 * sizeof(uint32);
-        constexpr uint32 RankString = 2;
-        std::size_t offset = SpellRecordBytes;
-        for (uint32 index = 0; index <= RankString && offset + sizeof(uint32) <= packet.size(); ++index)
-        {
-            uint32 const length = packet.read<uint32>(offset);
-            offset += sizeof(uint32);
-            if (index == RankString && offset + length <= packet.size())
-            {
-                uint32 rank = 0;
-                for (std::size_t at = offset; at < offset + length; ++at)
-                {
-                    char const character = char(packet.contents()[at]);
-                    if (character >= '0' && character <= '9')
-                        rank = rank * 10 + uint32(character - '0');
-                    else if (rank)
-                        break;
-                }
-                actor.clientSpellRank[spell] = rank;
-            }
-            offset += length;
-        }
-    }
     constexpr uint16 SmsgPatchCharacterAdvancement = 0x064A;
     constexpr std::size_t AdvancementEntrySpells = 9;
     if (packet.GetOpcode() == SmsgPatchCharacterAdvancement && packet.size() >= sizeof(uint32))
@@ -1912,14 +1917,6 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         uint32 xp;
         offer >> money >> xp;
         actor.questOfferXP[quest] = xp;
-    }
-
-    if (packet.GetOpcode() == 0x0934 && packet.size() >= 14 * sizeof(uint32))
-    {
-        uint32 const skillLine = packet.read<uint32>(sizeof(uint32));
-        uint32 const spell = packet.read<uint32>(2 * sizeof(uint32));
-        actor.skillLineAbilityRows[spell] = skillLine;
-        actor.skillLineAbilityAt[spell] = actor.packetOrdinal;
     }
 
     if (packet.GetOpcode() == SMSG_INITIAL_SPELLS)
@@ -2952,6 +2949,9 @@ private:
         actor.session->SetAscensionCompatEnabled(actor.definition.get<bool>("ascension_client", false));
         if (auto const address = actor.definition.get_optional<std::string>("address"))
             actor.session->SetAddress(*address);
+        static std::vector<WorldPacket> const clientFileSpellRows = AscensionClientFileSpellRows();
+        for (WorldPacket const& row : clientFileSpellRows)
+            RecordClientSpellRow(actor, row);
         actor.session->SetSocketlessPacketObserver([&actor](WorldPacket const& packet)
         {
             try
@@ -4318,34 +4318,13 @@ private:
             return sSpellMgr->GetFirstSpellInChain(spell);
         if (metric == "level_scaling_choice")
             return LocalLevelScaling::ScalingChoiceEnabled(player) ? 1.0 : 0.0;
-        if (metric == "skill_line_after_initial" || metric == "skill_line_after_learned")
-        {
-            Actor const& actor = _actors.at(step.get<std::string>("actor"));
-            auto const patch = actor.skillLineAbilityAt.find(spell);
-            if (patch == actor.skillLineAbilityAt.end())
-                return 0.0;
-            if (metric == "skill_line_after_initial")
-                return actor.initialSpellsAt && patch->second > actor.initialSpellsAt;
-            auto const learned = actor.learnedSpellAt.find(spell);
-            return learned != actor.learnedSpellAt.end() && patch->second > learned->second;
-        }
         if (metric == "initial_spells_at")
             return _actors.at(step.get<std::string>("actor")).initialSpellsAt;
-        if (metric == "learned_spell_at" || metric == "skill_line_ability_at" || metric == "skill_line_ability")
+        if (metric == "learned_spell_at")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
-            if (metric == "learned_spell_at")
-            {
-                auto const found = actor.learnedSpellAt.find(spell);
-                return found == actor.learnedSpellAt.end() ? 0.0 : double(found->second);
-            }
-            if (metric == "skill_line_ability_at")
-            {
-                auto const found = actor.skillLineAbilityAt.find(spell);
-                return found == actor.skillLineAbilityAt.end() ? 0.0 : double(found->second);
-            }
-            auto const found = actor.skillLineAbilityRows.find(spell);
-            return found == actor.skillLineAbilityRows.end() ? 0.0 : double(found->second);
+            auto const found = actor.learnedSpellAt.find(spell);
+            return found == actor.learnedSpellAt.end() ? 0.0 : double(found->second);
         }
         if (metric == "client_knows_spell")
             return _actors.at(step.get<std::string>("actor")).clientSpells.count(spell) ? 1.0 : 0.0;
@@ -4481,6 +4460,22 @@ private:
             uint32 aura = 0;
             std::memcpy(&aura, found->second[1].data() + CasterAuraSpellOffset, sizeof(aura));
             return double(aura);
+        }
+        if (metric == "client_spell_row_contains" || metric == "client_spell_row_u32")
+        {
+            auto const& rows = _actors.at(step.get<std::string>("actor")).clientSpellRows;
+            auto const found = rows.find(spell);
+            if (found == rows.end() || found->second[1].empty())
+                return -1.0;
+            std::string const& row = found->second[1];
+            if (metric == "client_spell_row_contains")
+                return row.find(step.get<std::string>("text")) != std::string::npos ? 1.0 : 0.0;
+            std::size_t const offset = std::size_t(step.get<uint32>("index")) * sizeof(uint32);
+            if (offset + sizeof(uint32) > row.size())
+                return -1.0;
+            uint32 value = 0;
+            std::memcpy(&value, row.data() + offset, sizeof(value));
+            return double(value);
         }
         if (metric == "client_spell_rank_for")
         {

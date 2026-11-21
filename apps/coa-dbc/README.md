@@ -69,8 +69,9 @@ reviewed native reader; a plausible label is not enough.
 
 The worldserver loads `DataDir/dbc` at startup. It must hold the original CoA client's tables: with a stock
 or partial set it drops content that references CoA-only rows, such as item limit categories, gameobjects and
-currencies. Players use the same tables, so client patches must not replace DBC archives, and `*_dbc` world
-tables must not override client rows. Game files are never committed.
+currencies. Players use the same tables: a client archive change must reach `DataDir/dbc` too, and `*_dbc` world
+tables must agree with the client rows ([static client data](../../docs/coa/client-data.md)). Game files are never
+committed.
 
 Extraction additionally requires [mpqcli](https://github.com/TheGrayDot/mpqcli).
 
@@ -88,5 +89,16 @@ Copy the extracted files into `<DataDir>/dbc` and restart the worldserver.
 - `check` validates the set against this checkout's `DBCfmt.h`: missing tables, file name case and field
   layouts. Strings outside the string block and rows with index -1 are reported as notes.
 - `diff` compares the values the core reads, so a rebuilt string block is not a change.
+- `drift` checks an extracted client set against the server: `--server-dbc` compares the core tables of
+  `DataDir/dbc`, and the world database (`--mysql`, `--database`, `--defaults-file`) supplies every non-empty
+  `*_dbc` override table, whose rows must exist in the client with the same values (an empty string keeps the
+  file's text; `spell_dbc` rows absent from the client are server-side spells and only noted), and
+  `coa_client_spell_description`, whose texts must match `Spell.dbc`. It exits 1 on drift; `--ids` lists the IDs
+  and `--json` writes the report.
+
+```sh
+python apps/coa-dbc/client_dbc.py drift out/client-dbc --server-dbc "C:/CoA/server/data/dbc" \
+    --mysql path/to/mysql --defaults-file path/to/client.ini --database acore_world --ids
+```
 
 Tests: `python apps/coa-dbc/test_client_dbc.py`

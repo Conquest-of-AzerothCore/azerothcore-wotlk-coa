@@ -163,8 +163,6 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_PATCHES, "SELECT * FROM spell_dbc WHERE ID = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_DESCRIPTIONS,
         "SELECT ID, Description, ToolTip FROM coa_client_spell_description", CONNECTION_SYNCH);
-    PrepareStatement(WORLD_SEL_CLIENT_SKILL_LINE_ABILITIES,
-        "SELECT ID, SkillLine FROM coa_client_skill_line_ability ORDER BY ID", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_COA_DUNGEON_HEALTH, "SELECT map_id, difficulty, creature_entry, max_health FROM coa_dungeon_health", CONNECTION_SYNCH);
 }
 

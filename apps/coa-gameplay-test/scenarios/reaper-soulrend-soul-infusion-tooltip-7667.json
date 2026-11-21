@@ -11,10 +11,10 @@
     "other formation-gated abilities do. The client's Spell.dbc cannot be edited from",
     "this repository, so the fix publishes each rank's unchanged DBC text with the",
     "conditional 'Requires Soul Infusion' prefix in coa_client_spell_description,",
-    "which AscensionCompat streams to the client as SMSG_PATCH_SPELL (opcode 2346) at",
-    "login. This scenario reads the streamed rows and then proves the text is true:",
+    "which is baked into the client's spell rows.",
+    "This scenario reads the client rows and then proves the text is true:",
     "row 500639 (Runeshroud, published by the same table) is the control for the",
-    "stream and must not gain the line, 573316 must arrive with it, and the same",
+    "client rows and must not gain the line, 573316 must carry it, and the same",
     "Soul Infusion the line names must gate the cast and be spent by it."
   ],
   "timeout_ms": 120000,
@@ -49,84 +49,71 @@
   "steps": [
     {
       "action": "wait",
-      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "label": "Let spawn AI and level scaling settle",
       "ms": 7000
     },
     {
       "action": "assert",
-      "label": "CONTROL: the shared description table still streams Runeshroud's own text as row 500639",
+      "label": "CONTROL: the client's spell row 500639 still carries Runeshroud's own text",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500639,
+      "metric": "client_spell_row_contains",
+      "spell": 500639,
       "text": "Requires Runeshroud",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "CONTROL: that streamed row carries no Soul Infusion requirement line",
+      "label": "CONTROL: that client row carries no Soul Infusion requirement line",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500639,
+      "metric": "client_spell_row_contains",
+      "spell": 500639,
       "text": "Requires Soul Infusion",
       "equals": 0
     },
     {
       "action": "assert",
-      "label": "STREAM: Soulrend rank 1 (573316) reaches the client with the requirement line",
+      "label": "CLIENT ROW: Soulrend rank 1 (573316) carries the requirement line",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 573316,
+      "metric": "client_spell_row_contains",
+      "spell": 573316,
       "text": "Requires Soul Infusion",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "STREAM: that row also names the Reaped Souls the cast spends",
+      "label": "CLIENT ROW: that row also names the Reaped Souls the cast spends",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 573316,
+      "metric": "client_spell_row_contains",
+      "spell": 573316,
       "text": "Consumes 3 Reaped Souls",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "STREAM: the rank-2 description still reaches the client with the same line",
+      "label": "CLIENT ROW: the rank-2 description still carries the same line",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 573317,
+      "metric": "client_spell_row_contains",
+      "spell": 573317,
       "text": "Requires Soul Infusion",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "STREAM: the level-12 chain member 802731 carries it too",
+      "label": "CLIENT ROW: the level-12 chain member 802731 carries it too",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 802731,
+      "metric": "client_spell_row_contains",
+      "spell": 802731,
       "text": "Requires Soul Infusion",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "CONTROL: every other streamed description is untouched - 501546 keeps its own prerequisite",
+      "label": "CONTROL: every other client description is untouched - 501546 keeps its own prerequisite",
       "actor": "reaper",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 501546,
+      "metric": "client_spell_row_contains",
+      "spell": 501546,
       "text": "Requires Assault Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "learn",
