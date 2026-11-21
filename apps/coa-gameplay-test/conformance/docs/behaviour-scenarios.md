@@ -1033,8 +1033,9 @@ cooldown wait under the global cooldown) is `NotModelled`. Judged exactly (`comp
 `cast_auras` (ADR 0674) has the class-file field's shape (`[{spell, auras, reason}]`) on the entry itself: each
 listed aura is set on the caster before every cast of that spell in the scenario (setup, priming, after and attempt
 casts), for a caster aura that CoA code requires at load while the raw DBC has `CasterAuraSpell` 0 (Trapper 681180:
-the four Trap launchers need Trap Launcher 802272, `AscensionWitchHunterCompletion.cpp:114-119`). The class-file
-field stays with value and hit scenarios, so an entry without it is unchanged.
+the four Trap launchers need Trap Launcher 802272, `AscensionWitchHunterCompletion.cpp:114-119`). An item may carry
+`stacks` (a positive integer, default 1) for an aura that must hold several stacks (Solar Power 500149 at 20 stacks
+before Dawn 804584). The class-file field stays with value and hit scenarios, so an entry without it is unchanged.
 
 `talent_cast` (ADR 0677, a `talent_aura` set once) grants the `talent_aura` by a real cast of it at the caster, after
 learning it, instead of `set_aura` (Dawn Knight 680497: 681390 makes the next Dawn Blade free).
@@ -1100,6 +1101,14 @@ for a guaranteed critical strike; Alertness 681152 on Witching Shroud 805770).
 (+2% passes from 0 to +4): the one-sided `1 - p` bound of the bonus must exclude 0, the standard error must be at most
 the stated bonus over `2 t` (else insufficient trials, with the trials needed), and the estimate must lie in the band.
 A zero-effect server then alerts instead of being withheld. Dusk 300571 and Dawn 705484 use `p` 1e-4.
+
+### Hit-ratio band on the stated value
+
+`band_points` (a number above 0 and below 2) narrows the judged band of a hit ratio to that many points of the ratio
+bonus, for a stated value whose G-19 band, mapped through a known formula, is tighter than two points of the ratio.
+Vindicator 704938 states 10% of the armor ignored: at 5528 armor and K 5500 the G-19 band 8% to 12% maps to +4.18% to
++6.40% of damage, so the entry carries `band_points` 1.1 on the expected +5.28%. The verdict states "the band of the
+stated value", and the pilot sizes the trials to it.
 
 ### Hit-ratio heals and actors
 
