@@ -1173,6 +1173,11 @@ bool ScriptMgr::OnPlayerCanRewardQuest(Player const* player, Quest const* quest)
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_REWARD_QUEST, !script->OnPlayerCanRewardQuest(player, quest));
 }
 
+bool ScriptMgr::OnPlayerCanRepeatDailyQuest(Player const* player, Quest const* quest)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(PlayerScript, PLAYERHOOK_CAN_REPEAT_DAILY_QUEST, script->OnPlayerCanRepeatDailyQuest(player, quest));
+}
+
 bool ScriptMgr::OnPlayerQuestGiverChooseReward(Player* player, Object* questGiver, Quest const* quest, uint32 reward)
 {
     CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(PlayerScript, PLAYERHOOK_ON_QUEST_GIVER_CHOOSE_REWARD, script->OnPlayerQuestGiverChooseReward(player, questGiver, quest, reward));
