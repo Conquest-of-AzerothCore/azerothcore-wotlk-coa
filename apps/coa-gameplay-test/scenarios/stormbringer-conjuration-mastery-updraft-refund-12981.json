@@ -16,7 +16,7 @@
     {"id": "storm", "race": 1, "class": 16, "level": 80}
   ],
   "creatures": [
-    {"id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 5, "stationary": true}
+    {"id": "dummy", "owner": "storm", "entry": 36, "health": 1000000, "distance": 3}
   ],
   "steps": [
     {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},

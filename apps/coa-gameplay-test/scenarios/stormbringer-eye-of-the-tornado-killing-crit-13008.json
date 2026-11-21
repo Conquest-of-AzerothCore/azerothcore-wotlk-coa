@@ -20,10 +20,7 @@
     {"id": "storm", "race": 1, "class": 16, "level": 80, "spell_crit_rating": 100000, "spell_hit_rating": 100000}
   ],
   "creatures": [
-    {
-      "id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "stationary": true,
-      "reaction": 2
-    },
+    {"id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2},
     {"id": "weak", "owner": "storm", "entry": 36, "level": 80, "health": 1, "distance": 8, "stationary": true}
   ],
   "steps": [
