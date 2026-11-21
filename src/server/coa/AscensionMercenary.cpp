@@ -4,6 +4,7 @@
 #include "AscensionRulesets.h"
 #include "Battlefield.h"
 #include "DBCStores.h"
+#include "DataMap.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -11,6 +12,7 @@
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "WorldSession.h"
+#include <unordered_set>
 
 namespace
 {
@@ -94,6 +96,42 @@ ReputationRank RaceReactionTo(Player const* player, Unit const* target)
 bool InMercenaryWar(Player const* player)
 {
     return ActiveMercenary(player) || IsPvPRuleset(player);
+}
+
+constexpr char const* RetaliationKey = "ascension_mercenary_retaliation";
+
+struct Retaliation final : DataMap::Base
+{
+    std::unordered_set<ObjectGuid> Mercenaries;
+};
+
+bool ShowsHostileTo(Player const* player, Player const* viewer)
+{
+    if (!player || !viewer || player == viewer || ActiveMercenary(player) || !IsPvPRuleset(player) ||
+        !ActiveMercenary(viewer))
+        return false;
+    Retaliation const* state = player->CustomData.Get<Retaliation>(RetaliationKey);
+    return state && state->Mercenaries.contains(viewer->GetGUID());
+}
+
+void ResendFaction(Player* player)
+{
+    player->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+    for (Unit* controlled : player->m_Controlled)
+        if (controlled->GetOwnerGUID() == player->GetGUID())
+            controlled->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+}
+
+void ExposeToMercenary(Unit* attacker, Unit* victim)
+{
+    Player* player = attacker ? attacker->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+    Player* mercenary = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+    if (!player || !mercenary || player == mercenary || !ActiveMercenary(mercenary) || ActiveMercenary(player) ||
+        !IsPvPRuleset(player) || !player->IsInCombat())
+        return;
+
+    if (player->CustomData.GetDefault<Retaliation>(RetaliationKey)->Mercenaries.insert(mercenary->GetGUID()).second)
+        ResendFaction(player);
 }
 
 bool ShowsFreeForAllTo(Player const* player, Player const* viewer)
@@ -310,11 +348,39 @@ public:
             Player const* owner = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (owner && ActiveMercenary(owner) && (owner == target || !InMercenaryWar(target)))
                 data.put(pos.UnitFieldFactionTemplatePos, RaceFaction(owner));
+            else if (ShowsHostileTo(owner, target))
+                data.put(pos.UnitFieldFactionTemplatePos, MERCENARY_FACTION_TEMPLATE);
         }
         if (pos.UnitFieldBytes2Pos < 0 || !unit || !ShowsFreeForAllTo(unit->ToPlayer(), target))
             return;
         uint32 const bytes = data.read<uint32>(pos.UnitFieldBytes2Pos);
         data.put(pos.UnitFieldBytes2Pos, bytes | (uint32(UNIT_BYTE2_FLAG_FFA_PVP) << 8));
+    }
+};
+
+class ascension_mercenary_retaliation : public UnitScript
+{
+public:
+    ascension_mercenary_retaliation()
+        : UnitScript("ascension_mercenary_retaliation", true,
+                     {UNITHOOK_ON_DAMAGE, UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_UNIT_EXIT_COMBAT}) { }
+
+    void OnDamage(Unit* attacker, Unit* victim, uint32&) override { ExposeToMercenary(attacker, victim); }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (!aura->GetSpellInfo()->IsPositive())
+            ExposeToMercenary(aura->GetCaster(), unit);
+    }
+
+    void OnUnitExitCombat(Unit* unit) override
+    {
+        Player* player = unit->ToPlayer();
+        Retaliation* state = player ? player->CustomData.Get<Retaliation>(RetaliationKey) : nullptr;
+        if (!state || state->Mercenaries.empty())
+            return;
+        state->Mercenaries.clear();
+        ResendFaction(player);
     }
 };
 
@@ -425,6 +491,7 @@ void AddSC_AscensionMercenary()
     RegisterSpellScript(spell_ascension_mercenary_loyalty);
     new ascension_mercenary_reaction();
     new ascension_mercenary_view();
+    new ascension_mercenary_retaliation();
     new ascension_mercenary_player();
     new ascension_mercenary_battlefield();
     new ascension_mercenary_arena_metadata();
