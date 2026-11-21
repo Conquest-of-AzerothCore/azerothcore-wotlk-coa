@@ -57,6 +57,7 @@ class HealSumSpec:
     checks: tuple[SumCheck, ...]
     gate_spell: int | None = None
     learn: tuple[int, ...] = ()
+    caster_health: tuple[int, int] | None = None
 
 
 def sum_creature(raw: dict) -> SumCreature:
@@ -189,8 +190,8 @@ def heal_sum_scenario(class_file: dict, spec: HealSumSpec) -> tuple[dict, list[E
         if phase == TREATMENT and spec.gate_spell is not None:
             steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.gate_spell})
         steps += health_steps(spec) + read_steps(spec, phase, 'start')
-        for cast in spec.casts:
-            steps += cast_steps(class_file, records, cast)
+        for index, cast in enumerate(spec.casts):
+            steps += cast_steps(class_file, records, cast, spec, phase, index)
         steps += read_steps(spec, phase, 'end')
         for cast in spec.casts:
             if cast.end_ms:
