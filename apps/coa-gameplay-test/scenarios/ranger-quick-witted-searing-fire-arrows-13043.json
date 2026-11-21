@@ -7,9 +7,10 @@
     "(15%) additional direct Fire damage as Fire Arrows 681109, computed from the damage the hit actually dealt;",
     "the stab is DmgClass 3 (ranged) but triggered, which the Ranger quiver hit handler skipped. Expected: each",
     "stab is followed by Fire Arrows worth about 15% of the stab (a critical Fire Arrows doubles it), so the Fire",
-    "Arrows total stays between 10% and 50% of the stab total. The mob has 1,000,000 health so overkill never",
-    "trims the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, and the ranger never attacks, so",
-    "every Fire Arrows comes from a stab."
+    "Arrows total stays between 5% and 50% of the stab total; partial Fire resists lower it (a first run measured",
+    "10.8%), while the reported failure left it near 0.3%. The mob has 1,000,000 health so overkill never trims",
+    "the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, and the ranger never attacks, so every",
+    "Fire Arrows comes from a stab."
   ],
   "timeout_ms": 120000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -56,7 +57,7 @@
     },
     {
       "action": "assert", "label": "#13043: Fire Arrows deals about 15% of the stab's damage", "actor": "ranger",
-      "metric": "spell_damage_total", "spell": 681109, "target": "mob", "ratio_to": "stab_total", "min": 0.1,
+      "metric": "spell_damage_total", "spell": 681109, "target": "mob", "ratio_to": "stab_total", "min": 0.05,
       "max": 0.5
     }
   ]
