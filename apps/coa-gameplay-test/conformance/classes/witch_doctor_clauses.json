@@ -173,7 +173,9 @@
     "claims": [
       {
         "claim": "In addition, your Hexbreak now affects an additional nearby ally,",
-        "labels": []
+        "labels": [
+          "300660 behaviour_metric_delta hex_jump"
+        ]
       },
       {
         "claim": "and has a 0.5s reduced global cooldown.",
@@ -184,15 +186,7 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "\"affects an additional nearby ally\": Hexbreak dispels from its target and one chain jump (SPELLMOD_JUMP_TARGETS +1 of Effect[1], native). A proof needs two allies carrying a curse, the talent learned between the arms and the dispel read on both. dispel_removal arms cast and learn the entry's own spell (Hexbreak, whose tooltip has no such quote) and set the debuff on the caster and one target only; metric_delta has no ally fixture. Tool: a dispel_removal arm with a gate spell learned between arms and a second ally.",
-      "attempts": [
-        {
-          "agent": "cycle6/author-B4",
-          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"affects an additional nearby ally\" is read by \"300660 behaviour_metric_delta hex_jump\" (ally_heal_reach aura_reach, ADR 1100): three grouped allies carry Curse of Weakness 702, a real Hexbreak 806240 at the first one clears it and its 6 yd neighbour only with 300660 learned; an ally 18 yd away keeps it in both phases."
   },
   {
     "spell": 300662,
@@ -330,26 +324,11 @@
     "spell": 301175,
     "clause": "@ifknown:500950:In addition, channeling Mojo Beam causes Spirit in a Bottle to affect ${$m2-1} additional allies near the primary target.:ifknown@",
     "labels": [
-      "301175 effect_value #4"
+      "301175 effect_value #4",
+      "301175 behaviour_metric_delta bottle_allies"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "\"channeling Mojo Beam causes Spirit in a Bottle to affect ${$m2-1} additional allies near the primary target\" needs a primary ally, several extra allies near it, a Mojo Beam channel and a heal read per ally. metric_delta has no ally actor, `ally_heal_breadth` casts at the dummy and `hit_ratio` takes one ally only. The tooltip tool reads ${$m2-1} = 3 (Effect[1] BasePoints 3 + 1 = 4) while AscensionWitchDoctorAbilities.cpp:109-118 stops at two (`++added == 2`): candidate defect lead L-B9-1, not reproduced. Tool: an ally list for metric_delta (T-ally2). Cycle 9 (author-B13) second design: ally_heal_breadth (behaviours.py:794-857) places N grouped allies and counts spell_heal_count per ally, but its cast steps cast only the trigger spell at the dummy, with no channel before it and no headroom ally; fixed_count counts only damage or auras on hostile dummies (HIT_METRICS). Tool note T-b13-1: ally_heal_breadth with a setup channel (Mojo Beam 501117 cast at the caster before every Bottle) and one extra ally, which is T-ally2 for this clause.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B9",
-          "report": ".agents/plans/witch-doctor-conformance/cycle8/author-B9.md#no-behaviour-route-with-reason-nothing-written-in-the-ledger-for-these"
-        },
-        {
-          "agent": "cycle8/author-B9-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle8/author-B9.md#fix-round"
-        },
-        {
-          "agent": "cycle9/author-B13",
-          "report": ".agents/plans/witch-doctor-conformance/cycle9/author-B13.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"301175 behaviour_metric_delta bottle_allies\" (ally_heal_reach reach with the primary allowed in the control) casts a real Spirit in a Bottle inside a Mojo Beam channel at a primary ally with exactly three grouped allies 6 yd from it: the tooltip ${$m2-1} = 3 needs all three healed, the control without 301175 heals none. The code stops at two (AscensionWitchDoctorAbilities.cpp:104-115, lead L-B9-1): the entry is expected to alert until that cap reads $m2 - 1; see the fix note in cycle11/author-a.md."
   },
   {
     "spell": 301297,
@@ -710,19 +689,12 @@
       {
         "claim": "for $d.",
         "labels": [
-          "501117 aura_duration_ms #2"
+          "501117 aura_duration_ms #2",
+          "501117 behaviour_metric_delta beam_lasts"
         ]
       }
     ],
-    "no_behaviour_route": {
-      "reason": "The claim \"for $d\" (8000 ms, DurationIndex 31) has no route at the reference mana. Mojo Beam is a channel whose every tick drains mana in script (AscensionWitchDoctorBrewing.cpp:191-196): cost = Effect[1] value 316 (315 + 1; the 7.2462 per level starts at BaseLevel 60) x branches x (100 + 10 (tick - 1)) / 200 per tick, so ticks cost 158, 174, 190 ... 395 and 16 ticks (8000 ms) cost 4424 mana after the 224 of the opening 15%; the channel is interrupted when the mana is below the next tick (InterruptSpell, :193-195). The reference caster holds 2567 mana at most (cast_power may not exceed it), which pays 10 ticks, so the channel ends near 5 sec on this server whatever the duration says. The duration is therefore read only by `501117 aura_duration_ms #2` (data conformant, 8000 ms), and the in-game ticks (`heal_ticks`, six heals in 3200 ms) prove the cadence. A route needs a mana-sustain fixture for a channel (power restored every tick, or a no-cost aura) that metric_delta does not have: phase_power sets the mana once at the start of a phase.",
-      "attempts": [
-        {
-          "agent": "cycle10/author-B20",
-          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#mojo-beam-501117"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"for $d\" is read by \"501117 behaviour_metric_delta beam_lasts\" (ally_heal_reach count, ADR 1100): one real Mojo Beam at a lone grouped ally with the mana refilled every 250 ms (the drain is clause 42) heals it exactly 16 times (8000 / 500 ms) in a 9500 ms window."
   },
   {
     "spell": 501117,
@@ -745,21 +717,11 @@
   {
     "spell": 501117,
     "clause": "For every sprouted the branch, you consume more and more mana.",
-    "labels": [],
+    "labels": [
+      "501117 behaviour_metric_delta beam_drain"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Mojo Beam branches only to allies the caster is grouped with (Allies() keeps units with Friendly(), which needs IsInRaidWith, Completion.cpp:57-62; the branch search is 15 yd around the target, Brewing.cpp:203-212), and metric_delta has no ally or group fixture and no per-ally heal read. The tooltip gives no mana number, so any expected drain per tick or per branch would come from the code, not from the tooltip (G-1); the growth with more branches also needs the ally fixture.",
-      "attempts": [
-        {
-          "agent": "cycle5/author-B2",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle5/author-B2-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"501117 behaviour_metric_delta beam_drain\" (ally_heal_reach drain, ADR 1100) reads the caster's mana around two real Mojo Beams in one window: one at an ally no branch can reach from, one at an ally with a neighbour 12 yd away; the second must spend more over the same 1250 ms (code 730 against 556). The tooltip gives no amount, so only the direction is judged."
   },
   {
     "spell": 501117,
@@ -1113,7 +1075,8 @@
         "claim": "Increases your Agility by $s1%",
         "labels": [
           "503609 effect_value e0 #0",
-          "503609 e0 stat 1"
+          "503609 e0 stat 1",
+          "503609 behaviour_metric_delta agility"
         ]
       },
       {
@@ -1130,7 +1093,7 @@
         ]
       }
     ],
-    "reason": "Agility and Intellect are linked to the learned-contrast readbacks `503609 e0 stat 1` (57 to 62) and `503609 e1 stat 3` (90 to 99), which the clause names (agility, intellect); Spirit is the load-time third effect, measured by `503609 behaviour_metric_delta spirit` (guide 9.4, M-19)."
+    "reason": "Agility and Intellect are linked to the learned-contrast readbacks `503609 e0 stat 1` (57 to 62) and `503609 e1 stat 3` (90 to 99), which the clause names (agility, intellect); Spirit is the load-time third effect, measured by `503609 behaviour_metric_delta spirit` (guide 9.4, M-19). Cycle 11 author A: the Agility readback is data_only (57 to 62 cannot resolve 5.7), so \"503609 behaviour_metric_delta agility\" reads it over a 2000 Agility fixture base: 2057 to 2262, ratio 1.10 to 0.001."
   },
   {
     "spell": 503696,
@@ -1714,26 +1677,14 @@
     "spell": 504840,
     "clause": "Allies within $505348A1 yds have 1 poison",
     "labels": [
-      "504840 effect_radius 505348e0 #1"
+      "504840 effect_radius 505348e0 #1",
+      "504840 periodic_dispel poison control",
+      "504840 periodic_dispel poison before_first",
+      "504840 periodic_dispel poison after_1",
+      "504840 periodic_dispel poison after_2"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "Data conformant (effect_radius 505348e0 ok). The poison half (\"1 poison\") and the 30 yd radius of the pulse: Cleansing Idol 505348 dispels by type (Effect[0] DISPEL_DISEASE misc 3, Effect[1] DISPEL_POISON misc 4), so periodic_dispel reads the disease arm (dispel_disease) and its labels carry no variant suffix, which makes a poison arm of the same spell collide with it (tool note T-pd); party_pulse demands a SPELL_EFFECT_DISPEL_MECHANIC radius spell and an ally whose fixture debuffs are read, and metric_delta has no ally actor (T-ally); a mixed set of one poison and one disease removes one of each, which the one-removal-per-period model of the kind cannot express. Cycle 9 (author-B13): the code side is Allies(player, me, 30 yd) (AscensionWitchDoctorSummons.cpp:509-513, 505348 EffectRadiusIndex 10 = 30 yd); party_pulse (periodic_dispel_party.py) requires SPELL_EFFECT_DISPEL_MECHANIC, which 505348 does not have, so the label collision of T-pd is not the only block.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B7",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle7/author-B7-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#fix-round"
-        },
-        {
-          "agent": "cycle9/author-B13",
-          "report": ".agents/plans/witch-doctor-conformance/cycle9/author-B13.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: the poison half is read by the tagged periodic_dispel arm dispel_poison (label_tag poison, ADR 1103): Deadly Poison 2818 and Wound Poison 13218 on the caster, one removed per 3000 ms pulse of a real Cleansing Idol, none without it. The 30 yd radius stays with the data label (effect_radius 505348e0)."
   },
   {
     "spell": 504840,
@@ -2028,15 +1979,7 @@
       "561069 behaviour_metric_delta fish_taught"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The alert is an incorrect test, not a defect: the teaching hook is AscensionCompat.cpp:1100-1130 (SynchronizeTaughtAbilities: specialization 6, parent 561069), run on login and progression sync, not by the harness learn. The harness has a specialization action (CoAGameplayTest.cpp:7164) but metric_delta has no option for it. Tool: a metric_delta option specialization: <id> applied before the gate learn.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: the fish_taught alert was an incorrect test: SynchronizeTaughtAbilities teaches 801662 only in specialization 6 (AscensionTaughtAbilityData.h:27). The repaired entry switches the caster to specialization 6 before the before reading (metric_delta option specialization, ADR 1102); the learn of 561069 between the phases then teaches it."
   },
   {
     "spell": 561069,
@@ -2166,23 +2109,12 @@
       {
         "claim": "to take $578296s1% more damage",
         "labels": [
-          "578295 effect_value 578296e0 #0"
+          "578295 effect_value 578296e0 #0",
+          "578295 behaviour_metric_delta touch_taken"
         ]
       }
     ],
-    "no_behaviour_route": {
-      "reason": "\"take $578296s1% more damage\" (3%) has the effect_value data label and the debuff itself is read by touch_debuff. A behaviour read is a hit ratio on the debuffed dummy, but hit_ratio arms cast plain spell ids at the dummy and set auras on the caster: the debuff comes only from a Spirit in a Bottle heal that lands on a hurt ally, which no arm cast can reproduce, and target_auras apply to both arms (a debuff applied to both arms gives a ratio of 1). A 3% value claim has a G-19 band of 2 points, so the ratio needs thousands of trials per arm: low priority. Tool note T-hr.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B7",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle7/author-B7-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"578295 behaviour_metric_delta touch_taken\" reads a deterministic Blood Frenzy 530295 hit of the caster on the dummy after a real Bottle debuffed it: 1.03 of the hit without the passive (2.03 on the running total), crits suppressed."
   },
   {
     "spell": 578295,
@@ -2193,7 +2125,8 @@
       {
         "claim": "and deal $578296s2% less damage",
         "labels": [
-          "578295 effect_value 578296e1 #1"
+          "578295 effect_value 578296e1 #1",
+          "578295 behaviour_hit_ratio touch_dealt"
         ]
       },
       {
@@ -2204,19 +2137,7 @@
         ]
       }
     ],
-    "no_behaviour_route": {
-      "reason": "\"deal $578296s2% less damage\" (3%): the debuff lasts 15 s (touch_lasts, a behaviour read) and its amount is the effect_value data label. The decrease applies to the damage the enemy deals, which needs a hostile unit that damages the caster and a read of its damage dealt with and without the debuff: no kind does that, and the 2 point band of a 3% value needs thousands of trials. Tool note T-hr.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B7",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle7/author-B7-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"578295 behaviour_hit_ratio touch_dealt\" (taken_hit damage_ratio): a striker's deterministic Blood Frenzy at the caster after a real Bottle damaged the striker, 0.97 with the passive against the same Bottle without it (G-19 band 0.95 to 0.99)."
   },
   {
     "spell": 602220,
@@ -3647,43 +3568,25 @@
     "spell": 705906,
     "clause": "Removes all poison, disease and curse effects from party and raid members within $a1 yds,",
     "labels": [
-      "705906 effect_radius 706555e0 #0"
+      "705906 effect_radius 706555e0 #0",
+      "705906 behaviour_metric_delta mass_poison",
+      "705906 behaviour_metric_delta mass_disease",
+      "705906 behaviour_metric_delta mass_curse"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "Data conformant (effect_radius 706555e0 ok). The radius and the immunity of Mass Allcure 706555 are read from the spell; a behaviour read needs a grouped ally carrying a poison, a disease and a curse within and beyond 8 yd and the ally's auras read after the cast. metric_delta phase_auras has `on` caster or dummy only (no ally), and the dispel_removal arms cast and learn the entry's own spell (705906 is a passive); the casts of mass_cast need the caster to hold the Mass Allcure talent aura 706555 the harness learn undoes (SyncReplacements, Auras.cpp:19-20). Tool: a phase aura on the ally actor, or a dispel_removal with a gate spell.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B5",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B5.md#fix-round"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: the mass_reach entry (ally_heal_reach aura_reach, ADR 1100) casts Allcure Elixir with and without 705906: with it a grouped ally 22 yd away loses a poison, a disease and a curse and one 34 yd away (beyond 30 plus its reach) keeps them; without it only the caster is cleansed."
   },
   {
     "spell": 705906,
     "clause": "and grants immunity to such effects for $d.",
     "labels": [
-      "705906 spell_duration 706555 #1"
+      "705906 spell_duration 706555 #1",
+      "705906 behaviour_metric_delta immune_poison",
+      "705906 behaviour_metric_delta immune_disease",
+      "705906 behaviour_metric_delta immune_curse"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "Data conformant (spell_duration 706555 ok). The radius and the immunity of Mass Allcure 706555 are read from the spell; a behaviour read needs a grouped ally carrying a poison, a disease and a curse within and beyond 8 yd and the ally's auras read after the cast. metric_delta phase_auras has `on` caster or dummy only (no ally), and the dispel_removal arms cast and learn the entry's own spell (705906 is a passive); the casts of mass_cast need the caster to hold the Mass Allcure talent aura 706555 the harness learn undoes (SyncReplacements, Auras.cpp:19-20). Tool: a phase aura on the ally actor, or a dispel_removal with a gate spell.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B5",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B5.md#fix-round"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: the mass_immune entry (immune_window, refusable set_aura, ADR 1100) sets the three debuffs again on a grouped ally 1000 ms and 4000 ms after Mass Allcure: refused at 1000 ms, taken at 4000 ms ($d 3000 ms); the single-target Allcure leaves the ally open at 1000 ms."
   },
   {
     "spell": 705907,
@@ -3752,27 +3655,12 @@
       },
       {
         "claim": "for 30% of the damage dealt",
-        "labels": []
+        "labels": [
+          "705910 behaviour_metric_delta strike_share"
+        ]
       }
     ],
-    "tool_gap": {
-      "reason": "The amount half has no route and an ambiguous reading: no kind relates the amounts of two spells at a ratio (the Serpent's Guile 705928 gap), and \"for 30% of the damage dealt over 3 sec\" reads as 30% in all or 30% per strike; the code gives each of the three ticks 30% (AscensionWitchDoctorAbilities.cpp:263-264, Copy with damage x 30 / 100 as the tick amount), 90% in all: a candidate defect lead, reported, not fixed. The former label \"705910 aura_amplitude_ms #0\" is unmodelled (the amplitude of the passive's own aura-354 effect, not of the 706898 aura whose period the tooltip states) and is dropped: the duration and the count are measured by \"705910 behaviour_metric_delta ticks\" (three ticks of 706898 after a real Bad Juju on a Threaded target, none before the talent; guide 9.4) and the period by \"705910 behaviour_metric_delta tick_period\", two stamped count reads between the ticks (1 strike at 4300 ms, 2 at 5300 ms after the cast, the 525377 hex_period shape; the missile flight of about 250 ms is absorbed by the 400 ms margins), which excludes periods under about 0.8 s and over about 1.3 s; the exact 1 sec stays with the data label (EffectAmplitude 1000), a bracket cannot resolve the 5% band of 1 sec. The Threads condition is read by \"threads_gate\" (the talent known in both phases, the strikes only after a real Malefic Wrath leaves the Threads).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B15",
-          "report": "cycle9/author-B15.md"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round 2",
-          "report": "cycle9/author-B15.md#fix-round-2"
-        }
-      ]
-    },
-    "reason": "Cycle 10 author D: \"705910 behaviour_metric_delta threads_at_use\" is added to the first claim. It reads the Threads-at-use half of \"used on enemies affected by\" (Puppeteer known in both phases, the Threads laid only by a Wrath before the Juju), threads_gate keeps the Threads-source axis and ticks the count. The other claims, labels and the tool_gap are unchanged."
+    "reason": "Cycle 11 author A: \"705910 behaviour_metric_delta strike_share\" reads the Strings damage over the Bad Juju damage of the after phase (ratio_to_metric increments, ADR 1101): 0.90, the per-strike reading of \"strikes ... every 1 sec for 30% of the damage dealt over 3 sec\" (three strikes of 30%), which the code gives. The other reading (30% in all, 0.30) is an owner question (Q-A-1 in cycle11/author-a.md); the expected value changes with the ruling. The period and duration claims are unchanged."
   },
   {
     "spell": 705911,
@@ -4146,17 +4034,11 @@
   {
     "spell": 706369,
     "clause": "The idol redistributes the health of all party and raid members every 2 sec, such that each player ends up with the same percentage of their maximum health.",
-    "labels": [],
+    "labels": [
+      "706369 behaviour_metric_delta link_share"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The redistribution (Summons.cpp:384-418, Link(): every 2000 ms the players Allies(player, idol, 10 yd) returns are set to the same share of their maximum health) needs two or more players at unequal health percentages and a read of every one of their health percentages after a pulse. metric_delta reads one actor and sets only the caster's health (caster_health_pct); aura_presence and hit_ratio place a grouped ally (target_distance, ally_distance) but read an aura or a ratio of a metric over trials; taken_hit reads ally_health_pct only to make a heal effective. No kind sets the health of the caster and the ally to different percentages, casts the idol, and reads both after 2000 ms to the 5% band. Tool: a metric_delta (or kind) option with ally_health_pct and caster_health_pct arms and a second read of the ally health, with a control arm without the idol (health stays unequal). Candidate lead L-b19-2: Link() scans 10 yd and players only, while the tooltip says all party and raid members with no radius (the sibling field idols use 30 yd).",
-      "attempts": [
-        {
-          "agent": "cycle10/author-B19",
-          "report": "cycle10/author-B19.md#tool-gaps"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"706369 behaviour_metric_delta link_share\" (ally_heal_reach health_share, ADR 1100): the caster and two grouped allies at 50%, 20% and 80% health end within 0.1 point of 50% 3000 ms after a real Spirit Link Idol; an ungrouped player beside them keeps 30%. Lead L-b19-2 (10 yd search against \"all party and raid members\") stays an observation."
   },
   {
     "spell": 706369,
@@ -4951,18 +4833,11 @@
     "spell": 707854,
     "clause": "healing you equal to $92086s2% of the damage dealt.",
     "labels": [
-      "707854 effect_value 92086e1 #2"
+      "707854 effect_value 92086e1 #2",
+      "707854 behaviour_metric_delta arrow_heal"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The heal is Shadowhunter 92086 (AscensionWitchDoctorAbilities.cpp:252, Copy(player, player, DevotionHeal 570156, damage x 40 / 100)). cast_leech_ratio is the right kind (heal spell 570156, expected 0.4, `auras` [[92086, 1]] as the precondition fixture, the control cast refused without the talent), but (1) its quote must lie in the entry spell's own tooltip, which for 707854 is only the transform sentence (the heal sentence is the pulled text of 801674), and (2) it reads the hit `cast_time_ms + 500` ms after the cast, 500 ms for the instant ranged-slot Arrow (CastingTimeIndex 18), while the shot casts 500 ms longer on this server and flies 375 ms at 15 yd (Speed 40): the damage read comes before the landing. Tool note T-c9-B16-5 (quote) and T-c9-B16-6: a `wait_ms` option for cast_leech_ratio.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B16",
-          "report": "cycle9/author-B16.md"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"707854 behaviour_metric_delta arrow_heal\" quotes the pulled markup @s:801674:0@ (the 301175 Spirit precedent) and reads the Devotion of Bwonsamdi 570156 heal over the Malefic Arrow 801674 damage of the after phase (ratio_to_metric increments): 0.40 with Shadowhunter 92086 learned between the phases, 0 without it; heal crits suppressed."
   },
   {
     "spell": 707855,
@@ -5270,17 +5145,11 @@
   {
     "spell": 573435,
     "clause": "The effect of Potion Toss will change based on your active Ingredients.",
-    "labels": [],
+    "labels": [
+      "573435 behaviour_metric_delta ingredient_effect"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The effect of the toss is the Potion of the active Ingredient (Brewing.cpp:86-107). Fish Oil is proven on rank 801661 (561069 potion_speed, potion_dodge) and Bones by 567736 bones_potion; the general claim needs one entry per ingredient on this rank with its own stated value, which the tooltip does not give. Not authored this cycle (each ingredient effect is its own ledger clause).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"573435 behaviour_metric_delta ingredient_effect\": a real Potion Toss 573435 with Frog Bones active gives no Potion: Fish Oil 802969, the same toss after a real Ingredient: Fish Oil gives it."
   },
   {
     "spell": 801663,
@@ -5319,18 +5188,11 @@
     "spell": 801663,
     "clause": "Potion: Grants target ally an absorption shield, absorbing ${$802971m1+$SPI*.35+$BH*.8} damage, scaling with Spirit.",
     "labels": [
-      "801663 effect_value #2"
+      "801663 effect_value #2",
+      "801663 behaviour_taken_hit bones_shield"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The shield formula has no behaviour route this cycle: taken_hit judge absorb 'formula' compares the absorbed amount with a constant plus coefficients of stat reads on the caster, but the term $BH (bonus healing) has no stat read, the shield 802971 is cast on the target of a Potion Toss by PotionEffects (Brewing.cpp:86-107) and its $802971m1 is a level-scaled value (EffectRealPointsPerLevel 5.0), so the constant needs the effective points at level 60 and a strike heavier than the shield. Tool note: a stat read of healing done (spell_healing_done is a readback) as a taken_hit absorb term.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"801663 behaviour_taken_hit bones_shield\" (taken_hit absorb formula with the healing_power read of ADR 1030): the shield of a real Potion Toss with Frog Bones active is absorbed whole by three 1100 Holy strikes and judged against 350 (100 + 5 x 50 levels) + 0.35 x Spirit + 0.8 x healing power, with a +2000 healing fixture so the $BH term is exercised."
   },
   {
     "spell": 801664,
@@ -5481,7 +5343,8 @@
         "claim": "to heal for $570064s1% of the damage they deal with their next 3 offensive abilities or spells",
         "labels": [
           "801690 effect_value 570064e0 #1",
-          "801690 behaviour_metric_delta master_heal"
+          "801690 behaviour_metric_delta master_heal",
+          "801690 behaviour_metric_delta master_share"
         ]
       },
       {
@@ -5492,13 +5355,17 @@
         ]
       }
     ],
-    "reason": "The 5% amount and the cap of 3 offensive casts are not read: `master_heal` reads the one heal event of the next offensive cast (the amount of a random hit has no exact value, and one trigger cast runs per phase).",
+    "reason": "Cycle 11 author A: the 5% amount has a behaviour read (master_share); the cap of 3 stays a tool gap.",
     "tool_gap": {
-      "reason": "The amount of \"to heal for 5% of the damage they deal\" and the cap of the next 3 offensive abilities have no behaviour proof. The master_heal entry reads the one heal event of the next cast (ok); the 5% needs a ratio of the heal to the damage of the same cast (cast_leech_ratio: Abilities.cpp:48-51, :195-199, :290-291, expected 0.05, heal 570185), and the entry cast_leech_ratio master_heal_amount written in cycle 9 (author-B16-held) cannot merge: a passive needs a P5 link label format in passives.BEHAVIOUR_LABELS (tool note T-c9-B16-14) and the learn of the Master of Concoctions buff chain needs prelude_casts with the passives learned (T-c9-B16-16). The label \"801690 effect_value 570064e0 #1\" is not_measured (a hook sets the amount after CalcValue) and has no aura_amount twin for the foreign spell 570064, so it stays until the held entry runs. The cap of 3 has no entry (one trigger cast per phase; tool note T2).",
+      "reason": "The 5% share is read by \"801690 behaviour_metric_delta master_share\" (cycle 11 author A, heal over damage of the next Hexfire, 0.05). Still open: the cap of the next 3 offensive abilities (one trigger cast per phase; a route is metric_delta after_trigger_casts with three more Hexfires and a heal count of 3 after four casts, not authored).",
       "attempts": [
         {
           "agent": "cycle10/author-B19",
           "report": "cycle10/author-B19.md#tool-gaps"
+        },
+        {
+          "agent": "cycle11/author-a",
+          "report": "cycle11/author-a.md"
         }
       ]
     }
@@ -6529,9 +6396,11 @@
     "spell": 806563,
     "clause": "Increases your Spirit by $s1%",
     "labels": [
-      "806563 effect_value e0 #0"
+      "806563 effect_value e0 #0",
+      "806563 behaviour_metric_delta spirit_share"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 11 author A: the readback 806563 e0 stat 4 is data_only (109 to 117 cannot resolve 8.72); \"806563 behaviour_metric_delta spirit_share\" reads it over a 2000 Spirit fixture base: 2109 to 2277, ratio 1.08 to 0.001."
   },
   {
     "spell": 806563,
@@ -8407,19 +8276,11 @@
     "clause": "and spell power by ${-($m3+0)}.",
     "labels": [
       "807833 effect_value e2 #2",
-      "807833 aura_amount e2 #2"
+      "807833 aura_amount e2 #2",
+      "807833 behaviour_metric_delta jinx_sp"
     ],
     "kind": "claim",
-    "reason": "The labels `807833 effect_value e2 #2` (not_measured: a DoEffectCalcAmount hook of the aura scripts bound to 807833 sets the amount after CalcValue) and `807833 aura_amount e2 #2` (alert: the value scenario reads the aura in the cast step, before the missile lands, the cycle 6 D3 generator limit that dropped the same reads of clauses 478 and 479) are kept because nothing in game replaces them: the clause has no in-game read (the tool_gap below).",
-    "tool_gap": {
-      "reason": "The spell power half is Effect[2] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT -85 on the cursed unit. The only spell power read is `spell_power` (Player::SpellBaseDamageBonusDone, a player's live value), which clamps at 0 and so cannot show a reduction below 0, and the dummy creature has no read. The attack power half works because AP Test 56412 lifts the dummy's attack power by 801 first (`jinx_ap`); no aura fixture lifts an enemy player's spell power. Tool: an enemy-player spell power fixture above 85 (a `player_spell_power`-style option for the enemy actor, or an aura of spell power castable on it) with the metric read on the enemy: before 100, after 15 (-85).",
-      "attempts": [
-        {
-          "agent": "cycle10/author-B20",
-          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#shrinking-jinx-807833"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author A: \"807833 behaviour_metric_delta jinx_sp\": an enemy player given 100 spell power (metric_delta option enemy_spell_power, ADR 1102) reads 15 after a real Shrinking Jinx, a gain of -85."
   },
   {
     "spell": 807833,

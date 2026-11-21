@@ -10709,26 +10709,6 @@
     {
       "spell": 561069,
       "kind": "metric_delta",
-      "variant": "fish_taught",
-      "label_suffix": "fish_taught",
-      "name": "Mixologist (teaches Ingredient: Fish Oil)",
-      "quote": "Teaches you",
-      "trigger_spell": 801663,
-      "target": "caster",
-      "cast_in_before": false,
-      "metric": "knows_spell",
-      "fields": {
-        "spell": 801662
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Mixologist 561069 (passive, Effect[0] and [1] aura 4 dummies 999 and 2999) is the talent that, per AscensionTaughtAbilityData.h:27 ({13, 6, 0, 561069, 801662}), teaches Ingredient: Fish Oil 801662. Ingredient: Fish Oil 801662 is the Frog Bones twin (instant, TARGET_UNIT_CASTER, 5% mana, 500 ms category, infinite aura, Effect[1] aura 23 every 1500 ms casting Fish Oil 803269, an area aura raid, aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($803269s1), EffectRadiusIndex 23 = 40 yd, and aura 58 MOD_INCREASE_SWIM_SPEED). The reference character as created does not know 801662 (knows_spell reads it before the learn: the control, the Witch Hunter Pavise Crossbowman 681453 learn_shield pattern); the harness learns 561069 between the phases (a real learn) and the class hook in AscensionTaughtAbilityData.h:27 gives the taught ability, read as knows_spell 801662 after it. Ingredient: Frog Bones 801663 is the trigger spell only because a metric_delta needs one learned active (cast_in_before false: no cast before, and the after phase casts it once, harmless). If the reference character already knew Fish Oil the before read would alert and show that the talent teaches nothing. Cast timing checked: the after cast is instant (5% mana), 500 ms read. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
-    },
-    {
-      "spell": 561069,
-      "kind": "metric_delta",
       "variant": "fish_speed",
       "label_suffix": "fish_speed",
       "name": "Mixologist (the Fish Oil Cauldron raises the caster's run speed by 10%)",
@@ -23987,6 +23967,971 @@
       ],
       "observe_source": "Reclaim Soul 803624: Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW, EffectBasePoints[0] 819 + DieSides 1 = 820 health ($s1), EffectMiscValue[0] 1030 mana ($q1); Attributes 268500992 holds SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000), so Spell::CheckCast (Spell.cpp:5942-5943, SpellInfo::CanBeUsedInCombat) refuses the cast while the caster is in combat with SPELL_FAILED_AFFECTING_COMBAT (1). CastingTimeIndex 170 = 8000 ms, GCD 1500, ManaCostPercentage 30 = 449 of the 1497 base mana (set before each attempt). No Witch Doctor code touches 803624. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) the dead ally takes with CMSG_RESURRECT_RESPONSE 348 (the cast_combat shape of ADR 0537). One scenario, two arms: the ally dies and first answers with no offer (stays dead: the control of the accept); out of combat (combat 0) the cast completes (cast_failure 0 after 8500 ms), the ally accepts and reads alive 1, health 820 and mana 1030 (regeneration off for the ally); then the ally dies again, the caster casts a real Hex of Malice 504608 at the dummy (instant, 20% base mana = 299, StartRecoveryTime 1500, spell hit rating 10000; its 24 s curse keeps the caster in combat) and waits 2000 ms, past its global cooldown (combat 1) and the same cast is refused (cast_failure 1), and the ally's answer finds no offer (alive 0). health and mana each need the control, the accepted cast and its amount; refusal needs both arms, so a server that allows the cast in combat reads 0 there and one that refuses it everywhere reads 1 out of combat. The out-of-combat arm runs first, because the harness keeps the last refusal reason per spell. No set_aura is used. Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the first design started the fight with one melee attack and a 500 ms settle; the sweep read combat_fighting 0, so the refusal arm ran out of combat (cast_failure_fighting 0, the 8000 ms cast unfinished at the 500 ms read, alive_fighting 0) and measured nothing about the refusal. The same attack step reaches combat in the Necromancer cast_combat revive run (20261121-193652, combat 1), where it follows no long cast; the cause here is not established. The repair needs the peaceful_resurrect module option combat_cast (cycle10/triage-peaceful-resurrect.patch): a real harmful cast at the dummy, waited past its cast time and global cooldown, in place of the swing; and a combat reading that misses its state (combat_peaceful 1 or combat_fighting 0) now makes the verdict unmeasured instead of an alert, since it is the arm's precondition and not the claim. Mana for the Hex: the peaceful attempt sets the 1497 base mana and spends 449, leaving 1048; the module sets the base mana again before the Hex.",
       "combat_cast": 504608
+    },
+    {
+      "spell": 503609,
+      "kind": "metric_delta",
+      "name": "Juju Injection rank 2 (Agility +10%)",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases your Agility, Intellect and Spirit by $s1%.",
+      "trigger_spell": 801696,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 1
+      },
+      "phase_auras": [
+        [
+          12174,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          12174,
+          0,
+          2000
+        ]
+      ],
+      "before_expected": 2057,
+      "expected": 2262.7,
+      "expected_ratio": 1.1,
+      "tolerance": 0.001,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Juju Injection rank 2 503609 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, BasePoints 9 + 1 = +10% ($s1), Agility (stat 1). The passive readback 503609 e0 stat 1 reads 57 to 62 (final07): the integer floor of a 57 base cannot tell 10% (5.7) from 9% or 11%, so it stays data (detail data_only). Here the caster carries Agility 12174 (aura 29 MOD_STAT misc 1) with its effect amount set to 2000 by phase_aura_amounts in both phases, a precondition fixture that only raises the base the percentage applies to (aura 137 multiplies the total of base and flat stat): 57 + 2000 = 2057 before the learn, 2057 x 1.10 = 2262.7 after it, stored 2262 (SetStat truncation), ratio 1.0997; tolerance 0.001 accepts 2262 and 2263 and excludes 9% (2242, 1.0899) and 11% (2283, 1.1099). Trigger: the same stat-neutral Spirit in a Bottle 801696 cast (1500 ms) as the spirit twin; waited 1700 ms. Control: the before reading without the passive. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 806563,
+      "kind": "metric_delta",
+      "name": "Staff of the Coven (Spirit +8%)",
+      "variant": "spirit_share",
+      "label_suffix": "spirit_share",
+      "quote": "Increases your Spirit by $s1%",
+      "trigger_spell": 801696,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 4
+      },
+      "phase_auras": [
+        [
+          12177,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          12177,
+          0,
+          2000
+        ]
+      ],
+      "before_expected": 2109,
+      "expected": 2277.72,
+      "expected_ratio": 1.08,
+      "tolerance": 0.001,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "Staff of the Coven 806563 (passive, native) Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE misc 4 (Spirit), BasePoints 7 + 1 = +8% ($s1). The passive readback 806563 e0 stat 4 reads 109 to 117 (final07), data_only: the integer floor of 109 cannot resolve 8% (8.72). Spirit 12177 (aura 29 MOD_STAT misc 4) is set on the caster in both phases with its amount set to 2000 (phase_aura_amounts), a precondition fixture that raises the base: 2109 before the learn, 2109 x 1.08 = 2277.72 after it, stored 2277, ratio 1.0797; tolerance 0.001 excludes 7% (2256, 1.0697) and 9% (2298, 1.0896). Trigger: a stat-neutral Spirit in a Bottle 801696 (1500 ms), waited 1700 ms. Control: the before reading. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 705910,
+      "kind": "metric_delta",
+      "name": "Voodoo Strings (each strike deals 30% of the Bad Juju damage)",
+      "variant": "strike_share",
+      "label_suffix": "strike_share",
+      "quote": "for 30% of the damage dealt",
+      "trigger_spell": 802087,
+      "gate_spell": 705910,
+      "learn": [
+        92084
+      ],
+      "setup_casts": [
+        807037
+      ],
+      "setup_wait_ms": 2500,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1400,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 706898,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 802087,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 0.9,
+      "tolerance": 0.01,
+      "wait_ms": 6600,
+      "expire_ms": 4500,
+      "observe_source": "The ticks entry layout (92084 learned at the start, a real Malefic Wrath 807037 lays the Threads, a real Bad Juju 802087 2500 ms later, 705910 learned between the phases, read 6600 ms after the Juju: 2750 ms to the hit plus three 1000 ms ticks plus margin). Reading: the Voodoo Strings 706898 damage on the dummy divided by the Bad Juju 802087 damage on the dummy; both are running totals, so the after reading divides the after-phase increase of each (ratio_to_metric increments). Expected (tooltip, read as a per-strike amount): \"strikes an additional time every $706898T1 sec for 30% of the damage dealt over $706898d\" states the amount of each strike as in the stock \"deals X every T sec over D\" form, so three strikes carry 3 x 30% = 0.90 of the Juju hit; the code gives each tick damage x 30 / 100 (AscensionWitchDoctorAbilities.cpp:263-264, Copy: the base point is the tick amount). The other reading (30% in all) would read 0.30: the entry separates the two and records the per-strike reading; if the owner rules 30% in all, expected becomes 0.30 and the server alerts. Reg's Test Aura 984954 (spell crit -1000, pitfall 21) on the caster in both phases keeps the ticks and the Juju non-critical, a precondition fixture. Tolerance 0.01: each tick truncates to an integer (at most 3 / Juju damage, about 0.006). Control: the before phase without 705910 reads no strike, 0. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 801690,
+      "kind": "metric_delta",
+      "select_dummy": true,
+      "name": "Master of Concoctions (the heal is 5% of the damage of the next offensive cast)",
+      "variant": "master_share",
+      "label_suffix": "master_share",
+      "quote": "to heal for $570064s1% of the damage they deal with their next 3 offensive abilities or spells",
+      "trigger_spell": 573026,
+      "target": "dummy",
+      "setup_casts": [
+        801660,
+        801661
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "learn": [
+        92085
+      ],
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 570185,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 573026,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 0.05,
+      "tolerance": 0.003,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The master_heal layout (Cauldron Brewer 92085 learned at the start, Ingredient: Jungle Shrooms 801660 and Potion Toss 801661 at the caster, then a real Hexfire 573026 at the dummy 3 yd away, 801690 learned between the phases). Reading: the Concoctions heal 570185 on the caster divided by the Hexfire 573026 damage on the dummy, each the increase over the after phase (ratio_to_metric increments, both are running totals). Code: the buff 570064 stamps its amount on the next offensive cast (Abilities.cpp:48-51) and a damaging hit casts 570185 for damage x amount / 100 (Abilities.cpp:186-190); $570064s1 = 5. Hexfire 573026 is one direct hit (Effect[0] SCHOOL_DAMAGE, ChainTarget 1, no periodic effect), so every damage point read has one heal. Reg's Test Aura 984954 (spell crit -1000) on the caster keeps the heal and the hit non-critical (precondition fixture). Expected 0.05; tolerance 0.003 (the heal truncates: at most 1 / damage, about 0.0025 for a hit near 420). Control: the before phase without 801690 makes no heal, 0. The cap of 3 casts is not read here. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 707854,
+      "kind": "metric_delta",
+      "name": "Malefic Arrow (Shadowhunter heals 40% of the Arrow damage)",
+      "variant": "arrow_heal",
+      "label_suffix": "arrow_heal",
+      "quote": "Malefic Arrow.@s:801674:0@",
+      "trigger_spell": 801674,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "learn": [
+        707854
+      ],
+      "gate_spell": 92086,
+      "measure_actor": "caster",
+      "cast_power": 1400,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 570156,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 801674,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 0.4,
+      "tolerance": 0.01,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: the 707854 Description pulls Malefic Arrow 801674 (@s:801674:0@, the 301175 Spirit precedent quotes the pulled markup the same way): \"healing you equal to $92086s2% of the damage dealt\" ($92086s2 = Shadowhunter 92086 Effect[1] BasePoints 39 + 1 = 40). Code: AscensionWitchDoctorAbilities.cpp:243-244, a damaging Arrow (IsArrow) with Shadowhunter 92086 held makes Copy(player, player, DevotionHeal 570156, damage x 40 / 100). Arms: Malefic Arrow 707854 is learned at the start so the Arrow passes its cast gate (Abilities.cpp:87 refuses an Arrow without 92086 or 707854); Shadowhunter 92086 is learned between the phases (gate_spell; the reference character does not know it, the 92086 Auto Shot and cost entries learn it the same way). A real Arrow 801674 (ranged slot, cast 500 ms longer on this server, Speed 40 over 15 yd = 375 ms, RecoveryTime 8000 reset, 5% mana) at the dummy 15 yd away (the ranged slot refuses closer targets), read 1500 ms after the cast. Reading: the 570156 heal on the caster divided by the 801674 damage on the dummy, the after-phase increase of each (ratio_to_metric increments). Reg's Test Aura 984954 suppresses heal crits (precondition fixture; an Arrow crit changes the damage, not the share). Expected 0.40, tolerance 0.01 (the heal truncates). Control: the before phase without 92086 heals nothing, 0. The reference $bh is 0, so no healing bonus is added to the copy. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 573435,
+      "kind": "metric_delta",
+      "name": "Potion Toss (the potion follows the active Ingredient)",
+      "variant": "ingredient_effect",
+      "label_suffix": "ingredient_effect",
+      "quote": "The effect of Potion Toss will change based on your active Ingredients.",
+      "trigger_spell": 573435,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        92085
+      ],
+      "setup_casts": [
+        801662
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "setup_only_after": true,
+      "phase_auras": [
+        [
+          801663,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 802969
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "PotionEffects (AscensionWitchDoctorBrewing.cpp:86-107) casts on the toss target the Potion of each Ingredient the cast stamped (IngredientMarker mask): Frog Bones gives Potion: Frog Bones 802971, Fish Oil gives Potion: Fish Oil 802969. Both phases learn Cauldron Brewer 92085 at the start (precondition: the Has Ingredient Marker 801702, Brewing.cpp:38-45) and carry the Ingredient: Frog Bones aura 801663 (set_aura in both phases; cost reason: metric_delta casts the same setup in both phases except with setup_only_after, so the control ingredient is the fixture, and the claim is the potion, not the ingredient). Before phase: Frog Bones is the active Ingredient and a real Potion Toss 573435 (the level 60 rank, instant, GCD 1500, category cooldown reset) at the caster gives no 802969 (the control: the toss does not always give the Fish Oil potion). After phase: a real Ingredient: Fish Oil 801662 cast (instant, 5% mana, replaces Frog Bones: one Ingredient without Mixologist, SyncIngredients capacity 1) 1700 ms before the toss, and the toss gives 802969 (DurationIndex 31 = 8000 ms, read 1700 ms after the toss). A server whose toss ignores the Ingredient reads the same in both phases. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 578295,
+      "kind": "metric_delta",
+      "name": "Touch of the Spirits (the debuffed enemy takes 3% more damage)",
+      "variant": "touch_taken",
+      "label_suffix": "touch_taken",
+      "quote": "to take $578296s1% more damage",
+      "trigger_spell": 530295,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        801696
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "cast_power": 2000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 530295,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 100,
+      "expected": 203,
+      "expected_ratio": 2.03,
+      "tolerance": 0.01,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "The touch_debuff route lays the debuff: a real Spirit in a Bottle 801696 (1500 ms cast) at the caster held at 5000 of 10000 health (an effective heal, Abilities.cpp:217) makes Bottle damage 504606 on the dummy 3 yd away, and with 578295 known the hit casts Touch of the Spirits 578296 on it (Abilities.cpp:269-270; Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN misc 127 +3% = $578296s1, DurationIndex 8 = 15000 ms). 2000 ms after the Bottle the caster casts Blood Frenzy 530295 at the dummy (instant, Effect[0] SCHOOL_DAMAGE BasePoints 164 DieSides 1: no roll, a deterministic hit) in both phases; 578295 is learned between them. spell_damage_total is a running total, so after = before + after-phase hit: 1 + 1.03 = 2.03 (the Necromancer 560848 soulfreeze_damage form); a hit near 170 rounds by under 1 point (tolerance 0.01, G-19 band of 3% is 2 points: 2.01 to 2.05). Reg's Test Aura 984954 (spell crit -1000) on the caster keeps the hits non-critical; the dummy has no resistance, so no partial resist. Control: the same Bottle and hit without the passive (the before reading, at least 100). Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 578295,
+      "kind": "taken_hit",
+      "name": "Touch of the Spirits (the debuffed enemy deals 3% less damage)",
+      "variant": "touch_dealt",
+      "label_suffix": "touch_dealt",
+      "judge": "damage_ratio",
+      "expected": 0.97,
+      "quote": "and deal $578296s2% less damage",
+      "strike_spell": 530295,
+      "trials": 10,
+      "caster_health_pct": 90,
+      "caster_max_health": 100000,
+      "cast_power": 2000,
+      "arms": [
+        {
+          "name": "control",
+          "casts": [
+            [
+              801696,
+              "caster"
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            578295
+          ],
+          "casts": [
+            [
+              801696,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "A level 60 striker (entry 36, passive, 3 yd from the caster) casts Blood Frenzy 530295 (Nature, instant, BasePoints 164 DieSides 1: no roll) at the caster held at 90% of 100000 health, 10 trials per arm. In every trial of both arms the caster first casts a real Spirit in a Bottle 801696 at itself (1500 ms cast, an effective heal at 90% health): Bottle damage 504606 hits the striker inside 5 yd of the healed target (Abilities.cpp:217-223); in the treatment arm 578295 is learned at the arm start, so the hit also casts Touch of the Spirits 578296 on the striker (Abilities.cpp:269-270; Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE misc 127, BasePoints -4 + 1 = -3, $578296s2). Non-critical logged hits are compared: expected 0.97 inside the G-19 band (2 points: 0.95 to 0.99), the cauldron_taken form; a debuff without the done-damage effect reads 1.00. The Bottle in the control arm makes the arms differ only by the passive. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 807833,
+      "kind": "metric_delta",
+      "name": "Shrinking Jinx (spell power -85)",
+      "variant": "jinx_sp",
+      "label_suffix": "jinx_sp",
+      "quote": "and spell power by ${-($m3+0)}.",
+      "trigger_spell": 807833,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_spell_power": 100,
+      "metric": "spell_power",
+      "fields": {
+        "school": 3
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "before_expected": 100,
+      "expected": 15,
+      "expected_gain": -85,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Shrinking Jinx 807833 Effect[2] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, BasePoints -86 + 1 = -85 (${-($m3+0)} = 85); Unit::SpellBaseDamageBonusDone adds every aura 345 whose misc is 0 or matches the school (Unit.cpp:10228-10232). The enemy is an orc Witch Doctor player (race 2, PvP on both, the enemy-player entries' location) given 100 spell power by the harness fixture (enemy_spell_power: ApplySpellPowerBonus, a precondition so the floor of 0 cannot hide the cut). spell_power is read on the enemy for Nature (school 3). Before phase: no cast, 100 (the control); after phase: a real Shrinking Jinx (instant, Speed 25, about 200 ms to land) at the enemy, read 1500 ms after the cast: 15, a gain of -85, judged exactly. Twin of jinx_ap (-165 attack power on the dummy). Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 801663,
+      "kind": "taken_hit",
+      "name": "Ingredient: Frog Bones (Potion: absorption shield)",
+      "variant": "bones_shield",
+      "label_suffix": "bones_shield",
+      "judge": "absorb",
+      "quote": "absorbing ${$802971m1+$SPI*.35+$BH*.8} damage, scaling with Spirit.",
+      "strike_spell": 41394,
+      "strikes": 3,
+      "trials": 3,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "cast_power": 2000,
+      "learn": [
+        92085
+      ],
+      "absorb_constant": 350,
+      "absorb_terms": [
+        {
+          "coefficient": 0.35,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 4
+            }
+          ]
+        },
+        {
+          "coefficient": 0.8,
+          "reads": [
+            {
+              "metric": "healing_power",
+              "school": 3
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "opening_casts": [
+            [
+              801663,
+              "caster"
+            ]
+          ],
+          "auras": [
+            [
+              51041,
+              1
+            ]
+          ]
+        },
+        {
+          "name": "bones",
+          "opening_casts": [
+            [
+              801663,
+              "caster"
+            ]
+          ],
+          "auras": [
+            [
+              51041,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              801661,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "A Potion Toss with Frog Bones active casts Potion: Frog Bones 802971 on the target (Brewing.cpp:86-107): Effect[0] aura 69 SCHOOL_ABSORB misc 127, BasePoints 99 + 1 = 100 plus EffectRealPointsPerLevel 5.0 from BaseLevel 10 (MaxLevel 0), 350 at level 60 ($802971m1 with the level term, M-46); the class coefficient table gives 0.80 healing power and 0.35 Spirit (AscensionWitchDoctorCoefficients.h:140). Both arms learn Cauldron Brewer 92085 (the marker Potion Toss needs) and open with a real Ingredient: Frog Bones 801663; QATest +2000 Spell Healing 51041 (aura 135 misc 126) is set on the caster in both arms so the $BH term is exercised (precondition fixture; the reference healing power is 0). Each bones trial casts a real Potion Toss 801661 at the caster, then the striker casts Light of the Naaru 41394 (Holy, 1100, no roll) 3 times at it: 3 x 1100 less the 3% cauldron cut (3201) exceeds the shield (about 350 + 0.35 x 109 + 0.8 x 2000 = 1988), so the whole shield is absorbed. The absorbed amount is judged against 350 + 0.35 x Spirit + 0.8 x healing power (school 3) read on the caster in the arm (the Templar 705295 formula form). Control: the same strikes without the toss absorb nothing. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 301175,
+      "kind": "ally_heal_reach",
+      "variant": "bottle_allies",
+      "name": "Spirit Out Of The Bottle (a Bottle in the Mojo Beam channel heals more allies)",
+      "quote": "causes Spirit in a Bottle to affect ${$m2-1} additional allies near the primary target.",
+      "gate_spell": 301175,
+      "allies": [
+        {
+          "id": "bottle_p",
+          "dx": 22,
+          "dy": 0
+        },
+        {
+          "id": "bottle_n1",
+          "dx": 22,
+          "dy": 6
+        },
+        {
+          "id": "bottle_n2",
+          "dx": 22,
+          "dy": -6
+        },
+        {
+          "id": "bottle_n3",
+          "dx": 28,
+          "dy": 0
+        },
+        {
+          "id": "bottle_far",
+          "dx": -10,
+          "dy": -30
+        }
+      ],
+      "casts": [
+        {
+          "spell": 501117,
+          "target": "bottle_p",
+          "watch_ms": 1750,
+          "poll_ms": 250,
+          "refill_power": 1497
+        },
+        {
+          "spell": 801696,
+          "target": "bottle_p",
+          "watch_ms": 2000,
+          "poll_ms": 250,
+          "end_ms": 6500
+        }
+      ],
+      "checks": [
+        {
+          "name": "bottle_allies",
+          "judge": "reach",
+          "spell": 801696,
+          "reference": "bottle_p",
+          "minimum": 1,
+          "healed": [
+            "bottle_n1",
+            "bottle_n2",
+            "bottle_n3"
+          ],
+          "unhealed": [
+            "bottle_far"
+          ],
+          "control_allowed": [
+            "bottle_p"
+          ]
+        }
+      ],
+      "observe_source": "Tooltip (the @ifknown:500950 part of 301175, shown with Mojo Beam known): ${$m2-1} = 3 additional allies (301175 Effect[1] aura 107 SPELLMOD_EFFECT2 BasePoints 3 + 1 = 4, so $m2 - 1 = 3). Code: AscensionWitchDoctorAbilities.cpp:104-115 (OnSpellBeforeEffects): a Bottle (IsBottle) cast during a channel it may be cast in (CanCastDuringChannel) with 301175 held adds Allies(player, target, 15 yd) less the target, within 40 yd of the caster, to effect 0, and stops at 2 (++added == 2): candidate defect L-B9-1, the entry alerts until the cap matches 3. Layout (yd from the caster, the cleared wave rays of 707617): bottle_p (22, 0) the primary; bottle_n1 (22, 6), bottle_n2 (22, -6), bottle_n3 (28, 0), each 6 yd from the primary (inside 15 plus both reaches), so exactly three allies are near it and the check does not depend on which ones a server picks; bottle_far (-10, -30), 32.6 yd from the primary (the beam_far point), grouped, unhealed (no witness: its 0 is not told apart from a placement fault; it only catches a search that ignores \"near\"). Five grouped allies make a raid (Friendly() uses IsInRaidWith, so all are seen). Each phase: a real Mojo Beam 501117 at the primary (instant, GCD 1500, mana refilled to 1497 every 250 ms as a precondition: the drain is clause 42), then after 1750 ms (past the GCD) a real Spirit in a Bottle 801696 at the primary inside the channel (instant there, the bottle_instant entry), watched 2000 ms (missile Speed 60 over 22 yd); 6500 ms more let the control channel end before the treatment window. Control: without 301175 the Bottle heals only the primary (control_allowed), no near ally. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 501117,
+      "kind": "ally_heal_reach",
+      "variant": "beam_lasts",
+      "name": "Mojo Beam (the channel heals for 8 sec)",
+      "quote": "every $T1 sec for $d.",
+      "allies": [
+        {
+          "id": "lasts_a",
+          "dx": 22,
+          "dy": 0
+        }
+      ],
+      "casts": [
+        {
+          "spell": 501117,
+          "target": "lasts_a",
+          "watch_ms": 9500,
+          "poll_ms": 250,
+          "refill_power": 1497
+        }
+      ],
+      "checks": [
+        {
+          "name": "beam_lasts",
+          "judge": "count",
+          "spell": 501117,
+          "reference": "lasts_a",
+          "expected": 16
+        }
+      ],
+      "observe_source": "Mojo Beam 501117: DurationIndex 31 = 8000 ms ($d), Effect[0] aura 8 amplitude 500 ($T1), so a full channel heals its target 8000 / 500 = 16 times (ticks at 500 to 8000 ms; Apply heals nothing, Brewing.cpp:119-128). The tick script drains mana and interrupts the channel when the caster cannot pay (Brewing.cpp:191-197); at the 1497 base mana an unrefilled channel stops after 6 ticks, so the mana is set to 1497 every 250 ms of the watch (precondition fixture: the drain is clause 42, judged by beam_drain; a refill cannot add a tick). One grouped ally at (22, 0) (the cleared beam_a point), 22 yd from the caster and alone, so no branch grows and every heal on it is a tick of its own branch. The window runs 9500 ms, 1500 ms past the stated end: a channel shorter than 8 s reads fewer than 16, a longer one more (17 at 8.5 s), so the count tells the duration to one 500 ms tick (heal_ticks proves the cadence). Real cast: instant, RecoveryTime 14000 reset, 15% mana. Counts only: crits do not matter. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 501117,
+      "kind": "ally_heal_reach",
+      "variant": "beam_drain",
+      "name": "Mojo Beam (each branch raises the mana drain)",
+      "quote": "For every sprouted the branch, you consume more and more mana.",
+      "allies": [
+        {
+          "id": "drain_lone",
+          "dx": -10,
+          "dy": -30
+        },
+        {
+          "id": "drain_a",
+          "dx": 22,
+          "dy": 0
+        },
+        {
+          "id": "drain_b",
+          "dx": 22,
+          "dy": -12
+        }
+      ],
+      "casts": [
+        {
+          "spell": 501117,
+          "target": "drain_lone",
+          "watch_ms": 1250,
+          "poll_ms": 250,
+          "power_reads": true,
+          "gap_ms": 2500
+        },
+        {
+          "spell": 501117,
+          "target": "drain_a",
+          "watch_ms": 1250,
+          "poll_ms": 250,
+          "power_reads": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "beam_drain",
+          "judge": "drain",
+          "spell": 501117,
+          "low_cast": 0,
+          "high_cast": 1
+        }
+      ],
+      "observe_source": "Brewing.cpp:191-197: every tick costs max(1, $m2) x branches x (100 + 10 x (tick - 1)) / 200 ($m2 = 316 at level 60), the branch count taken before the tick grows new ones. Two real Mojo Beams 501117 in one phase, each with the caster's mana read right before the cast (after the 1497 base mana fixture) and 1250 ms after it (ticks at 500 and 1000 ms, 250 ms clear of both and of the 1500 ms tick). Cast 0 at drain_lone (-10, -30), the beam_far point, 31.6 yd from the caster and 36 yd or more from every other ally: no branch can grow, so it spends the opening 224 plus 158 plus 174 = 556. Cast 1 at drain_a (22, 0) with drain_b (22, -12) 12 yd away (the cleared beam_a to beam_b ray): tick 1 grows drain_b, tick 2 pays for two branches, 224 + 158 + 348 = 730. The tooltip states no amount, so the check is the direction: cast 1 must spend more than cast 0 (a flat cost reads equal); the code amounts are for the reader. After cast 0 the caster waits 2500 ms without a refill: its channel stops for lack of mana at the 7th tick (3500 ms) before cast 1, so no tick of the first channel falls inside the second read; the 1500 ms GCD has passed. No refill in either window. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 300660,
+      "kind": "ally_heal_reach",
+      "variant": "hex_jump",
+      "name": "Disciple of Sseratus (Hexbreak dispels one more nearby ally)",
+      "quote": "now affects an additional nearby ally",
+      "gate_spell": 300660,
+      "allies": [
+        {
+          "id": "hex_p",
+          "dx": 22,
+          "dy": 0,
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "hex_n",
+          "dx": 22,
+          "dy": -6,
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "hex_far",
+          "dx": 22,
+          "dy": -24,
+          "auras": [
+            [
+              702,
+              1
+            ]
+          ]
+        }
+      ],
+      "casts": [
+        {
+          "spell": 806240,
+          "target": "hex_p",
+          "watch_ms": 1000,
+          "poll_ms": 250,
+          "end_ms": 1000
+        }
+      ],
+      "checks": [
+        {
+          "name": "hex_jump",
+          "judge": "aura_reach",
+          "spell": 806240,
+          "aura": 702,
+          "reference": "hex_p",
+          "removed": [
+            "hex_n"
+          ],
+          "kept": [
+            "hex_far"
+          ]
+        }
+      ],
+      "observe_source": "Hexbreak 806240: Effect[0] SPELL_EFFECT_DISPEL misc 2 (curse), TARGET_UNIT_TARGET_ALLY, ChainTarget 1, DmgClass 1; 300660 Effect[1] aura 107 SPELLMOD_JUMP_TARGETS +1 (native), so with it the dispel jumps to one more ally (Spell::SearchChainTargets, magic jump radius 12.5 yd plus both reaches). Curse of Weakness 702 (Dispel 2) is set on each ally at every phase start (precondition fixture, the 804049 dispel_removal debuff). Layout (cleared rays of the wave and branches entries): hex_p (22, 0) the target; hex_n (22, -6), 6 yd from it; hex_far (22, -24), 18 yd from hex_n and 24 from hex_p, beyond any jump; the caster 22 yd or more from all. A real Hexbreak (instant, 25% mana, GCD reset) at hex_p, the curses read 1000 ms later. Control (300660 not known): hex_p loses the curse, hex_n and hex_far keep it. Treatment: hex_p and hex_n lose it, hex_far keeps it. A server without the jump keeps hex_n's curse; one that jumps twice also clears hex_far only if in reach, so hex_far shows a far jump. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 705906,
+      "kind": "ally_heal_reach",
+      "variant": "mass_reach",
+      "name": "For Da Loa! (Mass Allcure cleanses party members within 30 yd)",
+      "quote": "Transforms Allcure Elixir into Mass Allcure Elixir.@s:706555:0@",
+      "gate_spell": 705906,
+      "gate_settle_ms": 1000,
+      "caster_auras": [
+        [
+          2818,
+          1
+        ],
+        [
+          55095,
+          1
+        ],
+        [
+          702,
+          1
+        ]
+      ],
+      "allies": [
+        {
+          "id": "mass_in",
+          "dx": 22,
+          "dy": 0,
+          "auras": [
+            [
+              2818,
+              1
+            ],
+            [
+              55095,
+              1
+            ],
+            [
+              702,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "mass_out",
+          "dx": 34,
+          "dy": 0,
+          "auras": [
+            [
+              2818,
+              1
+            ],
+            [
+              55095,
+              1
+            ],
+            [
+              702,
+              1
+            ]
+          ]
+        }
+      ],
+      "casts": [
+        {
+          "spell": 804049,
+          "target": "caster",
+          "watch_ms": 1000,
+          "poll_ms": 250,
+          "end_ms": 3000
+        }
+      ],
+      "checks": [
+        {
+          "name": "mass_poison",
+          "judge": "aura_reach",
+          "spell": 804049,
+          "aura": 2818,
+          "reference": "caster",
+          "removed": [
+            "mass_in"
+          ],
+          "kept": [
+            "mass_out"
+          ]
+        },
+        {
+          "name": "mass_disease",
+          "judge": "aura_reach",
+          "spell": 804049,
+          "aura": 55095,
+          "reference": "caster",
+          "removed": [
+            "mass_in"
+          ],
+          "kept": [
+            "mass_out"
+          ]
+        },
+        {
+          "name": "mass_curse",
+          "judge": "aura_reach",
+          "spell": 804049,
+          "aura": 702,
+          "reference": "caster",
+          "removed": [
+            "mass_in"
+          ],
+          "kept": [
+            "mass_out"
+          ]
+        }
+      ],
+      "observe_source": "For Da Loa! 705906 (passive) makes Allcure Elixir 804049 cast Mass Allcure Elixir 706555 (SyncReplacements every 500 ms, the base_refused entry; 1000 ms after the gate learn). 706555: three SPELL_AURA_DISPEL_IMMUNITY effects (misc 4 poison, 3 disease, 2 curse) at TARGET_UNIT_CASTER_AREA_RAID, EffectRadiusIndex 10 = 30 yd ($a1), DurationIndex 27 = 3000 ms ($d), AttributesEx 32768 SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY (the auras of those types are removed when the immunity applies). Fixtures (set_aura at each phase start, the 804049 dispel_removal debuffs): Deadly Poison 2818, Frost Fever 55095 and Curse of Weakness 702 on the caster and the allies. Control phase (705906 not known): the same Allcure Elixir cast at the caster is single-target, so only the caster is cleansed and immune. Layout: mass_in (22, 0), inside 30 yd plus its 1.5 yd reach; mass_out (34, 0), 2.5 yd beyond that edge, grouped (5 or fewer: a party). The debuffs are read 1000 ms after the cast. Treatment: the caster and mass_in lose all three, mass_out keeps them (a radius bracket). Limit: no witness reaches mass_out, so its kept debuffs are not told apart from a line of sight fault (it stands on the line of mass_in, 12 yd further); a search wider than 32.5 yd still alerts on it. 3000 ms end wait lets the immunity end before the next phase. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 705906,
+      "kind": "ally_heal_reach",
+      "variant": "mass_immune",
+      "name": "For Da Loa! (Mass Allcure grants the party immunity for 3 sec)",
+      "quote": "Transforms Allcure Elixir into Mass Allcure Elixir.@s:706555:0@",
+      "gate_spell": 705906,
+      "gate_settle_ms": 1000,
+      "caster_auras": [
+        [
+          2818,
+          1
+        ],
+        [
+          55095,
+          1
+        ],
+        [
+          702,
+          1
+        ]
+      ],
+      "allies": [
+        {
+          "id": "immune_in",
+          "dx": 22,
+          "dy": 0,
+          "auras": [
+            [
+              2818,
+              1
+            ],
+            [
+              55095,
+              1
+            ],
+            [
+              702,
+              1
+            ]
+          ]
+        }
+      ],
+      "casts": [
+        {
+          "spell": 804049,
+          "target": "caster",
+          "watch_ms": 4500,
+          "poll_ms": 250,
+          "probes": [
+            1000,
+            4000
+          ],
+          "end_ms": 1000
+        }
+      ],
+      "checks": [
+        {
+          "name": "immune_poison",
+          "judge": "immune_window",
+          "spell": 804049,
+          "aura": 2818,
+          "immune": [
+            "immune_in"
+          ],
+          "early_ms": 1000,
+          "late_ms": 4000
+        },
+        {
+          "name": "immune_disease",
+          "judge": "immune_window",
+          "spell": 804049,
+          "aura": 55095,
+          "immune": [
+            "immune_in"
+          ],
+          "early_ms": 1000,
+          "late_ms": 4000
+        },
+        {
+          "name": "immune_curse",
+          "judge": "immune_window",
+          "spell": 804049,
+          "aura": 702,
+          "immune": [
+            "immune_in"
+          ],
+          "early_ms": 1000,
+          "late_ms": 4000
+        }
+      ],
+      "observe_source": "For Da Loa! 705906 (passive) makes Allcure Elixir 804049 cast Mass Allcure Elixir 706555 (SyncReplacements every 500 ms, the base_refused entry; 1000 ms after the gate learn). 706555: three SPELL_AURA_DISPEL_IMMUNITY effects (misc 4 poison, 3 disease, 2 curse) at TARGET_UNIT_CASTER_AREA_RAID, EffectRadiusIndex 10 = 30 yd ($a1), DurationIndex 27 = 3000 ms ($d), AttributesEx 32768 SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY (the auras of those types are removed when the immunity applies). Fixtures (set_aura at each phase start, the 804049 dispel_removal debuffs): Deadly Poison 2818, Frost Fever 55095 and Curse of Weakness 702 on the caster and the allies. Control phase (705906 not known): the same Allcure Elixir cast at the caster is single-target, so only the caster is cleansed and immune. The ally immune_in (22, 0) is grouped. 1000 ms and 4000 ms after the cast the three debuffs are set again with a refusable set_aura: Unit::AddAura returns nothing for a unit immune to the spell (Unit.cpp:16768, IsImmunedToSpell checks the dispel type immunity), so an immune ally stays without it, and the harness records the refusal instead of failing (ADR 1100). Treatment: refused at 1000 ms, taken at 4000 ms (the 3000 ms immunity, G-19 band 150 ms, is bracketed by 2000 ms and 1000 ms margins). Control: the single-target Allcure leaves immune_in without immunity, so it holds the debuffs at 1000 ms. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 706369,
+      "kind": "ally_heal_reach",
+      "variant": "link_share",
+      "name": "Spirit Link Idol (party members end at one health percentage)",
+      "quote": "The idol redistributes the health of all party and raid members every 2 sec, such that each player ends up with the same percentage of their maximum health.",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "allies": [
+        {
+          "id": "link_low",
+          "dx": 3,
+          "dy": 0,
+          "health": 20000,
+          "maximum": 100000
+        },
+        {
+          "id": "link_high",
+          "dx": -3,
+          "dy": 0,
+          "health": 80000,
+          "maximum": 100000
+        },
+        {
+          "id": "link_stranger",
+          "dx": 0,
+          "dy": 3,
+          "grouped": false,
+          "health": 30000,
+          "maximum": 100000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 706369,
+          "target": "caster",
+          "watch_ms": 3000,
+          "poll_ms": 250
+        }
+      ],
+      "checks": [
+        {
+          "name": "link_share",
+          "judge": "health_share",
+          "spell": 706369,
+          "levelled": [
+            "caster",
+            "link_low",
+            "link_high"
+          ],
+          "apart": [
+            "link_stranger"
+          ],
+          "tolerance": 0.1
+        }
+      ],
+      "observe_source": "AscensionWitchDoctorSummons.cpp:384-418 (Link): every 2000 ms (500992 Effect[0] periodic trigger, amplitude 2000) the idol sets every player Allies(player, idol, 10 yd) returns (grouped, Friendly) to the pool's share health x maximum / pooled maximum, then hands out the rounding. Spirit Link Idol 706369 (instant, GCD 1000, 3% mana) summons it 3 yd front-left of the caster (TARGET_DEST_CASTER_FRONT_LEFT). Fixtures (regeneration off): the caster at 50000, link_low (3, 0) at 20000 and link_high (-3, 0) at 80000, all of 100000, so the pool is 150000 of 300000 = 50%; link_stranger (0, 3), an ungrouped player at 30000 of 100000, is not a party member. The health and maximum are read at the window start and 3000 ms after the cast (the first pulse at 2000 ms, the second at 4000 ms is not reached). Expected: the three party members end within 0.1 point of one another (50%), from a 60 point spread; the stranger stays at 30%. A server without the link keeps the spread; one that ignores the group moves the stranger. Lead L-b19-2 (not judged): the tooltip names all party and raid members with no radius, the code searches 10 yd; this entry keeps every member inside 10 yd. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 504840,
+      "kind": "periodic_dispel",
+      "variant": "dispel_poison",
+      "label_suffix": "dispel_poison",
+      "label_tag": "poison",
+      "name": "Cleansing Idol (removes 1 poison effect every 3 sec)",
+      "quote": "have 1 poison",
+      "debuffs": [
+        2818,
+        13218
+      ],
+      "period_ms": 3000,
+      "margin_ms": 300,
+      "observe_source": "The dispel_disease layout with two poisons: the Cleansing Idol 50217 casts Cleansing Idol 505348 every 3000 ms on Allies(player, me, 30 yd), the caster included (AscensionWitchDoctorSummons.cpp:309-310, :509-513); 505348 Effect[1] SPELL_EFFECT_DISPEL misc 4 (DISPEL_POISON), one effect per pulse. Fixtures: Deadly Poison 2818 (Dispel 4, 12000 ms) and Wound Poison 13218 (Dispel 4, 15000 ms) on the caster; neither expires inside the 6600 ms window. Control: both stay 6300 ms without the spell; with a real Cleansing Idol: both 300 ms before the first pulse, one 300 ms after it, none after the second. The labels carry the tag poison (periodic_dispel label_tag, ADR 1103), so they do not collide with the disease arm (tool note T-pd). Cleansing Idol costs 25% of the base mana. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+    },
+    {
+      "spell": 561069,
+      "kind": "metric_delta",
+      "variant": "fish_taught",
+      "label_suffix": "fish_taught",
+      "name": "Mixologist (teaches Ingredient: Fish Oil)",
+      "quote": "Teaches you",
+      "trigger_spell": 801663,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "knows_spell",
+      "fields": {
+        "spell": 801662
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Mixologist 561069 (passive, Effect[0] and [1] aura 4 dummies 999 and 2999) is the talent that, per AscensionTaughtAbilityData.h:27 ({13, 6, 0, 561069, 801662}), teaches Ingredient: Fish Oil 801662. Ingredient: Fish Oil 801662 is the Frog Bones twin (instant, TARGET_UNIT_CASTER, 5% mana, 500 ms category, infinite aura, Effect[1] aura 23 every 1500 ms casting Fish Oil 803269, an area aura raid, aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($803269s1), EffectRadiusIndex 23 = 40 yd, and aura 58 MOD_INCREASE_SWIM_SPEED). The reference character as created does not know 801662 (knows_spell reads it before the learn: the control, the Witch Hunter Pavise Crossbowman 681453 learn_shield pattern); the harness learns 561069 between the phases (a real learn) and the class hook in AscensionTaughtAbilityData.h:27 gives the taught ability, read as knows_spell 801662 after it. Ingredient: Frog Bones 801663 is the trigger spell only because a metric_delta needs one learned active (cast_in_before false: no cast before, and the after phase casts it once, harmless). If the reference character already knew Fish Oil the before read would alert and show that the talent teaches nothing. Cast timing checked: the after cast is instant (5% mana), 500 ms read. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Repair (cycle 11 author A): the alert of the earlier runs was an incorrect test, not a defect: the taught ability is given by SynchronizeTaughtAbilities (AscensionCompat.cpp:1100-1130), which the learn of the parent 561069 runs (OnPlayerLearnSpell, AffectsTaughtAbilities) but which teaches 801662 only in specialization 6 (AscensionTaughtAbilityData.h:27, entry.SpecId). The caster now switches to specialization 6 at the start of the before phase (option specialization, ADR 1102), so the control reads 0 in the right specialization and the learn of 561069 teaches 801662.",
+      "specialization": 6
     }
   ],
   "player_observations": [],
