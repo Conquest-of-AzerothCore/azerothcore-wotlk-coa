@@ -131,8 +131,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
                 existing->IsScriptedPrivateInstance() &&
                 existing->GetScriptedPrivateOwner() ==
                     player->GetScriptedPrivateOwner() &&
-                existing->IsScriptedPrivateMember(
-                    player->GetGUID())
+                existing->CanEnterScriptedPrivate(player)
                 ? existing
                 : nullptr;
         }
