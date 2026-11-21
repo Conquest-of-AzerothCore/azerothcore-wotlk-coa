@@ -214,6 +214,16 @@ class HttpTests(unittest.TestCase):
             relay.ReportService.issue_number({"status": "created", "issue_number": 3,
                                               "issue_url": "https://unrelated.example/3"})
 
+    def test_issue_in_the_moved_repository_is_created(self):
+        url = "https://github.com/Conquest-of-AzerothCore/azerothcore-wotlk-coa/issues/13129"
+        self.assertEqual(relay.ReportService.issue_number({"status": "created", "issue_number": 13129,
+                                                           "issue_url": url}), 13129)
+
+    def test_issue_in_the_former_repository_is_uncertain(self):
+        with self.assertRaises(relay.DeliveryError):
+            relay.ReportService.issue_number({"status": "created", "issue_number": 9322, "issue_url":
+                                              "https://github.com/jealous-sound/azerothcore-wotlk-coa/issues/9322"})
+
     def test_service_duplicate_returns_existing_issue(self):
         response = Response(json.dumps({"status": "created", "duplicate": True,
                                         "issue_number": 9, "issue_url": relay.WEB + "9"}).encode())

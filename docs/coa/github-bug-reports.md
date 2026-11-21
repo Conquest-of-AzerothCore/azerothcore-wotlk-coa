@@ -1,7 +1,7 @@
 # In-game reports to GitHub
 
 The original Ascension Help UI (Help → Bug Report) submits reports to
-`jealous-sound/azerothcore-wotlk-coa` through its native bug tracker packet. No client
+`Conquest-of-AzerothCore/azerothcore-wotlk-coa` through its native bug tracker packet. No client
 change is needed.
 
 The local relay forwards reports to `https://coa-bug-report.up.railway.app/v1/reports`.

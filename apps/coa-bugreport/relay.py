@@ -19,7 +19,7 @@ import time
 import urllib.error
 import urllib.request
 
-REPOSITORY = "jealous-sound/azerothcore-wotlk-coa"
+REPOSITORY = "Conquest-of-AzerothCore/azerothcore-wotlk-coa"
 SERVICE_URL = "https://coa-bug-report.up.railway.app"
 API = SERVICE_URL + "/v1/reports"
 DEFAULT_API_KEY = "coa_zRatxUHShOn-HEkoreKGME6sd3DdMG7eKTTKlj2JCK4"
