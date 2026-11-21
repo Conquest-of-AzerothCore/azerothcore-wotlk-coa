@@ -2267,7 +2267,7 @@
     "clause": "Shine the light of the sun on an enemy, dealing ${$m1+0+$sph*1} Holy Damage and granting you Scorch Marks.",
     "labels": [
       "704908 behaviour_metric_delta sun_ray_damage",
-      "704908 behaviour_metric_delta scorch_granted_sunray"
+      "704908 behaviour_metric_delta scorch_granted"
     ],
     "kind": "claim"
   },
@@ -2993,33 +2993,51 @@
     "dbc_clause": "Bless yourself and an ally, restoring $s1% of their maximum health",
     "text_source": {
       "table": "coa_client_spell_description",
-      "file": "rev_20261015_04_sun_cleric_bless_tooltip.sql",
-      "commit": "8ed21f1798",
-      "pr": "#7759",
-      "basis": "text_correction",
-      "ruling": null,
+      "file": "rev_20261121_01_sun_cleric_bless_mana_five_percent.sql",
+      "commit": "88d03d1069",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
     }
   },
   {
     "spell": 804247,
-    "clause": "and 1% of your maximum mana every 10 sec for 5 min.",
-    "labels": [
-      "804247 behaviour_metric_delta mana_tick"
-    ],
+    "clause": "and 5% of your maximum mana every 10 sec for 5 min.",
     "kind": "claim",
     "dbc_clause": "and $s2% of your maximum mana every $t1 sec for $d.",
     "text_source": {
       "table": "coa_client_spell_description",
-      "file": "rev_20261015_04_sun_cleric_bless_tooltip.sql",
-      "commit": "8ed21f1798",
-      "pr": "#7759",
-      "basis": "text_correction",
-      "ruling": null,
+      "file": "rev_20261121_01_sun_cleric_bless_mana_five_percent.sql",
+      "commit": "88d03d1069",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
-    }
+    },
+    "claims": [
+      {
+        "claim": "restores 5% of your maximum mana per tick",
+        "labels": [
+          "804247 behaviour_metric_delta mana_tick"
+        ]
+      },
+      {
+        "claim": "every 10 sec",
+        "labels": [
+          "804247 behaviour_metric_delta mana_tick",
+          "804247 behaviour_metric_delta mana_period"
+        ]
+      },
+      {
+        "claim": "for 5 min",
+        "labels": [
+          "804247 behaviour_metric_delta bless_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 804247,
@@ -3030,11 +3048,11 @@
     "kind": "claim",
     "text_source": {
       "table": "coa_client_spell_description",
-      "file": "rev_20261015_04_sun_cleric_bless_tooltip.sql",
-      "commit": "8ed21f1798",
-      "pr": "#7759",
-      "basis": "text_correction",
-      "ruling": null,
+      "file": "rev_20261121_01_sun_cleric_bless_mana_five_percent.sql",
+      "commit": "88d03d1069",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
     }
@@ -3460,7 +3478,8 @@
     "spell": 807973,
     "clause": "dealing ${$m1+0+$AP*0.159426} Holy damage",
     "labels": [
-      "807973 behaviour_metric_delta tick_damage"
+      "807973 behaviour_metric_delta tick_damage",
+      "807973 behaviour_metric_delta tick_damage_ap"
     ],
     "kind": "claim"
   },
@@ -3944,13 +3963,9 @@
   {
     "spell": 807749,
     "clause": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
-    "labels": [
-      "807749 behaviour_metric_delta fulfillment_main",
-      "807749 behaviour_metric_delta fulfillment_off",
-      "807749 behaviour_metric_delta ability_hits",
-      "807749 behaviour_metric_delta ability_hits_second"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "reason": "Owner point open: per damage event or per cast. The entries fulfillment_main, fulfillment_off, ability_hits and ability_hits_second measure the per-damage-event reading and are not cited until the owner rules."
   },
   {
     "spell": 807749,

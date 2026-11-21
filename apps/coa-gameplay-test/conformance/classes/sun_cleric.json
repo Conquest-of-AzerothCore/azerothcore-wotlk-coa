@@ -1154,9 +1154,83 @@
       "kind": "metric_delta",
       "variant": "mana_tick",
       "label_suffix": "mana_tick",
-      "quote": "and 1% of your maximum mana every 10 sec for 5 min.",
+      "quote": "and 5% of your maximum mana every 10 sec for 5 min.",
       "trigger_spell": 804247,
-      "gate_spell": 300357,
+      "target": "caster",
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1363,
+      "expected": 1234,
+      "observe_source": "Bless 804247 costs ManaCostPercentage 20 of BaseMana 1363 (player_class_stats class 27 level 60) = 272, instant; Effect[0] aura 227 every 10000 ms triggers 805360, whose Effect[0] BasePoints 4 with DieSides 1 gives 5 (spell_dbc 805360 EffectBasePoints_2 = 4, rev_20261121_01_sun_cleric_bless_mana_five_percent.sql, owner ruling O-4); AscensionSunClericAuras.cpp:220-226 adds CalculatePct(max mana, Amount(805360,1)) on the caster's own tick. Maximum mana read with the max_power metric: 2868, so one tick is 5% of 2868 = 143 (143.4 truncated). Mana is set to 1363 at the start of both phases (phase_power with phase_power_in_uncast_before) with regeneration off. Control phase: Bless is known but not cast, the mana reads 1363. Treatment phase: Bless is cast on the caster and read 10500 ms later (one tick): 1363 - 272 (cost) + 143 = 1234. The expected value comes from the tooltip percent, the DBC mana cost percent and the maximum mana, not from a run. A tick of 1%, 2%, 4% or 6% reads 1119, 1148, 1205 or 1263 and is excluded (exact read, tolerance 1e-5). The 300357 doubling is measured by mana_tick_lead. Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs, mean 871 and 974); bindmysoul 804247 reads \"Bless an ally, restoring 5% of their maximum health every 10 sec for 5 minutes\" (no self cast and no mana, an older state, G-9); owner ruling O-4 (2026-11-21) sets the mana to 5% of the maximum per tick, Sun Cleric ADR 0002. Nothing found that gives a live per tick mana percent beyond the ruling.",
+      "cast_in_before": false,
+      "phase_power": [
+        0,
+        1363,
+        1363
+      ],
+      "phase_power_in_uncast_before": true
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (mana tick period)",
+      "kind": "metric_delta",
+      "variant": "mana_period",
+      "label_suffix": "mana_period",
+      "quote": "and 5% of your maximum mana every 10 sec for 5 min.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "disable_regeneration": true,
+      "wait_ms": 9500,
+      "expire_ms": 1000,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1363,
+      "expected": 1091,
+      "observe_source": "Period arm of mana_tick: the tick comes every 10000 ms (Effect[0] aura 227 amplitude 10000 ms, 805360 triggered), so 9500 ms after the cast no tick has landed: 1363 - 272 (cost) = 1091, expected from the tooltip's every 10 sec and the DBC cost, not from a run. mana_tick reads the first tick at 10500 ms, so together the two reads put the period inside (9500, 10500) ms and exclude 9000 and 11000 ms (10% off on both sides). Control phase: Bless known but not cast, 1363. Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs); owner ruling O-4 sets the percent, not the period; nothing found that gives a different period.",
+      "cast_in_before": false,
+      "phase_power": [
+        0,
+        1363,
+        1363
+      ],
+      "phase_power_in_uncast_before": true
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (aura duration)",
+      "kind": "metric_delta",
+      "variant": "bless_duration",
+      "label_suffix": "bless_duration",
+      "quote": "and 5% of your maximum mana every 10 sec for 5 min.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "wait_ms": 5000,
+      "expire_ms": 1000,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804247
+      },
+      "before_expected": 0,
+      "expected": 295000,
+      "observe_source": "Duration arm of mana_tick: Bless 804247 lasts 5 min (the tooltip's for 5 min, 300000 ms). The remaining duration of the aura on the caster is read 5000 ms after the cast: 300000 - 5000 = 295000 ms, expected from the tooltip, not from a run; a total of 270000 or 330000 ms (10% off) reads 265000 or 325000 and is excluded by the tolerance of 10000. Control phase: Bless known but not cast, no aura, 0. Reference search: coa-history spell 804247 (347 casts in 27 logs, 141 applications and 142 removals in 24 to 26 logs); bindmysoul 804247 reads \"for 5 minutes\"; nothing found that gives a different duration.",
+      "cast_in_before": false,
+      "tolerance": 10000
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (mana per tick doubled by Lead Me Not Astray)",
+      "kind": "metric_delta",
+      "variant": "mana_tick_lead",
+      "label_suffix": "mana_tick_lead",
+      "quote": "and 5% of your maximum mana every 10 sec for 5 min.",
+      "trigger_spell": 804247,
       "target": "caster",
       "disable_regeneration": true,
       "cast_power": 1363,
@@ -1166,9 +1240,11 @@
       "fields": {
         "power": 0
       },
-      "before_expected": 1119,
-      "expected": 1148,
-      "observe_source": "Bless 804247 costs ManaCostPercentage 20 of BaseMana 1363 (player_class_stats class 27 level 60) = 272, instant; Effect[0] aura 227 every 10000 ms triggers 805360; AscensionSunClericAuras.cpp:220-226 adds CalculatePct(max mana, Amount(805360,1)) on the caster's own tick, doubled while 300357 (Lead Me Not Astray, 'Doubles the healing done and mana restored by Bless') is known. Maximum mana read with the max_power metric: 2868. Mana set to 1363 with regeneration off, Bless cast on the caster, read 10500 ms later (one tick); 300357 learned between the phases. Expected from the streamed text, 1% of 2868 = 28 per tick (1119), doubled 57 (1148). Effective data: the spell_dbc row 805360 (rev_20261015_05_sun_cleric_bless_mana.sql) has EffectBasePoints_2 = 1, so CalcValue is 2 (Spell.dbc 805360 has 4, value 5). Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs, mean 871 and 974); bindmysoul 804247 reads \"Bless an ally, restoring 5% of their maximum health every 10 sec for 5 minutes\" (no self cast and no mana, an older state, G-9); nothing found that gives a live per tick percent for the mana."
+      "before_expected": 1234,
+      "expected": 1377,
+      "observe_source": "The quote is the Bless sentence the doubling applies to; the doubling itself is the 300357 tooltip \"Doubles the healing done and mana restored by Bless\". Bless 804247 is cast on the caster in both phases and read 10500 ms later (one tick), 300357 (Lead Me Not Astray, 'Doubles the healing done and mana restored by Bless') learned between the phases. Plain phase: 1363 - 272 (cost) + 143 (5% of 2868, see mana_tick) = 1234. With 300357, AscensionSunClericAuras.cpp:220-226 doubles the amount: 286, so 1363 - 272 + 286 = 1377. The expected values come from the tooltips and the DBC, not from a run. A single 5% tick in both phases reads 1234 and is excluded. Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs, mean 871 and 974); bindmysoul 804247 reads \"Bless an ally, restoring 5% of their maximum health every 10 sec for 5 minutes\" (no self cast and no mana, an older state, G-9); owner ruling O-4 (2026-11-21) sets the mana to 5% of the maximum per tick, Sun Cleric ADR 0002.",
+      "cast_in_before": true,
+      "gate_spell": 300357
     },
     {
       "spell": 804247,
@@ -1633,6 +1709,50 @@
       "trigger_spell": 807973,
       "target": "dummy",
       "expire_ms": 500,
+      "name": "Sunslam (tick damage at 10000 more attack power)",
+      "variant": "tick_damage_ap",
+      "label_suffix": "tick_damage_ap",
+      "quote": "dealing ${$m1+0+$AP*0.159426} Holy damage",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805639,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 3410.8,
+      "tolerance": 171,
+      "wait_ms": 1500,
+      "observe_source": "Attack power arm of tick_damage in the same pair: the tooltip ${$m1+0+$AP*0.159426} with BasePoints 99 (100 as read) and 70 + 10000 attack power gives 100 + 0.159426 x 10070 = 1705.4 per hit, doubled by the forced crit (Unit.cpp:1731-1736, crit damage x 2) = 3410.8, band 5% (171): [3240, 3582]. It excludes an attack power coefficient of 0.10 (2 x 1107 = 2214), 0.15 (2 x 1610 = 3221) and 0.17 (2 x 1812 = 3624, above the band); the contrast on the same build is tick_damage at the reference attack power 70 (222.32). player_attack_power adds 10000 attack power (harness fixture). Crit fixtures, Dawn precondition and resistance fixture as tick_damage (984954, 807440, 823764). The read keeps only critical events, so a non-crit hit reads 0. Control: no cast before, 0 damage. Reference search: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs, 876 crits, mean 643, no per-hit AP read possible); bindmysoul 805629 text reads \"28 + 15.94% AP\", an older state against Spell.dbc 805639 BasePoints 99 (100 as read, G-9, older reference); nothing found for an attack power read at a hit beyond the tooltip token.",
+      "player_attack_power": 10000
+    },
+    {
+      "spell": 807973,
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "target": "dummy",
+      "expire_ms": 500,
       "name": "Sunslam (usable while moving)",
       "variant": "moving",
       "label_suffix": "moving",
@@ -1787,7 +1907,7 @@
       "before_expected": 0,
       "expected": 2,
       "wait_ms": 1500,
-      "observe_source": "Count of 506824 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). The tooltip \"Melee ability damage triggers an auto attack with each weapon\" is read per damage event, so one cast gives 2 events and 2 auto attacks per weapon: the expected gain 2 is 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement. The per-cast reading would be 1; nothing found settles it, which goes to the owner as a note. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Count of 506824 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
       "setup_casts": [
         807749
       ],
@@ -1849,7 +1969,7 @@
       "before_expected": 0,
       "expected": 2,
       "wait_ms": 1500,
-      "observe_source": "Count of 506823 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). The tooltip \"Melee ability damage triggers an auto attack with each weapon\" is read per damage event, so one cast gives 2 events and 2 auto attacks per weapon: the expected gain 2 is 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement. The per-cast reading would be 1; nothing found settles it, which goes to the owner as a note. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Count of 506823 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
       "setup_casts": [
         807749
       ],
@@ -2084,7 +2204,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "observe_source": "Diagnostic lead, not a ledger label: Sun Ray 504764 produced by Horusath Blast and a Sunflare cast (the Sunflare is replaced by Sun Ray through the temporary spell replacement, SpellHandler.cpp:411) leaves no Scorch Marks 807059 on the caster. The Sun Ray damage lands (transform, sun_ray_damage); a direct Sun Ray cast grants the aura (scorch_granted_sunray). Excluded by diagnostic runs on this build: the crit and resistance fixtures (absent without them), the read time (absent at 1500 and 6500 ms). Sun Ray Effect[1] TRIGGER_SPELL 807059 and AscensionSunClericAbilities.cpp:215-216 are the two grant paths; the cause on the replacement route is not established. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption."
+      "observe_source": "Ledger clause \"Shine the light of the sun on an enemy, ... and granting you Scorch Marks.\" of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). The player route: Horusath Blast 500154 with 704908 known applies the marker 803238, the harness cast of Sunflare 800231 goes through HandleCastSpellOpcode like a client cast, where GetCastReplacement turns it into Sun Ray 504764 (SpellHandler.cpp:410-418), and the aura 807059 on the caster is read 6500 ms later: expected 1 from the Sun Ray tooltip and Effect[1] TRIGGER_SPELL 807059. It alerts: 0, and also 0 at 100 ms after the cast (diagnostic runs on build 6b19c29902ee, the marker 803238 is consumed on this route and on the direct one). Cause, from the code and the contrast with the direct route (scorch_granted_sunray, harness-learned Sun Ray, reads 1): Refresh, run when the consumed marker is removed, unlearns the temporarily learned Sun Ray with removeSpell(504764, SPEC_MASK_ALL, true) (AscensionSunCleric.cpp:398), and Player::removeSpell removes the aura of every TriggerSpell of the removed spell (Player.cpp:3776-3778), which is 807059, Sun Ray Effect[1]. The harness learn is permanent, so removeSpell with onlyTemporary returns early and the direct route keeps the aura. Not run-verified: no server change is made on this check, see the fix note in the report. Crit and resistance fixtures 984954 and 823764 are preconditions. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption."
     },
     {
       "spell": 704908,
@@ -2103,7 +2223,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "observe_source": "Ledger clause 241 of 704908 (\"granting you Scorch Marks\"). Sun Ray 504764 is cast for real at the dummy (learned by the harness) with 704908 known between the phases; the aura 807059 on the caster is read 1000 ms later, 0 with no cast (control) and 1 after it (Scorch Marks lasts DurationIndex 1, 10000 ms). Sun Ray Effect[1] TRIGGER_SPELL 807059 and AscensionSunClericAbilities.cpp:215-216. The scorch_granted entry reads the same aura after the Sunflare turned into Sun Ray by Horusath Blast. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption.",
+      "observe_source": "Ledger clause \"Shine the light of the sun on an enemy, ... and granting you Scorch Marks.\" of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Diagnostic, not a ledger label, the direct route: Sun Ray 504764 is learned by the harness (a permanent learn, which a player never has: the player learns it temporarily while marker 803238 is up, AscensionSunCleric.cpp:391-398) and cast for real at the dummy; the aura 807059 on the caster is read 1000 ms later, 0 with no cast (control) and 1 after it (Scorch Marks lasts DurationIndex 1, 10000 ms). It differs from scorch_granted only in the Sun Ray being permanent, so the Refresh removeSpell that strips 807059 on the player route does not apply to it. 704908 is known between the phases but the grant (AscensionSunClericAbilities.cpp:215-216, Sun Ray Effect[1]) does not depend on it. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption.",
       "cast_in_before": false,
       "wait_ms": 1000
     },
@@ -2148,7 +2268,7 @@
       "expected": 500,
       "tolerance": 10,
       "wait_ms": 300,
-      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the amplitude of the periodic aura (Effect[0] every 1000 ms, SPELLMOD_ACTIVATION_TIME misc 19, -51, -50 as read: 500 with Scorch Marks, 1000 without; 450 or 550 would be 10% off) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption.",
+      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the amplitude of the periodic aura (Effect[0] every 1000 ms, SPELLMOD_ACTIVATION_TIME misc 19, -51, -50 as read: 500 with Scorch Marks, 1000 without; 450 or 550 would be 10% off) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. The arm that differs between the phases is the Sun Ray cast: the before phase casts Radiant Flame alone (control), the after phase casts Sun Ray first; 704908 is known in both. Sun Ray is the harness-learned (permanent) one, the direct route: on the player route the Scorch Marks grant is stripped, see scorch_granted.",
       "setup_casts": [
         504764
       ],
@@ -2175,7 +2295,7 @@
       "expected": 1700,
       "tolerance": 80,
       "wait_ms": 300,
-      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the remaining duration 300 ms after the cast (DurationIndex 35, 4000 ms; SPELLMOD_DURATION misc 1, -51, -50 as read: 2000 ms, so 1700 with Scorch Marks, 3700 without; a 10% error on the total reads 1500 or 1900, outside the tolerance of 80) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption.",
+      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the remaining duration 300 ms after the cast (DurationIndex 35, 4000 ms; SPELLMOD_DURATION misc 1, -51, -50 as read: 2000 ms, so 1700 with Scorch Marks, 3700 without; a 10% error on the total reads 1500 or 1900, outside the tolerance of 80) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. The arm that differs between the phases is the Sun Ray cast: the before phase casts Radiant Flame alone (control), the after phase casts Sun Ray first; 704908 is known in both. Sun Ray is the harness-learned (permanent) one, the direct route: on the player route the Scorch Marks grant is stripped, see scorch_granted.",
       "setup_casts": [
         504764
       ],
