@@ -26040,6 +26040,1496 @@
       "trigger_power": 1400,
       "poll_ms": 1,
       "observe_source": "Stasis Ward 801678 (instant, RecoveryTime 60000 reset, 13% base mana, trigger_power 1400) summons Stasis Ward 50108; at its first update with _age >= 2000 ms (about 2000 to 2100 ms after the cast; burst_held and burst bracket it) it casts Stasis 801677 at itself with the doctor as original caster and despawns (AscensionWitchDoctorSummons.cpp:541-544). 801677 Effect[0] SPELL_AURA_MOD_STUN, DurationIndex 35 = 4000 ms ($801677d), on the dummy 3 yd away inside the 10 yd burst. The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. This separates the 4000 ms stun from the 2000 ms fuse, the objection of the cycle 9 no-route note (B16): the stamps start at the stun, not at the cast. Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 802719,
+      "kind": "immunity",
+      "variant": "field",
+      "name": "Big Bad Voodoo (the caster inside the field is immune to harmful spells and effects)",
+      "quote": "you are immune to all harmful spells and effects",
+      "aura": 802718,
+      "effects": [
+        {
+          "spell": 1714,
+          "words": "harmful spells"
+        },
+        {
+          "spell": 35317,
+          "words": "harmful spells"
+        },
+        {
+          "spell": 47021,
+          "words": "effects"
+        }
+      ],
+      "expired_extra_ms": 2500,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. The fixtures are Curse of Tongues 1714 (Shadow, aura 216), Chilled Blood 35317 (Frost, aura 33) and Net 47021 (Physical, mechanic root): each is set on the caster by the dummy and read present (the caster is not immune by itself), then after a real Big Bad Voodoo (the carrier aura 802718 read on the caster 500 ms after the cast) the dummy casts each at the caster three times 500 ms apart (a real creature cast) and each must be absent, 4500 ms in all, inside the 8000 ms spirit. The expired reading waits 2500 ms past the kind's usual point (expired_extra_ms, ADR 1114 provisional): the spirit despawns at 8000 ms and its last field aura carries a 2200 ms duration, so the read at about 11500 ms after the cast is past every end the code allows (8000 ms if the owner's application leaves with the spirit, 10200 ms if it outlives it); then the same casts must land, the control that the cast route lands at all. A server whose field gives no immunity reads the fixtures present inside the window. Clause 470 claim \"you are immune to all harmful spells and effects\" (Physical is in mask 127, so Net is a harmful effect of a non-magic school). Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 802719,
+      "kind": "hit_ratio",
+      "variant": "field_damage",
+      "label_suffix": "field_damage",
+      "name": "Big Bad Voodoo (the caster inside the field deals 50% less damage)",
+      "quote": "but deal $802718s2% reduced damage and healing.",
+      "expected": 0.5,
+      "observe_spell": 573026,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          802719
+        ]
+      },
+      "critical": false,
+      "trials": 7,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 7000,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. Each treatment trial casts a real Big Bad Voodoo (the arm cast, 1600 ms wait) and then the observed Hexfire 573026 (level-60 rank, Fire, instant, CategoryRecoveryTime 10000 reset, 17% mana, cast_power 1000, missile speed 35) at the dummy, about 1600 ms into the spirit, when the field has been on the owner since the spirit's first update; cast_wait_ms 7000 then lets that spirit despawn and its field end before the next trial, so every observed hit lies under exactly one spirit (a second spirit's copy cannot stack: same spell and caster, Aura::CanStackWith) and none in a hand-over gap. The control arm casts the Hexfire alone. 20000 spell power so the stat term dominates the 48-point die, beeg spellpen 823764 on the caster in both arms (no partial resist; a positive aura, so the field's purge of negative auras, SpellAuraEffects.cpp:4230-4245, leaves it), non-critical hits only. Expected 0.50 ($802718s2 -50%): the band of the -50% bonus is 2.5 points (47.5% to 52.5% reduction); no field (1.00) and the One Armed Waltz amount (0.75) lie outside it. 7 trials per arm (8800 and 10400 ms each). Cast timing checked: both instant, GCD 1500, the 1600 ms cast waits. Player reports: none."
+    },
+    {
+      "spell": 705909,
+      "kind": "hit_ratio",
+      "variant": "waltz_dealt",
+      "label_suffix": "waltz_dealt",
+      "name": "One Armed Waltz (Big Bad Voodoo reduces damage dealt by 25% only)",
+      "quote": "now only reduces damage dealt by $s1%",
+      "expected": 0.75,
+      "observe_spell": 573026,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          802719
+        ],
+        "learn": [
+          705909
+        ]
+      },
+      "critical": false,
+      "trials": 7,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 7000,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. Each treatment trial casts a real Big Bad Voodoo (the arm cast, 1600 ms wait) and then the observed Hexfire 573026 (level-60 rank, Fire, instant, CategoryRecoveryTime 10000 reset, 17% mana, cast_power 1000, missile speed 35) at the dummy, about 1600 ms into the spirit, when the field has been on the owner since the spirit's first update; cast_wait_ms 7000 then lets that spirit despawn and its field end before the next trial, so every observed hit lies under exactly one spirit (a second spirit's copy cannot stack: same spell and caster, Aura::CanStackWith) and none in a hand-over gap. The control arm casts the Hexfire alone. 20000 spell power so the stat term dominates the 48-point die, beeg spellpen 823764 on the caster in both arms (no partial resist; a positive aura, so the field's purge of negative auras, SpellAuraEffects.cpp:4230-4245, leaves it), non-critical hits only. One Armed Waltz 705909 (passive, learned for real in the treatment arm, pitfall 9): Effect[0] aura 107 SPELLMOD_EFFECT2 +25 on SpellFamilyFlags[0] 32768 (the field 802718: -50% damage done becomes -25%, $s1), Effect[1] SPELLMOD_EFFECT3 +25 on the same mask (healing done -50% becomes -25%), Effect[2] SPELLMOD_EFFECT2 -5 on SpellFamilyFlags[2] 8192 (802719 Effect[1]: damage taken -20% becomes -25%, \"an additional $s3%\"). The field amount is computed by AuraEffect::CalculateAmount with the aura caster, the owner (SpellAuraEffects.cpp:507-511, SpellEffectInfo::CalcValue -> Unit::ApplyEffectModifiers, SpellInfo.cpp:531), so the owner's modifiers reach the aura the spirit casts. Expected 0.75 (-25%, $s1): the band of the -25% bonus is 2 points; the untalented field (0.50, 802719 field_damage) and no field (1.00) lie outside it. 7 trials per arm (8800 and 10400 ms each). Cast timing checked: both instant, GCD 1500, the 1600 ms cast waits. Player reports: none."
+    },
+    {
+      "spell": 802719,
+      "kind": "hit_ratio",
+      "variant": "field_healing",
+      "label_suffix": "field_healing",
+      "name": "Big Bad Voodoo (the caster inside the field heals 50% less)",
+      "quote": "but deal $802718s2% reduced damage and healing.",
+      "expected": 0.5,
+      "metric": "spell_heal_total",
+      "observe_spell": 801670,
+      "caster": "caster",
+      "target": "ally",
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "casts": [
+          802719
+        ]
+      },
+      "critical": false,
+      "trials": 7,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 5000,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. Each treatment trial casts a real Big Bad Voodoo, then the observed Loa's Brew 801670 (2000 ms cast, 33% mana with cast_power 1000, TARGET_UNIT_TARGET_ALLY, missile speed 55) at the second player (the ally, ungrouped, next to the caster, the Potent Mixes 504888 heal shape); the heal lands about 3700 ms into the spirit, under the field's Effect[2] healing done -50% (Unit::SpellHealingBonusDone multiplies by SPELL_AURA_MOD_HEALING_DONE_PERCENT). cast_wait_ms 5000 ends that spirit before the next trial (BBV 1600 + Brew 3600 + 5000 ms = 10200 ms per trial). The same ally every time, so Loa's Brew - Echo never fires (Abilities.cpp:208-215), and Loa's Blessing is not known. 20000 spell power so the 0.84 coefficient dominates the 12-point die; non-critical heals only. Control: the Brew alone. Expected 0.50 inside the 2.5-point band; no field (1.00) and the One Armed Waltz amount (0.75) lie outside it. Clause 470 claim \"and healing\". Cast timing checked: BBV instant, Brew 2000 ms plus 1600 ms. Player reports: none."
+    },
+    {
+      "spell": 802719,
+      "kind": "aura_presence",
+      "variant": "allies_inside",
+      "label_suffix": "allies_inside",
+      "name": "Big Bad Voodoo (an ally 16.4 yd from the cast point is in the damage-taken area)",
+      "quote": "While allies are within $a2 yds,",
+      "metric": "aura",
+      "fields": {
+        "spell": 802719
+      },
+      "target": "ally",
+      "target_distance": 16.4,
+      "wait_ms": 1500,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. The area is the persistent area aura of Effect[1] at the cast point (the caster's spawn, which the caster keeps: it does not move). DynObjAura::FillTargetMap searches with AnyFriendlyUnitInObjectRangeCheck (GridNotifiers.h:998-1008: IsWithinDistInMap of the dynamic object), which adds both object sizes (Object.cpp:1256-1263): the dynamic object has no combat reach field, so DEFAULT_WORLD_OBJECT_SIZE 0.389 times its scale 1 (Object.cpp:2892-2895), and the human ally player 1.5 (Player.h:1110, scale 1), so the edge between centres is 15 + 0.389 + 1.5 = 16.889 yd. The grouped ally (a second Witch Doctor player, the lock_ally fixture) is relocated along +x before a real Big Bad Voodoo at the caster and read 1500 ms after it (the dynamic object's first target update is within 500 ms): at 16.4 yd, 0.49 yd inside the edge, it must gain 802719 (it reads 0 before the cast). A 15 yd area searched without the sizes (edge 15.0) or a smaller radius fails this arm. Control: the 17.4 yd arm allies_beyond. Both reads are within about 0.5 yd of the code edge on their side (G-29, measured from the dynamic object, the unit the code searches from; a ground slope only lengthens the 3D distance). Clause 471. Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 802719,
+      "kind": "aura_presence",
+      "variant": "allies_beyond",
+      "label_suffix": "allies_beyond",
+      "name": "Big Bad Voodoo (an ally 17.4 yd from the cast point is not in the damage-taken area)",
+      "quote": "While allies are within $a2 yds,",
+      "metric": "aura",
+      "fields": {
+        "spell": 802719
+      },
+      "target": "ally",
+      "target_distance": 17.4,
+      "wait_ms": 1500,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. The area is the persistent area aura of Effect[1] at the cast point (the caster's spawn, which the caster keeps: it does not move). DynObjAura::FillTargetMap searches with AnyFriendlyUnitInObjectRangeCheck (GridNotifiers.h:998-1008: IsWithinDistInMap of the dynamic object), which adds both object sizes (Object.cpp:1256-1263): the dynamic object has no combat reach field, so DEFAULT_WORLD_OBJECT_SIZE 0.389 times its scale 1 (Object.cpp:2892-2895), and the human ally player 1.5 (Player.h:1110, scale 1), so the edge between centres is 15 + 0.389 + 1.5 = 16.889 yd. The grouped ally (a second Witch Doctor player, the lock_ally fixture) is relocated along +x before a real Big Bad Voodoo at the caster and read 1500 ms after it (the dynamic object's first target update is within 500 ms): at 17.4 yd, 0.51 yd beyond the edge, it must stay without 802719 while the caster carries it (the caster expectation: the caster stands in the area and is a friendly unit of it; 802719 is a positive aura, so the field immunity does not refuse it). A larger radius (20 yd and up) fails this arm. Control: the 16.4 yd arm allies_inside. Both reads are within about 0.5 yd of the code edge on their side (G-29, measured from the dynamic object, the unit the code searches from; a ground slope only lengthens the 3D distance). Clause 471. Cast timing checked: instant. Player reports: none.",
+      "present": false
+    },
+    {
+      "spell": 802719,
+      "kind": "taken_hit",
+      "variant": "ally_taken",
+      "label_suffix": "ally_taken",
+      "judge": "damage_ratio",
+      "struck": "ally",
+      "expected": 0.8,
+      "name": "Big Bad Voodoo (an ally inside the area takes 20% less damage)",
+      "quote": "their damage taken is reduced by $s2%.",
+      "strike_spell": 92559,
+      "trials": 6,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              802719,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500
+        }
+      ],
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. A passive stationary striker (creature 36) casts Void Zone 92559 (1000 Physical, DmgClass 0: it neither misses nor crits; the ally's armor applies the same in both arms) at the grouped ally (taken_hit `struck: \"ally\"` with the damage_ratio judge, ADR 1115 provisional), one strike per trial, 300 ms strike wait and 500 ms settle, the ally held at full health before every trial; the strike's damage logs on the ally are read. The treatment arm opens with one real Big Bad Voodoo at the caster (opening_casts, 1600 ms cast wait, opening_settle_ms 500): the six strikes land from about 2100 to 6100 ms after the cast, inside the 8000 ms area, and the ally (spawned at the caster, inside 15 yd) carries 802719 from the area's first update. The caster is immune inside the field, so the ally is the only unit that can be struck. One cast per scenario, so the Waning Wuju lock 803495 it puts on the ally never meets a second cast. Control: no cast. Expected 0.80 (aura 87 -20%, applied by Unit::SpellDamageBonusTaken before the armor): the band of the -20% bonus is 2 points; no area (1.00) and the One Armed Waltz amount (0.75) lie outside it. Clause 472. Player reports: none."
+    },
+    {
+      "spell": 705909,
+      "kind": "taken_hit",
+      "variant": "waltz_taken",
+      "label_suffix": "waltz_taken",
+      "judge": "damage_ratio",
+      "struck": "ally",
+      "expected": 0.75,
+      "name": "One Armed Waltz (Big Bad Voodoo reduces the damage allies take by 25%)",
+      "quote": "and reduces damage taken by an additional $s3%.",
+      "strike_spell": 92559,
+      "trials": 6,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            705909
+          ],
+          "opening_casts": [
+            [
+              802719,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500
+        }
+      ],
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime and CategoryRecoveryTime 300000 (reset by the scenario before every cast), 25% of base mana (374 of 1497), DurationIndex 31 = 8000 ms. Effect[0] summons the spirit 310659 at the caster (TARGET_DEST_CASTER; Summons.cpp:171-224, VoodooSlot keeps the cast point, no offset), whose AI casts the field 802718 on itself with the owner as original caster on its first update and every 1000 ms after (Summons.cpp:378-383 and :564-565, aura duration set to 2200 ms; Completion.cpp:499-504 turns its owner-area effects into SPELL_EFFECT_APPLY_AREA_AURA_PET, which SpellAuras.cpp:2953-2961 applies to the spirit and to its owner within 15 yd). 802718: Effect[0] aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE mask 127 BasePoints -51 + 1 = -50% ($802718s2), Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT mask 127 -50%. Effect[1] of 802719 is a persistent area aura at the cast point (Completion.cpp:497-498 sets TargetB TARGET_DEST_DYNOBJ_ALLY, so DynObjAura::FillTargetMap, SpellAuras.cpp:3038-3048, picks friendly units within 15 yd, $a2): aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN mask 127, BasePoints -21 + 1 = -20% ($s2). Effect[2] triggers Waning Wuju 803495 on allies in 15 yd; the field purges it from the caster (lock_blocks), so a cast per trial is accepted. One Armed Waltz 705909 (passive, learned for real in the treatment arm, pitfall 9): Effect[0] aura 107 SPELLMOD_EFFECT2 +25 on SpellFamilyFlags[0] 32768 (the field 802718: -50% damage done becomes -25%, $s1), Effect[1] SPELLMOD_EFFECT3 +25 on the same mask (healing done -50% becomes -25%), Effect[2] SPELLMOD_EFFECT2 -5 on SpellFamilyFlags[2] 8192 (802719 Effect[1]: damage taken -20% becomes -25%, \"an additional $s3%\"). The field amount is computed by AuraEffect::CalculateAmount with the aura caster, the owner (SpellAuraEffects.cpp:507-511, SpellEffectInfo::CalcValue -> Unit::ApplyEffectModifiers, SpellInfo.cpp:531), so the owner's modifiers reach the aura the spirit casts. A passive stationary striker (creature 36) casts Void Zone 92559 (1000 Physical, DmgClass 0: it neither misses nor crits; the ally's armor applies the same in both arms) at the grouped ally (taken_hit `struck: \"ally\"` with the damage_ratio judge, ADR 1115 provisional), one strike per trial, 300 ms strike wait and 500 ms settle, the ally held at full health before every trial; the strike's damage logs on the ally are read. The treatment arm opens with one real Big Bad Voodoo at the caster (opening_casts, 1600 ms cast wait, opening_settle_ms 500): the six strikes land from about 2100 to 6100 ms after the cast, inside the 8000 ms area, and the ally (spawned at the caster, inside 15 yd) carries 802719 from the area's first update. The caster is immune inside the field, so the ally is the only unit that can be struck. One cast per scenario, so the Waning Wuju lock 803495 it puts on the ally never meets a second cast. Control: no cast, 705909 not learned; treatment: 705909 learned at the arm start, then the cast. Expected 0.75 (-20% - 5%): the band of the -25% bonus is 2 points; the untalented area (0.80, 802719 ally_taken) and no area (1.00) lie outside it. Clause 209. Player reports: none."
+    },
+    {
+      "spell": 807743,
+      "kind": "school_lockout",
+      "variant": "lockout",
+      "label_suffix": "lockout",
+      "name": "Spirit Shock interrupt",
+      "quote": "and interrupting non-player spellcasting for",
+      "interrupt_spell": 807772,
+      "cast_spell": 807743,
+      "channel_spell": 12051,
+      "observe_source": "Spirit Shock 807743 (instant, RecoveryTime 28000 reset, 25% base mana, 30 yd): Effect[0] aura 27 SPELL_AURA_MOD_SILENCE (Mechanic 9) for 4000 ms; AscensionWitchDoctorAbilities.cpp:274-275 casts Spirit Shock 807772 (Effect[0] SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 35 = 4000 ms, $807772d) at a non-player target from OnSpellHitResult. The tooltip promises the interrupt of non-player spellcasting for 4 sec, which Spell::EffectInterruptCast (SpellEffects.cpp:4815-4847) delivers as a 4000 ms lock of the interrupted school (ProhibitSpellSchool) on a running PreventionType silence cast. The school_lockout kind (Divine Force 806153 and Darkslayer's Lantern 802139 shape): the dummy channels Evocation 12051 (Arcane, PreventionType silence, interruptible), the caster casts a real Spirit Shock at it, and school_prohibited of Arcane is read as an expiry pair around the stated 4000 ms from the cast: locked just before, free just after; not locked while the channel runs before the cast. The silence alone cannot read locked: a silence blocks casts by PreventionType and sets no school lock. Lead (fix note FIX-X1): on this build the silence aura applies before OnSpellHitResult and stops the channel on apply (AuraEffect::HandleAuraModSilence), so 807772 finds no running cast, sets no lock, and this entry is expected to alert until the interrupt is cast before the silence lands. Clause 381 (both claims). Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 807905,
+      "kind": "hit_ratio",
+      "variant": "hit_landed",
+      "label_suffix": "hit_landed",
+      "name": "Staff of the Coven (spell hit chance +4%, pooled)",
+      "quote": "and your hit chance by $s2%.",
+      "expected": 1.0,
+      "observe_spell": 573026,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807905
+        ]
+      },
+      "rate": "landed",
+      "expected_points": 4,
+      "trials": 160,
+      "parts": 16,
+      "streams": 8,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_hit_rating": 0
+      },
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Hexfire 573026 (EffectImplicitTargetA 6, no radius, EffectChainTarget 1; the Puppeteer's Threads branch needs 704511, never known here) is cast at the stream's own dummy by id; Staff of the Coven 807905 changes its owner's own hit chance only, and the streams are never grouped"
+      },
+      "observe_source": "Staff of the Coven 807905 (passive, learned for real in the treatment arm, pitfall 9): Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 3 + 1 = +4 ($s2), which StatSystem.cpp:1043 adds to m_modSpellHitChance. Unit::MagicSpellHitResult (Unit.cpp:3992-4040) gives a same-level creature target a base hit chance of 96 (levelDiff 0), adds m_modSpellHitChance and clamps to 100, so without the passive a spell misses 4% of its casts and with it none. The caster's spell hit rating is set to 0 for the entry (fixture spell_hit_rating 0, ADR 1116 provisional; the reference character carries 10000, which already removes every miss). Each trial casts a real Hexfire 573026 (instant, CategoryRecoveryTime 10000 reset, 17% mana, cast_power 1000) at the dummy (level 60, the class level) and reads the spell's damage events over its SPELL_GO count (rate \"landed\", ADR 1116 provisional: a miss sends SMSG_SPELLLOGMISS and no damage log), with beeg spellpen 823764 so no partial resist leaves a zero hit. Expected +4 points (96% to 100%) inside the 2-point band; an ignored aura 333 reads 0. Sizing: the control share 0.96 has a variance of 0.0384 per cast and the treatment 0, so the 99% half-width of the difference is 2.576 x sqrt(0.0384 / n) x 100 points; n = 2560 casts per arm (16 parts of 160, 8 streams of 20) gives 1.00 point, half the band. Lead: the 96% base assumes spell_hit_chance reads 0 before the passive with the rating at 0 (the passive reads 807905 e1 spell_hit_chance show the +4 step); another base shrinks the clamped difference and the entry alerts, a fixture fault to triage. Clause 389. Cast timing checked: instant, GCD 1500, the 1600 ms cast wait. Player reports: none."
+    },
+    {
+      "spell": 503714,
+      "kind": "hit_ratio",
+      "variant": "eye_damage",
+      "label_suffix": "eye_damage",
+      "name": "Eye of Kimbul (damage dealt to a target with 5 Eyes +5%)",
+      "quote": "Critical strikes now apply Eye of Kimbul to enemies",
+      "expected": 1.05,
+      "observe_spell": 807037,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          503714
+        ]
+      },
+      "warmup": [
+        573026,
+        573026,
+        573026,
+        573026,
+        573026
+      ],
+      "warmup_power": 1000,
+      "force_crit": "spell",
+      "critical": true,
+      "trials": 7,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "observe_source": "Eye of Kimbul 503714: AscensionWitchDoctorEvents.cpp:88 and :151-152 (a non-derived critical damage hit of the owner casts Eye of Kimbul 802707 on the target; DurationIndex 8 = 15000 ms, StackAmount 5). 802707 Effect[1] is aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER all schools, BasePoints 0 + 1 = +1% per stack ($s2), so five stacks raise the owner's damage to the target by 5%. The stacks come from the talent itself: every hit of the entry crits (force_crit spell, the eye_stacks shape), and each arm starts with five real Hexfire 573026 at the dummy (warmup, power set to 1000 before each, warmup_power, ADR 1116 provisional: the arm cannot afford five 254-mana casts after the control arm), which put five Eyes on the dummy in the treatment arm (eye_stacks reads 5 after six) and none in the control arm (503714 not learned). The observed Malefic Wrath 807037 (Nature, 2000 ms cast, 11% mana, cast_power 1000) crits too, and its own Eye refreshes the 15 s duration at the cap after the hit, so every observed hit lands at five stacks (7 trials, 25 s). Both arms crit every hit, so the crit multiplier cancels in the ratio; only critical hits are read. 20000 spell power so the stat term dominates the die; beeg spellpen 823764 (no partial resist). Expected 1.05 inside the 2-point band (3% to 7%): one stack (1.01) and no Eye (1.00) lie outside it. The claim half \"and critical strike chance\" has no route (author-b report). Clause 76 claim \"Increases your damage dealt\". Cast timing checked: Hexfire instant 1600 ms, Wrath 2000 + 1600 ms. Player reports: none."
+    },
+    {
+      "spell": 804684,
+      "kind": "metric_delta",
+      "variant": "cauldron_lasts",
+      "label_suffix": "cauldron_lasts",
+      "name": "Voodoo Cauldron (the cauldron lasts 15 sec)",
+      "quote": "Place down a Voodoo Cauldron for $d,",
+      "trigger_spell": 804684,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 506011
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 14700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14250,
+          15750
+        ],
+        "expired": [
+          14250,
+          15750
+        ]
+      },
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. A real cast at the caster; owned_creature_count of entry 506011 (the harness counts the caster's creatures of that entry in the grid, visible or not) reads 1 about 14700 ms after the cast and 0 about 600 ms later, both stamped in game time inside the G-19 band 14250 to 15750 around the stated 15000 ms, the 500961 idol_lasts shape. Control: the uncast before phase (gate_timing start, trigger_only_after) reads 0. Clause \"Place down a Voodoo Cauldron for $d,\" and the \"for $d\" of the heal clause (the pulses come from this creature). Cast timing checked: instant, GCD none (StartRecoveryTime 0), the summon is made in the cast's effect. Player reports: none."
+    },
+    {
+      "spell": 804684,
+      "kind": "metric_delta",
+      "variant": "cauldron_heal_base",
+      "label_suffix": "cauldron_heal_base",
+      "name": "Voodoo Cauldron (a pulse heals 300 at no healing power)",
+      "quote": "are healed for ${$m3+$BH*0.6}",
+      "trigger_spell": 804684,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 899906,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 300,
+      "wait_ms": 700,
+      "expire_ms": 500,
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. The reference caster has 0 healing power (class file reference, the 560280 healing_power control reads 0), so the first pulse heals the caster (1.5 yd from the cauldron, inside every reach) for exactly 300; spell_heal_total of 899906 from the caster on the caster is read 700 ms after a real cast, before the second pulse at 1500 ms. A pulse without the base reads 0, a level-scaled or rolled base another amount. Control: the uncast before phase reads 0. Cast timing checked: instant; first pulse at the first AI update."
+    },
+    {
+      "spell": 804684,
+      "kind": "metric_delta",
+      "variant": "cauldron_heal_sp",
+      "label_suffix": "cauldron_heal_sp",
+      "name": "Voodoo Cauldron (a pulse gains 0.6 of the healing power)",
+      "quote": "are healed for ${$m3+$BH*0.6}",
+      "trigger_spell": 804684,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 899906,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 12300,
+      "wait_ms": 700,
+      "expire_ms": 500,
+      "player_spell_power": 20000,
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. Same read at the harness spell power fixture 20000 (player_spell_power, which raises the healing power the same, the 801660 pulse_heal_sp precedent: 89 + 0.2 x 20000 read 4089): 300 + 0.6 x 20000 = 12300 (0.6f x 20000 = 12000.0005, truncated by CalcValue). A pulse without the term reads 300, one at 0.5 or 0.7 reads 10300 or 14300. Control: the uncast before phase reads 0. Clause \"Allies within $a3 yds are healed for ${$m3+$BH*0.6} ...\" (the $BH*0.6 half)."
+    },
+    {
+      "spell": 804684,
+      "kind": "metric_delta",
+      "variant": "cauldron_period_early",
+      "label_suffix": "cauldron_period_early",
+      "name": "Voodoo Cauldron (the cauldron heals every 1.5 sec, early read)",
+      "quote": "every 1.5 sec",
+      "trigger_spell": 804684,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 899906,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 2791,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2750,
+          2850
+        ]
+      },
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. The pulses come at the first AI update after the summon (s, under one world update) and then 1500 ms apart, each period ending on the first update past the timer (at most one update later). spell_heal_count of 899906 on the caster is read 2800 ms (early, 2 heals: 0 and 1500) and 3250 ms (late, 3 heals: and 3000) after a real cast, both stamped in game time (windows 2750..2850 and 3200..3300): 2 at 2800 needs a period above 1400 ms, 3 at 3250 one of at most 1625 ms, so the pair brackets 1.5 sec to about -7% and +8%; the third pulse lands 3000 to about 3075 ms after the cast, 175 ms before the late read and 200 ms after the early one. Control: the uncast before phase reads 0. Cast timing checked: instant."
+    },
+    {
+      "spell": 804684,
+      "kind": "metric_delta",
+      "variant": "cauldron_period_late",
+      "label_suffix": "cauldron_period_late",
+      "name": "Voodoo Cauldron (the cauldron heals every 1.5 sec, late read)",
+      "quote": "every 1.5 sec",
+      "trigger_spell": 804684,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 899906,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 3241,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3200,
+          3300
+        ]
+      },
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. The pulses come at the first AI update after the summon (s, under one world update) and then 1500 ms apart, each period ending on the first update past the timer (at most one update later). spell_heal_count of 899906 on the caster is read 2800 ms (early, 2 heals: 0 and 1500) and 3250 ms (late, 3 heals: and 3000) after a real cast, both stamped in game time (windows 2750..2850 and 3200..3300): 2 at 2800 needs a period above 1400 ms, 3 at 3250 one of at most 1625 ms, so the pair brackets 1.5 sec to about -7% and +8%; the third pulse lands 3000 to about 3075 ms after the cast, 175 ms before the late read and 200 ms after the early one. Control: the uncast before phase reads 0. Cast timing checked: instant."
+    },
+    {
+      "spell": 804684,
+      "kind": "hit_ratio",
+      "variant": "cauldron_received",
+      "label_suffix": "cauldron_received",
+      "name": "Voodoo Cauldron (allies near the cauldron receive 20% more healing)",
+      "quote": "increasing allies' healing received by $504419s1% while near the cauldron.",
+      "expected": 1.2,
+      "metric": "spell_heal_total",
+      "observe_spell": 801670,
+      "caster": "caster",
+      "target": "ally",
+      "ally_distance": 5,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "casts": [
+          804684
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 3000,
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. Each treatment trial casts a real Voodoo Cauldron (the cooldown reset by the harness; a new cauldron replaces the last, CauldronSlot, Summons.cpp:215-219) and then a real Loa's Brew 801670 (2000 ms cast, 33% base mana, cast_power 1000) at the ally grouped 5 yd away (ally_distance), which is 3.5 to 6.5 yd from the cauldron, inside the script's 10 yd search plus both reaches (12.5 yd). The first pulse puts 504419 on the ally at once and every 1500 ms refreshes its 2200 ms, so the Brew lands under it (aura 118, SPELL_AURA_MOD_HEALING_PCT, multiplies the healing taken, Unit.cpp SpellHealingBonusTaken; 801670 has no IGNORE_HEALTH_MODIFIERS). Control arm: the Brew alone. The mean non-critical heal received over the control must be 1.20 inside the G-19 band (2 points); spell power 20000 so the 0.84 coefficient dominates the die (the 801664 cauldron_heal precedent at +8%). The cauldron's own 899906 heals are another spell and not read. Cast timing checked: cauldron instant, Brew 2000 ms, cast_wait_ms 3000. Player reports: none."
+    },
+    {
+      "spell": 804684,
+      "kind": "ally_heal_reach",
+      "variant": "cauldron_radius",
+      "name": "Voodoo Cauldron (the cauldron heals grouped allies within 15 yd)",
+      "quote": "Allies within $a3 yds",
+      "allies": [
+        {
+          "id": "cauldron_near",
+          "dx": 3,
+          "dy": 0
+        },
+        {
+          "id": "cauldron_in",
+          "dx": 15,
+          "dy": 0
+        },
+        {
+          "id": "cauldron_out",
+          "dx": 20,
+          "dy": 0
+        }
+      ],
+      "casts": [
+        {
+          "spell": 804684,
+          "target": "caster",
+          "watch_ms": 2000,
+          "poll_ms": 500
+        }
+      ],
+      "checks": [
+        {
+          "name": "cauldron_radius",
+          "judge": "reach",
+          "spell": 899906,
+          "reference": "cauldron_near",
+          "minimum": 1,
+          "healed": [
+            "cauldron_near",
+            "cauldron_in"
+          ],
+          "unhealed": [
+            "cauldron_out"
+          ]
+        }
+      ],
+      "observe_source": "Voodoo Cauldron 804684: instant, 11% of the base mana (164 of 1497), RecoveryTime 180000 (reset by the scenario), DurationIndex 8 = 15000 ms, Effect[1] SUMMON creature 506011 at TARGET_DEST_CASTER_FRONT (no radius, so the point is the caster's combat reach, 1.5 yd, in front, Spell.cpp:1723-1760), Effect[2] the persistent heal (aura 8, EffectRadiusIndex 18 = 15 yd, $a3, BasePoints 299 + DieSides 1 = 300, $m3), which AscensionWitchDoctorCompletion.cpp:506-507 zeroes. The summon script (AscensionWitchDoctorSummons.cpp:574-598, Summon :171-226: TEMPSUMMON_TIMED_DESPAWN for the spell duration, CauldronSlot, the point of the cast kept, :203) creates the invisible cauldron (:284-285), whose AI pulses at its first update (_timer 0) and then every 1500 ms (:555-563): for every unit of Allies(player, me, 10.0f) (Completion.cpp:62-77: alive, in line of sight of the cauldron, Friendly(), which keeps the caster, grouped players and the caster's own summons, sorted by health) it applies Voodoo Cauldron 504419 (Field, a 2200 ms aura, +20% healing received, aura 118 BasePoints 19 + 1) and heals it with Loa's Brew - Echo Heal 899906 for Amount(VoodooCauldron, EFFECT_2) = CalcValue of effect 2: 300 plus the coefficient row {804684, 2, sp 0.6, healing} (AscensionWitchDoctorCoefficients.h:142, ModifySpellEffectBaseValue in Completion.cpp:653-672), so 300 + 0.6 x healing power. 899906 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT (Completion.cpp:600-605) and SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS (taken bonuses above 1 dropped, Unit.cpp:11064-11068), with BonusMultiplier 0 (:595-599), so the heal is that amount exactly and the cauldron's own +20% does not touch it. The stated radius is $a3 = 15 yd (EffectRadiusIndex[2] 18). The script searches Allies(player, me, 10.0f) (Summons.cpp:557), which counts both combat reaches (Nearby: AnyUnitInObjectRangeCheck, IsWithinDistInMap; G-29): 10 + 1.5 (player) + 1.0 (creature 506011, CombatReach 1, cycle1 g6 note) = 12.5 yd between centres, where a 15 yd search reaches 17.5 yd. The cauldron stands within 1.5 yd of the caster (the caster's front at its combat reach), so an ally dx yd out along x is dx - 1.5 to dx + 1.5 yd from it in any facing. Grouped allies (yd from the caster): cauldron_near (3, 0), the reference (1.5 to 4.5 yd); cauldron_in (15, 0), 13.5 to 16.5 yd: inside the stated 15 yd search with the reaches, beyond the 12.5 yd the code reaches; cauldron_out (20, 0), 18.5 to 21.5 yd, beyond a 15 yd search. One window of 2000 ms after a real cast holds the pulses at 0 and 1500 ms. Treatment: near and in take 899906, out none. The code as it stands leaves cauldron_in unhealed and alerts (defect lead, fix note FN-Y1); a wider search heals cauldron_out and alerts; no pulse leaves the reference unhealed (unmeasured). Limit: a coarse bracket (about 1 yd each side of the 17.5 yd edge of a 15 yd search); the outer side has no witness (no heal of the cast reaches cauldron_out on a right server), so its 0 is not told from a line of sight fault; the three allies stand on the (22, 0) ray the cycle 10 triage found clear. No gate: the cauldron is its own subject, and the near/out pair is the control of the placement (the radius_edge arms). Cast timing checked: instant."
+    },
+    {
+      "spell": 501205,
+      "kind": "heal_sum",
+      "variant": "echo_half",
+      "name": "Loa's Brew (a Brew at a new target heals the previous target for half)",
+      "quote": "Healing a different target with Loa's Brew also heals your previous Loa's Brew target for $899904s1% of the amount healed.",
+      "allies": [
+        {
+          "id": "echo_first",
+          "dx": 10,
+          "dy": 0,
+          "health": 2000,
+          "maximum": 20000
+        },
+        {
+          "id": "echo_second",
+          "dx": 15,
+          "dy": 0,
+          "health": 2000,
+          "maximum": 20000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 501205,
+          "target": "echo_first",
+          "watch_ms": 4000,
+          "poll_ms": 500
+        },
+        {
+          "spell": 501205,
+          "target": "echo_first",
+          "watch_ms": 4000,
+          "poll_ms": 500
+        },
+        {
+          "spell": 501205,
+          "target": "echo_second",
+          "watch_ms": 4000,
+          "poll_ms": 500
+        }
+      ],
+      "checks": [
+        {
+          "name": "echo_half",
+          "judge": "pair",
+          "spell": 899906,
+          "on": "echo_first",
+          "source": 501205,
+          "source_on": "echo_second",
+          "expected": 0.5,
+          "band": [
+            -0.5,
+            0.0
+          ],
+          "band_reason": "healing / 2 in uint32 floors the half"
+        }
+      ],
+      "observe_source": "Loa's Brew 501205 (rank 9, SpellFamilyFlags[1] 131072, 3000 ms cast, 33% base mana set before each cast, Speed 55, heal BasePoints 1316 + DieSides 337). AscensionWitchDoctorAbilities.cpp:198-207 (OnSpellHitResult, a Loa's Brew family hit of the caster that is not triggered): when its target is not the stored previous Brew target and that unit is Friendly() and within 40 yd of the caster, it casts Loa's Brew - Echo Heal 899906 on the previous target for healing / 2 (Copy, the base point set exactly; 899906 has CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_HEALTH_MODIFIERS, so the amount is the heal), then stores the new target. `healing` is m_healing after HealBySpell, the effective heal (Spell.cpp:2855-2862, :3057-3059). Grouped allies echo_first (10, 0) and echo_second (15, 0), each at 2000 of 20000 health with regeneration off, so a Brew of about 1500 never overheals and the effective heal is the heal. Real casts in order: a Brew at echo_first (the first target: no previous, no echo), a second Brew at echo_first (the same target: no echo), and a Brew at echo_second (a different target: echo_first takes half of it). The pair check reads the window's 899906 total on echo_first against 0.5 x the effective 501205 heal on echo_second, band [-0.5, 0] for the uint32 halving. The same-target recast is the control inside the window: a server that echoes on a recast at the same target adds about half of the second heal to echo_first and alerts; a server that echoes nothing reads 0 and one that echoes to the new target reads 0 on echo_first; both alert. Unmeasured when echo_second takes no Brew or overheals. Cast timing checked: 3000 ms cast, flight under 0.3 s, watch 4000 ms per cast. Player reports: none."
+    },
+    {
+      "spell": 707212,
+      "kind": "ally_heal_reach",
+      "variant": "secrets",
+      "name": "Jungle Secrets (a Loa's Brew heal makes the Effigy heal the lowest-health ally for 35%)",
+      "quote": "When you heal with Loa's Brew your Effigies will now heal an additional ally within $712348a1 yds",
+      "gate_spell": 707212,
+      "allies": [
+        {
+          "id": "secrets_brew",
+          "dx": 6,
+          "dy": 0,
+          "health": 10000,
+          "maximum": 20000
+        },
+        {
+          "id": "secrets_low",
+          "dx": 12,
+          "dy": 0,
+          "health": 6000,
+          "maximum": 20000
+        },
+        {
+          "id": "secrets_high",
+          "dx": 16,
+          "dy": 0
+        },
+        {
+          "id": "secrets_far",
+          "dx": 28,
+          "dy": 0,
+          "health": 2000,
+          "maximum": 20000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 505339,
+          "target": "caster",
+          "watch_ms": 1200,
+          "poll_ms": 400
+        },
+        {
+          "spell": 501205,
+          "target": "secrets_brew",
+          "watch_ms": 4000,
+          "poll_ms": 500
+        }
+      ],
+      "checks": [
+        {
+          "name": "secrets_lowest",
+          "judge": "reach",
+          "spell": 712348,
+          "reference": "secrets_low",
+          "minimum": 1,
+          "healed": [
+            "secrets_low"
+          ],
+          "unhealed": [
+            "secrets_brew",
+            "secrets_high",
+            "secrets_far"
+          ]
+        },
+        {
+          "name": "secrets_share",
+          "judge": "share",
+          "spell": 712348,
+          "source": 501205,
+          "quote": "for $s1% of the healing done",
+          "expected": 0.35,
+          "minimum": 1,
+          "band": [
+            -1.0,
+            0.0
+          ],
+          "band_reason": "uint32(healing x 35 / 100) floors the share"
+        }
+      ],
+      "observe_source": "Jungle Secrets 707212 (passive talent, learned between the phases; Effect[0] dummy, BasePoints 34 + 1 = 35, $s1). AscensionWitchDoctorAbilities.cpp:198-200: a Loa's Brew family hit calls HealThroughEffigies (AscensionWitchDoctorSummons.cpp:85-105): with 707212 known, for every living Effigy of the caster (Slot EffigySlot: Shadow Effigy 50119 among them) it takes Allies(player, effigy, 20 yd) (the radius of 712348 e0, EffectRadiusIndex 9, $712348a1; Completion.cpp:62-77: Friendly(), line of sight from the effigy, sorted by health percent, then GUID; both reaches count), removes the Brew's target and heals the first one with Jungle Secrets 712348 for uint32(healing x 35 / 100), `healing` being the Brew's effective heal (Spell.cpp:2855-2862, :3057-3059); 712348 is made CANT_CRIT and IGNORE_CASTER_MODIFIERS with BonusMultiplier 0 (Completion.cpp:616-627). Each phase: a real Shadow Effigy 505339 (instant, 15% mana, GCD 1000, the Effigy placed 1.5 yd from the caster, Summons.cpp:203-205; a recast replaces the last, :215-219) and a real Loa's Brew 501205 (3000 ms cast) at secrets_brew. Grouped allies, yd from the caster, health of 20000 with regeneration off: secrets_brew (6, 0) 50%, the Brew target (no overheal: the deficit exceeds the about 1500 Brew); secrets_low (12, 0) 30%, about 12 yd from the Effigy; secrets_high (16, 0) at full health, in range; secrets_far (28, 0) 10%, the lowest, about 28 yd from the Effigy, beyond 20 yd with both reaches (about 22.5 yd). The caster and the Effigy (its own ally, as the Spirit Idol) stand at full health. Treatment: secrets_low takes the 712348 heal; secrets_brew (the primary), secrets_high (higher health) and secrets_far (out of range though lowest) none; control phase without 707212: no ally takes one. The share check reads the mean 712348 heal against 0.35 x the mean effective Brew heal, band [-1, 0] for the floor. A server that heals the highest or a random ally alerts on reach, one that reaches 28 yd heals secrets_far and alerts, a wrong share alerts on share. Limit: the radius half is a coarse bracket (12 and 28 yd), and the unhealed allies have no witness (no heal of this cast reaches them on a right server). Same target in both phases, so the Loa's Brew echo stays out. Cast timing checked: Effigy instant, Brew 3000 ms plus flight, watch 4000 ms. Player reports: none."
+    },
+    {
+      "spell": 705859,
+      "kind": "heal_sum",
+      "variant": "booms_targets",
+      "name": "Jungle Booms (the Jungle Shrooms pulse heals 3 fewer targets: 5 of 8)",
+      "quote": "but heals $s2 less targets.",
+      "gate_spell": 705859,
+      "learn": [
+        92085
+      ],
+      "allies": [
+        {
+          "id": "booms_a",
+          "dx": 5,
+          "dy": 0
+        },
+        {
+          "id": "booms_b",
+          "dx": 12,
+          "dy": 0
+        },
+        {
+          "id": "booms_c",
+          "dx": 22,
+          "dy": 0
+        },
+        {
+          "id": "booms_d",
+          "dx": 22,
+          "dy": 6
+        },
+        {
+          "id": "booms_e",
+          "dx": 22,
+          "dy": -6
+        },
+        {
+          "id": "booms_f",
+          "dx": 28,
+          "dy": 0
+        },
+        {
+          "id": "booms_g",
+          "dx": 22,
+          "dy": -12
+        }
+      ],
+      "casts": [
+        {
+          "spell": 801663,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 801660,
+          "target": "caster",
+          "watch_ms": 6500,
+          "poll_ms": 500
+        }
+      ],
+      "checks": [
+        {
+          "name": "booms_targets",
+          "judge": "cap",
+          "spell": 802703,
+          "expected": 5,
+          "control_expected": 8,
+          "witness": "control"
+        }
+      ],
+      "observe_source": "Jungle Booms 705859 Effect[1] (aura 107, MiscValue 34, BasePoints -4 + 1 = -3, $s2) is turned into SPELL_AURA_MOD_MAX_AFFECTED_TARGETS on SpellFamilyFlags[2] 2048 by AscensionWitchDoctorCompletion.cpp:407-414, and Spell::SelectImplicitAreaTargets adds it to MaxAffectedTargets before Acore::Containers::RandomResize (Spell.cpp:1405-1411). The Shrooms pulse 802703 (SPELL_EFFECT_HEAL, TARGET_UNIT_CASTER_AREA_RAID, 30 yd, MaxAffectedTargets 8, SpellFamilyFlags[2] 2176) comes 6000 ms after a fresh Ingredient: Jungle Shrooms 801660 aura (EffectAmplitude 6000, the boom_heal entry). The caster and 7 grouped allies (a raid after the fourth, all raid members for the area raid selection) stand within 28 yd on the rays the cycle 10 triage found clear: 8 candidates, the cap. Each phase: a real Ingredient: Frog Bones 801663 (instant, GCD 1500), which with one Ingredient slot removes the previous phase's Shrooms (AscensionWitchDoctorBrewing.cpp:31-37), then a real Jungle Shrooms 801660, whose fresh aura pulses once in the 6500 ms watch; Cauldron Brewer 92085 is learned so the Ingredients are not blocked. The heal counts of 802703 on the caster and the seven allies are summed per window. Control (705859 unknown): all 8 healed, 8 in total, and every unit's heal there is the witness that each is a candidate. Treatment: 5 in total (8 - 3), whichever 5 the random resize keeps. A cap of 4 or 6 reads 4 or 6, no cap change 8; a missing pulse leaves the control short and alerts. Cast timing checked: Frog Bones instant, Shrooms pulse at 6000 ms, window 8100 ms. Player reports: none."
+    },
+    {
+      "spell": 567736,
+      "kind": "heal_sum",
+      "variant": "splash_cap",
+      "name": "Splash Potion (a splash heals at most 8 of 9 allies in the area)",
+      "quote": "healing up to $i allies",
+      "learn": [
+        92085
+      ],
+      "creatures": [
+        {
+          "id": "splash_1",
+          "entry": 631,
+          "distance": 2,
+          "faction": 35
+        },
+        {
+          "id": "splash_2",
+          "entry": 631,
+          "distance": 3,
+          "faction": 35
+        },
+        {
+          "id": "splash_3",
+          "entry": 631,
+          "distance": 4,
+          "faction": 35
+        },
+        {
+          "id": "splash_4",
+          "entry": 631,
+          "distance": 5,
+          "faction": 35
+        },
+        {
+          "id": "splash_5",
+          "entry": 631,
+          "distance": 6,
+          "faction": 35
+        },
+        {
+          "id": "splash_6",
+          "entry": 631,
+          "distance": 7,
+          "faction": 35
+        },
+        {
+          "id": "splash_7",
+          "entry": 631,
+          "distance": 8,
+          "faction": 35
+        },
+        {
+          "id": "splash_8",
+          "entry": 631,
+          "distance": 9,
+          "faction": 35
+        }
+      ],
+      "casts": [
+        {
+          "spell": 801663,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 567736,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 567736,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 567736,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 567736,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 567736,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        },
+        {
+          "spell": 567736,
+          "target": "caster",
+          "watch_ms": 1600,
+          "poll_ms": 400
+        }
+      ],
+      "checks": [
+        {
+          "name": "splash_cap",
+          "judge": "cap",
+          "spell": 567736,
+          "expected": 48,
+          "witness": "treatment"
+        }
+      ],
+      "observe_source": "Splash Potion 567736 (rank 7, level 60): instant, StartRecoveryTime 1500, CategoryRecoveryTime 15000 (reset before each cast), 20% base mana (set before each cast), CasterAuraSpell 801702 (the Ingredient marker, a precondition fixture by set_aura), Effect[0] SPELL_EFFECT_HEAL at TARGET_DEST_DEST with TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 13 = 10 yd, MaxAffectedTargets 8 ($i). Spell::SelectImplicitAreaTargets keeps 8 of the units the area finds by Acore::Containers::RandomResize (Spell.cpp:1405-1411); no Witch Doctor code selects its targets (AscensionWitchDoctorAbilities.cpp:74-75 only refuses it without an Ingredient). TARGET_CHECK_ALLY needs no group (Spell.cpp:9353-9358): any unit the caster may assist. The harness holds 8 players at most, so the ninth candidate is a creature: eight fixture creatures of entry 631 (creature_template type_flags 0x1000 CREATURE_TYPE_FLAG_CAN_ASSIST, the flag Unit::_IsValidAssistTarget needs for a player to assist a creature, Unit.cpp:12285-12292), faction 35 (friendly), 2 to 9 yd along x from the caster; with the caster, 9 candidates inside 10 yd of the destination (the cast at the caster sends its position). One real Ingredient: Frog Bones 801663 first (an active Ingredient), then six real Splash Potions, Cauldron Brewer 92085 learned. The heal counts of 567736 from the caster on the caster and the eight creatures are summed over the window: 8 per cast, 48. Witness: every one of the 9 units takes at least one heal in the window, so each is a candidate (a unit skipped by all six random draws of 8 of 9 has a chance of (1/9)^6, under 2e-5 for any of the nine); a unit no heal reaches makes the verdict unmeasured, never a false ok. An uncapped splash reads 54, a lower cap less than 48. No gate: the witness is the control that all 9 are reachable, so the missing heal per cast is the cap. Cast timing checked: instant, GCD 1500, watch 1600 ms. Player reports: none."
+    },
+    {
+      "spell": 567736,
+      "kind": "metric_delta",
+      "variant": "splash_amount",
+      "label_suffix": "splash_amount",
+      "name": "Splash Potion (a splash heals 206 to 228 plus 0.224494 of the healing power and 0.08 of Spirit)",
+      "quote": "for ${$m1+0+$bh*0.224494+$SPI*0.08}",
+      "trigger_spell": 567736,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 567736,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4704,
+      "after_at_least": 4704,
+      "after_at_most": 4726,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        92085
+      ],
+      "setup_casts": [
+        801663
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 92085,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": 20000,
+      "observe_source": "Splash Potion 567736 rank 7 (BaseLevel and SpellLevel 58, MaxLevel 66, Effect[0] SPELL_EFFECT_HEAL BasePoints 202, DieSides 23, EffectRealPointsPerLevel 1.71772): SpellEffectInfo::CalcValue at level 60 adds int32(2 x 1.71772) = 3 and the roll 1 to 23, so $m1 rolls 206 to 228; the coefficient row {567736, 0, sp 0.224494, spirit 0.08, healing} (AscensionWitchDoctorCoefficients.h:99) adds 0.224494 x the healing power and 0.08 x Spirit in ModifySpellEffectBaseValue (Completion.cpp:653-672, BonusMultiplier zeroed :592-594), and the value is truncated. 567736 is not in ScalingBaseSpells. At the spell power fixture 20000 (player_spell_power; the 801660 pulse_heal_sp read shows the healing power equal to it) and the reference Spirit 109 (class file reference_stats, the 560280 healing_power read): 206 + 4489.88 + 8.72 = 4704.6 to 4726.6, read 4704 to 4726. Spell crit is removed by Reg's Test Aura 984954 (a precondition fixture, the boom_heal precedent). A real Ingredient: Frog Bones 801663 first (setup cast, 1700 ms), then a real Splash Potion at the caster; the heal of 567736 on the caster is read 1500 ms later. A splash without the healing term reads 214 to 237, one with 0.2 or 0.25 about 4200 or 5240. Control: the uncast before phase reads 0. Clause 332 (the amount half of \"healing up to $i allies for ...\"). Cast timing checked: instant, GCD 1500."
+    },
+    {
+      "spell": 801664,
+      "kind": "metric_delta",
+      "variant": "potion_leech",
+      "label_suffix": "potion_leech",
+      "name": "Ingredient: Bloodthistle (the potion leeches 5% of the damage dealt)",
+      "quote": "Potion: Causes target ally to leech $802975s1% of all damage they deal",
+      "trigger_spell": 801674,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 803287,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0.05,
+      "tolerance": 0.0005,
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 801674,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "setup_casts": [
+        801664,
+        801661,
+        801663
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2100,
+      "setup_only_after": true,
+      "gate_spell": 92085,
+      "cast_power": 1000,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "player_spell_power": 20000,
+      "observe_source": "Bloodthistle potion 802975 (aura 354, BasePoints 4 + 1 = 5, $802975s1, 15000 ms) on the caster: AscensionWitchDoctorEvents.cpp:68-69 (Check: outgoing damage, not Derived) and :199-205 (Proc: Copy of Bloodthistle 803287 on the owner for uint64(damage) x 5 / 100, the damage of the proc's DamageInfo, after resist and absorb, as the hit's log). 803287 is made a HEAL at the caster with BonusMultiplier 0, CANT_CRIT and IGNORE_CASTER_MODIFIERS (Completion.cpp:396-401, :595-605). The potion is real: Cauldron Brewer 92085 is the gate, learned throughout (setup_only_after); in the treatment phase Ingredient: Bloodthistle 801664, Potion Toss 801661 at the caster (PotionEffects casts 802975, Brewing.cpp:86-107; the 801702 caster aura by required_aura_steps), then Ingredient: Frog Bones 801663, each 2100 ms apart. Frog Bones takes the one Ingredient slot (Brewing.cpp:31-37), so Bloodthistle's +8% healing taken 802771 (2000 ms, refreshed every 1500 ms by the Ingredient) runs out before the Arrow, and the leech heal is not multiplied (Frog Bones' own cauldron aura 803697 is damage taken only). The trigger is one real Malefic Arrow 801674 at the dummy (instant ranged shot, Speed 40, one damage event, a DONE_SPELL_RANGED_DMG_CLASS proc; its 8000 ms cooldown reset), 6300 ms after the Ingredient, inside the 15000 ms potion; the spell power fixture 20000 makes the hit about 5000, so the floor of 5% costs at most 0.0002 of the ratio. The reading is the 803287 heal total over the 801674 damage total on the dummy (ratio_to_metric, increments: the after reading is the phase's increment of each), before_expected 0 (no potion: no leech heal) and expected 0.05 within 0.0005. A 4% or 6% leech reads 0.04 or 0.06, the +8% cauldron left on 0.054. Control: the before phase casts the Arrow with no Ingredient or potion and reads 0. Cast timing checked: Ingredients and Potion Toss instant (GCD 1500), the Arrow lands in about 0.5 s, read 1500 ms after it."
+    },
+    {
+      "spell": 500961,
+      "kind": "summon_edge",
+      "variant": "ally_edge",
+      "label_suffix": "ally_edge",
+      "name": "Spirit Idol (the mana pulse reaches a grouped ally 0.5 yd inside its 30 yd edge, not one 0.5 yd beyond)",
+      "quote": "Allies within $500958A1 yds",
+      "summon_spell": 500961,
+      "summon_entry": 50106,
+      "radius": 30,
+      "role": "ally",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 805282,
+        "caster_entry": 50106
+      },
+      "inside_yd": -0.5,
+      "beyond_yd": 0.5,
+      "settle_ms": 1000,
+      "wait_ms": 6500,
+      "witness": true,
+      "observe_source": "Spirit Idol 500961: instant, RecoveryTime 180000 (reset by the scenario), GCD 1000, DurationIndex 8 = 15000 ms, Effect[0] SPELL_EFFECT_SUMMON of creature 50106; AscensionWitchDoctorSummons.cpp:171-230 (Summon: the idol stands about 1.5 yd from the caster) and :504-509 (the idol AI, every 3000 ms: for each unit of Allies(player, me, 30.0f) the idol casts Energize 805282 at it, triggered, the owner as original caster). Allies() (AscensionWitchDoctorCompletion.cpp:45-78) is Nearby(me, 30): Cell::VisitObjects over the cells of the 30 yd square around the idol and AnyUnitInObjectRangeCheck, i.e. WorldObject::IsWithinDistInMap with both combat reaches (Object.cpp:1256-1283, 3D), then Friendly() (a raid member: both allies are grouped) and the idol's line of sight. The stated radius $500958A1 is SpellRadius 10 = 30 yd (500958 Effect[0], and 805282 Effect[0]). Layout (kind summon_edge, ADR 1111 provisional): after the idol is summoned the two grouped allies are placed by the harness at the idol (relocate around_owner, ADR 1110 provisional) on one line along the world x axis, at the idol's height, 30 + the idol's reach + the ally's reach - 0.5 yd (inside) and + 0.5 yd (beyond) from it; their mana is set to 1. The idol's and the allies' positions and combat reaches are read at the start and the end of the 6500 ms window (two pulses), and a margin under 0.25 yd from the edge, a z offset or a grid cell the 30 yd search does not visit makes the verdict unmeasured, never ok. Read: the energize logs of 805282 cast by creature 50106 (caster_entry, ADR 1110) on each ally, seen by the caster, counted over the window. Expected: the inside ally at least 1, the beyond ally 0; the caster (about 1.5 yd from the idol) is the witness that the idol pulsed (at least 1, else unmeasured). A 30 yd radius measured from the caster, a larger radius or no radius at all reaches the beyond ally and alerts; a smaller one misses the inside ally. Cast timing checked: instant, the first pulse at the summon, then every 3000 ms; the window starts about 1000 ms after the summon. Clause 396 (radius claim)."
+    },
+    {
+      "spell": 505339,
+      "kind": "summon_edge",
+      "variant": "enemy_edge",
+      "label_suffix": "enemy_edge",
+      "name": "Shadow Effigy (the field reaches an enemy player 0.5 yd inside its 30 yd edge, not one 0.5 yd beyond)",
+      "quote": "Enemies within $504761a1 yds",
+      "summon_spell": 505339,
+      "summon_entry": 50119,
+      "radius": 30,
+      "role": "enemy",
+      "enemy_player_race": 2,
+      "metric": "aura",
+      "fields": {
+        "spell": 504761
+      },
+      "inside_yd": -0.5,
+      "beyond_yd": 0.5,
+      "settle_ms": 1000,
+      "wait_ms": 4500,
+      "observe_source": "Shadow Effigy 505339: instant, RecoveryTime 12000 (reset by the scenario), GCD 1000, 15% base mana, DurationIndex 3 = 60000 ms, Effect[0] SPELL_EFFECT_SUMMON of creature 50119; AscensionWitchDoctorSummons.cpp:531-543 (the effigy AI, every 1000 ms: for each unit of Nearby(me, Radius(ShadowField)) that the owner may attack, Field(enemy, 504761) and Field(enemy, 504909)) and :378-383 (Field: a triggered cast with the owner as original caster, the aura then set to 2200 ms). Radius(ShadowField) is SpellRadius 10 = 30 yd of 504761 Effect[0] ($504761a1; Completion.cpp:83-87, EffectInfo::CalcRadius). Nearby() is Cell::VisitObjects over the cells of the 30 yd square around the effigy and IsWithinDistInMap with both combat reaches (3D). Layout (kind summon_edge, ADR 1111 provisional): the scenario runs at the PvP location with the caster and two enemy players of race 2 PvP flagged (IsValidAttackTarget); after the effigy is summoned the two enemies are placed by the harness at the effigy on one line along the world x axis, at its height, 30 + both reaches - 0.5 yd (inside) and + 0.5 yd (beyond) from it (ADR 1110 provisional). They stand at the caster until then, so both may carry the field once (2200 ms); the read follows the move by 4500 ms, past that, and every second the effigy renews the inside one. Positions and reaches are read at the start and the end of the window; a margin under 0.25 yd, a z offset or an unvisited grid cell makes the verdict unmeasured. Expected at the end of the window: aura 504761 on the inside enemy (1), none on the beyond enemy (0). The caster-centred radius_edge entry effigy_radius_edge needs a 2.5 yd margin (M-55) and stays reproduction only; this entry measures from the code's centre, the effigy. Cast timing checked: instant, the first field at the first AI update. Clause 414 (radius claim)."
+    },
+    {
+      "spell": 575025,
+      "kind": "metric_delta",
+      "variant": "rite_ward",
+      "label_suffix": "rite_ward",
+      "name": "Rite of the Loa (one cast places the Serpent Ward 50105 held on an action button, with the Ward, Effigy and Idol)",
+      "quote": "Simultaneously places each selected",
+      "trigger_spell": 575025,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50105
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1497,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        500960,
+        505339,
+        500961
+      ],
+      "action_buttons": [
+        [
+          132,
+          500960
+        ],
+        [
+          133,
+          505339
+        ],
+        [
+          134,
+          500961
+        ]
+      ],
+      "observe_source": "Rite of the Loa 575025: instant, GCD 1000 (StartRecoveryCategory 133), no cost, Effect[0] SPELL_EFFECT_CAST_BUTTON (97) with MiscValue 0 and MiscValueB 4, no Witch Doctor code. Spell::EffectCastButtons (SpellEffects.cpp:7325-7366) walks action buttons 132 to 135 and casts, at the caster, every button spell the player knows, that is off cooldown, carries SPELL_ATTR7_CAN_BE_MULTI_CAST (AttributesEx7 32) and is affordable, with TRIGGERED_IGNORE_GCD, IGNORE_CAST_IN_PROGRESS and CAST_DIRECTLY. Serpent Ward 500960 (5% base mana, creature 50105), Shadow Effigy 505339 (15%, creature 50119) and Spirit Idol 500961 (no cost, creature 50106) all carry AttributesEx7 32; the three are learned in both phases (learn), and the mana is set to 1497 (the fixture base mana, cast_power) before the Rite, enough for 74 + 224. Control (before phase): the same Rite with the buttons empty places nothing (0). Treatment: buttons 132, 133 and 134 hold the Ward, the Effigy and the Idol (option action_buttons, ADR 1113 provisional, the harness set_action_button step, Player::addActionButton) and their cooldowns are reset; one Rite then places all three, read 1500 ms later as one owned creature of each entry, one entry per kind (this entry reads the Serpent Ward 50105). Report #12431 (the Rite drops nothing) fits empty buttons; this entry tells a defect from empty buttons, because the buttons are set. Cast timing checked: instant, the button casts are CAST_DIRECTLY. Clause 435."
+    },
+    {
+      "spell": 575025,
+      "kind": "metric_delta",
+      "variant": "rite_effigy",
+      "label_suffix": "rite_effigy",
+      "name": "Rite of the Loa (one cast places the Shadow Effigy 50119 held on an action button, with the Ward, Effigy and Idol)",
+      "quote": "Simultaneously places each selected",
+      "trigger_spell": 575025,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50119
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1497,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        500960,
+        505339,
+        500961
+      ],
+      "action_buttons": [
+        [
+          132,
+          500960
+        ],
+        [
+          133,
+          505339
+        ],
+        [
+          134,
+          500961
+        ]
+      ],
+      "observe_source": "Rite of the Loa 575025: instant, GCD 1000 (StartRecoveryCategory 133), no cost, Effect[0] SPELL_EFFECT_CAST_BUTTON (97) with MiscValue 0 and MiscValueB 4, no Witch Doctor code. Spell::EffectCastButtons (SpellEffects.cpp:7325-7366) walks action buttons 132 to 135 and casts, at the caster, every button spell the player knows, that is off cooldown, carries SPELL_ATTR7_CAN_BE_MULTI_CAST (AttributesEx7 32) and is affordable, with TRIGGERED_IGNORE_GCD, IGNORE_CAST_IN_PROGRESS and CAST_DIRECTLY. Serpent Ward 500960 (5% base mana, creature 50105), Shadow Effigy 505339 (15%, creature 50119) and Spirit Idol 500961 (no cost, creature 50106) all carry AttributesEx7 32; the three are learned in both phases (learn), and the mana is set to 1497 (the fixture base mana, cast_power) before the Rite, enough for 74 + 224. Control (before phase): the same Rite with the buttons empty places nothing (0). Treatment: buttons 132, 133 and 134 hold the Ward, the Effigy and the Idol (option action_buttons, ADR 1113 provisional, the harness set_action_button step, Player::addActionButton) and their cooldowns are reset; one Rite then places all three, read 1500 ms later as one owned creature of each entry, one entry per kind (this entry reads the Shadow Effigy 50119). Report #12431 (the Rite drops nothing) fits empty buttons; this entry tells a defect from empty buttons, because the buttons are set. Cast timing checked: instant, the button casts are CAST_DIRECTLY. Clause 435."
+    },
+    {
+      "spell": 575025,
+      "kind": "metric_delta",
+      "variant": "rite_idol",
+      "label_suffix": "rite_idol",
+      "name": "Rite of the Loa (one cast places the Spirit Idol 50106 held on an action button, with the Ward, Effigy and Idol)",
+      "quote": "Simultaneously places each selected",
+      "trigger_spell": 575025,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50106
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1497,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        500960,
+        505339,
+        500961
+      ],
+      "action_buttons": [
+        [
+          132,
+          500960
+        ],
+        [
+          133,
+          505339
+        ],
+        [
+          134,
+          500961
+        ]
+      ],
+      "observe_source": "Rite of the Loa 575025: instant, GCD 1000 (StartRecoveryCategory 133), no cost, Effect[0] SPELL_EFFECT_CAST_BUTTON (97) with MiscValue 0 and MiscValueB 4, no Witch Doctor code. Spell::EffectCastButtons (SpellEffects.cpp:7325-7366) walks action buttons 132 to 135 and casts, at the caster, every button spell the player knows, that is off cooldown, carries SPELL_ATTR7_CAN_BE_MULTI_CAST (AttributesEx7 32) and is affordable, with TRIGGERED_IGNORE_GCD, IGNORE_CAST_IN_PROGRESS and CAST_DIRECTLY. Serpent Ward 500960 (5% base mana, creature 50105), Shadow Effigy 505339 (15%, creature 50119) and Spirit Idol 500961 (no cost, creature 50106) all carry AttributesEx7 32; the three are learned in both phases (learn), and the mana is set to 1497 (the fixture base mana, cast_power) before the Rite, enough for 74 + 224. Control (before phase): the same Rite with the buttons empty places nothing (0). Treatment: buttons 132, 133 and 134 hold the Ward, the Effigy and the Idol (option action_buttons, ADR 1113 provisional, the harness set_action_button step, Player::addActionButton) and their cooldowns are reset; one Rite then places all three, read 1500 ms later as one owned creature of each entry, one entry per kind (this entry reads the Spirit Idol 50106). Report #12431 (the Rite drops nothing) fits empty buttons; this entry tells a defect from empty buttons, because the buttons are set. Cast timing checked: instant, the button casts are CAST_DIRECTLY. Clause 435."
+    },
+    {
+      "spell": 681007,
+      "kind": "metric_delta",
+      "variant": "mirror",
+      "label_suffix": "mirror",
+      "name": "Fool's Play (the copy casts the target's spell back at it)",
+      "quote": "and replicates their spells back on them",
+      "trigger_spell": 681007,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2653,
+        "target": "dummy",
+        "caster_entry": 300660
+      },
+      "before_expected": 0,
+      "expected": 8,
+      "after_at_least": 4,
+      "after_at_most": 8,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "dummy_casts_at_caster": {
+        "spell": 2653,
+        "casts": 8,
+        "gap_ms": 1500,
+        "lead_ms": 1000
+      },
+      "observe_source": "Fool's Play 681007: instant, RecoveryTime 120000 (reset), 17% base mana, DurationIndex 18 = 20000 ms; the clone 300660 (AscensionWitchDoctorSummons.cpp:181-184, level and faction of the owner at :270-283) takes the target as DataTarget (:342-352). The mirror (:666-697, witch_doctor_summon_events, ALLSPELLHOOK_ON_CAST): when any unit casts a non-triggered, non-positive spell that CanMirrorSpell accepts (:651-664: a SCHOOL_DAMAGE or weapon damage spell with no other effect and no spell_scripts row), every clone 300660 within 40 yd of that caster whose DataTarget is the caster gets DataSpell and ActionMirror, and casts the spell at its target, triggered (:359-370, in LOS and within 40 yd). The spell: Damage 100 (TEST) 2653, Effect[0] SCHOOL_DAMAGE only (Fire, 100), instant, no cost, no cooldown, RangeIndex 4 (30 yd), SpellVisual 34, no spell_scripts row (base spell_scripts.sql) and no script name. The harness creature cast was always TRIGGERED_FULL_MASK, which the hook skips (spell->IsTriggered()), so the dummy now casts it without trigger flags (creature cast triggered: false, ADR 1110 provisional; option dummy_casts_at_caster, ADR 1112 provisional): 8 casts at the caster, 1500 ms apart, in both phases. Before phase (the control, no clone): no 2653 hit by a creature 300660 on the dummy (0). Treatment: a real Fool's Play at the dummy, 1000 ms, then the 8 dummy casts: each is mirrored once by the clone, whose hit on the dummy is logged under the clone (originalCaster empty for the Fool), read with caster_entry 300660 (spell_damage_count, the caster's view of the combat log). Judged in [4, 8]: at most one mirror per dummy cast, and a level-60 creature's spell against the level-60 dummy misses about 4% of the time (Unit::MagicSpellHitResult), so fewer than 4 of 8 landing hits has a chance below 6e-6; a server without the mirror reads 0. Cast timing checked: instant casts; the last dummy cast ends about 13000 ms into the clone's 20000 ms. Clause 133 (claim 'and replicates their spells back on them')."
+    },
+    {
+      "spell": 803325,
+      "kind": "metric_delta",
+      "variant": "jinx_player_lasts",
+      "label_suffix": "jinx_player_lasts",
+      "name": "Hir'eek's Jinx (the fear lasts 8 sec on an enemy player in Cat Form)",
+      "quote": "(8 sec vs players)",
+      "trigger_spell": 803325,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 6,
+      "enemy_player_class": 11,
+      "enemy_casts_before": [
+        768
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803325,
+        "caster": "caster"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7800,
+      "expiry_wait_ms": 800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7700,
+          7950
+        ],
+        "expired": [
+          8500,
+          8800
+        ]
+      },
+      "observe_source": "Hir'eek's Jinx 803325: instant, 50 mana + 15% base mana, GCD 1500, RangeIndex 4 (30 yd), Speed 25, TargetCreatureType 1 (Beast), Mechanic 5 (fear), DurationIndex 64 = 40000 ms ($d), Effect[0] aura 7 MOD_FEAR, Effect[1] aura 31 +25% speed; no class script beyond the one-Jinx rule. Against a player the duration is the diminishing-returns limit: the fear group is duration limited and GetDiminishingReturnsLimitDuration (SpellMgr.cpp:341-411) returns 10000 ms for it, with 8000 ms only for the named spells (Amphibimorph 500952 at :359-361 among them), so the server is predicted to give 10 s and this entry to alert (fix note in cycle11/author-b.md). The target is an enemy Tauren Druid (race 6, class 11, PvP flagged at the PvP location) that learns and shifts into Cat Form 768 once at the start (option enemy_casts_before, ADR 1113 provisional): a player in a form takes the form's creature type (Unit::GetCreatureType through SpellShapeshiftForm, Cat = Beast), so the Beast-only Jinx is accepted. The caster carries beeg spellpen 823764 (precondition, the fear is binary). One real Jinx: the aura on the enemy about 7600 ms after it lands (read 7800 ms after the cast, the flight from the enemy's spot is 200 to 400 ms) and gone 800 ms later (aura age about 8400 ms): the 8000 ms end inside the G-19 band (5%, 400 ms) on both sides, both reads stamped in game time. Control: the uncast before phase reads 0 (the creature duration 40 s is jinx_lasts). Cast timing checked: instant, missile Speed 25. Clause 474 claim '(8 sec vs players)'."
+    },
+    {
+      "spell": 802100,
+      "kind": "metric_delta",
+      "variant": "range_inside",
+      "label_suffix": "range_inside",
+      "name": "Veil of Darkness (the pulse hits while the caster stands 0.5 yd inside the 40 yd range)",
+      "quote": "If you are within $806473r yds of the target",
+      "trigger_spell": 802100,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "dummy_distance": 38,
+      "cast_power": 1400,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806473,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 250,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2150,
+          2800
+        ]
+      },
+      "step_out": {
+        "dx": -4.275,
+        "after_ms": 750,
+        "hold_ms": 1200,
+        "radius": 40,
+        "side": "inside"
+      },
+      "observe_source": "Veil of Darkness 802100: instant, RecoveryTime 90000 (reset), 8% base mana, RangeIndex 5 (40 yd), no missile, DurationIndex 8 = 15000 ms, Effect[1] aura 23 every 1500 ms ($t2). AscensionWitchDoctorAuras.cpp:312-319: each tick casts Veil of Darkness 806473 at the target only while player->IsWithinDistInMap(target, 806473 GetMaxRange(false, player)) and in line of sight; 806473 RangeIndex 227 = 40 yd ($806473r). IsWithinDistInMap is 3D with both combat reaches (Object.cpp:1256-1283), so the edge lies 40 yd + the caster's and the dummy's reach from the centres (about 42.78 yd with 1.5 and 1.275). Layout: the dummy stands 38 yd out along x (inside the cast range); 750 ms after the cast (before the first tick at 1500 ms) the caster steps 4.275 yd along x, away from the dummy, to about 42.275 yd, inside the edge, is held there 1200 ms (past the tick) and steps back (option step_out, ADR 1119 provisional): the distance, both heights and both reaches are read right after the step and at the end of the hold, and a caster less than 0.25 yd on its side of the edge makes the verdict unmeasured. The caster carries beeg spellpen 823764 (precondition, the binary Veil, the lasts entry); the class file spell hit rating gives 100% spell hit. Read: spell_damage_count of 806473 on the dummy, about 2400 ms after the cast (game time window 2150 to 2800 ms, before the 3000 ms tick). Control: the uncast before phase reads 0. Cast timing checked: instant. Expected: 1 (the tick at 1500 ms lands); the control of range_beyond. Clause 336 claim \"If you are within $806473r yds of the target\"."
+    },
+    {
+      "spell": 802100,
+      "kind": "metric_delta",
+      "variant": "range_beyond",
+      "label_suffix": "range_beyond",
+      "name": "Veil of Darkness (no pulse hit while the caster stands 0.5 yd beyond the 40 yd range)",
+      "quote": "If you are within $806473r yds of the target",
+      "trigger_spell": 802100,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "dummy_distance": 38,
+      "cast_power": 1400,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806473,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 250,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2150,
+          2800
+        ]
+      },
+      "step_out": {
+        "dx": -5.275,
+        "after_ms": 750,
+        "hold_ms": 1200,
+        "radius": 40,
+        "side": "beyond"
+      },
+      "observe_source": "Veil of Darkness 802100: instant, RecoveryTime 90000 (reset), 8% base mana, RangeIndex 5 (40 yd), no missile, DurationIndex 8 = 15000 ms, Effect[1] aura 23 every 1500 ms ($t2). AscensionWitchDoctorAuras.cpp:312-319: each tick casts Veil of Darkness 806473 at the target only while player->IsWithinDistInMap(target, 806473 GetMaxRange(false, player)) and in line of sight; 806473 RangeIndex 227 = 40 yd ($806473r). IsWithinDistInMap is 3D with both combat reaches (Object.cpp:1256-1283), so the edge lies 40 yd + the caster's and the dummy's reach from the centres (about 42.78 yd with 1.5 and 1.275). Layout: the dummy stands 38 yd out along x (inside the cast range); 750 ms after the cast (before the first tick at 1500 ms) the caster steps 5.275 yd along x, away from the dummy, to about 43.275 yd, beyond the edge, is held there 1200 ms (past the tick) and steps back (option step_out, ADR 1119 provisional): the distance, both heights and both reaches are read right after the step and at the end of the hold, and a caster less than 0.25 yd on its side of the edge makes the verdict unmeasured. The caster carries beeg spellpen 823764 (precondition, the binary Veil, the lasts entry); the class file spell hit rating gives 100% spell hit. Read: spell_damage_count of 806473 on the dummy, about 2400 ms after the cast (game time window 2150 to 2800 ms, before the 3000 ms tick). Control: the uncast before phase reads 0. Cast timing checked: instant. Expected: 0 (no tick while the caster stands beyond the edge); range_inside is its control: the same step to 0.5 yd inside the edge keeps the tick, so the 0 is the range check. Clause 336 claim \"If you are within $806473r yds of the target\"."
+    },
+    {
+      "spell": 500478,
+      "kind": "hit_ratio",
+      "variant": "tiki_scales_heal",
+      "label_suffix": "tiki_scales_heal",
+      "name": "Tiki Splash (a Spirit in a Bottle modifier, Disciple of Sseratus, raises its heals)",
+      "quote": "Scales with modifiers to",
+      "expected": 1.596,
+      "observe_spell": 500478,
+      "metric": "spell_heal_total",
+      "caster": "caster",
+      "target": "caster",
+      "learn": [
+        500053
+      ],
+      "control": {
+        "casts": [
+          500962
+        ]
+      },
+      "treatment": {
+        "casts": [
+          500962
+        ],
+        "learn": [
+          300660
+        ]
+      },
+      "critical": false,
+      "trials": 6,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 5600,
+      "observe_source": "Tiki Splash 500478 (SpellFamilyFlags[2] 1, the Spirit in a Bottle flag; SpellLevel 24, MaxLevel 0, so CalculateLevelPenalty is 1.0), cast directly with Tiki Splash 500053 known and a real Base: Crystal Water 500962 cast before every trial in both arms (AscensionWitchDoctorAbilities.cpp:80 refuses it otherwise). Completion.cpp:377-381 turns Effect[0] into a periodic heal of 33 + 1 = 34 every 1250 ms for 5000 ms; the Doctor coefficient 0.25 (AscensionWitchDoctorCoefficients.h:19, healing) is folded into the base value by ModifySpellEffectBaseValue (Completion.cpp:652-672): 34 + 0.25 x 20000 = 5034 at the 20000 spell power fixture, and the native bonus of Unit::SpellHealingBonusDone adds nothing (spell_bonus_data 500478 is 0, BonusMultiplier zeroed). The modifier: Disciple of Sseratus 300660 Effect[0] aura 107 SPELLMOD_BONUS_MULTIPLIER +15 on class mask [2] 1, a Spirit in a Bottle modifier (its tooltip: the bonus healing scaling of Spirit in a Bottle) that reaches Tiki Splash through the shared flag: coeff 0 x 100 + 15, / 100 = 0.15, so +int(20000 x 0.15) = 3000 per heal (Unit.cpp:10856-10893, M-47). Control arm: no Disciple, mean heal 5034; treatment arm: 300660 learned, 8034; ratio 1.5960 (+59.6%, G-19 band 2.98 points), which a Tiki Splash that does not share the Bottle modifiers (1.0) cannot reach. The heals are a periodic heal with DmgClass 0 (no crit) and no die, deterministic; both arms share the done and taken percent modifiers. Each trial: Crystal Water (30% base mana), then Tiki Splash at the caster (mana set to 1000, 16% base mana), 5600 ms for its five heals (the channel lasts 5000 ms). The data-conformant readback is tiki_scales (the Mojo Beam cost modifier). Cast timing checked: both instant, Tiki RecoveryTime 5000 and Crystal Water 90000 reset by the harness. Clause 33 (500053 \"Scales with modifiers to Spirit in a Bottle.\")."
+    },
+    {
+      "spell": 681222,
+      "kind": "metric_delta",
+      "variant": "seeker_cost",
+      "label_suffix": "seeker_cost",
+      "name": "Call of Sseratus (a Serpent Ward cost modifier, Seeker, makes it affordable at 380 mana)",
+      "quote": "Scales with modifiers to",
+      "trigger_spell": 681222,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_spell": 705880,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 681222
+      },
+      "cast_power": 380,
+      "before_expected": 85,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 1500,
+      "disable_regeneration": true,
+      "observe_source": "Call of Sseratus 681222: instant, RecoveryTime 40000 (reset by the scenario), 28% base mana, DurationIndex 584 = 800 ms, Effect[0] aura 23 triggering the summon 572899 (4 Serpent Wards, the wards and wards_last entries), SpellFamilyFlags [0] 8192 and [1] 2: the flags of Serpent Ward 500960, so the native modifiers of Serpent Ward reach it. The modifier: Seeker 705880 (passive) Effect[0] aura 108 SPELLMOD_COST -20% on class mask [0] 8192, which Serpent Ward carries (\"Reduces the mana cost of your Wards, Idols, and Effigies\", the 705880 ward_cost entry). SpellInfo::CalcPowerCost: 28 x 1497 / 100 = 419 at the fixture base mana 1497; with Seeker int(419 x 0.8) = 335. The mana is set to 380 before the cast (cast_power), regeneration off. Before phase (Seeker unknown, the control): refused with SPELL_FAILED_NO_POWER (85); after phase (Seeker learned between the phases): accepted (0). A Call of Sseratus that does not take Serpent Ward modifiers is refused in both. cast_failure is the cast result, an event read. Cast timing checked: instant, the cooldown reset before each cast. Clause 138 (681222 \"Scales with modifiers to Serpent Ward.\"; one named modifier, the 500053 tiki_scales precedent)."
+    },
+    {
+      "spell": 712435,
+      "kind": "metric_delta",
+      "variant": "edge_splash",
+      "label_suffix": "edge_splash",
+      "name": "Bwonsamdi's Edge (the Spirit Eclipse explosion deals 40% more)",
+      "quote": "now deals $s1% increased damage when it explodes on impact",
+      "trigger_spell": 811117,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1400,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802712,
+        "target": "area1"
+      },
+      "before_expected": 135,
+      "expected": 324,
+      "expected_ratio": 2.4,
+      "tolerance": 0.02,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "dummy_distance": 5.0,
+      "area_dummies": [
+        1.0
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Bwonsamdi's Edge 712435 (passive): Effect[0] aura 108 SPELLMOD_DAMAGE +40% ($s1, BasePoints 39 + 1) on class mask [1] 8, which only Spirit Eclipse Explosion 802712 carries (SpellFamilyFlags[1] 8); the direct hits 802717 lack it. AscensionWitchDoctorAuras.cpp:228-237 (Apply of Spirit Eclipse 811117): _splash = SpellDamageBonusDone(Amount(802712) + 0.15 Shadow spell power + 0.15 ranged attack power), then ApplySpellMod(802712, SPELLMOD_DAMAGE, _splash), the +40%; :293-302 Copy(802712, _splash) to each other enemy within Radius(802712) of the target, once per Spirit; 802712 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Completion.cpp:350-356), so the modifier is applied once. The layout and fixtures of 811117 splash_damage: the afflicted dummy 5 yd out, the splash dummy area1 1 yd from the caster (4 yd apart, inside the 5 yd edge + both reaches), one Spirit (CasterAuraSpell 561136 set before every cast), Reg's Test Aura 984954 (no crit) and beeg spellpen 823764 (no partial resist) as phase auras. Both phases cast a real Spirit Eclipse; 712435 is learned between them. The splash total on area1 is cumulative: 135 without the talent (the splash_damage reading, [134, 136]), then 135 + int(135 x 1.4) = 135 + 189 = 324; ratio after / before 2.4 within 0.02 (2.0 without the talent, 2.96 if the +40% were applied twice). Cast timing checked: instant, the explosion within 250 ms, read 2500 ms after the cast, CategoryRecoveryTime 10000 reset by the scenario. Clause 307."
+    },
+    {
+      "spell": 705928,
+      "kind": "metric_delta",
+      "variant": "guile_share",
+      "label_suffix": "guile_share",
+      "name": "Serpent's Guile (each tick deals 15% of the Arrow's damage)",
+      "quote": "now deals an additional $s2% of its damage dealt",
+      "trigger_spell": 801674,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "dummy_distance": 15,
+      "cast_power": 2000,
+      "learn": [
+        707854
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": 20000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 705929,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 801674,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.6,
+      "tolerance": 0.005,
+      "wait_ms": 5500,
+      "expire_ms": 4500,
+      "observe_source": "Serpent's Guile 705928 Effect[1] BasePoints 14 + 1 = 15% ($s2). AscensionWitchDoctorAbilities.cpp:245-246 (OnSpellHitResult): a damaging Malefic Arrow (IsArrow) with the talent calls Copy(player, target, 705929, damage x 15 / 100), where damage is the dealt damage of the hit (Spell.cpp:2957-3059, scriptDamageResult), and Copy (Completion.cpp:93-97) casts 705929 with that base point, the amount of each tick of its periodic damage aura (aura 3, 1000 ms, 4000 ms: four ticks, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, Completion.cpp:595-615). The tooltip states 15% of the damage dealt every 1 sec for 4 sec, so the four ticks over the hit are 4 x 0.15 = 0.60 of the Arrow. Layout and timing of the ticks entry (Arrow 801674 at the dummy 15 yd out, Malefic Arrow 707854 learned in both phases, the four ticks landed 5500 ms after the cast); beeg spellpen 823764 (no partial resist on the Arrow or the Nature ticks) and 20000 spell power (the Arrow's $spn term, so the hit is large and the integer truncation of each tick, under 4 points in all, moves the share by less than 0.002). Read: the 705929 damage on the dummy over the 801674 damage on the dummy, both as phase increments (ratio_to_metric increments, ADR 1117 provisional): 0 before the talent is learned (the control, an Arrow without ticks), 0.60 within 0.005 after. A 15% total spread over the ticks reads 0.15, a missing talent 0. Crits of the Arrow change the hit and its ticks alike. Cast timing checked: instant, Speed 40, ticks 1000 to 4000 ms after the landing. Clause 232 claim 'Your Malefic Arrow now deals an additional $s2% of its damage dealt'."
+    },
+    {
+      "spell": 802719,
+      "kind": "summon_edge",
+      "variant": "field_owner_inside",
+      "label_suffix": "field_owner_inside",
+      "name": "Big Bad Voodoo (the field holds on the caster 0.5 yd inside its 15 yd reach of the spirit)",
+      "quote": "While within $802718a1 yds,",
+      "summon_spell": 802719,
+      "summon_entry": 310659,
+      "radius": 15,
+      "role": "owner",
+      "owner_side": "inside",
+      "cell_search": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 802718
+      },
+      "inside_yd": -0.5,
+      "beyond_yd": 0.5,
+      "settle_ms": 1000,
+      "wait_ms": 3000,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime 300000 (reset by the scenario), 25% base mana, DurationIndex 31 = 8000 ms, Effect[0] SUMMON at TARGET_DEST_CASTER of the spirit 310659 (AscensionWitchDoctorSummons.cpp:171-230, placed at the cast point; display 142802 set at :299-305, so its combat reach is only known at run time). Every second the spirit casts the field 802718 on itself with the owner as original caster (:564-565 and :378-383, the aura set to 2200 ms), and Completion.cpp:499-504 turns the three APPLY_AREA_AURA_OWNER effects of 802718 into APPLY_AREA_AURA_PET: UnitAura::FillTargetMap (SpellAuras.cpp:2953-2962) adds the spirit and its owner when GetUnitOwner()->IsWithinDistInMap(owner, radius), the 15 yd of 802718 (SpellRadius 18, $802718a1) plus both combat reaches, 3D, no grid search (cell_search false). Layout (kind summon_edge role owner, ADR 1111 provisional): 1000 ms after the cast the caster itself is placed by the harness at the spirit (ADR 1110 provisional), 0.5 yd inside 15 yd + the spirit's reach + its own reach, at the spirit's height; the positions and reaches are read at the start and the end of a 3000 ms window (the spirit lives 8000 ms), and a margin under 0.25 yd makes the verdict unmeasured. Read: aura 802718 on the caster at the end of the window, after three field refreshes. Expected 1 (the field holds); the control of field_owner_beyond. Cast timing checked: instant. Clause 483 (802719 \"While within $802718a1 yds,\")."
+    },
+    {
+      "spell": 802719,
+      "kind": "summon_edge",
+      "variant": "field_owner_beyond",
+      "label_suffix": "field_owner_beyond",
+      "name": "Big Bad Voodoo (the field leaves the caster 0.5 yd beyond its 15 yd reach of the spirit)",
+      "quote": "While within $802718a1 yds,",
+      "summon_spell": 802719,
+      "summon_entry": 310659,
+      "radius": 15,
+      "role": "owner",
+      "owner_side": "beyond",
+      "cell_search": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 802718
+      },
+      "inside_yd": -0.5,
+      "beyond_yd": 0.5,
+      "settle_ms": 1000,
+      "wait_ms": 3000,
+      "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime 300000 (reset by the scenario), 25% base mana, DurationIndex 31 = 8000 ms, Effect[0] SUMMON at TARGET_DEST_CASTER of the spirit 310659 (AscensionWitchDoctorSummons.cpp:171-230, placed at the cast point; display 142802 set at :299-305, so its combat reach is only known at run time). Every second the spirit casts the field 802718 on itself with the owner as original caster (:564-565 and :378-383, the aura set to 2200 ms), and Completion.cpp:499-504 turns the three APPLY_AREA_AURA_OWNER effects of 802718 into APPLY_AREA_AURA_PET: UnitAura::FillTargetMap (SpellAuras.cpp:2953-2962) adds the spirit and its owner when GetUnitOwner()->IsWithinDistInMap(owner, radius), the 15 yd of 802718 (SpellRadius 18, $802718a1) plus both combat reaches, 3D, no grid search (cell_search false). Layout (kind summon_edge role owner, ADR 1111 provisional): 1000 ms after the cast the caster itself is placed by the harness at the spirit (ADR 1110 provisional), 0.5 yd beyond 15 yd + the spirit's reach + its own reach, at the spirit's height; the positions and reaches are read at the start and the end of a 3000 ms window (the spirit lives 8000 ms), and a margin under 0.25 yd makes the verdict unmeasured. Read: aura 802718 on the caster at the end of the window, after three field refreshes. Expected 0: the owner copy leaves at the next target update (500 ms) once the caster is beyond the edge; field_owner_inside is the control (the same placement 0.5 yd inside keeps it), so the 0 is the radius. Cast timing checked: instant. Clause 483 (802719 \"While within $802718a1 yds,\")."
     }
   ],
   "player_observations": [],
