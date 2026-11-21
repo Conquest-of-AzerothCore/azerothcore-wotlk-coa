@@ -62,11 +62,12 @@ class RefusableTargetCastsTests(unittest.TestCase):
             reads = {label: value for label, value in reads.items() if value is not None}
             return judge_behaviour(base_verdict(expectation), FakeRun(reads), expectation).status
 
-        self.assertEqual(judged(0, 22), 'ok')
-        self.assertEqual(judged(0, 0), 'ok')
-        self.assertEqual(judged(0, 0, treatment_aura=1), 'alert')
+        self.assertEqual(judged(255, 22), 'ok')
+        self.assertEqual(judged(255, 255), 'ok')
+        self.assertEqual(judged(255, 255, treatment_aura=1), 'alert')
         self.assertEqual(judged(22, 22), 'unmeasured')
-        self.assertEqual(judged(0, None), 'unmeasured')
+        self.assertEqual(judged(0, 22), 'unmeasured')
+        self.assertEqual(judged(255, None), 'unmeasured')
 
 
 if __name__ == '__main__':

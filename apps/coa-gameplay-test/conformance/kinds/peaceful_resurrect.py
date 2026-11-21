@@ -7,7 +7,7 @@ from behaviours import (BEHAVIOUR_CAST_COMBAT, CAST_COMBAT_RESURRECT_RESPONSE_OP
 from hits import base_mana_steps, creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import ALLY, TARGET, Expectation, dataset, facts_of
+from values import ALLY, CAST_MARGIN_MS, TARGET, Expectation, dataset, facts_of
 
 KIND = 'peaceful_resurrect'
 ORDER = 47
@@ -21,6 +21,7 @@ CLAIM_READINGS = {'health': ('alive_unoffered', 'cast_failure_peaceful', 'alive_
                   'mana': ('alive_unoffered', 'cast_failure_peaceful', 'alive_peaceful', 'mana_peaceful'),
                   'refusal': ('combat_peaceful', 'cast_failure_peaceful', 'alive_peaceful', 'combat_fighting',
                               'alive_fighting', 'cast_failure_fighting')}
+PRECONDITIONS = {'combat_peaceful': 0, 'combat_fighting': 1}
 
 
 @dataclass(frozen=True)
@@ -30,12 +31,13 @@ class PeacefulResurrectSpec:
     quote: str
     claims: tuple[tuple[str, str], ...]
     label_suffix: str
+    combat_cast: int | None = None
 
 
 def peaceful_resurrect_spec(entry: dict) -> PeacefulResurrectSpec:
     claims = tuple((raw['claim'], raw.get('quote', entry['quote'])) for raw in entry['claims'])
     spec = PeacefulResurrectSpec(entry['spell'], entry['name'], entry['quote'], claims,
-                                 entry.get('label_suffix', 'peaceful'))
+                                 entry.get('label_suffix', 'peaceful'), entry.get('combat_cast'))
     names = [claim for claim, _ in spec.claims]
     if not names or len(set(names)) != len(names) or not set(names) <= set(CLAIM_READINGS):
         raise ValueError(f'{spec.spell} {KIND} needs distinct claims from {sorted(CLAIM_READINGS)}')
@@ -84,9 +86,23 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
                 + [{**step, 'actor': CASTER} for step in required_aura_steps(facts)]
                 + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': ALLY}])
 
+    def engage() -> list[dict]:
+        if spec.combat_cast is None:
+            return [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                    {'action': 'wait', 'ms': CAST_COMBAT_SETTLE_MS}]
+        engage_facts = facts_of(records, spec.combat_cast)
+        recovery = int(records.field('Spell', spec.combat_cast, 'StartRecoveryTime') or 0)
+        return (base_mana_steps(class_file, engage_facts)
+                + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.combat_cast}]
+                + [{**step, 'actor': CASTER} for step in required_aura_steps(engage_facts)]
+                + [{'action': 'cast', 'actor': CASTER, 'spell': spec.combat_cast, 'target': TARGET},
+                   {'action': 'wait', 'ms': max(CAST_COMBAT_SETTLE_MS,
+                                                engage_facts.cast_time_ms + recovery + CAST_MARGIN_MS)}])
+
+    learned = [spec.spell] + ([spec.combat_cast] if spec.combat_cast is not None else [])
     steps = (base_steps(class_file)
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
-                {'action': 'die', 'actor': ALLY}]
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
+             + [{'action': 'die', 'actor': ALLY}]
              + accept('accept with no resurrection offered')
              + [measurement(label['alive_unoffered'], ALLY, 'alive'),
                 measurement(label['combat_peaceful'], CASTER, 'combat')]
@@ -97,10 +113,9 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
              + [measurement(label['alive_peaceful'], ALLY, 'alive'),
                 measurement(label['health_peaceful'], ALLY, 'health'),
                 measurement(label['mana_peaceful'], ALLY, 'power', power=0),
-                {'action': 'die', 'actor': ALLY},
-                {'action': 'attack', 'actor': CASTER, 'target': TARGET},
-                {'action': 'wait', 'ms': CAST_COMBAT_SETTLE_MS},
-                measurement(label['combat_fighting'], CASTER, 'combat')]
+                {'action': 'die', 'actor': ALLY}]
+             + engage()
+             + [measurement(label['combat_fighting'], CASTER, 'combat')]
              + attempt()
              + [{'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                 measurement(label['cast_failure_fighting'], CASTER, 'cast_failure', spell=spec.spell),
@@ -114,8 +129,10 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
                      f'SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL). The dead ally first sends the resurrection response '
                      f'with no offer (it stays dead). Out of combat (combat 0) the cast completes (cast_failure '
                      f'{NO_CAST_FAILURE} after its {facts.cast_time_ms} ms cast), the ally accepts and is alive with '
-                     f'{health} health and {mana} mana (regeneration off). The ally dies again, the caster attacks '
-                     f'the dummy (combat 1), and the same cast is refused with '
+                     f'{health} health and {mana} mana (regeneration off). The ally dies again, the caster '
+                     + (f'casts {spec.combat_cast} at the dummy and waits past its global cooldown'
+                        if spec.combat_cast is not None else 'attacks the dummy')
+                     + f' (combat 1), and the same cast is refused with '
                      f'{SPELL_FAILED_AFFECTING_COMBAT} (SPELL_FAILED_AFFECTING_COMBAT); the ally\'s response finds no '
                      f'offer and it stays dead.'),
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY,
@@ -142,6 +159,12 @@ def peaceful_resurrect_verdict(base, run, model: dict):
         return replace(base, explanation=missing_measurement(run, missing))
     wrong = {reading: run.values[label] for reading, (label, expected) in readings.items()
              if abs(float(run.values[label]) - float(expected)) > 1e-9}
+    unmet = sorted(reading for reading in wrong if reading in PRECONDITIONS)
+    if unmet:
+        read = ', '.join(f'{reading} {float(run.values[readings[reading][0]]):g} (needs {PRECONDITIONS[reading]})'
+                         for reading in unmet)
+        return replace(base, status='unmeasured', explanation=f'{read}: the arm did not reach its combat state, so '
+                                                              f'the claim is not read')
     final_label, final_expected = list(readings.values())[-1]
     measured = float(run.values[final_label])
     status = 'ok' if not wrong else 'alert'

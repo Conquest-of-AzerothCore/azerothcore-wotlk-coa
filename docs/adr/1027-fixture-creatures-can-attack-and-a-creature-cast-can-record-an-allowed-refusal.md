@@ -21,7 +21,7 @@ harness"):
   state aggressive, `CreatureAI::AttackStart`, then `Unit::Attack` if the AI did not engage; the step fails unless the
   target is the victim; `stop: true` stops the melee and sets the creature passive). The creature `cast` accepts
   `allowed_refusal` (a `SpellCastResult`): the step also passes when the cast is refused with exactly that code. Every
-  creature cast records its result, read by `creature_cast_result` (creature actor, `spell`; -1 before any cast).
+  creature cast records its result, read by `creature_cast_result` (creature actor, `spell`; -1 before any cast, SPELL_CAST_OK 255 for a cast that started).
 - Two `metric_delta` option modules: `target_attack_window` (the dummy melees the caster from the control phase; each
   judged reading counts its swings over the window, from a snapshot) and `refusable_target_casts` (dummy casts after
   each trigger with an allowed refusal, their results read; a refused control cast is unmeasured).

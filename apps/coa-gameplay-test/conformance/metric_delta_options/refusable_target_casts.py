@@ -1,6 +1,7 @@
 from dataclasses import dataclass, replace
 
 NAME = 'refusable_target_casts'
+SPELL_CAST_OK = 255
 ORDER = 27
 JUDGED_MOMENTS = ('before', 'after')
 MAX_SPELL_CAST_RESULT = 254
@@ -77,10 +78,10 @@ def verdict(verdict, run, casts: dict):
     if any(value is None for values in readings.values() for value in values):
         return replace(verdict, status='unmeasured', explanation=f'{verdict.explanation}; a dummy cast result is '
                                                                  f'missing')
-    if any(value != 0 for value in readings['before']):
+    if any(value != SPELL_CAST_OK for value in readings['before']):
         return replace(verdict, status='unmeasured',
                        explanation=f'{verdict.explanation}; the control phase dummy cast was refused '
                                    f'({readings["before"]}), so the control is not the stated arm')
     results = ', '.join(f'{value:g}' for value in readings['after'])
-    return replace(verdict, explanation=f'{verdict.explanation}; dummy cast results: control 0, treatment {results} '
+    return replace(verdict, explanation=f'{verdict.explanation}; dummy cast results: control {SPELL_CAST_OK} (cast OK), treatment {results} '
                                         f'(refusal {casts["refusal"]} allowed)')

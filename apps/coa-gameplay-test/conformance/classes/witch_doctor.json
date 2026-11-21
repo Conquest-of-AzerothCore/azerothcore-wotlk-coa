@@ -17880,194 +17880,6 @@
       "observe_source": "Hexbreak 806240 (instant, CastingTimeIndex 1, GCD 1500, 25% base mana, no cooldown, Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue 2 = Curse, EffectDieSides 1 and BasePoints 0 so $s1 = 1 curse, TARGET_UNIT_TARGET_ALLY; tooltip \"dispelling $s1 curse effect$?s572870[s][]\"). Blessing of Hir'eek 572870 Effect[0] aura 107 SPELLMOD_FLAT, EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectSpellClassMask word 1 8388608 = Hexbreak SpellFamilyFlags[1], BasePoints 0 + 1 = +1: a native modifier of the dispel count, no class code (script_touch False). The Disciplined Mind 681483 dispel_count entry is the precedent for the harness set_aura of the modifier passive on the caster as a precondition fixture: the subject is the number of curses the real Hexbreak cast removes, not the passive itself. Cost reason of that fixture: dispel_count arms take auras only (no learn option, tool note T-TC-1 in cycle9/author-TC.md), and a learn of the passive 572870 (Attributes 64) applies the same aura 107 (pitfall 9), so the set state equals the learned one. The ally carries three curse fixtures set by harness set_aura (never the claim's subject), all SpellFamilyName 0 so none is a SPELL_SPECIFIC_CURSE: Curse of Weakness 18267 (aura 79, DurationIndex 9 = 30 s, the Witch Hunter 802278 curses fixture), Curse of Blood 8282 (aura 14, DurationIndex 4) and Curse of the Deadwood 13583 (aura 118, DurationIndex 4), each Spell.dbc Dispel 2, TARGET_UNIT_TARGET_ENEMY (negative), no spell_group row in the base data. Repair of the cycle 9 sweep result (TC): the earlier fixtures were three warlock curses (702, 1714, 1490, SpellFamilyName 5), which SpellInfo::GetSpellSpecific (SpellInfo.cpp:2453-2457) makes SPELL_SPECIFIC_CURSE, exclusive per caster (IsAuraExclusiveBySpecificPerCasterWith, SpellInfo.cpp:1737-1750): each set_aura replaced the one before, so the ally carried only 1490 before every cast ([1, 1], unmeasured). Each cast is made for real (reset cooldown, cast, wait the GCD) and each fixture is read before and 800 ms after it. Control arm: no passive, exactly 1 of the 3 curses is removed per cast; passive arm: exactly 2 (never 3, so \"an additional\" is one, not all). 2 trials per arm keep four Hexbreak casts (about 374 mana each) inside the 1497 base mana pool. Cast timing checked: instant, 800 ms read after each cast. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
-      "spell": 501117,
-      "kind": "ally_heal_reach",
-      "variant": "branches",
-      "name": "Mojo Beam (a heal grows a branch, which heals at once and keeps healing)",
-      "quote": "Each time Mojo Beam heals a target it will grow a new branch.",
-      "allies": [
-        {
-          "id": "beam_a",
-          "dx": 22,
-          "dy": 0
-        },
-        {
-          "id": "beam_b",
-          "dx": 22,
-          "dy": 12
-        },
-        {
-          "id": "beam_c",
-          "dx": 22,
-          "dy": 24
-        },
-        {
-          "id": "beam_far",
-          "dx": -10,
-          "dy": 30
-        },
-        {
-          "id": "beam_ungrouped",
-          "dx": 22,
-          "dy": -10,
-          "grouped": false
-        }
-      ],
-      "casts": [
-        {
-          "spell": 501117,
-          "target": "beam_a",
-          "watch_ms": 3000,
-          "poll_ms": 250,
-          "refill_power": 1497
-        }
-      ],
-      "checks": [
-        {
-          "name": "branch_grow",
-          "judge": "reach",
-          "spell": 501117,
-          "reference": "beam_a",
-          "minimum": 2,
-          "healed": [
-            "beam_b",
-            "beam_c"
-          ],
-          "unhealed": [
-            "beam_far",
-            "beam_ungrouped"
-          ]
-        },
-        {
-          "name": "branch_heals",
-          "judge": "offsets",
-          "spell": 501117,
-          "quote": "Each new branch immediately heals and continues healing.",
-          "reference": "beam_a",
-          "minimum": 2,
-          "offsets": {
-            "beam_b": 0,
-            "beam_c": -1
-          }
-        }
-      ],
-      "observe_source": "AscensionWitchDoctorBrewing.cpp:119-128 (Apply) makes the Beam target the first branch; Tick (:167-213) runs every 500 ms (Effect[0] amplitude 500, the 8000 ms channel of DurationIndex 31): for each branch of the tick's snapshot it heals the branch (Heal, :129-165, HealBySpell under spell 501117) and, while fewer than 8 branches, grows the first ally of Allies(player, branch, 15 yd) (Completion.cpp:62-77: alive, LOS, Friendly(), which needs IsInRaidWith, sorted by health then GUID) that is not a branch and is within 40 yd of the caster, and heals it at once. Allies() searches IsWithinDistInMap with both combat reaches (1.5 + 1.5), so 15 yd reach about 18 yd between centres. Layout (yd from the caster, world x and y): beam_a (22, 0) is the Beam target; beam_b (22, 12) is 12 from beam_a; beam_c (22, 24) is 12 from beam_b and 24 from beam_a (6 yd past the reach); beam_far (-10, 30) is grouped but 32.6 yd or more from every branch and 31.6 from the caster (in the 40 yd cap); beam_ungrouped (22, -10) is 10 from beam_a but not in the group; the caster is 22 yd or more from every ally, so it is never a branch. Expected per tick n: tick 1 heals beam_a and grows beam_b (healed at once); tick 2 heals beam_a, then beam_b, which grows beam_c (healed at once); later ticks heal all three. So beam_b and beam_c are healed (branch_grow: a heal grows a branch, and a branch grows its own), beam_far and beam_ungrouped never (the search is local and grouped only); and in any window that starts before the cast, beam_b reads exactly beam_a's count (healed in the tick it was grown, every tick since) and beam_c exactly one less (grown on tick 2) (branch_heals). A server without branches reads 0 on beam_b and beam_c and fails branch_grow; a branch that waits a tick before its first heal reads -1 and -2 and fails branch_heals. Limit of the unhealed side: no heal of this cast can reach beam_far or beam_ungrouped when the server is right, so branch_grow has no witness_spell, and their 0 is not told apart from a line of sight, spawn or relocation fault; a Beam that grows past the 15 yd reach or outside the group still alerts on them, and the healed beam_b and beam_c (relocated by the same steps, on open flat ground) show the layout was reached. Real cast: Mojo Beam 501117 (instant, RecoveryTime 14000 reset, GCD 1500, ManaCostPercentage 15 = 224 of the 1497 base mana set before the cast) at beam_a; the window is 3000 ms (6 ticks). Power: each tick costs max(1, $m2) x branches x (100 + 10 x (tick - 1)) / 200 (Brewing.cpp:191-197; $m2 = 316 at level 60: BasePoints 315 + DieSides 1, the per-level 7.25 starts at SpellLevel 60), up to 711 at tick 6 with three branches, and the Beam stops when mana runs short. The mana is set to 1497 (at or below the base, pitfall 6) every 250 ms during the window as a precondition fixture: a refill cannot heal or grow a branch, and the mana growth itself is clause 42, not judged here. Heal crits do not matter: only counts are judged. No set_aura is used. reference beam_a needs at least 2 heals in the window, else unmeasured.",
-      "label_suffix": "branches"
-    },
-    {
-      "spell": 707617,
-      "kind": "ally_heal_reach",
-      "variant": "wave",
-      "name": "Mojo Wave (each Mojo Beam heal heals the 2 lowest-health nearby allies for 50%)",
-      "quote": "Healing with Mojo Beam now heals up to $712453i of the lowest health nearby allies",
-      "gate_spell": 707617,
-      "allies": [
-        {
-          "id": "wave_a",
-          "dx": 22,
-          "dy": 0,
-          "health": 10000,
-          "maximum": 100000
-        },
-        {
-          "id": "wave_b",
-          "dx": 22,
-          "dy": 6,
-          "health": 20000,
-          "maximum": 100000
-        },
-        {
-          "id": "wave_c",
-          "dx": 22,
-          "dy": -6,
-          "health": 30000,
-          "maximum": 100000
-        },
-        {
-          "id": "wave_d",
-          "dx": 28,
-          "dy": 0,
-          "health": 90000,
-          "maximum": 100000
-        }
-      ],
-      "casts": [
-        {
-          "spell": 501117,
-          "target": "wave_a",
-          "watch_ms": 3000,
-          "poll_ms": 250,
-          "refill_power": 1497,
-          "end_ms": 5500
-        }
-      ],
-      "checks": [
-        {
-          "name": "wave_lowest",
-          "judge": "reach",
-          "spell": 712453,
-          "reference": "wave_a",
-          "witness_spell": 501117,
-          "minimum": 2,
-          "healed": [
-            "wave_a",
-            "wave_b",
-            "wave_c"
-          ],
-          "unhealed": [
-            "wave_d"
-          ]
-        },
-        {
-          "name": "wave_cap",
-          "judge": "per_source",
-          "spell": 712453,
-          "source": 501117,
-          "per_event": 2,
-          "minimum": 2
-        },
-        {
-          "name": "wave_share",
-          "judge": "share",
-          "spell": 712453,
-          "quote": "for $s1% of the healing done",
-          "source": 501117,
-          "expected": 0.5,
-          "minimum": 2,
-          "band": [
-            0.0,
-            1.0
-          ],
-          "band_reason": "rounding only: Copy passes effective / 2 as an integer base point, which drops up to 0.5, and SpellEffectInfo::CalcValue adds 1 for DieSides 1 (712453 EffectDieSides[0] 1, SpellInfo.cpp:501-506), so each Wave reads effective / 2 + 0.5 to + 1"
-        }
-      ],
-      "observe_source": "AscensionWitchDoctorBrewing.cpp:129-165 (Heal): after every Mojo Beam heal with effective healing > 0 and Mojo Wave 707617 on the caster (Wave, Completion.h:160), Allies(player, target, 15 yd) less the target, sorted by health percent then GUID (Completion.cpp:62-77), and the first 2 (cap 2, $712453i: 712453 MaxAffectedTargets 2) take Copy(player, ally, WaveHeal 712453, effective / 2) (Completion.cpp:93-97, CastCustomSpell BASE_POINT0). 712453: AttributesEx2 SPELL_ATTR2_CANT_CRIT, AttributesEx3 IGNORE_CASTER_MODIFIERS. 707617 is a passive (Attributes 64), so the harness learn applies its aura. Layout (yd from the caster): wave_a (22, 0) the Beam target, wave_b (22, 6), wave_c (22, -6), wave_d (28, 0): every pair is 12 yd apart or less (inside 15 plus both reaches), the caster 22 yd or more from each (never in Allies()). Health is set at each phase start with a 100000 maximum (10%, 20%, 30%, 90%, the set_health maximum fixture): the heals of a 3000 ms window move each ally by under 3 points, so the order never changes and no heal overheals. Branches grow (clauses 40 and 41) and every ally is healed by the Beam, so every Beam heal has three eligible allies, and wave_d, the highest, is never one of the two lowest: wave_lowest needs 712453 heals on wave_a, wave_b and wave_c, none on wave_d while wave_d takes Beam heals (the witness: it is grouped and in reach), and none in the control phase; wave_cap needs exactly 2 Wave heals per Beam heal (no Beam overheal, else unmeasured), and 0 in the control phase; wave_share judges the mean Wave heal against 0.5 x the mean effective Beam heal, inside the rounding band [+0, +1] (about 139 against 277 at the reference stats), with 0 Wave heals in the control phase. A server without Mojo Wave reads 0 Wave heals and fails wave_lowest (the three lowest read 0) and wave_cap (0 against 2 per Beam heal); wave_share then has fewer than its minimum of 2 Wave heals and reads unmeasured, not alert, so the absence of the behaviour is shown by the first two and wave_share judges only the amount of Wave heals that exist. One that picks other than the lowest heals wave_d; one that heals more than 2 fails wave_cap; one that heals another share fails wave_share. Phases: control (707617 not known) and treatment (learned), each a real Mojo Beam 501117 at wave_a (instant, RecoveryTime 14000 reset, GCD 1500, 15% = 224 of the 1497 base mana set before the cast), watched 3000 ms with the mana set to 1497 every 250 ms (precondition fixture: the per-tick drain grows with the branches, clause 42; the refill cannot heal). The control phase then waits 5500 ms without refills, past the 8000 ms channel, so its heals cannot reach the treatment window; the reads bracket each window. Beam crits change the effective amount, not the share, so no crit fixture is set. No set_aura is used.",
-      "label_suffix": "wave"
-    },
-    {
-      "spell": 803624,
-      "kind": "peaceful_resurrect",
-      "variant": "peaceful",
-      "name": "Reclaim Soul (resurrects with 820 health and 1030 mana out of combat, refused in combat)",
-      "quote": "Brings a dead ally back to life with $s1 health",
-      "label_suffix": "peaceful",
-      "claims": [
-        {
-          "claim": "health",
-          "quote": "Brings a dead ally back to life with $s1 health"
-        },
-        {
-          "claim": "mana",
-          "quote": "and $q1 mana."
-        },
-        {
-          "claim": "refusal",
-          "quote": "Cannot be cast when in combat."
-        }
-      ],
-      "observe_source": "Reclaim Soul 803624: Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW, EffectBasePoints[0] 819 + DieSides 1 = 820 health ($s1), EffectMiscValue[0] 1030 mana ($q1); Attributes 268500992 holds SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000), so Spell::CheckCast (Spell.cpp:5942-5943, SpellInfo::CanBeUsedInCombat) refuses the cast while the caster is in combat with SPELL_FAILED_AFFECTING_COMBAT (1). CastingTimeIndex 170 = 8000 ms, GCD 1500, ManaCostPercentage 30 = 449 of the 1497 base mana (set before each attempt). No Witch Doctor code touches 803624. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) the dead ally takes with CMSG_RESURRECT_RESPONSE 348 (the cast_combat shape of ADR 0537). One scenario, two arms: the ally dies and first answers with no offer (stays dead: the control of the accept); out of combat (combat 0) the cast completes (cast_failure 0 after 8500 ms), the ally accepts and reads alive 1, health 820 and mana 1030 (regeneration off for the ally); then the ally dies again, the caster attacks the dummy (combat 1) and the same cast is refused (cast_failure 1), and the ally's answer finds no offer (alive 0). health and mana each need the control, the accepted cast and its amount; refusal needs both arms, so a server that allows the cast in combat reads 0 there and one that refuses it everywhere reads 1 out of combat. The out-of-combat arm runs first, because the harness keeps the last refusal reason per spell. No set_aura is used."
-    },
-    {
       "spell": 802487,
       "kind": "ally_heal_reach",
       "variant": "unstable_radius",
@@ -19675,105 +19487,6 @@
       "observe_source": "Potion Toss 801661 (instant, CategoryRecoveryTime 15000 reset by the harness, 18% base mana, CasterAuraSpell 801702 set by the generator as a precondition fixture) at the caster makes the Jungle Shrooms potion 802973 when Ingredient: Jungle Shrooms 801660 is brewed (AscensionWitchDoctorBrewing.cpp:86-107, PotionEffects): 802973 DurationIndex 85 = 18000 ms ($802973d), Effect[0] aura 8 PERIODIC_HEAL EffectAmplitude 3000 ($802973t1, no EXTRA_INITIAL_PERIOD), BasePoints 9 + DieSides 2 + 1.25 per level over 49 levels. The Ingredient is a real cast before the Potion Toss (setup, 1700 ms settle, learned with the Brewer 92085), as in the Bloodthistle potion_lasts entry. CalcValue of effect 0 at level 60: 9 + int32(1.25 x (60 - SpellLevel 11)) = 9 + 61 + die 1..2 = 71 or 72 (the stock engine truncates the per-level term, SpellInfo.cpp:497, ADR 0147); the class coefficient table has no row for 802973, so no spell power term is added and the reference spell power is 0. The raw heal of the first tick (at 3000 ms) is read 3300 ms after the Potion Toss: 71 to 72. Spell crit is removed with Reg's Test Aura 984954 (a precondition fixture; a crit would read about 106). Control: the before phase casts nothing (cast_in_before false), 0. The effect_value #6 label (unreadable: $802973s1 of a foreign spell) is replaced by this read (M-19). Clause 301 (\"Heal the target ally for $802973s1\"). Cast timing checked: both instant, first tick 3000 ms."
     },
     {
-      "spell": 504462,
-      "kind": "metric_delta",
-      "variant": "puppets_faster",
-      "label_suffix": "puppets_faster",
-      "name": "Voodoo Mind (Shadow Puppets ticks 10% faster per Spirit: 5 Spirits)",
-      "quote": "now ticks $s1% faster",
-      "trigger_spell": 501087,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 802745,
-        "target": "dummy"
-      },
-      "setup_casts": [
-        501136
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1400,
-      "before_expected": 4,
-      "expected_gain": 7,
-      "expected": 11,
-      "tolerance": 0.5,
-      "wait_ms": 2850,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          2820,
-          2880
-        ]
-      },
-      "observe_source": "Voodoo Mind 504462 (passive, every effect dummied at load, AscensionWitchDoctorCompletion.cpp:297-298): Effect[0] BasePoints -11 + 1 = -10 ($s1 = 10%), Effect[1] BasePoints 9 + 1 = 10 ($s2). The scripts apply them for Shadow Puppets (SpellFamilyFlags[0] 8, rank 501087 here: instant, 15% base mana, RecoveryTime 18000 reset by the scenario, DurationIndex 27 = 3000 ms, Effect[0] aura 227 EffectAmplitude 750, AttributesEx5 0x200 so the first tick is at the apply): the period is amplitude x 100 / (100 + 10 x Spirits) (AscensionWitchDoctorAuras.cpp:175-178) and the duration x (100 + Spirits x 10) / 100 (AscensionWitchDoctorAbilities.cpp:144-145). Mirage 501136 (instant, 29% base mana, StartRecoveryTime 1500, RecoveryTime 180000 reset by the setup step) is the real source of 5 Spirits (GainSpirit(5), Abilities.cpp:345-346): period 750 x 100 / 150 = 500 ms, duration 3000 x 150 / 100 = 4500 ms. Each puppet tick also collects a Spirit, which keeps the stacks at the cap of 5. The strike 802745 (Speed 26, about 115 ms to a dummy 3 yd away, first stamped about 200 ms) lands once per tick, read as spell_damage_count of 802745 on the dummy (logged under the player, pitfall 14) at 2850 ms after the Puppets cast (window 2820 to 2880 ms in game time). Without Voodoo Mind (the before phase, the control, Mirage and Puppets cast the same way): ticks at 0, 750, 1500, 2250 -> 4 hits at 2850 ms (the fifth is the tick at the 3000 ms end, landing about 3115 ms, which falls in the 500 ms between the phases, so the cumulative count is 5 at the start of the after phase). With it learned between the phases: ticks every 500 ms, hits at about 115, 615, 1115, 1615, 2115 and 2615 ms -> 6 hits at 2850 ms (the seventh would land at about 3115 ms), so the after reading is 4 + 1 + 6 = 11, a gain of 7 over the before reading 4; a period of 750 would give 9 (gain 5). The count 6 at the window brackets the period between about 461 and 538 ms, inside the claim band for 5 Spirits at 10 +- 2 points per Spirit (469 to 536 ms). Clause 86. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 2850 ms."
-    },
-    {
-      "spell": 504462,
-      "kind": "metric_delta",
-      "variant": "puppets_longer",
-      "label_suffix": "puppets_longer",
-      "name": "Voodoo Mind (Shadow Puppets still lasts at 4350 ms with 5 Spirits)",
-      "quote": "lasts $s2% longer for each Spirit active on you.",
-      "trigger_spell": 501087,
-      "target": "dummy",
-      "measure_actor": "dummy",
-      "metric": "aura",
-      "fields": {
-        "spell": 501087
-      },
-      "setup_casts": [
-        501136
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1400,
-      "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 4350,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          4275,
-          4500
-        ]
-      },
-      "observe_source": "Voodoo Mind 504462 (passive, every effect dummied at load, AscensionWitchDoctorCompletion.cpp:297-298): Effect[0] BasePoints -11 + 1 = -10 ($s1 = 10%), Effect[1] BasePoints 9 + 1 = 10 ($s2). The scripts apply them for Shadow Puppets (SpellFamilyFlags[0] 8, rank 501087 here: instant, 15% base mana, RecoveryTime 18000 reset by the scenario, DurationIndex 27 = 3000 ms, Effect[0] aura 227 EffectAmplitude 750, AttributesEx5 0x200 so the first tick is at the apply): the period is amplitude x 100 / (100 + 10 x Spirits) (AscensionWitchDoctorAuras.cpp:175-178) and the duration x (100 + Spirits x 10) / 100 (AscensionWitchDoctorAbilities.cpp:144-145). Mirage 501136 (instant, 29% base mana, StartRecoveryTime 1500, RecoveryTime 180000 reset by the setup step) is the real source of 5 Spirits (GainSpirit(5), Abilities.cpp:345-346): period 750 x 100 / 150 = 500 ms, duration 3000 x 150 / 100 = 4500 ms. Each puppet tick also collects a Spirit, which keeps the stacks at the cap of 5. The aura 501087 is read on the dummy (measure_actor dummy), stamped in game time, the end (4500 ms) inside the G-19 band (5% = 225 ms: 4275 to 4725). Two entries, because an expiry read needs the talent known throughout (gate_timing start) and the control here is the before phase without it. Read 4350 ms after the Puppets cast: without Voodoo Mind (the before phase, Mirage and Puppets cast the same way) the aura ended at 3000 ms and reads 0 (the control), with it learned between the phases it is still on (1): a talent without the duration effect fails here. Clause 87. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 4350 ms."
-    },
-    {
-      "spell": 504462,
-      "kind": "metric_delta",
-      "variant": "puppets_longer_end",
-      "label_suffix": "puppets_longer_end",
-      "name": "Voodoo Mind (Shadow Puppets has ended at 4650 ms with 5 Spirits)",
-      "quote": "lasts $s2% longer for each Spirit active on you.",
-      "trigger_spell": 501087,
-      "target": "dummy",
-      "measure_actor": "dummy",
-      "metric": "aura",
-      "fields": {
-        "spell": 501087
-      },
-      "setup_casts": [
-        501136
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1400,
-      "before_expected": 0,
-      "expected": 0,
-      "wait_ms": 4650,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          4500,
-          4725
-        ]
-      },
-      "observe_source": "Voodoo Mind 504462 (passive, every effect dummied at load, AscensionWitchDoctorCompletion.cpp:297-298): Effect[0] BasePoints -11 + 1 = -10 ($s1 = 10%), Effect[1] BasePoints 9 + 1 = 10 ($s2). The scripts apply them for Shadow Puppets (SpellFamilyFlags[0] 8, rank 501087 here: instant, 15% base mana, RecoveryTime 18000 reset by the scenario, DurationIndex 27 = 3000 ms, Effect[0] aura 227 EffectAmplitude 750, AttributesEx5 0x200 so the first tick is at the apply): the period is amplitude x 100 / (100 + 10 x Spirits) (AscensionWitchDoctorAuras.cpp:175-178) and the duration x (100 + Spirits x 10) / 100 (AscensionWitchDoctorAbilities.cpp:144-145). Mirage 501136 (instant, 29% base mana, StartRecoveryTime 1500, RecoveryTime 180000 reset by the setup step) is the real source of 5 Spirits (GainSpirit(5), Abilities.cpp:345-346): period 750 x 100 / 150 = 500 ms, duration 3000 x 150 / 100 = 4500 ms. Each puppet tick also collects a Spirit, which keeps the stacks at the cap of 5. The aura 501087 is read on the dummy (measure_actor dummy), stamped in game time, the end (4500 ms) inside the G-19 band (5% = 225 ms: 4275 to 4725). Two entries, because an expiry read needs the talent known throughout (gate_timing start) and the control here is the before phase without it. Read 4650 ms after the Puppets cast (game time 4500 to 4725 ms): gone (0) in both phases, so the duration is not longer than 4725 ms; with puppets_longer the end lies in (4350, 4650] ms inside the band. Clause 87. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 4650 ms."
-    },
-    {
       "spell": 501087,
       "kind": "metric_delta",
       "variant": "spirit_heal",
@@ -19841,73 +19554,6 @@
         ]
       },
       "observe_source": "Shadow Puppets 501087 (rank 9, instant, 15% base mana, DurationIndex 27 = 3000 ms, EffectAmplitude 750, EXTRA_INITIAL_PERIOD): AscensionWitchDoctorAuras.cpp:279-284 casts the strike 802745 at each tick and GainSpirit(player) (Completion.cpp:142-155) casts Spirit 561136 on the caster once per tick; the row 26 clause is the empty extension wrapper \"@ext:@s:561136:0@:ext@\" of the pulled Spirit text (the Jungle Thistle 500472 precedent), so the Spirit it grants is the subject. Spirit 561136: DurationIndex 29 = 12000 ms, StackAmount 5, Effect[0] periodic energize and Effect[1] periodic heal, EffectAmplitude 4000, 7 per stack on the caster, EXTRA_INITIAL_PERIOD (so the first tick of a stack lands at its application). Same read as spirit_heal on the periodic energize (Effect[0], mana): spell_energize_total of 561136 on the caster (power 0) reads 7 at 500 ms (stamped inside 300 to 700 ms), 0 in the uncast before phase. Clause 26. Cast timing checked: instant, read at 500 ms."
-    },
-    {
-      "spell": 501087,
-      "kind": "metric_delta",
-      "variant": "spirit_stacks",
-      "label_suffix": "spirit_stacks",
-      "name": "Shadow Puppets (the Spirit it collects stacks 5 times)",
-      "quote": "Summon a Shadow Puppet that collects a Spirit",
-      "trigger_spell": 501087,
-      "target": "dummy",
-      "cast_in_before": false,
-      "measure_actor": "caster",
-      "metric": "aura_stacks",
-      "fields": {
-        "spell": 561136
-      },
-      "setup_casts": [
-        501136
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1400,
-      "before_expected": 0,
-      "expected": 5,
-      "wait_ms": 3200,
-      "expire_ms": 500,
-      "observe_source": "Shadow Puppets 501087 (rank 9, instant, 15% base mana, DurationIndex 27 = 3000 ms, EffectAmplitude 750, EXTRA_INITIAL_PERIOD): AscensionWitchDoctorAuras.cpp:279-284 casts the strike 802745 at each tick and GainSpirit(player) (Completion.cpp:142-155) casts Spirit 561136 on the caster once per tick; the row 26 clause is the empty extension wrapper \"@ext:@s:561136:0@:ext@\" of the pulled Spirit text (the Jungle Thistle 500472 precedent), so the Spirit it grants is the subject. Spirit 561136: DurationIndex 29 = 12000 ms, StackAmount 5, Effect[0] periodic energize and Effect[1] periodic heal, EffectAmplitude 4000, 7 per stack on the caster, EXTRA_INITIAL_PERIOD (so the first tick of a stack lands at its application). Mirage 501136 (a real cast, 5 Spirits) then Puppets (ticks at about 0, 750, 1500, 2250 and 3000 ms, each collecting a Spirit, 5 more): the stacks read 5 at 3200 ms, not 10 (StackAmount 5, $u). Control: the before phase casts nothing (cast_in_before false), 0 stacks; the cap is the arm that fails against 10. Clause 26. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 3200 ms."
-    },
-    {
-      "spell": 705948,
-      "kind": "metric_delta",
-      "variant": "price_ready_lasts",
-      "label_suffix": "price_ready_lasts",
-      "name": "A Price To Pay (the guaranteed crit lasts 8 sec)",
-      "quote": "and causes your next cast within $707326d to be guaranteed to critically strike.",
-      "trigger_spell": 801607,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "metric": "aura",
-      "fields": {
-        "spell": 707326
-      },
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "setup_casts": [
-        501136
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1400,
-      "before_expected": 0,
-      "expected": 1,
-      "after_expiry_expected": 0,
-      "wait_ms": 7650,
-      "expiry_wait_ms": 700,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          7600,
-          8000
-        ],
-        "expired": [
-          8000,
-          8400
-        ]
-      },
-      "observe_source": "AscensionWitchDoctorAbilities.cpp:332-336 (OnSpellCast): Spirit Eclipse 801607 (Family 0 536870912) cast with count == 5 Spirits and 705948 known casts A Price To Pay 707326 on the caster (DurationIndex 31 = 8000 ms, $707326d; Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +100 on the Spirit Glaive mask, native; Effect[2] zeroed at load, Completion.cpp:462-463). Mirage 501136 is the real setup (5 Spirits, 1600 ms settle; the trigger's required Spirit aura is set before the setup casts, so Mirage's five stacks are the count, as in the reset entry), Eclipse (instant, CategoryRecoveryTime 10000 reset by the scenario, 12% base mana) the trigger. The aura is read on the caster 7650 ms after the Eclipse cast and about 700 ms later, the end inside the G-19 band (5% of 8000 ms = 400 ms) on both sides, both stamped in game time. Control: the before phase (705948 known throughout, nothing cast) reads no aura (0). Only the duration half of clause 231; the guarantee itself has no route (tool_gap). Cast timing checked: Mirage and Eclipse instant, reads at 7650 and about 8350 ms."
     },
     {
       "spell": 501212,
@@ -20101,36 +19747,6 @@
         ]
       },
       "observe_source": "Sen'jin's Presence 560544 (passive, Effect[0] PROC_TRIGGER_SPELL 561017): AscensionWitchDoctorAbilities.cpp:317-321 (OnSpellCast): a Spirit in a Bottle (IsBottle) or Potion Toss (IsPotion) cast with 560544 known casts the buff 561017 on the caster and sets its charges to 2; 561017 (DurationIndex 1 = 10000 ms, $561017d, Effect[0] aura 108 ADD_PCT_MODIFIER on SPELLMOD_CASTING_TIME, BasePoints -21 + 1 = -20 ($561017s1), class mask word 1 131072 = the Loa's Brew family; Effect[1] zeroed at load, Completion.cpp:464-465). Loa's Brew 801670: CastingTimeIndex 5 = 2000 ms, 33% base mana, InterruptFlags 15. The OnSpellCast hook fires at the end of the Bottle cast (1500 ms), so the setup settle is 1700 ms; 560544 is learned between the phases (the before phase is the control: the same setup casts and the same Brew without it). Same cast as cast_held, read 1618 ms after the Brew cast starts (game time 1560 to 1640 ms): without the talent the Brew still casts (1, the control), with it and a Bottle cast first the 20% shorter cast (1600 ms) has ended (0). With cast_held the cast ends in (1575, 1618] ms, inside the G-19 band 1560 to 1640 ms of the stated 20%. Clause 105. Cast timing checked: Bottle 1500 ms (1700 ms settle), Brew 1600 ms, read at 1618 ms."
-    },
-    {
-      "spell": 560544,
-      "kind": "metric_delta",
-      "variant": "cast_done_potion",
-      "label_suffix": "cast_done_potion",
-      "name": "Sen'jin's Presence (a Potion Toss also gives the shorter Brew)",
-      "quote": "now reduce the cast time of your next 2 Loa's Brews by $561017s1%",
-      "trigger_spell": 801670,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "casting",
-      "fields": {},
-      "setup_casts": [
-        801661
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1400,
-      "before_expected": 1,
-      "expected": 0,
-      "wait_ms": 1618,
-      "expire_ms": 2500,
-      "game_time": {
-        "after": [
-          1560,
-          1640
-        ]
-      },
-      "observe_source": "Sen'jin's Presence 560544 (passive, Effect[0] PROC_TRIGGER_SPELL 561017): AscensionWitchDoctorAbilities.cpp:317-321 (OnSpellCast): a Spirit in a Bottle (IsBottle) or Potion Toss (IsPotion) cast with 560544 known casts the buff 561017 on the caster and sets its charges to 2; 561017 (DurationIndex 1 = 10000 ms, $561017d, Effect[0] aura 108 ADD_PCT_MODIFIER on SPELLMOD_CASTING_TIME, BasePoints -21 + 1 = -20 ($561017s1), class mask word 1 131072 = the Loa's Brew family; Effect[1] zeroed at load, Completion.cpp:464-465). Loa's Brew 801670: CastingTimeIndex 5 = 2000 ms, 33% base mana, InterruptFlags 15. The OnSpellCast hook fires at the end of the Bottle cast (1500 ms), so the setup settle is 1700 ms; 560544 is learned between the phases (the before phase is the control: the same setup casts and the same Brew without it). The second alternative of \"Potion Toss and Spirit in a Bottle\" (G-23): the setup cast is a real Potion Toss 801661 at the caster (instant, 18% base mana, StartRecoveryTime 1500, CategoryRecoveryTime 15000 reset by the setup step, CasterAuraSpell 801702 set by the generator as a precondition fixture; with no Ingredient brewed it makes no potion, the hook still gives the buff) and the Brew is read as in cast_done at 1618 ms: 1 without the talent, 0 with it. Clause 105. Cast timing checked: Potion Toss instant (1600 ms settle), Brew 1600 ms, read at 1618 ms."
     },
     {
       "spell": 560544,
@@ -20617,7 +20233,7 @@
     {
       "spell": 300871,
       "kind": "metric_delta",
-      "name": "Strength of Da Loa (a Spirit heals 50% more often: three heals by 9.3 sec, four by 9.9 sec)",
+      "name": "Strength of Da Loa (a Spirit heals 50% more often: four heals by 9.3 sec, five by 9.9 sec)",
       "variant": "spirit_period",
       "label_suffix": "spirit_period",
       "quote": "health and mana restoration provided by your Spirits now occurs $s3% more often",
@@ -20636,8 +20252,8 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 21,
-      "after_expiry_expected": 28,
+      "expected": 28,
+      "after_expiry_expected": 35,
       "wait_ms": 9300,
       "expiry_wait_ms": 600,
       "expire_ms": 500,
@@ -20651,12 +20267,12 @@
           9990
         ]
       },
-      "observe_source": "Spirit 561136 (DurationIndex 29 = 12000 ms, StackAmount 5, AttributesEx5 0x200 so the periodic effects start at the apply): Effect[0] aura 24 periodic energize and Effect[1] aura 8 periodic heal, EffectAmplitude 4000, 7 per stack (BasePoints 1 + die 1 + 0.1 per level over 50 levels), SpellFamilyFlags[1] 8192; GainSpirit casts it on the caster once per Spirit collected (AscensionWitchDoctorCompletion.cpp:142-154, Spirit in a Bottle 801696 with Spirit Out Of The Bottle 301175 learned as the harness-free source, AscensionWitchDoctorAbilities.cpp:314-315). Strength of Da Loa 300871 Effect[2] is aura 108 SPELL_AURA_ADD_PCT_MODIFIER misc 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -51 + 1 = -50 ($s3 = 50) on the mask word 1 8192 that Spirit carries: a native modifier, no script (the Doctor of the Jungle 706545 shrooms_period shape). The stored modifier halves the period from 4000 to 2000 ms, which is +100% heals. The tooltip governs, read literally (G-1, as G-6 reads a stated percentage as that exact increase): 'occurs $s3% more often' is a frequency 50% higher, a period of 4000 / 1.5 = 2667 ms (the G-19 band of 50%, the larger of 5% and 2 points, is +47.5% to +52.5%, periods 2623 to 2712 ms). This entry judges that literal reading, so against the stored 2000 ms it is expected to ALERT (reads of 28 and 35 where the clause gives 21 and 28): a candidate defect lead (reported, never fixed here; G-3 asks for the reproduced alert) and a G-4 owner question, whether '50% more often' is meant as the stored -50% period. Timing (the 525377 hex_period shape, ADR 0501): the cast is a real Spirit in a Bottle 801696 (1500 ms cast, the Spirit lands at the cast end: the 503707 spirit_heal reads of 7 at 5389 ms and 14 at 5718 ms put the first heal t_c inside 1500 to 1718 ms after the cast start), and the heals fall at t_c + k x P (the first at the apply, Ex5 0x200). With P in the band (2623 to 2712 ms) the third heal (k = 3) falls at t_c + 3P, 9369 to 9854 ms: the first heal read is stamped inside 9250 to 9360 ms (before the third heal of every period of the band: 9369 ms at the earliest): 3 heals, 21; and 600 ms later, stamped inside 9870 to 9990 ms (after the third heal of every period of the band: 9854 ms at the latest, before the fourth, 11992 ms at the earliest): 4 heals, 28. Control: the uncast before phase reads 0; without the passive (P = 4000, heals at t_c, +4000 and +8000, 9500 ms at the earliest) the reads are 14 and 21, with the stored modifier (P = 2000, the fourth heal at 9500 to 9718 ms) 28 and 35, so the entry fails in both cases. Excluded by the pair: a period outside about 2511 to 2830 ms, a frequency outside +41% to +59% (coarser than the 47.5% to 52.5% band because t_c is known only inside 218 ms; every period of the band passes). Cast timing checked: Spirit in a Bottle 1500 ms cast, GCD 1500 ms, 15% mana below cast_power 1400. Player reports: none."
+      "observe_source": "Spirit 561136 (DurationIndex 29 = 12000 ms, StackAmount 5, AttributesEx5 0x200 so the periodic effects start at the apply): Effect[0] aura 24 periodic energize and Effect[1] aura 8 periodic heal, EffectAmplitude 4000, 7 per stack (BasePoints 1 + die 1 + 0.1 per level over 50 levels), SpellFamilyFlags[1] 8192; GainSpirit casts it on the caster once per Spirit collected (AscensionWitchDoctorCompletion.cpp:142-154, Spirit in a Bottle 801696 with Spirit Out Of The Bottle 301175 learned as the harness-free source, AscensionWitchDoctorAbilities.cpp:314-315). Strength of Da Loa 300871 Effect[2] is aura 108 SPELL_AURA_ADD_PCT_MODIFIER misc 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -51 + 1 = -50 ($s3 = 50) on the mask word 1 8192 that Spirit carries: a native modifier, no script (the Doctor of the Jungle 706545 shrooms_period shape). The stored modifier halves the period from 4000 to 2000 ms, which is +100% heals. The tooltip governs, read literally (G-1, as G-6 reads a stated percentage as that exact increase): 'occurs $s3% more often' is a frequency 50% higher, a period of 4000 / 1.5 = 2667 ms (the G-19 band of 50%, the larger of 5% and 2 points, is +47.5% to +52.5%, periods 2623 to 2712 ms). This entry judges that literal reading, so against the stored 2000 ms it is expected to ALERT (reads of 28 and 35 where the clause gives 21 and 28): a candidate defect lead (reported, never fixed here; G-3 asks for the reproduced alert) and a G-4 owner question, whether '50% more often' is meant as the stored -50% period. Timing (the 525377 hex_period shape, ADR 0501): the cast is a real Spirit in a Bottle 801696 (1500 ms cast, the Spirit lands at the cast end: the 503707 spirit_heal reads of 7 at 5389 ms and 14 at 5718 ms put the first heal t_c inside 1500 to 1718 ms after the cast start), and the heals fall at t_c + k x P (the first at the apply, Ex5 0x200). With P in the band (2623 to 2712 ms) the third heal (k = 3) falls at t_c + 3P, 9369 to 9854 ms: the first heal read is stamped inside 9250 to 9360 ms (before the third heal of every period of the band: 9369 ms at the earliest): 3 heals, 21; and 600 ms later, stamped inside 9870 to 9990 ms (after the third heal of every period of the band: 9854 ms at the latest, before the fourth, 11992 ms at the earliest): 4 heals, 28. Control: the uncast before phase reads 0; without the passive (P = 4000, heals at t_c, +4000 and +8000, 9500 ms at the earliest) the reads are 14 and 21, with the stored modifier (P = 2000, the fourth heal at 9500 to 9718 ms) 28 and 35, so the entry fails in both cases. Excluded by the pair: a period outside about 2511 to 2830 ms, a frequency outside +41% to +59% (coarser than the 47.5% to 52.5% band because t_c is known only inside 218 ms; every period of the band passes). Cast timing checked: Spirit in a Bottle 1500 ms cast, GCD 1500 ms, 15% mana below cast_power 1400. Player reports: none. Cycle 10 decision M-68: \"occurs 50% more often\" is judged as the stored -50% period (2000 ms): the live Ascension logs show Spirit heal intervals at 2.0 s with the talent and 4.0 s without and none at 2.67 s, so 28 and 35 (7 per heal), not the literal 21 and 28."
     },
     {
       "spell": 300871,
       "kind": "metric_delta",
-      "name": "Strength of Da Loa (a Spirit restores mana 50% more often: three energizes by 9.3 sec, four by 9.9 sec)",
+      "name": "Strength of Da Loa (a Spirit restores mana 50% more often: four energizes by 9.3 sec, five by 9.9 sec)",
       "variant": "spirit_period_mana",
       "label_suffix": "spirit_period_mana",
       "quote": "health and mana restoration provided by your Spirits now occurs $s3% more often",
@@ -20676,8 +20292,8 @@
         "power": 0
       },
       "before_expected": 0,
-      "expected": 21,
-      "after_expiry_expected": 28,
+      "expected": 28,
+      "after_expiry_expected": 35,
       "wait_ms": 9300,
       "expiry_wait_ms": 600,
       "expire_ms": 500,
@@ -20691,7 +20307,7 @@
           9990
         ]
       },
-      "observe_source": "The mana half of 'health and mana restoration', the partner of the spirit_period entry (same cast, windows and periods; its observe_source holds the derivation, the literal +50% reading and the expected alert): the energize events of Spirit 561136 on the caster (Effect[0] aura 24 periodic energize of mana, power 0, 7 per stack, the spirit_mana read of 7 at 5389 ms) are summed at the same two reads: 3 energizes, 21, inside 9250 to 9360 ms, and 4, 28, inside 9870 to 9990 ms. Control: the uncast before phase reads 0; without the passive 14 and 21, with the stored modifier (P = 2000) 28 and 35. Cast timing checked: Spirit in a Bottle 1500 ms cast, GCD 1500 ms, 15% mana below cast_power 1400. Player reports: none."
+      "observe_source": "The mana half of 'health and mana restoration', the partner of the spirit_period entry (same cast, windows and periods; its observe_source holds the derivation, the literal +50% reading and the expected alert): the energize events of Spirit 561136 on the caster (Effect[0] aura 24 periodic energize of mana, power 0, 7 per stack, the spirit_mana read of 7 at 5389 ms) are summed at the same two reads: 3 energizes, 21, inside 9250 to 9360 ms, and 4, 28, inside 9870 to 9990 ms. Control: the uncast before phase reads 0; without the passive 14 and 21, with the stored modifier (P = 2000) 28 and 35. Cast timing checked: Spirit in a Bottle 1500 ms cast, GCD 1500 ms, 15% mana below cast_power 1400. Player reports: none. Cycle 10 decision M-68: \"occurs 50% more often\" is judged as the stored -50% period (2000 ms): the live Ascension logs show Spirit heal intervals at 2.0 s with the talent and 4.0 s without and none at 2.67 s, so 28 and 35 (7 per heal), not the literal 21 and 28."
     },
     {
       "spell": 501136,
@@ -20727,118 +20343,6 @@
         ]
       },
       "observe_source": "Mirage 501136: instant (CastingTimeIndex 1), RecoveryTime 180000 (reset by the scenario), GCD 1500, 29% mana, DurationIndex 18 = 20000 ms ($d), Effect[0] aura 18 SPELL_AURA_MOD_INVISIBILITY (made periodic at 1000 ms, AscensionWitchDoctorAuras.cpp:171-173), Effect[1] zeroed (Completion.cpp:433-434), Effect[2] SPELL_EFFECT_SUMMON of the copy 840000. A real Mirage cast at the caster (cast_power 1400, nothing else dealt or healed: a direct hit would end the aura): the aura 501136 on the caster reads present 19450 ms after the cast and gone 1100 ms later, 20550 ms, both stamped in game time inside 19000 to 21000 ms (the G-19 band of 20000 ms, 5% = 1000 ms), so the end lies in the band with 550 ms of margin each side. The Spirit heals are periodic (never a direct heal) and do not end it (the double_lasts entry holds the aura to 39000 ms with five Spirits). Control: the uncast before phase reads 0; a 10 s or a 30 s Mirage fails one read. Keeps the data label 501136 aura_duration_ms #0 beside it. Cast timing checked: instant, GCD 1500 ms. Player reports: none."
-    },
-    {
-      "spell": 501136,
-      "kind": "metric_delta",
-      "name": "Mirage (the threat on the dummy falls 20% a second: one tick (at 1000 ms))",
-      "variant": "mirage_threat_first",
-      "label_suffix": "mirage_threat_first",
-      "quote": "reducing threat each second",
-      "trigger_spell": 501136,
-      "target": "caster",
-      "measure_actor": "dummy",
-      "setup_casts": [
-        501181
-      ],
-      "setup_target": "dummy",
-      "setup_wait_ms": 3200,
-      "cast_in_before": false,
-      "setup_in_before": true,
-      "cast_power": 1400,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          600132,
-          1,
-          "dummy",
-          "caster"
-        ],
-        [
-          681330,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "threat",
-      "fields": {
-        "target": "caster"
-      },
-      "before_expected": 1,
-      "expected": 1.6,
-      "expected_ratio": 1.6,
-      "tolerance": 0.015,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "observe_source": "Mirage 501136: instant (CastingTimeIndex 1), RecoveryTime 180000 (reset by the scenario), GCD 1500, 29% mana, DurationIndex 18 = 20000 ms ($d), Effect[0] aura 18 SPELL_AURA_MOD_INVISIBILITY (made periodic at 1000 ms, AscensionWitchDoctorAuras.cpp:171-173), Effect[1] zeroed (Completion.cpp:433-434), Effect[2] SPELL_EFFECT_SUMMON of the copy 840000. Mirage's first aura effect is periodic every 1000 ms (Auras.cpp:171-173) and, on every tick, AscensionWitchDoctorAuras.cpp:336-341 calls enemy->GetThreatMgr().ModifyThreatByPercent(player, -20) on every enemy within 100 yd that CanHaveThreatList (the tooltip states no amount: the -20 per tick is the code's value, so the ratio 0.8 per second is the expectation read from the code, and the claim itself, 'reducing threat each second', is the direction and the cadence). Aura periods start at the apply (no Ex5 0x200), so the ticks fall at 1000, 2000 and 3000 ms. The threat source is a real Bad Juju 501181 (level-60 rank, one die side, so the same amount both times; 16% mana, 2500 ms cast, Speed 20, category 15000 reset by the scenario) at the dummy, made in BOTH phases as the setup cast (setup casts repeat per phase, setup_in_before), with beeg spellpen 823764 and Reg's Test Aura 984954 (no spell crit) on the caster so its two hits are the same amount T; Two further precondition fixtures are named with their reason (guide 3.4), set in both phases and neither the claim's subject: (a) Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0 and the reference dummy (creature 36) detects no invisibility, so ThreatReference::ShouldBeOffline (ThreatManager.cpp:118, WorldObject::CanDetectInvisibilityOf, Object.cpp:2003-2009) takes the caster's reference offline on the next 1000 ms threat update and the harness read (GetThreat without includeOffline, CoAGameplayTest.cpp:4128, ThreatManager.cpp:294-299) would read 0: Aroy Detect Invisibility 600132 (aura 19 MOD_INVISIBILITY_DETECT, type 0, value 1000 against Mirage's 340, DurationIndex 6 = 600000 ms) is set on the dummy, so its reference stays online and the 'sight' entry's finding (the dummy cannot see the invisible caster) is the very reason for the fixture; (b) Mirage's GainSpirit(5) (AscensionWitchDoctorAbilities.cpp:341) starts a Spirit whose energize tick at the apply (Ex5 0x200) forwards 0.5 x the mana gained as threat to the dummy (SpellAuraEffects.cpp:7183-7186, about 17.5 threat at 35 mana, a 0.016 move of the one-tick ratio at T about 883, beyond the 0.015 tolerance): Astral Archer 681330 (aura 220; its text 'gaining mana no longer generates threat' is Unit::GainsManaWithoutThreat, Unit.cpp:9348, which SpellAuraEffects.cpp:7185 tests) is set on the caster so only the two Bad Juju hits and the -20% ticks move the threat (its ranged crit rating from Intellect does not reach a spell, and the spell crit stays at -1000 through 984954). The Spirit heal tick forwards threat only for health actually gained (SpellAuraEffects.cpp:6990-6997) and the caster is at full health, so it adds 0. the dummy's threat of the caster is read as threat (STATE metric, the Death Draught entry's read). Before phase (the control, cast_in_before false): Bad Juju only, the threat reads T. After phase: Bad Juju again (2T) then a real Mirage; the threat is scaled by 0.8 per tick. The read 1500 ms after the Mirage cast follows exactly one tick (the second is at 2000 ms): 2T x 0.8 = 1.6 T, a ratio of 1.6 to the before reading; a Mirage that reduces nothing reads 2.0, one that reduces by 20% at the cast as well 1.28. Judged as after over before within 0.015. Cast timing checked: Bad Juju 2500 ms cast plus 250 ms of flight (the 3200 ms setup wait covers both), Mirage instant; mana 16% + 29% of 1497 under cast_power 1400. The threat read must reach 1 in the control (both phases carry the detection fixture); a read of 0 there would mean an offline reference, unmeasured and reported. Player reports: none."
-    },
-    {
-      "spell": 501136,
-      "kind": "metric_delta",
-      "name": "Mirage (the threat on the dummy falls 20% a second: three ticks (1000, 2000 and 3000 ms))",
-      "variant": "mirage_threat_third",
-      "label_suffix": "mirage_threat_third",
-      "quote": "reducing threat each second",
-      "trigger_spell": 501136,
-      "target": "caster",
-      "measure_actor": "dummy",
-      "setup_casts": [
-        501181
-      ],
-      "setup_target": "dummy",
-      "setup_wait_ms": 3200,
-      "cast_in_before": false,
-      "setup_in_before": true,
-      "cast_power": 1400,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          600132,
-          1,
-          "dummy",
-          "caster"
-        ],
-        [
-          681330,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "threat",
-      "fields": {
-        "target": "caster"
-      },
-      "before_expected": 1,
-      "expected": 1.024,
-      "expected_ratio": 1.024,
-      "tolerance": 0.015,
-      "wait_ms": 3500,
-      "expire_ms": 500,
-      "observe_source": "Mirage 501136: instant (CastingTimeIndex 1), RecoveryTime 180000 (reset by the scenario), GCD 1500, 29% mana, DurationIndex 18 = 20000 ms ($d), Effect[0] aura 18 SPELL_AURA_MOD_INVISIBILITY (made periodic at 1000 ms, AscensionWitchDoctorAuras.cpp:171-173), Effect[1] zeroed (Completion.cpp:433-434), Effect[2] SPELL_EFFECT_SUMMON of the copy 840000. Mirage's first aura effect is periodic every 1000 ms (Auras.cpp:171-173) and, on every tick, AscensionWitchDoctorAuras.cpp:336-341 calls enemy->GetThreatMgr().ModifyThreatByPercent(player, -20) on every enemy within 100 yd that CanHaveThreatList (the tooltip states no amount: the -20 per tick is the code's value, so the ratio 0.8 per second is the expectation read from the code, and the claim itself, 'reducing threat each second', is the direction and the cadence). Aura periods start at the apply (no Ex5 0x200), so the ticks fall at 1000, 2000 and 3000 ms. The threat source is a real Bad Juju 501181 (level-60 rank, one die side, so the same amount both times; 16% mana, 2500 ms cast, Speed 20, category 15000 reset by the scenario) at the dummy, made in BOTH phases as the setup cast (setup casts repeat per phase, setup_in_before), with beeg spellpen 823764 and Reg's Test Aura 984954 (no spell crit) on the caster so its two hits are the same amount T; Two further precondition fixtures are named with their reason (guide 3.4), set in both phases and neither the claim's subject: (a) Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0 and the reference dummy (creature 36) detects no invisibility, so ThreatReference::ShouldBeOffline (ThreatManager.cpp:118, WorldObject::CanDetectInvisibilityOf, Object.cpp:2003-2009) takes the caster's reference offline on the next 1000 ms threat update and the harness read (GetThreat without includeOffline, CoAGameplayTest.cpp:4128, ThreatManager.cpp:294-299) would read 0: Aroy Detect Invisibility 600132 (aura 19 MOD_INVISIBILITY_DETECT, type 0, value 1000 against Mirage's 340, DurationIndex 6 = 600000 ms) is set on the dummy, so its reference stays online and the 'sight' entry's finding (the dummy cannot see the invisible caster) is the very reason for the fixture; (b) Mirage's GainSpirit(5) (AscensionWitchDoctorAbilities.cpp:341) starts a Spirit whose energize tick at the apply (Ex5 0x200) forwards 0.5 x the mana gained as threat to the dummy (SpellAuraEffects.cpp:7183-7186, about 17.5 threat at 35 mana, a 0.016 move of the one-tick ratio at T about 883, beyond the 0.015 tolerance): Astral Archer 681330 (aura 220; its text 'gaining mana no longer generates threat' is Unit::GainsManaWithoutThreat, Unit.cpp:9348, which SpellAuraEffects.cpp:7185 tests) is set on the caster so only the two Bad Juju hits and the -20% ticks move the threat (its ranged crit rating from Intellect does not reach a spell, and the spell crit stays at -1000 through 984954). The Spirit heal tick forwards threat only for health actually gained (SpellAuraEffects.cpp:6990-6997) and the caster is at full health, so it adds 0. the dummy's threat of the caster is read as threat (STATE metric, the Death Draught entry's read). Before phase (the control, cast_in_before false): Bad Juju only, the threat reads T. After phase: Bad Juju again (2T) then a real Mirage; the threat is scaled by 0.8 per tick. The read 3500 ms after the cast follows three ticks (the fourth is at 4000 ms): 2T x 0.8^3 = 1.024 T, a ratio of 1.024; one tick fewer would read 1.28, a tick more 0.8192. Judged as after over before within 0.015. Cast timing checked: Bad Juju 2500 ms cast plus 250 ms of flight (the 3200 ms setup wait covers both), Mirage instant; mana 16% + 29% of 1497 under cast_power 1400. The threat read must reach 1 in the control (both phases carry the detection fixture); a read of 0 there would mean an offline reference, unmeasured and reported. Player reports: none."
     },
     {
       "spell": 705902,
@@ -22089,76 +21593,6 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "observe_source": "Resourceful Wuju 578344: instant, GCD 1000, 10% of the base mana (149), DurationIndex 30, Effect[0] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT misc 127, BasePoints -6 + 1 = -5% ($s1), EffectImplicitTargetA 21 (TARGET_UNIT_TARGET_ALLY) on both effects, here cast at the caster; native, an aura script only sets the applied amount (the not_measured effect_value label), the engine multiplies the cost in SpellInfo::CalcPowerCost as int32(cost x (1.0f + multiplier)). The Greater Resourceful Wuju 800195 cost_spent shape (1161 and 874 read exactly in both final07 runs): Cursed Effigy 706542 (instant, no GCD, 16% of the base mana, cooldown reset by the scenario) is cast for real at the caster with the power set to 1400 (below the 1497 base mana, no clamp) and regeneration off. Reference base mana about 1497, so the Effigy costs int32(239.5) = 239 and the Wuju int32(149.7) = 149. Before phase (setup_only_after, the control: no Wuju cast): 1400 - 239 = 1161. After phase: the Wuju is cast for real first (setup, 1100 ms past its GCD), then the Effigy at int32(239 x 0.95f) = 227: 1400 - 149 - 227 = 1024. A cut of 4% reads 1026 and 6% 1022, so the reading judged to 0.5 excludes both. Coverage note: the metric power is a state read promised by mana or cost words and the clause says \"resource costs\", so the part stays data until coverage.STATE_PROMISES allows \"costs\" (tool note T-c9-B16-1, open). Cast timing checked: both instant. Clause 422. Player reports: none."
-    },
-    {
-      "spell": 500961,
-      "kind": "metric_delta",
-      "variant": "mana_period_early",
-      "label_suffix": "mana_period_early",
-      "name": "Spirit Idol (the idol energizes its allies every 3 sec, early read)",
-      "quote": "regenerate $805282s1% maximum mana every $500958t2 sec.",
-      "trigger_spell": 500961,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "owned_creature_spell_cast_count",
-      "fields": {
-        "entry": 50106,
-        "spell": 805282
-      },
-      "before_expected": 1,
-      "expected": 2,
-      "wait_ms": 5741,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          5700,
-          5800
-        ]
-      },
-      "observe_source": "AscensionWitchDoctorSummons.cpp:246 (_timer starts at 1), :457-462 and :503-507: the Spirit Idol AI (creature 50106) runs its first update at once, casts Spirit Idol energize 805282 on every ally Allies(player, me, 30) returns (the caster counts as its own ally) and sets _timer to 3000 ms; $500958t2 = 3000 (Spirit Idol 500958 Effect[1] EffectAmplitude 3000). The idol is a creature, so its casts are read with owned_creature_spell_cast_count (ProcCounter::CastCount of the owned creature, triggered casts included, an event metric; the read needs a present owned creature, CoAGameplayTest.cpp:5915-5920, pitfall 7): with the caster as the only ally each pulse is one cast of 805282. Both phases cast a real Spirit Idol 500961 as the setup cast (instant, no mana cost, RecoveryTime 180000 reset by the scenario before the setup cast and again after it, GCD covered by the 2300 ms setup wait), so the idol exists at every read. Before phase (the control, no trigger cast): the idol is 2300 ms old and has pulsed once (the first pulse at about 0 ms, the second at 3000 ms), so the count reads 1 (before_expected 1: a period of 2000 ms or less would already read 2). After phase: the setup idol is cast again, 2300 ms later the trigger cast of 500961 summons a new idol that replaces it (one idol slot, Summons.cpp:216-220, the old idol is despawned), and the new idol's casts are read, stamped in game time since the trigger cast. At about 5750 ms the pulses at about 0 and 3000 ms have cast: 2 (window 5700..5800, the mana_pulses window). A period 5% short (2850 ms) would have brought the third pulse by 5700 ms and reads 3, a doubled cadence far more, a missing periodic pulse 1. It reads the period with an event metric, because the sibling mana_pulses reads the state metric power, which the coverage promise words (mana, cost) do not promise for the claim \"every $500958t2 sec\" (the amount part keeps mana_pulses). The two reads are two entries because expiry_wait_ms needs gate_timing start and setup_in_before needs the default gate timing. Cast timing checked: instant, setup wait 2300 ms past the GCD. Clause 396 (the period part). Player reports: none (the idol family report #11995 runs through the same Summon path).",
-      "setup_casts": [
-        500961
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 2300,
-      "setup_in_before": true,
-      "cast_in_before": false,
-      "trigger_reset_after_setup": true
-    },
-    {
-      "spell": 500961,
-      "kind": "metric_delta",
-      "variant": "mana_period_late",
-      "label_suffix": "mana_period_late",
-      "name": "Spirit Idol (the idol energizes its allies every 3 sec, late read)",
-      "quote": "regenerate $805282s1% maximum mana every $500958t2 sec.",
-      "trigger_spell": 500961,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "owned_creature_spell_cast_count",
-      "fields": {
-        "entry": 50106,
-        "spell": 805282
-      },
-      "before_expected": 1,
-      "expected": 3,
-      "wait_ms": 6341,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          6300,
-          6400
-        ]
-      },
-      "observe_source": "AscensionWitchDoctorSummons.cpp:246 (_timer starts at 1), :457-462 and :503-507: the Spirit Idol AI (creature 50106) runs its first update at once, casts Spirit Idol energize 805282 on every ally Allies(player, me, 30) returns (the caster counts as its own ally) and sets _timer to 3000 ms; $500958t2 = 3000 (Spirit Idol 500958 Effect[1] EffectAmplitude 3000). The idol is a creature, so its casts are read with owned_creature_spell_cast_count (ProcCounter::CastCount of the owned creature, triggered casts included, an event metric; the read needs a present owned creature, CoAGameplayTest.cpp:5915-5920, pitfall 7): with the caster as the only ally each pulse is one cast of 805282. Both phases cast a real Spirit Idol 500961 as the setup cast (instant, no mana cost, RecoveryTime 180000 reset by the scenario before the setup cast and again after it, GCD covered by the 2300 ms setup wait), so the idol exists at every read. Before phase (the control, no trigger cast): the idol is 2300 ms old and has pulsed once (the first pulse at about 0 ms, the second at 3000 ms), so the count reads 1 (before_expected 1: a period of 2000 ms or less would already read 2). After phase: the setup idol is cast again, 2300 ms later the trigger cast of 500961 summons a new idol that replaces it (one idol slot, Summons.cpp:216-220, the old idol is despawned), and the new idol's casts are read, stamped in game time since the trigger cast. At about 6350 ms the third pulse at about 6000 ms has cast: 3 (window 6300..6400, the mana_pulses window). A period 5% long (3150 ms) brings the third pulse after 6300 ms and reads 2, a missing periodic pulse 1. It reads the period with an event metric, because the sibling mana_pulses reads the state metric power, which the coverage promise words (mana, cost) do not promise for the claim \"every $500958t2 sec\" (the amount part keeps mana_pulses). The two reads are two entries because expiry_wait_ms needs gate_timing start and setup_in_before needs the default gate timing. Cast timing checked: instant, setup wait 2300 ms past the GCD. Clause 396 (the period part). Player reports: none (the idol family report #11995 runs through the same Summon path).",
-      "setup_casts": [
-        500961
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 2300,
-      "setup_in_before": true,
-      "cast_in_before": false,
-      "trigger_reset_after_setup": true
     },
     {
       "spell": 572383,
@@ -23535,7 +22969,10 @@
       "expected": 15,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Natural Alchemist 536213 (passive, Attributes 80) Effect[0]: aura 98 SPELL_AURA_MOD_SKILL_TALENT, EffectMiscValue 171 (Alchemy), BasePoints 14 + 1 = 15 ($s1). AuraEffect::HandleAuraModSkill (SpellAuraEffects.cpp:3544-3559) calls Player::ModifySkillBonus with talent true, which adds the amount to the permanent bonus of the skill line (Player.cpp:5822-5838) and does nothing for a line the player lacks. The reference character has no Alchemy (skill_lines 44, 48, 49, 51 and 118), so the option skill_line (ADR 1030) gives the caster line 171 at 1 of 300 at the start of the before phase, a precondition fixture. The read is skill_bonus (the permanent plus the temporary bonus of the line, Player::GetSkillPermBonusValue + GetSkillTempBonusValue, ADR 1030; skill_value reads the pure value without it): 0 before the learn (the control, 536213 learned between the phases; a passive learn applies its aura) and 15 after, exact. Trigger: Frog Bones 801663, instant, as in sp_agility. Cast timing checked: instant. Player reports: none names this spell."
+      "observe_source": "Natural Alchemist 536213 (passive, Attributes 80) Effect[0]: aura 98 SPELL_AURA_MOD_SKILL_TALENT, EffectMiscValue 171 (Alchemy), BasePoints 14 + 1 = 15 ($s1). AuraEffect::HandleAuraModSkill (SpellAuraEffects.cpp:3544-3559) calls Player::ModifySkillBonus with talent true, which adds the amount to the permanent bonus of the skill line (Player.cpp:5822-5838) and does nothing for a line the player lacks. The reference character has no Alchemy (skill_lines 44, 48, 49, 51 and 118), so the option skill_line (ADR 1030) gives the caster line 171 at 1 of 300 at the start of the before phase, a precondition fixture. The read is skill_bonus (the permanent plus the temporary bonus of the line, Player::GetSkillPermBonusValue + GetSkillTempBonusValue, ADR 1030; skill_value reads the pure value without it): 0 before the learn (the control, 536213 learned between the phases; a passive learn applies its aura) and 15 after, exact. Trigger: Frog Bones 801663, instant, as in sp_agility. Cast timing checked: instant. Player reports: none names this spell. Natural Alchemist is a class 13 starting spell (playercreateinfo_spell_custom), so the before phase unlearns it first (option unlearn_before).",
+      "unlearn_before": [
+        536213
+      ]
     },
     {
       "spell": 707329,
@@ -23976,6 +23413,580 @@
         ]
       },
       "observe_source": "The duration half of the empowerment entry: each of the four blessings 802207, 802208, 802215 and 802216 has DurationIndex 18 = 20000 ms ($802207d; the siblings share the index), applied when the real Loa's Brew 501205 heal lands about 3000 ms after the cast start (cast at the caster, no flight). With 705848 learned at the start (gate_timing start), carried_aura_count of the four reads 1 at 22300 ms after the cast start (about 19300 ms of aura life, inside the G-19 band of 20000 ms, 19000 to 21000) and 0 1400 ms later (about 20700 ms), both reads stamped in game time (windows 22000 to 22700 and 23400 to 24200 ms after the cast, so the life bracket is about 19000 to 21200 ms). Control: the uncast before phase reads 0 (trigger_only_after). A blessing that ends early (a 15 sec aura) reads 0 at the first read; one that lasts 30 sec reads 1 at the second. Clause 446 'for $802207d'. Cast timing checked: 3000 ms cast. Player reports: none."
+    },
+    {
+      "spell": 500961,
+      "kind": "metric_delta",
+      "variant": "mana_period_early",
+      "label_suffix": "mana_period_early",
+      "name": "Spirit Idol (the idol energizes its allies every 3 sec, early read)",
+      "quote": "regenerate $805282s1% maximum mana every $500958t2 sec.",
+      "trigger_spell": 500961,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_spell_cast_count",
+      "fields": {
+        "entry": 50106,
+        "spell": 805282
+      },
+      "before_expected": 2,
+      "expected": 4,
+      "wait_ms": 5741,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5700,
+          5800
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the entry read 2 before and 4 at 5750 ms against the 1 and 2 it expected, twice every count, because each idol pulse is two casts of 805282, not one. AscensionWitchDoctorSummons.cpp:504-508: on each pulse the Spirit Idol AI (creature 50106, _timer 1 at the summon, Summons.cpp:247, then 3000 ms) casts Spirit Idol energize 805282 once on every unit Allies(player, me, 30) returns. Allies() keeps a unit when Friendly(player, unit) holds (Completion.cpp:57-61: player == unit or player->IsInRaidWith(unit)), and Unit::IsInRaidWith returns true for two units with the same charmer-or-owner (Unit.cpp:16687-16690): the idol, owned by the caster (SetOwnerGUID, Summons.cpp:211), is its own ally. 805282 is rewritten to TARGET_UNIT_TARGET_ALLY at load (Completion.cpp:514-523), so each cast reaches only its explicit target: one energize on the caster and one on the idol itself. The caster still gains one 4% pulse every 3 sec: the mana_pulses entry reads 1204 at about 5750 ms and 1306 at about 6350 ms from 1000 (102 = 4% of 2567 per pulse, final07 run 1), so the second cast of each pulse does not reach the caster. The idol's own energize has no player-facing effect; it is an observation, not a claim of clause 396. With two casts per pulse at about 0, 3000 and 6000 ms after the summon the counts are: 2 at 2300 ms in the control phase (the setup idol, one pulse; a period of 2300 ms or less would read 4), 4 inside 5700..5800 ms (two pulses: a period of 2850 ms or less brings the third pulse by the latest stamp and reads 6, a missing periodic pulse 2). Together the two entries pass every period in (2900, 3150] ms and fail every period at or below 2850 ms or above 3200 ms, the 5% band of 3000 ms read with the stamps' 100 ms width. Both phases cast a real Spirit Idol 500961 as the setup cast (instant, no mana cost, RecoveryTime 180000 reset by the scenario before the setup cast and again after it, GCD covered by the 2300 ms setup wait), so an idol exists at every read (pitfall 7); in the treatment phase the trigger cast replaces the setup idol (one idol slot, Summons.cpp:217-221) and the new idol's casts are read, stamped in game time since the trigger cast. owned_creature_spell_cast_count is ProcCounter::CastCount of the present owned creature (CoAGameplayTest.cpp:5915-5920; one count per Spell::cast, whose only OnSpellCast call site is Spell.cpp:4191). Cast timing checked: instant, setup wait 2300 ms past the GCD. Clause 396 (the period part). Player reports: none (the idol family report #11995 runs through the same Summon path).",
+      "setup_casts": [
+        500961
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2300,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "trigger_reset_after_setup": true
+    },
+    {
+      "spell": 500961,
+      "kind": "metric_delta",
+      "variant": "mana_period_late",
+      "label_suffix": "mana_period_late",
+      "name": "Spirit Idol (the idol energizes its allies every 3 sec, late read)",
+      "quote": "regenerate $805282s1% maximum mana every $500958t2 sec.",
+      "trigger_spell": 500961,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "owned_creature_spell_cast_count",
+      "fields": {
+        "entry": 50106,
+        "spell": 805282
+      },
+      "before_expected": 2,
+      "expected": 6,
+      "wait_ms": 6341,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          6300,
+          6400
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the entry read 2 before and 6 at 6349 ms against the 1 and 3 it expected, twice every count, because each idol pulse is two casts of 805282, not one. AscensionWitchDoctorSummons.cpp:504-508: on each pulse the Spirit Idol AI (creature 50106, _timer 1 at the summon, Summons.cpp:247, then 3000 ms) casts Spirit Idol energize 805282 once on every unit Allies(player, me, 30) returns. Allies() keeps a unit when Friendly(player, unit) holds (Completion.cpp:57-61: player == unit or player->IsInRaidWith(unit)), and Unit::IsInRaidWith returns true for two units with the same charmer-or-owner (Unit.cpp:16687-16690): the idol, owned by the caster (SetOwnerGUID, Summons.cpp:211), is its own ally. 805282 is rewritten to TARGET_UNIT_TARGET_ALLY at load (Completion.cpp:514-523), so each cast reaches only its explicit target: one energize on the caster and one on the idol itself. The caster still gains one 4% pulse every 3 sec: the mana_pulses entry reads 1204 at about 5750 ms and 1306 at about 6350 ms from 1000 (102 = 4% of 2567 per pulse, final07 run 1), so the second cast of each pulse does not reach the caster. The idol's own energize has no player-facing effect; it is an observation, not a claim of clause 396. With two casts per pulse at about 0, 3000 and 6000 ms after the summon the counts are: 2 at 2300 ms in the control phase (the setup idol, one pulse; a period of 2300 ms or less would read 4), 6 inside 6300..6400 ms (three pulses: a period over 3150 ms brings the third pulse after the earliest stamp and reads 4, a missing periodic pulse 2). Together the two entries pass every period in (2900, 3150] ms and fail every period at or below 2850 ms or above 3200 ms, the 5% band of 3000 ms read with the stamps' 100 ms width. Both phases cast a real Spirit Idol 500961 as the setup cast (instant, no mana cost, RecoveryTime 180000 reset by the scenario before the setup cast and again after it, GCD covered by the 2300 ms setup wait), so an idol exists at every read (pitfall 7); in the treatment phase the trigger cast replaces the setup idol (one idol slot, Summons.cpp:217-221) and the new idol's casts are read, stamped in game time since the trigger cast. owned_creature_spell_cast_count is ProcCounter::CastCount of the present owned creature (CoAGameplayTest.cpp:5915-5920; one count per Spell::cast, whose only OnSpellCast call site is Spell.cpp:4191). Cast timing checked: instant, setup wait 2300 ms past the GCD. Clause 396 (the period part). Player reports: none (the idol family report #11995 runs through the same Summon path).",
+      "setup_casts": [
+        500961
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2300,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "trigger_reset_after_setup": true
+    },
+    {
+      "spell": 501117,
+      "kind": "ally_heal_reach",
+      "variant": "branches",
+      "name": "Mojo Beam (a heal grows a branch, which heals at once and keeps healing)",
+      "quote": "Each time Mojo Beam heals a target it will grow a new branch.",
+      "allies": [
+        {
+          "id": "beam_a",
+          "dx": 22,
+          "dy": 0
+        },
+        {
+          "id": "beam_b",
+          "dx": 22,
+          "dy": -12
+        },
+        {
+          "id": "beam_c",
+          "dx": 22,
+          "dy": -24
+        },
+        {
+          "id": "beam_far",
+          "dx": -10,
+          "dy": -30
+        },
+        {
+          "id": "beam_ungrouped",
+          "dx": 30,
+          "dy": 6,
+          "grouped": false
+        }
+      ],
+      "casts": [
+        {
+          "spell": 501117,
+          "target": "beam_a",
+          "watch_ms": 3000,
+          "poll_ms": 250,
+          "refill_power": 1497
+        }
+      ],
+      "checks": [
+        {
+          "name": "branch_grow",
+          "judge": "reach",
+          "spell": 501117,
+          "reference": "beam_a",
+          "minimum": 2,
+          "healed": [
+            "beam_b",
+            "beam_c"
+          ],
+          "unhealed": [
+            "beam_far",
+            "beam_ungrouped"
+          ]
+        },
+        {
+          "name": "branch_heals",
+          "judge": "offsets",
+          "spell": 501117,
+          "quote": "Each new branch immediately heals and continues healing.",
+          "reference": "beam_a",
+          "minimum": 2,
+          "offsets": {
+            "beam_b": 0,
+            "beam_c": -1
+          }
+        }
+      ],
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the first layout read beam_a 6, beam_b 6, beam_c 0, beam_far 0, beam_ungrouped 0, a placement fault and not a defect. The allies stand at the human start point (playercreateinfo race 1 class 13: map 0, -8949.95, -132.49, 83.53) plus their offsets, at the spawn height. A vmap ray from the caster to the old beam_b (22, 12) hits Duskwoodhearse.m2 at 14.6 yd (cycle10 triage, coa-world tools surface.wall at 0.5 to 2.5 yd above the spawn height; M2 models block line of sight because IsWithinLOSInMap defaults to ModelIgnoreFlags::Nothing, Object.h:552, and vmap.BlizzlikeLOSInOpenWorld keeps it). Tick (AscensionWitchDoctorBrewing.cpp:182-189) drops every branch the caster cannot see at the start of each tick (player->IsWithinLOSInMap), so beam_b was dropped every tick and grown again from beam_a in the same tick (healed at once): 6 heals, never in the tick's branch snapshot, so it never grew beam_c. The same rays find the wave layout (22, 0), (22, +-6), (28, 0) clear, where branches grow from branches (707617 wave read 6, 6, 5, 5 Beam heals in the control phase). New layout (yd from the caster, world x and y), mirrored to the south side, every needed ray clear at 0.5 to 2.5 yd: beam_a (22, 0) is the Beam target; beam_b (22, -12) is 12 yd from beam_a; beam_c (22, -24) is 12 yd from beam_b and 24 yd from beam_a (6 yd past the reach); beam_far (-10, -30) is grouped, 31.6 yd from the caster (inside the 40 yd branch cap) and 32.6 yd or more from every branch; beam_ungrouped (30, 6) is 10 yd from beam_a and 19.7 yd from beam_b, not in the group; the caster is 22 yd or more from every ally, so it is never a branch. Rays clear: the caster to each of the five allies, beam_a to beam_b, beam_b to beam_c, beam_a to beam_ungrouped. Mechanism: Apply (Brewing.cpp:119-128) makes the Beam target the first branch; Tick runs every 500 ms (Effect[0] amplitude 500, the 8000 ms channel of DurationIndex 31): for each branch of the tick's snapshot it heals the branch (Heal, :129-165, HealBySpell under spell 501117) and, while fewer than 8 branches, grows the first ally of Allies(player, branch, 15 yd) (Completion.cpp:62-77: alive, line of sight from the branch, Friendly(), which needs IsInRaidWith, sorted by health then GUID) that is not a branch and is within 40 yd of the caster, and heals it at once. Allies() searches IsWithinDistInMap with both combat reaches (1.5 + 1.5), so 15 yd reach about 18 yd between centres. Expected per tick n: tick 1 heals beam_a and grows beam_b (healed at once); tick 2 heals beam_a, then beam_b, which grows beam_c (healed at once); later ticks heal all three. So beam_b and beam_c are healed (branch_grow: a heal grows a branch, and a branch grows its own), beam_far and beam_ungrouped never (the search is local and grouped only); and in any window that starts before the cast, beam_b reads exactly beam_a's count and beam_c exactly one less (branch_heals). A server without branches reads 0 on beam_b and beam_c and fails branch_grow; a branch that waits a tick before its first heal reads -1 and -2 and fails branch_heals; a branch that does not grow its own reads 0 on beam_c (the first run's shape). Limit of the unhealed side: no witness_spell, so the 0 of beam_far and beam_ungrouped is not told apart from a spawn or relocation fault; their lines of sight are checked clear. Real cast: Mojo Beam 501117 (instant, RecoveryTime 14000 reset, GCD 1500, ManaCostPercentage 15 = 224 of the 1497 base mana set before the cast) at beam_a; the window is 3000 ms (6 ticks). Power: each tick costs max(1, $m2) x branches x (100 + 10 x (tick - 1)) / 200 (Brewing.cpp:191-197; $m2 = 316 at level 60), up to 711 at tick 6 with three branches; the mana is set to 1497 every 250 ms during the window as a precondition fixture (a refill cannot heal or grow a branch; the drain is clause 42, not judged here). Heal crits do not matter: only counts are judged. No set_aura is used. Reference beam_a needs at least 2 heals in the window, else unmeasured. Observation, not judged: a branch out of the caster's sight keeps being healed every tick through this drop-and-regrow, so the line-of-sight drop does not stop its healing.",
+      "label_suffix": "branches"
+    },
+    {
+      "spell": 501136,
+      "kind": "metric_delta",
+      "trigger_spell": 501136,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "metric": "threat",
+      "fields": {
+        "target": "caster"
+      },
+      "expire_ms": 500,
+      "cast_power": 1400,
+      "variant": "mirage_threat_first",
+      "label_suffix": "mirage_threat_first",
+      "name": "Mirage (the threat on the dummy falls within the first second: lower at 1500 ms than at 500 ms)",
+      "quote": "reducing threat each second",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        501181
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "phase_auras": [
+        [
+          600132,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expiry_below_after": true,
+      "game_time": {
+        "after": [
+          400,
+          900
+        ],
+        "expired": [
+          1100,
+          1900
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the first design judged the code's -20% per tick against 2T, the threat of two Bad Juju hits: it read 942 before and 1555.2 after one tick, 995.328 after three (ratios 1.651 and 1.057 against 1.6 and 1.024). The two runs are independent and agree exactly on a base of 1944 = 1555.2 / 0.8 = 995.328 / 0.512, so the reduction is exactly 0.8 a second (995.328 / 1555.2 = 0.64 = 0.8^2) and only the base was wrong: 60 threat above 2T = 1884 is present by the first read, from a source the design did not model (not found: mana gains add no threat under 681330, Unit.cpp:9337 and SpellAuraEffects.cpp:7185; Clone Me 45204 and Shadowstalker 807214 carry SPELL_ATTR1_NO_THREAT; no spell_threat row for 501181, 501136 or 561136; the caster is at full health, so Spirit heal ticks forward 0). The tooltip states no amount, only 'reducing threat each second', so the repair judges that claim and nothing the code chose: two reads in one phase, the second lower than the first (expiry_below_after, ADR 0738, 'a decay the tooltip states without a rate'), the pair one second apart, in the first second after the cast: after at about 500 ms (stamped 400..900, before the first tick at 1000 ms), expired about 1000 ms later (stamped 1100..1900, after the first tick and before the second at 2000 ms). With the sibling entry the two consecutive seconds each carry a reduction: a Mirage that lowers nothing reads the same twice and fails both, one that lowers threat only at the cast or only once fails one of the two. Mechanism (not judged): Mirage's first aura effect is made periodic at 1000 ms (AscensionWitchDoctorAuras.cpp:171-173) and each tick calls ModifyThreatByPercent(player, -20) on every enemy within 100 yd that CanHaveThreatList (Auras.cpp:336-341); the periods start at the apply (no Ex5 0x200). No other source changes the dummy's threat between the two reads: the Bad Juju hit (2500 ms cast, about 250 ms of flight) lands before Mirage, Bad Juju carries no periodic effect (Effect[1] zeroed, Completion.cpp:324-325), the next Spirit tick is at 4000 ms. gate_timing start: the before reading (0, the dummy not yet engaged) is taken before any cast; then a real Bad Juju 501181 at the dummy (the setup cast: 16% base mana, CategoryRecoveryTime 15000 reset by the scenario, 3200 ms setup wait), then a real Mirage 501136 (instant, 29% base mana, RecoveryTime 180000 reset). One precondition fixture, kept from the first design with its reason (guide 3.4, pitfall 4): Aroy Detect Invisibility 600132 set on the dummy by the caster at the start of both phases (aura 19 type 0, 999 + 1 = 1000, DurationIndex 6 = 600000 ms). Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0, and a dummy that detects none takes the caster's reference offline on the next threat update (ThreatManager.cpp:118 ShouldBeOffline, Object.cpp:2001-2009 CanDetectInvisibilityOf), which the harness read (GetThreat without includeOffline) sees as 0; 600132 keeps it online (1000 against Mirage's 340 + 5 a level, 590 at level 60; the first design read 1555.2 and 995.328 with it, so it works). Cost reason: the real Detect Invisibility 132 the dummy casts in the 811117 spirit_hits entry (target_casts_before) is accepted by the generator only when the trigger targets the dummy, and Mirage targets the caster. The fixture is not the claim's subject. after_at_least 1 requires the online reference: a read of 0 alerts. The other fixtures of the first design (823764, 984954, 681330) are dropped: no amount is judged, so a crit, a partial resist or the Spirit's mana tick at the apply (before the first read) cannot change the direction. Cast timing checked: Bad Juju 2500 ms plus flight under the 3200 ms setup wait, Mirage instant; mana 16% + 29% of 1497 under cast_power 1400. Player reports: none."
+    },
+    {
+      "spell": 501136,
+      "kind": "metric_delta",
+      "trigger_spell": 501136,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "metric": "threat",
+      "fields": {
+        "target": "caster"
+      },
+      "expire_ms": 500,
+      "cast_power": 1400,
+      "variant": "mirage_threat_third",
+      "label_suffix": "mirage_threat_third",
+      "name": "Mirage (the threat on the dummy falls again within the second second: lower at 2500 ms than at 1500 ms)",
+      "quote": "reducing threat each second",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        501181
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "phase_auras": [
+        [
+          600132,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 1500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expiry_below_after": true,
+      "game_time": {
+        "after": [
+          1100,
+          1900
+        ],
+        "expired": [
+          2100,
+          2900
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the first design judged the code's -20% per tick against 2T, the threat of two Bad Juju hits: it read 942 before and 1555.2 after one tick, 995.328 after three (ratios 1.651 and 1.057 against 1.6 and 1.024). The two runs are independent and agree exactly on a base of 1944 = 1555.2 / 0.8 = 995.328 / 0.512, so the reduction is exactly 0.8 a second (995.328 / 1555.2 = 0.64 = 0.8^2) and only the base was wrong: 60 threat above 2T = 1884 is present by the first read, from a source the design did not model (not found: mana gains add no threat under 681330, Unit.cpp:9337 and SpellAuraEffects.cpp:7185; Clone Me 45204 and Shadowstalker 807214 carry SPELL_ATTR1_NO_THREAT; no spell_threat row for 501181, 501136 or 561136; the caster is at full health, so Spirit heal ticks forward 0). The tooltip states no amount, only 'reducing threat each second', so the repair judges that claim and nothing the code chose: two reads in one phase, the second lower than the first (expiry_below_after, ADR 0738, 'a decay the tooltip states without a rate'), the pair one second apart, in the second second after the cast: after at about 1500 ms (stamped 1100..1900, after the first tick at 1000 ms and before the second), expired about 1000 ms later (stamped 2100..2900, after the second tick at 2000 ms and before the third). With the sibling entry the two consecutive seconds each carry a reduction: a Mirage that lowers nothing reads the same twice and fails both, one that lowers threat only at the cast or only once fails one of the two. Mechanism (not judged): Mirage's first aura effect is made periodic at 1000 ms (AscensionWitchDoctorAuras.cpp:171-173) and each tick calls ModifyThreatByPercent(player, -20) on every enemy within 100 yd that CanHaveThreatList (Auras.cpp:336-341); the periods start at the apply (no Ex5 0x200). No other source changes the dummy's threat between the two reads: the Bad Juju hit (2500 ms cast, about 250 ms of flight) lands before Mirage, Bad Juju carries no periodic effect (Effect[1] zeroed, Completion.cpp:324-325), the next Spirit tick is at 4000 ms. gate_timing start: the before reading (0, the dummy not yet engaged) is taken before any cast; then a real Bad Juju 501181 at the dummy (the setup cast: 16% base mana, CategoryRecoveryTime 15000 reset by the scenario, 3200 ms setup wait), then a real Mirage 501136 (instant, 29% base mana, RecoveryTime 180000 reset). One precondition fixture, kept from the first design with its reason (guide 3.4, pitfall 4): Aroy Detect Invisibility 600132 set on the dummy by the caster at the start of both phases (aura 19 type 0, 999 + 1 = 1000, DurationIndex 6 = 600000 ms). Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0, and a dummy that detects none takes the caster's reference offline on the next threat update (ThreatManager.cpp:118 ShouldBeOffline, Object.cpp:2001-2009 CanDetectInvisibilityOf), which the harness read (GetThreat without includeOffline) sees as 0; 600132 keeps it online (1000 against Mirage's 340 + 5 a level, 590 at level 60; the first design read 1555.2 and 995.328 with it, so it works). Cost reason: the real Detect Invisibility 132 the dummy casts in the 811117 spirit_hits entry (target_casts_before) is accepted by the generator only when the trigger targets the dummy, and Mirage targets the caster. The fixture is not the claim's subject. after_at_least 1 requires the online reference: a read of 0 alerts. The other fixtures of the first design (823764, 984954, 681330) are dropped: no amount is judged, so a crit, a partial resist or the Spirit's mana tick at the apply (before the first read) cannot change the direction. Cast timing checked: Bad Juju 2500 ms plus flight under the 3200 ms setup wait, Mirage instant; mana 16% + 29% of 1497 under cast_power 1400. Player reports: none."
+    },
+    {
+      "spell": 504462,
+      "kind": "metric_delta",
+      "variant": "puppets_faster",
+      "label_suffix": "puppets_faster",
+      "name": "Voodoo Mind (Shadow Puppets ticks 10% faster per Spirit: 5 Spirits)",
+      "quote": "now ticks $s1% faster",
+      "trigger_spell": 501087,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802745,
+        "target": "dummy"
+      },
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1400,
+      "before_expected": 4,
+      "expected_gain": 7,
+      "expected": 11,
+      "tolerance": 0.5,
+      "wait_ms": 2850,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2820,
+          2880
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): both phases read 0 (spell_damage_count of 802745) because the Shadow Puppets cast was refused: under Mirage the caster cannot see the dummy (the cast record reads target_visible false, target_check 12 = SPELL_FAILED_BAD_TARGETS, SpellInfo.cpp:1982-1983 CanSeeOrDetect). Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0, and an invisible unit sees another only if that unit detects its invisibility type (Object.cpp:2036-2039). Repair: the dummy casts the real Detect Invisibility 132 on itself right before the Puppets cast in both phases (target_casts_before, 300 ms settle; aura 19 type 0, AuraEffect::HandleModInvisibilityDetect adds the type flag, SpellAuraEffects.cpp:1837), the 811117 spirit_hits precedent (Mirage, then the dummy's 132, then a damaging cast at the dummy: 6 hits in final07). Puppet hits do not end Mirage (Abilities.cpp:277: the Puppets family and triggered casts are excluded), so the 5 Spirits and the invisibility stay through the read. Unchanged from the first design: Voodoo Mind 504462 (passive, every effect dummied at load, AscensionWitchDoctorCompletion.cpp:297-298): Effect[0] BasePoints -11 + 1 = -10 ($s1 = 10%), Effect[1] BasePoints 9 + 1 = 10 ($s2). The scripts apply them for Shadow Puppets (SpellFamilyFlags[0] 8, rank 501087 here: instant, 15% base mana, RecoveryTime 18000 reset by the scenario, DurationIndex 27 = 3000 ms, Effect[0] aura 227 EffectAmplitude 750, AttributesEx5 0x200 so the first tick is at the apply): the period is amplitude x 100 / (100 + 10 x Spirits) (AscensionWitchDoctorAuras.cpp:175-178) and the duration x (100 + Spirits x 10) / 100 (AscensionWitchDoctorAbilities.cpp:144-145). Mirage 501136 (instant, 29% base mana, StartRecoveryTime 1500, RecoveryTime 180000 reset by the setup step) is the real source of 5 Spirits (GainSpirit(5), Abilities.cpp:345-346): period 750 x 100 / 150 = 500 ms, duration 3000 x 150 / 100 = 4500 ms. Each puppet tick also collects a Spirit, which keeps the stacks at the cap of 5. The strike 802745 (Speed 26, about 115 ms to a dummy 3 yd away, first stamped about 200 ms) lands once per tick, read as spell_damage_count of 802745 on the dummy (logged under the player, pitfall 14) at 2850 ms after the Puppets cast (window 2820 to 2880 ms in game time). Without Voodoo Mind (the before phase, the control, Mirage and Puppets cast the same way): ticks at 0, 750, 1500, 2250 -> 4 hits at 2850 ms (the fifth is the tick at the 3000 ms end, landing about 3115 ms, which falls in the 500 ms between the phases, so the cumulative count is 5 at the start of the after phase). With it learned between the phases: ticks every 500 ms, hits at about 115, 615, 1115, 1615, 2115 and 2615 ms -> 6 hits at 2850 ms (the seventh would land at about 3115 ms), so the after reading is 4 + 1 + 6 = 11, a gain of 7 over the before reading 4; a period of 750 would give 9 (gain 5). The count 6 at the window brackets the period between about 461 and 538 ms, inside the claim band for 5 Spirits at 10 +- 2 points per Spirit (469 to 536 ms). Clause 86. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 2850 ms.",
+      "target_casts_before": [
+        132
+      ]
+    },
+    {
+      "spell": 504462,
+      "kind": "metric_delta",
+      "variant": "puppets_longer",
+      "label_suffix": "puppets_longer",
+      "name": "Voodoo Mind (Shadow Puppets still lasts at 4350 ms with 5 Spirits)",
+      "quote": "lasts $s2% longer for each Spirit active on you.",
+      "trigger_spell": 501087,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 501087
+      },
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4350,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4275,
+          4500
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): both phases read 0 (the 501087 aura on the dummy) because the Shadow Puppets cast was refused: under Mirage the caster cannot see the dummy (the cast record reads target_visible false, target_check 12 = SPELL_FAILED_BAD_TARGETS, SpellInfo.cpp:1982-1983 CanSeeOrDetect). Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0, and an invisible unit sees another only if that unit detects its invisibility type (Object.cpp:2036-2039). Repair: the dummy casts the real Detect Invisibility 132 on itself right before the Puppets cast in both phases (target_casts_before, 300 ms settle; aura 19 type 0, AuraEffect::HandleModInvisibilityDetect adds the type flag, SpellAuraEffects.cpp:1837), the 811117 spirit_hits precedent (Mirage, then the dummy's 132, then a damaging cast at the dummy: 6 hits in final07). Puppet hits do not end Mirage (Abilities.cpp:277: the Puppets family and triggered casts are excluded), so the 5 Spirits and the invisibility stay through the read. Unchanged from the first design: Voodoo Mind 504462 (passive, every effect dummied at load, AscensionWitchDoctorCompletion.cpp:297-298): Effect[0] BasePoints -11 + 1 = -10 ($s1 = 10%), Effect[1] BasePoints 9 + 1 = 10 ($s2). The scripts apply them for Shadow Puppets (SpellFamilyFlags[0] 8, rank 501087 here: instant, 15% base mana, RecoveryTime 18000 reset by the scenario, DurationIndex 27 = 3000 ms, Effect[0] aura 227 EffectAmplitude 750, AttributesEx5 0x200 so the first tick is at the apply): the period is amplitude x 100 / (100 + 10 x Spirits) (AscensionWitchDoctorAuras.cpp:175-178) and the duration x (100 + Spirits x 10) / 100 (AscensionWitchDoctorAbilities.cpp:144-145). Mirage 501136 (instant, 29% base mana, StartRecoveryTime 1500, RecoveryTime 180000 reset by the setup step) is the real source of 5 Spirits (GainSpirit(5), Abilities.cpp:345-346): period 750 x 100 / 150 = 500 ms, duration 3000 x 150 / 100 = 4500 ms. Each puppet tick also collects a Spirit, which keeps the stacks at the cap of 5. The aura 501087 is read on the dummy (measure_actor dummy), stamped in game time, the end (4500 ms) inside the G-19 band (5% = 225 ms: 4275 to 4725). Two entries, because an expiry read needs the talent known throughout (gate_timing start) and the control here is the before phase without it. Read 4350 ms after the Puppets cast: without Voodoo Mind (the before phase, Mirage and Puppets cast the same way) the aura ended at 3000 ms and reads 0 (the control), with it learned between the phases it is still on (1): a talent without the duration effect fails here. Clause 87. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 4350 ms.",
+      "target_casts_before": [
+        132
+      ]
+    },
+    {
+      "spell": 504462,
+      "kind": "metric_delta",
+      "variant": "puppets_longer_end",
+      "label_suffix": "puppets_longer_end",
+      "name": "Voodoo Mind (Shadow Puppets has ended at 4650 ms with 5 Spirits)",
+      "quote": "lasts $s2% longer for each Spirit active on you.",
+      "trigger_spell": 501087,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 501087
+      },
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 4650,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4500,
+          4725
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): both phases read 0 (the 501087 aura on the dummy), a pass that measured nothing because the Shadow Puppets cast was refused: under Mirage the caster cannot see the dummy (the cast record reads target_visible false, target_check 12 = SPELL_FAILED_BAD_TARGETS, SpellInfo.cpp:1982-1983 CanSeeOrDetect). Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0, and an invisible unit sees another only if that unit detects its invisibility type (Object.cpp:2036-2039). Repair: the dummy casts the real Detect Invisibility 132 on itself right before the Puppets cast in both phases (target_casts_before, 300 ms settle; aura 19 type 0, AuraEffect::HandleModInvisibilityDetect adds the type flag, SpellAuraEffects.cpp:1837), the 811117 spirit_hits precedent (Mirage, then the dummy's 132, then a damaging cast at the dummy: 6 hits in final07). Puppet hits do not end Mirage (Abilities.cpp:277: the Puppets family and triggered casts are excluded), so the 5 Spirits and the invisibility stay through the read. Unchanged from the first design: Voodoo Mind 504462 (passive, every effect dummied at load, AscensionWitchDoctorCompletion.cpp:297-298): Effect[0] BasePoints -11 + 1 = -10 ($s1 = 10%), Effect[1] BasePoints 9 + 1 = 10 ($s2). The scripts apply them for Shadow Puppets (SpellFamilyFlags[0] 8, rank 501087 here: instant, 15% base mana, RecoveryTime 18000 reset by the scenario, DurationIndex 27 = 3000 ms, Effect[0] aura 227 EffectAmplitude 750, AttributesEx5 0x200 so the first tick is at the apply): the period is amplitude x 100 / (100 + 10 x Spirits) (AscensionWitchDoctorAuras.cpp:175-178) and the duration x (100 + Spirits x 10) / 100 (AscensionWitchDoctorAbilities.cpp:144-145). Mirage 501136 (instant, 29% base mana, StartRecoveryTime 1500, RecoveryTime 180000 reset by the setup step) is the real source of 5 Spirits (GainSpirit(5), Abilities.cpp:345-346): period 750 x 100 / 150 = 500 ms, duration 3000 x 150 / 100 = 4500 ms. Each puppet tick also collects a Spirit, which keeps the stacks at the cap of 5. The aura 501087 is read on the dummy (measure_actor dummy), stamped in game time, the end (4500 ms) inside the G-19 band (5% = 225 ms: 4275 to 4725). Two entries, because an expiry read needs the talent known throughout (gate_timing start) and the control here is the before phase without it. Read 4650 ms after the Puppets cast (game time 4500 to 4725 ms): gone (0) in both phases, so the duration is not longer than 4725 ms; with puppets_longer the end lies in (4350, 4650] ms inside the band. Clause 87. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 4650 ms.",
+      "target_casts_before": [
+        132
+      ]
+    },
+    {
+      "spell": 501087,
+      "kind": "metric_delta",
+      "variant": "spirit_stacks",
+      "label_suffix": "spirit_stacks",
+      "name": "Shadow Puppets (the Spirit it collects stacks 5 times)",
+      "quote": "Summon a Shadow Puppet that collects a Spirit",
+      "trigger_spell": 501087,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 561136
+      },
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the treatment read 5 stacks of 561136, all from Mirage, a pass that never tried a sixth Spirit because the Shadow Puppets cast was refused: under Mirage the caster cannot see the dummy (the cast record reads target_visible false, target_check 12 = SPELL_FAILED_BAD_TARGETS, SpellInfo.cpp:1982-1983 CanSeeOrDetect). Mirage's Effect[0] is SPELL_AURA_MOD_INVISIBILITY type 0, and an invisible unit sees another only if that unit detects its invisibility type (Object.cpp:2036-2039). Repair: the dummy casts the real Detect Invisibility 132 on itself right before the Puppets cast in both phases (target_casts_before, 300 ms settle; aura 19 type 0, AuraEffect::HandleModInvisibilityDetect adds the type flag, SpellAuraEffects.cpp:1837), the 811117 spirit_hits precedent (Mirage, then the dummy's 132, then a damaging cast at the dummy: 6 hits in final07). Puppet hits do not end Mirage (Abilities.cpp:277: the Puppets family and triggered casts are excluded), so the 5 Spirits and the invisibility stay through the read. Unchanged from the first design: Shadow Puppets 501087 (rank 9, instant, 15% base mana, DurationIndex 27 = 3000 ms, EffectAmplitude 750, EXTRA_INITIAL_PERIOD): AscensionWitchDoctorAuras.cpp:279-284 casts the strike 802745 at each tick and GainSpirit(player) (Completion.cpp:142-155) casts Spirit 561136 on the caster once per tick; the row 26 clause is the empty extension wrapper \"@ext:@s:561136:0@:ext@\" of the pulled Spirit text (the Jungle Thistle 500472 precedent), so the Spirit it grants is the subject. Spirit 561136: DurationIndex 29 = 12000 ms, StackAmount 5, Effect[0] periodic energize and Effect[1] periodic heal, EffectAmplitude 4000, 7 per stack on the caster, EXTRA_INITIAL_PERIOD (so the first tick of a stack lands at its application). Mirage 501136 (a real cast, 5 Spirits) then Puppets (ticks at about 0, 750, 1500, 2250 and 3000 ms, each collecting a Spirit, 5 more): the stacks read 5 at 3200 ms, not 10 (StackAmount 5, $u). Control: the before phase casts nothing (cast_in_before false), 0 stacks; the cap is the arm that fails against 10. Clause 26. Cast timing checked: Mirage instant (1600 ms settle), Puppets instant, read at 3200 ms.",
+      "target_casts_before": [
+        132
+      ]
+    },
+    {
+      "spell": 560544,
+      "kind": "metric_delta",
+      "variant": "cast_done_potion",
+      "label_suffix": "cast_done_potion",
+      "name": "Sen'jin's Presence (a Potion Toss also gives the shorter Brew)",
+      "quote": "now reduce the cast time of your next 2 Loa's Brews by $561017s1%",
+      "trigger_spell": 801670,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "casting",
+      "fields": {},
+      "setup_casts": [
+        801663,
+        801661
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1400,
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1618,
+      "expire_ms": 2500,
+      "game_time": {
+        "after": [
+          1560,
+          1640
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the treatment read 1 (still casting at 1627 ms) because the Potion Toss setup cast was refused, so no Sen'jin's Presence buff was given: AscensionWitchDoctorAbilities.cpp:78-79 (OnSpellCheckCast) refuses a Potion Toss (IsPotion, SpellFamilyFlags[1] 2048) with SPELL_FAILED_CASTER_AURASTATE while State(player).ingredients is empty, and the harness-set 801702 marker does not fill that list (the first design's 'with no Ingredient brewed it makes no potion, the hook still gives the buff' was wrong). The Bottle sibling cast_done read 0 in the same sweep. Repair, the 802487 bottle and brew precedent: both phases learn Cauldron Brewer 92085 (a passive whose only code use is the Has Ingredient marker, Brewing.cpp:38-45; a precondition, not the subject, the same in both phases) and make a real Ingredient first: Frog Bones 801663 (instant, 5% base mana, CategoryRecoveryTime 500 reset by the setup step, StartRecovery category 130 so it does not hold the Potion Toss global cooldown; its aura has no cast time effect: a dummy aura and a 1500 ms Cauldron trigger 803697), a wait of 1600 ms, then the real Potion Toss 801661 at the caster (instant, 18% base mana, GCD 1500, CategoryRecoveryTime 15000 reset by the setup step; with Frog Bones it also casts the Frog Bones potion 802971, an absorb shield, on the caster, with no cast time effect), a wait of 1600 ms, then the Brew. Sen'jin's Presence 560544 (passive, Effect[0] PROC_TRIGGER_SPELL 561017): Abilities.cpp:321-325 (OnSpellCast): a Spirit in a Bottle or Potion Toss cast with 560544 known casts 561017 on the caster with 2 charges; 561017 (DurationIndex 1 = 10000 ms, Effect[0] aura 108 ADD_PCT_MODIFIER on SPELLMOD_CASTING_TIME, BasePoints -21 + 1 = -20, class mask word 1 131072 = the Loa's Brew family; Effect[1] zeroed at load). Loa's Brew 801670: CastingTimeIndex 5 = 2000 ms, 33% base mana. 560544 is learned between the phases (the before phase is the control: the same Ingredient, Potion Toss and Brew without it). Read 1618 ms after the Brew cast starts (stamped 1560..1640): 1 without the talent (a 2000 ms cast), 0 with it (1600 ms). The second alternative of 'Potion Toss and Spirit in a Bottle' (G-23). Clause 105. Cast timing checked: Frog Bones and Potion Toss instant (1600 ms waits past the 1500 ms GCD), Brew 1600 ms, read at 1618 ms; mana 5% + 18% + 33% = 56% of 1497 = 838 under cast_power 1400.",
+      "learn": [
+        92085
+      ]
+    },
+    {
+      "spell": 705948,
+      "kind": "metric_delta",
+      "variant": "price_ready_lasts",
+      "label_suffix": "price_ready_lasts",
+      "name": "A Price To Pay (the guaranteed crit lasts 8 sec)",
+      "quote": "and causes your next cast within $707326d to be guaranteed to critically strike.",
+      "trigger_spell": 801607,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 707326
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7650,
+      "expiry_wait_ms": 700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7600,
+          8000
+        ],
+        "expired": [
+          8000,
+          8400
+        ]
+      },
+      "observe_source": "Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the treatment read no 707326 aura at 7657 and 8368 ms because the Spirit Eclipse cast at the dummy was refused: under Mirage (the 5-Spirit setup) the caster cannot see the dummy (cast record: target_visible false, target_check 12 = SPELL_FAILED_BAD_TARGETS, SpellInfo.cpp:1982-1983; Object.cpp:2036-2039). Repair: the dummy casts the real Detect Invisibility 132 on itself right before the Eclipse (target_casts_before, 300 ms settle, aura 19 type 0), the 811117 spirit_hits precedent (Mirage, the dummy's 132, then Eclipse at the dummy: 6 hits in final07). The Eclipse hit ends Mirage (Abilities.cpp:277), which the read does not need; the Spirit count of 5 is taken at the Eclipse cast. Unchanged from the first design: AscensionWitchDoctorAbilities.cpp:332-336 (OnSpellCast): Spirit Eclipse 801607 (Family 0 536870912) cast with count == 5 Spirits and 705948 known casts A Price To Pay 707326 on the caster (DurationIndex 31 = 8000 ms, $707326d; Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +100 on the Spirit Glaive mask, native; Effect[2] zeroed at load, Completion.cpp:462-463). Mirage 501136 is the real setup (5 Spirits, 1600 ms settle; the trigger's required Spirit aura is set before the setup casts, so Mirage's five stacks are the count, as in the reset entry), Eclipse (instant, CategoryRecoveryTime 10000 reset by the scenario, 12% base mana) the trigger. The aura is read on the caster 7650 ms after the Eclipse cast and about 700 ms later, the end inside the G-19 band (5% of 8000 ms = 400 ms) on both sides, both stamped in game time. Control: the before phase (705948 known throughout, nothing cast) reads no aura (0). Only the duration half of clause 231; the guarantee itself has no route (tool_gap). Cast timing checked: Mirage and Eclipse instant, reads at 7650 and about 8350 ms.",
+      "target_casts_before": [
+        132
+      ]
+    },
+    {
+      "spell": 707617,
+      "kind": "ally_heal_reach",
+      "variant": "wave",
+      "name": "Mojo Wave (each Mojo Beam heal heals the 2 lowest-health nearby allies for 50%)",
+      "quote": "Healing with Mojo Beam now heals up to $712453i of the lowest health nearby allies",
+      "gate_spell": 707617,
+      "allies": [
+        {
+          "id": "wave_a",
+          "dx": 22,
+          "dy": 0,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "wave_b",
+          "dx": 22,
+          "dy": 6,
+          "health": 20000,
+          "maximum": 100000
+        },
+        {
+          "id": "wave_c",
+          "dx": 22,
+          "dy": -6,
+          "health": 30000,
+          "maximum": 100000
+        },
+        {
+          "id": "wave_d",
+          "dx": 28,
+          "dy": 0,
+          "health": 90000,
+          "maximum": 100000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 501117,
+          "target": "wave_a",
+          "watch_ms": 3000,
+          "poll_ms": 250,
+          "refill_power": 1497,
+          "end_ms": 5500
+        }
+      ],
+      "checks": [
+        {
+          "name": "wave_lowest",
+          "judge": "reach",
+          "spell": 712453,
+          "reference": "wave_a",
+          "witness_spell": 501117,
+          "minimum": 2,
+          "healed": [
+            "wave_a",
+            "wave_b",
+            "wave_c"
+          ],
+          "unhealed": [
+            "wave_d"
+          ]
+        },
+        {
+          "name": "wave_cap",
+          "judge": "per_source",
+          "spell": 712453,
+          "source": 501117,
+          "per_event": 2,
+          "minimum": 2
+        },
+        {
+          "name": "wave_share",
+          "judge": "share",
+          "spell": 712453,
+          "quote": "for $s1% of the healing done",
+          "source": 501117,
+          "expected": 0.5,
+          "minimum": 2,
+          "band": [
+            -0.5,
+            0.0
+          ],
+          "band_reason": "rounding only: Copy passes effective / 2 as an integer base point (Completion.cpp:93-97), which drops 0.5 for an odd effective heal; Spell::SetSpellValue stores CalcBaseValue(value) = value - 1 for DieSides 1 (Spell.cpp:8776-8777, SpellInfo.cpp:595-601) and CalcValue adds the 1 back (SpellInfo.cpp:501-503), so each Wave reads floor(effective / 2); 712453 cannot crit and ignores caster modifiers"
+        }
+      ],
+      "observe_source": "AscensionWitchDoctorBrewing.cpp:129-165 (Heal): after every Mojo Beam heal with effective healing > 0 and Mojo Wave 707617 on the caster (Wave, Completion.h:160), Allies(player, target, 15 yd) less the target, sorted by health percent then GUID (Completion.cpp:62-77), and the first 2 (cap 2, $712453i: 712453 MaxAffectedTargets 2) take Copy(player, ally, WaveHeal 712453, effective / 2) (Completion.cpp:93-97, CastCustomSpell BASE_POINT0). 712453: AttributesEx2 SPELL_ATTR2_CANT_CRIT, AttributesEx3 IGNORE_CASTER_MODIFIERS. 707617 is a passive (Attributes 64), so the harness learn applies its aura. Layout (yd from the caster): wave_a (22, 0) the Beam target, wave_b (22, 6), wave_c (22, -6), wave_d (28, 0): every pair is 12 yd apart or less (inside 15 plus both reaches), the caster 22 yd or more from each (never in Allies()). Health is set at each phase start with a 100000 maximum (10%, 20%, 30%, 90%, the set_health maximum fixture): the heals of a 3000 ms window move each ally by under 3 points, so the order never changes and no heal overheals. Branches grow (clauses 40 and 41) and every ally is healed by the Beam, so every Beam heal has three eligible allies, and wave_d, the highest, is never one of the two lowest: wave_lowest needs 712453 heals on wave_a, wave_b and wave_c, none on wave_d while wave_d takes Beam heals (the witness: it is grouped and in reach), and none in the control phase; wave_cap needs exactly 2 Wave heals per Beam heal (no Beam overheal, else unmeasured), and 0 in the control phase; wave_share judges the mean Wave heal against 0.5 x the mean effective Beam heal, inside the rounding band [-0.5, 0] (about 138 against 277 at the reference stats; triage repair of the cycle 10 pre-fix sweep 20261121-203210: the first band [+0, +1] assumed CalcValue's +1 on top of the custom base point, but SetSpellValue subtracts it first, Spell.cpp:8776-8777 and SpellInfo.cpp:595-601; the sweep read a mean Wave heal of 141.136 over 44 heals against 0.5 x 283.273 = 141.636, exactly 0.5 lower: every Beam heal was odd, 277 and its crits), with 0 Wave heals in the control phase. A server without Mojo Wave reads 0 Wave heals and fails wave_lowest (the three lowest read 0) and wave_cap (0 against 2 per Beam heal); wave_share then has fewer than its minimum of 2 Wave heals and reads unmeasured, not alert, so the absence of the behaviour is shown by the first two and wave_share judges only the amount of Wave heals that exist. One that picks other than the lowest heals wave_d; one that heals more than 2 fails wave_cap; one that heals another share fails wave_share. Phases: control (707617 not known) and treatment (learned), each a real Mojo Beam 501117 at wave_a (instant, RecoveryTime 14000 reset, GCD 1500, 15% = 224 of the 1497 base mana set before the cast), watched 3000 ms with the mana set to 1497 every 250 ms (precondition fixture: the per-tick drain grows with the branches, clause 42; the refill cannot heal). The control phase then waits 5500 ms without refills, past the 8000 ms channel, so its heals cannot reach the treatment window; the reads bracket each window. Beam crits change the effective amount, not the share, so no crit fixture is set. No set_aura is used.",
+      "label_suffix": "wave"
+    },
+    {
+      "spell": 803624,
+      "kind": "peaceful_resurrect",
+      "variant": "peaceful",
+      "name": "Reclaim Soul (resurrects with 820 health and 1030 mana out of combat, refused in combat)",
+      "quote": "Brings a dead ally back to life with $s1 health",
+      "label_suffix": "peaceful",
+      "claims": [
+        {
+          "claim": "health",
+          "quote": "Brings a dead ally back to life with $s1 health"
+        },
+        {
+          "claim": "mana",
+          "quote": "and $q1 mana."
+        },
+        {
+          "claim": "refusal",
+          "quote": "Cannot be cast when in combat."
+        }
+      ],
+      "observe_source": "Reclaim Soul 803624: Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW, EffectBasePoints[0] 819 + DieSides 1 = 820 health ($s1), EffectMiscValue[0] 1030 mana ($q1); Attributes 268500992 holds SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000), so Spell::CheckCast (Spell.cpp:5942-5943, SpellInfo::CanBeUsedInCombat) refuses the cast while the caster is in combat with SPELL_FAILED_AFFECTING_COMBAT (1). CastingTimeIndex 170 = 8000 ms, GCD 1500, ManaCostPercentage 30 = 449 of the 1497 base mana (set before each attempt). No Witch Doctor code touches 803624. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) the dead ally takes with CMSG_RESURRECT_RESPONSE 348 (the cast_combat shape of ADR 0537). One scenario, two arms: the ally dies and first answers with no offer (stays dead: the control of the accept); out of combat (combat 0) the cast completes (cast_failure 0 after 8500 ms), the ally accepts and reads alive 1, health 820 and mana 1030 (regeneration off for the ally); then the ally dies again, the caster casts a real Hex of Malice 504608 at the dummy (instant, 20% base mana = 299, StartRecoveryTime 1500, spell hit rating 10000; its 24 s curse keeps the caster in combat) and waits 2000 ms, past its global cooldown (combat 1) and the same cast is refused (cast_failure 1), and the ally's answer finds no offer (alive 0). health and mana each need the control, the accepted cast and its amount; refusal needs both arms, so a server that allows the cast in combat reads 0 there and one that refuses it everywhere reads 1 out of combat. The out-of-combat arm runs first, because the harness keeps the last refusal reason per spell. No set_aura is used. Triage repair (cycle 10 pre-fix sweep 20261121-203210, build be33fc85): the first design started the fight with one melee attack and a 500 ms settle; the sweep read combat_fighting 0, so the refusal arm ran out of combat (cast_failure_fighting 0, the 8000 ms cast unfinished at the 500 ms read, alive_fighting 0) and measured nothing about the refusal. The same attack step reaches combat in the Necromancer cast_combat revive run (20261121-193652, combat 1), where it follows no long cast; the cause here is not established. The repair needs the peaceful_resurrect module option combat_cast (cycle10/triage-peaceful-resurrect.patch): a real harmful cast at the dummy, waited past its cast time and global cooldown, in place of the swing; and a combat reading that misses its state (combat_peaceful 1 or combat_fighting 0) now makes the verdict unmeasured instead of an alert, since it is the arm's precondition and not the claim. Mana for the Hex: the peaceful attempt sets the 1497 base mana and spends 449, leaving 1048; the module sets the base mana again before the Hex.",
+      "combat_cast": 504608
     }
   ],
   "player_observations": [],

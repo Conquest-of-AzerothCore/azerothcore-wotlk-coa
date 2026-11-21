@@ -5,7 +5,7 @@ is cast at the dummy in both phases (`cast_in_before`, `gate_timing` `between`) 
 `delay_ms` after each trigger cast the dummy casts each spell at itself, triggered, with `allowed_refusal`: a refusal
 with exactly that code passes the step, any other refusal still fails the scenario (the plain creature cast refuses
 every refusal). The entry's `wait_ms` follows the casts. Right after each judged reading the scenario reads
-`creature_cast_result` of each spell (0 started, the code when refused). A missing result, or a refused control cast,
+`creature_cast_result` of each spell (SPELL_CAST_OK 255 when it started, the refusal code otherwise). A missing result, or a refused control cast,
 makes the verdict `unmeasured`; the treatment results are stated in the explanation. Absent, the scenario is unchanged.
 
 Named points: `after_trigger_steps` (the casts), `fixtures` (the result reads), `model` and `verdict`.

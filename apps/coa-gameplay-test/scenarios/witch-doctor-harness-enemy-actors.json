@@ -68,11 +68,11 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the unmarked cast starts",
+      "label": "CONTROL: the unmarked cast starts (SPELL_CAST_OK 255)",
       "actor": "dummy",
       "metric": "creature_cast_result",
       "spell": 2144558,
-      "equals": 0
+      "equals": 255
     },
     {
       "action": "assert",

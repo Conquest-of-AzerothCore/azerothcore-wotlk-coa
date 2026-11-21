@@ -66,6 +66,12 @@
       "maximum": 300
     },
     {
+      "action": "unlearn",
+      "label": "Natural Alchemist is a class 13 starting spell",
+      "actor": "doctor",
+      "spell": 536213
+    },
+    {
       "action": "assert",
       "label": "SETUP: no Alchemy bonus without Natural Alchemist",
       "actor": "doctor",
