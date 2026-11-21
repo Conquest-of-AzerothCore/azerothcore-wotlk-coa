@@ -2241,3 +2241,11 @@ Options with a module:
   to a stated stack count (ADR 1138, provisional)
 - [`use_gameobject_after`](metric_delta_options/use_gameobject_after.md): the caster uses the gameobject its
   treatment cast created, with the gameobject reads' evidence rows (ADR 1139, provisional)
+- [`dummy_casts_at_caster`](metric_delta_options/dummy_casts_at_caster.md): the dummy casts a spell at the caster in
+  each phase as an ordinary, untriggered cast (ADR 1112, provisional)
+- [`enemy_casts_before`](metric_delta_options/enemy_casts_before.md): the enemy player casts spells at itself once,
+  before any trigger cast, for a form or lasting state the trigger needs (ADR 1113, provisional)
+- [`action_buttons`](metric_delta_options/action_buttons.md): spells put on the caster's action buttons in the
+  treatment phase only, for a spell that casts from the action bar (ADR 1113, provisional)
+- [`step_out`](metric_delta_options/step_out.md): the caster stepped to one side of a range edge for a hold after the
+  trigger, the layout read back, off its side unmeasured (ADR 1119, provisional)
