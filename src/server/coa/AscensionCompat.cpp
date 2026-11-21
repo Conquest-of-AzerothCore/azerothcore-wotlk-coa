@@ -8611,9 +8611,6 @@ public:
             "Ascension_SeasonCollection", "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
-        // Descension client patches rename the internal addons (Ascension_X -> Descension_X,
-        // AscensionUI -> DescensionUI, ...). Both spellings are known and keep the same secure flag,
-        // so older and newer clients work against the same server.
         auto replaceAll = [](std::string_view in, std::string_view from, std::string_view to)
         {
             std::string out(in);

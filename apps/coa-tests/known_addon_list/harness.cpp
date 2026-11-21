@@ -140,7 +140,6 @@ int main()
         Expect(entry->secure == 0, "Ascension addons that need no protected calls are known but not secure");
     }
 
-    // Descension client patches rename the internal addons; the renamed spelling keeps the same flag.
     for (char const* name : { "DescensionUI", "Descension_CharacterAdvancement", "Descension_Collections",
                               "Descension_CompactRaidFrames", "Descension_HelpUI", "Descension_WildCard" })
     {
