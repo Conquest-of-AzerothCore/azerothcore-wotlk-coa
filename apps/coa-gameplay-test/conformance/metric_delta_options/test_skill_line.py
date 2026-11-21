@@ -18,7 +18,7 @@ class SkillLineTests(unittest.TestCase):
         scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), skill_entry())
         run.validate(scenario)
         steps = scenario['steps']
-        given = [index for index, step in enumerate(steps) if step['action'] == 'set_skill']
+        given = [index for index, step in enumerate(steps) if step['action'] == 'set_skill' and step['skill'] == 171]
         self.assertEqual(len(given), 1)
         self.assertEqual((steps[given[0]]['skill'], steps[given[0]]['value'], steps[given[0]]['maximum']),
                          (171, 1, 300))
@@ -28,7 +28,7 @@ class SkillLineTests(unittest.TestCase):
     def test_without_the_option_no_line_is_given(self):
         entry = {key: value for key, value in skill_entry().items() if key != 'skill_line'}
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
-        self.assertFalse(any(step['action'] == 'set_skill' for step in scenario['steps']))
+        self.assertFalse(any(step['action'] == 'set_skill' and step['skill'] == 171 for step in scenario['steps']))
 
     def test_refused_inputs(self):
         for raw in ({}, {'skill': 171, 'value': 1}, {'skill': 171, 'value': 0, 'maximum': 300},

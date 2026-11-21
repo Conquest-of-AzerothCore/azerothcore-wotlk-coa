@@ -57,7 +57,9 @@ class PeacefulResurrectTests(unittest.TestCase):
     def test_a_cast_allowed_in_combat_or_refused_out_of_it_alerts(self):
         self.assertEqual(judged(self.by_claim['refusal'], cast_failure_fighting=0).status, 'alert')
         self.assertEqual(judged(self.by_claim['refusal'], cast_failure_peaceful=1, alive_peaceful=0).status, 'alert')
-        self.assertEqual(judged(self.by_claim['refusal'], combat_fighting=0).status, 'alert')
+
+    def test_a_fighting_arm_that_never_reached_combat_is_unmeasured(self):
+        self.assertEqual(judged(self.by_claim['refusal'], combat_fighting=0).status, 'unmeasured')
 
     def test_other_amounts_or_a_living_unoffered_ally_alert(self):
         self.assertEqual(judged(self.by_claim['health'], health_peaceful=819).status, 'alert')
