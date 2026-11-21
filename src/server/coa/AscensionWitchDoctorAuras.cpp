@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionWitchDoctorCompletion.h"
+#include "Log.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -387,6 +388,9 @@ class aura_ascension_witch_doctor_lifecycle : public AuraScript
             _released = true;
             Copy(player, GetTarget(), ThreadsDamage, std::max(0, effect->GetAmount()));
         }
+        if (IsIngredient(id))
+            LOG_ERROR("coa", "DIAG13071 removed {} mode {} target {}", id, uint32(GetTargetApplication()->GetRemoveMode()),
+                GetTarget()->GetName());
         if (IsIngredient(id) && player == GetTarget())
             IngredientChanged(player, id, false);
         if (id == Spirit && player == GetTarget())
