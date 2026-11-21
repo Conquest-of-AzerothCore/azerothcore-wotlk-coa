@@ -479,7 +479,7 @@
     "spell": 300369,
     "clause": "Damage dealt by Radiant Flame now has a $h% chance to launch a Solar Flare at your target.",
     "labels": [
-      "300369 effect_value #0"
+      "300369 proc_rate"
     ],
     "kind": "claim"
   },
@@ -487,7 +487,8 @@
     "spell": 300369,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
     "labels": [
-      "300369 effect_value 807175e1 #1"
+      "804630 behaviour_metric_delta flare_damage",
+      "804630 behaviour_metric_delta flare_sp"
     ],
     "kind": "claim"
   },
@@ -495,8 +496,8 @@
     "spell": 300369,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
-      "300369 effect_value 807175e0 #2",
-      "300369 spell_duration 807175 #3"
+      "804630 behaviour_metric_delta flare_hit",
+      "804630 behaviour_metric_delta flare_duration"
     ],
     "kind": "claim"
   },
@@ -1594,7 +1595,8 @@
     "spell": 680618,
     "clause": "Increases your critical strike chance with Holy spells and abilities by $s1% on enemies above 80% health.",
     "labels": [
-      "680618 effect_value e0 #0"
+      "680618 behaviour_metric_delta above",
+      "680618 behaviour_metric_delta below"
     ],
     "kind": "claim"
   },
@@ -2247,21 +2249,25 @@
     "spell": 704908,
     "clause": "Casting Sunflare now has a $h% chance to  transform your next Sunflare into Sun Ray.",
     "labels": [
-      "704908 effect_value #0"
+      "704908 proc_rate"
     ],
     "kind": "claim"
   },
   {
     "spell": 704908,
     "clause": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
-    "labels": [],
+    "labels": [
+      "704908 behaviour_metric_delta horusath_marker",
+      "704908 behaviour_metric_delta transform"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704908,
     "clause": "Shine the light of the sun on an enemy, dealing ${$m1+0+$sph*1} Holy Damage and granting you Scorch Marks.",
     "labels": [
-      "704908 effect_value 504764e0 #1"
+      "704908 behaviour_metric_delta sun_ray_damage",
+      "704908 behaviour_metric_delta scorch_granted"
     ],
     "kind": "claim"
   },
@@ -2269,7 +2275,9 @@
     "spell": 704908,
     "clause": "Your next Radiant Flame has no mana cost, ticks $s2% faster,",
     "labels": [
-      "704908 effect_value 807059e1 #2"
+      "704908 behaviour_metric_delta scorch_cost",
+      "704908 behaviour_metric_delta scorch_period",
+      "704908 behaviour_metric_delta scorch_next"
     ],
     "kind": "claim"
   },
@@ -2277,7 +2285,7 @@
     "spell": 704908,
     "clause": "and its duration is reduced by $s1%.",
     "labels": [
-      "704908 effect_value 807059e0 #3"
+      "704908 behaviour_metric_delta scorch_duration"
     ],
     "kind": "claim"
   },
@@ -2739,7 +2747,7 @@
     "spell": 707773,
     "clause": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
     "labels": [
-      "707773 effect_value e0 #0"
+      "707773 behaviour_metric_delta armor_ignore"
     ],
     "kind": "claim"
   },
@@ -2978,49 +2986,73 @@
   {
     "spell": 804247,
     "clause": "Bless yourself and an ally, restoring 5% of their maximum health",
-    "labels": [],
+    "labels": [
+      "804247 behaviour_metric_delta health_tick"
+    ],
     "kind": "claim",
     "dbc_clause": "Bless yourself and an ally, restoring $s1% of their maximum health",
     "text_source": {
       "table": "coa_client_spell_description",
-      "file": "rev_20261015_04_sun_cleric_bless_tooltip.sql",
-      "commit": "8ed21f1798",
-      "pr": "#7759",
-      "basis": "text_correction",
-      "ruling": null,
+      "file": "rev_20261121_01_sun_cleric_bless_mana_five_percent.sql",
+      "commit": "88d03d1069",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
     }
   },
   {
     "spell": 804247,
-    "clause": "and 1% of your maximum mana every 10 sec for 5 min.",
-    "labels": [],
+    "clause": "and 5% of your maximum mana every 10 sec for 5 min.",
     "kind": "claim",
     "dbc_clause": "and $s2% of your maximum mana every $t1 sec for $d.",
     "text_source": {
       "table": "coa_client_spell_description",
-      "file": "rev_20261015_04_sun_cleric_bless_tooltip.sql",
-      "commit": "8ed21f1798",
-      "pr": "#7759",
-      "basis": "text_correction",
-      "ruling": null,
+      "file": "rev_20261121_01_sun_cleric_bless_mana_five_percent.sql",
+      "commit": "88d03d1069",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
-    }
+    },
+    "claims": [
+      {
+        "claim": "restores 5% of your maximum mana per tick",
+        "labels": [
+          "804247 behaviour_metric_delta mana_tick"
+        ]
+      },
+      {
+        "claim": "every 10 sec",
+        "labels": [
+          "804247 behaviour_metric_delta mana_tick",
+          "804247 behaviour_metric_delta mana_period"
+        ]
+      },
+      {
+        "claim": "for 5 min",
+        "labels": [
+          "804247 behaviour_metric_delta bless_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 804247,
     "clause": "Can only affect 1 ally at a time.",
-    "labels": [],
+    "labels": [
+      "804247 behaviour_single_target"
+    ],
     "kind": "claim",
     "text_source": {
       "table": "coa_client_spell_description",
-      "file": "rev_20261015_04_sun_cleric_bless_tooltip.sql",
-      "commit": "8ed21f1798",
-      "pr": "#7759",
-      "basis": "text_correction",
-      "ruling": null,
+      "file": "rev_20261121_01_sun_cleric_bless_mana_five_percent.sql",
+      "commit": "88d03d1069",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
     }
@@ -3260,7 +3292,11 @@
     "spell": 804630,
     "clause": "Casting Rapture now causes your next Dawnsear within $804631d to strike your target twice and launch a Solar Flare at the target.",
     "labels": [
-      "804630 spell_duration 804631 #0"
+      "804630 behaviour_metric_delta twice",
+      "804630 behaviour_metric_delta flare_count",
+      "804630 behaviour_metric_delta window_in",
+      "804630 behaviour_metric_delta window_out",
+      "804630 behaviour_metric_delta window_age"
     ],
     "kind": "claim"
   },
@@ -3268,7 +3304,8 @@
     "spell": 804630,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
     "labels": [
-      "804630 effect_value 807175e1 #1"
+      "804630 behaviour_metric_delta flare_damage",
+      "804630 behaviour_metric_delta flare_sp"
     ],
     "kind": "claim"
   },
@@ -3276,8 +3313,8 @@
     "spell": 804630,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
-      "804630 effect_value 807175e0 #2",
-      "804630 spell_duration 807175 #3"
+      "804630 behaviour_metric_delta flare_hit",
+      "804630 behaviour_metric_delta flare_duration"
     ],
     "kind": "claim"
   },
@@ -3441,8 +3478,8 @@
     "spell": 807973,
     "clause": "dealing ${$m1+0+$AP*0.159426} Holy damage",
     "labels": [
-      "807973 effect_value e0 #1",
-      "807973 aura_amount e0 #1"
+      "807973 behaviour_metric_delta tick_damage",
+      "807973 behaviour_metric_delta tick_damage_ap"
     ],
     "kind": "claim"
   },
@@ -3465,13 +3502,19 @@
   {
     "spell": 807973,
     "clause": "Only usable while Dawn is active.",
-    "labels": [],
+    "labels": [
+      "807973 behaviour_cast_gate caster_aura_blocked",
+      "807973 behaviour_cast_gate caster_aura_allowed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 807973,
     "clause": "Usable while moving.",
-    "labels": [],
+    "labels": [
+      "807973 behaviour_metric_delta moving",
+      "807973 behaviour_metric_delta moving_control"
+    ],
     "kind": "claim"
   },
   {
@@ -3903,15 +3946,17 @@
   {
     "spell": 807749,
     "clause": "Auto attacks generate 1 Solar Power",
-    "labels": [],
+    "labels": [
+      "807749 behaviour_metric_delta solar_power",
+      "807749 behaviour_metric_delta swings"
+    ],
     "kind": "claim"
   },
   {
     "spell": 807749,
     "clause": "and deal $s2% increased damage.",
     "labels": [
-      "807749 effect_value e1 #0",
-      "807749 aura_amount e1 #0"
+      "807749 behaviour_metric_delta damage"
     ],
     "kind": "claim"
   },
@@ -3919,12 +3964,20 @@
     "spell": 807749,
     "clause": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner point open: per damage event or per cast. The entries fulfillment_main, fulfillment_off, ability_hits and ability_hits_second measure the per-damage-event reading and are not cited until the owner rules."
   },
   {
     "spell": 807749,
     "clause": "Only 1 Vow can be active at a time.",
-    "labels": [],
+    "labels": [
+      "803489 behaviour_exclusivity",
+      "803491 behaviour_exclusivity",
+      "803719 behaviour_exclusivity",
+      "807435 behaviour_exclusivity",
+      "807547 behaviour_exclusivity",
+      "807749 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
