@@ -1555,6 +1555,7 @@ namespace
             _nextVeil = 80;
             _phase = false;
             _dormant = true;
+            _raise = 0;
             me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
