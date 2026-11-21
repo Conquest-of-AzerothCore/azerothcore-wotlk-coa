@@ -8611,17 +8611,34 @@ public:
             "Ascension_SeasonCollection", "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
+        auto replaceAll = [](std::string_view in, std::string_view from, std::string_view to)
+        {
+            std::string out(in);
+            for (size_t pos = out.find(from); pos != std::string::npos; pos = out.find(from, pos + to.size()))
+                out.replace(pos, from.size(), to);
+            return out;
+        };
+
         std::vector<std::string> names = session->GetClientAddonNames();
-        for (std::string_view addon : ascensionAddons)
+        auto addName = [&names](std::string const& addon)
+        {
             if (std::find(names.begin(), names.end(), addon) == names.end())
                 names.emplace_back(addon);
+        };
+        for (std::string_view addon : ascensionAddons)
+        {
+            addName(std::string(addon));
+            addName(replaceAll(addon, "Ascension", "Descension"));
+        }
 
         WorldPacket packet(SMSG_ASCENSION_SECURE_ADDONS, sizeof(uint32) + names.size() * 32);
         packet << uint32(names.size());
         for (std::string const& name : names)
         {
+            std::string const legacyName = replaceAll(name, "Descension", "Ascension");
             packet << name;
-            packet << uint8(name.starts_with("Blizzard_") || secureAscensionAddons.contains(name));
+            packet << uint8(name.starts_with("Blizzard_") || secureAscensionAddons.contains(name)
+                            || secureAscensionAddons.contains(legacyName));
         }
         session->SendPacket(&packet);
     }
