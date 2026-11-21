@@ -24932,6 +24932,720 @@
       "expire_ms": 500,
       "observe_source": "Mixologist 561069 (passive, Effect[0] and [1] aura 4 dummies 999 and 2999) is the talent that, per AscensionTaughtAbilityData.h:27 ({13, 6, 0, 561069, 801662}), teaches Ingredient: Fish Oil 801662. Ingredient: Fish Oil 801662 is the Frog Bones twin (instant, TARGET_UNIT_CASTER, 5% mana, 500 ms category, infinite aura, Effect[1] aura 23 every 1500 ms casting Fish Oil 803269, an area aura raid, aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($803269s1), EffectRadiusIndex 23 = 40 yd, and aura 58 MOD_INCREASE_SWIM_SPEED). The reference character as created does not know 801662 (knows_spell reads it before the learn: the control, the Witch Hunter Pavise Crossbowman 681453 learn_shield pattern); the harness learns 561069 between the phases (a real learn) and the class hook in AscensionTaughtAbilityData.h:27 gives the taught ability, read as knows_spell 801662 after it. Ingredient: Frog Bones 801663 is the trigger spell only because a metric_delta needs one learned active (cast_in_before false: no cast before, and the after phase casts it once, harmless). If the reference character already knew Fish Oil the before read would alert and show that the talent teaches nothing. Cast timing checked: the after cast is instant (5% mana), 500 ms read. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Repair (cycle 11 author A): the alert of the earlier runs was an incorrect test, not a defect: the taught ability is given by SynchronizeTaughtAbilities (AscensionCompat.cpp:1100-1130), which the learn of the parent 561069 runs (OnPlayerLearnSpell, AffectsTaughtAbilities) but which teaches 801662 only in specialization 6 (AscensionTaughtAbilityData.h:27, entry.SpecId). The caster now switches to specialization 6 at the start of the before phase (option specialization, ADR 1102), so the control reads 0 in the right specialization and the learn of 561069 teaches 801662.",
       "specialization": 6
+    },
+    {
+      "spell": 92084,
+      "kind": "metric_delta",
+      "name": "Puppeteer's Threads (the released hit is 15% of the hit that fed the Threads)",
+      "variant": "stored_share",
+      "label_suffix": "stored_share",
+      "quote": "Damaging abilities now leave behind Puppeteer's Threads on enemies for $572836d.",
+      "trigger_spell": 807037,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572837,
+        "target": "dummy"
+      },
+      "cast_power": 1400,
+      "player_spell_power": 20000,
+      "before_expected": 0,
+      "expected": 0.15,
+      "tolerance": 0.0002,
+      "wait_ms": 12600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          12300,
+          14000
+        ]
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 807037,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "observe_source": "Puppeteer 92084 (not a starting spell: unknown in the control phase, learned between the phases): AscensionWitchDoctorEvents.cpp:77-79 (Check: an outgoing non-periodic spell hit by the doctor) and :132-141 (Proc: Threads 572836 on the target, damage x 15 / 100 added to its Effect[0] amount); AscensionWitchDoctorAuras.cpp:386-390 releases the stored amount once as Puppeteer's Threads 572837 (SCHOOL_DAMAGE, SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS, SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS: no bonus, crit or taken modifier changes it; Shadow at a level 60 dummy with 0 resistance, no partial resist). Malefic Wrath 807037 (2000 ms cast, Speed 35, lands about 143 ms later at 3 yd, 11% of the 1497 base mana) at 20000 spell power (about 12,500 per hit, so the integer floor of the 15% moves the share by less than 8e-5). Each phase casts one Wrath and reads 12600 ms after the cast start, past the Threads' end at about 12143 ms (game time stamped): the released 572837 total over the Wrath total of the same phase (phase_since, ratio_to_metric). Control: without 92084 no Threads, 0. Treatment: 0.15 within 0.0002. A crit of the Wrath changes both totals alike. Clause \"Damage taken from the Witch Doctor stores 15% of its value.\" (92084 and its embedded copy in 707331). Player reports: none."
+    },
+    {
+      "spell": 560748,
+      "name": "Frenzied Spirits (three Spirits consumed: the heal is 6% of a damage hit)",
+      "kind": "metric_delta",
+      "label_suffix": "heal_three",
+      "quote": "Consumes your Spirits",
+      "expected": 0.06,
+      "before_expected": 0,
+      "tolerance": 0.0003,
+      "trigger_spell": 807037,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560747,
+        "target": "caster"
+      },
+      "setup_casts": [
+        560748
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 1400,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 807037,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "required_aura_stacks": {
+        "spell": 561136,
+        "stacks": 3
+      },
+      "variant": "heal_three",
+      "player_spell_power": 20000,
+      "observe_source": "Frenzied Spirits 560748 (instant, RecoveryTime 20000 reset, 14% base mana, CasterAuraSpell Spirit 561136): AscensionWitchDoctorAuras.cpp:155-162 sets Effect[2] to 2 per Spirit counted (recalculate false); AscensionWitchDoctorEvents.cpp:114-115 and :201-202 (case Frenzy: every damage hit of the doctor) heal the doctor with Spirit Heal 560747 for damage x Effect[2] / 100 (Copy, CastCustomSpell: 560747 is SPELL_ATTR2_CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_HEALTH_MODIFIERS, so the heal is the raw share). The treatment phase casts Frenzied Spirits as a setup cast (setup_only_after) with its Spirit precondition set to 3 stacks (required_aura_stacks, the auras_after_required precedent of crit_damage_spirits), then one Malefic Wrath 807037 at 20000 spell power 300 ms later (lands about 2.45 s into the 12 s buff); the control phase casts the Wrath alone. The reading is the 560747 heal total over the Wrath damage total of the same phase (phase_since, ratio_to_metric), read 2800 ms after the Wrath cast start: 0 without the buff, 0.06 (3 x 2%) with it, within 0.0003 (integer floor of about 12,500 x 6 / 100). Pair: heal_one (1 Spirit, 0.02) shows the per-Spirit scaling. Clause \"and causing you to heal for $s3% of all damage dealt for each Spirit consumed.\" Player reports: none."
+    },
+    {
+      "spell": 560748,
+      "name": "Frenzied Spirits (one Spirit consumed: the heal is 2% of a damage hit)",
+      "kind": "metric_delta",
+      "label_suffix": "heal_one",
+      "quote": "Consumes your Spirits",
+      "expected": 0.02,
+      "before_expected": 0,
+      "tolerance": 0.0003,
+      "trigger_spell": 807037,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560747,
+        "target": "caster"
+      },
+      "setup_casts": [
+        560748
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 1400,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 807037,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "required_aura_stacks": {
+        "spell": 561136,
+        "stacks": 1
+      },
+      "variant": "heal_one",
+      "player_spell_power": 20000,
+      "observe_source": "The per-Spirit pair of heal_three: the same layout with the Spirit precondition at 1 stack, so Effect[2] is 2 and the Spirit Heal 560747 is 2% of the Wrath hit (0.02 within 0.0003); 0 without the buff. heal_three's 0.06 against this 0.02 is the scaling per Spirit consumed."
+    },
+    {
+      "spell": 501146,
+      "kind": "metric_delta",
+      "name": "Shadowflare (killing the enemy grants a Spirit)",
+      "variant": "kill_spirit",
+      "label_suffix": "kill_spirit",
+      "quote": "Killing an enemy with this spell grants you a",
+      "trigger_spell": 501146,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 561136
+      },
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "after_target_health": 1,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:266-267 (OnSpellHit): a damaging Family(0, 4) hit (Shadowflare 501146, SpellFamilyFlags[0] 4) or Shadowflare 802704 on a target that is no longer alive calls GainSpirit (Spirit 561136 on the doctor). Shadowflare 501146: 2000 ms cast, 31% base mana, TRIGGER_SPELL_WITH_VALUE 802704 at the dummy's position, 602 Shadow at level 60. Both phases cast it at the dummy; the control dummy has its 50,000,000 health (no kill, no Spirit), the treatment dummy is set to 1 health first (after_target_health), so the hit kills it. aura_stacks of 561136 on the caster 3500 ms after the cast start: 0, then 1. Clause \"Killing an enemy with this spell grants you a Spirit.\" Player reports: none."
+    },
+    {
+      "spell": 803700,
+      "kind": "duration_ratio",
+      "variant": "root",
+      "name": "Spice: Peacebloom (roots 25% shorter on the caster)",
+      "quote": "Reduces the duration of roots, stuns, and snares against allies within $a1 yds by $s1%.",
+      "expected_ratio": 0.75,
+      "vehicle_spell": 29991,
+      "striker_entry": 36,
+      "observe_source": "Spice: Peacebloom 803700 Effect[0] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD misc 7 (root), BasePoints -26 + 1 = -25%, consumed by Unit::ModSpellDuration. Vehicle Chains of Ice 29991 (MOD_ROOT, Mechanic 7, magic, SPELL_ATTR3_ALWAYS_HIT, AuraInterruptFlags 0, DurationIndex 1 = 10000 ms) cast by the striker at the caster before and after the learn; the readback and the expiry pair (present before 10000 ms and gone after it without, before 7500 ms and gone after it with) as the snare entry. Clause \"Reduces the duration of roots, stuns, and snares against allies within $a1 yds by $s1%.\" (claim roots and stuns)."
+    },
+    {
+      "spell": 803700,
+      "kind": "duration_ratio",
+      "variant": "stun",
+      "name": "Spice: Peacebloom (stuns 25% shorter on the caster)",
+      "quote": "Reduces the duration of roots, stuns, and snares against allies within $a1 yds by $s1%.",
+      "expected_ratio": 0.75,
+      "vehicle_spell": 2880,
+      "striker_entry": 36,
+      "observe_source": "As root with misc 12 (stun): vehicle Stun 2880 (MOD_STUN, Mechanic 12, magic, physical school, AuraInterruptFlags 0, 10000 ms), the striker's spell_hit_bonus 100 removes the miss roll. Hammer of Justice 853 (3000 ms) is too short for an expiry pair at 25 ms per step (the generator reports it unmodelled)."
+    },
+    {
+      "spell": 602220,
+      "kind": "metric_delta",
+      "variant": "draught_ignored",
+      "label_suffix": "draught_ignored",
+      "name": "Death Draught (an enemy meleeing the drinker stops attacking it)",
+      "quote": "which may trick enemies into ignoring you",
+      "trigger_spell": 602220,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "melee_attacks_taken",
+      "fields": {
+        "target": "dummy"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "target_attack_window": {
+        "engage_ms": 1000,
+        "land_ms": 500
+      },
+      "before_expected": 2,
+      "expected": 0,
+      "expected_ratio": 0,
+      "tolerance": 0.01,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "Death Draught 602220 (instant self cast, RecoveryTime 30000 reset): Effect[0] aura 66 SPELL_AURA_FEIGN_DEATH, Effect[1] FORCE_DESELECT, Effect[2] Feign Death 985329 (MODIFY_THREAT_PERCENT -100 on enemies around the caster; the caster's spell hit rating 10000 leaves it no miss). The dummy melees the caster from the start of the control phase (target_attack_window, creature_attack): at least 2 swings in the 6000 ms control window; after the draught (500 ms to land) the dummy's swings at the caster are counted over 6000 ms: 0. Clause \"which may trick enemies into ignoring you\". Player reports: none."
+    },
+    {
+      "spell": 706557,
+      "kind": "metric_delta",
+      "variant": "heal_cut",
+      "label_suffix": "heal_cut",
+      "name": "Hex of Death (a heal the debuffed enemy receives is 20% smaller)",
+      "quote": "reduces the targets healing received by",
+      "trigger_spell": 801674,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "dummy_distance": 15,
+      "learn": [
+        707854
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 23783,
+        "caster_entry": 36,
+        "target": "dummy"
+      },
+      "target_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "cast_power": 1400,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "before_expected": 1500,
+      "expected": 1200,
+      "expected_ratio": 0.8,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 10500,
+      "phase_since": true,
+      "observe_source": "Hex of Death 706557: AscensionWitchDoctorEvents.cpp:108-109 and :182-183 put Hex of Death 706559 on the enemy an Arrow damages; 706559 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -21 + 1 = -20% ($706559s1), applied by SpellHealingBonusTaken. Both phases cast a real Malefic Arrow 801674 at the dummy (15 yd, the one_stack layout, 707854 learned, fixture 823764), then the dummy casts Gift of Life 23783 on itself (SPELL_EFFECT_HEAL, BasePoints 1499 + 1, no die, no cost, instant; Reg's Test Aura 984954 on the dummy removes its spell crit) and the caster reads the heal total of creature 36 on the dummy for that phase (phase_since): 1500 without the passive (no debuff), 1200 with one stack, the ratio 0.8 within 0.001. Clause claim \"by $706559s1%\". Player reports: none."
+    },
+    {
+      "spell": 705904,
+      "kind": "metric_delta",
+      "variant": "cost_spent",
+      "label_suffix": "cost_spent",
+      "name": "Wizened (Malefic Wrath spends 154 instead of 164 mana)",
+      "quote": "and reduces the mana cost of spells and abilities by $s2%.",
+      "trigger_spell": 807037,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "disable_regeneration": true,
+      "cast_power": 1400,
+      "before_expected": 1236,
+      "expected": 1246,
+      "expected_gain": 10,
+      "tolerance": 0.5,
+      "wait_ms": 2400,
+      "expire_ms": 500,
+      "observe_source": "Wizened 705904 Effect[1] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT misc 127, BasePoints -7 + 1 = -6% ($s2). Malefic Wrath 807037 costs 11% of the base mana 1497 (class file base_mana), int 164 (Spell::CalcPowerCost), and with -6% int(164 x 0.94) = 154. One real Wrath per phase from 1400 mana with regeneration off, read 2400 ms after the cast start (the cost is taken at the 2000 ms cast end): 1236 without the passive, 1246 with it, a gain of 10 within 0.5. Clause \"and reduces the mana cost of spells and abilities by $s2%.\" Player reports: none."
+    },
+    {
+      "spell": 705871,
+      "kind": "metric_delta",
+      "variant": "free_next",
+      "label_suffix": "free_next",
+      "name": "Mojo Madness (a forced proc makes the next Malefic Wrath free)",
+      "quote": "to reduce the cost of your next spell or ability by $503693s1% for $503693d",
+      "trigger_spell": 807037,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "disable_regeneration": true,
+      "cast_power": 1400,
+      "setup_casts": [
+        807037
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2600,
+      "forced_roll": {
+        "talent": 705871,
+        "forced_percent": 2000
+      },
+      "before_expected": 1072,
+      "expected": 1236,
+      "expected_gain": 164,
+      "tolerance": 0.5,
+      "wait_ms": 2400,
+      "expire_ms": 500,
+      "observe_source": "Mojo Madness 705871 (aura 42 PROC_TRIGGER_SPELL 503693, DBC ProcChance 5): AscensionWitchDoctorEvents.cpp:81-83 and :148-149 cast Mojo Madness 503693 (aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT -100%, 10000 ms) on a damage or heal event. The roll is forced with the ADR 0588 mutant at +2000% (5% x 21 = 105%, forced_percent). Each phase starts from 1400 mana with regeneration off and casts a setup Malefic Wrath (164) and 2600 ms later the trigger Wrath; read 2400 ms after the trigger: 1072 without the passive (two paid casts), 1236 with it (the setup Wrath's hit grants 503693, the next Wrath costs 0), a gain of 164 within 0.5. Clause claim \"to reduce the cost of your next spell or ability by $503693s1% for $503693d\" (100%: the next cast is free; the 10 sec stays the data label). Player reports: none."
+    },
+    {
+      "spell": 562719,
+      "kind": "metric_delta",
+      "variant": "cast_time_live",
+      "label_suffix": "cast_time_live",
+      "name": "Spirit Glaive (with Agility raised the live cast has ended 1400 ms in, without it it still runs)",
+      "quote": "Cast time scales with your Agility.",
+      "trigger_spell": 562719,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "casting",
+      "fields": {},
+      "cast_power": 1400,
+      "after_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          58451,
+          0,
+          943
+        ]
+      ],
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1400,
+      "expire_ms": 2000,
+      "observe_source": "Spirit Glaive 562719 (CastingTimeIndex 5 = 2000 ms): the server divides the cast time by 1 + Agility / 1000 (Unit.cpp:13093-13095; final07 read 1892 ms at the reference Agility and 1000 ms with Agility raised by 58451 amount 943). The live cast is read: `casting` of the caster 1400 ms after each cast start, 1 without the Agility aura (the 1892 ms cast still runs) and 0 with it (the 1000 ms cast has ended); 2000 ms between the phases let the first cast finish. The tooltip states no size, so the check is the direction the live cast takes, with margins of about 400 ms on each side. Clause \"Cast time scales with your Agility.\" Player reports: none."
+    },
+    {
+      "spell": 802268,
+      "kind": "last_application_expiry",
+      "variant": "true_lasts",
+      "label_suffix": "true_lasts",
+      "name": "The True Spirit (The True God from a Serpent Ward lasts 10 sec)",
+      "quote": "Summoning a Serpent Ward or Spirit now increases the damage of your next Spirit Glaive or Spirit Eclipse by $681233s1% for $681233d,",
+      "gate_spell": 802268,
+      "trigger_spell": 500960,
+      "trigger_target": "caster",
+      "aura": 681233,
+      "expected_ms": 10000,
+      "control_window_ms": 3000,
+      "window_ms": 13000,
+      "poll_ms": 100,
+      "caster": true,
+      "trigger_power": 1400,
+      "observe_source": "The True Spirit 802268: AscensionWitchDoctorSummons.cpp:223-225 casts The True God 681233 (DurationIndex 1 = 10000 ms, $681233d) on the owner for each Serpent Ward summon while 802268 is known (true_serpent reads the stack). Serpent Ward 500960 (instant, self range) is cast at the caster (trigger_target caster) without and with 802268; every 100 ms the game time, the caster's 681233 application count and its presence are read. Control: no application. Treatment: the aura ends 10000 ms after its application inside the G-19 band (+-500 ms), timed from the application itself, so the ward cast's own timing does not enter. Nothing consumes 681233 (no Spirit Glaive or Eclipse is cast). Clause claim \"for $681233d\". Player reports: none."
+    },
+    {
+      "spell": 501146,
+      "kind": "metric_delta",
+      "variant": "flare_damage",
+      "label_suffix": "flare_damage",
+      "name": "Shadowflare (602 + 35% of 20000 spell power + 10% of 47 ranged attack power)",
+      "quote": "Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.",
+      "trigger_spell": 501146,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501146,
+        "target": "dummy",
+        "critical": false
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 7606.7,
+      "tolerance": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "Shadowflare 501146 (BaseLevel 60, EffectBasePoints[0] 601 + 1, EffectRealPointsPerLevel 2.04 x 0 levels at 60 = $m1 602; AscensionWitchDoctorCoefficients.h:44 sp 0.35, rap 0.10, the tooltip's $sps*.35 and $RAP*.1). A real cast at the dummy at 20000 spell power (harness fixture) and the reference ranged attack power 47 (class file reference_stats); Reg's Test Aura 984954 removes spell crits and the read keeps non-critical hits; Shadow at a level 60 dummy with 0 resistance. Expected 602 + 7000 + 4.7 = 7606.7 within 1 (the engine truncates; the 801669 rank read 7069 against 7070.3 in final07, the same truncation). The control is the uncast before phase (0). Companion flare_hits counts one hit per cast. Clause \"Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.\" Player reports: none."
+    },
+    {
+      "spell": 501146,
+      "kind": "metric_delta",
+      "variant": "flare_hits",
+      "label_suffix": "flare_hits",
+      "name": "Shadowflare (one cast strikes the dummy once)",
+      "quote": "Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.",
+      "trigger_spell": 501146,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501146,
+        "target": "dummy"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "Count guard of flare_damage: the same cast lands exactly one 501146 hit on the dummy (spell_damage_count 0 before, 1 after), so the damage total is one hit."
+    },
+    {
+      "spell": 807056,
+      "kind": "metric_delta",
+      "name": "Brew Stew (the Bisque survives 14.5 min offline and is gone after 15.5 min)",
+      "variant": "logout_expiry",
+      "label_suffix": "logout_expiry",
+      "quote": "Brewed items disappear if logged out for more than 15 minutes.",
+      "trigger_spell": 807056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "item_count",
+      "fields": {
+        "item": 339008
+      },
+      "cast_power": 1400,
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "relog_before_read": {
+        "before_offline_s": 870,
+        "after_offline_s": 930
+      },
+      "observe_source": "Black Lotus Bisque 339008 is conjured (item_template Flags 67108866 holds ITEM_FLAG_CONJURED 0x2, realm world database, port 3307, read 2026-11-21); Player::_LoadItem removes a conjured item at login when the time since the stored logout exceeds 15 * MINUTE (PlayerStorage.cpp:6176), the logout age taken in game time (PlayerStorage.cpp:5482-5487). Brew Stew 807056 (3000 ms cast, 40% base mana) brews the Bisque in both phases; before each reading the caster is relogged with the stored logout time moved back 870 s (control) or 930 s (treatment), both inside the 45 s G-19 band of 900 s, and the Bisque count after the login is read over the count before the logout (relog_before_read): 1 (kept) and 0 (removed). The relog's own game time is stamped and added; a control that no longer stays below 900 s is unmeasured. Clause \"Brewed items disappear if logged out for more than 15 minutes.\" Player reports: none."
+    },
+    {
+      "spell": 801689,
+      "kind": "metric_delta",
+      "variant": "level_scaling",
+      "label_suffix": "level_scaling",
+      "name": "Arcane Brew (spell power +58.5 at caster level 50, +73.5 at 60)",
+      "quote": "Spell power scales with caster level.",
+      "trigger_spell": 801689,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "cast_power": 1000,
+      "before_expected": 58.5,
+      "expected": 73.5,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 10500,
+      "phase_caster_level": [
+        50,
+        60
+      ],
+      "observe_source": "Arcane Brew 801689 Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, BasePoints 29 + 1, EffectRealPointsPerLevel 1.5 above SpellLevel 31, MaxLevel 0: 58.5 at caster level 50 and 73.5 at 60 (SpellInfo CalcValue with the caster level). The same real self cast in both phases, the caster set to level 50 before the control cast and 60 before the treatment cast (phase_caster_level, harness set_level), each read 1500 ms after the cast; the 10500 ms between the phases lets the first 10000 ms buff end. The reference character has no spell power of its own (reference_stats 0). Level 50 is a fixture of this claim only (owner note: level policy). Clause \"Spell power scales with caster level.\" Player reports: none."
+    },
+    {
+      "spell": 500960,
+      "kind": "metric_delta",
+      "name": "Serpent Ward (spits at the selected one of two engaged enemies)",
+      "variant": "focus_primary",
+      "label_suffix": "focus_primary",
+      "quote": "attempting to focus on your primary target",
+      "trigger_spell": 500960,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 573055,
+        "target": "dummy"
+      },
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 4,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "area_dummies": [
+        6
+      ],
+      "engage_and_select": {
+        "spell": 504608,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:420-431 (Enemy): with the owner in combat, the ward takes the owner's selected unit when it is a valid attack target within 30 yd and in line of sight, else the first nearby enemy in combat with the owner; :466-468 casts Serpent Ward Attack 573055 at it every WardAttackInterval (2000 ms at no haste) with the owner as original caster, so the hits are logged under the caster. Both phases cast Serpent Ward 500960 at the caster, then select (area1 in the control phase, the dummy in the treatment phase) and cast Hex of Malice 504608 at area1 (6 yd) and the dummy (3 yd), 1600 ms apart, so the owner is in combat with both (engage_and_select). 573055 hits on the dummy 4300 ms after the second Hex: 0 with area1 selected, 2 to 4 (three ward updates) with the dummy selected. A ward that ignored the selection would hit the same dummy in both phases. Pair: focus_control. Open player report: #4067. Clause \"attempting to focus on your primary target.\""
+    },
+    {
+      "spell": 500960,
+      "kind": "metric_delta",
+      "name": "Serpent Ward (the unselected engaged enemy draws no spit)",
+      "variant": "focus_control",
+      "label_suffix": "focus_control",
+      "quote": "attempting to focus on your primary target",
+      "trigger_spell": 500960,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 573055,
+        "target": "area1"
+      },
+      "cast_power": 1400,
+      "before_expected": 2,
+      "expected": 2,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "area_dummies": [
+        6
+      ],
+      "engage_and_select": {
+        "spell": 504608,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "observe_source": "Pair of focus_primary, the same layout read on area1: at least 2 hits on area1 in the control phase (area1 selected; the ward was attacking), and no new hit on area1 in the treatment phase (gain 0) while the dummy is selected."
+    },
+    {
+      "spell": 807908,
+      "kind": "metric_delta",
+      "trigger_spell": 807908,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "observe_source": "Mojo Cauldron 807908 (CastingTimeIndex 16 = 1500 ms, 30% base mana, RecoveryTime 300000): Effect[0] SPELL_EFFECT_TRANS_DOOR of gameobject 129364 at TARGET_DEST_CASTER_FRONT (rev_20260909_00_witch_doctor_completion.sql:645: type 22 spellcaster, Data0 spell 572413, Data1 25 charges, Data2 party only). owned_gameobject_count of 129364 on the caster: 0 in the uncast control phase, 1 2000 ms after the cast. Clause \"Create a Cauldron of Rejuvenating Mojo.\"",
+      "variant": "created",
+      "label_suffix": "created",
+      "name": "Mojo Cauldron (one cast creates the owner one Cauldron)",
+      "quote": "Create a Cauldron of Rejuvenating Mojo.",
+      "metric": "owned_gameobject_count",
+      "fields": {
+        "entry": 129364
+      },
+      "expected": 1,
+      "wait_ms": 2000
+    },
+    {
+      "spell": 807908,
+      "kind": "metric_delta",
+      "trigger_spell": 807908,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "observe_source": "As created, read 176500 ms after the cast start (175000 ms after the Cauldron appears at the 1500 ms cast end) and again 10000 ms later: present, then gone, so the despawn lies inside the G-19 band of DurationIndex 25 = 180000 ms ($d, +-9000 ms), both reads stamped in game time. Clause \"The cauldron lasts for $d or 25 charges.\" (claim for $d).",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "name": "Mojo Cauldron (the Cauldron stands 175 sec after it appears and is gone 185 sec after)",
+      "quote": "The cauldron lasts for $d or 25 charges.",
+      "metric": "owned_gameobject_count",
+      "fields": {
+        "entry": 129364
+      },
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 176500,
+      "expiry_wait_ms": 10000,
+      "game_time": {
+        "after": [
+          172500,
+          181500
+        ],
+        "expired": [
+          181500,
+          190500
+        ]
+      }
+    },
+    {
+      "spell": 807908,
+      "kind": "metric_delta",
+      "trigger_spell": 807908,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "observe_source": "As created, then the caster uses its own Cauldron once 2000 ms after the cast (use_gameobject, the client use handler): GameObject::Use for type 22 (GameObject.cpp:1907-1930, party only: the owner or a group member) casts 572413 (SPELL_EFFECT_CREATE_ITEM 576135) for the user; item_count of Major Rejuvenating Mojo 576135: 0, then 1. Clause \"Raid members may interact with the Cauldron to acquire a Major Rejuvenating Mojo.\" (the owner as the member that interacts).",
+      "variant": "mojo_item",
+      "label_suffix": "mojo_item",
+      "name": "Mojo Cauldron (one use gives a Major Rejuvenating Mojo)",
+      "quote": "Raid members may interact with the Cauldron to acquire a",
+      "metric": "item_count",
+      "fields": {
+        "item": 576135
+      },
+      "expected": 1,
+      "wait_ms": 1000,
+      "use_gameobject_after": {
+        "entry": 129364,
+        "uses": 1,
+        "gap_ms": 2000
+      }
+    },
+    {
+      "spell": 807908,
+      "kind": "metric_delta",
+      "trigger_spell": 807908,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "observe_source": "As mojo_item, read as the user's casts of 572413 (spell_cast_count): 0, then 1, an event read of the interaction itself.",
+      "variant": "mojo_cast",
+      "label_suffix": "mojo_cast",
+      "name": "Mojo Cauldron (one use casts the Mojo spell for the user)",
+      "quote": "Raid members may interact with the Cauldron to acquire a",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572413
+      },
+      "expected": 1,
+      "wait_ms": 1000,
+      "use_gameobject_after": {
+        "entry": 129364,
+        "uses": 1,
+        "gap_ms": 2000
+      }
+    },
+    {
+      "spell": 807908,
+      "kind": "metric_delta",
+      "trigger_spell": 807908,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "observe_source": "As created, then 24 uses 300 ms apart (the first 2000 ms after the cast), each Mojo destroyed 300 ms after it is made so the bags never fill (a full bag fails the create-item cast and the use is not counted, GameObject.cpp:2113-2114 AddUse only on SPELL_CAST_OK): the Cauldron still stands 1000 ms after the 24th. Pair: charges_spent.",
+      "variant": "charges_left",
+      "label_suffix": "charges_left",
+      "name": "Mojo Cauldron (24 uses leave the Cauldron standing)",
+      "quote": "The cauldron lasts for $d or 25 charges.",
+      "metric": "owned_gameobject_count",
+      "fields": {
+        "entry": 129364
+      },
+      "expected": 1,
+      "wait_ms": 1000,
+      "use_gameobject_after": {
+        "entry": 129364,
+        "uses": 24,
+        "gap_ms": 300,
+        "destroy_item": 576135,
+        "lead_ms": 2000
+      }
+    },
+    {
+      "spell": 807908,
+      "kind": "metric_delta",
+      "trigger_spell": 807908,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "observe_source": "As charges_left with 25 uses: GameObject::Update (GameObject.cpp:733-738) sets GO_JUST_DEACTIVATED once the use count reaches the 25 charges (GetCharges, spellcaster.charges), and the summoned object is removed: 0 owned Cauldrons 1000 ms after the 25th use, against 1 after 24 (charges_left).",
+      "variant": "charges_spent",
+      "label_suffix": "charges_spent",
+      "name": "Mojo Cauldron (the 25th use removes the Cauldron)",
+      "quote": "The cauldron lasts for $d or 25 charges.",
+      "metric": "owned_gameobject_count",
+      "fields": {
+        "entry": 129364
+      },
+      "expected": 0,
+      "wait_ms": 1000,
+      "use_gameobject_after": {
+        "entry": 129364,
+        "uses": 25,
+        "gap_ms": 300,
+        "destroy_item": 576135,
+        "lead_ms": 2000
+      }
     }
   ],
   "player_observations": [],
