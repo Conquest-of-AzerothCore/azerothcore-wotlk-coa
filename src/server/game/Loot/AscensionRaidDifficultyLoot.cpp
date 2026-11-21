@@ -47,12 +47,25 @@ constexpr uint32 NaxxramasTokens[][MAX_RAID_DIFFICULTY] = {
     { 1510496, 1810496, 2810496, 1710496 },
 };
 
-uint32 NaxxramasTokenVariant(uint32 item, std::size_t difficulty)
+uint32 NaxxramasLootVariant(uint32 item, std::size_t difficulty)
 {
     for (auto const& variants : NaxxramasTokens)
         if (variants[0] == item)
             return variants[difficulty];
-    return item;
+
+    constexpr uint32 FirstWrathGear = 39139;
+    constexpr uint32 LastWrathGear = 40602;
+    constexpr uint32 NaxxramasGearBase = 8000000;
+    constexpr uint32 NaxxramasDifficultyStride = 100000;
+    if (item < FirstWrathGear || item > LastWrathGear)
+        return item;
+
+    ItemTemplate const* gear = sObjectMgr->GetItemTemplate(item);
+    if (!gear || gear->RequiredLevel <= 60 || gear->InventoryType == INVTYPE_NON_EQUIP ||
+        (gear->Class != ITEM_CLASS_WEAPON && gear->Class != ITEM_CLASS_ARMOR))
+        return item;
+
+    return NaxxramasGearBase + uint32(difficulty) * NaxxramasDifficultyStride + item;
 }
 
 bool IsNaxxramasEncounterLoot(LootStore const& store, uint32 lootId)
@@ -108,7 +121,7 @@ void AscensionRaidDifficultyLoot::Apply(Loot& loot, LootStore const& store, uint
 
         uint32 difficultyItem = item.itemid;
         if (naxxramas)
-            difficultyItem = NaxxramasTokenVariant(item.itemid, difficulty);
+            difficultyItem = NaxxramasLootVariant(item.itemid, difficulty);
         else if (std::binary_search(KarazhanTieredDrops.begin(), KarazhanTieredDrops.end(), item.itemid))
             difficultyItem = RedeemableToken(item.itemid) + ItemOffsets[difficulty];
         if (difficultyItem == item.itemid)
