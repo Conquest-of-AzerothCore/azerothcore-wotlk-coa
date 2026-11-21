@@ -374,6 +374,11 @@ class EvidenceStatusTest(unittest.TestCase):
     def test_an_effectiveness_clause_without_a_named_subject_stays_data(self):
         self.assertEqual(self.effectiveness('increasing Agility by $s1', named=3), DATA)
 
+    def test_a_literal_number_of_an_extension_row_is_not_a_second_value(self):
+        self.assertEqual(self.effectiveness('increasing Agility by $s1', 'Lasts $d.',
+                                            '@ext:Can only have 1 Gift active on a target at a time.:ext@'),
+                         BEHAVIOUR)
+
     def test_duration_and_range_are_not_stated_values(self):
         for text, stated in (('for $d', False), ('for $803237d', False), ('within $a1 yds', False),
                              ('increasing Agility by $s1', True), ('by 20%', True), ('for ${$m1+1} sec', True),

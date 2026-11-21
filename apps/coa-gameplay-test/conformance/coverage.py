@@ -191,6 +191,7 @@ FORMULA_TOKEN = re.compile(r'\$\{[^}]*\}')
 TOOLTIP_TOKEN = re.compile(r'\$(?:/\d+;)?(\d*)([A-Za-z])(\d*)')
 UNSTATED_PROPERTY_TOKENS = frozenset('dar')
 LITERAL_NUMBER = re.compile(r'\b\d+(?:\.\d+)?\b')
+EXTENSION_ROW = re.compile(r'\A@ext:.*:ext@\Z', re.DOTALL)
 
 
 def stated_values(text: str) -> set[str]:
@@ -248,7 +249,8 @@ def subject_claims(clause: dict, clauses: list[dict]) -> list[dict]:
     named = clause.get(EFFECTIVENESS_OF)
     if named is None:
         return found
-    entries = [other['clause'] for other in clauses if other.get('spell') == named]
+    entries = [other['clause'] for other in clauses
+               if other.get('spell') == named and not EXTENSION_ROW.match(other['clause'])]
     if len(set().union(*map(stated_values, entries))) != 1:
         return found
     stated = ' '.join(text for text in entries if states_value(text))
