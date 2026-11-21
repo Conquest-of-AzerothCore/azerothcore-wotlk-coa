@@ -1115,18 +1115,23 @@
       "arms": [
         {
           "stacks": 5,
-          "trials": 588
+          "trials": 74
         },
         {
           "stacks": 4,
-          "trials": 1175
+          "trials": 147
         }
       ],
-      "control_trials": 10,
-      "unlearned_trials": 10,
+      "control_trials": 2,
+      "unlearned_trials": 2,
       "cast_wait_ms": 1600,
       "cast_power": 1000,
       "parts": 9,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Malefic Arrow 801674 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id, facing it (FacingCasterFlags 1); the Spirit 561136 is a caster aura set and read on each caster; Spirit Hunting rolls in the caster's own OnSpellCast (AscensionWitchDoctorAbilities.cpp) and GainSpirit casts on that caster"
+      },
       "observe_source": "AscensionWitchDoctorAbilities.cpp:313-314 (OnSpellCast, non-triggered cast): if (IsArrow(info) && player->HasAura(SpiritHunting) && roll_chance_i(count * 15)) GainSpirit(player); count is the 561136 stack count snapshotted in OnSpellBeforeEffects (Abilities.cpp:101), which Spell.cpp:4044 calls before OnSpellCast (Spell.cpp:4191). GainSpirit (Completion.cpp:137-150) casts 561136 once, also at the 5-stack cap, so spell_cast_count of 561136 counts every extra Spirit; set_aura uses AddAura and casts nothing. Malefic Arrow 801674: IsArrow (SpellFamilyFlags[1] 0x80008000, Completion.h:372-375), not Family(1,4), so it grants no Spirit of its own; castable with ArrowTalent 707854 known (Abilities.cpp:83), needs the bow (EquippedItemSubClassMask 262156), instant (CastTime -1000000), GCD 1500, 8000 ms cooldown reset each cast, 5% base mana. cast_power 1000 is unverified for the bow: the 2567 maximum mana read in compare-c1 was taken with the reference weapon 72038, not the bow, and a set_power above the maximum errors the scenario rather than misjudging it. 707504 is passive with ProcFlags 0, so its native aura 42 (trigger 561136) never fires. Tooltip literal 15% per Spirit. Judged on each arm total (mentor M-1, ADR 0662 provisional), each arm sized flip-proof (mentor M-14/M-14a): n >= p(1-p)((2.576 + 3.719)/band)^2, the Wilson 99% interval of a true total chance leaving its band at most 1e-4 per edge; 5 Spirits 75% (band 3.75 points) needs 5284 casts, 4 Spirits 60% (band 3 points) needs 10568, the two cheapest stack counts; 9 parts of 588 and 1175 (5292 and 10575 per run), about 47.6 game minutes each, 428.7 per run (Witch Doctor ADR 0001).",
       "dummy_distance": 15
     },
@@ -1150,18 +1155,23 @@
       "arms": [
         {
           "stacks": 1,
-          "trials": 420
+          "trials": 53
         },
         {
           "stacks": 2,
-          "trials": 795
+          "trials": 100
         }
       ],
-      "control_trials": 90,
-      "unlearned_trials": 8,
+      "control_trials": 12,
+      "unlearned_trials": 1,
       "cast_wait_ms": 2500,
       "cast_power": 1000,
       "parts": 13,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Reclamation 806288 has one target on both effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id, facing it (FacingCasterFlags 1); Malefic Spirits 707422 casts 806288 again at the same target (EffectImplicitTargetA 6); the Spirit 561136 is a caster aura set and read on each caster"
+      },
       "observe_source": "AscensionWitchDoctorAbilities.cpp:305-309 (OnSpellCast, non-triggered cast): Family(info,1,4) (Reclamation 806288, SpellFamilyFlags[1] 268435460) -> GainSpirit(player), then if (player->HasAura(LoaEcho) && target && roll_chance_i(count * 5)) Cast(player, target, id); the recast is triggered, so OnSpellCast returns before a second GainSpirit and no recast rolls again. spell_cast_count counts every cast of 806288, triggered or not, so events are the 806288 casts less one per trial, and trials are the 561136 casts (one per player Reclamation). Tooltip $561361s1: 561361 EffectBasePoints[0] 4 + DieSides 1 = 5% per Spirit. 705843 is passive with ProcFlags 0, so its native aura 42 (trigger 707422, which re-triggers 806288, ProcChance 1) does not fire; if it came alive, the 0-stack control would catch it with probability 1 - 0.99^n, 99.9992% for the 1170 control casts of one run (13 parts of 90). Reclamation: cast 1800 ms + 500 ranged, GCD 1500, no cooldown, 8% base mana, bow; cast_power 1000 is unverified for the bow (the 2567 maximum mana of compare-c1 was read with the reference weapon 72038, not the bow). Judged on each arm total (mentor M-1, ADR 0662 provisional), each arm sized flip-proof (mentor M-14/M-14a): n >= p(1-p)((t + 3.719)/band)^2 with the between-part t quantile 3.055 (12 df), the 99% interval of a true total chance leaving its band at most 1e-4 per edge; 1 Spirit 5% needs 5449 casts and 2 Spirits 10% need 10324 (band 2 points each), the two cheapest stack counts; 13 parts of 420 and 795 (5460 and 10335 per run), about 54.8 game minutes each, 712.3 per run (Witch Doctor ADR 0001). Both arms also alert on a roll that counts the Spirit this Reclamation grants (10% and 15%).",
       "dummy_distance": 15
     },
@@ -17655,10 +17665,15 @@
         "metric": "spell_cast_count",
         "spell": 561136
       },
-      "cycles": 900,
-      "unlearned_cycles": 10,
+      "cycles": 113,
+      "unlearned_cycles": 2,
       "trials_per_cycle": 1,
       "parts": 21,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; the 823764 fixture is an aura on the caster only; the Spirit 561136 is a caster aura; Darkspear Traditionalist 503707 Effect 0 is an area raid aura (radius 100 yd) and the streams are never grouped, so an area raid or party aura holds only its own caster and the caster's own summons (AnyGroupedUnitInObjectRangeCheck, Unit::IsInRaidWith, Player::IsInSameRaidWith); aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing)"
+      },
       "observe_source": "Darkspear Traditionalist 503707 (passive, Attributes 0x40; Effect[1] aura 42 EffectTriggerSpell 561136, ProcChance 20 = $h; spell_proc row ProcFlags 262144 DONE_PERIODIC, Chance 20 then 0 by rev_20260919_20_coa_proc_chance_parity.sql:16 so the DBC 20 applies, Cooldown 0, rev_20260909_00_witch_doctor_completion.sql:9; spell_script_names aura_ascension_witch_doctor_event, :93): AscensionWitchDoctorEvents.cpp:84-87 (Check, case Traditionalist: damage && periodic && IsHex(info), outgoing from the caster) and :145-147 (Proc: GainSpirit), which casts Spirit 561136 on the caster (Completion.cpp:142), counted by spell_cast_count of 561136 also at the 5-stack cap. One engine roll per tick, no script roll. Hex of Malice 801693 (rank one, instant, StartRecoveryTime 1500, 20% of the 1497 base mana = 299, so cast_power 1400 below the 1497 maximum of the fixture; DurationIndex 106 = 24000 ms; Effect[0] aura 3 periodic damage EffectAmplitude 3000 with no START_PERIODIC_AT_APPLY, the first tick at 3000 ms; Effect[1] a direct SCHOOL_DAMAGE hit at the cast that is not periodic). One cycle casts Hex at the dummy, waits 3500 ms (the first tick at 3000 ms, the second would come at 6000 ms) and removes the Hex from the dummy (harness set_aura 0, the summon_lifetime 807450 precedent), so each cycle gives exactly one periodic tick and the next tick comes about 3500 ms after the last one. The trials are the periodic damage events of 801693 on the dummy (spell_damage_count with the harness periodic filter, CoAGameplayTest.cpp:5248-5256), so the direct hit is not a trial; this is the procs.py trials_step gap of the earlier tool_gap, closed in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (the unlearned arm, 10 cycles per part, 210 ticks): no Spirit from a Hex tick without the talent; any event alerts. Then 503707 is learned for real (a passive, so its aura applies, pitfall 9) and the treatment arm runs 900 cycles per part. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 20% and 2 points); 21 parts give a between-part t quantile of 2.845 (20 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 17237 trials; the entry plans 900 cycles x 1 trials x 21 parts = 18900. At the stated chance the 99% interval (half-width about 0.83 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.83 points or more (17.17% or 22.83%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 3e-11 (normal approximation at the off rate: the interval edge lies 2 points, 6.6 standard deviations, from the stated chance). Game time 3.505 s per cycle, 3154 s per part (under the 3540 s accelerated cap), 18.4 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 23 min of wall time per run and 46 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 63, claim \"a $h% chance\". Cast timing checked: Hex instant, GCD 1500 under the 3500 ms cycle. Player reports: none names this spell."
     },
     {
@@ -17691,10 +17706,25 @@
         "metric": "owned_creature_summon_count",
         "entry": 50587
       },
-      "cycles": 900,
-      "unlearned_cycles": 10,
+      "cycles": 300,
+      "unlearned_cycles": 4,
       "trials_per_cycle": 1,
       "parts": 27,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; the 823764 fixture is an aura on the caster only; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); Hexfire Mass summons its Mass Serpent Ward 50587 through 504777 at the proc target (TARGET_DEST_TARGET_ENEMY, then TARGET_DEST_TARGET_RANDOM within radius index 7, 2 yd), so within 2 yd of the own dummy and 5.5 yd of the caster; a Serpent, Mass Serpent or Viper Ward attacks only an enemy within 30 yd of itself: the owner's selected unit, else a unit the owner is in combat with (AscensionWitchDoctorSummons.cpp Enemy, IsWithinDistInMap 30 yd plus both combat reaches); the ward combat reach is not in the repository data, so 4 yd is a stated bound; the owner is in combat with its own dummy only; several Mass wards can live at once and spell_damage_count by entry reads one ward guid, so their isolation rests on the asserted placement of every living Mass ward each cycle",
+        "wards": [
+          {
+            "entries": [
+              50587
+            ],
+            "within_yd": 5.5,
+            "reach_yd": 30,
+            "combat_reach_yd": 4
+          }
+        ]
+      },
       "observe_source": "Hexfire Mass 807450 (passive; aura 42 EffectTriggerSpell 504777, ProcChance 30 = $h; spell_proc row ProcFlags 262144 DONE_PERIODIC, Chance 30 then 0 by rev_20260919_20_coa_proc_chance_parity.sql:16 so the DBC 30 applies, Cooldown 3000, rev_20260909_00_witch_doctor_completion.sql:23): AscensionWitchDoctorEvents.cpp:86-87 (Check, case HexfireMass: damage && periodic && IsHex(info)) and :224-225 (Proc: Summon(player, SerpentMass 504777, target)), which summons one creature 50587 (504777 EffectMiscValue[0]) owned by the caster (Summons.cpp:171-215, SummonCreature with the player as summoner), counted by owned_creature_summon_count of 50587 (the harness SummonCounter, CoAGameplayTest.cpp:811-850, the Unrelenting Army precedent of proc-rates.md). The direct hit of Hex never rolls (DONE_PERIODIC only), so \"Damage dealt by Hex of Malice\" is its periodic damage. The 3000 ms internal cooldown never refuses a trial here: one tick per cycle, and consecutive ticks lie a whole cycle (about 3500 ms) apart, beyond the cooldown (the earlier tool_gap named exactly this: one Hex stream with ticks spaced past the cooldown). The wards summoned live 10000 ms ($504777d) and attack the dummy with Serpent Ward Attack 573055, a direct Fire hit that is not Hex and rolls nothing. Hex of Malice 801693 (rank one, instant, StartRecoveryTime 1500, 20% of the 1497 base mana = 299, so cast_power 1400 below the 1497 maximum of the fixture; DurationIndex 106 = 24000 ms; Effect[0] aura 3 periodic damage EffectAmplitude 3000 with no START_PERIODIC_AT_APPLY, the first tick at 3000 ms; Effect[1] a direct SCHOOL_DAMAGE hit at the cast that is not periodic). One cycle casts Hex at the dummy, waits 3500 ms (the first tick at 3000 ms, the second would come at 6000 ms) and removes the Hex from the dummy (harness set_aura 0, the summon_lifetime 807450 precedent), so each cycle gives exactly one periodic tick and the next tick comes about 3500 ms after the last one. The trials are the periodic damage events of 801693 on the dummy (spell_damage_count with the harness periodic filter, CoAGameplayTest.cpp:5248-5256), so the direct hit is not a trial; this is the procs.py trials_step gap of the earlier tool_gap, closed in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, 10 cycles per part): no creature 50587 without the talent. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 30% and 2 points); 27 parts give a between-part t quantile of 2.779 (26 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 22166 trials; the entry plans 900 cycles x 1 trials x 27 parts = 24300. At the stated chance the 99% interval (half-width about 0.82 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.82 points or more (27.18% or 32.82%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 2e-11 (normal approximation at the off rate: the interval edge lies 2 points, 6.6 standard deviations, from the stated chance). Game time 3.505 s per cycle, 3154 s per part (under the 3540 s accelerated cap), 23.7 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 30 min of wall time per run and 59 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 378, claim \"Damage dealt by Hex of Malice now has a $h% chance\". Cast timing checked: Hex instant. Player reports: none names this spell."
     },
     {
@@ -17737,10 +17767,29 @@
         "metric": "spell_cast_count",
         "spell": 705926
       },
-      "cycles": 900,
-      "unlearned_cycles": 15,
+      "cycles": 225,
+      "unlearned_cycles": 4,
       "trials_per_cycle": 1,
       "parts": 25,
+      "dummy_distance": 25,
+      "streams": 4,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; the 823764 fixture is an aura on the caster only; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); Berserking 705926 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, which holds only summons the caster owns (SpellAuras.cpp), and WardBuff walks the owner's own summons; the Serpent Ward 500960 lands 3 yd in front of its caster (TARGET_DEST_DEST_FRONT, radius index 190), so 22 yd from the own dummy; a Serpent, Mass Serpent or Viper Ward attacks only an enemy within 30 yd of itself: the owner's selected unit, else a unit the owner is in combat with (AscensionWitchDoctorSummons.cpp Enemy, IsWithinDistInMap 30 yd plus both combat reaches); the ward combat reach is not in the repository data, so 4 yd is a stated bound; the owner is in combat with its own dummy only; the ward hits are read per ward guid before every recast and at the end",
+        "wards": [
+          {
+            "entries": [
+              50105
+            ],
+            "within_yd": 3.5,
+            "reach_yd": 30,
+            "combat_reach_yd": 4,
+            "spells": [
+              573055
+            ]
+          }
+        ]
+      },
       "observe_source": "Berserking 705925 (passive; Effect[0] aura 42 EffectTriggerSpell 705926, ProcChance 25 = $h; spell_proc row ProcFlags 262144 DONE_PERIODIC, Chance 25 then 0 by rev_20260919_20_coa_proc_chance_parity.sql:16, Cooldown 0, rev_20260909_00_witch_doctor_completion.sql:20): AscensionWitchDoctorEvents.cpp:105-107 (Check: damage && periodic) and :179-180 (Proc: WardBuff(player, WardHaste)), which casts Berserking 705926 from the player on every living Serpent, Mass Serpent or Viper Ward of the caster (Summons.cpp:105-111), so with one ward one spell_cast_count of 705926 per proc, and none without a ward (the reason of the earlier tool_gap). A real Serpent Ward 500960 (instant, StartRecoveryTime 1000, 5% of the base mana, DurationIndex 3 = 60000 ms, \"Can only have 1 Ward active at a time\": a recast replaces it, the ward_haste entry) is cast at the caster before cycle 1 and every 15 cycles (14 x 3505 + 4605 ms = 53.7 s, inside its 60 s), 1100 ms before that cycle's Hex (its GCD), so a ward is alive at every tick, in both arms. The ward's own attacks (Serpent Ward Attack 573055, a direct Fire hit) are not periodic and roll nothing; the only periodic damage is the Hex tick. Hex of Malice 801693 (rank one, instant, StartRecoveryTime 1500, 20% of the 1497 base mana = 299, so cast_power 1400 below the 1497 maximum of the fixture; DurationIndex 106 = 24000 ms; Effect[0] aura 3 periodic damage EffectAmplitude 3000 with no START_PERIODIC_AT_APPLY, the first tick at 3000 ms; Effect[1] a direct SCHOOL_DAMAGE hit at the cast that is not periodic). One cycle casts Hex at the dummy, waits 3500 ms (the first tick at 3000 ms, the second would come at 6000 ms) and removes the Hex from the dummy (harness set_aura 0, the summon_lifetime 807450 precedent), so each cycle gives exactly one periodic tick and the next tick comes about 3500 ms after the last one. The trials are the periodic damage events of 801693 on the dummy (spell_damage_count with the harness periodic filter, CoAGameplayTest.cpp:5248-5256), so the direct hit is not a trial; this is the procs.py trials_step gap of the earlier tool_gap, closed in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, 15 cycles per part, 375 ticks, with the ward): no 705926 cast without the talent. Two wards at one tick would double an event and read high: a fault alerts, it never passes. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 25% and 2 points); 25 parts give a between-part t quantile of 2.797 (24 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 19903 trials; the entry plans 900 cycles x 1 trials x 25 parts = 22500. At the stated chance the 99% interval (half-width about 0.81 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.81 points or more (22.19% or 27.81%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 1e-11 (normal approximation at the off rate: the interval edge lies 2 points, 6.7 standard deviations, from the stated chance). Game time 3.57833 s per cycle, 3220 s per part (under the 3540 s accelerated cap), 22.4 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 28 min of wall time per run and 56 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 219, claim \"Periodic damage dealt now has a $h% chance\". Cast timing checked: Hex and the ward instant, the ward 1100 ms before the Hex for its 1000 ms GCD. Player reports: none names this spell."
     },
     {
@@ -17765,10 +17814,15 @@
         "metric": "spell_cast_count",
         "spell": 503693
       },
-      "cycles": 700,
-      "unlearned_cycles": 10,
+      "cycles": 88,
+      "unlearned_cycles": 2,
       "trials_per_cycle": 1,
       "parts": 10,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Loa's Brew 801670 heals one ally (EffectImplicitTargetA 21, no radius, no chain) and is cast at the stream's own caster by id; the Spirit 561136 and Mojo Madness 503693 are caster auras; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing)"
+      },
       "observe_source": "Mojo Madness 705871 (spell_proc row ProcFlags 349524, which holds DONE_SPELL_MAGIC_DMG_CLASS_POS 0x4000, SpellTypeMask 3 damage and heal, SpellPhaseMask 2 hit, HitMask 3, Chance 0 after rev_20260919_20_coa_proc_chance_parity.sql so the DBC ProcChance 5 = $h applies; aura_ascension_witch_doctor_event): AscensionWitchDoctorEvents.cpp:80-84 (Check: outgoing damage or an effective heal, a Derived spell refused at :73) and the Proc, which gives Mojo Madness 503693 on the caster (Proc case MojoMadness, buff(MojoFree), Events.cpp:148-149), spell_cast_count of 503693. One engine roll per heal. Loa's Brew 801670 (CastingTimeIndex 5 = 2000 ms, StartRecoveryTime 1500, 33% of the 1497 base mana = 494, cast_power 1400; Effect[0] HEAL, TARGET_UNIT_TARGET_ALLY, cast at the caster; missile speed 55 at no distance) is cast at the caster every 2400 ms, the caster set to 30% of the 10000 health fixture before every cast, so each heal is effective (Events.cpp:63 counts healing only with GetEffectiveHeal(), which is 0 at full health; the trigger entries' caster_health_pct precedent). The trials are the heal events of 801670 on the caster (spell_heal_count). Loa's Brew grants no Spirit and casts nothing by itself (Abilities.cpp:194-204: the echo heal needs a different previous target and is a Derived heal, refused at Events.cpp:73; no effigies, no Loa Blessing known). This is the healing half the procs kind could not drive (its tool note: a caster or ally health fixture on a procs entry), driven in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, 10 casts per part): no event without the talent. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 5% and 2 points); 10 parts give a between-part t quantile of 3.250 (9 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 5768 trials; the entry plans 700 cycles x 1 trials x 10 parts = 7000. At the stated chance the 99% interval (half-width about 0.85 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.85 points or more (2.15% or 7.85%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 2e-10 (normal approximation at the off rate: the interval edge lies 2 points, 6.2 standard deviations, from the stated chance). Game time 2.404 s per cycle, 1683 s per part (under the 3540 s accelerated cap), 4.7 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 6 min of wall time per run and 12 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 191, claim \"and healing done now has a $h% chance\". The damage half keeps its proc entry (\"705871 proc_rate\"). Cast timing checked: 2000 ms cast and the 1500 ms GCD under the 2400 ms cycle, the missile has no distance to fly. Player reports: none names this spell."
     },
     {
@@ -17793,10 +17847,15 @@
         "metric": "spell_cast_count",
         "spell": 561136
       },
-      "cycles": 1000,
-      "unlearned_cycles": 10,
+      "cycles": 125,
+      "unlearned_cycles": 2,
       "trials_per_cycle": 1,
       "parts": 10,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Loa's Brew 801670 heals one ally (EffectImplicitTargetA 21, no radius, no chain) and is cast at the stream's own caster by id; the Spirit 561136 and Mojo Madness 503693 are caster auras; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing)"
+      },
       "observe_source": "Loa Spirits rank one 804620 (spell_proc row ProcFlags 349524, which holds DONE_SPELL_MAGIC_DMG_CLASS_POS 0x4000, SpellTypeMask 3 damage and heal, SpellPhaseMask 2 hit, HitMask 3, Chance 0 after rev_20260919_20_coa_proc_chance_parity.sql so the DBC ProcChance 8 = $h applies; aura_ascension_witch_doctor_event): AscensionWitchDoctorEvents.cpp:80-84 (Check: outgoing damage or an effective heal, a Derived spell refused at :73) and the Proc, which gives a Spirit (Proc case LoaSpiritsOne / LoaSpiritsTwo, GainSpirit, Events.cpp:143-146, Completion.cpp:142), spell_cast_count of 561136, counted also at the 5-stack cap. One engine roll per heal. Loa's Brew 801670 (CastingTimeIndex 5 = 2000 ms, StartRecoveryTime 1500, 33% of the 1497 base mana = 494, cast_power 1400; Effect[0] HEAL, TARGET_UNIT_TARGET_ALLY, cast at the caster; missile speed 55 at no distance) is cast at the caster every 2400 ms, the caster set to 30% of the 10000 health fixture before every cast, so each heal is effective (Events.cpp:63 counts healing only with GetEffectiveHeal(), which is 0 at full health; the trigger entries' caster_health_pct precedent). The trials are the heal events of 801670 on the caster (spell_heal_count). Loa's Brew grants no Spirit and casts nothing by itself (Abilities.cpp:194-204: the echo heal needs a different previous target and is a Derived heal, refused at Events.cpp:73; no effigies, no Loa Blessing known). This is the healing half the procs kind could not drive (its tool note: a caster or ally health fixture on a procs entry), driven in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, 10 casts per part): no event without the talent. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 8% and 2 points); 10 parts give a between-part t quantile of 3.250 (9 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 8936 trials; the entry plans 1000 cycles x 1 trials x 10 parts = 10000. At the stated chance the 99% interval (half-width about 0.88 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.88 points or more (5.12% or 10.88%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 7e-11 (normal approximation at the off rate: the interval edge lies 2 points, 6.4 standard deviations, from the stated chance). Game time 2.404 s per cycle, 2404 s per part (under the 3540 s accelerated cap), 6.7 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 8 min of wall time per run and 17 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 347, claim \"and healing done now has a $h% chance to collect a Spirit\". The damage half keeps its proc entry (\"804620 proc_rate\"). Cast timing checked: 2000 ms cast and the 1500 ms GCD under the 2400 ms cycle, the missile has no distance to fly. Player reports: none names this spell."
     },
     {
@@ -17821,10 +17880,15 @@
         "metric": "spell_cast_count",
         "spell": 561136
       },
-      "cycles": 1400,
-      "unlearned_cycles": 10,
+      "cycles": 175,
+      "unlearned_cycles": 2,
       "trials_per_cycle": 1,
       "parts": 12,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Loa's Brew 801670 heals one ally (EffectImplicitTargetA 21, no radius, no chain) and is cast at the stream's own caster by id; the Spirit 561136 and Mojo Madness 503693 are caster auras; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing)"
+      },
       "observe_source": "Loa Spirits rank two 807904 (spell_proc row ProcFlags 349524, which holds DONE_SPELL_MAGIC_DMG_CLASS_POS 0x4000, SpellTypeMask 3 damage and heal, SpellPhaseMask 2 hit, HitMask 3, Chance 0 after rev_20260919_20_coa_proc_chance_parity.sql so the DBC ProcChance 15 = $h applies; aura_ascension_witch_doctor_event): AscensionWitchDoctorEvents.cpp:80-84 (Check: outgoing damage or an effective heal, a Derived spell refused at :73) and the Proc, which gives a Spirit (Proc case LoaSpiritsOne / LoaSpiritsTwo, GainSpirit, Events.cpp:143-146, Completion.cpp:142), spell_cast_count of 561136, counted also at the 5-stack cap. One engine roll per heal. Loa's Brew 801670 (CastingTimeIndex 5 = 2000 ms, StartRecoveryTime 1500, 33% of the 1497 base mana = 494, cast_power 1400; Effect[0] HEAL, TARGET_UNIT_TARGET_ALLY, cast at the caster; missile speed 55 at no distance) is cast at the caster every 2400 ms, the caster set to 30% of the 10000 health fixture before every cast, so each heal is effective (Events.cpp:63 counts healing only with GetEffectiveHeal(), which is 0 at full health; the trigger entries' caster_health_pct precedent). The trials are the heal events of 801670 on the caster (spell_heal_count). Loa's Brew grants no Spirit and casts nothing by itself (Abilities.cpp:194-204: the echo heal needs a different previous target and is a Derived heal, refused at Events.cpp:73; no effigies, no Loa Blessing known). This is the healing half the procs kind could not drive (its tool note: a caster or ally health fixture on a procs entry), driven in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, 10 casts per part): no event without the talent. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 15% and 2 points); 12 parts give a between-part t quantile of 3.106 (11 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 14847 trials; the entry plans 1400 cycles x 1 trials x 12 parts = 16800. At the stated chance the 99% interval (half-width about 0.86 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.86 points or more (12.14% or 17.86%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 6e-12 (normal approximation at the off rate: the interval edge lies 2 points, 6.8 standard deviations, from the stated chance). Game time 2.404 s per cycle, 3366 s per part (under the 3540 s accelerated cap), 11.2 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 14 min of wall time per run and 28 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 383, claim \"and healing done now has a $h% chance to collect a Spirit\". The damage half keeps its proc entry (\"807904 proc_rate\"). Cast timing checked: 2000 ms cast and the 1500 ms GCD under the 2400 ms cycle, the missile has no distance to fly. Player reports: none names this spell."
     },
     {
@@ -17892,10 +17956,30 @@
         "spell": 500473,
         "entry": 50105
       },
-      "cycles": 52,
+      "cycles": 13,
       "unlearned_cycles": 1,
       "trials_per_cycle": 27,
       "parts": 14,
+      "dummy_distance": 25,
+      "streams": 4,
+      "isolation": {
+        "reach_yd": 10,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; Voodoo Fire 802262 and 803846 put their proc aura on the owner's own wards only (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, SpellAuras.cpp); a proc casts Voodoo Fire 500473 at up to 3 valid enemies within 10 yd of the ward's target (AscensionWitchDoctorSummons.cpp UpdateAI, Nearby(target, 10)), and 500473 chains to 3 targets 10 yd per jump (EffectChainTarget 3, magic default jump radius in Spell::SearchChainTargets), so 10 yd from the own dummy; the Serpent Ward 500960 lands 3 yd in front of its caster (TARGET_DEST_DEST_FRONT, radius index 190), so 22 yd from the own dummy; a Serpent, Mass Serpent or Viper Ward attacks only an enemy within 30 yd of itself: the owner's selected unit, else a unit the owner is in combat with (AscensionWitchDoctorSummons.cpp Enemy, IsWithinDistInMap 30 yd plus both combat reaches); the ward combat reach is not in the repository data, so 4 yd is a stated bound; the owner is in combat with its own dummy only; the ward hits are read per ward guid at every cycle end, 56.1 s into the ward's 60 s life, and the last 3.9 s rest on the asserted ward placement",
+        "wards": [
+          {
+            "entries": [
+              50105
+            ],
+            "within_yd": 3.5,
+            "reach_yd": 30,
+            "combat_reach_yd": 4,
+            "spells": [
+              573055,
+              500473
+            ]
+          }
+        ]
+      },
       "observe_source": "Voodoo Fire rank one 802262 (passive, ProcChance 20 = $h; Summons.cpp:469-472 takes 20 for this rank, the DBC value): A cycle casts Hex of Malice 801693 at the dummy (instant, 20% base mana, cast_power 1400; it puts the owner in combat, which Enemy(player) needs, Summons.cpp:420-432), 1600 ms later a real Serpent Ward 500960 at the caster (instant, GCD 1000, 5% base mana, 60000 ms), reads the ward's cast counts 100 ms after it spawns (owned_creature_spell_cast_count on creature 50105: Serpent Ward Attack 573055, the trials, and Voodoo Fire 500473, the events; the counters are per creature, so each cycle reads its own ward, start and end), recasts Hex 18400 and 37400 ms into the ward's life so the owner stays in combat (each Hex lasts 24000 ms), reads again at a ward age of about 56100 ms and waits 4000 ms, past the ward's 60000 ms, before the next cycle. The ward attacks every 2000 ms (WardAttackInterval, Summons.cpp:321-325; the first about 2000 ms after it spawns, :311-312), so about 28 attacks a cycle (27 planned). Every attack with a target is one roll: Summons.cpp:466-485 casts 573055 (:468) and then, with a Voodoo Fire rank known, rolls roll_chance_f(chance) after player->ApplySpellMod(rank, SPELLMOD_CHANCE_OF_SUCCESS, chance), casting 500473 at every valid enemy within 10 yd of the target up to 3 (Nearby includes the target, Completion.cpp:46-56): with the one dummy, one Voodoo Fire per proc. The roll does not depend on the attack landing, so the trial is the attack cast, not its hit. This is tool note T-c9-B16-4 (a creature's casts as the trials of a rate), built as per-cycle reads in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, one ward cycle per part): no Voodoo Fire from a ward without a Voodoo Fire rank. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 20% and 2 points); 14 parts give a between-part t quantile of 3.012 (13 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 18125 trials; the entry plans 52 cycles x 27 trials x 14 parts = 19656. At the stated chance the 99% interval (half-width about 0.86 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.86 points or more (17.14% or 22.86%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 1e-11 (normal approximation at the off rate: the interval edge lies 2 points, 6.7 standard deviations, from the stated chance). Game time 61.7 s per cycle, 3208 s per part (under the 3540 s accelerated cap), 12.5 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 16 min of wall time per run and 31 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 326, claim \"Your Serpent Ward's attacks now have a $h% chance\". Cast timing checked: Hex and the ward instant, the ward 1600 ms after the Hex (its GCD 1500). Player reports: none names this spell."
     },
     {
@@ -17963,10 +18047,30 @@
         "spell": 500473,
         "entry": 50105
       },
-      "cycles": 52,
+      "cycles": 13,
       "unlearned_cycles": 1,
       "trials_per_cycle": 27,
       "parts": 20,
+      "dummy_distance": 25,
+      "streams": 4,
+      "isolation": {
+        "reach_yd": 10,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; Voodoo Fire 802262 and 803846 put their proc aura on the owner's own wards only (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, SpellAuras.cpp); a proc casts Voodoo Fire 500473 at up to 3 valid enemies within 10 yd of the ward's target (AscensionWitchDoctorSummons.cpp UpdateAI, Nearby(target, 10)), and 500473 chains to 3 targets 10 yd per jump (EffectChainTarget 3, magic default jump radius in Spell::SearchChainTargets), so 10 yd from the own dummy; the Serpent Ward 500960 lands 3 yd in front of its caster (TARGET_DEST_DEST_FRONT, radius index 190), so 22 yd from the own dummy; a Serpent, Mass Serpent or Viper Ward attacks only an enemy within 30 yd of itself: the owner's selected unit, else a unit the owner is in combat with (AscensionWitchDoctorSummons.cpp Enemy, IsWithinDistInMap 30 yd plus both combat reaches); the ward combat reach is not in the repository data, so 4 yd is a stated bound; the owner is in combat with its own dummy only; the ward hits are read per ward guid at every cycle end, 56.1 s into the ward's 60 s life, and the last 3.9 s rest on the asserted ward placement",
+        "wards": [
+          {
+            "entries": [
+              50105
+            ],
+            "within_yd": 3.5,
+            "reach_yd": 30,
+            "combat_reach_yd": 4,
+            "spells": [
+              573055,
+              500473
+            ]
+          }
+        ]
+      },
       "observe_source": "Voodoo Fire rank two 803846 (passive, ProcChance 40 = $h; Summons.cpp:469-472 takes 40 for this rank): A cycle casts Hex of Malice 801693 at the dummy (instant, 20% base mana, cast_power 1400; it puts the owner in combat, which Enemy(player) needs, Summons.cpp:420-432), 1600 ms later a real Serpent Ward 500960 at the caster (instant, GCD 1000, 5% base mana, 60000 ms), reads the ward's cast counts 100 ms after it spawns (owned_creature_spell_cast_count on creature 50105: Serpent Ward Attack 573055, the trials, and Voodoo Fire 500473, the events; the counters are per creature, so each cycle reads its own ward, start and end), recasts Hex 18400 and 37400 ms into the ward's life so the owner stays in combat (each Hex lasts 24000 ms), reads again at a ward age of about 56100 ms and waits 4000 ms, past the ward's 60000 ms, before the next cycle. The ward attacks every 2000 ms (WardAttackInterval, Summons.cpp:321-325; the first about 2000 ms after it spawns, :311-312), so about 28 attacks a cycle (27 planned). Every attack with a target is one roll: Summons.cpp:466-485 casts 573055 (:468) and then, with a Voodoo Fire rank known, rolls roll_chance_f(chance) after player->ApplySpellMod(rank, SPELLMOD_CHANCE_OF_SUCCESS, chance), casting 500473 at every valid enemy within 10 yd of the target up to 3 (Nearby includes the target, Completion.cpp:46-56): with the one dummy, one Voodoo Fire per proc. The roll does not depend on the attack landing, so the trial is the attack cast, not its hit. This is tool note T-c9-B16-4 (a creature's casts as the trials of a rate), built as per-cycle reads in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, one ward cycle per part): no Voodoo Fire from a ward without a Voodoo Fire rank. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 40% and 2 points); 20 parts give a between-part t quantile of 2.861 (19 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 25978 trials; the entry plans 52 cycles x 27 trials x 20 parts = 28080. At the stated chance the 99% interval (half-width about 0.84 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.84 points or more (37.16% or 42.84%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 6e-12 (normal approximation at the off rate: the interval edge lies 2 points, 6.8 standard deviations, from the stated chance). Game time 61.7 s per cycle, 3208 s per part (under the 3540 s accelerated cap), 17.8 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 22 min of wall time per run and 45 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 342, claim \"Your Serpent Ward's attacks now have a $h% chance to shoot Voodoo Fire,\". Cast timing checked: Hex and the ward instant, the ward 1600 ms after the Hex (its GCD 1500). Player reports: none names this spell."
     },
     {
@@ -18035,10 +18139,30 @@
         "spell": 500473,
         "entry": 50105
       },
-      "cycles": 52,
+      "cycles": 13,
       "unlearned_cycles": 1,
       "trials_per_cycle": 27,
       "parts": 18,
+      "dummy_distance": 25,
+      "streams": 4,
+      "isolation": {
+        "reach_yd": 10,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; Voodoo Fire 802262 and 803846 put their proc aura on the owner's own wards only (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, SpellAuras.cpp); a proc casts Voodoo Fire 500473 at up to 3 valid enemies within 10 yd of the ward's target (AscensionWitchDoctorSummons.cpp UpdateAI, Nearby(target, 10)), and 500473 chains to 3 targets 10 yd per jump (EffectChainTarget 3, magic default jump radius in Spell::SearchChainTargets), so 10 yd from the own dummy; the Serpent Ward 500960 lands 3 yd in front of its caster (TARGET_DEST_DEST_FRONT, radius index 190), so 22 yd from the own dummy; a Serpent, Mass Serpent or Viper Ward attacks only an enemy within 30 yd of itself: the owner's selected unit, else a unit the owner is in combat with (AscensionWitchDoctorSummons.cpp Enemy, IsWithinDistInMap 30 yd plus both combat reaches); the ward combat reach is not in the repository data, so 4 yd is a stated bound; the owner is in combat with its own dummy only; the ward hits are read per ward guid at every cycle end, 56.1 s into the ward's 60 s life, and the last 3.9 s rest on the asserted ward placement",
+        "wards": [
+          {
+            "entries": [
+              50105
+            ],
+            "within_yd": 3.5,
+            "reach_yd": 30,
+            "combat_reach_yd": 4,
+            "spells": [
+              573055,
+              500473
+            ]
+          }
+        ]
+      },
       "observe_source": "Spirit Striker 806286 (passive, Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 SPELLMOD_CHANCE_OF_SUCCESS, BasePoints 9 + 1 = +10 = $s1, class mask word 1 134217728, the SpellFamilyFlags[1] of both Voodoo Fire ranks) raises the 20% of rank one 802262 to 30% through the ApplySpellMod of Summons.cpp:474-475; the treatment learns both 802262 and 806286, so a modifier that never applies reads 20% against the 28% to 32% band of 30% and fails (the 802262 entry measures the 20% alone): A cycle casts Hex of Malice 801693 at the dummy (instant, 20% base mana, cast_power 1400; it puts the owner in combat, which Enemy(player) needs, Summons.cpp:420-432), 1600 ms later a real Serpent Ward 500960 at the caster (instant, GCD 1000, 5% base mana, 60000 ms), reads the ward's cast counts 100 ms after it spawns (owned_creature_spell_cast_count on creature 50105: Serpent Ward Attack 573055, the trials, and Voodoo Fire 500473, the events; the counters are per creature, so each cycle reads its own ward, start and end), recasts Hex 18400 and 37400 ms into the ward's life so the owner stays in combat (each Hex lasts 24000 ms), reads again at a ward age of about 56100 ms and waits 4000 ms, past the ward's 60000 ms, before the next cycle. The ward attacks every 2000 ms (WardAttackInterval, Summons.cpp:321-325; the first about 2000 ms after it spawns, :311-312), so about 28 attacks a cycle (27 planned). Every attack with a target is one roll: Summons.cpp:466-485 casts 573055 (:468) and then, with a Voodoo Fire rank known, rolls roll_chance_f(chance) after player->ApplySpellMod(rank, SPELLMOD_CHANCE_OF_SUCCESS, chance), casting 500473 at every valid enemy within 10 yd of the target up to 3 (Nearby includes the target, Completion.cpp:46-56): with the one dummy, one Voodoo Fire per proc. The roll does not depend on the attack landing, so the trial is the attack cast, not its hit. This is tool note T-c9-B16-4 (a creature's casts as the trials of a rate), built as per-cycle reads in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Control (unlearned arm, one ward cycle per part): no Voodoo Fire from a ward without a Voodoo Fire rank. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 30% and 2 points); 18 parts give a between-part t quantile of 2.898 (17 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 22989 trials; the entry plans 52 cycles x 27 trials x 18 parts = 25272. At the stated chance the 99% interval (half-width about 0.84 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.84 points or more (27.16% or 32.84%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 6e-12 (normal approximation at the off rate: the interval edge lies 2 points, 6.8 standard deviations, from the stated chance). Game time 61.7 s per cycle, 3208 s per part (under the 3540 s accelerated cap), 16.0 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 20 min of wall time per run and 40 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 358, claim \"Increases the proc chance of Voodoo Fire by $s1%.\". Cast timing checked: Hex and the ward instant, the ward 1600 ms after the Hex (its GCD 1500). Player reports: none names this spell."
     },
     {
@@ -18108,10 +18232,30 @@
         "spell": 712415,
         "entry": 51105
       },
-      "cycles": 100,
+      "cycles": 34,
       "unlearned_cycles": 1,
       "trials_per_cycle": 17,
       "parts": 12,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Hex of Malice 801693 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the Viper Ward 712373 lands at its target dummy (TARGET_DEST_DEST, radius index 16, 1 yd), so within 4.5 yd of the caster, and the control Serpent Ward 500960 3 yd in front of the caster; a Serpent, Mass Serpent or Viper Ward attacks only an enemy within 30 yd of itself: the owner's selected unit, else a unit the owner is in combat with (AscensionWitchDoctorSummons.cpp Enemy, IsWithinDistInMap 30 yd plus both combat reaches); the ward combat reach is not in the repository data, so 4 yd is a stated bound; the owner is in combat with its own dummy only; the Hexfire Blast 712415 goes to the ward's own attack target (AscensionWitchDoctorSummons.cpp UpdateAI); no Voodoo Fire talent is learned; the ward hits are read per ward guid at every cycle end",
+        "wards": [
+          {
+            "entries": [
+              51105,
+              50105
+            ],
+            "within_yd": 4.5,
+            "reach_yd": 30,
+            "combat_reach_yd": 4,
+            "spells": [
+              573055,
+              712415
+            ]
+          }
+        ]
+      },
       "observe_source": "Viper Ward 707329 (passive, the talent; Abilities.cpp:85 refuses Viper Ward 712373 without it, Auras.cpp:70-71 makes it the replacement of Call of Sseratus): the Viper Ward 712373 (instant, RecoveryTime 45000 reset before every cast, 14% of the base mana, DurationIndex 18 = 20000 ms, summons creature 51105 at the target location) attacks every 1000 ms (WardAttackInterval for NpcViper, Summons.cpp:321-325) with Serpent Ward Attack 573055 and then rolls roll_chance_f(ProcChance of 712374 + GetRatingBonusValue(CR_CRIT_RANGED)) (Summons.cpp:486-488, the attack at :468): 712374 ProcChance 50 = $712374h, and the reference character has no ranged critical strike rating (the class file ratings hold the three hit ratings only), so the chance is 50%; a success casts Hexfire Blast 712415 at the target. A cycle casts Hex of Malice 801693 at the dummy (combat for Enemy(player), Summons.cpp:420-432), 1600 ms later the Viper Ward at the dummy, reads the Viper's cast counts (owned_creature_spell_cast_count on 51105: 573055 the trials, 712415 the events, per creature) 100 ms after it spawns and again at an age of about 19000 ms, and waits 1500 ms past its 20000 ms. Attacks from about 1000 ms, so about 18 a cycle (17 planned); each attack with a target is one roll, landed or not. Control (unlearned arm, one cycle per part, 707329 unknown): Viper Ward is refused without the talent, so the cycle casts a plain Serpent Ward 500960 at the caster and reads creature 50105: it attacks and never casts a Hexfire Blast (the roll is gated on NpcViper, Summons.cpp:486). Per-cycle creature reads are tool note T-c9-B16-4, built in a contributor kind module (kinds/flat_chance_rate.py, guide 14.1). Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2.5 points (the larger of 5% of 50% and 2 points); 12 parts give a between-part t quantile of 3.106 (11 df), so n >= p(1 - p) x ((t + 3.719) / band)^2 = 18632 trials; the entry plans 100 cycles x 17 trials x 12 parts = 20400. At the stated chance the 99% interval (half-width about 1.09 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 3.59 points or more (46.41% or 53.59%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 4e-13 (normal approximation at the off rate: the interval edge lies 2.5 points, 7.2 standard deviations, from the stated chance). Game time 22.1 s per cycle, 2210 s per part (under the 3540 s accelerated cap), 7.4 h per run; at the median simulated-clock rate of final07 run 1 (48x over the 551 scenarios of more than 300 s of game time, 24x to 65x) about 9 min of wall time per run and 18 min per counted pair, inside the 90 minutes of G-20 step 3. Clause 268, claims \"Viper Wards have a $712374h% chance\" and \"to unleash a Hexfire Blast\" (the events are the Blast casts). The rating clause 270 keeps its tool_gap (a rating arm needs a per-arm rating fixture and a read of the rating bonus). Cast timing checked: Hex and Viper Ward instant, the Viper Ward 1600 ms after the Hex. Player reports: none names this spell."
     },
     {
@@ -18278,10 +18422,15 @@
         "metric": "spell_cast_count",
         "spell": 705845
       },
-      "cycles": 675,
-      "unlearned_cycles": 3,
+      "cycles": 85,
+      "unlearned_cycles": 1,
       "trials_per_cycle": 5,
       "parts": 4,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Shadow Puppets 500015 puts both its periodic trigger auras (aura 227, EffectImplicitTargetA 6) on the stream's own dummy, cast by id; the triggered 801797 and 802745 each have one target (no radius, no chain) and the Puppet hit is cast at the aura's own target (AscensionWitchDoctorAuras.cpp CastCustomSpell(PuppetHit, ..., GetTarget())); the 823764 fixture is an aura on the caster only; Overflowing Juju 705845 is a caster aura that resets the caster's own Bad Juju; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); there is no area trigger"
+      },
       "observe_source": "Overflowing Juju 705844 (passive, Attributes 0x40; Effect[0] aura 42 EffectTriggerSpell 705845, ProcChance 15 = $h; spell_proc row ProcFlags 332116, SpellTypeMask 1, SpellPhaseMask 2, HitMask 3, AttributesMask 2, Chance 15 then 0 by rev_20260919_20_coa_proc_chance_parity.sql so the DBC 15 applies, Cooldown 0, rev_20260909_00_witch_doctor_completion.sql:14; spell_script_names aura_ascension_witch_doctor_event, :183): AscensionWitchDoctorEvents.cpp:98-99 (Check, case Overflow: damage and the spell is Shadow Puppet 802745 or Puppeteer's Threads 572837) and :164-167 (Proc: Reduce(BadJuju) and Cast(OverflowBuff 705845)), one 705845 cast per proc, counted by spell_cast_count of 705845 also while an earlier 705845 is held. One engine roll per Puppet hit, no script roll and no internal cooldown (the spell_proc Cooldown is 0; the 3250 ms of the procs entry is its attempt spacing, not a cooldown). Shadow Puppets 500015 (instant, StartRecoveryTime 1500, RecoveryTime 18000 reset before each cast, 15% of the 1497 base mana = 225, cast_power 1400 at or below the 1497 maximum of the fixture; DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms with the extra initial tick): the aura script casts Shadow Puppet 802745 at the dummy on each tick (AscensionWitchDoctorAuras.cpp:279-284), five hits per cast, and 500015 itself deals no damage. This closes the measuring gap of the procs entry `705844 proc_rate`: its judge counts the damage of the trigger 500015 as the trials and reads 0 (unmeasured in both final07 runs, 23 of 23 parts), while its own read of the 802745 hits gave 12910 trials per run with 1864 and 1881 procs (14.44% and 14.57%, about 13.6 to 15.3% at 99%). Here the trials are the 802745 hits on the dummy (spell_damage_count) and the events the 705845 casts. One cycle casts Shadow Puppets at the dummy and waits 3750 ms, past the 3000 ms aura and the last Puppet missile (speed 26, about 200 ms), so each cycle gives five trials and the next cast never refreshes a running aura. Control (the unlearned arm, 3 cycles per part, 60 hits pooled): no 705845 from a Puppet hit without the talent; any event alerts. Then 705844 is learned for real (a passive, so its aura applies, pitfall 9) and the treatment arm runs 675 cycles per part. Sizing (flip-proof, the stack_chance_rate rule, mentor M-14): the band is 2 points (the larger of 5% of 15% and 2 points); 4 parts are judged by the pooled Wilson 99% interval (z 2.576), so n >= p(1 - p) x ((2.576 + 3.719) / band)^2 = 12632 trials; the entry plans 675 cycles x 5 trials x 4 parts = 13500 (each roll is independent, so pooling the parts is binomial). At the stated chance the 99% interval (half-width about 0.79 points) crosses a band edge with probability at most 1e-4 per edge; a server off by 2.79 points or more (12.21% or 17.79%) puts the stated chance outside its 99% interval, an alert, with probability at least 1 - 6e-10 (normal approximation at the off rate: the interval edge lies 2 points, 6.1 standard deviations, from the stated chance). Game time 3.75 s per cycle, about 2545 s per part (under the 3540 s accelerated cap, about 3400 steps), 2.8 h per run; about 3.5 min of wall time per run at the median 48x of final07 run 1. Clause 169, claim \"Damage dealt by your Shadow Puppets now has a $h% chance\". The Puppeteer's Threads path keeps its forced-roll entry proc_buff_threads. Cast timing checked: Shadow Puppets instant, GCD 1500 under the 3750 ms cycle. Player reports: none names this spell."
     },
     {
