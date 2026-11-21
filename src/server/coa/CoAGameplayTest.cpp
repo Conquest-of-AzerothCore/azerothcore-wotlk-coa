@@ -3748,7 +3748,8 @@ private:
                         return std::max(0, current->GetCastTimeRemaining());
             return 0;
         }
-        if (metric == "xp" || metric == "next_level_xp" || metric == "skill_value" || metric == "skill_maximum")
+        if (metric == "xp" || metric == "next_level_xp" || metric == "skill_value" || metric == "skill_maximum" ||
+            metric == "skill_bonus")
         {
             Player* player = unit->ToPlayer();
             Require(player != nullptr, "XP/skill metric needs a player");
@@ -3756,6 +3757,12 @@ private:
                 return player->GetPureSkillValue(step.get<uint32>("skill"));
             if (metric == "skill_maximum")
                 return player->GetPureMaxSkillValue(step.get<uint32>("skill"));
+            if (metric == "skill_bonus")
+            {
+                uint32 const skill = step.get<uint32>("skill");
+                Require(player->HasSkill(skill), "Skill bonus needs a known skill line");
+                return player->GetSkillPermBonusValue(skill) + player->GetSkillTempBonusValue(skill);
+            }
             return player->GetUInt32Value(metric == "xp" ? PLAYER_XP : PLAYER_NEXT_LEVEL_XP);
         }
         if (metric == "level")
@@ -4057,6 +4064,8 @@ private:
             return unit->GetSpeedRate(MOVE_RUN);
         if (metric == "flight_speed_rate")
             return unit->GetSpeedRate(MOVE_FLIGHT);
+        if (metric == "swim_speed_rate")
+            return unit->GetSpeedRate(MOVE_SWIM);
         if (metric == "spell_hit_bonus_taken")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
@@ -5417,6 +5426,12 @@ private:
             uint32 school = step.get<uint32>("school");
             Require(school > SPELL_SCHOOL_NORMAL && school < MAX_SPELL_SCHOOL, "Invalid spell power school");
             return player->SpellBaseDamageBonusDone(SpellSchoolMask(1 << school));
+        }
+        if (metric == "healing_power")
+        {
+            uint32 school = step.get<uint32>("school");
+            Require(school > SPELL_SCHOOL_NORMAL && school < MAX_SPELL_SCHOOL, "Invalid healing power school");
+            return player->SpellBaseHealingBonusDone(SpellSchoolMask(1 << school));
         }
         if (metric == "combat_rating")
         {

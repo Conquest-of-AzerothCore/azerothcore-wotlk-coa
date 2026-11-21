@@ -2184,3 +2184,7 @@ Options with a module:
   point of damage judged equal in both phases, by its own verdict (ADR 1004)
 - [`stop_shooting_after_ms`](metric_delta_options/stop_shooting_after_ms.md): the caster moved out of range a set
   time after an auto-repeat shot, its hits read so no shot fires after the move (ADR 1005)
+- [`ratio_to_metric`](metric_delta_options/ratio_to_metric.md): each judged reading divided by a second metric of the
+  same unit, for a stated share (ADR 1030, provisional)
+- [`skill_line`](metric_delta_options/skill_line.md): a skill line given to the caster at the start of the before
+  phase, for an aura that modifies a line (ADR 1030, provisional)

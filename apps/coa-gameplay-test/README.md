@@ -589,7 +589,9 @@ This fixture supports exact health-percentage boundaries without granting GM per
 `gather_skill` calls `UpdateGatherSkill`; it does not harvest a node or prove loot delivery.
 
 `xp` and `next_level_xp` read the player's XP fields; `skill_value` and `skill_maximum` require `skill` and read
-the pure skill value and maximum. `spell_active` requires `spell` and reports whether a known rank is the active one.
+the pure skill value and maximum. `skill_bonus` requires `skill` and reads the line's permanent plus temporary bonus
+(`GetSkillPermBonusValue` + `GetSkillTempBonusValue`, what `SPELL_AURA_MOD_SKILL_TALENT` and `SPELL_AURA_MOD_SKILL`
+add); the step fails when the player lacks the line. `spell_active` requires `spell` and reports whether a known rank is the active one.
 `client_knows_spell` requires `spell` and is 1 when the spell packets sent to the player (initial list, learned,
 superseded, removed and unlearned) leave it in the client's spellbook. `client_spellbook_copies` requires `spell`
 and counts how many rows the client's spellbook holds for it: the client appends a row per announcement and only
@@ -721,7 +723,9 @@ expertise; `combat_rating` requires `rating` (0..24, native `CombatRating`) and 
 `stat` (0..4), `resistance` requires `school` (1..6); `item_armor_by_subclass` requires `subclass`
 (`ITEM_SUBCLASS_ARMOR_*`, 0..10) and reads a player's `Player::GetItemArmorBySubclass`, the raw item-sourced
 Armor of that subclass, independent of any armor-percent aura; `armor`, `attack_power`, `ranged_attack_power`, the hasted
-`attack_time_ms` (optional `hand`, 0..2) and `run_speed_rate` read the unit's current totals.
+`attack_time_ms` (optional `hand`, 0..2) and `run_speed_rate` read the unit's current totals; `swim_speed_rate` reads
+`Unit::GetSpeedRate(MOVE_SWIM)` beside it. `healing_power` requires `school` (1..6) and reads the player's
+`Unit::SpellBaseHealingBonusDone` for that school, the healing bonus beside `spell_power`.
 `pet_attack_time_ms` uses the same hand selection for a player's current pet and requires that
 pet to exist. `attack_timer_ms` (optional `hand`, 0..2) reads the time left until that hand's
 next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's periodic interval.

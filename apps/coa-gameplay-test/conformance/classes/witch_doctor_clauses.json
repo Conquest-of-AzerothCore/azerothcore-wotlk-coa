@@ -1902,18 +1902,11 @@
     "spell": 560280,
     "clause": "Increases healing power by $s1% of Spirit",
     "labels": [
-      "560280 effect_value e0 #0"
+      "560280 effect_value e0 #0",
+      "560280 behaviour_metric_delta healing_power"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Healing power from Spirit is aura 175 (SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, Spirit x 40%, 43.6 at Spirit 109), read by Player::SpellBaseHealingBonusDone. No state metric reads the healing bonus: spell_power reads SpellBaseDamageBonusDone only (CoAGameplayTest.cpp:5415-5420), and spell_healing_done is a readback class metric (coverage.py METRIC_EVIDENCE) that also needs a heal of known coefficient and level penalty (Loa's Brew 801670 has die 12, spell level 1 and $SP*0.84, so no stated expectation exists). Tool: a state metric healing_power (SpellBaseHealingBonusDone) with the promise \"healing power\", then a metric_delta of 43.6 within 0.5 as sp_agility does for spell power.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "\"560280 behaviour_metric_delta healing_power\" reads the healing power (Unit::SpellBaseHealingBonusDone, the healing_power read of ADR 1030, provisional) 0 without the passive and 43 with it at Spirit 109 (40% of 109 = 43.6, truncated by the engine). Closes the cycle 9 tool gap (no state metric read the healing bonus)."
   },
   {
     "spell": 560280,
@@ -2107,19 +2100,12 @@
       {
         "claim": "by $803269s1% (swim speed)",
         "labels": [
-          "561069 effect_value 803269e0 #1"
+          "561069 effect_value 803269e0 #1",
+          "561069 behaviour_metric_delta swim_speed"
         ]
       }
     ],
-    "no_behaviour_route": {
-      "reason": "The swim speed half (Fish Oil 803269 Effect[1] aura 58 SPELL_AURA_MOD_INCREASE_SWIM_SPEED, BasePoints 9 + 1 = 10, the same area aura as the movement speed) has no read: the harness has `run_speed_rate` (Unit::GetSpeedRate MOVE_RUN) only, no swim speed metric. Tool note T-b10-2: metric `swim_speed_rate` (GetSpeedRate(MOVE_SWIM)) in CoAGameplayTest.cpp and compare.py; the entry would be a copy of fish_speed with it (expected 1.1). The swim claim stays on the data label; the movement speed claim and the radius are behaviour entries.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B10",
-          "report": ".agents/plans/witch-doctor-conformance/cycle8/author-B10.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "\"561069 behaviour_metric_delta swim_speed\" reads the caster's swim speed rate (swim_speed_rate, ADR 1030, provisional) 1.0 without the Fish Oil Cauldron and 1.10 with it, the fish_speed layout. Closes tool note T-b10-2."
   },
   {
     "spell": 561069,
@@ -3852,22 +3838,11 @@
     "spell": 705911,
     "clause": "Allows $s2% of your mana regeneration to continue while casting",
     "labels": [
-      "705911 effect_value e1 #0"
+      "705911 effect_value e1 #0",
+      "705911 behaviour_metric_delta regen_casting"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "Data conformant (effect_value e1 ok). Spiritual Traditions 705911 Effect[1] is aura 134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT, BasePoints 39 + 1 = 40 ($s2). The harness reads the interrupted regeneration (`mana_regen_interrupted`, UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, CoAGameplayTest.cpp:3564-3570) but `compare.DETERMINISTIC_STAT_METRICS` and `coverage.METRIC_EVIDENCE` know only `mana_regen`, so a metric_delta on it is refused as an unknown metric, and the value is a spirit-derived float that needs a ratio against `mana_regen` of the same unit (40% of the regeneration). Tool note T-b10-5: accept `mana_regen_interrupted` in metric_delta and a ratio judge of two reads of one unit (expected 0.4 within the rounding), control: the same read before the learn (0).",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B10",
-          "report": ".agents/plans/witch-doctor-conformance/cycle8/author-B10.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    }
+    "reason": "\"705911 behaviour_metric_delta regen_casting\" reads the regeneration while casting as a ratio to the regeneration out of casting of the same caster (option ratio_to_metric, ADR 1030, provisional): 0 without the passive, 0.40 with it. Closes tool note T-b10-5."
   },
   {
     "spell": 705911,
@@ -7455,18 +7430,11 @@
     "spell": 536213,
     "clause": "Alchemy skill increased by $s1.",
     "labels": [
-      "536213 effect_value e0 #0"
+      "536213 effect_value e0 #0",
+      "536213 behaviour_metric_delta alchemy_bonus"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "Data conformant (effect_value e0 ok). Natural Alchemist 536213 is aura 98 SPELL_AURA_MOD_SKILL_TALENT on skill 171 (Alchemy), BasePoints 14 + 1 = 15 ($s1). The harness reads the skill only through `skill_value` / `skill_maximum` (CoAGameplayTest.cpp:3751-3758: GetPureSkillValue and GetPureMaxSkillValue), the pure value without the temporary bonus the aura writes (SKILL_TEMP_BONUS), and tooltip-reading.md says so (\"no metric reads that bonus\"). The reference character has no Alchemy skill either (skill_lines 44, 48, 49, 51 and 118), so the aura has no skill to modify until a skill-line fixture exists. Route: a metric `skill_value_with_bonus` (Player::GetSkillValue) after a `set_skill` of line 171 and a learn of 536213, before and after: gain 15. Tool note T-b10-1: harness metric (owner file CoAGameplayTest.cpp) plus its entry in compare.py DETERMINISTIC_STAT_METRICS and coverage.py METRIC_EVIDENCE.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B10",
-          "report": ".agents/plans/witch-doctor-conformance/cycle8/author-B10.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "\"536213 behaviour_metric_delta alchemy_bonus\" gives the caster Alchemy 171 (option skill_line) and reads its skill bonus (skill_bonus, ADR 1030, provisional): 0 without the passive, 15 with it. Closes tool note T-b10-1."
   },
   {
     "spell": 561142,
