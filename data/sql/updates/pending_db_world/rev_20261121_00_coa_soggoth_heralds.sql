@@ -28,13 +28,19 @@ INSERT INTO `coa_world_boss_level` (`entry`, `difficulty`, `health`, `damage_pct
 (64607, 0, 100000, 81, 'per player; Soggoth herald, designed'),
 (64608, 0, 100000, 81, 'per player; Soggoth herald, designed');
 
--- They stand before him in the pit; dead, they stay dead until the instance resets.
-DELETE FROM `creature` WHERE `guid` IN (9781600, 9781601, 9781602);
+-- They stand in a triangle around him on the cavern floor (spots taken in game), facing him; dead, they stay dead
+-- until a wipe or an instance reset brings them back.
+DELETE FROM `creature` WHERE `guid` IN (9781600, 9781601, 9781602, 9781603);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9781600, 64606, 883, 10238, 10238, 15, 1, 4505.0, 265.0, 31.48, 3.1416, 604800, 0, 0),
-(9781601, 64607, 883, 10238, 10238, 15, 1, 4500.0, 250.0, 31.48, 3.1416, 604800, 0, 0),
-(9781602, 64608, 883, 10238, 10238, 15, 1, 4505.0, 235.0, 31.48, 3.1416, 604800, 0, 0);
+(9781600, 64606, 883, 10238, 10238, 15, 1, 4512.10, 284.54, 74.54, 5.07, 604800, 0, 0),
+(9781601, 64607, 883, 10238, 10238, 15, 1, 4544.60, 246.56, 74.54, 2.77, 604800, 0, 0),
+(9781602, 64608, 883, 10238, 10238, 15, 1, 4514.09, 233.26, 74.54, 1.16, 604800, 0, 0);
+
+-- His hologram above the shrine at the entrance of his map too.
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
+(9781603, 978077, 883, 10238, 10238, 15, 1, 4405.5, 264.3, 83.0, 0, 300, 0, 0);
 
 -- The models the client gives these creatures their own scale (Creature.dbc): no extra scale on top.
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 5965, `DisplayScale` = 1 WHERE `CreatureID` = 64600;

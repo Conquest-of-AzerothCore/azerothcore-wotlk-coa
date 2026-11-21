@@ -42,7 +42,8 @@
  *                                     that grows with them
  *   Fierce Blow         every 9s      tank
  *
- * The Will of Soggoth (he shows himself once his three heralds are dead)
+ * The Will of Soggoth (shielded, bound by his heralds' beams, until all three die;
+ * a wipe brings every herald back)
  *   Corla               Mind Flay every 6s, Shadow Nova every 20s
  *   Azil                Horror Bolt every 3s, Waking Tear every 20s
  *   Drahga              Scorching Ray every 3s, Meteor every 20s
@@ -50,8 +51,8 @@
  *   Void Beam           every 2s      a random player
  *   Waking Tear         every 22.1s   3s cast: a tear at a player for 20s
  *   Waking Nightmare    every 33.1s   six Psychophages rise around a player
- *   Visions of Ny'alotha every 45s    4s cast: everyone, then after 6s a void
- *                                     explosion under each of them
+ *   Visions of Ny'alotha every 45s    4s cast: everyone, then after 5s a void
+ *                                     explosion under each of them (5 yards)
  *   Fierce Blow         every 7.8s    tank
  * His health is per player in his map (10 to 40), and only the Normal difficulties
  * are open; his shrine, rewards and portal out are boss_soggoth_instance_coa.cpp.
@@ -1057,10 +1058,13 @@ namespace
         SPELL_VISIONS_HIT       = 2119313,
         SPELL_VOID_REND         = 2119314,
         SPELL_WAKING_TEAR       = 2119315,
-        SPELL_TEAR_ZONE         = 2119317,
         SPELL_TEAR_HIT          = 2119319,
         SPELL_WAKING_NIGHTMARE  = 2119320,
         SPELL_HOVER_FALL        = 2119354,
+        SPELL_TWILIGHT_SHIELD   = 2119350,
+        SPELL_TWILIGHT_BEAM     = 2119351,
+        SPELL_TEAR_MISSILE      = 2119316,
+        NPC_SOGGOTH             = 64605,
         NPC_PSYCHOPHAGE         = 454004,
         NPC_CORLA               = 64606,
         NPC_AZIL                = 64607,
@@ -1069,6 +1073,19 @@ namespace
 
     constexpr std::array<uint32, 3> SoggothHeralds = { NPC_CORLA, NPC_AZIL, NPC_DRAHGA };
     constexpr float HERALD_RANGE = 200.0f;
+    constexpr float VOID_REND_RADIUS = 5.0f;
+
+    void RespawnHeralds(Creature* me)
+    {
+        for (uint32 entry : SoggothHeralds)
+        {
+            std::list<Creature*> heralds;
+            me->GetCreatureListWithEntryInGrid(heralds, entry, HERALD_RANGE);
+            for (Creature* herald : heralds)
+                if (!herald->IsAlive())
+                    herald->Respawn(true);
+        }
+    }
 
     enum SoggothEvents
     {
@@ -1089,8 +1106,13 @@ namespace
             _summons.DespawnAll();
             _tears.clear();
             ApplyFlexHealth(me);
-            if (HeraldsAlive())
-                Hide(true);
+            Shield(HeraldsAlive());
+        }
+
+        void EnterEvadeMode(EvadeReason why) override
+        {
+            RespawnHeralds(me);
+            custom_world_boss_coa::EnterEvadeMode(why);
         }
 
         bool HeraldsAlive()
@@ -1101,30 +1123,36 @@ namespace
             return false;
         }
 
-        void Hide(bool hide)
+        void Shield(bool shield)
         {
-            _hidden = hide;
-            me->SetVisible(!hide);
-            me->SetReactState(hide ? REACT_PASSIVE : REACT_AGGRESSIVE);
-            if (hide)
-                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            if (shield == _shielded)
+                return;
+            _shielded = shield;
+            me->SetReactState(shield ? REACT_PASSIVE : REACT_AGGRESSIVE);
+            if (shield)
+            {
+                me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+                DoCastSelf(SPELL_TWILIGHT_SHIELD, true);
+            }
             else
             {
-                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIELD);
+                me->RemoveAurasDueToSpell(SPELL_TWILIGHT_BEAM);
                 DoCastSelf(SPELL_HOVER_FALL, true);
             }
         }
 
         void UpdateAI(uint32 diff) override
         {
-            if (_hidden)
+            if (_shielded)
             {
                 _heraldCheck -= Milliseconds(diff);
                 if (_heraldCheck <= 0ms)
                 {
                     _heraldCheck = 1s;
                     if (!HeraldsAlive())
-                        Hide(false);
+                        Shield(false);
                 }
                 return;
             }
@@ -1191,7 +1219,7 @@ namespace
         {
             if (spell->Id == SPELL_WAKING_TEAR)
             {
-                CastAt(_tearSpot, SPELL_TEAR_ZONE);
+                CastAt(_tearSpot, SPELL_TEAR_MISSILE);
                 _tears.push_back({ _tearSpot, TEAR_SECONDS });
             }
             else if (spell->Id == SPELL_VISIONS)
@@ -1201,7 +1229,7 @@ namespace
                     me->CastSpell(p, SPELL_VISIONS_HIT, true);
                     me->CastSpell(p, SPELL_VISIONS_MARK, true);
                 }
-                _clock.ScheduleEvent(TG_REND, 6s);
+                _clock.ScheduleEvent(TG_REND, 5s);
             }
         }
 
@@ -1230,15 +1258,25 @@ namespace
                     break;
                 }
                 case TG_REND:
-                    for (Player* p : PlayersWithin(me, 200.0f))
-                        if (p->HasAura(SPELL_VISIONS_MARK))
-                            me->CastSpell(p, SPELL_VOID_REND, true);
+                {
+                    std::vector<Player*> const players = PlayersWithin(me, 200.0f);
+                    for (Player* marked : players)
+                    {
+                        if (!marked->HasAura(SPELL_VISIONS_MARK))
+                            continue;
+                        me->CastSpell(marked, SPELL_VOID_REND, true);
+                        for (Player* p : players)
+                            if (p->IsWithinDist3d(marked, VOID_REND_RADIUS))
+                                SpellDamage(me, p, SPELL_VOID_REND,
+                                    uint32(Info(me, SPELL_VOID_REND, 1) * _damage), SPELL_SCHOOL_MASK_SHADOW);
+                    }
                     break;
+                }
             }
         }
 
     private:
-        bool _hidden = false;
+        bool _shielded = false;
         Milliseconds _heraldCheck = 1s;
         SummonList _summons;
         Position _tearSpot;
@@ -1258,7 +1296,7 @@ namespace
         SPELL_HORROR_BOLT_HIT   = 2119372,
         SPELL_HORROR_BOLT_INFO  = 2119370,
         SPELL_HERALD_TEAR       = 2119373,
-        SPELL_HERALD_TEAR_ZONE  = 2119375,
+        SPELL_HERALD_TEAR_FALL  = 2119374,
         SPELL_HERALD_TEAR_HIT   = 2119377,
         SPELL_SCORCHING_RAY     = 2119381,
         SPELL_SCORCHING_INFO    = 2119380,
@@ -1287,8 +1325,32 @@ namespace
 
         void JustEngagedWith(Unit* who) override
         {
+            me->InterruptNonMeleeSpells(false);
             ApplyFlexHealth(me);
             custom_world_boss_coa::JustEngagedWith(who);
+        }
+
+        void EnterEvadeMode(EvadeReason why) override
+        {
+            RespawnHeralds(me);
+            custom_world_boss_coa::EnterEvadeMode(why);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!me->IsInCombat())
+            {
+                _beamCheck -= Milliseconds(diff);
+                if (_beamCheck <= 0ms)
+                {
+                    _beamCheck = 2s;
+                    if (!me->HasUnitState(UNIT_STATE_CASTING))
+                        if (Creature* boss = me->FindNearestCreature(NPC_SOGGOTH, HERALD_RANGE, true))
+                            if (boss->HasAura(SPELL_TWILIGHT_SHIELD))
+                                me->CastSpell(boss, SPELL_TWILIGHT_BEAM, true);
+                }
+            }
+            custom_world_boss_coa::UpdateAI(diff);
         }
 
         void Schedule() override
@@ -1361,7 +1423,7 @@ namespace
                 Hit(me, ObjectAccessor::GetUnit(*me, _target), SPELL_HORROR_BOLT_HIT, Info(me, SPELL_HORROR_BOLT_INFO));
             else if (spell->Id == SPELL_HERALD_TEAR)
             {
-                CastAt(_spot, SPELL_HERALD_TEAR_ZONE);
+                CastAt(_spot, SPELL_HERALD_TEAR_FALL);
                 _tears.push_back({ _spot, TEAR_SECONDS });
             }
         }
@@ -1401,6 +1463,7 @@ namespace
         }
 
     private:
+        Milliseconds _beamCheck = 0ms;
         ObjectGuid _target;
         Position _spot;
         Position _meteor;

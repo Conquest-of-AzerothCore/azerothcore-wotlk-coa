@@ -20,9 +20,8 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (64605, 11272, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Twilight Faceguard'),
 (64605, 11273, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Visage of Aydreath');
 
--- He waits in the middle of the pit (WorldMapArea 2037), below the ledge his map starts on, so players do not land
--- on top of him; floor height measured.
-UPDATE `creature` SET `position_x` = 4530.0, `position_y` = 250.0, `position_z` = 31.48, `orientation` = 3.1416
+-- He waits in the middle of the pit, between his three heralds, on the cavern floor (74.54, taken in game).
+UPDATE `creature` SET `position_x` = 4523.6, `position_y` = 254.8, `position_z` = 74.54, `orientation` = 3.1416
 WHERE `guid` = 9780102 AND `id` = 64605;
 
 -- His health is per player in his map (10 to 40). The CoA logs of Normal kills end at 20.14M with 38 players and
@@ -73,7 +72,7 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 978077;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
-(978077, 0, 228465, 0.06, 1, 12340);
+(978077, 0, 228465, 0.12, 1, 12340);
 DELETE FROM `creature_template_addon` WHERE `entry` = 978077;
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978077, '22650 16245');
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978077;

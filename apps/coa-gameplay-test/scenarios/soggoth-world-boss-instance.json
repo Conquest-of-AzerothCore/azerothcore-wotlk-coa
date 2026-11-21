@@ -6,7 +6,8 @@
     "takes the player to his map (883). His health is per player in his map, counted from 10 to 40,",
     "so 5230000 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
     "Treasures of Azeroth chest (978059). The portal out (978078) opens where he falls and takes the player back.",
-    "He is hidden and cannot be attacked until Corla (64606), Azil (64607) and Drahga (64608) are dead."
+    "While Corla (64606), Azil (64607) and Drahga (64608) live he stands shielded and bound by their",
+    "beams and cannot be attacked; a wipe brings fallen heralds back."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -22,7 +23,8 @@
       "class": 1,
       "level": 60,
       "melee_hit_rating": 10000,
-      "expertise_rating": 10000
+      "expertise_rating": 10000,
+      "security": 3
     }
   ],
   "steps": [
@@ -141,91 +143,123 @@
     },
     {
       "action": "assert",
-      "label": "Herald 9781600 stands on the floor of the pit",
       "actor": "raider",
-      "metric": "spawn_ground_gap",
-      "guid": 9781600,
-      "spawn_type": "creature",
-      "min": -1.0,
-      "max": 2.0
-    },
-    {
-      "action": "assert",
-      "label": "Herald 9781601 stands on the floor of the pit",
-      "actor": "raider",
-      "metric": "spawn_ground_gap",
-      "guid": 9781601,
-      "spawn_type": "creature",
-      "min": -1.0,
-      "max": 2.0
-    },
-    {
-      "action": "assert",
-      "label": "Herald 9781602 stands on the floor of the pit",
-      "actor": "raider",
-      "metric": "spawn_ground_gap",
-      "guid": 9781602,
-      "spawn_type": "creature",
-      "min": -1.0,
-      "max": 2.0
-    },
-    {
-      "action": "assert",
-      "label": "While his heralds live he is hidden",
-      "actor": "raider",
+      "label": "He is there, in plain sight, while his heralds live",
       "metric": "nearby_creature_at_client",
       "entry": 64605,
-      "equals": 0,
+      "equals": 1,
       "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "While his heralds live he cannot be attacked",
       "actor": "raider",
+      "label": "but cannot be attacked",
       "metric": "nearby_creature_can_attack",
       "entry": 64605,
       "equals": 0
     },
     {
       "action": "assert",
+      "actor": "raider",
+      "label": "His Twilight Shield holds",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119350,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "His heralds bind him with their Twilight Beams",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119351,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
       "label": "Herald 64606 wears model 31546",
-      "actor": "raider",
       "metric": "nearby_creature_display",
       "entry": 64606,
-      "equals": 31546,
-      "within_ms": 3000
-    },
-    {
-      "action": "attack_nearby",
-      "actor": "raider",
-      "entry": 64606,
-      "kill": true
-    },
-    {
-      "action": "wait",
-      "ms": 1500
+      "equals": 31546
     },
     {
       "action": "assert",
-      "label": "With a herald still alive he stays hidden",
       "actor": "raider",
-      "metric": "nearby_creature_at_client",
-      "entry": 64605,
-      "equals": 0
-    },
-    {
-      "action": "assert",
       "label": "Herald 64607 wears model 454000",
-      "actor": "raider",
       "metric": "nearby_creature_display",
       "entry": 64607,
-      "equals": 454000,
-      "within_ms": 3000
+      "equals": 454000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64608 wears model 31792",
+      "metric": "nearby_creature_display",
+      "entry": 64608,
+      "equals": 31792
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64606,
+      "kill": true,
+      "radius": 60
     },
     {
       "action": "attack_nearby",
       "actor": "raider",
       "entry": 64607,
+      "radius": 60
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "die",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "A wipe brings the fallen herald back",
+      "metric": "nearby_creature_count",
+      "entry": 64606,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "command",
+      "actor": "raider",
+      "command": ".revive"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "raider",
+      "guid": 9781601
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64606,
+      "radius": 60,
       "kill": true
     },
     {
@@ -234,25 +268,17 @@
     },
     {
       "action": "assert",
-      "label": "With a herald still alive he stays hidden",
       "actor": "raider",
-      "metric": "nearby_creature_at_client",
+      "label": "With a herald alive he stays shielded",
+      "metric": "nearby_creature_can_attack",
       "entry": 64605,
       "equals": 0
     },
     {
-      "action": "assert",
-      "label": "Herald 64608 wears model 31792",
-      "actor": "raider",
-      "metric": "nearby_creature_display",
-      "entry": 64608,
-      "equals": 31792,
-      "within_ms": 3000
-    },
-    {
       "action": "attack_nearby",
       "actor": "raider",
-      "entry": 64608,
+      "entry": 64607,
+      "radius": 60,
       "kill": true
     },
     {
@@ -261,26 +287,45 @@
     },
     {
       "action": "assert",
-      "label": "Once the three heralds are dead he shows himself",
       "actor": "raider",
-      "metric": "nearby_creature_at_client",
+      "label": "With a herald alive he stays shielded",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64608,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Once the three heralds are dead he can be attacked",
+      "metric": "nearby_creature_can_attack",
       "entry": 64605,
       "equals": 1,
       "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "and can be attacked",
       "actor": "raider",
-      "metric": "nearby_creature_can_attack",
+      "label": "and his shield is gone",
+      "metric": "nearby_creature_aura_count",
       "entry": 64605,
-      "equals": 1,
-      "within_ms": 3000
+      "spell": 2119350,
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "He wears the green Faceless One of the WDB caches",
       "actor": "raider",
+      "label": "He wears the green Faceless One of the WDB caches",
       "metric": "nearby_creature_display",
       "entry": 64605,
       "equals": 228465
@@ -298,7 +343,8 @@
       "action": "attack_nearby",
       "actor": "raider",
       "entry": 64605,
-      "kill": true
+      "kill": true,
+      "radius": 60
     },
     {
       "action": "assert",
