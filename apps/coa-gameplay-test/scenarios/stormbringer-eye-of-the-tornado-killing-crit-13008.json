@@ -15,7 +15,10 @@
     "Stormbringer script now holds the refund until the cast has finished and its cost is paid. Spell crit rating",
     "forces every critical, an aggressive mob keeps the Stormbringer in combat so Static does not decay, and the",
     "Stormbringer never auto attacks, so no melee critical can add Static, and Tempest Calling is not learned, so",
-    "Aeroblast's delayed echo never runs."
+    "Aeroblast's delayed echo never runs. A killing critical Shock (804020, a builder, so no Static spender is",
+    "being cast) covers the direct refund path, which casts 804044 at the dead enemy and relies on the contract",
+    "that points its dummy effect at the caster: from 60 Static it must leave 60 + 20 (Shock's damaging hit casts",
+    "804086, EffectMiscValue[1] 20) + 5 = 85."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -24,7 +27,8 @@
   ],
   "creatures": [
     {"id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2},
-    {"id": "weak", "owner": "storm", "entry": 36, "level": 80, "health": 1, "distance": 8, "stationary": true}
+    {"id": "weak", "owner": "storm", "entry": 36, "level": 80, "health": 1, "distance": 8, "stationary": true},
+    {"id": "weak2", "owner": "storm", "entry": 36, "level": 80, "health": 1, "distance": 10, "stationary": true}
   ],
   "steps": [
     {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
@@ -33,6 +37,7 @@
       "value": 1000000, "maximum": 1000000
     },
     {"action": "learn", "actor": "storm", "spell": 706297},
+    {"action": "learn", "actor": "storm", "spell": 804020},
     {"action": "learn", "actor": "storm", "spell": 801839},
     {
       "action": "assert", "label": "SETUP: Eye of the Tornado is active", "actor": "storm", "metric": "aura",
@@ -93,6 +98,29 @@
     {
       "action": "assert", "label": "#13008: a killing critical still refunds 5 (80 - 50 + 5)", "actor": "storm",
       "metric": "aura_stacks", "spell": 803102, "equals": 35, "within_ms": 1000
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "set_power", "actor": "storm", "power": 0, "value": 2500},
+    {
+      "action": "set_aura", "label": "SETUP: 60 Static, so Shock's gain plus the refund stays below the cap",
+      "actor": "storm", "spell": 803102, "stacks": 60
+    },
+    {
+      "action": "cast", "label": "Shock the second 1 health enemy", "actor": "storm", "spell": 804020,
+      "target": "weak2"
+    },
+    {
+      "action": "assert", "label": "SETUP: Shock crits the second 1 health enemy", "actor": "storm",
+      "metric": "spell_damage_count", "spell": 804020, "target": "weak2", "critical": true, "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "SETUP: the critical Shock kills it", "actor": "weak2", "metric": "health",
+      "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "#13008: a killing critical builder still refunds 5 (60 + 20 from 804086 + 5)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 85, "within_ms": 1000
     }
   ]
 }
