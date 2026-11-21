@@ -378,9 +378,10 @@ def duration_refresh_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
                                                    [without, with_arm])]
 
 
-def striker_fixture(class_file: dict, striker_entry: int) -> dict:
+def striker_fixture(class_file: dict, striker_entry: int, melee_hit_bonus: bool = False) -> dict:
     return {'id': STRIKER, 'owner': CASTER, 'entry': striker_entry, 'level': class_file['level'],
-            'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100}
+            'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100,
+            **({'melee_hit_bonus': 100} if melee_hit_bonus else {})}
 
 
 def duration_ratio_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
@@ -407,7 +408,7 @@ def duration_ratio_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Exp
         f'learned and {with_arm.expected_ms:g} ms after it ({spec.expected_ratio:g} of it) once learned; the '
         f'arms are {MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS} ms apart after the first effect ends, so '
         f'neither cast is diminished.', steps)
-    scenario['creatures'] = [striker_fixture(class_file, spec.striker_entry)]
+    scenario['creatures'] = [striker_fixture(class_file, spec.striker_entry, spec.striker_melee_hit_bonus)]
     return finished(scenario), [expiry_expectation(expiry_label(spec.spell), spec.spell, spec.vehicle_spell,
                                                    str(spec.expected_ratio), prose_rule(spec.quote, spec.spell),
                                                    [without, with_arm])]

@@ -3515,6 +3515,8 @@ private:
                 }
                 if (auto bonus = definition.get_optional<float>("spell_hit_bonus"))
                     creature->m_modSpellHitChance = *bonus;
+                if (auto bonus = definition.get_optional<float>("melee_hit_bonus"))
+                    creature->m_modMeleeHitChance = *bonus;
             }
         }
         _targetsCreated = true;

@@ -682,7 +682,7 @@ def validate(scenario, clock=REAL_CLOCK):
     for creature in creatures:
         keys(creature, {'id', 'owner', 'entry'},
              {'id', 'owner', 'entry', 'distance', 'faction', 'level', 'health', 'reaction', 'spell_hit_bonus',
-              'stationary', 'min_level_armor'},
+              'melee_hit_bonus', 'stationary', 'min_level_armor'},
              'creature')
         identity = creature['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid creature id')
@@ -697,6 +697,7 @@ def validate(scenario, clock=REAL_CLOCK):
         require(type(creature.get('stationary', False)) is bool, 'stationary must be boolean')
         require(type(creature.get('min_level_armor', False)) is bool, 'min_level_armor must be boolean')
         number(creature.get('spell_hit_bonus', 0), 'creature spell hit bonus', 0, 100)
+        number(creature.get('melee_hit_bonus', 0), 'creature melee hit bonus', 0, 100)
     if 'location' in scenario:
         location = scenario['location']
         keys(location, {'map', 'x', 'y', 'z'}, {'map', 'x', 'y', 'z', 'o', 'ignore_access'}, 'location')

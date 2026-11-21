@@ -419,8 +419,11 @@ non-class spell whose own effect mechanic matches the passive's `EffectMiscValue
 `MECHANIC_SNARE`) — directly at the caster, once before the passive is learned and once after, reading
 `aura_duration_ms` of `vehicle_spell`'s own applied aura `CAST_MARGIN_MS` (500 ms) after the last of up to
 `MECHANIC_LAND_ATTEMPTS` (3) casts, `MECHANIC_RETRY_WAIT_MS` (500 ms) apart, per phase. A `vehicle_spell` with
-`DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, rolls the separate dodge/parry leg of the melee
-combat table that `spell_hit_bonus` does not reach — only the miss roll does — so each phase opens with a
+`DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, rolls the melee combat table, which `spell_hit_bonus`
+(the magic hit modifier, read by `MagicSpellHitResult` only) does not reach: its miss roll subtracts the striker's
+melee hit modifier alone (`MeleeSpellMissChance`), so it misses the caster about 5% of the time unless the entry sets
+`striker_melee_hit_bonus: true` (the striker fixture's `melee_hit_bonus` 100, ADR 1049, provisional; both the
+readback and the `duration_ratio_expiry` striker take it), and it rolls a dodge/parry leg, so each phase opens with a
 `set_combat_avoidance` fixture step (`Player::SetRealDodgeParryForTest`, round10 ADR 0053, superseding round9's
 retry-only ADR 0050) that zeroes the caster's dodge and parry chance before the attempts, making the first
 attempt land deterministically; 712466's `behaviour_duration_ratio` flipped `unmeasured`/`alert` across round

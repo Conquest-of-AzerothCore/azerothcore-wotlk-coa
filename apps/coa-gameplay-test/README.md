@@ -360,7 +360,9 @@ and Linux binaries.
 
 ## Scenario format
 
-A creature fixture accepts `spell_hit_bonus` (0–100 percentage points) for its native spell hit modifier.
+A creature fixture accepts `spell_hit_bonus` (0–100 percentage points) for its native spell hit modifier, read by
+magic hit rolls (`MagicSpellHitResult`), and `melee_hit_bonus` (0–100) for its native melee hit modifier
+(`m_modMeleeHitChance`), which `MeleeSpellMissChance` subtracts for its melee attacks and melee-class spells.
 An omitted bonus uses the creature's normal stats. Require the observed hit as well as the configured modifier.
 Optional `stationary: true` disables native movement for that fixture using `UNIT_FLAG_DISABLE_MOVE` and stops
 its current motion. Other creatures retain their original movement. Use it for a fixed damage target when

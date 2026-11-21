@@ -5983,6 +5983,7 @@ class MechanicDurationSpec:
     expected_ratio: float
     vehicle_spell: int
     striker_entry: int = 36
+    striker_melee_hit_bonus: bool = False
 
 
 def mechanic_duration_label(spec: MechanicDurationSpec, moment: str) -> str:
@@ -5993,7 +5994,8 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
-              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100}
+              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100,
+              **({'melee_hit_bonus': 100} if spec.striker_melee_hit_bonus else {})}
     before_label = mechanic_duration_label(spec, BEFORE)
     after_label = mechanic_duration_label(spec, AFTER)
     unreduced_ms = records.duration_ms(spec.vehicle_spell)
@@ -6051,8 +6053,11 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
 
 
 def mechanic_duration_spec(entry: dict) -> MechanicDurationSpec:
+    if type(entry.get('striker_melee_hit_bonus', False)) is not bool:
+        raise ValueError(f'{entry["spell"]} duration_ratio striker_melee_hit_bonus is a boolean')
     return MechanicDurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
-                                entry['vehicle_spell'], entry.get('striker_entry', 36))
+                                entry['vehicle_spell'], entry.get('striker_entry', 36),
+                                entry.get('striker_melee_hit_bonus', False))
 
 
 DEFAULT_DURATION_REFRESH_DECAY_MS = 4000
