@@ -117,16 +117,27 @@
       "equals": 0
     },
     {
-      "action": "teleport",
+      "action": "set_phase",
       "actor": "raider",
-      "map": 883,
-      "x": 4485.0,
-      "y": 250.0,
-      "z": 32.5
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "The raider walks down to the heralds",
+      "actor": "raider",
+      "guid": 9781601
     },
     {
       "action": "wait",
       "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the raider stands by the heralds",
+      "actor": "raider",
+      "metric": "nearest_creature_distance",
+      "entry": 64607,
+      "max": 15
     },
     {
       "action": "assert",
@@ -323,6 +334,16 @@
       "metric": "item_count",
       "item": 1615011,
       "equals": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "The raider goes to where he stood",
+      "actor": "raider",
+      "guid": 9780102
+    },
+    {
+      "action": "wait",
+      "ms": 1500
     },
     {
       "action": "assert",
