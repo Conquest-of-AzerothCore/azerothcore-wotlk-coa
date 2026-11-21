@@ -134,7 +134,11 @@ void SyncSpirits(Player* player)
     if (count && player->HasAura(SpiritWalk))
     {
         if (Aura* speed = player->AddAura(SpiritSpeed, player))
+        {
+            speed->SetMaxDuration(-1);
+            speed->SetDuration(-1);
             speed->SetStackAmount(count);
+        }
     }
     else
         player->RemoveAurasDueToSpell(SpiritSpeed);

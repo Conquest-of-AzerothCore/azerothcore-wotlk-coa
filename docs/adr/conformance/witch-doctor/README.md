@@ -28,3 +28,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0019](0019-voodoo-strings-needs-threads-when-bad-juju-is-used.md) | Voodoo Strings needs Puppeteer's Threads on the enemy when Bad Juju is used | accepted |
 | [0020](0020-graven-effigy-reaches-enemies-within-20-yd.md) | Graven Effigy reaches enemies within 20 yd | accepted; possible tooltip token slip noted |
 | [0021](0021-spirit-eclipse-splash-reaches-5-yd.md) | Spirit Eclipse splash reaches 5 yd | accepted |
+| [0022](0022-spirit-speed-lasts-while-spirits-are-held.md) | Spirit speed lasts while Spirits are held | accepted; dormant path (M-52) |
