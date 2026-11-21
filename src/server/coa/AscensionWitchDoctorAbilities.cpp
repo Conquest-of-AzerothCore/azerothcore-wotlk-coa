@@ -235,7 +235,8 @@ class witch_doctor_casts : public AllSpellScript
             if (Aura* unstable = target->GetAura(UnstableDebuff, player->GetGUID()))
             {
                 unstable->Remove();
-                for (Unit* ally : Allies(player, target, 10.0f, 5))
+                for (Unit* ally : Allies(player, target, Radius(UnstableHeal),
+                                         sSpellMgr->GetSpellInfo(UnstableHeal)->MaxAffectedTargets))
                     Cast(player, ally, UnstableHeal);
             }
         if ((healing || target->IsAlive()) && (IsPotion(info) || IsSplash(info)))

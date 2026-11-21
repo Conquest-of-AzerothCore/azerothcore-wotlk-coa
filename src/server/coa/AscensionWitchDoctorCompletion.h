@@ -403,6 +403,7 @@ std::list<Unit*> Nearby(Unit* center, float range);
 std::list<Unit*> Allies(Player* player, Unit* center, float range, uint32 cap = 0);
 bool Friendly(Player* player, Unit* target);
 int32 Amount(uint32 id, uint8 effect = 0, Unit* caster = nullptr);
+float Radius(uint32 id, uint8 effect = 0);
 void Cast(Unit* caster, Unit* target, uint32 id);
 void Copy(Unit* caster, Unit* target, uint32 id, uint32 amount);
 uint8 Spirits(Player* player);

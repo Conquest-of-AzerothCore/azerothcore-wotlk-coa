@@ -411,7 +411,7 @@ class aura_ascension_witch_doctor_lifecycle : public AuraScript
             if (Family(GetSpellInfo(), 0, 33554432) && player->HasAura(Godslayer))
             {
                 Cast(player, GetTarget(), GlaiveExplosion);
-                for (Unit* enemy : Nearby(GetTarget(), 10.0f))
+                for (Unit* enemy : Nearby(GetTarget(), Radius(GlaiveExplosion)))
                     if (enemy != GetTarget() && player->IsValidAttackTarget(enemy))
                         Cast(player, enemy, GlaiveExplosion);
             }
