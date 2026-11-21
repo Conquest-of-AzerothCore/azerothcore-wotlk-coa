@@ -18,6 +18,7 @@ using namespace AscensionSunCleric;
 constexpr uint32 ChosenKing = 707079;
 constexpr uint32 HammerOfKings = 804751;
 constexpr uint32 Anointed = 524998;
+constexpr uint32 SolemnPriest = 804269;
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -283,7 +284,8 @@ public:
         {
             if (Named(info, 800611))
             {
-                uint32 copied = CalculatePct(damage, Amount(707521));
+                int32 const share = Amount(707521) + (player->HasAura(SolemnPriest) ? Amount(SolemnPriest, 1) : 0);
+                uint32 copied = CalculatePct(damage, share);
                 bool const oldGavelHealing = State(player).gavelHealing;
                 State(player).gavelHealing = true;
                 Copy(player, player, 707522, copied);
