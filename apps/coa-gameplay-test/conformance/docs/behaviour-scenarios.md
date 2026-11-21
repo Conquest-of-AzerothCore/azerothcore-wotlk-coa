@@ -2148,6 +2148,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`spawn_fuse`](kinds/spawn_fuse.md): the time from a summoned creature's first spawn to its first fuse cast,
   read on an encounter timeline (ADR 0602)
 - [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
+- [`summon_edge`](kinds/summon_edge.md): a summon-centred field or pulse bracketed by two players placed at its edge
+  from the summon itself, with the layout read back (ADR 1111, provisional)
 - [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
   parts (ADR 0544, ADR 0546)
 
