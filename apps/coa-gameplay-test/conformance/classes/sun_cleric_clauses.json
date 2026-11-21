@@ -2118,19 +2118,47 @@
   {
     "spell": 704562,
     "clause": "Fulfilling a Vow now increases your block chance by $680672s1% for $680672d,",
-    "labels": [
-      "704562 effect_value 680672e0 #0",
-      "704562 spell_duration 680672 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fulfilling a Vow now increases your block chance by $680672s1%",
+        "labels": [
+          "704562 behaviour_metric_delta block_one"
+        ]
+      },
+      {
+        "claim": "for $680672d: lasts more than 14.6 s",
+        "labels": [
+          "704562 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "for $680672d: lasts less than 16.4 s",
+        "labels": [
+          "704562 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704562,
     "clause": "stacking $680672u times.",
-    "labels": [
-      "704562 max_stacks 680672 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "stacking",
+        "labels": [
+          "704562 behaviour_metric_delta stack_one",
+          "704562 behaviour_metric_delta block_cap"
+        ]
+      },
+      {
+        "claim": "$680672u times: the cap of 5",
+        "labels": [
+          "704562 behaviour_metric_delta stack_cap"
+        ]
+      }
+    ]
   },
   {
     "spell": 704563,

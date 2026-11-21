@@ -3892,16 +3892,16 @@
       "cast_power": 1000,
       "force_crit": "spell",
       "expire_ms": 500,
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 0
       },
       "before_expected": 40,
       "expected": 44.0,
       "expected_ratio": 1.1,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Strength (stat 0, reference 40) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Strength (stat 0, reference 40) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3915,16 +3915,16 @@
       "cast_power": 1000,
       "force_crit": "spell",
       "expire_ms": 500,
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 1
       },
       "before_expected": 35,
       "expected": 38.5,
       "expected_ratio": 1.1,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Agility (stat 1, reference 35) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Agility (stat 1, reference 35) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3938,16 +3938,16 @@
       "cast_power": 1000,
       "force_crit": "spell",
       "expire_ms": 500,
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 2
       },
       "before_expected": 56,
       "expected": 61.6,
       "expected_ratio": 1.1,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Stamina (stat 2, reference 56) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Stamina (stat 2, reference 56) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3961,16 +3961,16 @@
       "cast_power": 1000,
       "force_crit": "spell",
       "expire_ms": 500,
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 3
       },
       "before_expected": 119,
       "expected": 130.9,
       "expected_ratio": 1.1,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Intellect (stat 3, reference 119) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Intellect (stat 3, reference 119) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3984,16 +3984,16 @@
       "cast_power": 1000,
       "force_crit": "spell",
       "expire_ms": 500,
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 4
       },
       "before_expected": 128,
       "expected": 140.8,
       "expected_ratio": 1.1,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Spirit (stat 4, reference 128) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Spirit (stat 4, reference 128) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -4037,10 +4037,7 @@
       "expected": 3040.5,
       "tolerance": 1.5,
       "wait_ms": 3000,
-      "player_spell_power": {
-        "amount": 20000,
-        "hit_arm": true
-      },
+      "player_spell_power": 20000,
       "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The contrast of mana_flat on the same pair: with 20000 more Holy spell power the same hit regenerates 40.5 + 0.15 x 20000 = 3040.5 ($SP*.15), so the spell power term is measured as its own difference. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
     },
     {
@@ -4084,6 +4081,313 @@
       "expected": 0,
       "wait_ms": 7300,
       "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is gone 5300 ms after the hit: its duration is below 5.3 s, which excludes 5.5 s (+10%). With duration_held it lies in (4.6, 5.3) s around 5 s. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (block chance after one fulfilled Vow)",
+      "kind": "metric_delta",
+      "variant": "block_one",
+      "label_suffix": "block_one",
+      "quote": "Fulfilling a Vow now increases your block chance by $680672s1% for $680672d,",
+      "trigger_spell": 500143,
+      "gate_spell": 704562,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.05,
+      "wait_ms": 2600,
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). The caster's block chance (PLAYER_BLOCK_PERCENTAGE) is read after the heal lands (wait 2600 ms from the cast start): the gain must be 2 within 0.05, which excludes 1 and 3. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (stacks after one fulfilled Vow)",
+      "kind": "metric_delta",
+      "variant": "stack_one",
+      "label_suffix": "stack_one",
+      "quote": "stacking $680672u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 704562,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680672
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2600,
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). One fulfilment: 1 stack of 680672. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (stacks after six fulfilled Vows)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $680672u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 704562,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143
+      ],
+      "setup_wait_ms": 2600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680672
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 2600,
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (block chance after six fulfilled Vows)",
+      "kind": "metric_delta",
+      "variant": "block_cap",
+      "label_suffix": "block_cap",
+      "quote": "Fulfilling a Vow now increases your block chance by $680672s1% for $680672d,",
+      "trigger_spell": 500143,
+      "gate_spell": 704562,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143
+      ],
+      "setup_wait_ms": 2600,
+      "metric": "block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.05,
+      "wait_ms": 2600,
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (still active at 14.6 s)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Fulfilling a Vow now increases your block chance by $680672s1% for $680672d,",
+      "trigger_spell": 500143,
+      "gate_spell": 704562,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 680672
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 16600,
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is on the caster 14600 ms after the fulfilling heal landed (2000 ms cast + 14600): its duration is above 14.6 s, which excludes 13.5 s (-10% of 15 s). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (gone at 16.4 s)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Fulfilling a Vow now increases your block chance by $680672s1% for $680672d,",
+      "trigger_spell": 500143,
+      "gate_spell": 704562,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 680672
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 18400,
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is gone 16400 ms after the heal landed: its duration is below 16.4 s, which excludes 16.5 s (+10%). With duration_held it lies in (14.6, 16.4) s around 15 s. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+    },
+    {
+      "spell": 300371,
+      "name": "Censure (Chains of Light chains to a nearby enemy)",
+      "kind": "spread",
+      "variant": "chain",
+      "label_suffix": "chain",
+      "quote": "Dealing direct damage to an enemy affected by",
+      "expected": 1,
+      "seed_spell": 801524,
+      "aura_spell": 806697,
+      "target_rank": 800231,
+      "radius": 10.0,
+      "radius_reason": "AscensionSunClericEvents.cpp:327-334 Nearby(target, 10) is a hardcoded radius; 300371 and 801582 define no distance the tooltip states.",
+      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer, and :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
     }
   ],
   "player_observations": [],
