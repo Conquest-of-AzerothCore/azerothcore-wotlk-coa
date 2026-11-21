@@ -212,25 +212,30 @@
         "claim": "and effectiveness of your Jinxes by $s1%",
         "labels": [
           "300662 effect_value e0 #0",
-          "300662 behaviour_metric_delta jinx_effect"
+          "300662 behaviour_metric_delta jinx_effect",
+          "300662 behaviour_metric_delta jinx_effect_misery"
         ]
       }
-    ]
+    ],
+    "reason": "jinx_effect is the aura_amount readback of Shrinking Jinx (-21 to -26, data); jinx_effect_misery reads the damage of a Misery the doctor casts on a dispeller as an event: 459 to 462 over three ticks with the passive against 369 without, an event read that counts as behaviour."
   },
   {
     "spell": 300663,
     "clause": "Your Lethargy Jinx now increases your critical strike chance against the target by $s1%.",
     "labels": [
-      "300663 effect_value e0 #0"
+      "300663 effect_value e0 #0",
+      "300663 behaviour_hit_ratio jinx_crit_rate"
     ],
     "kind": "claim",
-    "reason": "Data conformant (effect_value e0 ok: +10). The behaviour entry `300663 behaviour_crit_rate jinx_crit` is not linked: it is a pilot of 300 Hexfires per arm with and without 300663 learned (effect present, interval stated, not final, G-20 step 1), and a label that reads measured would turn this claim from data to unproven. The pooled proof to the 2-point band needs about 15,000 casts per arm (about 27 hours of game time), over the 90 minute limit of G-20 step 3, so the claim goes to status 5 with that cast count unless the owner decides otherwise."
+    "reason": "Behaviour: `300663 behaviour_hit_ratio jinx_crit_rate` (cycle 10 fix round, hit_ratio rate critical, 175 pooled parts of 80 Hexfires per arm, each after a real Lethargy Jinx) judges the +10 points of critical strike chance against the Jinxed target; the data label effect_value e0 (+10) stays. The 300-cast pilot `300663 behaviour_crit_rate jinx_crit` (final07: +9.33 and +13.00 points, measured, not final) is replaced by it. The earlier status 5 reading and the cycle 10 tool note P-T2 are withdrawn: the pooled crit share is an existing kind (the Templar 520608 and Necromancer 300960 precedents), about 25 h of game time per run."
   },
   {
     "spell": 300871,
     "clause": "Increases the attack power of party and raid members by $s1%.",
     "labels": [
-      "300871 effect_value e0 #0"
+      "300871 effect_value e0 #0",
+      "300871 behaviour_party_stat_ratio party",
+      "300871 behaviour_party_stat_ratio raid"
     ],
     "kind": "claim"
   },
@@ -246,9 +251,12 @@
     "spell": 300871,
     "clause": "In addition, health and mana restoration provided by your Spirits now occurs $s3% more often.",
     "labels": [
-      "300871 effect_value e2 #1"
+      "300871 effect_value e2 #1",
+      "300871 behaviour_metric_delta spirit_period",
+      "300871 behaviour_metric_delta spirit_period_mana"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The tooltip governs, read literally (G-1): \"occurs $s3% more often\" with $s3 = 50 is a frequency 50% higher, a period of 4000 / 1.5 = 2667 ms. spirit_period reads the heals of a real Spirit at 9300 and 9900 ms (3 then 4 heals, 21 and 28) and spirit_period_mana the mana energizes of the same Spirit at the same reads, the two halves of \"health and mana restoration\". The stored modifier (SPELLMOD_ACTIVATION_TIME -50%, period 2000 ms, +100% frequency) reads 28 and 35, so both entries are expected to alert: a candidate defect lead and a G-4 owner question (is \"50% more often\" meant as the stored -50% period?). The data label stays: it reads the value 50 that the tooltip prints."
   },
   {
     "spell": 301175,
@@ -355,10 +363,34 @@
   {
     "spell": 301361,
     "clause": "Increases the duration and effectiveness of your Jinxes by $s1%.",
-    "labels": [
-      "301361 effect_value e0 #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration of your Jinxes by $s1%",
+        "labels": [
+          "301361 effect_value e0 #0",
+          "301361 behaviour_metric_delta jinx_held",
+          "301361 behaviour_metric_delta jinx_gone"
+        ]
+      },
+      {
+        "claim": "and effectiveness of your Jinxes by $s1%",
+        "labels": [
+          "301361 effect_value e0 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Cycle 10 B19: the duration half is read on Lethargy Jinx 802065 (10 s to 15 s: still on at about 14900 ms, gone at about 15300 ms, stamped in game time, without the talent gone by 14900 ms). The effectiveness half (SPELLMOD_ALL_EFFECTS +50% on the Jinx amounts) has only the data label.",
+    "tool_gap": {
+      "reason": "The effectiveness half changes the amounts of the Jinx auras (the slow, the attack power and spell power cuts, the leech). Every metric that reads them is a readback (aura_amount) or a state metric whose promise words (slow, attack power) the claim \"and effectiveness of your Jinxes\" does not contain: run_speed_rate promises \"movement speed|run speed|slow\", spell_power and attack_power promise their stat names. No event metric shows a Jinx amount (a dummy attack power cut needs a striker kind with the Jinx cast on the striker, taken_hit arms cast at the caster, ally or none). Tool: a taken_hit arm cast at the striker, or a promise word for \"effectiveness\" in the run_speed_rate / aura_amount reads (an owner file). Candidate: the Jinx cast by the caster reads through Unit::ApplyEffectModifiers for SPELLMOD_ALL_EFFECTS (Unit.cpp:12935), so the amount is not in doubt, only its proof class.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 501087,
@@ -408,10 +440,12 @@
     "spell": 501087,
     "clause": "@ext::ext@",
     "labels": [
-      "501087 effect_value #3",
-      "501087 effect_value #4"
+      "501087 behaviour_metric_delta spirit_heal",
+      "501087 behaviour_metric_delta spirit_mana",
+      "501087 behaviour_metric_delta spirit_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The clause text is the empty extension wrapper \"@ext:@s:561136:0@:ext@\" of the pulled Spirit text (the Jungle Thistle 500472 precedent). The former labels effect_value #3 and #4 read unreadable (no token). What it states is what the Spirit a Puppets tick collects does: it regenerates 7 health and 7 mana (`spirit_heal`, `spirit_mana`: the first Spirit of a real cast, read at 500 ms) and stacks 5 times (`spirit_stacks`: 5 from Mirage plus the five ticks read 5, not 10). The 4 sec period and the 12 sec duration of the same Spirit aura are measured on the Bottle Spirit (707504 spirit_heal, spirit_lasts) and on the Puppeteer's Grasp Spirit (707209 grasp_spirit_lasts)."
   },
   {
     "spell": 500053,
@@ -434,7 +468,6 @@
         "claim": "healing for ${$m1+0+$SP*.25}",
         "labels": [
           "500053 effect_value 500478e0 #0",
-          "500053 effect_value #7",
           "500478 behaviour_metric_delta tiki_heal_amount"
         ]
       },
@@ -451,7 +484,8 @@
           "500478 behaviour_metric_delta tiki_lasts"
         ]
       }
-    ]
+    ],
+    "reason": "The label 500053 effect_value #7 is the $t1 token of \"every $t1 sec\" (unreadable: the client hastes the shown period by the cast speed, SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC of 500478, which the data scenario does not measure); it belonged to the amount claim by position only. It is dropped; the period is measured by the behaviour label 500478 behaviour_metric_delta tiki_heal_ticks of the \"every $t1 sec\" claim (3 heals at 3600 ms and 4 at 3950 ms in game time, a bracket of the 1250 ms period inside the G-19 band, guide 9.4, M-19)."
   },
   {
     "spell": 500053,
@@ -595,12 +629,45 @@
   {
     "spell": 500947,
     "clause": "Transform into a serpent, removing all movement impairing effects and increasing movement speed by $s1% for $D.",
-    "labels": [
-      "500947 effect_value e0 #0",
-      "500947 aura_amount e0 #0",
-      "500947 aura_duration_ms #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Transform into a serpent",
+        "labels": []
+      },
+      {
+        "claim": "removing all movement impairing effects",
+        "labels": [
+          "500947 behaviour_metric_delta slither_unsnare",
+          "500947 behaviour_metric_delta slither_unroot"
+        ]
+      },
+      {
+        "claim": "increasing movement speed by $s1%",
+        "labels": [
+          "500947 aura_amount e0 #0",
+          "500947 behaviour_metric_delta slither_speed"
+        ]
+      },
+      {
+        "claim": "for $D",
+        "labels": [
+          "500947 aura_duration_ms #1",
+          "500947 behaviour_metric_delta slither_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label \"500947 effect_value e0 #0\" is not_measured (an aura script hook sets the amount after CalcValue) and is dropped; the same value is read by \"500947 aura_amount e0 #0\", which stays in the speed claim (guide 9.4, M-19). Cycle 10 B19: slither_speed reads run_speed_rate 1.8 after a real cast (1.0 uncast), slither_lasts reads the aura on at about 4850 ms and gone at about 5200 ms in game time, slither_unsnare and slither_unroot read a Slow 31589 and a Frost Nova 122 that a striker casts at the caster for real (metric_delta strike, as the Necromancer 805038 removes_slows), removed by the cast (present in the uncast before phase).",
+    "tool_gap": {
+      "reason": "The transform half (\"Transform into a serpent\", aura 56 TRANSFORM misc 2914) has no read: the display id of the caster is a state metric (display_id, promise word \"transform\") whose expected value is the model of creature template 2914, which is in the realm world database only (no repository SQL names creature 2914 as a template) and no kind reads a display change against the template model.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 500947,
@@ -608,7 +675,16 @@
     "labels": [
       "500947 effect_value 806295e0 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Data conformant (effect_value 806295e0 ok: -100, aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE and aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE -100 on the caster while Slither 500947 lasts, 5000 ms). The behaviour is a certain miss of every spell and ranged strike at the caster. taken_hit can cast Slither for real in an arm (arm casts), but its judges need landed strikes (each arm needs half its trials landed) or judge a resist difference against a stated number of points (resist_rate), and no judge reads an absolute 100% miss share; the miss chance of the control is the striker level miss, so the difference is not the stated 100. Tool note P-T3 (behaviours.py taken_hit, owner): a judge \"miss_share\" with an absolute expected share per arm (0 landed of N with Slither cast before each trial, the control landing). A tool gap, not a missing route.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-P",
+          "report": "cycle10/author-P.md"
+        }
+      ]
+    }
   },
   {
     "spell": 501117,
@@ -637,45 +713,34 @@
           "501117 aura_duration_ms #2"
         ]
       }
-    ]
+    ],
+    "no_behaviour_route": {
+      "reason": "The claim \"for $d\" (8000 ms, DurationIndex 31) has no route at the reference mana. Mojo Beam is a channel whose every tick drains mana in script (AscensionWitchDoctorBrewing.cpp:191-196): cost = Effect[1] value 316 (315 + 1; the 7.2462 per level starts at BaseLevel 60) x branches x (100 + 10 (tick - 1)) / 200 per tick, so ticks cost 158, 174, 190 ... 395 and 16 ticks (8000 ms) cost 4424 mana after the 224 of the opening 15%; the channel is interrupted when the mana is below the next tick (InterruptSpell, :193-195). The reference caster holds 2567 mana at most (cast_power may not exceed it), which pays 10 ticks, so the channel ends near 5 sec on this server whatever the duration says. The duration is therefore read only by `501117 aura_duration_ms #2` (data conformant, 8000 ms), and the in-game ticks (`heal_ticks`, six heals in 3200 ms) prove the cadence. A route needs a mana-sustain fixture for a channel (power restored every tick, or a no-cost aura) that metric_delta does not have: phase_power sets the mana once at the start of a phase.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#mojo-beam-501117"
+        }
+      ]
+    }
   },
   {
     "spell": 501117,
     "clause": "Each time Mojo Beam heals a target it will grow a new branch.",
-    "labels": [],
+    "labels": [
+      "501117 behaviour_metric_delta branch_grow"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Mojo Beam branches only to allies the caster is grouped with (Allies() keeps units with Friendly(), which needs IsInRaidWith, Completion.cpp:57-62; the branch search is 15 yd around the target, Brewing.cpp:203-212), and metric_delta has no ally or group fixture and no per-ally heal read. Tool: grouped ally players at a distance in metric_delta and a read of the heals per ally (spell_heal_count with a target).",
-      "attempts": [
-        {
-          "agent": "cycle5/author-B2",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle5/author-B2-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 10 author T: \"501117 behaviour_metric_delta branch_grow\" (kind ally_heal_reach, ADR 1021 provisional) casts a real Mojo Beam at a grouped ally player; a grouped ally 12 yd from the target and a second grouped ally 12 yd beyond it (24 yd from the target) are healed (a heal grows a branch, and a branch grows its own), while a grouped ally out of every branch's 15 yd reach and an ungrouped ally 10 yd from the target are never healed. Closes the cycle 5 tool gap (grouped ally players and a per-ally heal read)."
   },
   {
     "spell": 501117,
     "clause": "Each new branch immediately heals and continues healing.",
-    "labels": [],
+    "labels": [
+      "501117 behaviour_metric_delta branch_heals"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Mojo Beam branches only to allies the caster is grouped with (Allies() keeps units with Friendly(), which needs IsInRaidWith, Completion.cpp:57-62; the branch search is 15 yd around the target, Brewing.cpp:203-212), and metric_delta has no ally or group fixture and no per-ally heal read. The same tool covers this clause: the heals of a branch ally at the first tick and later.",
-      "attempts": [
-        {
-          "agent": "cycle5/author-B2",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle5/author-B2-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 10 author T: \"501117 behaviour_metric_delta branch_heals\" (same scenario as branch_grow) reads, in a window that starts before the cast, the first branch's heal count equal to the Beam target's (healed in the tick it was grown and every tick since) and the second branch's exactly one less (grown on tick 2); a branch that waits a tick before its first heal, or stops healing, reads another offset."
   },
   {
     "spell": 501117,
@@ -900,18 +965,42 @@
     "spell": 500962,
     "clause": "Infuse your Cauldron with Crystal Water for $d,",
     "labels": [
-      "500962 aura_duration_ms #0"
+      "500962 aura_duration_ms #0",
+      "500962 behaviour_metric_delta crystal_lasts"
     ],
     "kind": "claim"
   },
   {
     "spell": 500962,
     "clause": "causing party and raid members within $a1 yds to be shielded for 20% of their healing taken for $547574d.",
-    "labels": [
-      "500962 effect_radius e0 #1",
-      "500962 spell_duration 547574 #2"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "causing party and raid members within $a1 yds",
+        "labels": [
+          "500962 effect_radius e0 #1",
+          "500962 behaviour_aura_presence crystal_inside",
+          "500962 behaviour_aura_presence crystal_outside",
+          "500962 behaviour_aura_presence crystal_outside caster"
+        ]
+      },
+      {
+        "claim": "to be shielded for 20% of their healing taken",
+        "labels": [
+          "500962 behaviour_metric_delta shield_amount",
+          "500962 behaviour_metric_delta shield_control"
+        ]
+      },
+      {
+        "claim": "for $547574d.",
+        "labels": [
+          "500962 spell_duration 547574 #2",
+          "500962 behaviour_metric_delta shield_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The radius is read on a grouped ally at 35 yd (carries the area aura) and at 45 yd (does not, the caster does) with real casts; the shield amount by the damage a real Potion Toss heal's shield absorbs in the logs (25 = 126 to 129 / 5) against the same scenario without the Base (0); the 5 sec by the shield aura read in game time. The party members' own shields are the same Proc on each owner (Events.cpp:66-67 and :212-218 act on the aura's owner), read here on the caster; an ally's shield has no entry."
   },
   {
     "spell": 500962,
@@ -926,7 +1015,8 @@
     "spell": 501136,
     "clause": "Become invisible for $d,",
     "labels": [
-      "501136 aura_duration_ms #0"
+      "501136 aura_duration_ms #0",
+      "501136 behaviour_metric_delta mirage_lasts"
     ],
     "kind": "claim"
   },
@@ -950,9 +1040,13 @@
       },
       {
         "claim": "reducing threat each second",
-        "labels": []
+        "labels": [
+          "501136 behaviour_metric_delta mirage_threat_first",
+          "501136 behaviour_metric_delta mirage_threat_third"
+        ]
       }
-    ]
+    ],
+    "reason": "The tooltip states no threat amount: the -20% per second of ModifyThreatByPercent (AscensionWitchDoctorAuras.cpp:341) is the code's value; the two reads (one tick 1.6, three ticks 1.024 of the before threat, the setup repeating per phase) show the cadence and the factor."
   },
   {
     "spell": 501136,
@@ -1083,15 +1177,6 @@
     "clause": "Periodic damage dealt by Hex of Malice now has a $h% chance to collect a Spirit.",
     "labels": [],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "A 20% chance on the periodic damage of Hex of Malice 801693 (spell_proc 503707 Chance 20, SpellFamilyMask 0, ProcFlags 262144; Events.cpp:84-86 accepts `damage && periodic && IsHex(info)`, :145-147 GainSpirit). A procs entry with a cast trigger counts the trials with procs.py trials_step, which reads spell_damage_count of the trigger spell on the target with no periodic filter, and 801693 also has a direct SCHOOL_DAMAGE effect (Effect[1]) that never rolls, so the direct hit of every cast counts as a trial that cannot roll and the measured rate reads below the 20% of a correct server. The harness already filters spell_damage_count by `periodic` (CoAGameplayTest.cpp:5248-5256; the metric_delta fields use it): the gap is only trials_step, which cannot pass periodic: true for a cast trigger. With it a flip-proof chance arm (kinds/stack_chance_rate.py) becomes possible. A recast keeps the running Hex tick timer (SpellAuraEffects.cpp:752-755), so a spacing between casts does not separate the trials. Tool: periodic: true in trials_step for a cast trigger, with base_mana_per_attempt (Hex of Malice costs 20% of the base mana; the class file now needs base_mana 1497, player_class_stats class 13 level 60 BaseMana, read in the realm world database on 2026-11-20).",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B5",
-          "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B5.md#fix-round"
-        }
-      ]
-    },
     "claims": [
       {
         "claim": "Periodic damage dealt by Hex of Malice now has a chance to collect a Spirit",
@@ -1102,11 +1187,11 @@
       {
         "claim": "a $h% chance",
         "labels": [
-          "503707 effect_value #1"
+          "503707 behaviour_metric_delta hex_spirit_rate"
         ]
       }
     ],
-    "reason": "The effect and its trigger are proven by `503707 behaviour_metric_delta hex_spirit` under the forced_roll fixture (no Spirit from a Hex tick without the talent, one Spirit from the one rolling tick with it); the stated 20% is the rate and keeps `503707 effect_value #1` and the tool_gap below (a periodic-only trial filter for procs)."
+    "reason": "The effect and its trigger are proven by 503707 behaviour_metric_delta hex_spirit (forced roll). The stated 20% is judged by 503707 behaviour_metric_delta hex_spirit_rate (kind flat_chance_rate, cycle 10 author P): one Hex of Malice tick per cycle (the Hex removed after 3500 ms), the periodic ticks of 801693 the trials, the Spirit 561136 casts the events, an unlearned control, 21 parts of 900 ticks, flip-proof sizing. The former label 503707 effect_value #1 is the unmodelled data label of the chance $h (no effect amount to read) and is dropped: the chance is measured by the rate (guide 9.4, M-19). The tool_gap (a periodic trial filter in procs.py trials_step) is closed by the contributor kind module."
   },
   {
     "spell": 503707,
@@ -1480,16 +1565,21 @@
   {
     "spell": 504424,
     "clause": "Infuse your Cauldron with Spice: Earthbloom.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "504424 behaviour_hit_ratio shrooms_effect"
+    ],
+    "kind": "claim",
+    "reason": "Cycle 10 B19: the sentence infuses the Cauldron effects; the same shrooms_effect entry reads the infused Cauldron heal (Jungle Shrooms pulse 802703 at +30%, ratio 1.30) with the passive learned against not learned."
   },
   {
     "spell": 504424,
     "clause": "Increases effectiveness of all Cauldron effects and Ingredients by $s1%.",
     "labels": [
-      "504424 effect_value e0 #0"
+      "504424 effect_value e0 #0",
+      "504424 behaviour_hit_ratio shrooms_effect"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19: the Jungle Shrooms Cauldron heal reads 1.30 with the passive (the Master Mixologist 705864 shrooms_effect shape, ok at 2.0001 for +100%); the other Cauldron effects and the Ingredients are the same SPELLMOD_ALL_EFFECTS mask (word 2 4224) and are not read one by one (guide 3.6, G-23)."
   },
   {
     "spell": 504426,
@@ -1530,7 +1620,8 @@
     "spell": 504462,
     "clause": "Shadow Puppets now ticks $s1% faster",
     "labels": [
-      "504462 effect_value e0 #0"
+      "504462 effect_value e0 #0",
+      "504462 behaviour_metric_delta puppets_faster"
     ],
     "kind": "claim"
   },
@@ -1538,7 +1629,9 @@
     "spell": 504462,
     "clause": "and lasts $s2% longer for each Spirit active on you.",
     "labels": [
-      "504462 effect_value e1 #1"
+      "504462 effect_value e1 #1",
+      "504462 behaviour_metric_delta puppets_longer",
+      "504462 behaviour_metric_delta puppets_longer_end"
     ],
     "kind": "claim"
   },
@@ -1584,10 +1677,28 @@
   {
     "spell": 504636,
     "clause": "Increases the duration and effectiveness of Vol'jin's Vigil and Swift Idol by $s1%.",
-    "labels": [
-      "504636 effect_value e0 #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration of Vol'jin's Vigil and Swift Idol by $s1%",
+        "labels": [
+          "504636 effect_value e0 #0",
+          "504636 behaviour_metric_delta vigil_held",
+          "504636 behaviour_metric_delta vigil_gone",
+          "504636 behaviour_metric_delta idol_held",
+          "504636 behaviour_metric_delta idol_gone"
+        ]
+      },
+      {
+        "claim": "and effectiveness (the Swift Idol's movement speed and Vol'jin's Vigil damage taken)",
+        "labels": [
+          "504636 behaviour_metric_delta swift_effect",
+          "504636 behaviour_hit_ratio vigil_effect"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Cycle 10 B19 (fix round): the duration half is read on Vol'jin's Vigil (10 s to 12 s) and on the Swift Idol (10 s to 12 s), each still on at about 11850 ms and gone at about 12150 ms, stamped in game time, without the talent gone by 11850 ms. The effectiveness half is read on both spells as for the 504459 twin: the Swift Idol movement speed 1.30 against 1.25 (swift_effect, 25 x 1.20 = 30) and the damage taken of real strikes under a real Vigil 0.70 over 0.75 (vigil_effect, a ratio 0.9333). The first version of this row held the effectiveness half as a tool_gap although both reads exist; the data label stays in the duration claim."
   },
   {
     "spell": 504774,
@@ -1775,7 +1886,8 @@
     "spell": 560278,
     "clause": "Increases the damage of Shadowflare by $s1%.",
     "labels": [
-      "560278 effect_value e0 #0"
+      "560278 effect_value e0 #0",
+      "560278 behaviour_hit_ratio shadowflare"
     ],
     "kind": "claim"
   },
@@ -1815,11 +1927,27 @@
   {
     "spell": 560544,
     "clause": "Casting Potion Toss and Spirit in a Bottle now reduce the cast time of your next 2 Loa's Brews by $561017s1% for $561017d.",
-    "labels": [
-      "560544 effect_value 561017e0 #0",
-      "560544 spell_duration 561017 #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Potion Toss and Spirit in a Bottle now reduce the cast time of your next 2 Loa's Brews by $561017s1%",
+        "labels": [
+          "560544 behaviour_metric_delta cast_held",
+          "560544 behaviour_metric_delta cast_done",
+          "560544 behaviour_metric_delta cast_done_potion",
+          "560544 behaviour_metric_delta second_brew"
+        ]
+      },
+      {
+        "claim": "for $561017d.",
+        "labels": [
+          "560544 spell_duration 561017 #1",
+          "560544 behaviour_metric_delta lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label `560544 effect_value 561017e0 #0` (not_measured: a DoEffectCalcAmount hook of the aura scripts bound to 561017 sets the amount) is dropped; the 20% is measured by the real Brew cast time bracket (still casting at 1575 ms, ended at 1618 ms, the G-19 band of 1600 ms) after a Bottle and after a Potion Toss, and the second charge by the second Brew. The cap of \"next 2\" (a third unreduced Brew) does not fit the mana pool and has no entry; the 20% against the 25% of the 561017 description is noted in the report (the tooltip token is $561017s1 = 20)."
   },
   {
     "spell": 560545,
@@ -2058,9 +2186,11 @@
     "spell": 572871,
     "clause": "Increases your critical strike chance by $s1%.",
     "labels": [
-      "572871 effect_value e0 #0"
+      "572871 effect_value e0 #0",
+      "572871 e0 melee_crit_chance_refreshed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Aura 290 SPELL_AURA_MOD_CRIT_PCT covers every crit chance; read on the melee crit chance after a harness-forced UpdateCritPercentage around the learn (4.99966 to 8.99966 in both final07 runs, +4 judged to the rounding), as Templar 705271 and Witch Hunter 300792 (cycle 6 review M-3) are counted."
   },
   {
     "spell": 578295,
@@ -2154,23 +2284,37 @@
           "602220 behaviour_metric_delta draught_threat"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "\"which may trick enemies into ignoring you\": the effect is the Feign Death 985329 threat wipe (SPELL_EFFECT_MODIFY_THREAT_PERCENT -100 around the caster), read as a threat ratio of 0 (draught_threat, ok in both final07 runs). threat is a STATE metric whose promise word is \"threat\" (coverage.STATE_PROMISES), and this clause names none, so the read stays data; no earlier clause of 602220 can supply the words (promise_of needs an earlier clause of the same spell that names threat). The behaviour read of \"ignoring you\" is an enemy that stops attacking the caster: an attacker that melees the caster in a window with melee_attacks_taken read, with and without the draught (tool note T-b13-9, the same enemy_attacks gap as the Amphibimorph \"unable to attack\"). The word \"may\" is the stock feign death resist chance, which a deterministic read does not prove.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B18",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B18.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680882,
     "clause": "Increases your hit chance by $s2%",
     "labels": [
-      "680882 effect_value e1 #0"
+      "680882 effect_value e1 #0",
+      "680882 e1 melee_hit_chance",
+      "680882 e1 spell_hit_chance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (SpellAuraDefines.h:390) raises every hit chance; the passive reads of the melee and spell hit chance around the learn give the stated points in both final07 runs, judged to the rounding, as Templar 705250 \"and your chance to hit by $s2%\" is counted."
   },
   {
     "spell": 680882,
     "clause": "and the damage of Reclamation by $s1%.",
     "labels": [
-      "680882 effect_value e0 #1"
+      "680882 effect_value e0 #1",
+      "680882 behaviour_hit_ratio reclamation"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19: reclamation reads the per-hit mean of real Reclamation casts with the passive over without it (1.20 at 20000 ranged attack power, the Soul Feeder 705894 arrow_spirits shape)."
   },
   {
     "spell": 681007,
@@ -2294,7 +2438,6 @@
       {
         "claim": "Ranged attacks now have a $h% chance",
         "labels": [
-          "681242 effect_value #0",
           "681242 proc_rate"
         ]
       },
@@ -2312,7 +2455,8 @@
           "681242 behaviour_metric_delta ready_lasts"
         ]
       }
-    ]
+    ],
+    "reason": "The former label 681242 effect_value #0 is the unmodelled data label of the chance $h (no effect amount to read; unmodelled in both final07 runs) and is dropped from the claim \"Ranged attacks now have a $h% chance\": the chance is judged by the proc entry 681242 proc_rate (ok in both final07 runs, 0.1004 and 0.1010 against 10%, residual target 0.001, guide 9.4, M-19), as 804620 and 705871 were."
   },
   {
     "spell": 681242,
@@ -2340,7 +2484,6 @@
       {
         "claim": "repeating every $t1 sec",
         "labels": [
-          "681242 aura_amplitude_ms #3",
           "501134 behaviour_metric_delta leech_period"
         ]
       },
@@ -2351,13 +2494,15 @@
           "501134 behaviour_metric_delta scales_lasts_control"
         ]
       }
-    ]
+    ],
+    "reason": "The former label `681242 aura_amplitude_ms #3` is unmodelled (the amplitude of a foreign spell has no scenario) and is dropped from the period claim; the period is read in game time by `501134 behaviour_metric_delta leech_period` (four ticks by 4916 ms, the fifth by 5416 ms, ok in final07), the guide 9.4 and M-19 link."
   },
   {
     "spell": 681242,
     "clause": "Refreshes the duration of Hex of Malice.",
     "labels": [
-      "501134 behaviour_metric_delta refreshes_hex"
+      "501134 behaviour_metric_delta refreshes_hex",
+      "501134 behaviour_metric_delta refreshes_hex_kept"
     ],
     "kind": "claim"
   },
@@ -2431,7 +2576,16 @@
           "704495 behaviour_metric_delta haste_lasts"
         ]
       }
-    ]
+    ],
+    "no_behaviour_route": {
+      "reason": "The claim \"by $504458s1%\" is data conformant and its entry is the route: `704495 behaviour_metric_delta haste_cast` (ok in final07) reads the live cast time of Malefic Wrath 807037 falling from 2000 to 1666.7 ms after a forced-crit Hexfire (ratio 0.8333, haste +20%, Hexplosion 504458 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, spell haste only). The only block is the promise regexp: the read is `spell_cast_time_ms`, a READBACK metric, so the claim classes as data. The state read of the same haste, `cast_speed_multiplier` (UNIT_MOD_CAST_SPEED, 1 / 1.2 = 0.8333), is a STATE metric whose promise regexp is `casting speed|cast speed|spell haste` (coverage.STATE_PROMISES); the clause says \"your haste\" only, so the state read would class data too. The buff does not touch melee swings, so `attack_time_ms` (promise `haste`) does not move. A real cast-time bracket (`casting` read at 1760 ms of a 2000 ms cast) separates 20% (ends 1667) from 10% (ends 1818) by 58 ms on one side and 65 ms on the other, inside the 50 ms update jitter of a stamped read: not built. Tool note (owner-owned coverage.py): add `haste` to the `cast_speed_multiplier` promise regexp (the Necromancer 705750 `cast_haste` and 705943 `cast_haste` entries use the same read), or accept `haste_cast` as the behaviour read of a spell-haste clause.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#hexplosion-704495"
+        }
+      ]
+    }
   },
   {
     "spell": 704497,
@@ -2778,7 +2932,9 @@
     "spell": 704500,
     "clause": "Scales with modifiers to Malefic Wrath.",
     "labels": [
-      "704500 behaviour_metric_delta scales"
+      "704500 behaviour_metric_delta scales",
+      "704500 behaviour_metric_delta scales_held",
+      "704500 behaviour_metric_delta scales_done"
     ],
     "kind": "claim"
   },
@@ -2904,7 +3060,10 @@
   {
     "spell": 704512,
     "clause": "Reduces the cast time of Loa's Brew by 0.25 sec.",
-    "labels": [],
+    "labels": [
+      "704512 behaviour_metric_delta cast_time_held",
+      "704512 behaviour_metric_delta cast_time_done"
+    ],
     "kind": "claim"
   },
   {
@@ -2989,7 +3148,7 @@
       {
         "claim": "Damage dealt by your Shadow Puppets now has a $h% chance",
         "labels": [
-          "705844 proc_rate"
+          "705844 behaviour_metric_delta puppet_rate"
         ]
       },
       {
@@ -3006,7 +3165,7 @@
         ]
       }
     ],
-    "reason": "The former label `705844 effect_value #0` is dropped (unmodelled in final04: `$h` is a proc chance, not a value, guide 9.4); the stated chance is measured by `705844 proc_rate`. The chance is the engine's single roll on the aura (ProcChance 15), sampled on the Shadow Puppet hits (802745) by proc_rate; the Puppeteer's Threads path (572837, Events.cpp:99) is driven by `705844 behaviour_metric_delta proc_buff_threads` with a forced roll, which shows the path and the effect, not a second rate: a rate sample of Threads releases costs about 13 s per trial (G-20 step 3, beyond 90 minutes)."
+    "reason": "The former label `705844 effect_value #0` is dropped (unmodelled in final04: `$h` is a proc chance, not a value, guide 9.4). The stated chance is measured by `705844 behaviour_metric_delta puppet_rate` (cycle 10 fix round, kind flat_chance_rate: the 802745 Puppet hits as trials and the 705845 casts as events, 4 pooled parts of 3375 hits). It replaces the link to `705844 proc_rate`, which read unmeasured in both final07 runs because its judge counts the damage of the trigger 500015 (none) as the trials. The chance is the engine's single roll on the aura (ProcChance 15); the Puppeteer's Threads path (572837, Events.cpp:99) is driven by `705844 behaviour_metric_delta proc_buff_threads` with a forced roll, which shows the path and the effect, not a second rate: a rate sample of Threads releases costs about 13 s per trial (G-20 step 3, beyond 90 minutes)."
   },
   {
     "spell": 705844,
@@ -3122,48 +3281,102 @@
   {
     "spell": 705850,
     "clause": "Your Potion Toss and Splash Potion cooldown is reset, and the next use within $d now applies Fish Bones to affected allies.",
-    "labels": [
-      "705850 aura_duration_ms #0"
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Your Potion Toss and Splash Potion cooldown is reset",
+        "labels": [
+          "705850 cost_gate 801661 cooldown_reset without",
+          "705850 cost_gate 801661 cooldown_reset with"
+        ]
+      },
+      {
+        "claim": "and the next use within $d",
+        "labels": [
+          "705850 aura_duration_ms #0",
+          "705850 behaviour_metric_delta fishbones_applied",
+          "705850 behaviour_metric_delta fishbones_window"
+        ]
+      },
+      {
+        "claim": "now applies Fish Bones to affected allies.",
+        "labels": [
+          "705850 behaviour_metric_delta fishbones_applied"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The cooldown reset is read through the cost_gate resets arms with a real Potion Toss and a real Mojo; the window and the application through a real Potion Toss 4750 ms and 5250 ms after a real Mojo (the Mojo: Jungle Thistle 500472 route, final07). Splash Potion 802710 is reset by the same Reduce call as Potion Toss and has no entry of its own."
   },
   {
     "spell": 705850,
     "clause": "Instantly swaps your Ingredients to Fish Oil and Frog Bones.",
-    "labels": [],
+    "labels": [
+      "705850 behaviour_metric_delta fish_oil",
+      "705850 behaviour_metric_delta frog_bones",
+      "705850 behaviour_metric_delta swapped"
+    ],
     "kind": "claim"
   },
   {
     "spell": 705850,
     "clause": "@ext::ext@",
     "labels": [
-      "705850 effect_value #1",
-      "705850 effect_value #2"
+      "705850 behaviour_metric_delta fishbones_applied",
+      "705850 behaviour_metric_delta fishbones_window"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The clause text is an empty nested tooltip (the Fish Bones effect the Mojo hands to the next potion). The two former labels effect_value #1 and #2 read unreadable (no token). What it states is that the next potion applies Fish Bones (Fish Bones 500594) on the ally, which fishbones_applied reads on the caster 4750 ms after a real Mojo and fishbones_window shows absent 5250 ms after it (the Mojo: Jungle Thistle 500472 precedent). The effect values of Fish Bones itself have no entry."
   },
   {
     "spell": 705851,
     "clause": "Your Potion Toss and Splash Potion cooldown is reset, and the next use within $d now applies Frog Shrooms to affected allies.",
-    "labels": [
-      "705851 aura_duration_ms #0"
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Your Potion Toss and Splash Potion cooldown is reset",
+        "labels": [
+          "705851 cost_gate 801661 cooldown_reset without",
+          "705851 cost_gate 801661 cooldown_reset with"
+        ]
+      },
+      {
+        "claim": "and the next use within $d",
+        "labels": [
+          "705851 aura_duration_ms #0",
+          "705851 behaviour_metric_delta frogshrooms_applied",
+          "705851 behaviour_metric_delta frogshrooms_window"
+        ]
+      },
+      {
+        "claim": "now applies Frog Shrooms to affected allies.",
+        "labels": [
+          "705851 behaviour_metric_delta frogshrooms_applied"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The cooldown reset is read through the cost_gate resets arms with a real Potion Toss and a real Mojo; the window and the application through a real Potion Toss 4750 ms and 5250 ms after a real Mojo (the Mojo: Jungle Thistle 500472 route, final07). Splash Potion 802710 is reset by the same Reduce call as Potion Toss and has no entry of its own."
   },
   {
     "spell": 705851,
     "clause": "Instantly swaps your Ingredients to Jungle Shrooms and Frog Bones.",
-    "labels": [],
+    "labels": [
+      "705851 behaviour_metric_delta jungle_shrooms",
+      "705851 behaviour_metric_delta frog_bones",
+      "705851 behaviour_metric_delta swapped"
+    ],
     "kind": "claim"
   },
   {
     "spell": 705851,
     "clause": "@ext::ext@",
     "labels": [
-      "705851 effect_value #1",
-      "705851 effect_value #2"
+      "705851 behaviour_metric_delta frogshrooms_applied",
+      "705851 behaviour_metric_delta frogshrooms_window"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The clause text is an empty nested tooltip (the Frog Shrooms effect the Mojo hands to the next potion). The two former labels effect_value #1 and #2 read unreadable (no token). What it states is that the next potion applies Frog Shrooms (Frog Shrooms 500509) on the ally, which frogshrooms_applied reads on the caster 4750 ms after a real Mojo and frogshrooms_window shows absent 5250 ms after it (the Mojo: Jungle Thistle 500472 precedent). The effect values of Frog Shrooms itself have no entry."
   },
   {
     "spell": 705856,
@@ -3300,7 +3513,9 @@
       },
       {
         "claim": "and healing done now has a $h% chance",
-        "labels": []
+        "labels": [
+          "705871 behaviour_metric_delta heal_rate"
+        ]
       },
       {
         "claim": "to reduce the cost of your next spell or ability by $503693s1% for $503693d",
@@ -3311,11 +3526,15 @@
       }
     ],
     "tool_gap": {
-      "reason": "The healing half is not driven: the proc entry's trigger is a damaging cast (Malefic Wrath 807037) because a heal trial needs an effective heal on a hurt ally (AscensionWitchDoctorEvents.cpp:82-84 counts only an effective heal) and the procs kind has no ally health fixture for a cast trigger at an ally (the same tool note as Loa Spirits 804620: an ally_health_pct field on a procs entry). The cost reduction of the next spell has no behaviour route this pass: cost_gate power arms cannot gate a percent-of-base-mana cost (NotModelled), and a power metric_delta needs the buff 503693 from a real proc, which costs about 1000 casts at 5%; the data labels stay for the 100% and the 10 sec. The former label \"705871 effect_value #0\" is the unmodelled data label of the chance $h and is dropped: the chance is judged by \"705871 proc_rate\" (pooled hits against the band, guide 9.4, M-19).",
+      "reason": "The healing half is now driven by 705871 behaviour_metric_delta heal_rate (kind flat_chance_rate, cycle 10 author P: a Loa's Brew self heal at 30% health per trial, 10 parts of 700). The cost reduction of the next spell keeps no behaviour route: cost_gate power arms cannot gate a percent-of-base-mana cost (NotModelled), and a power read after a forced proc is spoiled by mana regeneration between the two casts; the data labels stay for the 100% and the 10 sec. The former label \"705871 effect_value #0\" is the unmodelled data label of the chance $h and is dropped: the chance is judged by \"705871 proc_rate\" (guide 9.4, M-19). Tool note P-T4 (owner): a spell_power_cost read of the next cast with 503693 held, or cost_gate for percent costs.",
       "attempts": [
         {
           "agent": "cycle9/author-B15",
           "report": "cycle9/author-B15.md"
+        },
+        {
+          "agent": "cycle10/author-P",
+          "report": "cycle10/author-P.md"
         }
       ]
     }
@@ -3324,23 +3543,35 @@
     "spell": 705877,
     "clause": "Increases your critical strike chance by $s1%",
     "labels": [
-      "705877 effect_value e0 #0"
+      "705877 effect_value e0 #0",
+      "705877 e0 melee_crit_chance_refreshed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT covers every crit chance; read on the melee crit chance after a harness-forced UpdateCritPercentage around the learn (4.99966 to 8.99966 in both final07 runs, +4 judged to the rounding), as Templar 705271 and Witch Hunter 300792 (M-3) are counted."
   },
   {
     "spell": 705877,
     "clause": "and reduces threat generated by your Voodoo spells by $s2%.",
     "labels": [
-      "705877 effect_value e1 #1"
+      "705877 effect_value e1 #1",
+      "705877 behaviour_metric_delta threat_wrath",
+      "705877 behaviour_metric_delta threat_wrath_control",
+      "705877 behaviour_metric_delta threat_hexfire",
+      "705877 behaviour_metric_delta threat_hexfire_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19: threat_wrath and threat_hexfire read the dummy threat per damage after a second equal hit with the talent over the first without it (0.90 = (1 + 0.8) / 2, tolerance 0.01), with a flip control each (the same two hits and no talent: 1.0). Malefic Wrath and Hexfire are two shapes (a cast time and an instant) of the seven spell families the mask carries (one effect, one mask, no scripted spell; guide 3.6). Fix round: crit and partial resist are suppressed by 984954 and 823764 in both phases, so the two hits are equal and the quotient is (1 + m) / 2."
   },
   {
     "spell": 705880,
     "clause": "Reduces the mana cost of your Wards, Idols, and Effigies by $s1%.",
     "labels": [
-      "705880 effect_value e0 #0"
+      "705880 effect_value e0 #0",
+      "705880 behaviour_metric_delta ward_cost",
+      "705880 behaviour_metric_delta idol_cost",
+      "705880 behaviour_metric_delta effigy_cost",
+      "705880 behaviour_metric_delta idol_cost_scripted",
+      "705880 behaviour_metric_delta idol_cost_link"
     ],
     "kind": "claim"
   },
@@ -3417,15 +3648,18 @@
     "spell": 705902,
     "clause": "Increases the damage of Hex of Malice by $s1%",
     "labels": [
-      "705902 effect_value e0 #0"
+      "705902 effect_value e0 #0",
+      "705902 behaviour_metric_delta dot_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "dot_damage reads the periodic tick (SPELLMOD_DOT 22). Lead L-b18-1: the direct hit of Hex of Malice is not raised by a DOT modifier; whether \"the damage of Hex of Malice\" includes it is an uncertain expectation, reported and not measured."
   },
   {
     "spell": 705902,
     "clause": "and the duration of Jinxes by $/1000;s2 sec.",
     "labels": [
-      "705902 effect_value e1 #1"
+      "705902 effect_value e1 #1",
+      "705902 behaviour_metric_delta jinx_lasts"
     ],
     "kind": "claim"
   },
@@ -3443,7 +3677,8 @@
     "clause": "and reduces the mana cost of spells and abilities by $s2%.",
     "labels": [
       "705903 effect_value e1 #1",
-      "705903 behaviour_metric_delta cost"
+      "705903 behaviour_metric_delta cost",
+      "705903 behaviour_metric_delta cost_spent"
     ],
     "kind": "claim"
   },
@@ -3528,7 +3763,8 @@
     "spell": 705907,
     "clause": "Increases the damage dealt by Veil of Darkness by $s1%.",
     "labels": [
-      "705907 effect_value e0 #0"
+      "705907 effect_value e0 #0",
+      "705907 behaviour_hit_ratio veil_hits"
     ],
     "kind": "claim"
   },
@@ -3538,7 +3774,16 @@
     "labels": [
       "705909 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The two modifiers (SPELLMOD_EFFECT2 +25 and -5 on the Big Bad Voodoo field aura 802718 and its ally aura) change the amount of the aura the spirit applies (Summons.cpp:563-564, Field(me, BigVoodooField)), which is only present inside the 8000 ms spirit. A real behaviour read needs one real Big Bad Voodoo cast (a 300000 ms cooldown and a 120000 ms lock 803495 on the caster, so a second cast per trial is refused) and several hits inside the 8 s with and without the talent: hit_ratio has no one opening cast with N trials inside the buff (tool note T-c9-B16-10), and the caster is immune inside the field, so the ally reduction needs an ally-struck taken_hit judge (T-c9-B16-11, ADR 0763 struck ally reads absorb only). The data label stays. Part 208: the dealt reduction would read 0.75 over 0.5 on the caster damage.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 705909,
@@ -3546,7 +3791,16 @@
     "labels": [
       "705909 effect_value e2 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The two modifiers (SPELLMOD_EFFECT2 +25 and -5 on the Big Bad Voodoo field aura 802718 and its ally aura) change the amount of the aura the spirit applies (Summons.cpp:563-564, Field(me, BigVoodooField)), which is only present inside the 8000 ms spirit. A real behaviour read needs one real Big Bad Voodoo cast (a 300000 ms cooldown and a 120000 ms lock 803495 on the caster, so a second cast per trial is refused) and several hits inside the 8 s with and without the talent: hit_ratio has no one opening cast with N trials inside the buff (tool note T-c9-B16-10), and the caster is immune inside the field, so the ally reduction needs an ally-struck taken_hit judge (T-c9-B16-11, ADR 0763 struck ally reads absorb only). The data label stays. Part 209: the taken reduction would read 0.75 over 0.80 on an ally.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 705910,
@@ -3558,7 +3812,8 @@
         "claim": "When Bad Juju is used on enemies affected by Puppeteer's Threads, it strikes an additional time",
         "labels": [
           "705910 behaviour_metric_delta ticks",
-          "705910 behaviour_metric_delta threads_gate"
+          "705910 behaviour_metric_delta threads_gate",
+          "705910 behaviour_metric_delta threads_at_use"
         ]
       },
       {
@@ -3590,7 +3845,8 @@
           "report": "cycle9/author-B15.md#fix-round-2"
         }
       ]
-    }
+    },
+    "reason": "Cycle 10 author D: \"705910 behaviour_metric_delta threads_at_use\" is added to the first claim. It reads the Threads-at-use half of \"used on enemies affected by\" (Puppeteer known in both phases, the Threads laid only by a Wrath before the Juju), threads_gate keeps the Threads-source axis and ticks the count. The other claims, labels and the tool_gap are unchanged."
   },
   {
     "spell": 705911,
@@ -3689,9 +3945,14 @@
     "spell": 705922,
     "clause": "Reduces the cast time of Malefic Wrath and Bad Juju by $/1000;S1 sec.",
     "labels": [
-      "705922 effect_value e0 #0"
+      "705922 effect_value e0 #0",
+      "705922 behaviour_metric_delta wrath_held",
+      "705922 behaviour_metric_delta wrath_done",
+      "705922 behaviour_metric_delta juju_held",
+      "705922 behaviour_metric_delta juju_done"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19: Malefic Wrath 572336 and Bad Juju 501181 (2500 ms) are still casting at 1900 ms and done by 2060 ms with the talent, still casting at both reads without it (the Brewmaster 707856 brew_held and brew_done shape). Hexfire Wrath 807480 carries the mask too and has its own scales entry (704500)."
   },
   {
     "spell": 705925,
@@ -3702,7 +3963,7 @@
       {
         "claim": "Periodic damage dealt now has a $h% chance",
         "labels": [
-          "705925 effect_value #0"
+          "705925 behaviour_metric_delta ward_haste_rate"
         ]
       },
       {
@@ -3715,24 +3976,12 @@
       {
         "claim": "for $705926d",
         "labels": [
-          "705925 spell_duration 705926 #2"
+          "705925 spell_duration 705926 #2",
+          "705925 behaviour_metric_delta ward_haste_lasts"
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The 25% chance has no behaviour route this pass: the proc is observable only while a living Serpent Ward exists (WardBuff casts 705926 only on the caster's wards, AscensionWitchDoctorSummons.cpp:105-111, so a roll with no ward leaves no event), and a procs entry has no setup cast to summon the ward before its trials (attempt_auras sets auras only; the trigger casts one spell). A forced roll (ward_haste) is never a rate proof. Tool: a setup_casts field on a procs entry (a real Serpent Ward 500960 at the caster before every trial) with event_metric spell_cast_count of 705926 on the player, a roll per periodic Hex of Malice tick.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B15",
-          "report": "cycle9/author-B15.md"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    },
-    "reason": "ward_haste reads the stacked haste (the ward's cast speed 1.0 before the learn, 0.917431 after) at 13000 ms with the buff refreshed by every forced tick, so it measures the amount per stack and the stack cap, not the 15 sec duration: the duration claim rests on the spell_duration data label alone (DurationIndex 8 = 15000 ms, $705926d)."
+    "reason": "The 25% chance is judged by 705925 behaviour_metric_delta ward_haste_rate (kind flat_chance_rate, one Hex tick per cycle with a real Serpent Ward alive, 25 parts of 900); the former label \"705925 effect_value #0\" is the unmodelled data label of the chance $h and is dropped (guide 9.4, M-19). ward_haste reads the stacked haste (the ward cast speed 1.0 before the learn, 0.917431 after) with the buff refreshed by every forced tick, so it measures the amount per stack and the stack cap. The 15 sec duration is judged by 705925 behaviour_metric_delta ward_haste_lasts (cycle 10 fix round): one forced Hex tick, the Hex then cleared (clear_trigger_after_ms), the single stack held at 17600 ms and gone at 18600 ms of game time after the cast, inside the G-19 band of 15000 ms from the tick; the spell_duration data label stays."
   },
   {
     "spell": 705925,
@@ -3741,7 +3990,9 @@
       "705925 max_stacks 705926 #3",
       "705925 behaviour_metric_delta ward_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "promise_of": "Periodic damage dealt now has a $h% chance to increase the haste of your Serpent Wards by $705926s1% for $705926d,",
+    "reason": "The stack cap continues the sentence of the previous clause (\"... to increase the haste of your Serpent Wards by $705926s1% for $705926d, stacking up to $705926u times.\"): `promise_of` names that clause so that the state read `705925 behaviour_metric_delta ward_haste` (the ward's cast speed after four forced ticks reads three stacks, 1 / 1.09, an uncapped buff 1 / 1.12) is promised the haste it measures; the read was ok in both final07 runs and classed data only because this claim's own words name no haste (coverage.promised_state)."
   },
   {
     "spell": 705928,
@@ -3850,11 +4101,12 @@
     "spell": 705942,
     "clause": "While Shadowstalker or Mirage is active, every $807214T2 sec you now gain a stack of Voodoo Hunger.",
     "labels": [
-      "705942 aura_amplitude_ms #0",
       "705942 behaviour_metric_delta stack_rate",
+      "705942 behaviour_metric_delta stack_rate_tight",
       "705942 behaviour_metric_delta stack_rate_mirage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `705942 aura_amplitude_ms #0` (unmodelled: the amplitude of a foreign spell, 807214 EffectAmplitude 500) is dropped: the stack_rate entries read ok in both final07 runs (5 stacks at 2750 ms with Shadowstalker and with Mirage, a stack every 500 ms) and `705942 behaviour_metric_delta stack_rate_tight` (cycle 10, 9 stacks at 4700 ms) brackets the period to about 470 to 530 ms, close to the G-19 band of 475 to 525 ms, where the 5-stack read alone brackets only 458 to 550 ms (guide 9.4, M-19; the 707504 aura_amplitude_ms #1 precedent)."
   },
   {
     "spell": 705942,
@@ -3903,10 +4155,30 @@
   {
     "spell": 705948,
     "clause": "and causes your next cast within $707326d to be guaranteed to critically strike.",
-    "labels": [
-      "705948 spell_duration 707326 #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and causes your next cast within $707326d",
+        "labels": [
+          "705948 spell_duration 707326 #0",
+          "705948 behaviour_metric_delta price_ready_lasts"
+        ]
+      },
+      {
+        "claim": "to be guaranteed to critically strike.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The guarantee is read on the Spirit Glaive cast made after Spirit Eclipse with 5 Spirits. metric_delta casts every setup cast before its trigger and sets the required aura of each cast right before it (values.required_aura_steps), so a Glaive trigger with Eclipse as a setup cast makes Eclipse see 1 Spirit, not 5 (the existing reset_packet note: the keep_required_aura owner tool), and with Eclipse as the trigger no Glaive cast follows it; hit_ratio_cast and crit_rate cast each cast after resetting its required aura as well. The crit (SPELLMOD_CRITICAL_CHANCE +100 of 707326 Effect[1]) reads only as spell_done_crit_chance, a readback. Tool: a metric_delta `after_trigger_cast` (a second cast of a named spell after the trigger, counted by spell_damage_count with critical true) with the Spirits kept, or a crit_rate arm `casts_keep_aura`.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-price-crit"
+        }
+      ]
+    }
   },
   {
     "spell": 705948,
@@ -3914,7 +4186,16 @@
     "labels": [
       "705948 effect_value 712372e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The cut of 15 sec on the 180 sec cooldown of Shadowstalker 807040 (712372 Effect[0] 165 MODIFY_COOLDOWN, -15001) is applied by the Glaive cast of Abilities.cpp:366-368 after Eclipse (5 Spirits) made the 707326 buff; reading it takes a Glaive cast after the Eclipse (see the guarantee gap above) and then either cooldown_ms (a readback, data) or a recast attempt of Shadowstalker at about 164 and 166 sec (kinds cooldown_clear_time and heal_cooldown_cut read events of minions and heals, not a cast-driven cut). The data label `705948 effect_value 712372e0 #1` (-15000 read ok) stays. Tool: a cast-driven cooldown cut kind (cut per Glaive cast, attempts of the gated spell every 1-2 sec from 160 to 170 sec) and the same second cast after the trigger.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-price-cooldown"
+        }
+      ]
+    }
   },
   {
     "spell": 706368,
@@ -3932,29 +4213,51 @@
       "706368 effect_value e1 #1",
       "706368 behaviour_metric_delta ap_effect"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "effectiveness_of": 707676,
+    "tool_gap": {
+      "reason": "ap_effect reads the attack power of the caster after a real Power Wuju 707676 (432 without, 478 with the passive, ok, learned contrast) but the clause names only \"the effectiveness of Power Wuju\", and the attack_power state promises \"attack power\" words. The tool has the route: effectiveness_of 707676 (ADR 0268, as the Templar Martyr 300530) extends the claim words with the buff's stated value, but subject_claims keeps it only when the stated_values of every 707676 clause are a single value, and the \"@ext:Can only have 1 Wuju active ...:ext@\" row of 707676 carries the literal 1 beside $s1, so the union has two values and the extension is dropped. Tool note T-b18-2: ignore the literal numbers of @ext rows in stated_values (coverage.py), or let a ledger row name the promise words. The effectiveness_delta kind does not take attack_power either (READ_METRICS). The field is set so the row closes when the rule is fixed.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B18",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B18.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706369,
     "clause": "Drop a Spirit Link Idol for $500992d.",
     "labels": [
-      "706369 spell_duration 500992 #0"
+      "706369 spell_duration 500992 #0",
+      "706369 behaviour_metric_delta link_lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19: link_lasts counts creature 522106 at about 13700 ms and no longer at about 14300 ms, stamped in game time inside the G-19 band of 14000 ms (the Spirit Idol idol_lasts shape); the data label stays."
   },
   {
     "spell": 706369,
     "clause": "The idol redistributes the health of all party and raid members every 2 sec, such that each player ends up with the same percentage of their maximum health.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The redistribution (Summons.cpp:384-418, Link(): every 2000 ms the players Allies(player, idol, 10 yd) returns are set to the same share of their maximum health) needs two or more players at unequal health percentages and a read of every one of their health percentages after a pulse. metric_delta reads one actor and sets only the caster's health (caster_health_pct); aura_presence and hit_ratio place a grouped ally (target_distance, ally_distance) but read an aura or a ratio of a metric over trials; taken_hit reads ally_health_pct only to make a heal effective. No kind sets the health of the caster and the ally to different percentages, casts the idol, and reads both after 2000 ms to the 5% band. Tool: a metric_delta (or kind) option with ally_health_pct and caster_health_pct arms and a second read of the ally health, with a control arm without the idol (health stays unequal). Candidate lead L-b19-2: Link() scans 10 yd and players only, while the tooltip says all party and raid members with no radius (the sibling field idols use 30 yd).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 706369,
     "clause": "@ext:Can only have 1 Idol active at a time.:ext@",
     "labels": [
-      "706369 effect_value #1"
+      "706369 behaviour_metric_delta one_idol"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label \"706369 effect_value #1\" (unmodelled: the literal \"1\" of the client extension note) is dropped; the sentence is measured by \"706369 behaviour_metric_delta one_idol\" (a Spirit Idol standing, then a Spirit Link Idol: no Spirit Idol left) (guide 9.4, M-19)."
   },
   {
     "spell": 706482,
@@ -4175,11 +4478,12 @@
       {
         "claim": "$582257u times, the cap of 10",
         "labels": [
-          "706551 max_stacks 582257 #1"
+          "706551 max_stacks 582257 #1",
+          "706551 behaviour_metric_delta stacks_cap"
         ]
       }
     ],
-    "reason": "The cap of 10 has no behaviour route: a Hex of Malice ticks eight times in 24000 ms (ten in the 30000 ms of Prolonged Malice) and the debuff goes with the Hex (Auras.cpp:399-400), so an eleventh stack that the cap refuses is never offered; the data label stays for the cap, the stacks entry proves that ticks stack."
+    "reason": "Cycle 10 B19 (fix round): the cap of 10 is read by `706551 behaviour_metric_delta stacks_cap`: a real Hex of Malice at the dummy and a real recast 21500 ms later (the recast refreshes the Hex without a REAL removal, Auras.cpp:442-443, so the debuff 582257 stays), so that eleven ticks are offered inside 35000 ms and the debuff the caster owns reads 10 stacks. The data label stays for the StackAmount; the stacks entry proves that ticks stack."
   },
   {
     "spell": 706557,
@@ -4342,40 +4646,91 @@
     "spell": 707209,
     "clause": "Transform into a malignant spirit for $d,",
     "labels": [
-      "707209 aura_duration_ms #0"
+      "707209 aura_duration_ms #0",
+      "707209 behaviour_metric_delta grasp_lasts"
     ],
     "kind": "claim"
   },
   {
     "spell": 707209,
     "clause": "allowing you to cast Malefic Wrath and Bad Juju while moving, and periodically granting you a Spirit every $t3 sec.",
-    "labels": [
-      "707209 aura_amplitude_ms #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "allowing you to cast Malefic Wrath and Bad Juju while moving",
+        "labels": [
+          "707209 behaviour_metric_delta grasp_moving_wrath",
+          "707209 behaviour_metric_delta grasp_moving_juju"
+        ]
+      },
+      {
+        "claim": "and periodically granting you a Spirit every $t3 sec.",
+        "labels": [
+          "707209 aura_amplitude_ms #1",
+          "707209 behaviour_metric_delta grasp_spirit_period"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The moving half is read by the two real casts under the native movement flag (Malefic Wrath and Bad Juju refused with 51 before the Grasp, accepted after it); the periodic Spirit by the stacks of 561136 straddling the fourth tick at 6000 ms (3 stacks at 5750 ms, 4 at about 6170 ms: three periods, so the read keeps 120 ms against the tick). The data label aura_amplitude_ms #1 (ok) stays."
   },
   {
     "spell": 707209,
     "clause": "Regenerates ${$m2+$ppl2} health",
     "labels": [
-      "707209 effect_value 561136e1 #2"
+      "707209 behaviour_metric_delta grasp_spirit_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `707209 effect_value 561136e1 #2` (not_measured: an aura script hook of Spirit 561136 sets the amount after CalcValue) is dropped; the stated 7 health per stack is measured by `707209 behaviour_metric_delta grasp_spirit_heal` (the logged heal of the Spirit a real Grasp cast grants, guide 9.4, M-19)."
   },
   {
     "spell": 707209,
     "clause": "and mana, repeating every $T2 sec$?s707335[and increases your movement speed by $561071s1%][] for $d,",
-    "labels": [
-      "707209 aura_amplitude_ms #3",
-      "707209 spell_duration 561136 #4"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and mana",
+        "labels": [
+          "707209 behaviour_metric_delta grasp_spirit_mana"
+        ]
+      },
+      {
+        "claim": "repeating every $T2 sec",
+        "labels": [
+          "707504 behaviour_metric_delta spirit_heal",
+          "707504 behaviour_metric_delta spirit_mana"
+        ]
+      },
+      {
+        "claim": "and increases your movement speed by $561071s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "707209 spell_duration 561136 #4",
+          "707209 behaviour_metric_delta grasp_spirit_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label `707209 aura_amplitude_ms #3` (unmodelled: the amplitude of a foreign spell) is dropped. \"and mana\" is read by `grasp_spirit_mana`; \"for $d\" by `grasp_spirit_lasts` (last application expiry of the Spirit a Grasp refreshes every 2000 ms). \"repeating every $T2 sec\" (4 sec, Spirit 561136 EffectAmplitude 4000) cannot be read on a Grasp Spirit: every Grasp tick refreshes the aura and AuraEffect::CalculatePeriodic restarts the periodic timer of a non-damage aura on reapply (SpellAuraEffects.cpp:757-770, EXTRA_INITIAL_PERIOD), so the Spirit heals at each 2000 ms grant. The same aura's period is measured on a Spirit from a real Bottle cast, straddling the second tick (`707504 spirit_heal` at 5380 and 5700 ms, `707504 spirit_mana`), and those labels are linked (guide 9.4: a dropped label that measures a stated value is linked to a passing label). The 707335 speed branch follows M-52 and the 301175 precedent (no_behaviour_route). Observation: the `707504 spirit_heal` and `707504 spirit_mana` labels measure the 4 sec period of a Spirit cast by a real Bottle; a Spirit that a Grasp tick refreshes every 2 sec heals every 2 sec instead, which follows from the reapply restart above and is not a defect of the stated 4 sec.",
+    "no_behaviour_route": {
+      "reason": "Mentor ruling M-52 (cycle 8, MENTOR-DECISIONS.md): the branch `$?s707335[and increases your movement speed by $561071s1%][]` needs the spell 707335, which no player can learn, so the clause is recorded as unreachable and not fixed; the claim \"and increases your movement speed by $561071s1%\" has no behaviour route and no label. The fixture route (aura 707335 set by the harness in the after phase, the repaired `707504 spirit_speed` entry) exists for 707504 but is not linked, as for 301175.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#no-route-speed"
+        }
+      ]
+    }
   },
   {
     "spell": 707209,
     "clause": "stacking $u times.",
     "labels": [
-      "707209 max_stacks 561136 #5"
+      "707209 max_stacks 561136 #5",
+      "707209 behaviour_metric_delta grasp_spirit_stacks"
     ],
     "kind": "claim"
   },
@@ -4423,31 +4778,42 @@
       {
         "claim": "Viper Wards have a $712374h% chance",
         "labels": [
-          "707329 effect_value #1"
+          "707329 behaviour_metric_delta viper_rate"
         ]
       },
       {
         "claim": "to unleash a Hexfire Blast",
-        "labels": []
+        "labels": [
+          "707329 behaviour_metric_delta viper_rate"
+        ]
       }
     ],
-    "reason": "The 50% base chance has no rate entry: the procs minion trigger counts pet_melee_swings as attempts, which a ward never makes (tool note T4); `viper_hexfire_forced` (the Blast on every update with certain ranged crit) is held: its control arm has no ward to read."
+    "reason": "Judged by 707329 behaviour_metric_delta viper_rate (kind flat_chance_rate, cycle 10 author P): one Viper Ward per cycle, its Serpent Ward Attack 573055 casts the trials and its Hexfire Blast 712415 casts the events (so the rate also shows the unleash), 50% with no ranged crit rating, 12 parts of 100 wards; the control is a plain Serpent Ward without the talent, which never casts the Blast. This is tool note T4 / T-c9-B16-4 built as per-cycle creature reads in a contributor kind module. The former label \"707329 effect_value #1\" is the unmodelled data label of the chance and is dropped (guide 9.4, M-19)."
   },
   {
     "spell": 707329,
     "clause": "dealing ${$712415m1+$712415ppl1+$RAP*.15} Fire damage to an enemy.",
     "labels": [
-      "707329 effect_value 712415e0 #2"
+      "707329 effect_value 712415e0 #2",
+      "707329 script_hit 712415 viper_hexfire"
     ],
     "kind": "claim",
-    "reason": "No behaviour entry: the damage of one Hexfire Blast is rolled by a creature cast with partial resists, owned_creature_damage_total has no spell filter (the Serpent Attack would be summed in) and the 0.15 x ranged attack power term needs a per-hit read of a random amount; the data label stays (tool note T4)."
+    "reason": "The damage of one Hexfire Blast is read by `707329 script_hit 712415 viper_hexfire` on a real Viper Ward and a real Hexfire, the hits of 712415 under the player (a control arm without the ward counting none); the earlier \"no behaviour entry\" reason (the damage logs under the original caster, so the player's filter reads it) is superseded."
   },
   {
     "spell": 707329,
     "clause": "Chance increased based on your ranged critical strike rating.",
     "labels": [],
     "kind": "claim",
-    "reason": "The entry reads the certain-chance end only (rating 100000): a ward that took no rating bonus would fail it with at least 99.6% probability; the size of the increase per rating point has no rate entry (tool note T4)."
+    "tool_gap": {
+      "reason": "The rating term of the Viper roll (Summons.cpp:486-488: ProcChance of 712374 + GetRatingBonusValue(CR_CRIT_RANGED)) needs a treatment arm with a set ranged critical strike rating and the expected chance from the rating bonus at level 60. The flat_chance_rate kind sets one player fixture for both arms, and no read gives GetRatingBonusValue(CR_CRIT_RANGED) to derive the expected chance (never invented). The 50% end at rating 0 is judged by 707329 behaviour_metric_delta viper_rate, which does not prove the increase. Tool note P-T5 (harness read, owner): a combat_rating_bonus read (GetRatingBonusValue of one rating) and a per-part player_ratings field in the contributor kind; then a second viper_rate entry at a rating whose bonus makes about 70%.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-P",
+          "report": "cycle10/author-P.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707331,
@@ -4552,9 +4918,7 @@
       },
       {
         "claim": "and increases your movement speed by $561071s1%",
-        "labels": [
-          "707504 behaviour_metric_delta spirit_speed"
-        ]
+        "labels": []
       },
       {
         "claim": "for $d",
@@ -4564,7 +4928,16 @@
         ]
       }
     ],
-    "reason": "The former label `707504 aura_amplitude_ms #1` (unmodelled) is dropped; the period is read by the two Spirit regeneration entries at the two ticks (the 301175, 503707 and 572383 precedent). Claims 278.1 (repeating every $T2 sec) and 278.3 (for $d) have no new entry: their labels (spirit_mana, spirit_heal; spell_duration 561136 #2, spirit_lasts) read ok in both final05 runs and the parts stay not final only because the cycle's candidate list did not name them (tally.classify: carried). The one open part of the clause is 278.2, the 707335 branch, which M-52 records as unreachable."
+    "reason": "The former label `707504 aura_amplitude_ms #1` (unmodelled) is dropped; the period is read by the two Spirit regeneration entries at the two ticks (the 301175, 503707 and 572383 precedent). Claims 278.1 (repeating every $T2 sec) and 278.3 (for $d) have no new entry: their labels (spirit_mana, spirit_heal; spell_duration 561136 #2, spirit_lasts) read ok in both final05 runs and the parts stay not final only because the cycle's candidate list did not name them (tally.classify: carried). The one open part of the clause is 278.2, the 707335 branch, which M-52 records as unreachable. Cycle 10 B17: the speed claim follows M-52 and the 301175 precedent (no_behaviour_route); the `spirit_speed` entry is repaired (the harness learn of 707335 applies no aura; after_auras sets it in the after phase) so it stops alerting, and stays unlinked.",
+    "no_behaviour_route": {
+      "reason": "Mentor ruling M-52 (cycle 8, MENTOR-DECISIONS.md): the branch `$?s707335[and increases your movement speed by $561071s1%][]` needs the spell 707335, which no player can learn, so the clause is recorded as unreachable and not fixed; the claim \"and increases your movement speed by $561071s1%\" has no behaviour route and no label. The repaired `707504 behaviour_metric_delta spirit_speed` entry (aura 707335 set in the after phase as a precondition fixture, 1.0 before and 1.04 after) shows the branch works under that fixture; it is not linked here.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#no-route-speed"
+        }
+      ]
+    }
   },
   {
     "spell": 707504,
@@ -4579,11 +4952,24 @@
   {
     "spell": 707505,
     "clause": "Increases the critical strike chance and critical damage of Hexfire by $s1%.",
-    "labels": [
-      "707505 effect_value e0 #0"
-    ],
+    "labels": [],
     "kind": "claim",
-    "reason": "Data conformant (effect_value e0 ok), the two behaviour halves unbuilt on purpose. Crit chance: a crit_rate entry exists in kind, but at +25 points with the 2-point band the 99% interval needs about 5300 Hexfire casts per arm (1.46 / sqrt(n) <= 0.02), beyond the 90-minute rule, so it takes the G-20 path to status 5, with the cast count the full band needs. Crit damage: \"increases critical damage by 25%\" reads either as the bonus part (engine SPELLMOD_CRIT_DAMAGE_BONUS, a ratio near 1.08 to 1.125 on a forced crit) or as the whole hit (1.25); the expectation is uncertain, a question for the owner, not a built entry."
+    "reason": "The crit chance half is judged by 707505 behaviour_metric_delta hexfire_crit (the Juju Spirits 807296 bad_juju_crit shape: the Hexfire spell critical chance against the dummy before and after a real learn, gain 25.0 within 0.05). The critical damage half is an uncertain expectation (defects rule), awaiting the owner: question Q-P-1 in cycle10/author-P.md. \"Increases the critical damage by 25%\" reads either as the critical bonus (engine SPELLMOD_CRIT_DAMAGE_BONUS; the readback 707505 e1 spell_critical_damage 573026 reads 1500 to 1625 in both final07 runs) or as the whole critical hit (x 1.25). The owner chose the bonus reading for the same Templar wording (Legacy of the Silver Hand, 2026-11-12, Templar only). The entry 707505 behaviour_hit_ratio hexfire_crit_damage measures forced Hexfire crits under the bonus reading (1.083333) and is linked to this claim once the owner answers; until then the claim keeps its data label effect_value e0 (25).",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of Hexfire by $s1%",
+        "labels": [
+          "707505 effect_value e0 #0",
+          "707505 behaviour_metric_delta hexfire_crit"
+        ]
+      },
+      {
+        "claim": "and critical damage of Hexfire by $s1%",
+        "labels": [
+          "707505 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707617,
@@ -4601,13 +4987,15 @@
       {
         "claim": "Healing with Mojo Beam now heals up to $712453i of the lowest health nearby allies",
         "labels": [
-          "707617 effect_value #0"
+          "707617 behaviour_metric_delta wave_lowest",
+          "707617 behaviour_metric_delta wave_cap"
         ]
       },
       {
         "claim": "for $s1% of the healing done",
         "labels": [
-          "707617 effect_value e0 #1"
+          "707617 effect_value e0 #1",
+          "707617 behaviour_metric_delta wave_share"
         ]
       },
       {
@@ -4619,19 +5007,7 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The two heal claims need a Mojo Beam channel cast at a grouped ally with two more grouped allies at different health, and a read of each ally's heal of Mojo Wave 712453 against the heal of the channel (Brewing.cpp:153-162: allies within 15 yd of the target, at most 2, half of the effective healing). metric_delta has no ally fixtures; the kinds that have allies (cast_applies_aura, aura_presence, ally_heal_breadth) read an aura or cast the trigger at the dummy. The effect_value #0 label reads the count 2 of $712453i and is unmodelled. Tool: ally fixtures with a per-ally `spell_heal_total` read inside metric_delta (the cycle 5 note for Mojo Beam branches).",
-      "attempts": [
-        {
-          "agent": "cycle6/author-B4",
-          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B4.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle8/author-B11",
-          "report": "cycle8/author-B11.md#no-behaviour-route"
-        }
-      ]
-    }
+    "reason": "Cycle 10 author T: three behaviour labels of one scenario (kind ally_heal_reach, ADR 1021 provisional): a real Mojo Beam at a grouped ally with three more grouped allies at 10%, 20%, 30% and 90% health (100000 maximum), Mojo Wave 707617 learned between a control and a treatment phase. \"wave_lowest\": Mojo Wave 712453 heals reach the three lowest allies and never the 90% ally, which takes Beam heals (grouped and in reach), and none in the control phase; \"wave_cap\": exactly 2 Wave heals per Beam heal ($712453i = 2); \"wave_share\": the mean Wave heal is 0.5 x the mean effective Beam heal inside the rounding band [+0, +1] ($s1 = 50). The unmodelled label \"707617 effect_value #0\" (it read the count 2 of $712453i) is dropped from the first claim and linked to \"707617 behaviour_metric_delta wave_cap\", which measures the same 2 (guide 9.4). The tool gap is closed."
   },
   {
     "spell": 707617,
@@ -4830,7 +5206,10 @@
     "spell": 712478,
     "clause": "Reduces the cooldown of Malefic Arrow by $/1000;s1 sec.",
     "labels": [
-      "712478 effect_value e0 #0"
+      "712478 effect_value e0 #0",
+      "712478 cost_gate 801674 arrow_cooldown without",
+      "712478 cost_gate 801674 arrow_cooldown with",
+      "712478 cost_gate 801674 arrow_cooldown beyond"
     ],
     "kind": "claim"
   },
@@ -4908,38 +5287,105 @@
   {
     "spell": 811117,
     "clause": "Each Spirit explodes on impact, dealing ${$802712m1*$<scalingbp>+$sps*.15+$RAP*.15} Shadow damage to other nearby enemies within $802712a1 yds of the target.",
-    "labels": [
-      "811117 effect_value 802712e0 #2",
-      "811117 effect_radius 802712e0 #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Each Spirit explodes on impact, dealing ${$802712m1*$<scalingbp>+$sps*.15+$RAP*.15} Shadow damage",
+        "labels": [
+          "811117 behaviour_metric_delta splash_damage"
+        ]
+      },
+      {
+        "claim": "to other nearby enemies within $802712a1 yds of the target.",
+        "labels": [
+          "811117 effect_radius 802712e0 #3",
+          "811117 behaviour_metric_delta splash_inside",
+          "811117 behaviour_metric_delta splash_beyond"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label \"811117 effect_value 802712e0 #2\" alerted in both final07 runs (read 128, formula 135.42): the value scenario reads the effect with CalcValue, which carries no attack power term (128.37 plus 0.15 x 47 reference ranged attack power = 135.42, the read is the first term only); classification: incorrect test, and the label is dropped from the damage claim, which is measured by \"811117 behaviour_metric_delta splash_damage\" (the damage of the splash hit on a second dummy, in [134, 136] at spell power 0, no crit, no resist; guide 9.4, M-19). The radius is bracketed by splash_inside (7.05 yd, 0.5 yd inside the 5 yd edge plus both reaches, one hit) and splash_beyond (8.05 yd, no hit); the code searches 10 yd (AscensionWitchDoctorAuras.cpp:298), so splash_beyond alerts today: candidate defect lead L-b19-4."
   },
   {
     "spell": 801660,
     "clause": "Brew Jungle Shrooms into your Cauldron.",
-    "labels": [],
+    "labels": [
+      "801660 behaviour_metric_delta brewed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801660,
     "clause": "Cauldron: Heal up to $?s705859[5][$i] allies within $802703a1 yds for ${$802703m1*$<scalingbp>+$BH*.2} every $t1 sec.",
-    "labels": [
-      "801660 effect_value #0",
-      "801660 effect_radius 802703e0 #1",
-      "801660 aura_amplitude_ms #2",
-      "801660 effect_value #5"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Cauldron: Heal up to $?s705859[5][$i] allies",
+        "labels": [
+          "801660 effect_value #0"
+        ]
+      },
+      {
+        "claim": "within $802703a1 yds",
+        "labels": [
+          "801660 effect_radius 802703e0 #1"
+        ]
+      },
+      {
+        "claim": "for ${$802703m1*$<scalingbp>+$BH*.2}",
+        "labels": [
+          "801660 behaviour_metric_delta pulse_heal",
+          "801660 behaviour_metric_delta pulse_heal_sp"
+        ]
+      },
+      {
+        "claim": "every $t1 sec.",
+        "labels": [
+          "801660 aura_amplitude_ms #2",
+          "801660 behaviour_metric_delta pulse"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label `801660 effect_value #5` (unreadable: the formula has the $BH token) is replaced by `801660 behaviour_metric_delta pulse_heal` (the raw pulse 89 to 90 at spell power 0: the scaled base $802703m1*$<scalingbp>) and `801660 behaviour_metric_delta pulse_heal_sp` (the same pulse at a spell power of 20000, 4089 to 4090: the $BH*.2 term; 802703 has MaxLevel 0, so CalculateLevelPenalty returns 1.0, Unit.cpp:3629, and Coefficients.h:138 has {802703, 0.2, healing}). The period is read by `pulse` (no pulse at 5750 ms, one at about 6200 ms). The count and the radius keep their data labels and the tool gap below.",
+    "tool_gap": {
+      "reason": "\"Heal up to $i allies\": the cap is 8 (MaxAffectedTargets of 802703, 5 with Jungle Booms 705859) and a proof needs 9 allies inside the radius; the harness has one ally player (the group action) and no way to add creatures that receive a raid heal. \"within $802703a1 yds\" (30 yd): the heal events are logged per measuring actor and metric_delta cannot place the ally (aura_presence reads the actor's own events, and the pulse is a heal, not an aura), so no inside / outside arm exists for the pulse (hit_ratio has an ally placement but compares two arms of one spell). Tool: a metric_delta `ally_distance` with a heal read of the ally (spell_heal_count with the caster's events and the ally as target), and a party of up to 9 fixtures for the cap.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-shrooms-cauldron"
+        }
+      ]
+    }
   },
   {
     "spell": 801660,
     "clause": "Potion Toss: Heal the target ally for $802973s1 every $802973t1 sec for $802973d.",
-    "labels": [
-      "801660 aura_amplitude_ms #3",
-      "801660 spell_duration 802973 #4",
-      "801660 effect_value #6"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Potion Toss: Heal the target ally for $802973s1",
+        "labels": [
+          "801660 behaviour_metric_delta potion_heal"
+        ]
+      },
+      {
+        "claim": "every $802973t1 sec",
+        "labels": [
+          "801660 behaviour_metric_delta potion_period"
+        ]
+      },
+      {
+        "claim": "for $802973d.",
+        "labels": [
+          "801660 spell_duration 802973 #4",
+          "801660 behaviour_metric_delta potion_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The former labels `801660 effect_value #6` (unreadable: $802973s1 of a foreign spell) and `801660 aura_amplitude_ms #3` (unmodelled: the amplitude of a foreign spell) are dropped; the tick amount 71 to 72 is measured by `potion_heal` (the raw heal of the first tick), the period by `potion_period` (2 heals at 8750 ms, 3 at about 9170 ms: three periods) and the duration by `potion_lasts` with the data label (guide 9.4, M-19)."
   },
   {
     "spell": 573435,
@@ -4991,12 +5437,12 @@
       {
         "claim": "$s1% reduced damage taken",
         "labels": [
-          "801663 effect_value e0 #1",
           "801663 aura_amount e0 #1",
           "801663 behaviour_hit_ratio cauldron_taken"
         ]
       }
-    ]
+    ],
+    "reason": "The former label `801663 effect_value e0 #1` is not_measured: a DoEffectCalcAmount hook of the aura scripts bound to 801663 sets the amount after CalcValue, so the readback of the effect does not measure the amount the aura applies (the verdict says an aura_amount read of a present aura does). It is dropped (guide 9.4, M-19) and the stated -3% stays measured by `801663 aura_amount e0 #1` (the live aura amount, ok -3) and by `801663 behaviour_hit_ratio cauldron_taken` (ratio 0.9645, -3.55% inside the +-2 point band, ok in final07)."
   },
   {
     "spell": 801663,
@@ -5033,7 +5479,10 @@
         "claim": "Cauldron: Allies within $802771a1 yds",
         "labels": [
           "801664 effect_radius 802771e0 #0",
-          "801664 behaviour_metric_delta cauldron_silenced"
+          "801664 behaviour_metric_delta cauldron_silenced",
+          "801664 behaviour_aura_presence cauldron_inside",
+          "801664 behaviour_aura_presence cauldron_outside",
+          "801664 behaviour_aura_presence cauldron_outside caster"
         ]
       },
       {
@@ -5101,11 +5550,12 @@
         ]
       },
       {
-        "claim": "by ${$m1+0}",
+        "claim": "spell power and Spirit by ${$m1+0}",
         "labels": [
           "801689 effect_value e0 #0",
           "801689 aura_amount e0 #0",
-          "801689 behaviour_metric_delta brew_spell_power"
+          "801689 behaviour_metric_delta brew_spell_power",
+          "801689 behaviour_metric_delta brew_spirit"
         ]
       },
       {
@@ -5116,7 +5566,7 @@
         ]
       }
     ],
-    "reason": "The claim \"by ${$m1+0}\" is the value of the Spirit and spell power gain: \"801689 behaviour_metric_delta brew_spell_power\" reads exactly that value (73.5 within 0.5) from a real cast and is linked to it beside the data labels (a label may serve more than one claim, guide 9.4); \"801689 behaviour_metric_delta brew_spirit\" reads the Spirit half through the Human Spirit +3%.",
+    "reason": "The claim \"by ${$m1+0}\" is the value of the Spirit and spell power gain: \"801689 behaviour_metric_delta brew_spell_power\" reads exactly that value (73.5 within 0.5) from a real cast and is linked to it beside the data labels (a label may serve more than one claim, guide 9.4); \"801689 behaviour_metric_delta brew_spirit\" reads the Spirit half through the Human Spirit +3%, and is linked to the value claim too, so the Spirit half of the stated value is read. Cycle 10: the value claim is worded with the quantity it moves (\"spell power and Spirit by ${$m1+0}\", a contiguous part of the clause), so the spell power read promises it (brew_spell_power ok, learned contrast, in both final07 runs): the claim words named only the number, so a state read counted as data.",
     "labels": []
   },
   {
@@ -5171,21 +5621,53 @@
         ]
       }
     ],
-    "reason": "The 5% amount and the cap of 3 offensive casts are not read: `master_heal` reads the one heal event of the next offensive cast (the amount of a random hit has no exact value, and one trigger cast runs per phase)."
+    "reason": "The 5% amount and the cap of 3 offensive casts are not read: `master_heal` reads the one heal event of the next offensive cast (the amount of a random hit has no exact value, and one trigger cast runs per phase).",
+    "tool_gap": {
+      "reason": "The amount of \"to heal for 5% of the damage they deal\" and the cap of the next 3 offensive abilities have no behaviour proof. The master_heal entry reads the one heal event of the next cast (ok); the 5% needs a ratio of the heal to the damage of the same cast (cast_leech_ratio: Abilities.cpp:48-51, :195-199, :290-291, expected 0.05, heal 570185), and the entry cast_leech_ratio master_heal_amount written in cycle 9 (author-B16-held) cannot merge: a passive needs a P5 link label format in passives.BEHAVIOUR_LABELS (tool note T-c9-B16-14) and the learn of the Master of Concoctions buff chain needs prelude_casts with the passives learned (T-c9-B16-16). The label \"801690 effect_value 570064e0 #1\" is not_measured (a hook sets the amount after CalcValue) and has no aura_amount twin for the foreign spell 570064, so it stays until the held entry runs. The cap of 3 has no entry (one trigger cast per phase; tool note T2).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 801716,
     "clause": "Let the spirit of Bwonsamdi possess you for $d$?s705916[, increasing your Shadow damage dealt by $s3%][].",
-    "labels": [
-      "801716 aura_duration_ms #0"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Let the spirit of Bwonsamdi possess you for $d",
+        "labels": [
+          "801716 aura_duration_ms #0",
+          "801716 behaviour_metric_delta voice_lasts"
+        ]
+      },
+      {
+        "claim": "$?s705916[, increasing your Shadow damage dealt by $s3%][].",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "The duration is read by a real cast in game time (20 sec in the G-19 band). The conditional \"increasing your Shadow damage dealt by $s3%\" (with The Price of Power 705916, $s3 = 100) has no entry: Effect[2] of Voice is aura 137 on Spirit (misc 4), AscensionWitchDoctorAuras.cpp:162-163 and :466-467 set it to 100%, and the 705916 tooltip says \"now increases your Spirit by $s1%\" (the `voice_spirit` entry reads Spirit x2.0), so the code raises Spirit and the Voice tooltip says Shadow damage; the two tooltips of one mechanic disagree and the expectation is uncertain (candidate lead, see the report).",
+    "tool_gap": {
+      "reason": "The conditional claim \"increasing your Shadow damage dealt by $s3%\" is an uncertain expectation: Voice of Bwonsamdi Effect[2] is a Spirit stat percent (aura 137, misc 4), which the code sets to +100% with The Price of Power; the tooltip of Voice says Shadow damage dealt and the tooltip of 705916 says Spirit. A hit_ratio of Shadow damage with the Voice and the talent against none would read 1.0 unless Spirit feeds spell power (it does only through Voodoo Power), against the tooltip's +100%, so building it without a ruling would only record the disagreement. Needs the owner to say which tooltip governs (section 8 question), then a hit_ratio entry (Shadow damage) or the stat read already in `voice_spirit`.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#voice-of-bwonsamdi-801716"
+        }
+      ]
+    }
   },
   {
     "spell": 801716,
     "clause": "Dealing periodic damage unleashes a trapped voodoo spirit at enemies, exploding for ${$504452m1*$<scalingbp>+$sps*0.25} Shadow damage.",
     "labels": [
-      "801716 effect_value 504452e0 #1"
+      "801716 effect_value 504452e0 #1",
+      "801716 behaviour_metric_delta voice_explosion",
+      "801716 behaviour_metric_delta voice_explosion_control"
     ],
     "kind": "claim"
   },
@@ -5224,25 +5706,50 @@
   {
     "spell": 802092,
     "clause": "Damage dealt by Shadow Puppets now increases your damage and critical strike chance by $570066s1% for $570066d,",
-    "labels": [
-      "802092 effect_value 570066e0 #0",
-      "802092 spell_duration 570066 #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Shadow Puppets now increases your damage by $570066s1%",
+        "labels": [
+          "802092 trigger_count",
+          "802092 effect_value 570066e0 #0",
+          "802092 behaviour_hit_ratio other_side_damage"
+        ]
+      },
+      {
+        "claim": "and critical strike chance by $570066s1%",
+        "labels": [
+          "802092 behaviour_metric_delta other_side_crit"
+        ]
+      },
+      {
+        "claim": "for $570066d",
+        "labels": [
+          "802092 spell_duration 570066 #1",
+          "802092 behaviour_metric_delta other_side_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The trigger (every Puppet hit casts 570066) is 802092 trigger_count; the damage per stack is 802092 behaviour_hit_ratio other_side_damage (cycle 10 fix round: Hexfire hits after one real Shadow Puppets, five stacks, +5% against a control without the talent; the Duty Calls 705286 precedent); the crit per stack is other_side_crit; the duration is other_side_lasts with the spell_duration data label."
   },
   {
     "spell": 802092,
     "clause": "stacking up to $570066u times.",
     "labels": [
-      "802092 max_stacks 570066 #2"
+      "802092 max_stacks 570066 #2",
+      "802092 behaviour_metric_delta other_side_cap"
     ],
     "kind": "claim"
   },
   {
     "spell": 802092,
     "clause": "Additional procs do not refresh the duration.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "802092 behaviour_metric_delta other_side_lasts"
+    ],
+    "kind": "claim",
+    "reason": "The buff of one Shadow Puppets cast (five procs from about 200 to 3200 ms) reads 5 stacks at 19200 ms and 0 at 21200 ms in game time: it ends 20 sec after the first proc; a refreshing server ends about 23200 ms after the cast and fails the gone read (Events.cpp:188-196 keeps the remaining duration)."
   },
   {
     "spell": 802100,
@@ -5331,7 +5838,9 @@
     "claims": [
       {
         "claim": "Your Serpent Ward's attacks now have a $h% chance",
-        "labels": []
+        "labels": [
+          "802262 behaviour_metric_delta voodoo_rate"
+        ]
       },
       {
         "claim": "to shoot Voodoo Fire,",
@@ -5340,16 +5849,7 @@
         ]
       }
     ],
-    "reason": "The former label \"802262 effect_value #0\" is unmodelled (a $h chance has no value read); the effect is read by \"802262 behaviour_metric_delta voodoo_shoot\" under a forced roll (never a rate proof).",
-    "tool_gap": {
-      "reason": "The 20% is rolled by the ward (AscensionWitchDoctorSummons.cpp:469-475, roll_chance_f after ApplySpellMod SPELLMOD_CHANCE_OF_SUCCESS) once per ward attack (every 2000 ms, 573055), and the Voodoo Fire cast is another creature cast (500473). A rate needs the trials (the ward's attack casts) and the events (its Voodoo Fire casts) counted per creature with game-time-independent counts: stack_chance_rate counts the player's `spell_cast_count`, and owned_creature_spell_cast_count is a state-class read that cannot be a trial count of a rate kind. At 20% the flip-proof size is about 15,900 attacks per arm (band 2 points: p(1 - p) x ((2.576 + 3.719) / 0.02)^2 = 0.16 x 99,225), 31,800 s of ward time at 2000 ms per attack, more than the G-20 90-minute bound, so a pilot of 300 attacks (600 s) records \"effect present, interval stated\" at best. Tool note T-c9-B16-4: an `owned_creature_spell_cast_count` pair as the trial and event counts of stack_chance_rate (or of a new minion_chance_rate kind), with the forced roll absent.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B16",
-          "report": "cycle9/author-B16.md"
-        }
-      ]
-    },
+    "reason": "The 20% is judged by 802262 behaviour_metric_delta voodoo_rate (kind flat_chance_rate, cycle 10 author P): one real Serpent Ward per cycle, its Serpent Ward Attack 573055 casts the trials and its Voodoo Fire 500473 casts the events (owned_creature_spell_cast_count read at the start and end of each ward), 14 parts of 52 wards, an unlearned control; tool note T-c9-B16-4 built in a contributor kind module. The former label \"802262 effect_value #0\" is unmodelled (a $h chance has no value read); the effect is also read by 802262 behaviour_metric_delta voodoo_shoot under a forced roll.",
     "labels": []
   },
   {
@@ -5468,7 +5968,8 @@
       {
         "claim": "healing nearby allies within $802489a1 yds",
         "labels": [
-          "802487 effect_radius 802489e0 #1"
+          "802487 effect_radius 802489e0 #1",
+          "802487 behaviour_metric_delta unstable_radius"
         ]
       },
       {
@@ -5479,7 +5980,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Radius and amount have no route. Radius: the tooltip says 20 yd ($802489a1, RadiusIndex 9) but Abilities.cpp:232 searches Allies(player, target, 10.0f, 5), a 10 yd literal and a cap of 5 (M-48: the cap of 5 agrees with $i and MaxAffectedTargets): a probable defect by code read (R3-e2; G-3 needs a reproduction). No kind places grouped ally players at chosen distances while making the setup casts (Frog Bones 801663, Potion Toss 801661) and reading the 802489 heal on each: radius_edge, fixed_count and metric_delta place creatures only, and ally_heal_breadth, party_stat_ratio and hit_ratio ally_distance take no setup casts or read no per-ally heal count. Tool note T-c8-1 (author-T.md): a radius_edge field ally_players (grouped player fixtures in place of the dummies, spell_heal_count of hit_spell on each, player reach 1.5). Until then the bracket is the hand-written scenario cycle8/brackets/witch-doctor-unstable-concoction-radius.json (allies 3, 22.5 and 23.5 yd from the marked Witch Doctor) for the integrator's sweep. Amount: `${m1+ppl1+$BH*0.4}` has a bonus-healing term and script_hit reads damage of a script cast on the dummy or the striker, not a heal on an ally.",
+      "reason": "Cycle 10 author T: the radius claim now has a behaviour label, \"802487 behaviour_metric_delta unstable_radius\" (kind ally_heal_reach, ADR 1021 provisional): grouped ally players 3, 22.5 and 23.5 yd from the marked Witch Doctor (0.5 yd inside and beyond 20 yd plus both 1.5 yd combat reaches), real Frog Bones, Potion Toss and Spirit in a Bottle casts in a control phase without 802487 and a treatment phase with it; the inner two take 802489, the outer one none, the control none. The code searches Radius(UnstableHeal) since fix 61f0d44cf0 (the 10 yd literal of lead R3-e2 is gone). Still unproven: the amount ${$802489m1+$802489ppl1+$BH*0.4}, whose $BH (bonus healing) token has no resolver in tooltip.py, so \"802487 effect_value #2\" stays unreadable and no expected heal exists (proposal-tooltip-reader.md).",
       "attempts": [
         {
           "agent": "cycle7/author-B8",
@@ -5488,6 +5989,10 @@
         {
           "agent": "cycle8/author-T",
           "report": "cycle8/author-T.md"
+        },
+        {
+          "agent": "cycle10/author-T",
+          "report": "cycle10/author-T.md"
         }
       ]
     }
@@ -5539,7 +6044,8 @@
     "spell": 802714,
     "clause": "Your Spirit Glaive now deals an additional ${$806616m1*$<scalingbp>+$sps*.4+$RAP*.25} Shadow damage at the end of its duration.",
     "labels": [
-      "802714 effect_value 806616e0 #0"
+      "802714 effect_value 806616e0 #0",
+      "802714 script_hit 806616 godslayer_blast"
     ],
     "kind": "claim"
   },
@@ -5566,12 +6072,13 @@
         ]
       },
       {
-        "claim": "and Hexbreak",
+        "claim": "Reduces the cost of your Hexbreak by $s1%",
         "labels": [
           "803463 behaviour_metric_delta hexbreak_cost"
         ]
       }
-    ]
+    ],
+    "reason": "Cycle 10: the Hexbreak claim is worded as the cost reduction it states, as the Loa's Brew claim is, so the power read (hexbreak_cost ok, learned contrast in both final07 runs, 1664 against 1626 mana) promises it by the word \"cost\"; the part was data only because \"and Hexbreak\" names no cost."
   },
   {
     "spell": 803678,
@@ -5632,7 +6139,8 @@
         "claim": "Reduces the duration of snares by $s1%",
         "labels": [
           "803700 effect_value e0 #1",
-          "803700 behaviour_duration_ratio"
+          "803700 behaviour_duration_ratio",
+          "803700 behaviour_expiry"
         ]
       },
       {
@@ -5649,31 +6157,57 @@
       }
     ],
     "tool_gap": {
-      "reason": "The root (Net 47021, Mechanic 7) and stun (Hammer of Justice 853, Mechanic 12) duration_ratio entries generate and run, but a duration_ratio entry has no `variant` in its label (\"803700 behaviour_duration_ratio\" and \"803700 behaviour_expiry\"): three entries of one spell collide and the generator writes one scenario for the three expiry keys. Only the snare entry (Hamstring 1715) is in the fragment. Tool note: a variant suffix in the duration_ratio and expiry labels, then the two entries (vehicle 47021 with the root, vehicle 853 with the stun, expected_ratio 0.75) are added.",
+      "reason": "The root (Net 47021, Mechanic 7) and stun (Hammer of Justice 853, Mechanic 12) duration_ratio entries generate and run, but a duration_ratio entry has no `variant` in its label (\"803700 behaviour_duration_ratio\" and \"803700 behaviour_expiry\"): three entries of one spell collide and the generator writes one scenario for the three expiry keys. Only the snare entry is in the class file (vehicle Hamstring 1715 until cycle 10, Icy Clutch 50436 since). Tool note: a variant suffix in the duration_ratio and expiry labels, then the two entries (vehicle 47021 with the root, vehicle 853 with the stun, expected_ratio 0.75) are added. When they are added, their vehicles need a landing that no roll can refuse (cycle10/author-F.md: a melee vehicle keeps the 5% melee miss the striker's spell hit does not reach).",
       "attempts": [
         {
           "agent": "cycle8/author-B12",
           "report": "cycle8/author-B12.md"
+        },
+        {
+          "agent": "cycle10/author-F",
+          "report": "cycle10/author-F.md"
         }
       ]
-    }
+    },
+    "reason": "Cycle 10 author F: \"803700 behaviour_expiry\" joins the snare claim. It is the behaviour proof of the stated 25% (ADR 0126: the vehicle snare is present just before 10000 ms and gone just after it without 803700, present just before 7500 ms and gone just after it with 803700, timed from each act), generated from the same duration_ratio entry; \"803700 behaviour_duration_ratio\" is the remaining-time readback and stays data (coverage EVIDENCE: BEHAVIOUR_DURATION_RATIO is DATA). The expiry label was generated and judged in final07 (run 1 ok, run 2 alert from a missed Hamstring) but linked to no claim, so the snare claim counted as data only (final07 new 341.0)."
   },
   {
     "spell": 803846,
     "clause": "Your Serpent Ward's attacks now have a $h% chance to shoot Voodoo Fire,",
     "labels": [
-      "803846 effect_value #0"
+      "803846 behaviour_metric_delta voodoo_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The 40% is judged by 803846 behaviour_metric_delta voodoo_rate (the 802262 shape with rank two, 20 parts of 52 wards). The former label \"803846 effect_value #0\" is the unmodelled data label of the chance $h and is dropped (guide 9.4, M-19)."
   },
   {
     "spell": 803846,
     "clause": "dealing ${$cond($gt($spfi, $spn), $500473m1*$<scalingbp>+$RAP*0.125+$spfi*0.12, $500473m1*$<scalingbp>+$RAP*0.125+$spn*0.12)} Fire damage to up to $500473x1 nearby enemies.",
-    "labels": [
-      "803846 effect_value 500473e0 #1",
-      "803846 effect_value #2"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$cond($gt($spfi, $spn), $500473m1*$<scalingbp>+$RAP*0.125+$spfi*0.12, $500473m1*$<scalingbp>+$RAP*0.125+$spn*0.12)} Fire damage",
+        "labels": [
+          "803846 effect_value 500473e0 #1",
+          "803846 script_hit 500473 voodoo_fire_damage"
+        ]
+      },
+      {
+        "claim": "to up to $500473x1 nearby enemies.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "The former label \"803846 effect_value #2\" is unreadable (the $500473x1 token) and is dropped from the targets claim, which keeps no label (the tool_gap below); the damage claim is read by \"803846 script_hit 500473 voodoo_fire_damage\" (a real Serpent Ward and Hexfire, the hits of 500473 by the ward, a control arm without 803846 counting none; the rank 1 twin 802262 is ok in both final07 runs) beside the data label (guide 9.4, M-19).",
+    "tool_gap": {
+      "reason": "The count \"up to 3 nearby enemies\" (Voodoo Fire 500473 EffectChainTarget 3; the code caps the search at 3 enemies within 10 yd of the ward target, Summons.cpp:477-483) needs four dummies placed around the ward target and the shot counted on each: a script_hit reads the hits on one receiver; the shot is a minion cast behind a 40% roll (forced_roll exists for metric_delta, but the ward shots are logged under the player with no per-dummy target filter in a kind that runs a real Serpent Ward). Tool note T-c9-B16-18: a forced_roll option for a metric_delta with area_dummies reading spell_damage_count of 500473 on each dummy (a metric_delta with the real ward as setup cast and forced_roll talent 803846 is the candidate shape, not built here).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 804226,
@@ -5750,19 +6284,12 @@
       },
       {
         "claim": "and healing done now has a $h% chance to collect a Spirit",
-        "labels": []
+        "labels": [
+          "804620 behaviour_metric_delta heal_rate"
+        ]
       }
     ],
-    "tool_gap": {
-      "reason": "The healing half is not driven: the proc entry's trigger is a damaging cast (Malefic Wrath 807037) because a heal trial needs an effective heal on a hurt ally (AscensionWitchDoctorEvents.cpp:63 and :83 count only an effective heal) and the `procs` kind has no ally health fixture for a `cast` at an ally (triggers have `ally_health_pct`). Tool note: an `ally_health_pct` field on a procs entry whose trigger casts at an ally (Loa's Brew 801670).",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        }
-      ]
-    },
-    "reason": "The former label \"804620 effect_value #0\" is the unmodelled data label of the chance $h (no effect amount to read) and is dropped from the damage half: the chance is judged by the proc entry \"804620 proc_rate\" (pooled hits against the band, residual failure probability 0.001, guide 9.4, M-19). The healing half keeps no label and carries the tool_gap below."
+    "reason": "The damage half is judged by the proc entry \"804620 proc_rate\" (residual failure probability 0.001); the healing half by 804620 behaviour_metric_delta heal_rate (kind flat_chance_rate, cycle 10 author P: a Loa's Brew self heal at 30% health per trial, 10 parts of 1000, an unlearned control), which closes the ally_health_pct tool note of cycle 8. The former label \"804620 effect_value #0\" was dropped earlier (guide 9.4, M-19)."
   },
   {
     "spell": 804620,
@@ -5798,7 +6325,6 @@
       {
         "claim": "repeating every $T2 sec",
         "labels": [
-          "804620 aura_amplitude_ms #3",
           "804620 behaviour_metric_delta spirit_heal",
           "804620 behaviour_metric_delta spirit_mana"
         ]
@@ -5810,7 +6336,8 @@
           "804620 behaviour_metric_delta spirit_lasts"
         ]
       }
-    ]
+    ],
+    "reason": "The former label `804620 aura_amplitude_ms #3` is unmodelled (the amplitude of a foreign spell, the Spirit 561136, has no scenario) and is dropped from the period claim (guide 9.4, M-19); the period is read by `804620 behaviour_metric_delta spirit_heal` and `spirit_mana`, which read the health and the mana of one Spirit at its initial tick (7, about 3880 ms old) and the doubled amount at the next tick (14, about 4200 ms old), both stamped in game time, so the 4 sec period lies in the bracket (ok in final07); the claim keeps those two passing in-game reads."
   },
   {
     "spell": 804620,
@@ -5876,36 +6403,28 @@
       {
         "claim": "and deals ${$m1+0+$sps*0.6} Shadow Damage",
         "labels": [
-          "806283 effect_value 806346e0 #1",
           "806283 behaviour_metric_delta misery_damage"
         ]
       },
       {
         "claim": "every $T1 sec for the duration",
         "labels": [
-          "806283 aura_amplitude_ms #2",
-          "806283 behaviour_metric_delta misery_damage"
+          "806283 behaviour_metric_delta misery_damage",
+          "806283 behaviour_metric_delta misery_period"
         ]
       }
     ],
-    "reason": "The two data labels the clause carried are kept beside misery_damage (guide 9.4). misery_damage expects 123 per tick at level 60 (369 over three ticks): the stock per-level term of the DBC (EffectRealPointsPerLevel 2.2 from level 8, MaxLevel 0), mentor decision M-46 (cycle 8), supported by the db.exil.es export and by the live Mana Jinx Leech 630879 amounts (100 at low ranks, 232 at level 60); the tooltip prints the level-0 value 9 (ADR 0014), an owner text question (R1 F2)."
+    "reason": "M-46: the tooltip $m1 prints the level-0 value 9 (ADR 0014), an open owner text question (R1 F2); M-46 expects the server amount, 123 per tick at level 60 (8 + int32(52 x 2.2 = 114.4) + 1), read as 369 over three ticks by misery_damage (ok in both final07 runs). The data label 806283 effect_value 806346e0 #1 is not_measured (the tool counts the DoEffectCalcAmount hook bound to every Doctor aura as a possible override, but no branch of that hook applies to Misery: AscensionWitchDoctorAuras.cpp:137 tests SpellFamilyFlags[0] 536870912 or 8 and Misery carries only SpellFamilyFlags[2] 32, so the amount is the CalcValue of the DBC) and its expected value is the level-0 print, so it can never pass; it is dropped and the amount is linked to misery_damage (guide 9.4, M-19). The unmodelled data label 806283 aura_amplitude_ms #2 (amplitude of a foreign spell) is replaced by misery_period, a hit_period read of a real Misery cast (judged to the G-19 band of 1 sec), beside misery_damage."
   },
   {
     "spell": 806286,
     "clause": "Increases the proc chance of Voodoo Fire by $s1%.",
     "labels": [
-      "806286 effect_value e0 #0"
+      "806286 effect_value e0 #0",
+      "806286 behaviour_metric_delta voodoo_rate"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The chance is rolled by the Serpent Ward, Mass Serpent and Viper creatures once per attack: Summons.cpp:469-474 takes 20% (Voodoo Fire rank one 802262) or 40% (rank two 803846), applies the player's SPELLMOD_CHANCE_OF_SUCCESS of that rank (Spirit Striker 806286 Effect[0] aura 107 misc 18, +10, mask word 1 134217728 = both ranks) and rolls roll_chance_f(chance), casting 500473 on up to 3 enemies. A rate entry for +10 points (30% against 20%) needs about 21,000 ward attacks per arm for the flip-proof sizing (p(1-p) x ((2.576+3.719)/0.02)^2 at 30%), at one attack per WardAttackInterval, and no kind counts a creature's proc against its own attacks (procs minion trials count a minion's casts through a Command, the ward has none). A read of the modifier through spell_modifier is a readback (data class), the existing data label stays. Tool note: a minion-attack rate kind.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "Judged by 806286 behaviour_metric_delta voodoo_rate: Voodoo Fire rank one 802262 and Spirit Striker 806286 learned together after the unlearned control, the ward attacks shoot at 30% (20 + 10), 18 parts of 52 wards; a modifier that never applies reads 20% against the 28% to 32% band."
   },
   {
     "spell": 572383,
@@ -5916,13 +6435,14 @@
       {
         "claim": "Shoot a quick voodoo arrow at an enemy dealing $s2% Ranged Weapon Damage",
         "labels": [
-          "572383 effect_value e1 #0"
+          "572383 effect_value e1 #0",
+          "572383 hit_mean"
         ]
       },
       {
         "claim": "plus ${$m1+0} as Nature damage",
         "labels": [
-          "572383 effect_value e0 #1"
+          "572383 hit_mean"
         ]
       },
       {
@@ -5931,7 +6451,8 @@
           "572383 behaviour_metric_delta collect"
         ]
       }
-    ]
+    ],
+    "reason": "Cycle 10 B19: the damage is judged by the generated hit_mean check (842 usable hits, mean 469.84 against the weapon model 468.89 of the measured stats and the target, 4 of 4 parts, ok in both final07 runs). The former label \"572383 effect_value e0 #1\" alerted in both runs (read 520, modelled 519): the value scenario omits the per-level term of the effect (EffectRealPointsPerLevel 0.5642 over the 2 levels from BaseLevel 58, 1.13, truncated into 520 by SpellInfo.cpp:497), which the engine and the client both add; classification: incorrect test (tool model, a 0.2% delta), and the label is dropped from the Nature damage claim, which is linked to the passing applied-hit label \"572383 hit_mean\" (guide 9.4, M-19). Tool note T-b19-1."
   },
   {
     "spell": 572383,
@@ -5962,9 +6483,7 @@
       },
       {
         "claim": "and increases your movement speed by $561071s1%",
-        "labels": [
-          "572383 behaviour_metric_delta spirit_speed"
-        ]
+        "labels": []
       },
       {
         "claim": "for $d",
@@ -5973,7 +6492,17 @@
           "572383 behaviour_metric_delta spirit_lasts"
         ]
       }
-    ]
+    ],
+    "reason": "Cycle 10 B19 (fix round): the 707335 speed branch follows M-52 and the 301175, 707504 and 503707 precedents (no_behaviour_route). The `572383 behaviour_metric_delta spirit_speed` entry alerted in both final07 runs (1.0 against 1.04) because the harness learn of 707335 applies no aura; it is repaired (after_auras sets the aura in the after phase) so it stops alerting, and stays unlinked. The other three claims keep their labels.",
+    "no_behaviour_route": {
+      "reason": "Mentor ruling M-52 (cycle 8, MENTOR-DECISIONS.md): the branch `$?s707335[and increases your movement speed by $561071s1%][]` needs the spell 707335, which no player can learn, so the clause is recorded as unreachable and not fixed; the claim \"and increases your movement speed by $561071s1%\" has no behaviour route and no label. The repaired `572383 behaviour_metric_delta spirit_speed` entry (aura 707335 set in the after phase as a precondition fixture, 1.0 before and 1.04 after) shows the branch works under that fixture; it is not linked here.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#no-route-speed"
+        }
+      ]
+    }
   },
   {
     "spell": 572383,
@@ -5988,8 +6517,12 @@
   {
     "spell": 572383,
     "clause": "Usable while moving.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "572383 behaviour_metric_delta moving_cast",
+      "572383 behaviour_metric_delta moving_control"
+    ],
+    "kind": "claim",
+    "reason": "Cycle 10 B19: moving_cast reads cast_failure of Reclamation under a forward movement flag (0: InterruptFlags 2 has no movement bit, and Unit::CanCastSpellWhileMoving lists the family flag), moving_control the same for Loa's Brew (51, SPELL_FAILED_MOVING): the Spirit Glaive 562719 route (ADR 0731)."
   },
   {
     "spell": 562719,
@@ -6133,9 +6666,12 @@
     "spell": 806563,
     "clause": "and your hit chance by $s2%.",
     "labels": [
-      "806563 effect_value e1 #1"
+      "806563 effect_value e1 #1",
+      "806563 e1 melee_hit_chance",
+      "806563 e1 spell_hit_chance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (SpellAuraDefines.h:390) raises every hit chance; the passive reads of the melee and spell hit chance around the learn give the stated points in both final07 runs, judged to the rounding, as Templar 705250 \"and your chance to hit by $s2%\" is counted."
   },
   {
     "spell": 807040,
@@ -6236,7 +6772,9 @@
     "claims": [
       {
         "claim": "Damage dealt by Hex of Malice now has a $h% chance",
-        "labels": []
+        "labels": [
+          "807450 behaviour_metric_delta ward_rate"
+        ]
       },
       {
         "claim": "to summon a Serpent Ward on top of your enemy",
@@ -6252,24 +6790,7 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The 30% needs a rate over periodic Hex ticks: the trial of a procs `cast` trigger is a damage event of the trigger rank, which also counts the direct hit of Hex of Malice 801693 Effect[1] at the cast (it never rolls: ProcFlags DONE_PERIODIC), and the internal cooldown (3000 ms, spell_proc) equals the tick period (EffectAmplitude 3000), so a tick that follows a success by less than 3000 ms (any second Hex on another dummy) is refused and biases the rate. A route needs a trial metric of periodic ticks only and one Hex stream. The ward lifetime is no longer part of the gap: \"807450 behaviour_metric_delta ward_lifetime\" reads it (cycle 9). Tool notes: (1) procs `trial_metric` periodic ticks of the cast rank.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        },
-        {
-          "agent": "cycle9/author-B16",
-          "report": "cycle9/author-B16.md"
-        },
-        {
-          "agent": "cycle9/fix-B16",
-          "report": "cycle9/author-B16.md#fix-round"
-        }
-      ]
-    },
-    "reason": "The former label \"807450 effect_value #0\" is the unmodelled data label of the chance $h and is dropped from the claim \"Damage dealt by Hex of Malice now has a $h% chance\", which has no behaviour label (the tool_gap below); the claim stays unproven, with no label linked to it, rather than counting a data label that measures nothing (guide 9.4, M-19)."
+    "reason": "The 30% is judged by 807450 behaviour_metric_delta ward_rate (kind flat_chance_rate, cycle 10 author P): one Hex tick per cycle, about 3500 ms apart so the 3000 ms internal cooldown never refuses a trial, the summons of creature 50587 the events, 27 parts of 900. The former label \"807450 effect_value #0\" was dropped earlier (guide 9.4, M-19); the tool_gap (periodic trials of one Hex stream) is closed by the contributor kind module."
   },
   {
     "spell": 807450,
@@ -6341,19 +6862,12 @@
       },
       {
         "claim": "and healing done now has a $h% chance to collect a Spirit",
-        "labels": []
+        "labels": [
+          "807904 behaviour_metric_delta heal_rate"
+        ]
       }
     ],
-    "tool_gap": {
-      "reason": "The healing half is not driven: the proc entry's trigger is a damaging cast (Malefic Wrath 807037) because a heal trial needs an effective heal on a hurt ally (AscensionWitchDoctorEvents.cpp:63 and :83 count only an effective heal) and the `procs` kind has no ally health fixture for a `cast` at an ally (triggers have `ally_health_pct`). Tool note: an `ally_health_pct` field on a procs entry whose trigger casts at an ally (Loa's Brew 801670).",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        }
-      ]
-    },
-    "reason": "The former label \"807904 effect_value #0\" is the unmodelled data label of the chance $h (no effect amount to read) and is dropped from the damage half: the chance is judged by the proc entry \"807904 proc_rate\" (pooled hits against the band, residual failure probability 0.001, guide 9.4, M-19). The healing half keeps no label and carries the tool_gap below."
+    "reason": "The damage half is judged by the proc entry \"807904 proc_rate\"; the healing half by 807904 behaviour_metric_delta heal_rate (a Loa's Brew self heal at 30% health per trial, 12 parts of 1400, an unlearned control). The former label \"807904 effect_value #0\" was dropped earlier."
   },
   {
     "spell": 807904,
@@ -6389,7 +6903,6 @@
       {
         "claim": "repeating every $T2 sec",
         "labels": [
-          "807904 aura_amplitude_ms #3",
           "807904 behaviour_metric_delta spirit_heal",
           "807904 behaviour_metric_delta spirit_mana"
         ]
@@ -6401,7 +6914,8 @@
           "807904 behaviour_metric_delta spirit_lasts"
         ]
       }
-    ]
+    ],
+    "reason": "The unmodelled data label 807904 aura_amplitude_ms #3 (amplitude of a foreign spell) is dropped from the period claim; spirit_heal and spirit_mana read the period as heals and energizes in game time (7 at 5389 ms, 14 at 5718 ms: the repeat of 4 sec inside the G-19 band), as the 503707 and 301175 rows do (guide 9.4, M-19)."
   },
   {
     "spell": 807904,
@@ -6417,23 +6931,29 @@
     "spell": 807905,
     "clause": "Increases your Spirit by $s1%",
     "labels": [
-      "807905 effect_value e0 #0"
+      "807905 effect_value e0 #0",
+      "807905 behaviour_metric_delta spirit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19: spirit reads the Spirit stat before and after the passive is learned around a real Spirit in a Bottle cast (109 to 126, ratio 1.156 inside 1.16 +- 0.01; the Mojo Addiction 504889 spirit shape)."
   },
   {
     "spell": 807905,
     "clause": "and your hit chance by $s2%.",
     "labels": [
-      "807905 effect_value e1 #1"
+      "807905 effect_value e1 #1",
+      "807905 e1 melee_hit_chance",
+      "807905 e1 spell_hit_chance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (SpellAuraDefines.h:390) raises every hit chance; the passive reads of the melee and spell hit chance around the learn give the stated points in both final07 runs, judged to the rounding, as Templar 705250 \"and your chance to hit by $s2%\" is counted."
   },
   {
     "spell": 807915,
     "clause": "Increases your Spirit by $s1%",
     "labels": [
-      "807915 effect_value e0 #0"
+      "807915 effect_value e0 #0",
+      "807915 behaviour_metric_delta spirit"
     ],
     "kind": "claim"
   },
@@ -6441,9 +6961,12 @@
     "spell": 807915,
     "clause": "and your hit chance by $s2%.",
     "labels": [
-      "807915 effect_value e1 #1"
+      "807915 effect_value e1 #1",
+      "807915 e1 melee_hit_chance",
+      "807915 e1 spell_hit_chance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (SpellAuraDefines.h:390) raises every hit chance; the passive reads of the melee and spell hit chance around the learn give the stated points in both final07 runs, judged to the rounding, as Templar 705250 \"and your chance to hit by $s2%\" is counted."
   },
   {
     "spell": 500960,
@@ -6557,11 +7080,22 @@
       {
         "claim": "every $500958t2 sec",
         "labels": [
-          "500961 behaviour_metric_delta mana_pulses"
+          "500961 behaviour_metric_delta mana_pulses",
+          "500961 behaviour_metric_delta mana_period_early",
+          "500961 behaviour_metric_delta mana_period_late"
         ]
       }
     ],
-    "reason": "The former label `500961 aura_amplitude_ms #3` (unmodelled: amplitude of a foreign spell has no scenario) is dropped from \"every $500958t2 sec\"; the period is measured by `500961 behaviour_metric_delta mana_pulses`, which reads the caster's mana at two game-time stamps around the second and third pulse (1204 at 5700 to 5800 ms, 1306 at 6300 to 6400 ms; 102 mana per pulse is 4% of the 2567 maximum; guide 9.4, M-19). The link holds once that label has run and passed."
+    "reason": "Cycle 10 B19: the period is read by two entries. mana_pulses reads the caster mana (a state metric whose promise words, mana or cost, the claim \"every $500958t2 sec\" does not contain); mana_period_early and mana_period_late read the idol casts of the energize 805282 with owned_creature_spell_cast_count (an event metric): 2 at about 5750 ms and 3 at about 6350 ms, stamped in game time (pulses at about 0, 3000 and 6000 ms), with a setup idol present in the control phase (1 at 2300 ms; fix round: the first version had no idol in the control phase and could not read). The radius part keeps its data label and the tool_gap below.",
+    "tool_gap": {
+      "reason": "The 30 yd radius of the energize (\"Allies within $500958A1 yds\", Summons.cpp:503-507, Allies(player, me, 30)) needs a grouped ally at two distances from the idol and a read of what the idol does to it. aura_presence places the ally (target_distance) but needs an aura (805282 is an instant energize, no aura), and the idol casts are logged under the creature (the energize log names the creature, spell_energize_* reads nothing for a creature caster); metric_delta has no ally distance. Tool: an ally placed at a distance in a metric_delta (or owned_creature_spell_cast_count with a target filter on the ally). The sibling field idols read an aura on the ally (ally_inside, ally_outside).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 504759,
@@ -6648,7 +7182,16 @@
           "505339 behaviour_metric_delta effigy_cast_slow"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "The radius claim (\"Enemies within $504761a1 yds\", 30 yd, data read ok) has no counting route yet and waits on tool note T-c8-2 (a summon-centred radius_edge layout), recorded as a tool gap like the sibling radius rows 706542 and 506635: the effigy scan is centred on the summoned Shadow Effigy 50119 (Summons.cpp:530-540, `Nearby(me, Radius(ShadowField))` since the cycle 9 fix) and the radius_edge kind measures from the caster-side primary dummy, so the existing `505339 behaviour_radius_edge effigy_radius_edge` entry needs a 2.5 yd margin (reproduction only, G-29 asks 0.5 yd measured from the code's centre) and is not linked (the minion_range_arms kind is caster-centred). The casting-speed amount is read by effigy_cast_slow.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-effigy-radius"
+        }
+      ]
+    }
   },
   {
     "spell": 505339,
@@ -6672,37 +7215,88 @@
     "spell": 506634,
     "clause": "Drop a Hexing Effigy near you for $d.",
     "labels": [
-      "506634 aura_duration_ms #0"
+      "506634 behaviour_metric_delta effigy_lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label 506634 aura_duration_ms #0 (unmodelled: the spell applies no aura) is dropped; effigy_lasts reads the 60 s in game time, as for the Shadow, Graven and Cursed effigies (guide 9.4, M-19)."
   },
   {
     "spell": 506634,
     "clause": "The next enemy that casts a spell on you is transformed into a frog for $504762d.",
-    "labels": [
-      "506634 spell_duration 504762 #1"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "The next enemy that casts a spell on you is transformed into a frog",
+        "labels": []
+      },
+      {
+        "claim": "for $504762d",
+        "labels": [
+          "506634 spell_duration 504762 #1",
+          "506634 behaviour_metric_delta hexed_lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The duration half is read on a real Hexed 504762 cast at the dummy (hexed_lasts, the frog lasts 40 s on a creature, in game time), beside the data label. The trigger half (\"the next enemy that casts a spell on you\") has no behaviour route: see the tool_gap.",
+    "tool_gap": {
+      "reason": "The Effigy hook is witch_doctor_summon_events::OnSpellCast (AscensionWitchDoctorSummons.cpp:666-686): it fires only for a NON-triggered, harmful cast whose unit target is the Effigy owner, then casts Hexed on the caster and despawns the Effigy (so only the next enemy cast frogs). The harness cannot send such a cast at the Witch Doctor: creature casts are triggered (CoAGameplayTest.cpp:7639, TRIGGERED_FULL_MASK, and the hook skips triggered casts), enemy_casts of metric_delta make the enemy player cast at ITSELF only (behaviours.py enemy_cast_steps), and the taken_hit striker_race player casts at the caster but its read is a damage log, not an aura on the striker. Capability needed (tool note T-b18-1, a contributor-owned metric_delta option under guide 14.1, routed to task T of the cycle 10 plan): a new module in metric_delta_options, additive, in which the enemy player casts a learned hostile spell at the CASTER after the trigger (the Effigy is the setup cast), the enemy's aura 504762 (and the Effigy creature count 0) read afterwards, with a second enemy cast read as not frogged; control arm without the Effigy. Hexed itself is proven by hexed_lasts, hexed_interrupt and hexed_silenced.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B18",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B18.md"
+        }
+      ]
+    }
   },
   {
     "spell": 506634,
     "clause": "While transformed, they are unable to move, attack or cast spells.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While transformed, they are unable to move",
+        "labels": []
+      },
+      {
+        "claim": "While transformed, they are unable to attack",
+        "labels": []
+      },
+      {
+        "claim": "While transformed, they are unable to cast spells",
+        "labels": [
+          "506634 behaviour_metric_delta hexed_silenced"
+        ]
+      }
+    ],
+    "reason": "The clause states three inabilities; the cast part is read on an enemy player hit by a real Hexed (Effect[1] MOD_CONFUSE refuses the Renew, hexed_silenced). Movement: Hexed Effect[2] is turned into MOD_ROOT (AscensionWitchDoctorCompletion.cpp:578) and the harness has a rooted read (CoAGameplayTest.cpp:4067) but no METRIC_EVIDENCE row for it (tool note T-b14-5), so it cannot count as behaviour. Attack: no enemy swings at the caster while a window is read (tool note T-b13-9, the same gap as Amphibimorph).",
+    "tool_gap": {
+      "reason": "Two of the three inabilities have no countable read: \"unable to move\" needs a METRIC_EVIDENCE row for the existing `rooted` harness read (CoAGameplayTest.cpp:4067; tool note T-b14-5: a state metric promised by \"move\", \"root\" or \"movement\"), then a metric_delta of the dummy's rooted state after a real Hexed with the uncast control; \"unable to attack\" needs an enemy that melees the caster in a window with melee_attacks_taken read (tool note T-b13-9, enemy_attacks option on metric_delta). Both are tool capabilities, not routes the author may build in a core file.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B18",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B18.md"
+        }
+      ]
+    }
   },
   {
     "spell": 506634,
     "clause": "Damage dealt may interrupt this effect.",
-    "labels": [],
+    "labels": [
+      "506634 behaviour_metric_delta hexed_interrupt"
+    ],
     "kind": "claim"
   },
   {
     "spell": 506634,
     "clause": "@ext:Can only have 1 Effigy active at a time.:ext@",
     "labels": [
-      "506634 effect_value #2"
+      "506634 behaviour_metric_delta one_effigy"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label 506634 effect_value #2 (a client extension note, no token, unmodelled) is dropped; one_effigy casts a real Shadow Effigy and then a real Hexing Effigy and reads the Shadow Effigy gone (guide 9.4, M-19)."
   },
   {
     "spell": 506635,
@@ -6929,7 +7523,8 @@
     "spell": 572415,
     "clause": "Concoct a major rejuvenating mojo that can be used to instantly restore $572414s1 health.",
     "labels": [
-      "572415 effect_value 572414e0 #0"
+      "572415 effect_value 572414e0 #0",
+      "572415 behaviour_metric_delta mojo_heal"
     ],
     "kind": "claim"
   },
@@ -6956,11 +7551,21 @@
     "spell": 578344,
     "clause": "Empowers an ally with da voodoo, reducing their resource costs by $s1%.",
     "labels": [
-      "578344 effect_value e0 #0",
       "578344 aura_amount e0 #0",
-      "578344 behaviour_metric_delta cost"
+      "578344 behaviour_metric_delta cost",
+      "578344 behaviour_metric_delta cost_spent"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The not_measured label \"578344 effect_value e0 #0\" (an aura script hook sets the amount after CalcValue) is dropped; the same value is read by \"578344 aura_amount e0 #0\", which stays in the claim (guide 9.4, M-19). Cycle 10 B19: \"578344 behaviour_metric_delta cost_spent\" reads the mana a real cast spends (Cursed Effigy, 16% of the base mana: 239 without, 227 after a real Wuju cast, 1161 and 1024 left of 1400; the Greater Resourceful Wuju 800195 shape, exact in both final07 runs). The metric power is a state read promised by mana or cost words and this clause says \"resource costs\" (coverage.STATE_PROMISES power: `\\bcost` does not match \"costs\"), so the part reads data until the owner allows \"costs\" (tool note T-c9-B16-1).",
+    "no_behaviour_route": {
+      "reason": "The cost claim is read by \"578344 behaviour_metric_delta cost_spent\" (a real Wuju, a real Cursed Effigy cost of 239 without and 227 after), but the read is a state metric of mana (\"power\") whose promise words are mana and cost words: coverage.STATE_PROMISES power matches `\\bcost` and the clause says \"costs\", so the part stays data conformant until the owner allows \"costs\" (tool note T-c9-B16-1). The entry is the route; the promise regex is the only block. The sibling cost entry reads spell_power_cost, a readback.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#no-route"
+        }
+      ]
+    }
   },
   {
     "spell": 578344,
@@ -7415,7 +8020,16 @@
     "spell": 501205,
     "clause": "$?s705848[\r\n@ext::ext@\r\n@ext::ext@\r\n@ext::ext@\r\n@ext::ext@][]",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The row is the conditional wrapper of the four embedded tooltips of Loa's Blessing 705848 (@s:802207, :802208, :802215, :802216, one empowerment chosen at random per Loa's Brew heal, AscensionWitchDoctorAbilities.cpp:205-219) and has no label; the same four effects are the 705848 rows 172 to 175 (tool_gap T-b14-8: the reader does not follow an embedded @s: link) and the 501205 row 446 claim \"and empowering them with a random effect\" (no_behaviour_route, cycle 8 author B9: the cast carries exactly one of four auras, so the claim is the sum of four aura reads being 1, and `fields_sum` adds one second read only). Tool: a list form of `fields_sum` (T-sum4) reading the four blessing auras together after a real Loa's Brew with 705848 learned between the phases, then 1 against 0 before; with it the wrapper row links to the same label as row 446.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#loas-brew-501205"
+        }
+      ]
+    }
   },
   {
     "spell": 501205,
@@ -7576,102 +8190,123 @@
     "spell": 501212,
     "clause": "Send a spirit to an ally, healing them for ${$m1+0+$SP*.45}",
     "labels": [
-      "501212 effect_value e0 #0"
+      "501212 effect_value e0 #0",
+      "501212 behaviour_metric_delta bottle_heal",
+      "501212 behaviour_metric_delta bottle_heal_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 501212,
     "clause": "and dealing damage to up to $504606i enemies within 5 yds of them equal to $707172s1% of the healing done.",
-    "labels": [
-      "501212 effect_value #1",
-      "501212 effect_value 707172e0 #2"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and dealing damage to up to $504606i enemies",
+        "labels": [
+          "501212 effect_value #1"
+        ]
+      },
+      {
+        "claim": "within 5 yds of them",
+        "labels": []
+      },
+      {
+        "claim": "equal to $707172s1% of the healing done.",
+        "labels": [
+          "501212 effect_value 707172e0 #2",
+          "501212 behaviour_metric_delta bottle_damage"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "\"up to $504606i enemies\" (5, MaxAffectedTargets of 504606; the Nearby loop stops at 5, Abilities.cpp:213-219) needs 6 enemies around the healed target and a damage read of each; area_dummies and area_sum read the damage of one cast on dummies beside the primary, but the Bottle damage is a script Copy cast on the units near the healed ally with a health fixture on the caster (a full-health caster heals nothing and the Copy needs healing above 0, caster_health), a combination no kind holds. \"within 5 yds of them\": radius_edge brackets a spell the dummies are struck by, with no health fixture, so the heal is empty and no damage follows. Tool: area_dummies / radius_edge with `caster_health` for a self-healing cast whose hit spell is a script Copy.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-bottle-area"
+        }
+      ]
+    }
   },
   {
     "spell": 803624,
     "clause": "Brings a dead ally back to life with $s1 health",
     "labels": [
-      "803624 effect_value e0 #0"
+      "803624 effect_value e0 #0",
+      "803624 behaviour_cast_combat peaceful health"
     ],
     "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The 820 health ($s1, a data label that reads ok) is a behaviour of the accepted resurrection, which cast_combat reads with `resurrect: true` and `resurrect_amounts: true` (ADR 0537), but cast_combat always attacks the dummy before the cast (behaviours.py cast_combat_scenario: attack, then the cast at the dead ally while still fighting, and it expects cast_failure 0), and Reclaim Soul carries SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (Attributes 268500992), so the cast is refused in combat (SPELL_FAILED_AFFECTING_COMBAT). No other kind kills an ally and takes its resurrection response. Tool note: a cast_combat `in_combat: false` (or a resurrect entry without the fight) that reads the health and mana of an accepted offer out of combat, with the response-before-cast control.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        },
-        {
-          "agent": "cycle9/fix-B16",
-          "report": "cycle9/author-B16.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 10 author T: \"803624 behaviour_cast_combat peaceful health\" (kind peaceful_resurrect, ADR 1022 provisional): out of combat a real Reclaim Soul at the dead ally completes, the ally accepts and reads alive with 820 health ($s1, EffectBasePoints 819 + DieSides 1); the control is the same accept before any cast (the ally stays dead). The no_behaviour_route (cast_combat casts only in combat) is withdrawn."
   },
   {
     "spell": 803624,
     "clause": "and $q1 mana.",
     "labels": [
-      "803624 effect_value #1"
+      "803624 behaviour_cast_combat peaceful mana"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "As the health clause: the 1030 mana ($q1, EffectMiscValue[0]) is read after the accepted offer by cast_combat `resurrect_amounts`, which only runs in combat, where Reclaim Soul is refused. The label \"803624 effect_value #1\" is unreadable (the $q token). Tool note: the same out-of-combat resurrect amounts read. Cycle 9: cast_combat resurrect_amounts reads that mana of the accepted offer (EffectMiscValue 1030) only after a cast made while fighting the dummy, which this spell refuses; the same out-of-combat variant closes it.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        },
-        {
-          "agent": "cycle9/fix-B16",
-          "report": "cycle9/author-B16.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 10 author T: \"803624 behaviour_cast_combat peaceful mana\" (same scenario) reads the accepted ally's mana at 1030 ($q1, EffectMiscValue[0]), regeneration off, with the no-offer control. The unreadable label \"803624 effect_value #1\" (the reader has no $q token) is dropped and linked to this behaviour label, which measures the same 1030 (guide 9.4). The tool gap is closed."
   },
   {
     "spell": 803624,
     "clause": "Cannot be cast when in combat.",
-    "labels": [],
+    "labels": [
+      "803624 behaviour_cast_combat peaceful refusal"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The refusal in combat is the engine check of SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (Spell.cpp CheckCasterAuras): the caster fights the dummy and the cast at the dead ally must read SPELL_FAILED_AFFECTING_COMBAT while it reads 0 out of combat. cast_combat expects the cast to go through (`cast_failure` 0) and has no refused expectation. Tool note: a cast_combat `expect_refused` result code with the out-of-combat control arm. Cycle 9: the cast_combat kind exists but states the opposite shape (\"Usable while in combat\": cast_failure expected 0 after the fight, Expectation of NO_CAST_FAILURE in cast_combat_scenario), so the refusal of this clause cannot be expressed; cast_state and cast_condition cover feared, outdoors and mounted only.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        },
-        {
-          "agent": "cycle9/fix-B16",
-          "report": "cycle9/author-B16.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 10 author T: \"803624 behaviour_cast_combat peaceful refusal\" (same scenario) reads both arms: out of combat (combat 0) the cast completes (cast_failure 0) and resurrects the ally; after the ally dies again and the caster attacks the dummy (combat 1) the same cast is refused with SPELL_FAILED_AFFECTING_COMBAT (1, SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL, Spell.cpp:5942-5943) and the ally finds no offer (alive 0). A server that allows the cast in combat reads 0 there; one that refuses it everywhere reads 1 out of combat. The tool gap is closed."
   },
   {
     "spell": 801925,
     "clause": "Curse an enemy for $d,",
     "labels": [
-      "801925 aura_duration_ms #0"
+      "801925 behaviour_metric_delta jinx_lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The former label `801925 aura_duration_ms #0` alerts for a generator reason (the value scenario reads the aura in the cast step, before the missile lands, cycle 6 D3: incorrect test, not a server fault); the same value is read in game by `801925 behaviour_metric_delta jinx_lasts` after the landing (the Shrinking Jinx 807833 clause 478 precedent), the guide 9.4 link for a dropped label."
   },
   {
     "spell": 801925,
     "clause": "leeching ${$630879m1} mana every $t1 sec and preventing mana regeneration.",
-    "labels": [
-      "801925 effect_value 630879e0 #1",
-      "801925 aura_amplitude_ms #2"
-    ],
+    "labels": [],
     "kind": "claim",
-    "reason": "801925 effect_value 630879e0 #1 reads 232 at level 60 (final05, both runs) where the value tool expects the level-0 print 100 (ADR 0014). Mentor decision M-46 (cycle 8): the expected value at level 60 is 232 = 100 + int32(34 x 3.9), the stock per-level term of 630879 (BaseLevel 26, MaxLevel 0, 3.9 per level), which the live logs show (36 leech events of 232 from level-60 casters, 4 of 100 from a low-rank caster; aggregates). The label stays until the owner tool note on helper $m1 (cycle8/author-R.md) lands; it does not block."
+    "reason": "The former label `801925 effect_value 630879e0 #1` reads 232 at level 60 against the tool's level-0 expectation 100 (ADR 0014; mentor ruling M-46: 232 = 100 + int32(34 x 3.9)) and alerts, and `801925 aura_amplitude_ms #2` alerts for the generator reason of cycle 6 D3 (the aura is read before the missile lands); both are dropped (guide 9.4, M-19) and the claims link to the in-game reads: `jinx_leech` reads the 232 mana the caster gains at the first tick from a real cast at a creature with mana, and `jinx_leech_period` brackets the 2 sec period in game time. The regeneration half has no entry (the tool_gap below).",
+    "claims": [
+      {
+        "claim": "leeching ${$630879m1} mana",
+        "labels": [
+          "801925 behaviour_metric_delta jinx_leech"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "801925 behaviour_metric_delta jinx_leech_period"
+        ]
+      },
+      {
+        "claim": "and preventing mana regeneration.",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "\"and preventing mana regeneration\" is Effect[1] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT -100 (Mana Jinx 801925). On a player it multiplies the regeneration tick and does not move the UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER fields the mana_regen metric reads, so a stat read cannot show it, and a hostile cast puts an enemy player in combat, where a Witch Doctor with no mp5 regenerates nothing even without the aura, so no control arm of an enemy player's mana read differs. On a creature the aura does act: Creature::Regenerate multiplies every mana tick by GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT) (Creature.cpp:1072), gated only by UNIT_FLAG2_REGENERATE_POWER or a player owner (:1022). The dummy Mylentha Riverbend 11795 (the creature of `jinx_leech`) carries unit_flags2 2048 in its creature_template row, so it regenerates: maxValue / 3 every 2000 ms out of combat, Spirit / 5 + 17 in combat (:1049-1068), and `power` reads a creature's mana with measure_actor dummy (CoAGameplayTest.cpp:3621-3633). A creature route therefore exists in principle, and it is not built for two reasons. (1) The 232 mana that Mana Jinx Leech takes every 2000 ms confounds the read, and the only way to separate it is a dummy whose mana starts at 0 (nothing to drain; the Jinx reads 0, a cast-free arm refills it to the maximum, which also proves regeneration runs in the fixture), but the set_power step reaches only the player and its pet (CoAGameplayTest.cpp:8906-8916), never a creature. (2) The other control, the dummy's refill after the Jinx ends (the first read with the aura exact at the maximum less the drained ticks, a later read above it), needs a judge that takes the expired reading above the after reading; `expiry_below_after` judges only below. Without one of them a dummy that never regenerates in the fixture would pass an exact read, so the entry would be no control. Tool: a `set_power` step for the selected creature (actor `dummy`), or an `expiry_above_after` option; either completes the entry (Jinx cast at a dummy emptied to 0, `power` read of the dummy 9000 ms later: 0 with the Jinx, the full 2434 without it in the uncast before phase).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#mana-jinx-801925"
+        }
+      ]
+    }
   },
   {
     "spell": 801925,
     "clause": "Can only have 1 Jinx active on a target at a time.",
-    "labels": [],
+    "labels": [
+      "801925 behaviour_metric_delta one_jinx"
+    ],
     "kind": "claim"
   },
   {
@@ -7907,7 +8542,9 @@
     "spell": 806240,
     "clause": "Break an ally's curse, dispelling $s1 curse effect$?s572870[s][] from them.",
     "labels": [
-      "806240 effect_value e0 #0"
+      "806240 effect_value e0 #0",
+      "806240 behaviour_dispel_count curse control curse",
+      "806240 behaviour_dispel_count curse repeat curse"
     ],
     "kind": "claim"
   },
@@ -7923,12 +8560,30 @@
   {
     "spell": 807833,
     "clause": "reducing their size and their attack power by ${($m1+0)*-1}",
-    "labels": [
-      "807833 effect_value e0 #1",
-      "807833 behaviour_metric_delta jinx_ap"
-    ],
+    "labels": [],
     "kind": "claim",
-    "reason": "The former label `807833 aura_amount e0 #1` alerts for a generator reason (the value scenario reads the aura in the cast step, before the missile lands, cycle 6 D3: incorrect test); the same value is read in game by `807833 behaviour_metric_delta jinx_ap` after the landing, and the not-measured label `807833 effect_value e0 #1` is kept. The size part (`jinx_size`, -15%) is held with the crit entries (its metric has no evidence class yet, tool note T8) and has no label here."
+    "reason": "The former label `807833 effect_value e0 #1` is not_measured (a DoEffectCalcAmount hook of the aura scripts bound to 807833 sets the amount after CalcValue); the stated attack power -165 is read in game by `807833 behaviour_metric_delta jinx_ap` (the dummy's attack power falls by 165, ok in final07), the guide 9.4 link. The size half (\"reducing their size\") has no entry: Effect[1] is aura 61 MOD_SCALE -15%.",
+    "claims": [
+      {
+        "claim": "reducing their size",
+        "labels": []
+      },
+      {
+        "claim": "and their attack power by ${($m1+0)*-1}",
+        "labels": [
+          "807833 behaviour_metric_delta jinx_ap"
+        ]
+      }
+    ],
+    "tool_gap": {
+      "reason": "The size claim is Effect[1] aura 61 SPELL_AURA_MOD_SCALE (-16 + 1 = -15%) on the cursed unit. The harness reads it as `unit_scale` (Unit::GetObjectScale, CoAGameplayTest.cpp:3617), but that metric has no coverage.METRIC_EVIDENCE row (pitfall 5; the dummy's `jinx_size` entry of cycle 6 was held for it), so an entry built on it would stop coverage with an EvidenceError. Tool note (owner-owned coverage.py): a STATE row for `unit_scale` with the promise words `size|scale`, after which a metric_delta of the dummy's `unit_scale` before and after a real Shrinking Jinx (ratio 0.85) needs no other tool.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#shrinking-jinx-807833"
+        }
+      ]
+    }
   },
   {
     "spell": 807833,
@@ -7937,7 +8592,17 @@
       "807833 effect_value e2 #2",
       "807833 aura_amount e2 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The labels `807833 effect_value e2 #2` (not_measured: a DoEffectCalcAmount hook of the aura scripts bound to 807833 sets the amount after CalcValue) and `807833 aura_amount e2 #2` (alert: the value scenario reads the aura in the cast step, before the missile lands, the cycle 6 D3 generator limit that dropped the same reads of clauses 478 and 479) are kept because nothing in game replaces them: the clause has no in-game read (the tool_gap below).",
+    "tool_gap": {
+      "reason": "The spell power half is Effect[2] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT -85 on the cursed unit. The only spell power read is `spell_power` (Player::SpellBaseDamageBonusDone, a player's live value), which clamps at 0 and so cannot show a reduction below 0, and the dummy creature has no read. The attack power half works because AP Test 56412 lifts the dummy's attack power by 801 first (`jinx_ap`); no aura fixture lifts an enemy player's spell power. Tool: an enemy-player spell power fixture above 85 (a `player_spell_power`-style option for the enemy actor, or an aura of spell power castable on it) with the metric read on the enemy: before 100, after 15 (-85).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B20",
+          "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#shrinking-jinx-807833"
+        }
+      ]
+    }
   },
   {
     "spell": 807833,
@@ -8018,7 +8683,17 @@
       "807076 effect_value e0 #0",
       "807076 behaviour_metric_delta items"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 10 B19 (fix round): \"807076 behaviour_metric_delta items\" counts the Primal Loa Cocktails (item 230506) one real cast creates, the twin of the Brew Stew 807056 items entry. It reads 20 against the stated 21 in both final07 runs: Spell::DoCreateItem caps one Create Item at the item's stack size (SpellEffects.cpp:2716-2718), 20 in the realm database. Classification: recorded low-priority candidate defect (M-50, M-60), no fix without a stack size from a source. item_count is a state metric promised only by \"creat...\" words and the clause says \"Brews\", so the part reads data conformant until the owner adds \"brew\\w*\" (tool note T-c9-B16-12).",
+    "no_behaviour_route": {
+      "reason": "The creation claim is read by \"807076 behaviour_metric_delta items\" (a real Brew Cocktail cast creates the Primal Loa Cocktails, item 230506, the control reading none), but item_count is a state metric whose promise words are \"creat...\" and the clause says \"Brews\", so the part stays data conformant until the owner adds \"brew\\w*\" to coverage.STATE_PROMISES item_count (tool note T-c9-B16-12). The entry is the route; the promise regex is the only block. The read of 20 against 21 is the recorded M-50 candidate defect.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#fix-round"
+        }
+      ]
+    }
   },
   {
     "spell": 807076,
@@ -8026,25 +8701,61 @@
     "labels": [
       "807076 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The sentence says the Witch Doctor and allies get something to drink: the item 230506 (Primal Loa Cocktail) must be a drink an ally can use. Its item_template (spell, class, subclass) is in the realm world database only (no repository SQL names it: grep of data/sql finds a vendor row of rev_20261104_91 and no template), and no kind uses an item on an ally (use_item exists as a step for trigger_item kinds, with the item spell known in advance). Tool: a way to read the item template (spell id, drink aura) and a use_item arm on an ally with the mana read. Not a defect lead.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 807076,
     "clause": "Conjured items disappear if logged out for more than 15 minutes.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The 15 minute loss after a logout needs a harness logout and login with an offline clock (the item duration is real time in the character item rows); no harness step logs a player out and back in with a chosen offline time. Tool note T-c9-B16-13 (carried from the 807056 Brew Stew twin).",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B19",
+          "report": "cycle10/author-B19.md#tool-gaps"
+        }
+      ]
+    }
   },
   {
     "spell": 807908,
     "clause": "Create a Cauldron of Rejuvenating Mojo.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The Cauldron is a gameobject (SPELL_EFFECT_TRANS_DOOR 50 of gameobject 129364, a type 22 spellcaster with 25 charges created by rev_20260909_00_witch_doctor_completion.sql:645). The harness side exists: the metrics `owned_gameobject_count` and `gameobject_remaining_ms` (CoAGameplayTest.cpp:5704-5710: owned objects of an entry, remaining despawn time in whole seconds) and the `use_gameobject` action (CoAGameplayTest.cpp:8702-8710: an object the acting player owns, so the caster uses its own Cauldron). The missing pieces are on the conformance side: neither metric has a coverage.METRIC_EVIDENCE row (a metric without one cannot count; a kind or option module can carry the row, coverage.py:524) and metric_delta has no step that uses a gameobject. Tool note T-b17-1: METRIC_EVIDENCE rows for `owned_gameobject_count` and `gameobject_remaining_ms` and a metric_delta option that adds a `use_gameobject` step after the trigger cast; no harness change is needed. With them the creation is readable as an owned object count of 1 after the cast.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-mojo-cauldron"
+        }
+      ]
+    }
   },
   {
     "spell": 807908,
     "clause": "Raid members may interact with the Cauldron to acquire a Major Rejuvenating Mojo.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The Cauldron is a gameobject (SPELL_EFFECT_TRANS_DOOR 50 of gameobject 129364, a type 22 spellcaster with 25 charges created by rev_20260909_00_witch_doctor_completion.sql:645). The harness side exists: the metrics `owned_gameobject_count` and `gameobject_remaining_ms` (CoAGameplayTest.cpp:5704-5710: owned objects of an entry, remaining despawn time in whole seconds) and the `use_gameobject` action (CoAGameplayTest.cpp:8702-8710: an object the acting player owns, so the caster uses its own Cauldron). The missing pieces are on the conformance side: neither metric has a coverage.METRIC_EVIDENCE row (a metric without one cannot count; a kind or option module can carry the row, coverage.py:524) and metric_delta has no step that uses a gameobject. Tool note T-b17-1: METRIC_EVIDENCE rows for `owned_gameobject_count` and `gameobject_remaining_ms` and a metric_delta option that adds a `use_gameobject` step after the trigger cast; no harness change is needed. With them the interaction is readable as the caster using its own Cauldron and gaining the Major Rejuvenating Mojo.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-mojo-cauldron"
+        }
+      ]
+    }
   },
   {
     "spell": 807908,
@@ -8052,6 +8763,15 @@
     "labels": [
       "807908 aura_duration_ms #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The Cauldron is a gameobject (SPELL_EFFECT_TRANS_DOOR 50 of gameobject 129364, a type 22 spellcaster with 25 charges created by rev_20260909_00_witch_doctor_completion.sql:645). The harness side exists: the metrics `owned_gameobject_count` and `gameobject_remaining_ms` (CoAGameplayTest.cpp:5704-5710: owned objects of an entry, remaining despawn time in whole seconds) and the `use_gameobject` action (CoAGameplayTest.cpp:8702-8710: an object the acting player owns, so the caster uses its own Cauldron). The missing pieces are on the conformance side: neither metric has a coverage.METRIC_EVIDENCE row (a metric without one cannot count; a kind or option module can carry the row, coverage.py:524) and metric_delta has no step that uses a gameobject. Tool note T-b17-1: METRIC_EVIDENCE rows for `owned_gameobject_count` and `gameobject_remaining_ms` and a metric_delta option that adds a `use_gameobject` step after the trigger cast; no harness change is needed. With them the duration is readable as the remaining despawn time of the object (whole seconds); the 25 charges have no harness read and stay part of the gap.",
+      "attempts": [
+        {
+          "agent": "cycle10/author-B17",
+          "report": "cycle10/author-B17.md#tool-gap-mojo-cauldron"
+        }
+      ]
+    }
   }
 ]
