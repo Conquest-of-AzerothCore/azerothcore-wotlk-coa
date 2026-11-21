@@ -243,7 +243,8 @@ to it in the log.
       server DBC, the client DBC, the Exiles DB and the SUB dump all give 30 % haste and 30 % more damage taken,
       with no tier variant. In the live log of 2026-08-02 his median swing drops from 2.47 s to 1.80 s under
       Frenzy, about 1.4 times faster, not the 1.65 of 65 %. Kept at 30 % (user decision, 2026-11-04).
-    - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it.
+    - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it. Round 11
+      keeps their area immunity and lets a Necromancer's commanded minions reach the chosen shade (item 21).
 16. Tester feedback of 2026-11-08:
     - Not changed, the live logs disagree: Thekal's Frenzy every 90 s, Mandokir charging only ranged players, a
       bleed from Ohgan, Arlokk's melee bleeding everyone, a 30 s Arlokk cycle, and Hakkar's click box (the client model, identical on live). Hakkar's Dungeon Spoils already drop
@@ -338,6 +339,12 @@ to it in the log.
       instance prove it, each only for its own cursed owner; the CoA hounds and Necromancer minions are guardians
       with an owner too (summon properties 61 and 64). Observation, not changed: the Witch Hunter hound (50224)
       keeps an attack it already started on a shade after its owner's vision ends, because its AI never drops a
-      victim it can no longer see. Uncertain expectation: the tester's report that pet classes
-      (Farstrider Ranger, Wildwalker Primalist, Houndmaster Witch Hunter, Necromancer) could not help; the tester is
-      asked which pet failed and whether its owner was cursed.
+      victim it can no longer see. Uncertain expectation: the tester's report that the other pet classes
+      (Farstrider Ranger, Wildwalker Primalist, Houndmaster Witch Hunter) could not help; the tester is asked which
+      pet failed and whether its owner was cursed.
+    - Necromancer minions dealt no damage to a shade (#11573): seeing it was not the problem. The shade's
+      creature immunities -95 make it immune to area damage, so the area and cone command attacks of the Ghoul
+      (801514), Skeletal Warriors (570042), Decaying Colossus (505229), Zombie Plague (504022) and Bonestorm
+      (801411) never selected it. The shades stay immune to area damage (user decision, 2026-11-21); only the
+      target of Command: Undead 504868 is added to its minions' area and cone command attacks, when it stands
+      within the effect's radius, arc and line of sight. A second shade beside it takes no damage.
