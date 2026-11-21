@@ -7,25 +7,20 @@
     "that you can add an additional ingredient to your Cauldron. The ingredients are permanent self auras",
     "(SpellDuration 21 after the class contract) with no AuraInterruptFlags and no dispel type, so nothing in",
     "Spell.dbc ties them to a silence. Expected: with Cauldron Brewer 92085 and Mixologist, brewing Jungle",
-    "Shrooms then Bloodthistle keeps both, and a hostile Silence (15487, 5 sec) neither removes either ingredient",
-    "while it lasts nor after it ends. Bloodthistle is a periodic trigger aura that brews its Cauldron tick",
-    "802771 every 1.5 sec, and 802771 has PreventionType 1 (silence) in Spell.dbc. While the Witch Doctor was",
-    "silenced the tick failed its cast check, and the native rule for non-passive periodic auras on players ended",
+    "Shrooms then Bloodthistle keeps both, and a Silence (15487, 5 sec) neither removes either ingredient while",
+    "it lasts nor after it ends. Bloodthistle is a periodic trigger aura that brews its Cauldron tick 802771",
+    "every 1.5 sec, and 802771 has PreventionType 1 (silence) in Spell.dbc. While the Witch Doctor was silenced",
+    "the tick failed its cast check, and the native rule for non-passive periodic auras on players ended",
     "Bloodthistle (it expired right after the silence). Jungle Shrooms' tick 802703 has no prevention type, and",
     "Fish Oil and Frog Bones are plain dummy auras, so they survived. The Witch Doctor contract clears the",
     "prevention type of the Bloodthistle tick. A second Witch Doctor brews the same pair and is never silenced,",
-    "as a control."
+    "as a control. The silence is applied directly as an aura: a mob's cast of it can miss or be resisted, and",
+    "the tick fails the same way whoever applies the silence."
   ],
   "timeout_ms": 60000,
   "players": [
     {"id": "doctor", "race": 1, "class": 13, "level": 80},
     {"id": "control", "race": 1, "class": 13, "level": 80}
-  ],
-  "creatures": [
-    {
-      "id": "caster", "owner": "doctor", "entry": 36, "level": 80, "health": 1000000, "distance": 5, "reaction": 0,
-      "stationary": true
-    }
   ],
   "steps": [
     {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
@@ -56,10 +51,7 @@
       "action": "assert", "label": "SETUP: Mixologist keeps Jungle Shrooms beside it", "actor": "doctor",
       "metric": "aura", "spell": 801660, "equals": 1
     },
-    {
-      "action": "cast", "label": "A hostile caster silences the Witch Doctor", "actor": "caster", "spell": 15487,
-      "target": "doctor"
-    },
+    {"action": "set_aura", "label": "Silence the Witch Doctor", "actor": "doctor", "spell": 15487, "stacks": 1},
     {
       "action": "assert", "label": "SETUP: the Witch Doctor is silenced", "actor": "doctor", "metric": "aura",
       "spell": 15487, "equals": 1, "within_ms": 1500
