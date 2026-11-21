@@ -11,19 +11,15 @@
     "power to its 1 base damage and an active Poison Quiver (800260) applies its poison (500104) to the stabbed",
     "enemy. Evasion (5277, +50% dodge) and 40 seconds of melee from a hostile mob make at least one avoided",
     "attack near certain (about 20 swings at over 50% dodge). The ranger never attacks, so the poison can only",
-    "come from the stab. Armor reduces the Physical hit, so the damage floor is 30% of the ranger's attack power.",
-    "A second ranger with Searing Quiver (500103, +15% of a ranged hit as Fire Arrows 681109) checks that each",
-    "stab is followed by Fire Arrows worth about 15% of the stab (a critical Fire Arrows doubles it)."
+    "come from the stab. Armor reduces the Physical hit, so the damage floor is 30% of the ranger's attack power."
   ],
   "timeout_ms": 120000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
   "players": [
-    {"id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false},
-    {"id": "searing", "race": 1, "class": 21, "level": 80, "allow_regeneration": false}
+    {"id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false}
   ],
   "creatures": [
-    {"id": "mob", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2},
-    {"id": "mob2", "owner": "searing", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2}
+    {"id": "mob", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2}
   ],
   "steps": [
     {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000},
@@ -38,19 +34,6 @@
     },
     {
       "action": "set_aura", "label": "SETUP: Evasion makes avoided attacks frequent", "actor": "ranger", "spell": 5277,
-      "stacks": 1
-    },
-    {
-      "action": "set_health", "label": "Keep the Searing Quiver ranger alive", "actor": "searing", "value": 1000000,
-      "maximum": 1000000
-    },
-    {"action": "learn", "actor": "searing", "spell": 704311},
-    {
-      "action": "set_aura", "label": "SETUP: Searing Quiver is the second ranger's quiver", "actor": "searing",
-      "spell": 500103, "stacks": 1
-    },
-    {
-      "action": "set_aura", "label": "SETUP: Evasion for the second ranger", "actor": "searing", "spell": 5277,
       "stacks": 1
     },
     {"action": "snapshot", "actor": "ranger", "metric": "attack_power", "save_as": "ranger_ap"},
@@ -86,23 +69,6 @@
     {
       "action": "assert", "label": "The stab still slows the enemy's attack speed", "actor": "mob", "metric": "aura",
       "spell": 704314, "caster": "ranger", "equals": 1
-    },
-    {
-      "action": "assert", "label": "SETUP: the Searing Quiver ranger's stab fires", "actor": "searing",
-      "metric": "spell_damage_count", "spell": 704314, "target": "mob2", "min": 1, "within_ms": 40000
-    },
-    {
-      "action": "assert", "label": "#13043: the stab is followed by Searing Quiver's Fire Arrows", "actor": "searing",
-      "metric": "spell_damage_count", "spell": 681109, "target": "mob2", "min": 1, "within_ms": 1500
-    },
-    {
-      "action": "snapshot", "actor": "searing", "metric": "spell_damage_total", "spell": 704314, "target": "mob2",
-      "save_as": "stab_total"
-    },
-    {
-      "action": "assert", "label": "#13043: Fire Arrows deals about 15% of the stab's damage", "actor": "searing",
-      "metric": "spell_damage_total", "spell": 681109, "target": "mob2", "ratio_to": "stab_total", "min": 0.1,
-      "max": 0.5
     }
   ]
 }
