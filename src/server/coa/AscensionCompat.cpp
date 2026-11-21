@@ -48,6 +48,7 @@
 #include "AscensionAverageItemLevel.h"
 #include "AscensionPersonalBank.h"
 #include "AscensionVanityOwnership.h"
+#include "AscensionIncarnation.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionCollectibleSpellData.h"
 #include "AscensionCustomClassData.h"
@@ -433,6 +434,8 @@ constexpr uint32 APPEARANCE_CATEGORY_AMMUNITION = 32;
 constexpr uint32 APPEARANCE_CATEGORY_ITEM_SET = 55;
 constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
 constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
+constexpr uint32 APPEARANCE_CATEGORY_AQUATIC_FORM = 20;
+constexpr uint32 SPELL_VENOMANCER_SEA_SERPENT_FORM = 803212;
 
 AscensionCollectionModels::Entry const* FindCollectionModel(uint32 creatureId);
 constexpr std::size_t MAX_APPEARANCE_SNAPSHOT_ENTRIES = 65536;
@@ -6034,6 +6037,12 @@ public:
         return category ? GetActiveIncarnation(player, category) : nullptr;
     }
 
+    uint32 GetIncarnationCategoryDisplay(Player* player, uint32 category)
+    {
+        AppearanceInfo const* appearance = GetActiveIncarnation(player, category);
+        return appearance ? appearance->CreatureDisplay : 0;
+    }
+
     uint32 GetIncarnationFormDisplay(Player* player, ShapeshiftForm form)
     {
         AppearanceInfo const* appearance = GetActiveFormIncarnation(player, form);
@@ -6095,7 +6104,7 @@ public:
         if (!player || !player->IsInWorld())
             return;
 
-        if (player->GetShapeshiftForm() != FORM_NONE)
+        if (player->GetShapeshiftForm() != FORM_NONE || player->HasAura(SPELL_VENOMANCER_SEA_SERPENT_FORM))
             player->RestoreDisplayId();
         if (Pet* pet = player->GetPet())
             RefreshIncarnationGuardian(player, pet);
@@ -10473,6 +10482,35 @@ class spell_ascension_enchant_strider : public AuraScript
     }
 };
 
+class aura_ascension_venomancer_sea_serpent_incarnation : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_venomancer_sea_serpent_incarnation);
+
+    void ShowIncarnation(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Player* player = GetTarget()->ToPlayer();
+        if (!player || player->getTransForm() != GetId() ||
+            player->GetModelForForm(player->GetShapeshiftForm(), GetId()))
+            return;
+
+        if (uint32 const display = AscensionCollectionService::Instance().GetIncarnationCategoryDisplay(player,
+                APPEARANCE_CATEGORY_AQUATIC_FORM))
+            player->SetDisplayId(display);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_venomancer_sea_serpent_incarnation::ShowIncarnation,
+            EFFECT_1, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK);
+    }
+};
+
+}
+
+bool AscensionIncarnation::HasActiveFormIncarnation(Player* player)
+{
+    return player &&
+        AscensionCollectionService::Instance().GetActiveFormIncarnation(player, player->GetShapeshiftForm());
 }
 
 std::vector<WorldPacket> AscensionClientFileSpellRows()
@@ -10811,6 +10849,7 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_experience_potion);
   RegisterSpellScript(spell_ascension_vanity_use_restriction);
   RegisterSpellScript(spell_ascension_stick_on_a_carrot);
+  RegisterSpellScript(aura_ascension_venomancer_sea_serpent_incarnation);
   RegisterSpellScript(spell_ascension_enchant_strider);
   RegisterSpellScript(spell_ascension_local_mount);
   RegisterSpellScript(spell_ascension_specialization_slot);
