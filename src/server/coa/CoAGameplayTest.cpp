@@ -4760,6 +4760,25 @@ private:
             }
             return 100.0 * hits / rolls;
         }
+        if (metric == "fishing_loot_item_rate")
+        {
+            uint32 const lootId = step.get<uint32>("entry");
+            uint32 const wanted = step.get<uint32>("item");
+            uint32 const rolls = step.get<uint32>("rolls", 10000);
+            Require(LootTemplates_Fishing.HaveLootFor(lootId), "Unknown fishing loot template");
+            Require(rolls != 0, "fishing_loot_item_rate needs rolls");
+            uint32 hits = 0;
+            for (uint32 roll = 0; roll < rolls; ++roll)
+            {
+                Loot loot;
+                loot.FillLoot(lootId, LootTemplates_Fishing, player, true, true);
+                hits += std::any_of(loot.items.begin(), loot.items.end(), [wanted](LootItem const& item)
+                {
+                    return item.itemid == wanted;
+                });
+            }
+            return 100.0 * hits / rolls;
+        }
         if (metric == "item_loot_item_rate")
         {
             uint32 const lootId = step.get<uint32>("entry");
