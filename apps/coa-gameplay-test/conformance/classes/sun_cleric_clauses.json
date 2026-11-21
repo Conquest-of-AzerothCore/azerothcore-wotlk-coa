@@ -487,7 +487,8 @@
     "spell": 300369,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
     "labels": [
-      "804630 behaviour_metric_delta flare_damage"
+      "804630 behaviour_metric_delta flare_damage",
+      "804630 behaviour_metric_delta flare_sp"
     ],
     "kind": "claim"
   },
@@ -2266,7 +2267,7 @@
     "clause": "Shine the light of the sun on an enemy, dealing ${$m1+0+$sph*1} Holy Damage and granting you Scorch Marks.",
     "labels": [
       "704908 behaviour_metric_delta sun_ray_damage",
-      "704908 behaviour_metric_delta scorch_granted"
+      "704908 behaviour_metric_delta scorch_granted_sunray"
     ],
     "kind": "claim"
   },
@@ -2275,7 +2276,8 @@
     "clause": "Your next Radiant Flame has no mana cost, ticks $s2% faster,",
     "labels": [
       "704908 behaviour_metric_delta scorch_cost",
-      "704908 behaviour_metric_delta scorch_period"
+      "704908 behaviour_metric_delta scorch_period",
+      "704908 behaviour_metric_delta scorch_next"
     ],
     "kind": "claim"
   },
@@ -3284,7 +3286,8 @@
     "spell": 804630,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
     "labels": [
-      "804630 behaviour_metric_delta flare_damage"
+      "804630 behaviour_metric_delta flare_damage",
+      "804630 behaviour_metric_delta flare_sp"
     ],
     "kind": "claim"
   },
@@ -3490,7 +3493,8 @@
     "spell": 807973,
     "clause": "Usable while moving.",
     "labels": [
-      "807973 behaviour_metric_delta moving"
+      "807973 behaviour_metric_delta moving",
+      "807973 behaviour_metric_delta moving_control"
     ],
     "kind": "claim"
   },
@@ -3942,7 +3946,9 @@
     "clause": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
     "labels": [
       "807749 behaviour_metric_delta fulfillment_main",
-      "807749 behaviour_metric_delta fulfillment_off"
+      "807749 behaviour_metric_delta fulfillment_off",
+      "807749 behaviour_metric_delta ability_hits",
+      "807749 behaviour_metric_delta ability_hits_second"
     ],
     "kind": "claim"
   },
