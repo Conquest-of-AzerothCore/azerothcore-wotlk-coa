@@ -3156,12 +3156,11 @@
     "spell": 705848,
     "clause": "@ext::ext@",
     "labels": [
-      "705848 effect_value #0",
-      "705848 effect_value #1"
+      "705848 effect_value 802207e0 #0"
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The ledger line is the embedded text @s:802207:0@, the tooltip of the blessing 802207 (\"Increases melee, ranged and spell haste by $s1%.\"), which has its own stated value: 3% haste (auras 216, 138 and 218: spell, melee and ranged haste, BasePoints 2 + 1 on each). The unreadable effect_value labels of 705848 (the reader does not follow an embedded @s: link into the linked spell's text, tool note T-b14-8) leave that value unproven. The empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (author-B14-held-root.json, carried_aura_count needs a METRIC_EVIDENCE row, T-b14-5), which proves that one of the four exists but not which. Tool: an embedded @s: reader that expands the line into the linked spell's tooltip and its $s1 value, then a metric_delta of the matching stat or hit ratio (haste, healing received, critical strike chance, physical damage taken) with the blessing applied. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
+      "reason": "The ledger line is the embedded text @s:802207:0@, the tooltip of the blessing 802207 (\"Increases melee, ranged and spell haste by $s1%.\"), which has its own stated value: 3% haste (auras 216, 138 and 218: spell, melee and ranged haste, BasePoints 2 + 1 on each). The reader expands an @s: markup inside an @ext: block since the cycle 10 tool build (ADR 1024 provisional, tool note T-b14-8), so the data label \"705848 effect_value 802207e0 #0\" reads that value. The behaviour is still unproven: the empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (carried_aura_count, T-b14-5), which proves that one of the four exists but not which, and a real Loa's Brew picks the blessing at random, so no arm can hold this blessing for a metric_delta of its stat or hit ratio without setting it by set_aura (the claim's subject). Tool: a share or pick kind that reads which blessing each real cast applied and the matching stat on that ally. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
       "attempts": [
         {
           "agent": "cycle9/author-B14",
@@ -3174,12 +3173,11 @@
     "spell": 705848,
     "clause": "@ext::ext@",
     "labels": [
-      "705848 effect_value #2",
-      "705848 effect_value #3"
+      "705848 effect_value 802208e0 #1"
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The ledger line is the embedded text @s:802208:0@, the tooltip of the blessing 802208 (\"Healing received increased by $s1%.\"), which has its own stated value: 3% healing received (aura 118, BasePoints 2 + 1). The unreadable effect_value labels of 705848 (the reader does not follow an embedded @s: link into the linked spell's text, tool note T-b14-8) leave that value unproven. The empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (author-B14-held-root.json, carried_aura_count needs a METRIC_EVIDENCE row, T-b14-5), which proves that one of the four exists but not which. Tool: an embedded @s: reader that expands the line into the linked spell's tooltip and its $s1 value, then a metric_delta of the matching stat or hit ratio (haste, healing received, critical strike chance, physical damage taken) with the blessing applied. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
+      "reason": "The ledger line is the embedded text @s:802208:0@, the tooltip of the blessing 802208 (\"Healing received increased by $s1%.\"), which has its own stated value: 3% healing received (aura 118, BasePoints 2 + 1). The reader expands an @s: markup inside an @ext: block since the cycle 10 tool build (ADR 1024 provisional, tool note T-b14-8), so the data label \"705848 effect_value 802208e0 #1\" reads that value. The behaviour is still unproven: the empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (carried_aura_count, T-b14-5), which proves that one of the four exists but not which, and a real Loa's Brew picks the blessing at random, so no arm can hold this blessing for a metric_delta of its stat or hit ratio without setting it by set_aura (the claim's subject). Tool: a share or pick kind that reads which blessing each real cast applied and the matching stat on that ally. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
       "attempts": [
         {
           "agent": "cycle9/author-B14",
@@ -3192,12 +3190,11 @@
     "spell": 705848,
     "clause": "@ext::ext@",
     "labels": [
-      "705848 effect_value #4",
-      "705848 effect_value #5"
+      "705848 effect_value 802215e0 #2"
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The ledger line is the embedded text @s:802215:0@, the tooltip of the blessing 802215 (\"Critical Strike chance increased by $s1%.\"), which has its own stated value: 3% critical strike chance (aura 290, BasePoints 2 + 1). The unreadable effect_value labels of 705848 (the reader does not follow an embedded @s: link into the linked spell's text, tool note T-b14-8) leave that value unproven. The empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (author-B14-held-root.json, carried_aura_count needs a METRIC_EVIDENCE row, T-b14-5), which proves that one of the four exists but not which. Tool: an embedded @s: reader that expands the line into the linked spell's tooltip and its $s1 value, then a metric_delta of the matching stat or hit ratio (haste, healing received, critical strike chance, physical damage taken) with the blessing applied. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
+      "reason": "The ledger line is the embedded text @s:802215:0@, the tooltip of the blessing 802215 (\"Critical Strike chance increased by $s1%.\"), which has its own stated value: 3% critical strike chance (aura 290, BasePoints 2 + 1). The reader expands an @s: markup inside an @ext: block since the cycle 10 tool build (ADR 1024 provisional, tool note T-b14-8), so the data label \"705848 effect_value 802215e0 #2\" reads that value. The behaviour is still unproven: the empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (carried_aura_count, T-b14-5), which proves that one of the four exists but not which, and a real Loa's Brew picks the blessing at random, so no arm can hold this blessing for a metric_delta of its stat or hit ratio without setting it by set_aura (the claim's subject). Tool: a share or pick kind that reads which blessing each real cast applied and the matching stat on that ally. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
       "attempts": [
         {
           "agent": "cycle9/author-B14",
@@ -3210,12 +3207,11 @@
     "spell": 705848,
     "clause": "@ext::ext@",
     "labels": [
-      "705848 effect_value #6",
-      "705848 effect_value #7"
+      "705848 effect_value 802216e0 #3"
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The ledger line is the embedded text @s:802216:0@, the tooltip of the blessing 802216 (\"Reduces Physical Damage taken by $s1%.\"), which has its own stated value: 3% less physical damage taken (aura 87, misc 1 physical, BasePoints -4 + 1 = -3). The unreadable effect_value labels of 705848 (the reader does not follow an embedded @s: link into the linked spell's text, tool note T-b14-8) leave that value unproven. The empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (author-B14-held-root.json, carried_aura_count needs a METRIC_EVIDENCE row, T-b14-5), which proves that one of the four exists but not which. Tool: an embedded @s: reader that expands the line into the linked spell's tooltip and its $s1 value, then a metric_delta of the matching stat or hit ratio (haste, healing received, critical strike chance, physical damage taken) with the blessing applied. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
+      "reason": "The ledger line is the embedded text @s:802216:0@, the tooltip of the blessing 802216 (\"Reduces Physical Damage taken by $s1%.\"), which has its own stated value: 3% less physical damage taken (aura 87, misc 1 physical, BasePoints -4 + 1 = -3). The reader expands an @s: markup inside an @ext: block since the cycle 10 tool build (ADR 1024 provisional, tool note T-b14-8), so the data label \"705848 effect_value 802216e0 #3\" reads that value. The behaviour is still unproven: the empowerment itself, that one of the four blessings is applied after a Loa's Brew heal, is the held entry 705848 empowerment (carried_aura_count, T-b14-5), which proves that one of the four exists but not which, and a real Loa's Brew picks the blessing at random, so no arm can hold this blessing for a metric_delta of its stat or hit ratio without setting it by set_aura (the claim's subject). Tool: a share or pick kind that reads which blessing each real cast applied and the matching stat on that ally. The four rows share the clause text @ext::ext@ and are told apart by their labels.",
       "attempts": [
         {
           "agent": "cycle9/author-B14",
