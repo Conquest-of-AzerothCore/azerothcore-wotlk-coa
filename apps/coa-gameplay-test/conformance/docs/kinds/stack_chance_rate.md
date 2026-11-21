@@ -55,3 +55,9 @@ a run without it would count no trial at all.
 Witch Doctor (Witch Doctor ADR 0001): Spirit Hunting 707504 (Malefic Arrow 801674, one extra Spirit 561136 at 15% per
 Spirit, arms of 5 and 4 Spirits) and Loa Spirits 705843 (Reclamation 806288 cast an additional time at 5% per Spirit,
 arms of 1 and 2 Spirits, trials counted by the Spirit each Reclamation grants, `event_offset` 1).
+
+`streams` and `isolation` work as in `flat_chance_rate` (its Streams section; the stream helpers live in this
+module): each arm's `trials`, `control_trials` and `unlearned_trials` are per stream and per part, the arm reads
+are one group per stream, summed per part, and the crossing reads cover the trigger and the spells it triggers.
+Witch Doctor: 8 streams for both entries, each caster 15 yd from its dummy and facing it (Malefic Arrow and
+Reclamation need the target in front, FacingCasterFlags 1).

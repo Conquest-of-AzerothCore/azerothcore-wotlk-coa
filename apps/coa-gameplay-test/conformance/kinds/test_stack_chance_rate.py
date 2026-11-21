@@ -2,7 +2,8 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import banded_rate, judge_behaviour
-from kinds.stack_chance_rate import POOLED_JUDGE, Z_FLIP, arm_trials_needed, stack_chance_verdict
+from kinds.stack_chance_rate import (POOLED_JUDGE, STREAM_LOCATION, Z_FLIP, arm_trials_needed,
+                                     stack_chance_verdict)
 from profile import DBC_DIR
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -31,6 +32,10 @@ FAIR = {'unlearned': (10, 0), 'control': (10, 0), 'stacks 5': (588, 441), 'stack
 ECHO_FAIR = {'unlearned': (8, 0), 'control': (10, 0), 'stacks 1': (420, 21), 'stacks 2': (795, 80)}
 ECHO_SPREAD = {'stacks 1': 2, 'stacks 2': 3}
 OLD_MINIMUM = {'parts': 6, 'arms': [{'stacks': 5, 'trials': 590}, {'stacks': 4, 'trials': 1180}]}
+STREAMS = {'streams': 8, 'arms': [{'stacks': 5, 'trials': 74}, {'stacks': 4, 'trials': 147}], 'control_trials': 2,
+           'unlearned_trials': 2,
+           'isolation': {'reach_yd': 0, 'source': 'Malefic Arrow has one target and is cast at the own dummy'}}
+STREAM_FAIR = {'unlearned': (2, 0), 'control': (2, 0), 'stacks 5': (74, 55.5), 'stacks 4': (147, 88.2)}
 PILOT = {'pilot': True, 'parts': 1, 'arms': [{'stacks': 5, 'trials': 300}, {'stacks': 4, 'trials': 300}],
          'control_trials': 50, 'unlearned_trials': 50}
 
@@ -39,11 +44,13 @@ def counted_run(expectation, counts: dict, offset: int = 0) -> FakeRun:
     values, trials_total, events_total = {}, 0.0, 0.0
     for arm in expectation.model['arms']:
         trials, extra = counts[arm['name']]
-        reads = arm['reads']
-        values[reads['start trials']], values[reads['start events']] = trials_total, events_total
-        trials_total += trials
-        events_total += extra + offset * trials
-        values[reads['end trials']], values[reads['end events']] = trials_total, events_total
+        for reads in arm['reads'] if isinstance(arm['reads'], list) else [arm['reads']]:
+            values[reads['start trials']], values[reads['start events']] = trials_total, events_total
+            trials_total += trials
+            events_total += extra + offset * trials
+            values[reads['end trials']], values[reads['end events']] = trials_total, events_total
+    for item in expectation.model.get('isolation', []):
+        values[item['label']] = (item['min'] + item['max']) / 2
     return FakeRun(values)
 
 
@@ -180,3 +187,30 @@ class StackChanceRateTests(unittest.TestCase):
                 scenario, _ = self.built(entry)
                 self.assertEqual(scenario['creatures'][0]['distance'], 15)
                 self.assertIn('The dummy stands 15 yd from the caster.', scenario['contract'])
+
+    def test_streams_cast_every_trial_on_each_caster_at_its_own_dummy(self):
+        scenario, [expectation] = self.built(**STREAMS)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertEqual(scenario['location'], STREAM_LOCATION)
+        self.assertEqual(len(scenario['players']), 8)
+        self.assertEqual(scenario['creatures'][7]['distance'], 100.0)
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == ARROW]
+        self.assertEqual(len(casts), 8 * (2 + 2 + 74 + 147))
+        self.assertTrue(all(step['target'] == step['actor'].replace('caster', 'dummy') for step in casts))
+        self.assertEqual([len(arm['reads']) for arm in expectation.model['arms']], [8, 8, 8, 8])
+        distance = next(step for step in scenario['steps'] if step.get('label', '').endswith('s3 to s3 distance'))
+        self.assertEqual((distance['min'], distance['max']), (14.5, 15.5))
+
+    def test_stream_reads_are_summed_and_a_cross_stream_hit_alerts(self):
+        _, [expectation] = self.built(**STREAMS)
+        parts = counted_parts(expectation, STREAM_FAIR, ENTRY['parts'])
+        verdict = POOLED_JUDGE(base_verdict(expectation), parts, expectation.model)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail['arms'][2]['casts'], 74 * 8 * ENTRY['parts'])
+        label = next(item['label'] for item in expectation.model['isolation'] if ' dummy 801674 from ' in item['label'])
+        parts[0].values[label] = 2
+        self.assertEqual(POOLED_JUDGE(base_verdict(expectation), parts, expectation.model).status, 'alert')
+
+    def test_streams_keep_the_flip_proof_size(self):
+        with self.assertRaisesRegex(ValueError, 'flip-proof trials'):
+            self.built(**{**STREAMS, 'arms': [{'stacks': 5, 'trials': 73}, {'stacks': 4, 'trials': 147}]})

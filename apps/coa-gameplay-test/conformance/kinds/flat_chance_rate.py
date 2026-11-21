@@ -5,10 +5,14 @@ from behaviours import BEHAVIOUR_METRIC_DELTA, LEARNED_CONTRAST, METRIC_DELTA_MA
     prose_rule, waited_ms
 from compare import CONTRAST, Verdict, Run, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, creature_fixture, timed
-from kinds.stack_chance_rate import (CONTROL_MINIMUM_TRIALS, PILOT_TRIALS, STATUS_ORDER, arm_trials_needed,
-                                     control_reading, interval_name, minimum_wait_ms, treatment_reading)
+from kinds.stack_chance_rate import (CONTROL_MINIMUM_TRIALS, DUMMY_DISTANCE, PILOT_TRIALS, STATUS_ORDER, Isolation,
+                                     Stream, arm_trials_needed, control_reading, crossing_steps, each_stream,
+                                     interval_name, isolation_bounds, isolation_of, isolation_reading,
+                                     minimum_wait_ms, on_stream, placement_steps, stream_base_steps, stream_scenario,
+                                     streams_of, treatment_reading, triggered_spells, ward_hit_steps,
+                                     ward_placement_steps)
 from procs import rate_band
-from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
+from profile import CASTER, DBC_DIR, measurement, player_fixture
 from tooltip import Records
 from values import MAX_SCENARIO_STEPS, TARGET, Expectation, armed_for, dataset, facts_of, fixture_health_step
 
@@ -77,6 +81,7 @@ class FlatChanceSpec:
     pilot: bool
     label_suffix: str
     dummy_distance: float | None
+    isolation: Isolation = Isolation(1, DUMMY_DISTANCE, 0.0, '', ())
 
 
 def read_of(entry: dict, allowed: tuple[str, ...], role: str, spell: int) -> Read:
@@ -145,6 +150,8 @@ def flat_chance_spec(entry: dict) -> FlatChanceSpec:
         float(entry['trials_per_cycle']), int(entry.get('parts', 1)), bool(entry.get('pilot', False)),
         entry.get('label_suffix', 'flat_chance'),
         float(entry['dummy_distance']) if entry.get('dummy_distance') is not None else None)
+    spec = replace(spec, isolation=isolation_of(entry, KIND, spec.dummy_distance))
+    streams = spec.isolation.streams
     chance = spec.chance_pct / 100
     if not 0 < chance < 1 or spec.events_per_proc < 1 or spec.trials_per_cycle <= 0:
         raise ValueError(f'{spell} {KIND} needs a chance below 100%, a positive events_per_proc and trials_per_cycle')
@@ -161,13 +168,17 @@ def flat_chance_spec(entry: dict) -> FlatChanceSpec:
                          f'{METRIC_DELTA_MAX_DUMMY_DISTANCE}] yd')
     if (spec.unlearned_setup is not None or spec.unlearned_entry is not None) and spec.setup is None:
         raise ValueError(f'{spell} {KIND} overrides the unlearned setup of an entry with no setup')
-    planned = spec.cycles * spec.trials_per_cycle * spec.parts
+    planned = spec.cycles * spec.trials_per_cycle * spec.parts * streams
     needed = PILOT_TRIALS if spec.pilot else arm_trials_needed(chance, 1, spec.parts)
     if planned < needed:
-        raise ValueError(f'{spell} {KIND} plans {planned:g} trials over {spec.parts} part(s), fewer than the '
-                         f'{needed} flip-proof trials the band of {spec.chance_pct:g}% needs')
-    if spec.unlearned_cycles * spec.trials_per_cycle * spec.parts < CONTROL_MINIMUM_TRIALS:
+        raise ValueError(f'{spell} {KIND} plans {planned:g} trials over {spec.parts} part(s) and {streams} '
+                         f'stream(s), fewer than the {needed} flip-proof trials the band of {spec.chance_pct:g}% needs')
+    if spec.unlearned_cycles * spec.trials_per_cycle * spec.parts * streams < CONTROL_MINIMUM_TRIALS:
         raise ValueError(f'{spell} {KIND} unlearned arm plans fewer than {CONTROL_MINIMUM_TRIALS} trials')
+    if any(ward.spells for ward in spec.isolation.wards) and not per_cycle(spec):
+        if spec.setup is None or spec.unlearned_entry is not None:
+            raise ValueError(f'{spell} {KIND} reads ward hits only at a cycle end read or before a setup recast '
+                             f'of the same ward entry')
     return spec
 
 
@@ -175,7 +186,7 @@ def chance_mark(spec: FlatChanceSpec, mark: str) -> str:
     return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix} {mark}'.rstrip()
 
 
-def read_step(label: str, read: Read, entry: int | None) -> dict:
+def read_step(label: str, read: Read, entry: int | None, stream: Stream) -> dict:
     fields = {}
     if read.spell is not None:
         fields['spell'] = read.spell
@@ -185,7 +196,7 @@ def read_step(label: str, read: Read, entry: int | None) -> dict:
         fields['target'] = read.target
     if read.periodic is not None:
         fields['periodic'] = read.periodic
-    return measurement(label, CASTER, read.metric, **fields)
+    return on_stream(measurement(label, CASTER, read.metric, **fields), stream)
 
 
 def costed(records: Records, spell: int) -> bool:
@@ -223,56 +234,91 @@ def check_spacing(records: Records, spec: FlatChanceSpec, setup: Setup | None):
                              f'{minimum_wait_ms(records, spell)} ms cast and global cooldown')
 
 
-def cycle_steps(records: Records, spec: FlatChanceSpec, setup: Setup | None, index: int, reads) -> list[dict]:
+def cycle_steps(records: Records, spec: FlatChanceSpec, setup: Setup | None, index: int, reads,
+                streams: list[Stream], wards) -> list[dict]:
     steps = []
     for step in spec.layout:
         if step.token == SETUP:
             if setup is not None and index % setup.every == 0:
-                steps += cast_steps(records, setup.spell, setup.target, setup.power)
+                steps += wards.before_setup(index)
+                steps += each_stream(cast_steps(records, setup.spell, setup.target, setup.power), streams)
                 steps.append({'action': 'wait', 'label': 'setup', 'ms': step.wait_ms})
             continue
         if step.token == TRIGGER:
-            if spec.caster_health_pct is not None:
-                steps.append(fixture_health_step(CASTER, spec.caster_health_pct))
-            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
-                      for aura, stacks, _ in spec.attempt_auras]
-            steps += cast_steps(records, spec.trigger_spell, spec.trigger_target, spec.cast_power)
-            steps.append({'action': 'wait', 'label': 'cast', 'ms': step.wait_ms})
+            one = [fixture_health_step(CASTER, spec.caster_health_pct)] if spec.caster_health_pct is not None else []
+            one += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                    for aura, stacks, _ in spec.attempt_auras]
+            one += cast_steps(records, spec.trigger_spell, spec.trigger_target, spec.cast_power)
+            one.append({'action': 'wait', 'label': 'cast', 'ms': step.wait_ms})
             if spec.stop_trigger_aura:
-                steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.trigger_spell, 'stacks': 0,
-                              'target': TARGET})
+                one.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.trigger_spell, 'stacks': 0,
+                            'target': TARGET})
+            steps += each_stream(one, streams)
             continue
         if step.token in (START, END):
             steps += reads(index, step.token)
             continue
         steps.append({'action': 'wait', 'label': 'cycle', 'ms': step.wait_ms})
-    return steps
+    return steps + wards.after_cycle(index)
 
 
 def per_cycle(spec: FlatChanceSpec) -> bool:
     return any(step.token == START for step in spec.layout)
 
 
-def arm_plan(records: Records, spec: FlatChanceSpec, role: str, cycles: int) -> tuple[list[dict], list[dict]]:
+class WardChecks:
+    def __init__(self, spec: FlatChanceSpec, role: str, streams: list[Stream], cast: dict):
+        self.spec, self.role, self.streams, self.cast = spec, role, streams, cast
+        self.entry = spec.unlearned_entry if role == UNLEARNED else None
+
+    def mark(self, text: str) -> str:
+        return chance_mark(self.spec, text)
+
+    def entry_of(self, ward) -> int:
+        return self.entry if self.entry is not None else ward.entries[0]
+
+    def hits(self, tag: str) -> list[dict]:
+        return ward_hit_steps(self.spec.isolation, self.streams, self.mark, tag, self.entry_of)
+
+    def before_setup(self, index: int) -> list[dict]:
+        steps = self.hits(f'{self.role} c{index} before setup') if self.cast['ward'] and not per_cycle(
+            self.spec) else []
+        self.cast['ward'] = True
+        return steps
+
+    def placement(self, index: int) -> list[dict]:
+        return ward_placement_steps(self.spec.isolation, self.streams, self.mark, f'{self.role} c{index}')
+
+    def after_cycle(self, index: int) -> list[dict]:
+        return [] if per_cycle(self.spec) else self.placement(index)
+
+
+def arm_plan(records: Records, spec: FlatChanceSpec, role: str, cycles: int, streams: list[Stream],
+             cast: dict) -> tuple[list[dict], list[dict]]:
     setup = spec.unlearned_setup or spec.setup if role == UNLEARNED else spec.setup
-    entry = spec.unlearned_entry if role == UNLEARNED else None
+    wards = WardChecks(spec, role, streams, cast)
     segments, steps = [], []
 
     def reads(index: int | None, edge: str) -> list[dict]:
-        name = role if index is None else f'{role} c{index}'
-        segment = {f'{edge} trials': chance_mark(spec, f'{name} {edge} trials'),
-                   f'{edge} events': chance_mark(spec, f'{name} {edge} events')}
-        if edge == START:
-            segments.append(segment)
-        else:
-            segments[-1].update(segment)
-        return [read_step(segment[f'{edge} trials'], spec.trial, entry),
-                read_step(segment[f'{edge} events'], spec.event, entry)]
+        out = []
+        for position, stream in enumerate(streams):
+            name = (role if index is None else f'{role} c{index}') + stream.suffix
+            segment = {f'{edge} trials': chance_mark(spec, f'{name} {edge} trials'),
+                       f'{edge} events': chance_mark(spec, f'{name} {edge} events')}
+            if edge == START:
+                segments.append(segment)
+            else:
+                segments[position - len(streams)].update(segment)
+            out += [read_step(segment[f'{edge} trials'], spec.trial, wards.entry, stream),
+                    read_step(segment[f'{edge} events'], spec.event, wards.entry, stream)]
+        if edge == END and index is not None:
+            out += wards.hits(f'{role} c{index}') + wards.placement(index)
+        return out
 
     if not per_cycle(spec):
         steps += reads(None, START)
     for index in range(cycles):
-        steps += cycle_steps(records, spec, setup, index, reads if per_cycle(spec) else None)
+        steps += cycle_steps(records, spec, setup, index, reads if per_cycle(spec) else None, streams, wards)
     if not per_cycle(spec):
         steps += reads(None, END)
     return steps, segments
@@ -288,14 +334,27 @@ def flat_chance_scenario(class_file: dict, spec: FlatChanceSpec) -> tuple[dict, 
             check_spacing(records, spec, setup)
     check_spacing(records, spec, None)
     armed = armed_for(class_file, records, spec.trigger_spell)
+    streams = streams_of(spec.isolation)
     chance = spec.chance_pct / 100
     needed = PILOT_TRIALS if spec.pilot else arm_trials_needed(chance, 1, spec.parts)
-    steps = base_steps(armed) + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
-                                 for spell in dict.fromkeys((spec.trigger_spell, *spec.learn))]
-    unlearned_steps, unlearned_segments = arm_plan(records, spec, UNLEARNED, spec.unlearned_cycles)
-    treatment_steps, treatment_segments = arm_plan(records, spec, TREATMENT, spec.cycles)
-    steps += unlearned_steps + [{'action': 'learn', 'actor': CASTER, 'spell': talent} for talent in spec.talents]
+    steps = stream_base_steps(armed, streams) + each_stream(
+        [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+         for spell in dict.fromkeys((spec.trigger_spell, *spec.learn))], streams)
+    steps += placement_steps(spec.isolation, streams, lambda text: chance_mark(spec, text))
+    cast = {'ward': False}
+    unlearned_steps, unlearned_segments = arm_plan(records, spec, UNLEARNED, spec.unlearned_cycles, streams, cast)
+    treatment_steps, treatment_segments = arm_plan(records, spec, TREATMENT, spec.cycles, streams, cast)
+    steps += unlearned_steps + each_stream([{'action': 'learn', 'actor': CASTER, 'spell': talent}
+                                            for talent in spec.talents], streams)
     steps += treatment_steps
+    if cast['ward'] and not per_cycle(spec):
+        steps += WardChecks(spec, TREATMENT, streams, cast).hits('end')
+    healing = spec.trial.metric == 'spell_heal_count'
+    damage = () if healing else tuple(dict.fromkeys(
+        (spec.trigger_spell, *triggered_spells(records, spec.trigger_spell),
+         *((spec.trial.spell,) if spec.trial.metric == 'spell_damage_count' else ()))))
+    steps += crossing_steps(spec.isolation, streams, lambda text: chance_mark(spec, text), damage,
+                            (spec.trial.spell,) if healing else ())
     if len(steps) > MAX_SCENARIO_STEPS:
         raise ValueError(f'{spec.spell} {KIND} needs {len(steps)} steps, more than {MAX_SCENARIO_STEPS}: split the '
                          f'cycles over more parts')
@@ -325,9 +384,12 @@ def flat_chance_scenario(class_file: dict, spec: FlatChanceSpec) -> tuple[dict, 
         'players': [player_fixture(armed)],
         'creatures': [dummy],
         'steps': steps}
+    scenario = stream_scenario(scenario, armed, spec.isolation, streams)
     model = {'kind': KIND, 'metric': METRIC, 'evidence_metric': METRIC, 'quote': entry.quote,
              'chance_pct': spec.chance_pct, 'events_per_proc': spec.events_per_proc, 'fixtures': fixtures,
              'trial': spec.trial.metric, 'event': spec.event.metric, 'arms': arms}
+    if spec.isolation.streams > 1:
+        model.update(streams=spec.isolation.streams, isolation=isolation_bounds(steps))
     expectation = Expectation(chance_mark(spec, ''), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
                               f'{spec.chance_pct:g}% per trial', prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
@@ -349,6 +411,9 @@ def arm_counts(runs: list[Run], arm: dict, per_proc: int) -> list[tuple[float, f
 
 
 def flat_chance_judgement(base: Verdict, runs: list[Run], model: dict) -> Verdict:
+    isolation = isolation_reading(runs, model.get('isolation', []))
+    if isolation:
+        return replace(base, status=isolation[0], explanation=isolation[1])
     detail, controls_held, deciding = [], True, {}
     for arm in model['arms']:
         parts = arm_counts(runs, arm, int(model['events_per_proc']))
