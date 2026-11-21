@@ -7,6 +7,7 @@
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include <algorithm>
 
 namespace AscensionFelsworn
