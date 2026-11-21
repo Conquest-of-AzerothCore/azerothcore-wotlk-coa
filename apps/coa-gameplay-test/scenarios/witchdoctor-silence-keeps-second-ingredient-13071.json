@@ -8,8 +8,13 @@
     "(SpellDuration 21 after the class contract) with no AuraInterruptFlags and no dispel type, so nothing in",
     "Spell.dbc ties them to a silence. Expected: with Cauldron Brewer 92085 and Mixologist, brewing Jungle",
     "Shrooms then Bloodthistle keeps both, and a hostile Silence (15487, 5 sec) neither removes either ingredient",
-    "while it lasts nor after it ends. This scenario reproduces the report. A second Witch Doctor brews the same",
-    "pair and is never silenced, as a control."
+    "while it lasts nor after it ends. Bloodthistle is a periodic trigger aura that brews its Cauldron tick",
+    "802771 every 1.5 sec, and 802771 has PreventionType 1 (silence) in Spell.dbc. While the Witch Doctor was",
+    "silenced the tick failed its cast check, and the native rule for non-passive periodic auras on players ended",
+    "Bloodthistle (it expired right after the silence). Jungle Shrooms' tick 802703 has no prevention type, and",
+    "Fish Oil and Frog Bones are plain dummy auras, so they survived. The Witch Doctor contract clears the",
+    "prevention type of the Bloodthistle tick. A second Witch Doctor brews the same pair and is never silenced,",
+    "as a control."
   ],
   "timeout_ms": 60000,
   "players": [
