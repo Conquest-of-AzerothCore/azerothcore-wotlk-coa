@@ -7,8 +7,12 @@
     "after a relog. SMSG_TOTEM_CREATED (opcode 1043) carries the zero-based bar slot (byte 0), the summon GUID",
     "(bytes 1 to 8), the duration in milliseconds (byte 9) and the spell (byte 13). This scenario records what",
     "the server sends for a ward summoned after a bar dismissal (CMSG_TOTEM_DESTROYED, opcode 1044) and after a",
-    "relog: each new ward must be announced again for slot 0 with spell 500960 and a non-zero duration. Whether",
-    "the client draws the bar is not observed."
+    "relog: each new ward must be announced again for slot 0 with spell 500960 and a non-zero duration. Native",
+    "totems send this packet from Totem::InitStats, before the summon is added to the world, because the client",
+    "links a bar slot only to a unit it has not created yet; the class summon script sent it after the ward was",
+    "already visible, so a fresh character never saw the bar. The ward is now announced while it is added to the",
+    "world, before its creation reaches the client. The packet order relative to SMSG_UPDATE_OBJECT and whether",
+    "the client draws the bar are not observed."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
