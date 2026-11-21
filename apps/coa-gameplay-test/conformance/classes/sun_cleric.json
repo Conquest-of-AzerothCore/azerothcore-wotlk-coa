@@ -4714,70 +4714,6 @@
     },
     {
       "spell": 572752,
-      "name": "Sun Down (first Solar Flare not before 2.75 s)",
-      "kind": "metric_delta",
-      "variant": "period_held",
-      "label_suffix": "period_held",
-      "quote": "every $572754t1 sec",
-      "trigger_spell": 572752,
-      "target": "dummy",
-      "cast_power": 1363,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 807175,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "wait_ms": 6750,
-      "expire_ms": 500,
-      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. Solar Flare 807175 hits on the dummy counted 6750 ms after the cast starts, 2.75 s after the ground aura starts (about 4000 ms): none, so the period is above 2.75 s (excludes 2.7 s, -10% of 3 s). Control (the phase before the learn): no cast, 0. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
-      "measure_actor": "caster",
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "gate_timing": "start",
-      "trigger_only_after": true
-    },
-    {
-      "spell": 572752,
-      "name": "Sun Down (first Solar Flare by 3.25 s)",
-      "kind": "metric_delta",
-      "variant": "period_done",
-      "label_suffix": "period_done",
-      "quote": "every $572754t1 sec",
-      "trigger_spell": 572752,
-      "target": "dummy",
-      "cast_power": 1363,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 807175,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 7250,
-      "expire_ms": 500,
-      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The same hits counted 7250 ms after the cast starts, 3.25 s after the ground aura starts: exactly one, so the period is at most 3.25 s (excludes 3.3 s, +10%). With period_held it lies in (2.75, 3.25] s around 3 s. Control (the phase before the learn): no cast, 0. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
-      "measure_actor": "caster",
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "gate_timing": "start",
-      "trigger_only_after": true
-    },
-    {
-      "spell": 572752,
       "name": "Sun Down (Horusath Blast damage taken inside the ground aura)",
       "kind": "hit_ratio",
       "variant": "taken_horusath",
@@ -4800,7 +4736,7 @@
       },
       "critical": false,
       "trials": 20,
-      "parts": 13,
+      "parts": 50,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Horusath Blast 500154 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
@@ -4828,7 +4764,7 @@
       },
       "critical": false,
       "trials": 20,
-      "parts": 13,
+      "parts": 45,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Rapture 806477 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
@@ -4838,7 +4774,7 @@
       "kind": "metric_delta",
       "variant": "flare_aura_held",
       "label_suffix": "flare_aura_held",
-      "quote": "reduces the target's chance to hit by",
+      "quote": "While inside, enemies are struck by a",
       "trigger_spell": 572752,
       "target": "dummy",
       "cast_power": 1363,
@@ -4869,7 +4805,7 @@
       "kind": "metric_delta",
       "variant": "flare_aura_gone",
       "label_suffix": "flare_aura_gone",
-      "quote": "reduces the target's chance to hit by",
+      "quote": "While inside, enemies are struck by a",
       "trigger_spell": 572752,
       "target": "dummy",
       "cast_power": 1363,
@@ -4893,6 +4829,39 @@
         ]
       ],
       "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The same aura is gone 23850 ms after the cast starts, 10.85 s after the last tick: its duration is below 10.85 s, which excludes 11 s (+10%). With flare_aura_held it lies in (9.15, 10.85) s around 10 s. Control: no cast, absent. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts); nothing else beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Solar Flare every 3 s)",
+      "kind": "metric_delta",
+      "variant": "period",
+      "label_suffix": "period",
+      "quote": "every $572754t1 sec",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 807175,
+        "caster": "caster",
+        "target": "dummy",
+        "since_spell": 572752
+      },
+      "before_expected": 3000,
+      "expected": 3000,
+      "tolerance": 250,
+      "wait_ms": 14500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The same hits counted 7250 ms after the cast starts, 3.25 s after the ground aura starts: exactly one, so the period is at most 3.25 s (excludes 3.3 s, +10%). With period_held it lies in (2.75, 3.25] s around 3 s. Control (the phase before the learn): no cast, 0. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).Median interval between the damage events of Solar Flare 807175 on the dummy since the last cast of Sun Down (three ticks of the ground aura, two intervals), as the Searing Light faster_ticks entry: 3000 ms within 250 ms, which excludes 2.7 s and 3.3 s (+-10% of 3 s). Sun Down is an active spell, so both phases cast it and each reads its own events; the two phases are replicates. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
     }
   ],
   "player_observations": [],

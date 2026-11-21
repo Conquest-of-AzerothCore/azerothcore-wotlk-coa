@@ -503,14 +503,18 @@
   {
     "spell": 300371,
     "clause": "Dealing direct damage to an enemy affected by Chains of Light will now cause it to chain to a nearby enemy.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300371 behaviour_metric_delta chain"
+    ]
   },
   {
     "spell": 300371,
     "clause": "Can only occur once per sec.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300371 behaviour_metric_delta chain"
+    ]
   },
   {
     "spell": 300621,
@@ -1497,59 +1501,117 @@
   {
     "spell": 572752,
     "clause": "Bring the wrath of the sun down upon an enemy after $d,",
+    "kind": "claim",
     "labels": [
-      "572752 effect_value #7"
-    ],
-    "kind": "claim"
+      "572752 behaviour_metric_delta delay_window"
+    ]
   },
   {
     "spell": 572752,
     "clause": "dealing ${$572753m1+$572753ppl1+$SP*1.3} Holyflame Damage",
-    "labels": [
-      "572752 effect_value 572753e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$572753m1+$572753ppl1} Holyflame Damage",
+        "labels": [
+          "572752 script_hit 572753 damage"
+        ]
+      },
+      {
+        "claim": "$SP*1.3 spell power term",
+        "labels": [
+          "572752 script_hit 572753 damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "and scorching the earth beneath them for $572754d.",
-    "labels": [
-      "572752 spell_duration 572754 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "lasts more than 8.2 s",
+        "labels": [
+          "572752 behaviour_metric_delta ground_held"
+        ]
+      },
+      {
+        "claim": "lasts less than 9.9 s",
+        "labels": [
+          "572752 behaviour_metric_delta ground_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "While inside, enemies are struck by a Solar Flare every $572754t1 sec",
+    "kind": "claim",
     "labels": [
-      "572752 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
+      "572752 behaviour_metric_delta period"
+    ]
   },
   {
     "spell": 572752,
     "clause": "and take $572754s2% increased damage from Rapture and Horusath Blast.",
-    "labels": [
-      "572752 effect_value 572754e1 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Horusath Blast",
+        "labels": [
+          "572752 behaviour_hit_ratio taken_horusath"
+        ]
+      },
+      {
+        "claim": "Rapture",
+        "labels": [
+          "572752 behaviour_hit_ratio taken_rapture"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
-    "labels": [
-      "572752 effect_value 807175e1 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m2+$ppl2} Holyflame Damage",
+        "labels": [
+          "572752 script_hit 807175 flare_damage"
+        ]
+      },
+      {
+        "claim": "$SP*0.26 spell power term",
+        "labels": [
+          "572752 script_hit 807175 flare_damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
-    "labels": [
-      "572752 effect_value 807175e0 #5",
-      "572752 spell_duration 807175 #6"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the target's chance to hit by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $d: lasts more than 9.15 s after the last tick",
+        "labels": [
+          "572752 behaviour_metric_delta flare_aura_held"
+        ]
+      },
+      {
+        "claim": "for $d: lasts less than 10.85 s after the last tick",
+        "labels": [
+          "572752 behaviour_metric_delta flare_aura_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 572885,
