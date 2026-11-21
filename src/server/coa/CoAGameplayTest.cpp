@@ -7758,6 +7758,15 @@ private:
                 player->GetPositionY() + step.get<float>("dy", 0.0f),
                 player->GetPositionZ() + step.get<float>("dz", 0.0f), player->GetOrientation());
         }
+        else if (action == "relocate_to_creature")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), step.get<float>("radius", 20.0f));
+            Require(creature != nullptr, "No living creature of that entry within the radius");
+            player->UpdatePosition(creature->GetPositionX(), creature->GetPositionY(), player->GetPositionZ(),
+                player->GetOrientation());
+            record.put("destination_x", creature->GetPositionX());
+            record.put("destination_y", creature->GetPositionY());
+        }
         else if (action == "stop_attack")
         {
             WorldPacket packet(CMSG_ATTACKSTOP, 0);
