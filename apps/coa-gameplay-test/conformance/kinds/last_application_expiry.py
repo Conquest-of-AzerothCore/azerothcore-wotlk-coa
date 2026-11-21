@@ -33,6 +33,7 @@ class LastApplicationSpec:
     repeat: tuple[int, int] | None = None
     no_refresh: bool = False
     forced_roll: int | None = None
+    trigger_target: str = TARGET
 
 
 AURA_HOLDERS = {False: TARGET, True: CASTER}
@@ -46,7 +47,10 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
                                int(entry.get('poll_ms', 50)), entry.get('label_suffix', 'last_application_expiry'),
                                entry.get('caster', False), repeat_of(entry.get('repeat')),
                                entry.get('no_refresh', False),
-                               None if entry.get('forced_roll') is None else int(entry['forced_roll']))
+                               None if entry.get('forced_roll') is None else int(entry['forced_roll']),
+                               entry.get('trigger_target', TARGET))
+    if spec.trigger_target not in (TARGET, CASTER):
+        raise ValueError(f'{spec.spell} last_application_expiry casts its trigger at {TARGET} or {CASTER}')
     if not isinstance(spec.caster, bool) or not isinstance(spec.no_refresh, bool):
         raise ValueError(f'{spec.spell} last_application_expiry caster and no_refresh are true or false')
     if spec.no_refresh and spec.repeat is None:
@@ -84,7 +88,7 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
 
     def arm(name: str, window_ms: int) -> list[dict]:
         power = spec.trigger_power if spec.trigger_power is not None else facts.mana_cost
-        cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET}
+        cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.trigger_target}
         steps = [{'action': 'wait', 'label': f'{name} before the cast', 'ms': GCD_WAIT_MS},
                  {'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': power},
                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell},
@@ -136,6 +140,8 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
         forced_roll.fixtures(class_file, spec, forced_roll.ForcedRoll(spec.forced_roll), scenario)
     if spec.caster:
         scenario['contract'] += ' The aura is read on the caster, not the dummy.'
+    if spec.trigger_target == CASTER:
+        scenario['contract'] += f' {spec.trigger_spell} is cast at the caster, not the dummy.'
     if spec.repeat is not None:
         scenario['contract'] += (f' {spec.trigger_spell} is cast up to {spec.repeat[0]} times per arm (inside its '
                                  f'poll window), {spec.repeat[1]} ms apart.')

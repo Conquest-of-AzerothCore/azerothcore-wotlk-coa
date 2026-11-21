@@ -103,6 +103,18 @@ class NoRefreshTests(unittest.TestCase):
         self.assertTrue(all(step['actor'] == 'dummy' for step in scenario['steps']
                             if step.get('metric') == 'aura' and step.get('spell') == 707010))
 
+    def test_a_trigger_target_of_the_caster_is_cast_at_the_caster(self):
+        entry = {**ENTRY, 'trigger_target': 'caster'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        targets = {step['target'] for step in scenario['steps']
+                   if step['action'] == 'cast' and step['spell'] == 707007}
+        self.assertEqual(targets, {'caster'})
+        default, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+        self.assertEqual({step['target'] for step in default['steps']
+                          if step['action'] == 'cast' and step['spell'] == 707007}, {'dummy'})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'trigger_target': 'ally'})
+
     def test_one_application_with_rising_stacks_timed_from_it_passes(self):
         self.assertEqual(self.judged(3000.0).status, 'ok')
 

@@ -52,6 +52,15 @@ class TargetAttackWindowTests(unittest.TestCase):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(23), window_entry(**changes))
 
+    def test_a_self_cast_trigger_keeps_the_dummy_attacking(self):
+        entry = window_entry(spell=602220, trigger_spell=602220, target='caster', label_suffix='draught_ignored',
+                             quote='which may trick enemies into ignoring you')
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == 602220]
+        self.assertEqual([step['target'] for step in casts], ['caster'])
+        self.assertTrue(any(step['action'] == 'creature_attack' for step in scenario['steps']))
+
     def test_one_swing_under_the_debuff_alerts(self):
         _, [expectation] = behaviour_scenario(load_fixture_class_file(23), window_entry())
         before, after = expectation.model['before_label'], expectation.model['after_label']

@@ -31,8 +31,8 @@ def check(spec, window):
     if spec.metric != WINDOW_METRIC or spec.measure_actor != CASTER or spec.fields != {'target': TARGET}:
         raise ValueError(f'{spec.spell} target_attack_window reads {WINDOW_METRIC} of the caster from the dummy '
                          f'(fields {{"target": "dummy"}})')
-    if spec.target != TARGET:
-        raise ValueError(f'{spec.spell} target_attack_window needs the dummy as the trigger target')
+    if spec.target not in (TARGET, CASTER):
+        raise ValueError(f'{spec.spell} target_attack_window casts its trigger at the dummy or at the caster')
 
 
 def phase_steps(spec, window: AttackWindow, after: bool) -> list[dict]:
