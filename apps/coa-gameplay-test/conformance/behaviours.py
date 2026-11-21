@@ -4664,10 +4664,12 @@ class PeriodicDispelSpec:
     period_ms: int
     margin_ms: int = PERIODIC_DISPEL_MARGIN_MS
     power: int | None = None
+    label_tag: str = ''
 
 
-def periodic_dispel_label(spell: int, moment: str, debuff: int | None = None) -> str:
-    return f'{spell} periodic_dispel {moment}' + (f' {debuff}' if debuff is not None else '')
+def periodic_dispel_label(spell: int, moment: str, debuff: int | None = None, tag: str = '') -> str:
+    return f'{spell} periodic_dispel' + (f' {tag}' if tag else '') + f' {moment}' + (
+        f' {debuff}' if debuff is not None else '')
 
 
 def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tuple[dict, list[Expectation]]:
@@ -4682,8 +4684,8 @@ def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tupl
         return [{'action': 'set_aura', 'actor': CASTER, 'spell': debuff, 'stacks': 1} for debuff in spec.debuffs]
 
     def read(moment: str) -> list[dict]:
-        return [measurement(periodic_dispel_label(spec.spell, moment, debuff), CASTER, 'aura', spell=debuff)
-                for debuff in spec.debuffs]
+        return [measurement(periodic_dispel_label(spec.spell, moment, debuff, spec.label_tag), CASTER, 'aura',
+                            spell=debuff) for debuff in spec.debuffs]
 
     moments = [('before_first', spec.period_ms - spec.margin_ms, count)]
     moments += [(f'after_{tick}', tick * spec.period_ms + spec.margin_ms, max(count - tick, 0))
@@ -4704,9 +4706,10 @@ def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tupl
         elapsed = at_ms
     rule = prose_rule(entry.quote, spec.spell)
     model = {'kind': 'periodic_dispel', 'period_ms': spec.period_ms, 'quote': entry.quote}
-    expectations = [Expectation(periodic_dispel_label(spec.spell, moment), BEHAVIOUR_CAST_CONDITION, spec.spell,
-                                spec.spell, None, str(present), rule,
-                                {**model, 'sum_labels': [periodic_dispel_label(spec.spell, moment, debuff)
+    expectations = [Expectation(periodic_dispel_label(spec.spell, moment, tag=spec.label_tag),
+                                BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(present), rule,
+                                {**model, 'sum_labels': [periodic_dispel_label(spec.spell, moment, debuff,
+                                                                               spec.label_tag)
                                                          for debuff in spec.debuffs]})
                     for moment, present in [('control', count)] + [(m, n) for m, _, n in moments]]
     scenario = {
@@ -4724,7 +4727,7 @@ def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tupl
 def periodic_dispel_spec(entry: dict) -> PeriodicDispelSpec:
     return PeriodicDispelSpec(entry['spell'], entry['name'], entry['quote'], tuple(int(d) for d in entry['debuffs']),
                               int(entry['period_ms']), entry.get('margin_ms', PERIODIC_DISPEL_MARGIN_MS),
-                              entry.get('power'))
+                              entry.get('power'), entry.get('label_tag', ''))
 
 
 SPELL_FAILED_TARGET_AURASTATE = 111

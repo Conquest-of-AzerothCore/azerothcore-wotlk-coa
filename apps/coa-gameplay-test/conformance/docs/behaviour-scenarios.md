@@ -1259,6 +1259,9 @@ is not fixed, so each reading is the sum of the fixtures' `aura` values (`sum_la
 cost, for a channel that also drains power per second (Testament of Fortitude: `ManaPerSecond` 15 on top of
 `ManaCost` 15; at exactly the cost the channel ended at its first tick).
 
+`label_tag` (ADR 1103) puts a tag after `periodic_dispel` in every label (`<spell> periodic_dispel <tag> <moment>`),
+for a second arm of the same spell: Cleansing Idol 504840 `dispel_poison` (tag `poison`) beside its disease arm.
+
 `party_pulse: {"radius_spell": id, "pulses": n}` (ADR 0930, `periodic_dispel_party.py`) judges a pulse that removes
 every effect of the dispelled mechanics from party members inside a radius (Witching Idol 804051). The debuffs go on a
 party member 3 yd away (`ally`) and one at the radius of `radius_spell`'s Effect[0] plus 15 yd (`ally_far`); labels
