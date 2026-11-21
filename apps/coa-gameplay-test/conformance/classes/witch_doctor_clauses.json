@@ -4312,19 +4312,6 @@
     "clause": "and reduces the cooldown of Spirit Glaive by $706803s1% every $706489t1 sec.",
     "labels": [],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The amount ($706803s1%) and the period ($706489t1 sec) have no behaviour route this pass. The cooldown gates (cost_gate on Spirit Glaive with a real Avatar) are presence reads: an integer replay of the cut (remaining // 5 per tick) shows that the accepted attempt passes any cut of about 14 to 16% or more and that the refused attempt only rules out a cut near 50% or more a tick, so they cannot tell 20% from 19% or 21% (the cooldown ends about 200 ms apart, inside the tick-phase uncertainty; widening margin_ms to make a bracket pass is pitfall 1). Tool: a behaviour read of a running cooldown at two moments of one cast, so that the cut per second is read as a difference and not as an accepted or refused recast (the cycle 8 B11 note). The amount keeps its data label and, for 706577 and 705943, the 705943 glaive_cd cooldown_ms readback (a readback, coverage class data). The presence of the cut under the Lesser Shadow Avatar is read by the glaive_lesser gate (a real Avatar cast before the priming Glaive, a recast accepted 19530 ms and refused 16530 ms after the priming cast, refused without the talent).",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B11",
-          "report": "cycle8/author-B11.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    },
     "claims": [
       {
         "claim": "and reduces the cooldown of Spirit Glaive",
@@ -4337,15 +4324,18 @@
       {
         "claim": "by $706803s1%",
         "labels": [
-          "706543 effect_value 706803e0 #1"
+          "706543 effect_value 706803e0 #1",
+          "706543 behaviour_metric_delta lesser_cut"
         ]
       },
       {
         "claim": "every $706489t1 sec",
-        "labels": []
+        "labels": [
+          "706543 behaviour_metric_delta lesser_cut_period"
+        ]
       }
     ],
-    "reason": "The former label \"706543 aura_amplitude_ms #2\" is unmodelled and is dropped; the period has no label in this row now: the gate is a presence read and does not measure it (cycle 9 fix round, guide 9.4)."
+    "reason": "The former label \"706543 aura_amplitude_ms #2\" is unmodelled and is dropped (cycle 9 fix round, guide 9.4). The gate stays the presence read; the 20% and the 1 sec are judged by 706543 behaviour_metric_delta lesser_cut and lesser_cut_period (kind cooldown_cut_series, cycle 10 tool build, ADR 1026 provisional): game-time stamped reads of the Glaive's remaining cooldown under a real Lesser Shadow Avatar against a control series without Residual Energy."
   },
   {
     "spell": 706543,
@@ -4448,7 +4438,7 @@
     "clause": "While Shadow Avatar is active, the cooldown of Spirit Glaive is now reduced by $706803s1% every 1 sec.",
     "labels": [],
     "kind": "claim",
-    "reason": "The glaive_cd entry of Shadow Avatar 705943 (gate_spell 706577) reads the Glaive cooldown with and without the talent (a cooldown_ms readback, coverage class data): -8407 and -8421 against an expected -8419 within 400 in both final04 runs. The glaive_gate cost gate adds the presence read: with Vol'jin's Blessing and a real Shadow Avatar the Glaive is accepted 11429 ms after the priming cast (1000 ms after the replayed end of the cut cooldown, 10429 ms), refused at the same moment without the talent and refused at 7429 ms; it does not tell 20% from nearby rates, which is why the value and the period keep their tool_gap (cycle 9 fix round).",
+    "reason": "The glaive_cd entry of Shadow Avatar 705943 (gate_spell 706577) reads the Glaive cooldown with and without the talent (a cooldown_ms readback, coverage class data): -8407 and -8421 against an expected -8419 within 400 in both final04 runs. The glaive_gate cost gate adds the presence read. The 20% and the 1 sec are judged by 706577 behaviour_metric_delta glaive_cut and glaive_cut_period (kind cooldown_cut_series, cycle 10 tool build, ADR 1026 provisional): game-time stamped reads of the remaining Glaive cooldown under a real Shadow Avatar, each tick's cut share and the tick period, against a control series without the talent.",
     "claims": [
       {
         "claim": "While Shadow Avatar is active, the cooldown of Spirit Glaive is now reduced",
@@ -4462,27 +4452,17 @@
         "claim": "by $706803s1%",
         "labels": [
           "706577 effect_value 706803e0 #0",
-          "705943 behaviour_metric_delta glaive_cd"
+          "705943 behaviour_metric_delta glaive_cd",
+          "706577 behaviour_metric_delta glaive_cut"
         ]
       },
       {
         "claim": "every 1 sec",
-        "labels": []
+        "labels": [
+          "706577 behaviour_metric_delta glaive_cut_period"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "The amount ($706803s1%) and the period ($706489t1 sec) have no behaviour route this pass. The cooldown gates (cost_gate on Spirit Glaive with a real Avatar) are presence reads: an integer replay of the cut (remaining // 5 per tick) shows that the accepted attempt passes any cut of about 14 to 16% or more and that the refused attempt only rules out a cut near 50% or more a tick, so they cannot tell 20% from 19% or 21% (the cooldown ends about 200 ms apart, inside the tick-phase uncertainty; widening margin_ms to make a bracket pass is pitfall 1). Tool: a behaviour read of a running cooldown at two moments of one cast, so that the cut per second is read as a difference and not as an accepted or refused recast (the cycle 8 B11 note). The amount keeps its data label and, for 706577 and 705943, the 705943 glaive_cd cooldown_ms readback (a readback, coverage class data).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B15",
-          "report": "cycle9/author-B15.md"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 707162,
@@ -7604,28 +7584,18 @@
       {
         "claim": "by $706803s1%",
         "labels": [
-          "705943 behaviour_metric_delta glaive_cd"
+          "705943 behaviour_metric_delta glaive_cd",
+          "705943 behaviour_metric_delta glaive_cut"
         ]
       },
       {
         "claim": "every $706489t1 sec",
-        "labels": []
+        "labels": [
+          "705943 behaviour_metric_delta glaive_cut_period"
+        ]
       }
     ],
-    "reason": "The former label \"705943 effect_value e1 #1\" is not_measured in both final05 runs: the aura script's DoEffectCalcAmount hook sets the effect's amount after CalcValue, so the CalcValue read does not measure the amount the aura applies, and the verdict names the aura_amount read of a present aura as the measure. \"705943 aura_amount e1 #1\" reads the same stated $s2 (20 against 20, ok in both runs) and is kept, with the behaviour_hit_ratio shadow_taken entry (guide 9.4: a dropped label that measures a stated value is linked to a passing label).",
-    "tool_gap": {
-      "reason": "The amount ($706803s1%) and the period ($706489t1 sec) have no behaviour route this pass. The cooldown gates (cost_gate on Spirit Glaive with a real Avatar) are presence reads: an integer replay of the cut (remaining // 5 per tick) shows that the accepted attempt passes any cut of about 14 to 16% or more and that the refused attempt only rules out a cut near 50% or more a tick, so they cannot tell 20% from 19% or 21% (the cooldown ends about 200 ms apart, inside the tick-phase uncertainty; widening margin_ms to make a bracket pass is pitfall 1). Tool: a behaviour read of a running cooldown at two moments of one cast, so that the cut per second is read as a difference and not as an accepted or refused recast (the cycle 8 B11 note). The amount keeps its data label and, for 706577 and 705943, the 705943 glaive_cd cooldown_ms readback (a readback, coverage class data).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B15",
-          "report": "cycle9/author-B15.md"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    }
+    "reason": "The former label \"705943 effect_value e1 #1\" is not_measured in both final05 runs: the aura script's DoEffectCalcAmount hook sets the effect's amount after CalcValue, so the CalcValue read does not measure the amount the aura applies, and the verdict names the aura_amount read of a present aura as the measure. \"705943 aura_amount e1 #1\" reads the same stated $s2 (20 against 20, ok in both runs) and is kept, with the behaviour_hit_ratio shadow_taken entry (guide 9.4: a dropped label that measures a stated value is linked to a passing label). The Glaive cut share and its period are judged by 705943 behaviour_metric_delta glaive_cut and glaive_cut_period (kind cooldown_cut_series, cycle 10 tool build, ADR 1026 provisional)."
   },
   {
     "spell": 707676,

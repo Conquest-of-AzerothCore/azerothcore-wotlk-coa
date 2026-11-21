@@ -2082,6 +2082,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   forced ability crit earns it (ADR 0694, provisional)
 - [`chase_halt`](kinds/chase_halt.md): a hooked enemy's chase against an unhooked one; unmeasured until enemies can
   be moved (ADR 0596)
+- [`cooldown_cut_series`](kinds/cooldown_cut_series.md): a percent cut of a running cooldown per tick and its
+  period, from game-time stamped remaining-cooldown reads against a control series (ADR 1026, provisional)
 - [`cooldown_reset_rate`](kinds/cooldown_reset_rate.md): a talent's chance to reset a cooldown, from the
   clear-cooldown packets per trigger hit (ADR 0603)
 - [`corpse_per_raise`](kinds/corpse_per_raise.md): the corpses a periodic raise leaves, against the raises (ADR 0595)

@@ -11791,6 +11791,49 @@
       "observe_source": "Shadow Avatar 705943: instant (CastingTimeIndex 1), RecoveryTime 90000 reset by the scenario, DurationIndex 8 = 15000 ms ($d), 15% base mana, no global cooldown; aura on the caster (TARGET_UNIT_CASTER), no class script on the duration (AscensionWitchDoctorAuras.cpp only makes the first effect periodic and casts the Lesser Avatar at the end). A real cast at the caster (cast_power 2000): the aura reads 1 at 14750 ms and 0 500 ms later, so its end lies inside the G-19 band (5% of 15000 ms = 750 ms) on both sides, both reads stamped in game time (windows 14250..15000 and 15000..15750 ms); the shape of the Vol'jin's Vigil 504465 vigil_lasts entry. Control: the uncast before phase reads 0. Clause 430 'Become empowered by shadow magic for $d'. Cast timing checked: instant. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
+      "spell": 705943,
+      "kind": "cooldown_cut_series",
+      "name": "Shadow Avatar (with Vol'jin's Blessing, the Spirit Glaive cooldown falls 20% a second)",
+      "variant": "glaive_cut",
+      "label_suffix": "glaive_cut",
+      "quote": "and reducing the cooldown of Spirit Glaive by $706803s1% every $706489t1 sec",
+      "talent": 706577,
+      "gated_spell": 562719,
+      "casts": [
+        {
+          "spell": 562719,
+          "target": "dummy",
+          "wait_ms": 2700
+        },
+        {
+          "spell": 705943,
+          "target": "caster",
+          "wait_ms": 200
+        }
+      ],
+      "series": {
+        "reads": 110,
+        "step_ms": 50
+      },
+      "expected_pct": 20,
+      "pct_source": [
+        706803,
+        0
+      ],
+      "expected_period_ms": 1000,
+      "period_source": [
+        706489,
+        0
+      ],
+      "clear_auras": [
+        705943
+      ],
+      "min_ticks": 4,
+      "cast_power": 1400,
+      "dummy_distance": 15,
+      "observe_source": "The Shadow Avatar 705943 tooltip branch $?s706577[ and reducing the cooldown of Spirit Glaive by $706803s1% every $706489t1 sec]: the same mechanism and arms as 706577 glaive_cut (AscensionWitchDoctorAuras.cpp:342-349, Reduce(player, Glaive, GetSpellCooldownDelay(glaive) / 5) each 1000 ms tick while Vol'jin's Blessing 706577 is known; $706803s1 = 20, $706489t1 = 1 sec from 706489 EffectAmplitude 1000), keyed on the Avatar's own sentence. Each arm: a real Spirit Glaive 562719 at the dummy 15 yd away, 2700 ms later a real Shadow Avatar, 200 ms later 110 reads of the Glaive's remaining cooldown and the game time every 50 ms, then the Avatar cancelled. Control: 706577 not yet learned (the cooldown falls by elapsed time alone); treatment: learned. Each tick's share inside 20% +- 2 and the period inside 1000 +- 50 ms over at least 4 ticks (ADR 1026 provisional). Clause 431 'by $706803s1%' and 'every $706489t1 sec'. Player reports: none."
+    },
+    {
       "spell": 706538,
       "kind": "metric_delta",
       "name": "Touch of Mueh'zala (the Stasis stun lasts 5 sec)",
@@ -16092,6 +16135,47 @@
       "observe_source": "AscensionWitchDoctorAuras.cpp:342-349 (aura script Tick, Shadow Avatar first effect, every 1000 ms): with Vol'jin's Blessing 706577 on the caster Reduce(player, Glaive, GetSpellCooldownDelay(glaive) / 5) cuts the remaining Spirit Glaive cooldown each second ($706803s1 = 19 + 1, $706489t1 = 1 sec). This entry is a PRESENCE read: with the talent and a real Shadow Avatar the Glaive recast is accepted long before its uncut cooldown ends, without the talent it is refused at the same moment; it does not measure the 20% or the 1 sec period, which stay with the data labels and under the clause's tool_gap (an integer replay shows the attempts cannot tell 20% from nearby rates: the with attempt passes any cut of about 16% or more). The cooldown is consumed, not read (a cooldown_ms read is a readback, coverage.METRIC_EVIDENCE). Spirit Glaive 562719: CastingTimeIndex 5 = 2000 ms, category cooldown 20000 ms counted from the cast end, so it ends 22000 ms after the priming submission. Shadow Avatar 705943 (instant, RecoveryTime 90000 reset by the scenario, 15% base mana, DurationIndex 8 = 15000 ms) is cast 2500 ms after the submission, so its ticks fall at 3500, 4500 ... ms. Integer replay of the cut (remaining // 5 per tick): the cooldown ends at 10429 ms after the submission (an effective cut of 11571 ms). reduction 10571 and margin_ms 2000 turn the generator's levels into the attempts at 11429 ms (1000 ms after that end: with 706577 it goes through, 0) and at 7429 ms (refused: at 20% the cooldown then runs to 12126 ms; a cut of about 50% a tick or more, which ends near 6782 ms, would let it through and alert). Control: without 706577 the attempt at 11429 ms is refused (67, the Avatar is cast in every arm, only the talent differs). Limits, stated in the verdict: the bracket shows that the cooldown is cut and not reset, not the rate; the 20% value is read by the glaive_cd cooldown_ms entry of 705943 (a readback). arm_wait_ms 5000 lets the previous arm's Shadow Avatar (15000 ms, cast about 9400 ms before its attempt) end before the next priming cast: otherwise its remaining ticks, with 706577 learned, would cut the next arm's Glaive cooldown before that arm's own Avatar. Cast timing checked: Glaive 2000 ms, Avatar instant, ticks 1000 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the presence of the cut in clause 255 and in the cooldown part of 705943 clause 431."
     },
     {
+      "spell": 706577,
+      "kind": "cooldown_cut_series",
+      "name": "Vol'jin's Blessing (Shadow Avatar cuts the Spirit Glaive cooldown 20% a second)",
+      "variant": "glaive_cut",
+      "label_suffix": "glaive_cut",
+      "quote": "the cooldown of Spirit Glaive is now reduced by $706803s1% every 1 sec.",
+      "learn": [
+        705943
+      ],
+      "gated_spell": 562719,
+      "casts": [
+        {
+          "spell": 562719,
+          "target": "dummy",
+          "wait_ms": 2700
+        },
+        {
+          "spell": 705943,
+          "target": "caster",
+          "wait_ms": 200
+        }
+      ],
+      "series": {
+        "reads": 110,
+        "step_ms": 50
+      },
+      "expected_pct": 20,
+      "pct_source": [
+        706803,
+        0
+      ],
+      "expected_period_ms": 1000,
+      "clear_auras": [
+        705943
+      ],
+      "min_ticks": 4,
+      "cast_power": 1400,
+      "dummy_distance": 15,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:342-349 (aura script Tick of the Shadow Avatar 705943 first effect, made periodic every 1000 ms at :171-174): with Vol'jin's Blessing 706577 on the caster, Reduce(player, Glaive, GetSpellCooldownDelay(glaive) / 5) cuts the remaining Spirit Glaive cooldown by a fifth, truncated, each second ($706803s1 = 19 + 1 = 20; 'every 1 sec' is literal). Each arm casts a real Spirit Glaive 562719 at the dummy 15 yd away (CastingTimeIndex 5 = 2000 ms, CategoryRecoveryTime 20000 from the cast end, the rank-60 id), 2700 ms later a real Shadow Avatar 705943 (instant, RecoveryTime 90000 reset, 15% base mana), then 200 ms later reads the Glaive's remaining cooldown and the game time 110 times every 50 ms (5.5 s, ticks at about 1000 to 5000 ms after the Avatar, the cooldown above 3000 ms throughout by an integer replay), and cancels the Avatar at the arm's end so the control's Avatar never ticks with the talent learned. Control (before 706577 is learned): the cooldown falls by the elapsed game time alone. Treatment: each tick's cut c = before - after - elapsed and c / before bracket the share to about 0.2 points (floor rounding) inside the G-19 band of 20% (18 to 22%); the tick times bracket the period over at least 4 ticks against 1000 ms +- 50. Evidence: a game-time stamped remaining-cooldown series under a real aura with a control series (ADR 1026 provisional, owner ruling of 2026-11-21). The glaive_gate cost gate stays the presence read and glaive_cd of 705943 the readback. Clause 255 'by $706803s1%' and 'every 1 sec'. Cast timing checked: Glaive 2000 ms, then Avatar instant. Player reports: none."
+    },
+    {
       "spell": 706543,
       "name": "Residual Energy (Spirit Glaive recast accepted once the Lesser Shadow Avatar has cut its cooldown 20% a second)",
       "kind": "cost_gate",
@@ -16158,6 +16242,45 @@
       "cast_power": 1000,
       "cast_wait_ms": 2500,
       "observe_source": "Residual Energy 706543 (passive): Auras.cpp:417-419 casts Lesser Shadow Avatar 706544 on the caster when Shadow Avatar 705943 is removed by AURA_REMOVE_BY_EXPIRE with the talent known. 706544 (DurationIndex 31 = 8000 ms) Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE misc 126 (the magic schools), BasePoints 9 + 1 = +10% ($s3). The existing lesser and lesser_lasts entries read 706544 present 600 ms after the 15000 ms Avatar and gone at about 23000 ms. Both arms cast a real Shadow Avatar 705943 (instant, RecoveryTime 90000 reset by hit_ratio_cast, 15% base mana, DurationIndex 8 = 15000 ms) before every trial and wait casts_wait_ms 14000 after the 1600 ms cast wait: the observed Malefic Wrath 807037 (Nature, 2000 ms, cast_power 1000) starts about 15600 ms after the Avatar, when it has expired, and lands about 17600 ms after it, inside the Lesser Avatar's 8000 ms window (no set_aura of 706544, the claim's subject, guide 3.4). The previous trial's Lesser Avatar ends at about 23000 ms after its Avatar, before the next trial's Wrath at about 37300 ms. Control: 706543 not learned (the Avatar ends with no Lesser Avatar); treatment: learned. 20000 spell power so the stat term dominates the die, 823764 on the caster, non-critical hits only, 10 trials per arm (21.7 s each, the scenario cap). The per-hit mean ratio must be 1.10 inside the G-19 band; no Lesser Avatar (1.0) or a wrong amount alerts. Clause 247 'Increases magic damage dealt by $s3%'. Cast timing checked: Avatar instant, 1600 + 14000 ms lead, Wrath 2000 + 1600 ms and cast_wait_ms 2500. Player reports: none."
+    },
+    {
+      "spell": 706543,
+      "kind": "cooldown_cut_series",
+      "name": "Residual Energy (the Lesser Shadow Avatar cuts the Spirit Glaive cooldown 20% a second)",
+      "variant": "lesser_cut",
+      "label_suffix": "lesser_cut",
+      "quote": "Lesser Shadow Avatar",
+      "gated_spell": 562719,
+      "casts": [
+        {
+          "spell": 705943,
+          "target": "caster",
+          "wait_ms": 13000
+        },
+        {
+          "spell": 562719,
+          "target": "dummy",
+          "wait_ms": 2400
+        }
+      ],
+      "series": {
+        "reads": 120,
+        "step_ms": 50
+      },
+      "expected_pct": 20,
+      "pct_source": [
+        706803,
+        0
+      ],
+      "expected_period_ms": 1000,
+      "period_source": [
+        706489,
+        0
+      ],
+      "min_ticks": 4,
+      "cast_power": 1400,
+      "dummy_distance": 15,
+      "observe_source": "Lesser Shadow Avatar 706544 (DurationIndex 31 = 8000 ms, cast on the caster when Shadow Avatar 705943 expires with Residual Energy 706543 known, AscensionWitchDoctorAuras.cpp:417-419) carries Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($706489t1 is the Avatar 706489 amplitude, the same 1000 ms) of 706803, whose Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT 192 (SpellEffects.cpp:972-990) cuts the remaining cooldown of misc 806289 (Spirit Glaive) by CalculatePct(remaining, 20), truncated ($706803s1 = 19 + 1). Each arm casts a real Shadow Avatar 705943 (instant, RecoveryTime 90000 reset, 15% base mana, DurationIndex 8 = 15000 ms) and 13000 ms later a real Spirit Glaive 562719 at the dummy 15 yd away (CastingTimeIndex 5 = 2000 ms, about 1667 ms under the Avatar's 20% spell haste, CategoryRecoveryTime 20000 from the cast end, the rank-60 id), then 2400 ms later, about 15400 ms after the Avatar, reads the Glaive's remaining cooldown and the game time 120 times every 50 ms (6 s): with 706543 the Lesser Avatar forms at 15000 ms and ticks at about 16000 to 21000 ms, while the cooldown stays above 2700 ms (integer replay of remaining x 0.8 per tick). Control (before 706543 is learned): the Avatar ends with no Lesser Avatar and the cooldown falls by the elapsed game time alone. Treatment: each tick's cut c = before - after - elapsed is exact up to the read jitter, and c / before brackets the share to about 0.2 points (floor rounding, 50 ms between reads); every tick must lie inside the G-19 band of 20% (18 to 22%), so 19% or 21% per tick is told apart from a wrong rate only beyond the band, as the rule requires; the tick times, bracketed by their reads, give the period over at least 4 ticks (about +-12 ms against the band of 50 ms) and every gap. Evidence: a game-time stamped series of remaining-cooldown reads under a real aura against a control series (ADR 1026 provisional, the owner ruling of 2026-11-21: behaviour evidence for this shape; a single cooldown_ms read stays data). Clause 248 'by $706803s1%' and 'every $706489t1 sec'. Cast timing checked: Avatar instant, Glaive about 1667 ms hasted, reads from 15400 ms. Player reports: none."
     },
     {
       "spell": 707162,
