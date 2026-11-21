@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "A Strange Piece of Scrap cannot be shared, so no receiver is stuck without the item (#13107)",
+  "contract": "#13107: a shared Goblin Salvage quest could not be done by the receiver, 'probably because they need to have quest item in their inventory'. 176000 'A Strange Piece of Scrap' (rev_20261023_50_goblin_salvage_project.sql) is started by item 9707001 and requires that item, and a negated condition stops 9707001 from dropping while 176000 is active, yet it carried QUEST_FLAGS_SHARABLE (8): a receiver who accepted it could never complete it. Every stock quest that requires its own start item is non-sharable. 176011 itself is not changed: a receiver can only take it with 176000 rewarded and its three items are quest loot open to any holder. The fix clears flag 8 on 176000. Two grouped Horde players stand together; the sharer carries 176000 and the stock sharable quest 583 'Welcome to the Jungle'. The sharer shares each (CMSG_PUSHQUESTTOPARTY) and the receiver answers with the CMSG_QUESTGIVER_ACCEPT_QUEST a client sends for a shared quest, naming the sharer; WorldSession::HandleQuestgiverAcceptQuestOpcode accepts it only while the sharer can share the quest. CONTROL: 583 is accepted (status 1: it has no objectives, so it completes at once), so sharing and accepting work here. With the old flag 176000 is accepted the same way; with the fix the receiver must not carry it (status 0).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11340.0,
+    "y": -215.0,
+    "z": 75.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "sharer",
+      "race": 2,
+      "class": 1,
+      "level": 35
+    },
+    {
+      "id": "receiver",
+      "race": 2,
+      "class": 1,
+      "level": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "SETUP: the two players are grouped",
+      "actor": "sharer",
+      "target": "receiver"
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the sharer carries 583 'Welcome to the Jungle'",
+      "actor": "sharer",
+      "quest": 583,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the sharer carries 176000 'A Strange Piece of Scrap'",
+      "actor": "sharer",
+      "quest": 176000,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: share 583, a stock sharable quest",
+      "actor": "sharer",
+      "opcode": 413,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 583
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: the receiver accepts the shared 583",
+      "actor": "receiver",
+      "opcode": 393,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "sharer"
+        },
+        {
+          "u32": 583
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the receiver now carries 583, so sharing works here",
+      "actor": "receiver",
+      "metric": "quest_status",
+      "quest": 583,
+      "within_ms": 3000,
+      "min": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Share 176000 'A Strange Piece of Scrap'",
+      "actor": "sharer",
+      "opcode": 413,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 176000
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "The receiver accepts the shared 176000",
+      "actor": "receiver",
+      "opcode": 393,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "sharer"
+        },
+        {
+          "u32": 176000
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the receiver does not carry 176000, which it could never complete",
+      "actor": "receiver",
+      "metric": "quest_status",
+      "quest": 176000,
+      "equals": 0
+    }
+  ]
+}

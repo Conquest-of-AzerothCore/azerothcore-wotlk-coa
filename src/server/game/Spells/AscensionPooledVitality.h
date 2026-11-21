@@ -22,7 +22,8 @@ enum Spells : uint32
     HeartbreakBuff = 807563,
     VisceralPower = 807687,
     CursedFormCheck = 524861,
-    CursedForm = 802877
+    CursedForm = 802877,
+    NightmareTalent = 300226
 };
 
 constexpr uint32 BloodmageSpellFamily = 26;

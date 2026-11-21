@@ -1,0 +1,477 @@
+{
+  "schema": 1,
+  "name": "Venomancer forms show the matching druid form incarnations",
+  "contract": [
+    "AppearanceCategories.dbc rows 17-23 (Bear, Cat, Travel, Aquatic, Flight, Moonkin, Tree of Life) carry the Venomancer class bit (class 29, mask 0x10000000) and in field 21 the Venomancer form: Beetle Form 53, Spider Form 52, Venomwing Form 47, Weaver Form 54, Vizier Form 62. Wasp Form 805141 already is form 29 (Flight Form).",
+    "A Venomancer's selection is accepted and each form takes the selected display while it lasts: appearance 822 = 1083, 645 = 328642, 506 = 100536, 47621 = 80084, 15595 = 110039, 15605 = 39801 (Appearances.dbc field 8). Leaving the form restores the character; without a selection the form keeps its own model.",
+    "A Druid keeps its incarnations (Cat Form 768 with appearance 645 = 328642) and a class outside the mask is still refused. Cast in Hellfire Peninsula, outdoors in Outland, where Venomwing Form and Wasp Form are usable."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "v",
+      "name": "Venomkin",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "w",
+      "name": "Clawless",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "d",
+      "name": "Clawkeeper",
+      "race": 4,
+      "class": 11,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": -211.237,
+    "y": 4278.54,
+    "z": 86.5678,
+    "o": 4.59776
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 520307
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805141
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 706940
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 504798
+    },
+    {
+      "action": "wait",
+      "label": "Weaver Form and Vizier Form are taught by their talents",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Mana pool for six form changes",
+      "actor": "v",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "Mana pool for six form changes",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "The character's own model",
+      "actor": "v",
+      "metric": "display_id",
+      "save_as": "native"
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Spider Form without a selection",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Spider Form's own model",
+      "actor": "v",
+      "metric": "display_id",
+      "save_as": "stock_spider"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select one incarnation in each of the seven druid form categories",
+      "actor": "v",
+      "selection": {
+        "17": 822,
+        "18": 645,
+        "19": 506,
+        "20": 47619,
+        "21": 47621,
+        "22": 15595,
+        "23": 15605
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The druid form incarnations are offered to a Venomancer",
+      "actor": "v",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Beetle Form",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "assert",
+      "label": "Beetle Form shows the Bear Form incarnation",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 1083,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Beetle Form",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Beetle Form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Spider Form",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form shows the Cat Form incarnation",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 328642,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Spider Form",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Spider Form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Venomwing Form",
+      "actor": "v",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "label": "Venomwing Form shows the Travel Form incarnation",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 100536,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Venomwing Form",
+      "actor": "v",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Venomwing Form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Wasp Form",
+      "actor": "v",
+      "spell": 805141
+    },
+    {
+      "action": "assert",
+      "label": "Wasp Form shows the Flight Form incarnation",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 80084,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Wasp Form",
+      "actor": "v",
+      "spell": 805141
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Wasp Form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Weaver Form",
+      "actor": "v",
+      "spell": 804980
+    },
+    {
+      "action": "assert",
+      "label": "Weaver Form shows the Moonkin Form incarnation",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 110039,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Weaver Form",
+      "actor": "v",
+      "spell": 804980
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Weaver Form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Vizier Form",
+      "actor": "v",
+      "spell": 800912
+    },
+    {
+      "action": "assert",
+      "label": "Vizier Form shows the Tree of Life incarnation",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 39801,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Vizier Form",
+      "actor": "v",
+      "spell": 800912
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Vizier Form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "d",
+      "spell": 768
+    },
+    {
+      "action": "apply_appearances",
+      "label": "A druid selects the Cat Form incarnation",
+      "actor": "d",
+      "selection": {
+        "18": 645
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Cat Form incarnations are still offered to druids",
+      "actor": "d",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "The druid's Cat Form",
+      "actor": "d",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "label": "The druid's Cat Form still shows the incarnation",
+      "actor": "d",
+      "metric": "display_id",
+      "equals": 328642,
+      "within_ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "A warrior selects the Cat Form incarnation",
+      "actor": "w",
+      "selection": {
+        "18": 645
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Cat Form incarnations are still not offered to warriors",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "The Venomancer clears every selection",
+      "actor": "v",
+      "selection": {}
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Spider Form after clearing",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "assert",
+      "label": "Without a selection Spider Form keeps its own model",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "stock_spider",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

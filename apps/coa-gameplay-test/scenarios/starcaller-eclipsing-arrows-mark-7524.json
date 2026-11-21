@@ -28,7 +28,7 @@
   "steps": [
     {
       "action": "wait",
-      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "label": "Let spawn AI and level scaling settle",
       "ms": 7000
     },
     {
@@ -85,14 +85,12 @@
     },
     {
       "action": "assert",
-      "label": "STREAM: the mark row reaches the client with its wording",
+      "label": "CLIENT ROW: the mark row carries its wording",
       "actor": "star",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 574154,
+      "metric": "client_spell_row_contains",
+      "spell": 574154,
       "text": "Huntress Shot",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "learn",

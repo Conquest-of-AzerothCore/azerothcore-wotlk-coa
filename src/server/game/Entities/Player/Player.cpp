@@ -25,7 +25,6 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionBazaarTokenReserve.h"
-#include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
@@ -3036,7 +3035,6 @@ void Player::SendInitialSpells()
     }
 
     SendDirectMessage(&data);
-    AscensionDisplayPatch::ResendSkillLineAbilityRows(this);
 }
 
 void Player::SendUnlearnSpells()
@@ -3293,7 +3291,6 @@ void Player::SendLearnPacket(uint32 spellId, bool learn, bool keepActionButtons 
         data << uint32(spellId);
         data << uint16(0);
         SendDirectMessage(&data);
-        AscensionDisplayPatch::ResendSkillLineAbilityRows(this, spellId);
     }
     else
     {
@@ -10662,6 +10659,10 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         }
     }
 
+    if (spell && op == SPELLMOD_DAMAGE && spell->GetSpellInfo()->Id == spellId && !temporaryPet)
+        if (uint64 const nightmare = spell->GetScriptValue(AscensionBloodmage::NightmareTalent))
+            totalmul *= CalculatePct(1.0f, 100.0f + float(nightmare));
+
     for (auto mod : m_spellMods[op])
     {
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
@@ -17038,6 +17039,8 @@ void Player::RefundItem(Item* item)
             ASSERT(msg == EQUIP_ERR_OK); /// Already checked before
             Item* it = StoreNewItem(dest, itemid, true, true);
             SendNewItem(it, count, true, false, true);
+            if (itemid == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                AscensionBazaarTokenReserve::AddReserve(this, count);
         }
     }
 

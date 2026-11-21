@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: releasing revives the player at the nearest killed boss's checkpoint",
+  "contract": [
+    "Tester (ZG feedback, 2026-11-20) marked a Release Spirit checkpoint for each boss; the user chose the nearest",
+    "checkpoint whose boss is dead. Before any kill, a player who releases in Zul'Gurub is revived at the entrance,",
+    "far from Jin'do's checkpoint (-11657.934, -1516.3619). Once Jin'do and then Thekal are dead, a player who dies",
+    "in Jin'do's arena is revived at Jin'do's checkpoint, about 280 yards away: the nearest unlocked checkpoint,",
+    "not the one of Thekal, the latest kill, about 600 yards away."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60, "security": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "teleport", "actor": "hero", "map": 309, "x": -11518, "y": -1275.5, "z": 79.66, "o": 0, "ignore_access": true },
+    { "action": "assert", "actor": "hero", "metric": "map_id", "equals": 309, "within_ms": 15000, "label": "CONTROL: the player is in Zul'Gurub" },
+    { "action": "assert", "actor": "hero", "metric": "map_difficulty", "equals": 0, "label": "CONTROL: the instance is the base difficulty" },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "die", "actor": "hero" },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 0, "label": "the player dies in Jin'do's arena" },
+    { "action": "release_spirit", "actor": "hero", "label": "release with no boss dead" },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 1, "within_ms": 5000, "label": "the player is revived" },
+    { "action": "assert", "actor": "hero", "metric": "map_id", "equals": 309, "label": "the player stays in Zul'Gurub" },
+    { "action": "assert", "actor": "hero", "metric": "point_distance_2d", "x": -11657.934, "y": -1516.3619, "min": 50, "label": "CONTROL: with no boss dead the player is revived away from Jin'do's checkpoint" },
+
+    { "action": "command", "actor": "hero", "command": ".instance setbossstate 7 3", "label": "Jin'do dies" },
+    { "action": "wait", "ms": 500 },
+    { "action": "command", "actor": "hero", "command": ".instance setbossstate 4 3", "label": "Thekal dies, the latest kill" },
+    { "action": "wait", "ms": 500 },
+
+    { "action": "teleport", "actor": "hero", "map": 309, "x": -11518, "y": -1275.5, "z": 79.66, "o": 0, "ignore_access": true },
+    { "action": "wait", "ms": 1000 },
+    { "action": "die", "actor": "hero" },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 0, "label": "the player dies in Jin'do's arena again" },
+    { "action": "release_spirit", "actor": "hero", "label": "release with Jin'do and Thekal dead" },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 1, "within_ms": 5000, "label": "the player is revived" },
+    { "action": "assert", "actor": "hero", "metric": "map_id", "equals": 309, "label": "the player stays in Zul'Gurub" },
+    { "action": "assert", "actor": "hero", "metric": "point_distance_2d", "x": -11657.934, "y": -1516.3619, "max": 3, "label": "DISCRIMINATING: the player stands at Jin'do's checkpoint, the nearest unlocked one" }
+  ]
+}
