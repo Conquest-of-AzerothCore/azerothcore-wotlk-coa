@@ -28,7 +28,15 @@ def extend_toc(data, name='XPHotspots.lua'):
     return data + (b'' if data.endswith(b'\n') else newline) + name.encode() + newline
 
 
-def package(baseline, output, executable, lua_files=None):
+def loader_entries(members, loads, lua_files):
+    loads = [name.replace('/', '\\') for name in loads]
+    for name in loads:
+        if (FRAMEXML + name.replace('\\', '/')).lower() not in members:
+            raise ValueError(f'Baseline has no {FRAMEXML}{name} to load')
+    return loads + list(lua_files)
+
+
+def package(baseline, output, executable, lua_files=None, loads=None):
     lua_files = list(lua_files or DEFAULT_LUA)
     baseline, output = Path(baseline).resolve(), Path(output).resolve()
     executable = str(Path(executable).resolve())
@@ -62,7 +70,7 @@ def package(baseline, output, executable, lua_files=None):
         payload.mkdir()
         new_toc = payload / 'FrameXML.toc'
         toc_data = toc.read_bytes()
-        for name in lua_files:
+        for name in loader_entries(wanted, loads or [], lua_files):
             toc_data = extend_toc(toc_data, name)
         new_toc.write_bytes(toc_data)
         candidate = temp / 'candidate.MPQ'
@@ -93,8 +101,11 @@ def main():
     parser.add_argument('--mpqcli', type=Path, required=True)
     parser.add_argument('--lua', action='append', default=None,
                         help='FrameXML Lua file from client/Interface/FrameXML to add; repeatable, default XPHotspots.lua')
+    parser.add_argument('--load', action='append', default=None,
+                        help='FrameXML file already in the baseline to add to FrameXML.toc, loaded before the --lua files; '
+                             'repeatable, path relative to Interface/FrameXML')
     args = parser.parse_args()
-    print(json.dumps(package(args.baseline, args.output, args.mpqcli, args.lua), indent=2))
+    print(json.dumps(package(args.baseline, args.output, args.mpqcli, args.lua, args.load), indent=2))
 
 
 if __name__ == '__main__':

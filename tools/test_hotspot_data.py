@@ -9,7 +9,7 @@ import tarfile
 import tempfile
 import unittest
 from import_hotspot_locations import catalog, map_rows
-from package_hotspot_client import extend_toc
+from package_hotspot_client import extend_toc, loader_entries
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +24,19 @@ class HotspotDataTests(unittest.TestCase):
         self.assertEqual(extend_toc(updated), updated)
         with self.assertRaises(ValueError):
             extend_toc(b'XPHotspots.lua\nxphotspots.lua\n')
+
+    def test_baseline_members_load_before_overlays(self):
+        members = {'interface/framexml/ascension_coaresources/ascension_templarresource.lua': 'hash'}
+        entries = loader_entries(members, ['Ascension_CoAResources/Ascension_TemplarResource.lua'],
+                                 ['CoATemplarResourceBar.lua'])
+        self.assertEqual(entries, ['Ascension_CoAResources\\Ascension_TemplarResource.lua', 'CoATemplarResourceBar.lua'])
+        toc = b'ClassResources.lua\r\n'
+        for name in entries:
+            toc = extend_toc(toc, name)
+        self.assertEqual(toc, b'ClassResources.lua\r\nAscension_CoAResources\\Ascension_TemplarResource.lua\r\n'
+                              b'CoATemplarResourceBar.lua\r\n')
+        with self.assertRaisesRegex(ValueError, 'Baseline has no'):
+            loader_entries(members, ['Ascension_CoAResources/Missing.lua'], [])
 
     def test_catalog_contains_every_objective_and_valid_geometry(self):
         sql = (ROOT / 'data/sql/updates/pending_db_world/rev_20261011_00_hotspots.sql').read_text()
