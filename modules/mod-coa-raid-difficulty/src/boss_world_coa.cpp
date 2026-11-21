@@ -14,7 +14,7 @@
  *                                         frost damage and -15% speed per pulse;
  *                                         six stacks freeze the target solid
  *   Chill                   every 31s     the stock aura, kept by Ascension
- *   Blizzard                every 25s     2s cast at a player; 10 seconds of ice
+ *   Blizzard                every 15s     2s cast at a player; 30 seconds of ice
  *                                         shards at that spot
  *   Reflection              every 62s     the stock spell reflection
  *   Ice Spikes              every 60s     six players: a 4s warning, then the
@@ -248,7 +248,7 @@ namespace
             events.ScheduleEvent(EV_FIERCE, 11600ms);
             events.ScheduleEvent(EV_BREATH, 15s);
             events.ScheduleEvent(EV_REFLECTION, 20s);
-            events.ScheduleEvent(EV_BLIZZARD, 25s);
+            events.ScheduleEvent(EV_BLIZZARD, 15s);
             events.ScheduleEvent(EV_ICE_SPIKES, 64s);
             events.ScheduleEvent(EV_TAIL, 12s);
             events.ScheduleEvent(EV_VACUUM, 30s);
@@ -272,7 +272,7 @@ namespace
                         _blizzardSpot = target->GetPosition();
                         DoCast(target, SPELL_BLIZZARD_CAST);
                     }
-                    events.Repeat(25s);
+                    events.Repeat(15s);
                     break;
                 case EV_ICE_SPIKES:
                 {
@@ -302,14 +302,14 @@ namespace
             else if (spell->Id == SPELL_BLIZZARD_CAST)
             {
                 if (Creature* spot = me->SummonCreature(NPC_INVISIBLE_TRIGGER, _blizzardSpot,
-                        TEMPSUMMON_TIMED_DESPAWN, 21000))
+                        TEMPSUMMON_TIMED_DESPAWN, 31000))
                 {
                     spot->SetFaction(me->GetFaction());
                     SpellCastTargets targets;
                     targets.SetDst(_blizzardSpot);
                     CustomSpellValues values;
                     values.AddSpellMod(SPELLVALUE_RADIUS_MOD, 20000);
-                    values.AddSpellMod(SPELLVALUE_AURA_DURATION, 20000);
+                    values.AddSpellMod(SPELLVALUE_AURA_DURATION, 30000);
                     spot->CastSpell(targets, sSpellMgr->GetSpellInfo(SPELL_BLIZZARD_AREA), &values,
                         TRIGGERED_FULL_MASK, nullptr, nullptr, me->GetGUID());
                 }
