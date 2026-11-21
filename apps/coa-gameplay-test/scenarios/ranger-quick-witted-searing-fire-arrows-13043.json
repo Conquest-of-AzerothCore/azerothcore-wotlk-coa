@@ -8,9 +8,9 @@
     "the stab is DmgClass 3 (ranged) but triggered, which the Ranger quiver hit handler skipped. Expected: each",
     "stab is followed by Fire Arrows worth about 15% of the stab (a critical Fire Arrows doubles it), so the Fire",
     "Arrows total stays between 5% and 50% of the stab total; partial Fire resists lower it (a first run measured",
-    "10.8%), while the reported failure left it near 0.3%. The mob has 1,000,000 health so overkill never trims",
-    "the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, and the ranger never attacks, so every",
-    "Fire Arrows comes from a stab."
+    "10.8%), while before the fix no Fire Arrows followed the stab at all. The mob has 1,000,000 health so",
+    "overkill never trims the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, and the ranger",
+    "never attacks, so every Fire Arrows comes from a stab."
   ],
   "timeout_ms": 120000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
