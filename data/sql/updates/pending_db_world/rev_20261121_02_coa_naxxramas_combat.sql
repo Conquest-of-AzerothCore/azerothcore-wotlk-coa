@@ -107,6 +107,27 @@ INSERT INTO `_coa_naxx_combat` VALUES
 
 -- The scoping list contains only Naxxramas enemies and encounter helpers. Update the linked
 -- native difficulty templates too so higher modes keep their existing abilities and appearance.
+CREATE TEMPORARY TABLE `_coa_naxx_shared_templates` (
+    `entry` INT UNSIGNED PRIMARY KEY
+) ENGINE=InnoDB;
+
+INSERT IGNORE INTO `_coa_naxx_shared_templates` (`entry`)
+SELECT CASE `mode`.`id`
+    WHEN 0 THEN `outside`.`entry`
+    WHEN 1 THEN `outside`.`difficulty_entry_1`
+    WHEN 2 THEN `outside`.`difficulty_entry_2`
+    WHEN 3 THEN `outside`.`difficulty_entry_3`
+    END AS `entry`
+FROM (
+    SELECT DISTINCT `template`.`entry`, `template`.`difficulty_entry_1`,
+        `template`.`difficulty_entry_2`, `template`.`difficulty_entry_3`
+    FROM `creature` AS `spawn`
+    JOIN `creature_template` AS `template` ON `template`.`entry` = `spawn`.`id`
+    WHERE `spawn`.`map` <> 533
+) AS `outside`
+CROSS JOIN (SELECT 0 AS `id` UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS `mode`
+HAVING `entry` <> 0;
+
 CREATE TEMPORARY TABLE `_coa_naxx_combat_templates` AS
 SELECT `template`.`entry`, `profile`.`level`, `profile`.`expansion`, `profile`.`fixed_normal`
 FROM `_coa_naxx_combat` AS `profile`
@@ -114,15 +135,12 @@ JOIN `creature_template` AS `base` ON `base`.`entry` = `profile`.`entry`
 JOIN `creature_template` AS `template`
     ON `template`.`entry` IN (`base`.`entry`, `base`.`difficulty_entry_1`,
         `base`.`difficulty_entry_2`, `base`.`difficulty_entry_3`)
-WHERE NOT EXISTS (
+LEFT JOIN `_coa_naxx_shared_templates` AS `shared` ON `shared`.`entry` = `template`.`entry`
+WHERE `shared`.`entry` IS NULL AND NOT EXISTS (
     SELECT 1 FROM `creature` AS `outside`
-    WHERE `outside`.`map` <> 533 AND `outside`.`id` = `base`.`entry`)
-AND NOT EXISTS (
-    SELECT 1 FROM `creature_template` AS `other`
-    WHERE `template`.`entry` IN (`other`.`entry`, `other`.`difficulty_entry_1`,
-        `other`.`difficulty_entry_2`, `other`.`difficulty_entry_3`)
-    AND EXISTS (SELECT 1 FROM `creature` AS `outside`
-        WHERE `outside`.`id` = `other`.`entry` AND `outside`.`map` <> 533));
+    WHERE `outside`.`map` <> 533 AND `outside`.`id` = `base`.`entry`);
+
+DROP TEMPORARY TABLE `_coa_naxx_shared_templates`;
 
 UPDATE `creature_template` AS `template`
 JOIN `_coa_naxx_combat_templates` AS `profile` ON `profile`.`entry` = `template`.`entry`

@@ -1,0 +1,79 @@
+{
+  "schema": 2,
+  "name": "Naxxramas level-60 items load and their effect amounts are applied",
+  "contract": [
+    "Equip the level-60 version of Loatheb’s Shadow and use it through the native session.",
+    "The registered item spell reaches the wearer as a 250 attack power aura."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 2296.01,
+    "y": -5340.98,
+    "z": 90.8799
+  },
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "bot": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "member",
+      "raid": true,
+      "loot_method": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "member",
+      "value": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "leader",
+      "item": 8039257
+    },
+    {
+      "action": "equip",
+      "actor": "leader",
+      "item": 8039257,
+      "slot": 12
+    },
+    {
+      "action": "wait",
+      "ms": 32000
+    },
+    {
+      "action": "use_item",
+      "actor": "leader",
+      "item": 8039257,
+      "spell": 8500002
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "aura_amount",
+      "spell": 8500002,
+      "effect": 0,
+      "equals": 250,
+      "within_ms": 3000
+    }
+  ]
+}
