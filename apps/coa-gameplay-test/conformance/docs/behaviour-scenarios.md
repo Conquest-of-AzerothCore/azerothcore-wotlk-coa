@@ -457,6 +457,11 @@ vary slightly run to run); that per-read jitter is amplified by the ratio itself
 measured at up to ~100 ms for Courage's -20% rank — within `CAST_MARGIN_MS`, comfortably outside the shared
 delta-margin scale's usual 0.5%-of-expected floor.
 
+A `duration_ratio` entry may name a `variant` (ADR 1134, provisional): its labels then end in it
+(`<spell> behaviour_duration_ratio <variant>` and `<spell> behaviour_expiry <variant>`), so one passive can carry one
+entry per mechanic (Spice: Peacebloom 803700 `root` with Chains of Ice 29991 and `stun` with Stun 2880 beside its
+unnamed snare entry). An entry without a variant keeps its labels.
+
 ### Duration-refresh scenarios (`behaviour_duration_refresh`, `kind: "duration_refresh"`)
 
 Some prose passives refresh an existing aura's remaining duration back to its own maximum, rather than reducing
@@ -2206,3 +2211,17 @@ Options with a module:
   be refused with one stated code, their results read (ADR 1027, provisional)
 - [`after_trigger_casts`](metric_delta_options/after_trigger_casts.md): real casts by the caster after the treatment
   trigger, at a unit or at a unit's position (ADR 1028, provisional)
+- [`phase_since`](metric_delta_options/phase_since.md): each judged reading and its ratio base counted from right
+  before its own phase's trigger cast (ADR 1130, provisional)
+- [`after_target_health`](metric_delta_options/after_target_health.md): the dummy's health set in the treatment phase
+  only, for a kill by the cast (ADR 1131, provisional)
+- [`relog_before_read`](metric_delta_options/relog_before_read.md): a relog with a stated offline time before each
+  judged reading, read as a share of the pre-logout read (ADR 1133, provisional)
+- [`phase_caster_level`](metric_delta_options/phase_caster_level.md): the caster level set per phase (ADR 1136,
+  provisional)
+- [`engage_and_select`](metric_delta_options/engage_and_select.md): every dummy engaged and one selected per phase
+  (ADR 1137, provisional)
+- [`required_aura_stacks`](metric_delta_options/required_aura_stacks.md): a CasterAuraSpell precondition fixture set
+  to a stated stack count (ADR 1138, provisional)
+- [`use_gameobject_after`](metric_delta_options/use_gameobject_after.md): the caster uses the gameobject its
+  treatment cast created, with the gameobject reads' evidence rows (ADR 1139, provisional)

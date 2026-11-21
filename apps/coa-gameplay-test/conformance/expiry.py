@@ -409,7 +409,8 @@ def duration_ratio_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Exp
         f'arms are {MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS} ms apart after the first effect ends, so '
         f'neither cast is diminished.', steps)
     scenario['creatures'] = [striker_fixture(class_file, spec.striker_entry, spec.striker_melee_hit_bonus)]
-    return finished(scenario), [expiry_expectation(expiry_label(spec.spell), spec.spell, spec.vehicle_spell,
+    label = expiry_label(spec.spell) + (f' {spec.variant}' if spec.variant else '')
+    return finished(scenario), [expiry_expectation(label, spec.spell, spec.vehicle_spell,
                                                    str(spec.expected_ratio), prose_rule(spec.quote, spec.spell),
                                                    [without, with_arm])]
 
@@ -612,7 +613,9 @@ def built(build, class_file: dict, label: str, spell: int, entry: dict) -> tuple
 
 def behaviour_expiry(class_file: dict, entry: dict) -> tuple[dict | None, list[Expectation]] | None:
     build = BEHAVIOUR_EXPIRIES.get(entry.get('kind'))
-    return built(build, class_file, expiry_label(entry['spell']), entry['spell'], entry) if build else None
+    label = expiry_label(entry['spell']) + (f' {entry["variant"]}' if entry.get('kind') == 'duration_ratio'
+                                            and entry.get('variant') else '')
+    return built(build, class_file, label, entry['spell'], entry) if build else None
 
 
 def trigger_expiry(class_file: dict, entry: dict) -> tuple[dict | None, list[Expectation]] | None:

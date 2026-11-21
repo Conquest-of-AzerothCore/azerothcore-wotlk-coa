@@ -5996,6 +5996,11 @@ class MechanicDurationSpec:
     vehicle_spell: int
     striker_entry: int = 36
     striker_melee_hit_bonus: bool = False
+    variant: str | None = None
+
+
+def duration_ratio_label(spec: MechanicDurationSpec) -> str:
+    return f'{spec.spell} behaviour_duration_ratio' + (f' {spec.variant}' if spec.variant else '')
 
 
 def mechanic_duration_label(spec: MechanicDurationSpec, moment: str) -> str:
@@ -6055,7 +6060,7 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
                  [{'action': 'wait', 'label': f'{spec.spell} let the vehicle aura and its DR window expire',
                   'ms': gap_ms},
                  {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + phase(after_label)}
-    label = f'{spec.spell} behaviour_duration_ratio'
+    label = duration_ratio_label(spec)
     model = {'kind': 'duration_ratio', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected_ratio, 'quote': entry.quote, 'target_name': spec.name,
              'vehicle_spell': spec.vehicle_spell}
@@ -6067,9 +6072,11 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
 def mechanic_duration_spec(entry: dict) -> MechanicDurationSpec:
     if type(entry.get('striker_melee_hit_bonus', False)) is not bool:
         raise ValueError(f'{entry["spell"]} duration_ratio striker_melee_hit_bonus is a boolean')
+    if entry.get('variant') is not None and (not isinstance(entry['variant'], str) or not entry['variant']):
+        raise ValueError(f'{entry["spell"]} duration_ratio variant is a non-empty string')
     return MechanicDurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
                                 entry['vehicle_spell'], entry.get('striker_entry', 36),
-                                entry.get('striker_melee_hit_bonus', False))
+                                entry.get('striker_melee_hit_bonus', False), entry.get('variant'))
 
 
 DEFAULT_DURATION_REFRESH_DECAY_MS = 4000
