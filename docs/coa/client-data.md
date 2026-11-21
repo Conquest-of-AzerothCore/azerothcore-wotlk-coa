@@ -8,15 +8,18 @@ override tables. See [ADR 1012](../adr/1012-static-client-data-ships-in-the-clie
 ## Where each table lives
 
 The client loads its archives in order and the last archive carrying a table wins (`archive_rank` in
-`apps/coa-dbc/client_dbc.py`). The rows the server used to stream were baked into these winning files:
+`apps/coa-dbc/client_dbc.py`). The rows the server used to stream live in these winning files:
 
 - `patch-M.MPQ`: CreatureModelData, CreatureDisplayInfo, Item, SoundEntries, SuperTrack, QuestSuperTrack,
-  SkillLineAbility, VanityCollection, Vehicle, VehicleSeat, WorldMapArea, WorldMapOverlay, Map, MapDifficulty,
+  SkillLineAbility, Vehicle, VehicleSeat, WorldMapArea, WorldMapOverlay, Map, MapDifficulty,
   GameObjectDisplayInfo
-- `patch-S.MPQ`: SpellVisual, SpellVisualKit, SpellVisualKitModelAttach, SpellVisualEffectName,
-  SpellShapeshiftForm
-- `patch-T.MPQ`: Spell
-- `patch-ZG.MPQ`: ItemDisplayInfo
+- `patch-S.MPQ`: SpellVisual, SpellVisualKit, SpellVisualKitModelAttach, SpellShapeshiftForm
+- `patch-ZG.MPQ`: Spell, SpellVisualEffectName, ItemDisplayInfo, VanityCollection (prices stream from the server,
+  see below)
+
+`patch-ZG.MPQ` loads after `patch-M.MPQ`, `patch-S.MPQ` and `patch-T.MPQ`, so it also wins for every other table
+it carries, among them Achievement, AreaTable, ItemAddon, ItemSet, SkillLine and SpellMissileMotion. The copies of
+those tables in the earlier archives are not read; edit the `patch-ZG.MPQ` copy.
 
 `client_dbc.py extract` writes `client-dbc.manifest.json`, which records the archive each table came from; check it
 when a later archive starts carrying one of these tables.
@@ -27,9 +30,15 @@ Rows that differ per player or over time cannot be baked and are still sent: spe
 swap placement rows (rank text) for custom classes (0x092A, built from the server's Spell store and
 `coa_client_spell_description`, the same row the client file carries), character advancement swap entries
 (0x064A), spellbook custom attributes (0x05F4), Mythic+ data and `QuestSuperTrack` rows with race restrictions
-(0x06BF; the client file carries the all-race version). Lua hot patches, global strings, Tutorial, cosmetic pets,
-Destiny Weaver displays, Manastorm rows and woodworking appearances still stream. `CoA.SendDisplayPatches` gates
-the per-player rows.
+(0x06BF; the client file carries the all-race version). The server owns Vanity Store prices: at login it streams a
+`VanityCollection` row (0x0573) for every `coa_client_vanity_collection` item that has a client row, with the
+realm's Donation Point, Seasonal Point and Bazaar Token prices in fields 4 to 6. The client file's prices are only
+a fallback for a client that has not received the stream. Only Bazaar Token purchases are charged in game: the
+server takes the price from `coa_client_vanity_collection` (or the DBC when the item has no row), never from the
+client. A Donation Point request only delivers an item the account already owns, and Seasonal Point requests are
+ignored. Lua hot patches, global strings, Tutorial, cosmetic pets, Destiny Weaver displays,
+Manastorm rows and woodworking appearances still stream.
+`CoA.SendDisplayPatches` gates the per-player rows.
 
 ## Adding or changing a client row
 
