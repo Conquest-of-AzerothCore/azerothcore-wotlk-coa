@@ -9,7 +9,10 @@
     "that enemy the dead explicit target fails the cast and no Static is refunded; #13008 reports the missing",
     "refund on killing blows and on Static spenders such as Aeroblast. Expected (ruled by the PR author: a",
     "killing critical still refunds): an Aeroblast (801839, depletes 50 Static) that crits a living enemy leaves",
-    "80 - 50 + 5 = 35 Static, and one that crits and kills a 1 health enemy leaves 35 as well. Spell crit rating",
+    "80 - 50 + 5 = 35 Static, one that crits and kills a 1 health enemy leaves 35 as well, and one that crits at",
+    "the 100 Static cap leaves 55. The refund lands during the hit, before the class resource code takes the",
+    "spender's cost, so at the cap the +5 was clamped away (100 -> 100 -> 50); for a Static spender the",
+    "Stormbringer script now holds the refund until the cast has finished and its cost is paid. Spell crit rating",
     "forces every critical, an aggressive mob keeps the Stormbringer in combat so Static does not decay, and the",
     "Stormbringer never auto attacks, so no melee critical can add Static, and Tempest Calling is not learned, so",
     "Aeroblast's delayed echo never runs."
@@ -51,6 +54,27 @@
     {
       "action": "assert", "label": "#13008: a critical Static spender refunds 5 (80 - 50 + 5)", "actor": "storm",
       "metric": "aura_stacks", "spell": 803102, "equals": 35, "within_ms": 1000
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "reset_cooldown", "actor": "storm", "spell": 801839},
+    {"action": "set_power", "actor": "storm", "power": 0, "value": 2500},
+    {"action": "set_aura", "label": "SETUP: Static at its 100 cap", "actor": "storm", "spell": 803102, "stacks": 100},
+    {
+      "action": "assert", "label": "SETUP: 100 Static", "actor": "storm", "metric": "aura_stacks", "spell": 803102,
+      "equals": 100
+    },
+    {
+      "action": "cast", "label": "Aeroblast the living dummy at full Static", "actor": "storm", "spell": 801839,
+      "target": "dummy"
+    },
+    {
+      "action": "assert", "label": "SETUP: the full Static Aeroblast crits", "actor": "storm",
+      "metric": "spell_damage_count", "spell": 801839, "target": "dummy", "critical": true, "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "#13008: at the cap the refund follows the cost (100 - 50 + 5)", "actor": "storm",
+      "metric": "aura_stacks", "spell": 803102, "equals": 55, "within_ms": 1000
     },
     {"action": "wait", "label": "Global cooldown", "ms": 1600},
     {"action": "reset_cooldown", "actor": "storm", "spell": 801839},

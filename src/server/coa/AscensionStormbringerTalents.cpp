@@ -4,6 +4,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -45,6 +46,8 @@ enum StormbringerTalentSpells : uint32
     SPELL_CRITICAL_CIRCUIT = 807314,
     SPELL_REFUND_STATIC_10 = 804084,
     SPELL_CONJURATION_MASTERY = 300595,
+    SPELL_EYE_OF_THE_TORNADO = 706297,
+    SPELL_REFUND_STATIC_5 = 804044,
     SPELL_PREDICTABLE_WEATHER_WINDOW = 807481,
     SPELL_LIGHTNING_ROD = 300609,
     SPELL_LIGHTNING_ROD_SPREAD = 300928,
@@ -194,7 +197,26 @@ class stormbringer_talent_casts : public AllSpellScript
 {
 public:
     stormbringer_talent_casts() : AllSpellScript("stormbringer_talent_casts",
-        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT,
+            ALLSPELLHOOK_ON_SPELL_CHECK_CAST}) { }
+
+    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    {
+        SpellInfo const* trigger = spell->GetTriggeredByAuraSpellInfo();
+        if (result != SPELL_CAST_OK || spell->GetSpellInfo()->Id != SPELL_REFUND_STATIC_5 || !trigger ||
+            trigger->Id != SPELL_EYE_OF_THE_TORNADO)
+            return;
+        Player* player = spell->GetCaster()->ToPlayer();
+        Spell* spender = player ? player->GetCurrentSpell(CURRENT_GENERIC_SPELL) : nullptr;
+        if (!spender || !SpendsStatic(spender->GetSpellInfo()->Id))
+            return;
+        result = SPELL_FAILED_DONT_REPORT;
+        player->m_Events.AddEventAtOffset([guid = player->GetGUID()]()
+        {
+            if (Player* owner = ObjectAccessor::FindPlayer(guid))
+                owner->CastSpell(owner, SPELL_REFUND_STATIC_5, true);
+        }, Milliseconds(1));
+    }
 
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
