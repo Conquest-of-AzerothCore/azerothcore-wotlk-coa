@@ -70,6 +70,8 @@ enum StormbringerTalentSpells : uint32
 
 constexpr int32 ASCENSION_SPELLMOD_BONUS_MULTIPLIER = 41;
 constexpr uint32 CONJURE_STORM_FAMILY_FLAG_TWO = 16;
+constexpr uint32 UPDRAFT_FAMILY_FLAG_ZERO = 8192;
+constexpr uint32 UPDRAFT_FAMILY_FLAG_ONE = 256;
 constexpr uint32 SHOCK_FAMILY_FLAG_ZERO = 2048;
 constexpr uint32 BRINE_FAMILY_FLAG_ONE = 128;
 constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_ONE = 1;
@@ -79,6 +81,12 @@ constexpr uint32 DELUGE_FAMILY_FLAG_ONE = 0x8000;
 bool IsConjureStorm(SpellInfo const* info)
 {
     return info && info->SpellFamilyName == 22 && (info->SpellFamilyFlags[2] & CONJURE_STORM_FAMILY_FLAG_TWO);
+}
+
+bool IsUpdraft(SpellInfo const* info)
+{
+    return info && info->SpellFamilyName == 22 && (info->SpellFamilyFlags[0] & UPDRAFT_FAMILY_FLAG_ZERO) &&
+        (info->SpellFamilyFlags[1] & UPDRAFT_FAMILY_FLAG_ONE);
 }
 
 bool SpendsStatic(uint32 spellId)
@@ -207,7 +215,8 @@ public:
             !spell->IsTriggered())
             player->CastSpell(player, SPELL_RIDE_THE_LIGHTNING_LEAP, true);
 
-        if (player && player->getClass() == CLASS_STORMBRINGER && IsConjureStorm(info) &&
+        if (player && player->getClass() == CLASS_STORMBRINGER &&
+            (IsConjureStorm(info) || IsUpdraft(info)) &&
             !spell->IsTriggered() && player->HasSpell(SPELL_CONJURATION_MASTERY))
             player->CastSpell(player, SPELL_REFUND_STATIC_10, true);
     }
