@@ -1005,7 +1005,11 @@ when none was sent; the client refuses a cast without that aura before the reque
 `client_removals_keeping_buttons_for` counts its removed notices ending in a zero byte, which Extensions.dll
 answers without clearing the spell's action buttons. `client_spell_row_restored` returns 1 when the last two
 `SMSG_PATCH_SPELL` rows for `spell` are the same row, first with `SPELL_ATTR0_DO_NOT_DISPLAY` and then without.
-The model reads attributes only from rows the server sent, not from the client's own tables.
+Each player starts with the Spell rows the client MPQs carry for the server's spell patches (the rows the server
+would send for `spell`), and `SMSG_PATCH_SPELL` rows the server sends replace them. `client_spell_row_contains`
+requires `spell` and `text` and returns 1 when the client's current row for `spell` contains `text`, 0 when not,
+or -1 without a row; `client_spell_row_u32` requires `spell` and `index` and returns that dword of the row (the
+`SMSG_PATCH_SPELL` layout, ID at 0), or -1.
 `temporary_spell_replacement` requires `spell` and returns the spell ID currently standing in for it on the
 player's bars. `Player::GetTemporarySpellReplacement` returns the queried spell itself when nothing replaces
 it, so the unreplaced reading is that spell's own ID, never zero. It reads server-side state, not what the
@@ -1444,8 +1448,8 @@ template's) sets the hover anim tier; it is a swimmer when its movement allows s
 its template has no display or is a transport (types 11 and 15). A creature's displays are the spawn's model and
 every template model; a gameobject's is its template display. A display is `client` when its id is a record of
 `CreatureDisplayInfo.dbc` or `GameObjectDisplayInfo.dbc` under `DataDir/dbc` (the client set the server
-enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, streamed to clients
-by the display patch service), and `missing` otherwise.
+enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, which the client
+MPQs carry), and `missing` otherwise.
 
 Known limits: a spawn on the wrong floor layer (a cave spawn placed on the terrain above the cave) stands on
 ground and reads as grounded; a wrong but existing model needs an external reference; positions changed at
