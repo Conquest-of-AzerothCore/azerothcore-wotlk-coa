@@ -1,0 +1,247 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Growing Malice raises each Hex of Malice tick by 3% once",
+  "contract": [
+    "Growing Malice 706551: 'Each tick of Hex of Malice increases the damage of the next tick on the enemy by",
+    "$582257s1%, stacking $582257u times' (3%, 10 stacks). Each periodic Hex tick procs the debuff 582257, whose",
+    "Effect[0] is aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER (3% per stack, class mask word 1 33554432, the",
+    "IsHex flag), so Unit::SpellDamageBonusTaken already scales every later tick. The proc also rescaled the",
+    "Hex tick amount by (100 + 3 s') / (100 + 3 s) (AscensionWitchDoctorEvents.cpp:220-234): the growth counted",
+    "twice, eight ticks summed to 1531 in both final06 runs against 159 x 8.84 = 1405.6 from the tooltip",
+    "(cycle 8 lead; with int truncation the double count is exactly 159, 167, 177, 186, 196, 205, 215, 226).",
+    "The fix keeps the native aura 271 and drops the rescale. Hex of Malice 504608: instant, 20% base mana,",
+    "24000 ms, a tick every 3000 ms (8 ticks), tick 159 at level 60. Control arm first on dummy a without the",
+    "talent: 8 ticks of 159 = 1272, judged in [1270, 1274] so a 158 or 160 tick fails it. Then Growing Malice is",
+    "learned (a passive: the learn applies its aura) and a second Hex is cast at dummy b: 7 stacks of 582257",
+    "after the seventh tick, and 8 ticks summing to 159 + 163 + 168 + 173 + 178 + 182 + 187 + 192 = 1402",
+    "(truncated per tick; 1406 if rounded): judged in [1395, 1410], which excludes the double count 1531, the",
+    "control 1272 and the 160-tick sum 1411. Crits are suppressed deterministically: Hex ticks roll the caster's",
+    "spell crit chance, snapshot when the Hex applies (AscensionWitchDoctorAuras.cpp:183-190, #4308, no 574358",
+    "needed; reference spell crit 3.387%), so Reg's Test Aura 984954 (Effect[1] aura 57 spell crit -1000,",
+    "3600000 ms, the Necromancer and Witch Doctor no-crit precondition fixture) is set on the doctor before both",
+    "casts and the shadow spell crit is read below -900. Hex of Malice is DmgClass 1 (magic), so the aura 52",
+    "weapon crit of Effect[0] does not reach it. 823764 removes partial resists and spell_hit_rating 10000 full",
+    "resists. Every tick is counted as noncritical, so a stray crit or resist fails the count, never the sum."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_a",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "dummy_b",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 6,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "doctor",
+      "item": 72038
+    },
+    {
+      "action": "equip",
+      "label": "The conformance reference weapon (the 159 tick was read with it)",
+      "actor": "doctor",
+      "item": 72038,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "label": "Hex of Malice",
+      "actor": "doctor",
+      "spell": 504608
+    },
+    {
+      "action": "set_aura",
+      "label": "Precondition: target resistance -9999 (no partial resists)",
+      "actor": "doctor",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Precondition: spell crit -1000 (Reg's Test Aura 984954) so no Hex tick can crit",
+      "actor": "doctor",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the shadow spell crit chance is far below 0",
+      "actor": "doctor",
+      "metric": "spell_crit_chance",
+      "school": 5,
+      "max": -900
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 504608
+    },
+    {
+      "action": "cast",
+      "label": "Hex of Malice",
+      "actor": "doctor",
+      "spell": 504608,
+      "target": "dummy_a"
+    },
+    {
+      "action": "wait",
+      "label": "Eight ticks and the end of the Hex (24000 ms)",
+      "ms": 24500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Hex ticked 8 times, none critical (crits suppressed)",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 504608,
+      "target": "dummy_a",
+      "periodic": true,
+      "critical": false,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Growing Malice the 8 ticks sum to 8 x 159",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 504608,
+      "target": "dummy_a",
+      "periodic": true,
+      "critical": false,
+      "min": 1270,
+      "max": 1274
+    },
+    {
+      "action": "learn",
+      "label": "Growing Malice",
+      "actor": "doctor",
+      "spell": 706551
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the passive Growing Malice is active",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 706551,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Precondition: target resistance -9999 (no partial resists)",
+      "actor": "doctor",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Precondition: spell crit -1000 (Reg's Test Aura 984954) so no Hex tick can crit",
+      "actor": "doctor",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the shadow spell crit chance is far below 0",
+      "actor": "doctor",
+      "metric": "spell_crit_chance",
+      "school": 5,
+      "max": -900
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 504608
+    },
+    {
+      "action": "cast",
+      "label": "Hex of Malice",
+      "actor": "doctor",
+      "spell": 504608,
+      "target": "dummy_b"
+    },
+    {
+      "action": "wait",
+      "label": "Seven ticks (21000 ms) and half a period",
+      "ms": 22500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: seven ticks left 7 stacks of Growing Malice 582257",
+      "actor": "dummy_b",
+      "metric": "aura_stacks",
+      "spell": 582257,
+      "caster": "doctor",
+      "equals": 7
+    },
+    {
+      "action": "wait",
+      "label": "The eighth tick and the end of the Hex",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Growing Malice Hex ticked 8 times, none critical (crits suppressed)",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 504608,
+      "target": "dummy_b",
+      "periodic": true,
+      "critical": false,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the 8 ticks sum to 1402 (one 3% step per stack), not the double count 1531",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 504608,
+      "target": "dummy_b",
+      "periodic": true,
+      "critical": false,
+      "min": 1395,
+      "max": 1410
+    }
+  ]
+}

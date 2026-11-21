@@ -528,7 +528,9 @@ class npc_ascension_witch_doctor : public ScriptedAI
                         enemy->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
                     }
         if (entry == NpcShadow || entry == NpcGraven || entry == NpcCursed)
-            for (Unit* enemy : Nearby(me, entry == NpcCursed ? Radius(CursedField) : 10.0f))
+            for (Unit* enemy : Nearby(me, entry == NpcCursed   ? Radius(CursedField)
+                                          : entry == NpcShadow ? Radius(ShadowField)
+                                                               : 10.0f))
                 if (player->IsValidAttackTarget(enemy))
                 {
                     Field(enemy, entry == NpcShadow   ? ShadowField

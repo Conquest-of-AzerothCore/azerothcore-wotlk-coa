@@ -222,7 +222,7 @@ class aura_ascension_witch_doctor_lifecycle : public AuraScript
             if (player == target)
                 player->RemoveAurasDueToSpell(id == Beast ? Crystal : Beast);
             if (id == Beast)
-                Cast(player, target, BeastShield);
+                target->CastSpell(target, BeastShield, true, nullptr, nullptr, player->GetGUID());
         }
         if (Family(GetSpellInfo(), 0, 536870912))
         {

@@ -535,6 +535,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK;
         info->Effects[EFFECT_1].Effect = 0;
+        info->AttributesEx5 &= ~SPELL_ATTR5_LIMIT_N;
     }
     if (id == WardHaste)
     {
