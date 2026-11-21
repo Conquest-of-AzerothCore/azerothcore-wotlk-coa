@@ -786,6 +786,8 @@ public:
 
             Map* map = targetPlayer->GetMap();
             bool privateObserver = false;
+            // A refused transfer into another copy puts back the copy the game master still observes.
+            Optional<Player::ScriptedPrivateObserverState> const previousObservation = _player->GetScriptedPrivateObserverState();
             if (map->IsScriptedPrivateInstance())
             {
                 // A scripted private copy (Manastorm) admits only its own members. A game master in GM mode
@@ -910,7 +912,7 @@ public:
                 if (_player->TeleportTo(transport->GetMapId(), worldX, worldY, worldZ + 0.25f, worldO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_GM_MODE, targetPlayer, privateObserver))
                     _player->SetPhaseMask(targetPlayer->GetPhaseMask() | 1, false);
                 else if (privateObserver)
-                    _player->ClearScriptedPrivateInstance();
+                    _player->RestoreScriptedPrivateObserver(previousObservation);
             }
             else
             {
@@ -918,7 +920,7 @@ public:
                 if (_player->TeleportTo(targetPlayer->GetMapId(), targetPlayer->GetPositionX(), targetPlayer->GetPositionY(), targetPlayer->GetPositionZ() + 0.25f, _player->GetOrientation(), TELE_TO_GM_MODE, targetPlayer, privateObserver))
                     _player->SetPhaseMask(targetPlayer->GetPhaseMask() | 1, false);
                 else if (privateObserver)
-                    _player->ClearScriptedPrivateInstance();
+                    _player->RestoreScriptedPrivateObserver(previousObservation);
             }
         }
         else
@@ -1396,7 +1398,18 @@ public:
             targetPlayer->CleanupAfterTaxiFlight();
         }
 
-        targetPlayer->TeleportTo(targetPlayer->m_recallMap, targetPlayer->m_recallX, targetPlayer->m_recallY, targetPlayer->m_recallZ, targetPlayer->m_recallO);
+        // An observer leaves its private copy. On the copy's own map id the near branch of TeleportTo would keep it
+        // inside, so end the observation and force the far transfer; a refused transfer keeps it observing.
+        Optional<Player::ScriptedPrivateObserverState> const observation = targetPlayer->GetScriptedPrivateObserverState();
+        if (observation)
+            targetPlayer->ClearScriptedPrivateInstance();
+
+        if (!targetPlayer->TeleportTo(targetPlayer->m_recallMap, targetPlayer->m_recallX, targetPlayer->m_recallY,
+            targetPlayer->m_recallZ, targetPlayer->m_recallO, 0, nullptr, observation.has_value()) && observation)
+        {
+            targetPlayer->RestoreScriptedPrivateObserver(observation);
+        }
+
         return true;
     }
 

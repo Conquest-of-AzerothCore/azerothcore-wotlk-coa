@@ -181,6 +181,63 @@
       "equals": 0,
       "within_ms": 10000,
       "label": "The game master leaves the run again"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".go xyz 3.81 -14.82 -17.84 389",
+      "label": "The game master enters an ordinary copy of the run's dungeon (Ragefire Chasm entrance)"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "map_id",
+      "relative_to": "run_map",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "The game master stands on the run's map id"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "label": "That copy is the ordinary dungeon, not the run"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessa"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "instance_id",
+      "relative_to": "run_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "From the ordinary copy the game master reaches the run's own copy"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".recall"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": ".recall onto the same map id leaves the run instead of moving inside it"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "map_id",
+      "relative_to": "run_map",
+      "equals": 0,
+      "label": "The game master is back in the ordinary copy of that dungeon"
     }
   ]
 }

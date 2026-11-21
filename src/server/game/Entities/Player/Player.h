@@ -2191,6 +2191,34 @@ public:
         _scriptedPrivateInstanceId = instanceId;
         _scriptedPrivateObserver = true;
     }
+    struct ScriptedPrivateObserverState
+    {
+        uint32 MapId = MAPID_INVALID;
+        uint32 InstanceId = 0;
+        WorldLocation Return;
+        ObjectGuid Owner;
+        bool DatabaseSpawns = false;
+    };
+    // The observed copy, put back when a later transfer is refused; empty while not observing.
+    Optional<ScriptedPrivateObserverState> GetScriptedPrivateObserverState() const
+    {
+        if (!_scriptedPrivateObserver)
+            return {};
+
+        return ScriptedPrivateObserverState{ _scriptedPrivateMapId, _scriptedPrivateInstanceId, _scriptedPrivateReturn,
+            _scriptedPrivateOwner, _scriptedPrivateDatabaseSpawns };
+    }
+    void RestoreScriptedPrivateObserver(Optional<ScriptedPrivateObserverState> const& state)
+    {
+        if (!state)
+        {
+            ClearScriptedPrivateInstance();
+            return;
+        }
+
+        PrepareScriptedPrivateObserver(state->MapId, state->InstanceId, state->Return, state->Owner,
+            state->DatabaseSpawns);
+    }
     bool IsScriptedPrivateObserver() const { return _scriptedPrivateObserver; }
     bool IsScriptedPrivateObserverOf(uint32 mapId, uint32 instanceId) const
     {
