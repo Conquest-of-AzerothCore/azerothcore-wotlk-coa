@@ -108,6 +108,7 @@ enum DoctorSpells : uint32
     MojoMadness = 705871,
     MojoFree = 503693,
     Unleashed = 705901,
+    UnleashedCooldown = 504607,
     MaliciousGolems = 705912,
     GolemHaste = 705913,
     HollowSpirit = 705917,

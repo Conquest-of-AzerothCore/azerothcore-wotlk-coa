@@ -130,18 +130,6 @@ class witch_doctor_casts : public AllSpellScript
                             break;
                     }
             }
-        if (player->HasAura(DarkEffigy) && (IsJuju(info) || Family(info, 1, 262144)))
-            if (Unit* target = spell->m_targets.GetUnitTarget())
-            {
-                uint32 added = 0;
-                for (Unit* unit : Nearby(target, 10.0f))
-                    if (unit != target && player->IsValidAttackTarget(unit) && player->IsWithinLOSInMap(unit))
-                    {
-                        spell->AddUnitTargetForScript(unit, 1 << EFFECT_0);
-                        if (++added == 2)
-                            break;
-                    }
-            }
     }
 
     void OnCalcMaxDuration(Aura const* aura, int32& duration) override
@@ -365,7 +353,7 @@ class witch_doctor_casts : public AllSpellScript
         if (id == HexfireWrath && target)
             Summon(player, WrathWard, target, target->GetPosition());
         if (IsJuju(info) && player->HasAura(Unleashed))
-            Reduce(player, Puppets, 5000);
+            Reduce(player, Puppets, std::abs(Amount(UnleashedCooldown)));
         if (IsBeam(info) && player->HasAura(Wave))
             for (Unit* ally : Allies(player, player, 40.0f, 10))
                 Cast(player, ally, Replenishment);

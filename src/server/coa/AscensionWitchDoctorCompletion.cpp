@@ -265,6 +265,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
         info->Effects[EFFECT_0].TriggerSpell = 0;
     }
+    if (Family(info, 1, 262144) && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
+        info->Effects[EFFECT_0].ChainTarget = 0;
     if (id == CallSseratus && info->Effects[EFFECT_1].TriggerSpell == TrueSpiritReady)
         info->Effects[EFFECT_1].Effect = 0;
     if (id == ShadowhunterCost)
@@ -655,7 +657,12 @@ class witch_doctor_scaling : public UnitScript
                                  : c.school == 12 ? std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE),
                                                              player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE))
                                                   : player->SpellBaseDamageBonusDone(SpellSchoolMask(c.school)));
-                value += std::max(0.0f, sp) * c.sp + player->GetStat(STAT_SPIRIT) * c.spirit +
+                float coefficient = c.sp;
+                if (!IsArrow(info))
+                    if (AuraEffect const* juju = player->GetAuraEffect(OverflowingJuju, EFFECT_0))
+                        if (juju->IsAffectedOnSpell(info))
+                            coefficient *= 1.0f + float(juju->GetAmount()) / 100.0f;
+                value += std::max(0.0f, sp) * coefficient + player->GetStat(STAT_SPIRIT) * c.spirit +
                          player->GetTotalAttackPowerValue(RANGED_ATTACK) * c.rap +
                          player->GetTotalAttackPowerValue(BASE_ATTACK) * c.ap;
             }
