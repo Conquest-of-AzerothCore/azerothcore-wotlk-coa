@@ -4252,9 +4252,6 @@ public:
 
     for (QuestSuperTrackPatch const &patch : rows.QuestSuperTracks)
       SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
-
-    for (VanityCollectionPatchRow const &row : rows.VanityCollections)
-      SendVanityCollectionRow(player, row);
   }
 
 private:
@@ -4345,23 +4342,10 @@ private:
     bool RequiresRegistration = false;
   };
 
-  static constexpr uint32 VANITY_COLLECTION_DBC_FIELD_COUNT = 77;
-  static constexpr uint32 VANITY_COLLECTION_DESCRIPTION_FIELD = 42;
-  static constexpr uint32 VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD = 59;
-  static constexpr uint32 VANITY_COLLECTION_LEARNED_SPELL_FIELD = 76;
-
-  struct VanityCollectionPatchRow {
-    std::array<uint32, VANITY_COLLECTION_DBC_FIELD_COUNT> Values{};
-    std::string Artwork;
-    std::string Description;
-    std::string AdditionalText;
-  };
-
   struct PreparedPatchRows {
     std::vector<SpellPatchRow> Spells;
     std::unordered_map<uint32, std::size_t> SpellRowIndexById;
     std::vector<QuestSuperTrackPatch> QuestSuperTracks;
-    std::vector<VanityCollectionPatchRow> VanityCollections;
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
@@ -4611,57 +4595,6 @@ private:
       packet.append(reinterpret_cast<uint8 const *>(text.data()), text.size());
   }
 
-  static std::size_t SendVanityCollectionRow(Player *player, VanityCollectionPatchRow const &row) {
-    WorldPacket packet(SMSG_PATCH_VANITY_COLLECTION, VANITY_COLLECTION_DBC_FIELD_COUNT * sizeof(uint32) + 256);
-    for (uint32 field = 0; field < 3; ++field)
-      packet << row.Values[field];
-    packet << row.Artwork;
-    for (uint32 field = 4; field < VANITY_COLLECTION_DESCRIPTION_FIELD; ++field)
-      packet << row.Values[field];
-    packet << row.Description << row.AdditionalText;
-    packet << row.Values[VANITY_COLLECTION_LEARNED_SPELL_FIELD];
-    packet << "" << "" << "";
-    return SendRowPacket(player, packet);
-  }
-
-  static std::vector<VanityCollectionPatchRow> LoadVanityCollectionPatchRows() {
-    std::vector<VanityCollectionPatchRow> rows;
-    std::map<uint32, VanityPrice> prices = LoadVanityPrices();
-    if (prices.empty())
-      return rows;
-
-    ClientDBC vanity;
-    if (!vanity.Load(GetClientDBCPath("VanityCollection.dbc"), VANITY_COLLECTION_DBC_FIELD_COUNT))
-    {
-      LOG_ERROR("coa", "Cannot read the client VanityCollection.dbc; coa_client_vanity_collection prices are not "
-                       "streamed");
-      return rows;
-    }
-
-    for (uint32 index = 0; index < vanity.GetRecordCount(); ++index)
-    {
-      ClientDBC::Record const record = vanity.GetRecord(index);
-      auto const price = prices.find(record.GetUInt32(1));
-      if (price == prices.end())
-        continue;
-
-      VanityCollectionPatchRow &row = rows.emplace_back();
-      for (uint32 field = 0; field < VANITY_COLLECTION_DBC_FIELD_COUNT; ++field)
-        row.Values[field] = record.GetUInt32(field);
-      row.Values[4] = price->second.DonationPoints;
-      row.Values[5] = price->second.SeasonalPoints;
-      row.Values[6] = price->second.BazaarTokens;
-      row.Artwork = std::string(record.GetString(3));
-      row.Description = std::string(record.GetString(VANITY_COLLECTION_DESCRIPTION_FIELD));
-      row.AdditionalText = std::string(record.GetString(VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD));
-      prices.erase(price);
-    }
-
-    for (auto const &[itemId, price] : prices)
-      LOG_ERROR("coa", "coa_client_vanity_collection {} has no VanityCollection.dbc row", itemId);
-    return rows;
-  }
-
   static WorldPacket BuildSpellRow(SpellPatchRow const &row) {
     WorldPacket packet(SMSG_PATCH_SPELL,
                        row.Values.size() * sizeof(uint32) + 1024);
@@ -4738,7 +4671,6 @@ private:
       for (std::size_t index = 0; index < _rows.Spells.size(); ++index)
         _rows.SpellRowIndexById.emplace(_rows.Spells[index].Values[0], index);
       _rows.QuestSuperTracks = LoadQuestSuperTrackPatchRows();
-      _rows.VanityCollections = LoadVanityCollectionPatchRows();
       _rowsPrepared = true;
     }
     return _rows;

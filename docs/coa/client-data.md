@@ -14,7 +14,11 @@ The client loads its archives in order and the last archive carrying a table win
   SkillLineAbility, Vehicle, VehicleSeat, WorldMapArea, WorldMapOverlay, Map, MapDifficulty,
   GameObjectDisplayInfo
 - `patch-S.MPQ`: SpellVisual, SpellVisualKit, SpellVisualKitModelAttach, SpellShapeshiftForm
-- `patch-ZG.MPQ`: Spell, SpellVisualEffectName, ItemDisplayInfo, VanityCollection (prices still stream, see below)
+- `patch-ZG.MPQ`: Spell, SpellVisualEffectName, ItemDisplayInfo, VanityCollection
+
+VanityCollection carries the live realm's store prices from `coa_client_vanity_collection` in fields 4 to 6
+(DonationPointCost, SeasonalPointCost, BazaarTokenCost). The server charges the database price, so a price change
+in SQL also needs the client file rebaked, or the store shows the old price.
 
 `patch-ZG.MPQ` loads after `patch-M.MPQ`, `patch-S.MPQ` and `patch-T.MPQ`, so it also wins for every other table
 it carries, among them Achievement, AreaTable, ItemAddon, ItemSet, SkillLine and SpellMissileMotion. The copies of
@@ -29,10 +33,7 @@ Rows that differ per player or over time cannot be baked and are still sent: spe
 swap placement rows (rank text) for custom classes (0x092A, built from the server's Spell store and
 `coa_client_spell_description`, the same row the client file carries), character advancement swap entries
 (0x064A), spellbook custom attributes (0x05F4), Mythic+ data and `QuestSuperTrack` rows with race restrictions
-(0x06BF; the client file carries the all-race version). `VanityCollection` rows for every item in
-`coa_client_vanity_collection` stream at login (0x0573) with the realm's Donation Point, Seasonal Point and Bazaar
-Token prices in fields 4 to 6: prices differ per realm and change through SQL, so the client file's prices are
-only a fallback. Lua hot patches, global strings, Tutorial, cosmetic pets,
+(0x06BF; the client file carries the all-race version). Lua hot patches, global strings, Tutorial, cosmetic pets,
 Destiny Weaver displays, Manastorm rows and woodworking appearances still stream. `CoA.SendDisplayPatches` gates
 the per-player rows.
 
