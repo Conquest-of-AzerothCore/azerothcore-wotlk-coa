@@ -14876,54 +14876,6 @@
       "observe_source": "Amphibimorph 500952: CastingTimeIndex 4 = 1000 ms, RecoveryTime 120000 (reset by the scenario), 18% mana, RangeIndex 4 (30 yd), DurationIndex 64 = 40000 ms ($d), Mechanic 17 (polymorph); Effect[0] aura 56 SPELL_AURA_TRANSFORM (display of creature 216377), Effect[1] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -26 + 1 = -25% ($s3), all TARGET_UNIT_DEST_AREA_ENEMY of EffectRadiusIndex 14 (8 yd) around the target; the only class code is AscensionWitchDoctorCompletion.cpp:579-580, which adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to the spell. Clause 46 \"While transformed into a frog the enemy is considered a Beast.\" (key new 46.0). The only server-visible meaning of the creature type is the target check of a spell with TargetCreatureType: Spell::CheckCast refuses a target whose Unit::GetCreatureTypeMask does not match, SPELL_FAILED_BAD_TARGETS 12. Scare Beast 1513 (Hunter rank 1, TargetCreatureType 1 = Beast, 2% mana, range 30 yd, CastingTimeIndex 10, GCD 1500) is the stock Beast-only spell. The dummy is Kobold Vermin 6 (target_entry, a Humanoid: the Brand of the Unworthy shape of ADR 0737). Amphibimorph 500952 is known in both phases (setup_only_after); the before phase (the control) casts Scare Beast alone at the humanoid dummy and the cast is refused, 12; the after phase casts a real Amphibimorph at it first (1300 ms past its 1000 ms cast) and Scare Beast again: with the dummy considered a Beast the cast is accepted, 0. Unit::GetCreatureType (Unit.cpp:13348-13367) reads the creature template type for a creature and the shapeshift form for a player, and no class code names Amphibimorph for it (Completion.cpp:579-580 only adds the damage interrupt), so the cast is predicted to be refused in the after phase as well, 12: a candidate defect lead, reported and not fixed here. Cast timing checked: the frog lands at 1000 ms, the Beast spell is attempted at 1300 ms and read 300 ms later. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
-      "spell": 572870,
-      "name": "Blessing of Hir'eek (Hexbreak removes two curses instead of one)",
-      "kind": "dispel_count",
-      "variant": "curses",
-      "label_suffix": "curses",
-      "quote": "removes an additional curse effect",
-      "cast_spell": 806240,
-      "debuffs": [
-        [
-          2,
-          [
-            702,
-            1714,
-            1490
-          ]
-        ]
-      ],
-      "arms": [
-        {
-          "name": "control",
-          "expected": [
-            [
-              2,
-              1
-            ]
-          ]
-        },
-        {
-          "name": "passive",
-          "auras": [
-            [
-              572870,
-              1
-            ]
-          ],
-          "expected": [
-            [
-              2,
-              2
-            ]
-          ]
-        }
-      ],
-      "trials": 2,
-      "wait_ms": 800,
-      "observe_source": "Hexbreak 806240 (instant, CastingTimeIndex 1, GCD 1500, 25% base mana, no cooldown, Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue 2 = Curse, EffectDieSides 1 and BasePoints 0 so $s1 = 1 curse, TARGET_UNIT_TARGET_ALLY; tooltip \"dispelling $s1 curse effect$?s572870[s][]\"). Blessing of Hir'eek 572870 Effect[0] aura 107 SPELLMOD_FLAT, EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectSpellClassMask word 1 8388608 = Hexbreak SpellFamilyFlags[1], BasePoints 0 + 1 = +1: a native modifier of the dispel count, no class code (script_touch False). The Disciplined Mind 681483 dispel_count entry is the precedent for the harness set_aura of the modifier passive on the caster as a precondition fixture: the subject is the number of curses the real Hexbreak cast removes, not the passive itself. The ally carries three curse fixtures (Curse of Weakness 702, Curse of Tongues 1714, Curse of the Elements 1490, each Spell.dbc Dispel 2 and set by harness set_aura, never the claim's subject); each cast is made for real by hit_ratio_cast (reset cooldown, cast, wait the GCD plus the cast time) and each fixture is read before and 800 ms after it. Control arm: no passive, exactly 1 of the 3 curses is removed per cast; passive arm: exactly 2 (never 3, so \"an additional\" is one, not all). 2 trials per arm keep four Hexbreak casts (about 374 mana each) inside the 1497 base mana pool. Cast timing checked: instant, 800 ms read after each cast. Player reports: none of the open reports of cycles 5 and 6 names this spell."
-    },
-    {
       "spell": 560280,
       "name": "Spirit Healer (mana regeneration rises by 100% of Spirit)",
       "kind": "metric_delta",
@@ -15973,51 +15925,6 @@
     {
       "spell": 707331,
       "kind": "hit_ratio",
-      "name": "Dark Effigy (Shadowflare +50% against enemies affected by Puppeteer's Threads)",
-      "variant": "flare_threads",
-      "label_suffix": "flare_threads",
-      "quote": "Shadowflare now deals $s2% increased damage to enemies affected by Puppeteer's Threads.",
-      "expected": 1.5,
-      "observe_spell": 801669,
-      "control": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
-          807037
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
-          807037
-        ],
-        "learn": [
-          707331
-        ]
-      },
-      "critical": false,
-      "trials": 20,
-      "fixture": {
-        "spell_power": 20000
-      },
-      "cast_power": 1000,
-      "observe_source": "Dark Effigy 707331 (passive, Effect[1] aura 107 misc 23, BasePoints 49 + 1 = 50 = $s2): AscensionWitchDoctorAbilities.cpp:175-177 (OnSpellCalculatedTarget): a hit of Shadowflare (Family(info, 0, 4)) or its child 802704 with Dark Effigy known on a target that carries the caster's Puppeteer's Threads 572836 (target->HasAura(Threads, player->GetGUID())) is multiplied by 1.5f. The Threads come from the real route, not a fixture: Puppeteer's Threads 92084 is learned in both arms (passive, native aura 354 proc, spell_proc row rev_20260909_00 :5, Chance 100) and every trial first casts a real Malefic Wrath 807037 at the dummy (2000 ms cast; AscensionWitchDoctorEvents.cpp:77-79, Puppeteer: a non-periodic damage hit leaves 572836 on the target, DurationIndex 1 = 10000 ms), then the observed Shadowflare 801669 (CastingTimeIndex 5 = 2000 ms, GCD 1500, 31% base mana; AscensionWitchDoctorCompletion.cpp:263-266 rewrites its Effect[0] to SCHOOL_DAMAGE, so the damage event carries 801669), within the Threads' 10000 ms (Wrath 2000 + settle + Shadowflare 2000). Control arm: 707331 not learned, Threads present; treatment arm: learned. The per-hit mean of the treatment over the control must be 1.50 inside the G-19 band (2.5 points, 5% of 50: 1.475 to 1.525); no effect (1.0) alerts. 20000 spell power so the stat term dominates the die, 823764 on the caster, non-critical hits only, cast_power 1000 under the 1497 base mana (11% Wrath plus 31% Shadowflare, set before each cast). Cast timing checked: Wrath 2000 ms, Shadowflare 2000 ms plus GCD, Threads 10000 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 272. Rank note (pitfall 12): Malefic Wrath 807037 and Shadowflare 801669 are rank-1 ids (level-60 ranks 572336 and 501146); the ratio of the same spell across arms with 20000 spell power is not affected, and the x1.5 multiplies the finished hit.",
-      "learn": [
-        92084
-      ]
-    },
-    {
-      "spell": 707331,
-      "kind": "hit_ratio",
       "name": "Dark Effigy (Shadowflare without Puppeteer's Threads)",
       "variant": "flare_no_threads",
       "label_suffix": "flare_no_threads",
@@ -16051,48 +15958,6 @@
       "cast_power": 1000,
       "observe_source": "The condition arm of flare_threads: the same observed Shadowflare 801669 with Dark Effigy learned and no Puppeteer's Threads on the dummy (92084 not learned, no Wrath cast first: target->HasAura(Threads, player->GetGUID()) is false at AscensionWitchDoctorAbilities.cpp:175-177): the hit is not multiplied, the ratio of the arms is 1.0 inside the 2-point band, so the +50% is tied to enemies affected by the Threads. 20000 spell power, 823764 on the caster, non-critical hits, 20 trials per arm. Cast timing checked: Shadowflare 2000 ms plus GCD. Rank note (pitfall 12): Shadowflare 801669 is the rank-1 id (level-60 rank 501146); the ratio of the same spell across arms is not affected.",
       "learn": []
-    },
-    {
-      "spell": 707331,
-      "name": "Dark Effigy (Bad Juju strikes 2 additional nearby enemies)",
-      "kind": "fixed_count",
-      "variant": "juju_two",
-      "label_suffix": "juju_two",
-      "quote": "Your Bad Juju and Hexfire now strike 2 additional nearby enemies.",
-      "expected": 2,
-      "radius": 8,
-      "metric": "spell_damage_count",
-      "target_rank": 802087,
-      "repeats": 1,
-      "learn": [
-        707331,
-        802087
-      ],
-      "radius_reason": "AscensionWitchDoctorAbilities.cpp:133-143 (OnSpellBeforeEffects): with Dark Effigy known a Juju (IsJuju, SpellFamilyFlags[2] 2: Bad Juju 802087) adds the first two valid attackable enemies in line of sight within Nearby(target, 10.0f) to Effect[0]; the three near dummies stand 2 to 6 yd from the primary, inside the 10 yd the script searches (and inside the 8 yd radius of the layout), and the far dummy stands 13 yd from the primary, 3 yd beyond that 10 yd; the native chain (+3 jump targets on a ChainTarget 0 spell, jump radius 10 yd) searches from the primary and its hops, so the far dummy at 13 yd is not reached by the two chain hops",
-      "observe_source": "Dark Effigy 707331 Effect[0] aura 107 misc 17 BasePoints 2 + 1 = 3; AscensionWitchDoctorAbilities.cpp:133-143 (OnSpellBeforeEffects) adds up to two extra unit targets to Effect[0] of Bad Juju 802087 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow, CastingTimeIndex 19 = 2500 ms, GCD 1500, 16% base mana, CategoryRecoveryTime 15000, range 0 to 30, Speed 20) when 707331 is known: the first two valid attackable enemies in line of sight within Nearby(target, 10.0f) of the primary. 707331 is a passive, so cast_spell 802087 makes the builder cast the real Bad Juju (learned with 707331, waits the 2500 ms cast time plus its 500 ms margin) once at the primary dummy 3 yd out. The layout of the fixed_count builder is the primary, three more dummies within 8 yd of it (one more than the stated 2, the headroom: 5, 7 and 9 yd from the caster, 2 to 6 yd from the primary, inside the 10 yd the script searches) and one far dummy 13 yd from the primary (beyond that 10 yd); the damage events of 802087 on each dummy are read after the cast. Exactly 2 of the 3 near extras must be struck and the far dummy not: no extra struck (the behaviour absent) reads 0 of 2, a third struck reads 3 (the headroom dummy shows it) and a radius beyond 10 yd strikes the far dummy. repeats 1 because the script picks the two extras from an unordered Nearby list (the Umbral Glaive two_nearby shape). There is no pre-learn control cast in this scenario (the single phase learns 707331 before the cast): the check that fails if the behaviour were absent is the count of extras struck. Native path (the second source of extra targets): Dark Effigy 707331 Effect[0] is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 17 SPELLMOD_JUMP_TARGETS, BasePoints 2 + 1 = +3, EffectSpellClassMask words 0, 262144 (Hexfire) and 2 (Bad Juju), applied in Spell::SelectImplicitChainTargets (Spell.cpp:1921-1925) before the script's picks. Bad Juju has EffectChainTarget 0, so its target count becomes 0 + 3 = 3 and the engine itself chains it to 2 extra enemies (SearchChainTargets, DmgClass magic: jump radius 10 yd, nearest to the previous target first, so the dummies at 5 and 7 yd), before the script (Abilities.cpp:133-143) adds up to 2 more from an unordered Nearby(target, 10) list; a script pick that repeats a chained dummy adds nothing, one that picks the 9 yd dummy makes a third extra. The two sources are not told apart by this entry, which judges the total: the tooltip states 2 additional nearby enemies (G-1), so this entry likely alerts with 3 of the 3 near dummies struck, whenever the script's picks do not coincide with the chained ones; that is a candidate defect lead (the native +3 and the script both add targets), reported, not fixed. The far dummy, 13 yd from the primary, is beyond the two chain hops (the second hop ends at 7 yd and the next dummy it could take is the 9 yd one) and the script's 10 yd. The Hexfire half of the clause is the hexfire_two entry. Rank note (pitfall 12): 802087 is the rank-1 id of Bad Juju (level-60 rank 501181); the count of struck dummies does not depend on the rank. Cast timing checked: Bad Juju 2500 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Read timing: the damage events are read after the cast time plus the builder margin and a settle_ms of 1000 ms, because the missiles reach the chained and script-picked dummies one after another (Bad Juju Speed 20: 250 to 450 ms of flight on top of its 2500 ms cast).",
-      "cast_spell": 802087,
-      "settle_ms": 1000
-    },
-    {
-      "spell": 707331,
-      "name": "Dark Effigy (Hexfire strikes 2 additional nearby enemies)",
-      "kind": "fixed_count",
-      "variant": "hexfire_two",
-      "label_suffix": "hexfire_two",
-      "quote": "Your Bad Juju and Hexfire now strike 2 additional nearby enemies.",
-      "expected": 2,
-      "radius": 8,
-      "metric": "spell_damage_count",
-      "target_rank": 573026,
-      "repeats": 1,
-      "learn": [
-        707331,
-        573026
-      ],
-      "radius_reason": "AscensionWitchDoctorAbilities.cpp:133-143 (OnSpellBeforeEffects): with Dark Effigy known a Hexfire (Family(info, 1, 262144)) adds the first two valid attackable enemies in line of sight within Nearby(target, 10.0f) to Effect[0]; the three near dummies stand 2 to 6 yd from the primary, inside that 10 yd (and inside the 8 yd radius of the layout), and the far dummy stands 13 yd from the primary, 3 yd beyond it. The native chain (SPELLMOD_JUMP_TARGETS +3 on ChainTarget 1, jump radius 10 yd from the primary and each hop) is the other source of extra targets",
-      "observe_source": "Hexfire half of the clause 'Your Bad Juju and Hexfire now strike 2 additional nearby enemies' (G-1: the tooltip value is 2 additional enemies beyond the primary). Hexfire 573026 (the id the other Witch Doctor entries cast; instant CastingTimeIndex 1, 17% base mana, CategoryRecoveryTime 10000 reset before the cast, RangeIndex 4, Speed 35, Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, ImplicitTargetA TARGET_UNIT_TARGET_ENEMY, EffectChainTarget[0] 1, SPELL_ATTR4_BOUNCY_CHAIN_MISSILES, SpellFamilyFlags[1] 262144) strikes only its primary target on its own (a chain target count of 1 is not above 1, Spell.cpp:1921-1931). With Dark Effigy 707331 known two things add targets: the native modifier Effect[0] (aura 107 SPELLMOD_JUMP_TARGETS misc 17, BasePoints 2 + 1 = +3, EffectSpellClassMask word 1 262144 = Hexfire, Spell.cpp:1921-1925) makes the chain count 1 + 3 = 4, so the engine chains the Hexfire to 3 extra enemies (nearest to the previous target first, jump radius 10 yd, bouncing far), and the script (Abilities.cpp:133-143) adds up to 2 more from an unordered Nearby(target, 10) list. The entry judges the total against the tooltip: one real Hexfire at the primary dummy 3 yd out (instant, learned with 707331 and the cast spell; cast_spell 573026 makes the builder cast the real Hexfire and wait the cast time plus its margin), the damage events of 573026 on each dummy read afterwards. The layout is the primary, three more dummies within 8 yd of it (5, 7 and 9 yd from the caster, 2 to 6 yd from the primary, one more than the stated 2, the headroom) and one far dummy 13 yd from the primary. Exactly 2 of the 3 near extras must be struck and the far one not: no extra struck (the behaviour absent) reads 0 of 2, the native chain of 3 extras plus the script reads 3 (the headroom dummy shows it) and alerts, as does a radius beyond 10 yd that strikes the far dummy. That alert would be a candidate defect lead (the native +3 and the script both add targets), reported, not fixed. repeats 1 because the script picks its extras from an unordered Nearby list. There is no pre-learn control cast (the single phase learns 707331 before the cast): the check that fails if the behaviour were absent is the count of extras struck. Rank note (pitfall 12): 573026 is the castable Hexfire id used by the other entries (the rank-1 id is 807042); the count of struck dummies does not depend on the rank. Cast timing checked: Hexfire instant. Player reports: none of the open reports of cycles 5 and 6 names this spell. Read timing: the damage events are read after the cast time plus the builder margin and a settle_ms of 1500 ms, because the missiles reach the chained and script-picked dummies one after another (Hexfire Speed 35 with bouncing chain missiles: about 143 ms per hop at the floored 5 yd, up to about 570 ms for the fourth target).",
-      "cast_spell": 573026,
-      "settle_ms": 1500
     },
     {
       "spell": 705901,
@@ -16375,116 +16240,6 @@
       "observe_source": "Companion read of alongside: a Serpent Ward count of 1 before and after reads the same when the Mimic Ward cast is refused (player casts are not required, the one_each_casts precedent), so the casts of Mimic Ward 707162 on the caster are counted (spell_go_count, cumulative, one event per cast that went off): 0 in the before phase (no Mimic Ward cast, cast_in_before false) and 1 after the real Mimic Ward cast of the after phase. A refused cast reads 0 and fails. Same setup, timing and mana as alongside (Serpent Ward 500960 in both phases, Mimic Ward instant, RecoveryTime 60000 reset by the scenario, wait 1500 ms). Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
-      "spell": 707405,
-      "name": "Overflowing Juju (Malefic Wrath spell power scaling +20%)",
-      "kind": "hit_ratio",
-      "variant": "wrath",
-      "label_suffix": "wrath",
-      "quote": "Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by $s1%.",
-      "expected": 1.2,
-      "observe_spell": 807037,
-      "control": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ],
-        "learn": [
-          707405
-        ]
-      },
-      "critical": false,
-      "trials": 20,
-      "fixture": {
-        "spell_power": 60000
-      },
-      "cast_power": 1000,
-      "cast_wait_ms": 2500,
-      "observe_source": "Overflowing Juju 707405 (passive, Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 24 SPELLMOD_BONUS_MULTIPLIER, BasePoints 19 + 1 = 20 = $s1, EffectSpellClassMask[0] 4 (Shadowflare), [1] 33792 = 32768 (Malefic Wrath) + 1024 (Bad Juju)): a native percent modifier, no script (script touch none beyond the ids of Overflowing Juju 705844's proc); aura 108 on the bonus multiplier is x1.2 of the spell power coefficient, not +20 points (aura 107, the Disciple of Sseratus 300660 reading of mentor decision M-47). The Doctor's spell power term is folded into the effect base value by AscensionWitchDoctorCompletion.cpp:640-656 (ModifySpellEffectBaseValue) with the coefficient of AscensionWitchDoctorCoefficients.h, so this entry reads whether the modifier reaches that folded term at all (a modifier that does not scale it reads 1.0 and alerts: a candidate defect lead, reported, not fixed). Malefic Wrath 807037 is cast for real at the dummy; 60000 spell power (harness fixture, precondition, both arms) so the spell power term dominates the die, the base and the Spirit term (about 700 of 60000: the expected ratio with the term x1.2 is about 1.198, inside the band), 823764 on the caster (no partial resists), non-critical hits only, 20 trials per arm. Control arm: 707405 not learned; treatment: learned (a real learn). The per-hit mean ratio must be 1.20 inside the G-19 band (2 points: 1.18 to 1.22); no effect (1.0) and +20 coefficient points (a ratio of about 1.0004 at this spell power for a coefficient of 1) alert. Cast timing checked: Wrath 2000 ms plus GCD 1500, cast_wait_ms 2500. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 275 (Malefic Wrath). Rank note (pitfall 12): Malefic Wrath 807037 is the rank-1 id (level-60 rank 572336): the folded Doctor spell power term applies no level penalty (ModifySpellEffectBaseValue), so the ratio is unaffected."
-    },
-    {
-      "spell": 707405,
-      "name": "Overflowing Juju (Bad Juju spell power scaling +20%)",
-      "kind": "hit_ratio",
-      "variant": "badjuju",
-      "label_suffix": "badjuju",
-      "quote": "Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by $s1%.",
-      "expected": 1.2,
-      "observe_spell": 802087,
-      "control": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ],
-        "learn": [
-          707405
-        ]
-      },
-      "critical": false,
-      "trials": 20,
-      "fixture": {
-        "spell_power": 60000
-      },
-      "cast_power": 1000,
-      "cast_wait_ms": 2800,
-      "observe_source": "Overflowing Juju 707405 (passive, Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 24 SPELLMOD_BONUS_MULTIPLIER, BasePoints 19 + 1 = 20 = $s1, EffectSpellClassMask[0] 4 (Shadowflare), [1] 33792 = 32768 (Malefic Wrath) + 1024 (Bad Juju)): a native percent modifier, no script (script touch none beyond the ids of Overflowing Juju 705844's proc); aura 108 on the bonus multiplier is x1.2 of the spell power coefficient, not +20 points (aura 107, the Disciple of Sseratus 300660 reading of mentor decision M-47). The Doctor's spell power term is folded into the effect base value by AscensionWitchDoctorCompletion.cpp:640-656 (ModifySpellEffectBaseValue) with the coefficient of AscensionWitchDoctorCoefficients.h, so this entry reads whether the modifier reaches that folded term at all (a modifier that does not scale it reads 1.0 and alerts: a candidate defect lead, reported, not fixed). Bad Juju 802087 is cast for real at the dummy; 60000 spell power (harness fixture, precondition, both arms) so the spell power term dominates the die, the base and the Spirit term (about 700 of 60000: the expected ratio with the term x1.2 is about 1.198, inside the band), 823764 on the caster (no partial resists), non-critical hits only, 20 trials per arm. Control arm: 707405 not learned; treatment: learned (a real learn). The per-hit mean ratio must be 1.20 inside the G-19 band (2 points: 1.18 to 1.22); no effect (1.0) and +20 coefficient points (a ratio of about 1.0004 at this spell power for a coefficient of 1) alert. Cast timing checked: Bad Juju 2500 ms plus GCD, cast_wait_ms 2800. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 275 (Bad Juju). Rank note (pitfall 12): Bad Juju 802087 is the rank-1 id (level-60 rank 501181): the folded Doctor spell power term applies no level penalty (ModifySpellEffectBaseValue), so the ratio is unaffected."
-    },
-    {
-      "spell": 707405,
-      "name": "Overflowing Juju (Shadowflare spell power scaling +20%)",
-      "kind": "hit_ratio",
-      "variant": "shadowflare",
-      "label_suffix": "shadowflare",
-      "quote": "Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by $s1%.",
-      "expected": 1.2,
-      "observe_spell": 801669,
-      "control": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ],
-        "learn": [
-          707405
-        ]
-      },
-      "critical": false,
-      "trials": 20,
-      "fixture": {
-        "spell_power": 60000
-      },
-      "cast_power": 1000,
-      "observe_source": "Overflowing Juju 707405 (passive, Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 24 SPELLMOD_BONUS_MULTIPLIER, BasePoints 19 + 1 = 20 = $s1, EffectSpellClassMask[0] 4 (Shadowflare), [1] 33792 = 32768 (Malefic Wrath) + 1024 (Bad Juju)): a native percent modifier, no script (script touch none beyond the ids of Overflowing Juju 705844's proc); aura 108 on the bonus multiplier is x1.2 of the spell power coefficient, not +20 points (aura 107, the Disciple of Sseratus 300660 reading of mentor decision M-47). The Doctor's spell power term is folded into the effect base value by AscensionWitchDoctorCompletion.cpp:640-656 (ModifySpellEffectBaseValue) with the coefficient of AscensionWitchDoctorCoefficients.h, so this entry reads whether the modifier reaches that folded term at all (a modifier that does not scale it reads 1.0 and alerts: a candidate defect lead, reported, not fixed). Shadowflare 801669 is cast for real at the dummy; 60000 spell power (harness fixture, precondition, both arms) so the spell power term dominates the die, the base and the Spirit term (about 700 of 60000: the expected ratio with the term x1.2 is about 1.198, inside the band), 823764 on the caster (no partial resists), non-critical hits only, 20 trials per arm. Control arm: 707405 not learned; treatment: learned (a real learn). The per-hit mean ratio must be 1.20 inside the G-19 band (2 points: 1.18 to 1.22); no effect (1.0) and +20 coefficient points (a ratio of about 1.0004 at this spell power for a coefficient of 1) alert. Cast timing checked: Shadowflare 2000 ms plus GCD 1500 (hit_ratio_cast waits the cast time and the global cooldown). Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 275 (Shadowflare). Rank note (pitfall 12): Shadowflare 801669 is the rank-1 id (level-60 rank 501146): the folded Doctor spell power term applies no level penalty (ModifySpellEffectBaseValue), so the ratio is unaffected."
-    },
-    {
       "spell": 706368,
       "name": "Loa Empowerment (Spirit Wuju costs 50% less mana)",
       "kind": "metric_delta",
@@ -16537,37 +16292,6 @@
       "measure_actor": "caster",
       "cast_power": 1400,
       "observe_source": "AscensionWitchDoctorAbilities.cpp:263-264 (OnSpellHitResult): a Juju hit (IsJuju) with Voodoo Strings 705910 known on a target that carries the caster's Puppeteer's Threads 572836 calls Copy(player, target, StringsDamage 706898, damage x 30 / 100) (Completion.cpp:88-96: CastCustomSpell with the base point as the tick amount). 706898 is a periodic damage aura (aura 3, EffectAmplitude 1000 = $706898T1, DurationIndex 27 = 3000 ms = $706898d, Nature): three ticks at 1000, 2000 and 3000 ms after it lands. The Threads come from the real route (92084 learned at the start, a real Malefic Wrath 807037 cast first, 2000 ms plus settle, as the 573026 snap_gone entry). Both phases cast a real Bad Juju 802087 (CastingTimeIndex 19 = 2500 ms, 16% base mana, GCD 1500, CategoryRecoveryTime 15000 reset by the scenario) at the dummy; 705910 is learned between the phases (gate_spell): the before phase reads no 706898 hit (the control: Juju on a Threaded target without the talent), the after phase 3. The Juju lands 2500 ms after its submission, so 6600 ms after it exactly 3 ticks have landed (2500 + 3000 + margin). Read with the caster as the actor. Cast timing checked: Wrath 2000 ms, Juju 2500 ms, wait 6600 ms. The amount half (30% of the Juju damage, the code gives each of the three ticks 30%, so 90% in all against the tooltip's 'for 30% of the damage dealt over 3 sec', which reads as 30% in all) is a candidate defect lead and an ambiguous reading, reported, not built; no kind relates the amounts of two spells at a ratio. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the period and duration half of clause 210. Limit: this read at 6600 ms proves the number of strikes of the aura (3 inside its 3000 ms duration), not the period by itself (a 0.5 s period over 1.5 s would also read 3); the period is bracketed by the tick_period entry (two stamped count reads between the ticks, the 525377 hex_period shape) and by the data labels (EffectAmplitude 1000, DurationIndex 27). Rank note (pitfall 12): Bad Juju 802087 is the rank-1 id (level-60 rank 501181) and Malefic Wrath 807037 the rank-1 id (572336); only the number of strikes of 706898 is read, which does not depend on the rank."
-    },
-    {
-      "spell": 705910,
-      "name": "Voodoo Strings (no extra strikes while the enemy lacks Puppeteer's Threads)",
-      "kind": "metric_delta",
-      "variant": "threads_gate",
-      "label_suffix": "threads_gate",
-      "quote": "it strikes an additional time every $706898T1 sec for 30% of the damage dealt over $706898d as Nature damage.",
-      "expected": 3,
-      "before_expected": 0,
-      "trigger_spell": 802087,
-      "gate_spell": 705910,
-      "learn": [
-        92084
-      ],
-      "setup_casts": [
-        807037
-      ],
-      "setup_wait_ms": 2500,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 706898,
-        "target": "dummy"
-      },
-      "wait_ms": 6600,
-      "expire_ms": 4500,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "cast_power": 1400,
-      "observe_source": "The condition arm of ticks (AscensionWitchDoctorAbilities.cpp:263-264: Voodoo Strings 705910 acts only on a target that carries the caster's Puppeteer's Threads 572836, which the DBC TargetAuraSpell 572836 on 706898 also requires). 705910 and Puppeteer's Threads 92084 are learned once at the start (setup_only_after: the passive stays known in both phases) and the Threads come only from the real route in the after phase: a real Malefic Wrath 807037 (2000 ms cast, GCD 1500) is a setup cast of the after phase only. Both phases cast a real Bad Juju 802087 (CastingTimeIndex 19 = 2500 ms, 16% base mana, CategoryRecoveryTime 15000 reset by the scenario) at the dummy and read the hits of 706898 6600 ms later: the before phase (the talent known, no Threads on the dummy: the Juju's own hit leaves the Threads only after the hit is processed) reads 0, the after phase (Threads from the Wrath) reads 3. The Juju of the before phase leaves a 10000 ms Threads aura on the dummy that does not matter to the after phase, which expects the strikes. Cast timing checked: Wrath 2000 ms, Juju 2500 ms, wait 6600 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Rank note (pitfall 12): 802087 and 807037 are rank-1 ids (level-60 ranks 501181 and 572336); only the strikes of 706898 are counted.",
-      "setup_only_after": true
     },
     {
       "spell": 707162,
@@ -17280,62 +17004,6 @@
       "observe_source": "Big Bad Voodoo 802719 Effect[0] SPELL_EFFECT_SUMMON (TARGET_DEST_CASTER, EffectMiscValue 310659), DurationIndex 31 = 8000 ms ($d), RecoveryTime 300000 reset by the scenario. Summon (AscensionWitchDoctorSummons.cpp:171-224) makes one TEMPSUMMON_TIMED_DESPAWN creature 310659 owned by the caster (Summons.cpp:68 NpcBwonsamdi). A real cast at the caster: owned_creature_count reads 1 at about 7760 ms and 0 at about 8170 ms after the cast, so the despawn lies inside the G-19 band (5% of 8000 ms = 400 ms) on both sides, both reads stamped in game time. Control: the uncast before phase reads 0. Clause 468. Cast timing checked: instant. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
-      "spell": 802719,
-      "kind": "metric_delta",
-      "variant": "lock_blocks",
-      "label_suffix": "lock_blocks",
-      "name": "Big Bad Voodoo (a second cast within the lock is refused)",
-      "quote": "Cannot be used within $803495d of benefitting from Big Bad Voodoo.",
-      "trigger_spell": 802719,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "cast_failure",
-      "fields": {
-        "spell": 802719
-      },
-      "cast_power": 2000,
-      "before_expected": 0,
-      "expected": 22,
-      "wait_ms": 300,
-      "expire_ms": 500,
-      "observe_source": "Big Bad Voodoo 802719 Effect[2] SPELL_EFFECT_TRIGGER_SPELL 803495 (Waning Wuju, aura 4 dummy, DurationIndex 4 = 120000 ms, $803495d) at TARGET_UNIT_DEST_AREA_ALLY, radius 15 yd, so the caster carries the lock from its own cast. AscensionWitchDoctorAbilities.cpp:90-91 (OnSpellCheckCast): id == BigVoodoo with the caster holding BigVoodooLock (803495, Completion.h:257) gives SPELL_FAILED_CASTER_AURASTATE (22). Both phases cast Big Bad Voodoo at the caster for real (instant, cooldown 300000 reset by the scenario before each cast) and read the cast result: the before phase is the control (first cast, no lock yet: 0, accepted), the after phase is the second cast 800 ms later under the lock: 22. A server that applied no lock, or a lock the check ignored, reads 0 after. Clause 473 (the refusal; the 120 s is the lock_lasts entry). Cast timing checked: instant, 300 ms read after the cast. Player reports: none of the open reports of cycles 5 and 6 names this spell."
-    },
-    {
-      "spell": 802719,
-      "kind": "metric_delta",
-      "variant": "lock_lasts",
-      "label_suffix": "lock_lasts",
-      "name": "Big Bad Voodoo (the lock lasts 120 sec)",
-      "quote": "Cannot be used within $803495d of benefitting from Big Bad Voodoo.",
-      "trigger_spell": 802719,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "aura",
-      "fields": {
-        "spell": 803495
-      },
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "cast_power": 2000,
-      "before_expected": 0,
-      "expected": 1,
-      "after_expiry_expected": 0,
-      "wait_ms": 119500,
-      "expiry_wait_ms": 800,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          114000,
-          126000
-        ],
-        "expired": [
-          114000,
-          126000
-        ]
-      },
-      "observe_source": "Waning Wuju 803495 (the lock, triggered by Big Bad Voodoo Effect[2] on the allies within 15 yd of the cast, the caster included), DurationIndex 4 = 120000 ms ($803495d). A real cast of Big Bad Voodoo at the caster (instant, cooldown reset by the scenario): the aura 803495 is on the caster about 119510 ms later and gone about 120330 ms, inside the G-19 band (5% of 120000 ms = 6000 ms), both reads stamped in game time. Control: the uncast before phase reads no aura. The waits exceed 80000 ms, so the scenario takes the matching timeout (ADR 0405). Clause 473 (the duration). Cast timing checked: instant. Player reports: none of the open reports of cycles 5 and 6 names this spell."
-    },
-    {
       "spell": 804049,
       "kind": "immunity",
       "variant": "poison",
@@ -17490,27 +17158,6 @@
       "observe_source": "Arcane Brew 801689 Effect[1] aura 29 SPELL_AURA_MOD_STAT misc 4 (Spirit) at TARGET_UNIT_TARGET_ALLY, BasePoints 29 + 1.5 per level above 31 + 1 = 73.5 at level 60 (the engine truncates the amount to 73). Spirit is read with Unit::GetStat, which carries the percent multipliers of the reference character: the reference character is a Human (race 1) of class 13, and AscensionLiveBaselineData.h:47 grants class 13 Humans The Human Spirit 20598 (aura 137 MOD_TOTAL_STAT_PERCENTAGE misc 4, +3%, cited by the 680872 Spirit entry), which scales a flat total value. The reading is derived, not calibrated: (105.8 + 73) x 1.03 = 184.1 after the cast against the reference Spirit 109 before (105.8 x 1.03 = 108.97), stored stats being whole numbers 184 and 109, a gain of 75 exactly (73 x 1.03 = 75.2). It is judged to 0.5, so a gain of 73 (no multiplier), 74 or 76 (an amount of 74), a flat 60 or 90 alert. A real cast at the caster, the uncast before phase is the control (109, the reference Spirit). Residual risk stated for triage: if the unrounded base differs from 105.8 the truncation of the two stored values can read 76. Clause 311 (the Spirit part). Cast timing checked: instant. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
-      "spell": 807056,
-      "name": "Brew Stew (21 Black Lotus Bisque)",
-      "variant": "items",
-      "label_suffix": "items",
-      "quote": "Brews $s1 Black Lotus Bisque providing the Witch Doctor and their allies with something to eat.",
-      "trigger_spell": 807056,
-      "target": "caster",
-      "cast_in_before": false,
-      "cast_power": 2000,
-      "wait_ms": 3500,
-      "expire_ms": 500,
-      "metric": "item_count",
-      "fields": {
-        "item": 339008
-      },
-      "before_expected": 0,
-      "expected": 21,
-      "observe_source": "Brew Stew 807056: Effect[0] SPELL_EFFECT_CREATE_ITEM, EffectItemType 339008, BasePoints 20 + 1 = 21 ($s1); CastingTimeIndex 14 (3000 ms), 40% of the base mana (cast_power 2000, ManaCostPercentage 40), StartRecoveryTime 1500, RecoveryTime 0, no reagent. No CoA class code names it (class map: not in the map). The twin of the Brew Cocktail 807076 items entry (the same 20 + 1 under the same \"Brews $s1\" wording): M-50 shows that this shape finds a real lead where one Create Item is capped at one stack, so 21 items would not all arrive. The control is the uncast before phase: no 339008 in the bags; one real cast: 21 (item_count, ADR 0425). Open question, not a defect lead: item 339008 is in Item.dbc, and no item_template row of the repository SQL names it (grep of data/sql), but rev_20261104_91_ptr_realm_npcs.sql sells it at a vendor and the harness clones the realm world database, so the template may exist there; the cloned database was not queried. The first run settles it: item_count reads 21, or less if a stack caps at 20, or the scenario is unmeasured. Coverage note: item_count is a STATE metric whose promise word is \"creat\\w*\", which \"Brews\" does not match, so even an ok read stays data conformant until the owner adds \"brew\\w*\" (tool note T-c9-B16-12). Clause 484. Cast timing checked: 3000 ms cast, wait_ms 3500. Player reports: none of the open reports of cycles 5 and 6 names this spell.",
-      "kind": "metric_delta"
-    },
-    {
       "spell": 802262,
       "name": "Voodoo Fire (the shot deals the stated Fire damage)",
       "kind": "script_hit",
@@ -17596,6 +17243,352 @@
         }
       ],
       "observe_source": "712396 Dark Mojo (passive, Effect[0] and Effect[1] SPELL_AURA_MOD_DEBUFF_RESISTANCE 178, MiscValue 2 (curse) and 1 (magic), EffectBasePoints 19 + 1 = +20 each, $s1): no script touches it. Unit::MagicSpellHitResult (Unit.cpp:4072-4073) adds the aura's amount x 100 to the resist roll of a negative magic-class spell of that Dispel type cast at the victim, and only magic-class spells reach it (Unit::SpellHitResult, Unit.cpp:4147). The templar Holy Constitution 706323 disease_resist entry is the precedent (taken_hit judge resist_rate, ADR 0196). A level 60 striker (entry 36) casts 1714 (Curse of Tongues) (Dispel 2 curse, DmgClass 1 magic, instant, no cooldown, one SPELL_AURA_HASTE_SPELLS and one SPELL_AURA_MOD_LANGUAGE effect, a harmless curse on the target) at the caster; each trial reads whether 1714 is on the caster 300 ms later and removes it; the control arm's resisted share is the same-level creature miss chance and the treatment arm must resist 20 points more often (judged inside the larger of 5% of 20 and 2 points). Sizing: 12 parts of 800 trials = 9600 per arm; the difference of two shares near 4% and 24% has sd about 0.47/sqrt(n) = 0.48 points, so the 2 point tolerance is about 4.2 sd (G-20 step 2, pooled proof; Holy Constitution pools 28 parts for 30 points). The passive is set with set_aura as a precondition fixture, with the cost reason: the resist_rate arm steps emit only set_aura for an arm's auras (taken_rate_arm_steps does not emit the arm's learn), and the passive has no cast, so a learn would not be applied by this kind; the aura effects are the native ones the claim reads, so the control arm without it and the treatment with it differ only by the aura. The magic half (MiscValue 1) and the curse half (MiscValue 2) are separate entries because an entry has one strike spell. Clause 293. Cast timing checked: the strikes are instant, read 300 ms after each. Player reports: none."
+    },
+    {
+      "spell": 707331,
+      "kind": "hit_ratio",
+      "name": "Dark Effigy (Shadowflare +50% against enemies affected by Puppeteer's Threads)",
+      "variant": "flare_threads",
+      "label_suffix": "flare_threads",
+      "quote": "Shadowflare now deals $s2% increased damage to enemies affected by Puppeteer's Threads.",
+      "expected": 1.5,
+      "observe_spell": 801669,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          807037
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          807037
+        ],
+        "learn": [
+          707331
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "observe_source": "Dark Effigy 707331 (passive, Effect[1] aura 107 misc 23, BasePoints 49 + 1 = 50 = $s2): AscensionWitchDoctorAbilities.cpp:175-177 (OnSpellCalculatedTarget): a hit of Shadowflare (Family(info, 0, 4)) or its child 802704 with Dark Effigy known on a target that carries the caster's Puppeteer's Threads 572836 (target->HasAura(Threads, player->GetGUID())) is multiplied by 1.5f. The Threads come from the real route, not a fixture: Puppeteer's Threads 92084 is learned in both arms (passive, native aura 354 proc, spell_proc row rev_20260909_00 :5, Chance 100) and every trial first casts a real Malefic Wrath 807037 at the dummy (2000 ms cast, Speed 35; AscensionWitchDoctorEvents.cpp:77-79 and 132-140, Puppeteer: a non-periodic damage hit on a target without the caster's Threads adds 572836, DurationIndex 1 = 10000 ms), then the observed Shadowflare 801669 (CastingTimeIndex 5 = 2000 ms, GCD 1500, 31% base mana; AscensionWitchDoctorCompletion.cpp:263-266 rewrites its Effect[0] to SCHOOL_DAMAGE, so the damage event carries 801669) 3600 ms after the Wrath, about 3.4 s into the Threads' 10000 ms. Clean-up fixture (triage TA, cycle 9): target_auras [[572836, 0]] removes the caster's Threads from the dummy before each trial's Wrath (the harness set_aura with 0 stacks, RemoveAurasDueToSpell with the caster's guid, the clear_auras shape of Holy Cleave 573049), so that Wrath lays fresh Threads. The reason: a later hit on a target that already holds the Threads only adds to the stored amount and does not refresh them (Events.cpp:134-136), and a trial lasts 7200 ms, so without the removal the Threads a Wrath lays (about 2200 ms into a trial) expire about 5000 ms into the next trial, which keeps them, before its Shadowflare lands about 5600 ms in; the pre-pair sweep (20261121-050819) read 7069 in every control trial and 10603 (7069 x 1.5) in 13 of 20 treatment trials, 7069 in trials 1, 4, 7, ..., 19, a per-hit ratio of 1.325 from a cycle of three, not a smaller bonus. The removal is not the claim's subject (the Threads are still laid by a real Wrath) and releases only the stored damage as Threads damage 572837, which is not the observed spell. Control arm: 707331 not learned, Threads present; treatment arm: learned. The per-hit mean of the treatment over the control must be 1.50 inside the G-19 band (2.5 points, 5% of 50: 1.475 to 1.525); no effect (1.0) alerts, and a trial that lost its Threads pulls the ratio below the band. 20000 spell power so the stat term dominates the die (the readings are deterministic: 7069 per hit without the bonus, int(7069 x 1.5) = 10603 with it), 823764 on the caster, non-critical hits only, cast_power 1000 under the 1497 base mana (11% Wrath plus 31% Shadowflare, set before each cast). Cast timing checked: Wrath 2000 ms, Shadowflare 2000 ms plus GCD, 3600 ms per cast, Threads 10000 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 272. Rank note (pitfall 12): Malefic Wrath 807037 and Shadowflare 801669 are rank-1 ids (level-60 ranks 572336 and 501146); the ratio of the same spell across arms with 20000 spell power is not affected, and the x1.5 multiplies the finished hit.",
+      "learn": [
+        92084
+      ],
+      "target_auras": [
+        [
+          572836,
+          0
+        ]
+      ]
+    },
+    {
+      "spell": 707331,
+      "name": "Dark Effigy (Bad Juju strikes 2 additional nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "juju_two",
+      "label_suffix": "juju_two",
+      "quote": "Your Bad Juju and Hexfire now strike 2 additional nearby enemies.",
+      "expected": 2,
+      "radius": 8,
+      "metric": "spell_damage_count",
+      "target_rank": 802087,
+      "repeats": 1,
+      "learn": [
+        707331,
+        802087
+      ],
+      "radius_reason": "Native chain (the script block that added up to 2 extra targets from Nearby(target, 10.0f), formerly AscensionWitchDoctorAbilities.cpp:133-144 in OnSpellBeforeEffects, is removed by cycle 9 fix 1): Dark Effigy 707331 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS +3 makes Bad Juju (EffectChainTarget 0) a 3-target chain (Spell.cpp:1921-1925); SearchChainTargets (DmgClass magic: jump radius 10 yd, and IsWithinDist adds both combat reaches, 1.275 each for creature 36, model 367, so 12.55 yd between centres) takes the closest remaining dummy to the previous target: the primary, then the near dummies 2 and 4 yd from it; the third near dummy (6 yd from the primary) is the headroom, and the far dummy 13 yd from the primary is never reached because the chain ends after its 2 hops",
+      "observe_source": "Dark Effigy 707331 (passive) Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 17 SPELLMOD_JUMP_TARGETS, BasePoints 2 + 1 = +3, EffectSpellClassMask words 0, 262144 (Hexfire) and 2 (Bad Juju), applied in Spell::SelectImplicitChainTargets (Spell.cpp:1921-1925). Bad Juju 802087 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow, EffectChainTarget 0, CastingTimeIndex 19 = 2500 ms, GCD 1500, 16% base mana, CategoryRecoveryTime 15000, range 0 to 30, Speed 20) becomes a 0 + 3 = 3-target chain with the talent: the primary and 2 additional enemies, the tooltip's 'strike 2 additional nearby enemies' (G-1). SearchChainTargets (DmgClass magic: jump radius 10 yd, and IsWithinDist adds both combat reaches, 1.275 each for creature 36, model 367, so 12.55 yd between centres) takes the closest remaining dummy to the previous target, so the near dummies 2 and 4 yd from the primary are struck and the third near dummy (6 yd, the headroom) is not. 707331 is a passive, so cast_spell 802087 makes the builder cast the real Bad Juju (learned with 707331, waits the 2500 ms cast time plus its 500 ms margin) once at the primary dummy 3 yd out. The layout of the fixed_count builder is the primary, three more dummies within 8 yd of it (5, 7 and 9 yd from the caster, 2 to 6 yd from the primary, one more than the stated 2) and one far dummy 13 yd from the primary; the damage events of 802087 on each dummy are read after the cast. Exactly 2 of the 3 near extras must be struck and the far dummy not: no extra struck (the behaviour absent) reads 0 of 2, a third struck reads 3 (the headroom dummy shows it). There is no pre-learn control cast in this scenario (the single phase learns 707331 before the cast): the check that fails if the behaviour were absent is the count of extras struck. Pre-fix record: the cycle 9 pre-pair sweep (build 8754f260, run aa9100f4b467) read 3 of 3 near extras and the far dummy 0, because the script block (Abilities.cpp:133-144 at 270db9d51e) added up to 2 more targets from an unordered Nearby(target, 10) list on top of the native 2 (triage TA: confirmed defect, fix 1; catalog witch-doctor-dark-effigy-two-additional-enemies); live logs of 2026-08-15 show Bad Juju striking at most 3 enemies per cast. repeats 1: the chain order is deterministic (closest first). The Hexfire half of the clause is the hexfire_two entry. Rank note (pitfall 12): 802087 is the rank-1 id of Bad Juju (level-60 rank 501181); the count of struck dummies does not depend on the rank. Cast timing checked: Bad Juju 2500 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Read timing: the damage events are read after the cast time plus the builder margin and a settle_ms of 1000 ms, because the missiles reach the chained dummies one after another (Bad Juju Speed 20: 250 to 450 ms of flight on top of its 2500 ms cast).",
+      "cast_spell": 802087,
+      "settle_ms": 1000
+    },
+    {
+      "spell": 707331,
+      "name": "Dark Effigy (Hexfire strikes 2 additional nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "hexfire_two",
+      "label_suffix": "hexfire_two",
+      "quote": "Your Bad Juju and Hexfire now strike 2 additional nearby enemies.",
+      "expected": 2,
+      "radius": 8,
+      "metric": "spell_damage_count",
+      "target_rank": 573026,
+      "repeats": 1,
+      "learn": [
+        707331,
+        573026
+      ],
+      "radius_reason": "Native chain (cycle 9 fix 1 removes the script block that added up to 2 extra targets from Nearby(target, 10.0f), formerly AscensionWitchDoctorAbilities.cpp:133-144, and gives the Hexfire ranks EffectChainTarget 0 in ApplyContracts, AscensionWitchDoctorCompletion.cpp): Dark Effigy 707331 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS +3 makes Hexfire a 0 + 3 = 3-target chain (Spell.cpp:1921-1925); SearchChainTargets (DmgClass magic: jump radius 10 yd, and IsWithinDist adds both combat reaches, 1.275 each for creature 36, model 367, so 12.55 yd between centres) takes the closest remaining dummy to the previous target: the primary, then the near dummies 2 and 4 yd from it; the third near dummy (6 yd from the primary) is the headroom, and the far dummy 13 yd from the primary is never reached because the chain ends after its 2 hops",
+      "observe_source": "Hexfire half of the clause 'Your Bad Juju and Hexfire now strike 2 additional nearby enemies' (G-1: the tooltip value is 2 additional enemies beyond the primary). Hexfire 573026 (the id the other Witch Doctor entries cast; instant CastingTimeIndex 1, 17% base mana, CategoryRecoveryTime 10000 reset before the cast, RangeIndex 4, Speed 35, Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, ImplicitTargetA TARGET_UNIT_TARGET_ENEMY, DBC EffectChainTarget[0] 1, SPELL_ATTR4_BOUNCY_CHAIN_MISSILES, SpellFamilyFlags[1] 262144) strikes only its primary target on its own (a chain target count of 0 or 1 is not above 1, Spell.cpp:1927). Cycle 9 fix 1 gives every Hexfire rank EffectChainTarget 0 (ApplyContracts, AscensionWitchDoctorCompletion.cpp: Family(info, 1, 262144) with Effect[0] SCHOOL_DAMAGE), so with Dark Effigy 707331 known the native modifier Effect[0] (aura 107 SPELLMOD_JUMP_TARGETS misc 17, BasePoints 2 + 1 = +3, EffectSpellClassMask word 1 262144 = Hexfire, Spell.cpp:1921-1925) makes the chain count 0 + 3 = 3: the primary and 2 additional enemies. SearchChainTargets (DmgClass magic: jump radius 10 yd, and IsWithinDist adds both combat reaches, 1.275 each for creature 36, model 367, so 12.55 yd between centres) takes the closest remaining dummy to the previous target, so the near dummies 2 and 4 yd from the primary are struck and the third near dummy (6 yd, the headroom) is not. The entry judges the total against the tooltip: one real Hexfire at the primary dummy 3 yd out (instant, learned with 707331 and the cast spell; cast_spell 573026 makes the builder cast the real Hexfire and wait the cast time plus its margin), the damage events of 573026 on each dummy read afterwards. The layout is the primary, three more dummies within 8 yd of it (5, 7 and 9 yd from the caster, 2 to 6 yd from the primary, one more than the stated 2, the headroom) and one far dummy 13 yd from the primary. Exactly 2 of the 3 near extras must be struck and the far one not: no extra struck (the behaviour absent) reads 0 of 2, a third extra reads 3 (the headroom dummy shows it). Pre-fix record: the cycle 9 pre-pair sweep (build 8754f260, run 228fb6889635) read 3 of 3 near extras and the far dummy 0: the DBC chain count 1 gave 1 + 3 = 4 targets and the script block (Abilities.cpp:133-144 at 270db9d51e) added up to 2 more (triage TA: confirmed defect, fix 1; catalog witch-doctor-dark-effigy-two-additional-enemies). Live logs of 2026-08-15 show Hexfire striking up to 4 enemies per cast, the native 1 + 3; the tooltip governs (lead L-TA-1). repeats 1: the chain order is deterministic (closest first). There is no pre-learn control cast (the single phase learns 707331 before the cast): the check that fails if the behaviour were absent is the count of extras struck. Rank note (pitfall 12): 573026 is the castable Hexfire id used by the other entries (the rank-1 id is 807042); the count of struck dummies does not depend on the rank. Cast timing checked: Hexfire instant. Player reports: none of the open reports of cycles 5 and 6 names this spell. Read timing: the damage events are read after the cast time plus the builder margin and a settle_ms of 1500 ms, because the bouncing chain missiles reach the dummies one after another (Hexfire Speed 35: about 143 ms per hop at the floored 5 yd).",
+      "cast_spell": 573026,
+      "settle_ms": 1500
+    },
+    {
+      "spell": 707405,
+      "name": "Overflowing Juju (Shadowflare spell power scaling +20%)",
+      "kind": "hit_ratio",
+      "variant": "shadowflare",
+      "label_suffix": "shadowflare",
+      "quote": "Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 801669,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707405
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 60000
+      },
+      "cast_power": 1000,
+      "observe_source": "Overflowing Juju 707405 (passive, Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 24 SPELLMOD_BONUS_MULTIPLIER, BasePoints 19 + 1 = 20 = $s1, EffectSpellClassMask[0] 4 (Shadowflare), [1] 33792 = 32768 (Malefic Wrath) + 1024 (Bad Juju), word 0 widened to 4 | 1024 by AscensionWitchDoctorAbilities.cpp:442-451): aura 108 on the bonus multiplier is x1.2 of the spell power coefficient, not +20 points (aura 107, the Disciple of Sseratus 300660 reading of mentor decision M-47). Every Witch Doctor coefficient row has its native BonusMultiplier zeroed (AscensionWitchDoctorCompletion.cpp:586-588) and its spell power term folded into the effect base value by ModifySpellEffectBaseValue (AscensionWitchDoctorCompletion.cpp:646-660) with the coefficient of AscensionWitchDoctorCoefficients.h, so this entry reads whether the talent reaches that folded term. The cycle 9 pre-pair sweep read +0.000% in all three 707405 entries (triage TA: confirmed defect, fix 2, which multiplies the folded spell power coefficient by the talent's percent for the spells in its mask, Malefic Arrow excluded; catalog witch-doctor-overflowing-juju-scales-spell-power). Shadowflare 801669 is cast for real at the dummy; 60000 spell power (harness fixture, precondition, both arms) so the spell power term dominates the die, the base and the other terms (coefficient 0.35: 21000 of the 21069 per hit the sweep read; with the term x1.2 the ratio is about 1.199, inside the band), 823764 on the caster (no partial resists), non-critical hits only, 20 trials per arm. Control arm: 707405 not learned; treatment: learned (a real learn). The per-hit mean ratio must be 1.20 inside the G-19 band (2 points: 1.18 to 1.22); no effect (1.0) alerts. A flat +20 coefficient points (+0.20, 12000 at this spell power) would read about 1.57 (33069 / 21069) and alert as well. Cast timing checked: Shadowflare 2000 ms plus GCD 1500 (hit_ratio_cast waits the cast time and the global cooldown). Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 275 (Shadowflare). Rank note (pitfall 12): Shadowflare 801669 is the rank-1 id (level-60 rank 501146): the folded Doctor spell power term applies no level penalty (ModifySpellEffectBaseValue), so the ratio is unaffected."
+    },
+    {
+      "spell": 707405,
+      "name": "Overflowing Juju (Bad Juju spell power scaling +20%)",
+      "kind": "hit_ratio",
+      "variant": "badjuju",
+      "label_suffix": "badjuju",
+      "quote": "Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 802087,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707405
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 60000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 2800,
+      "observe_source": "Overflowing Juju 707405 (passive, Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 24 SPELLMOD_BONUS_MULTIPLIER, BasePoints 19 + 1 = 20 = $s1, EffectSpellClassMask[0] 4 (Shadowflare), [1] 33792 = 32768 (Malefic Wrath) + 1024 (Bad Juju), word 0 widened to 4 | 1024 by AscensionWitchDoctorAbilities.cpp:442-451): aura 108 on the bonus multiplier is x1.2 of the spell power coefficient, not +20 points (aura 107, the Disciple of Sseratus 300660 reading of mentor decision M-47). Every Witch Doctor coefficient row has its native BonusMultiplier zeroed (AscensionWitchDoctorCompletion.cpp:586-588) and its spell power term folded into the effect base value by ModifySpellEffectBaseValue (AscensionWitchDoctorCompletion.cpp:646-660) with the coefficient of AscensionWitchDoctorCoefficients.h, so this entry reads whether the talent reaches that folded term. The cycle 9 pre-pair sweep read +0.000% in all three 707405 entries (triage TA: confirmed defect, fix 2, which multiplies the folded spell power coefficient by the talent's percent for the spells in its mask, Malefic Arrow excluded; catalog witch-doctor-overflowing-juju-scales-spell-power). Bad Juju 802087 is cast for real at the dummy; 60000 spell power (harness fixture, precondition, both arms) so the spell power term dominates the die, the base and the other terms (coefficient 1.0 plus 0.3 x Spirit: 60000 of the 60235 per hit the sweep read; with the term x1.2 the ratio is about 1.199, inside the band), 823764 on the caster (no partial resists), non-critical hits only, 20 trials per arm. Control arm: 707405 not learned; treatment: learned (a real learn). The per-hit mean ratio must be 1.20 inside the G-19 band (2 points: 1.18 to 1.22); no effect (1.0) alerts. For a coefficient of 1.0 a flat +20 coefficient points (+0.20, 12000 at this spell power) gives the same ratio as x1.2, so this entry cannot tell the two readings apart; the shadowflare and wrath entries do. Cast timing checked: Bad Juju 2500 ms plus GCD, cast_wait_ms 2800. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 275 (Bad Juju). Rank note (pitfall 12): Bad Juju 802087 is the rank-1 id (level-60 rank 501181): the folded Doctor spell power term applies no level penalty (ModifySpellEffectBaseValue), so the ratio is unaffected."
+    },
+    {
+      "spell": 707405,
+      "name": "Overflowing Juju (Malefic Wrath spell power scaling +20%)",
+      "kind": "hit_ratio",
+      "variant": "wrath",
+      "label_suffix": "wrath",
+      "quote": "Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 807037,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707405
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 60000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 2500,
+      "observe_source": "Overflowing Juju 707405 (passive, Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 24 SPELLMOD_BONUS_MULTIPLIER, BasePoints 19 + 1 = 20 = $s1, EffectSpellClassMask[0] 4 (Shadowflare), [1] 33792 = 32768 (Malefic Wrath) + 1024 (Bad Juju), word 0 widened to 4 | 1024 by AscensionWitchDoctorAbilities.cpp:442-451): aura 108 on the bonus multiplier is x1.2 of the spell power coefficient, not +20 points (aura 107, the Disciple of Sseratus 300660 reading of mentor decision M-47). Every Witch Doctor coefficient row has its native BonusMultiplier zeroed (AscensionWitchDoctorCompletion.cpp:586-588) and its spell power term folded into the effect base value by ModifySpellEffectBaseValue (AscensionWitchDoctorCompletion.cpp:646-660) with the coefficient of AscensionWitchDoctorCoefficients.h, so this entry reads whether the talent reaches that folded term. The cycle 9 pre-pair sweep read +0.000% in all three 707405 entries (triage TA: confirmed defect, fix 2, which multiplies the folded spell power coefficient by the talent's percent for the spells in its mask, Malefic Arrow excluded; catalog witch-doctor-overflowing-juju-scales-spell-power). Malefic Wrath 807037 is cast for real at the dummy; 60000 spell power (harness fixture, precondition, both arms) so the spell power term dominates the die, the base and the other terms (coefficient 0.625: 37500 of the 37525 per hit the sweep read; with the term x1.2 the ratio is about 1.199, inside the band), 823764 on the caster (no partial resists), non-critical hits only, 20 trials per arm. Control arm: 707405 not learned; treatment: learned (a real learn). The per-hit mean ratio must be 1.20 inside the G-19 band (2 points: 1.18 to 1.22); no effect (1.0) alerts. A flat +20 coefficient points (+0.20, 12000 at this spell power) would read about 1.32 (49525 / 37525) and alert as well. Cast timing checked: Wrath 2000 ms plus GCD 1500, cast_wait_ms 2500. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 275 (Malefic Wrath). Rank note (pitfall 12): Malefic Wrath 807037 is the rank-1 id (level-60 rank 572336): the folded Doctor spell power term applies no level penalty (ModifySpellEffectBaseValue), so the ratio is unaffected."
+    },
+    {
+      "spell": 802719,
+      "kind": "metric_delta",
+      "variant": "lock_blocks",
+      "label_suffix": "lock_blocks",
+      "name": "Big Bad Voodoo (a cast while carrying the lock is refused)",
+      "quote": "Cannot be used within $803495d of benefitting from Big Bad Voodoo.",
+      "trigger_spell": 802719,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 802719
+      },
+      "after_auras": [
+        [
+          803495,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 22,
+      "wait_ms": 300,
+      "expire_ms": 11000,
+      "observe_source": "Big Bad Voodoo 802719 Effect[2] SPELL_EFFECT_TRIGGER_SPELL 803495 (Waning Wuju, aura 4 dummy, SPELL_ATTR0_AURA_IS_DEBUFF, Shadow, DurationIndex 4 = 120000 ms, $803495d) at TARGET_UNIT_DEST_AREA_ALLY 15 yd. AscensionWitchDoctorAbilities.cpp:90-91 (OnSpellCheckCast): id == BigVoodoo with the caster holding BigVoodooLock (803495, Completion.h:257) gives SPELL_FAILED_CASTER_AURASTATE (22). Repair of the cycle 9 entry (author TB): the caster's own cast cannot give the caster the lock. The spirit's field 802718 (aura 39 SPELL_AURA_SCHOOL_IMMUNITY mask 127, SPELL_ATTR1_IMMUNITY_PURGES_EFFECT, positive) lands on the owner within the first second and AuraEffect::HandleAuraModSchoolImmunity (SpellAuraEffects.cpp:4230-4245) removes every negative aura of a covered school, so Waning Wuju is purged; the recorded original-CoA combat log shows the same (the caster's 803495 removed about 100 ms after the field arrives, catalog witchdoctor-big-bad-voodoo-ally-aura-7400.json). The sweep on build 8754f260 read 0 for a second cast 800 ms later. The lock stays only on a benefitting ally (lock_ally), and a second Witch Doctor caster is not a metric_delta fixture (tool note T-c9-TB-1), so the lock is a precondition fixture: after_auras sets 803495 on the caster (guide 3.4; cost reason: no real cast can leave the lock on the scenario's caster, and the claim's subject is the refusal of the Big Bad Voodoo cast, which is a real cast in both phases). Before phase (the control): a real Big Bad Voodoo with no lock is accepted, 0. expire_ms 11000: the spirit 310659 despawns at 8000 ms (spirit_lasts) and its field aura lives at most 2200 ms past the last refresh (Summons.cpp:378-383), so the immunity is gone before the fixture (11300 ms after the first cast, margin about 1100 ms) and cannot block it. After phase: the lock fixture, the cooldown reset by the scenario, a real cast read 300 ms later: 22. A server whose check ignored the lock reads 0, as the sweep's second cast did. Clause 473 (the refusal; the lock on an ally is lock_ally, the 120 s is the data label 802719 spell_duration 803495 #5). Cast timing checked: instant, RecoveryTime 300000 and CategoryRecoveryTime 300000 reset by the scenario (the sweep's second cast was accepted after the reset), 25% of base mana, cast_power 1400 at or below the 1497 base. Player reports: none of the open reports of cycles 5 and 6 names this spell."
+    },
+    {
+      "spell": 802719,
+      "kind": "aura_presence",
+      "variant": "lock_ally",
+      "label_suffix": "lock_ally",
+      "name": "Big Bad Voodoo (a benefitting ally carries the Waning Wuju lock)",
+      "quote": "Cannot be used within $803495d of benefitting from Big Bad Voodoo.",
+      "metric": "aura",
+      "fields": {
+        "spell": 803495
+      },
+      "target": "ally",
+      "wait_ms": 1500,
+      "observe_source": "Big Bad Voodoo 802719 Effect[2] SPELL_EFFECT_TRIGGER_SPELL 803495 (Waning Wuju, aura 4 dummy, tooltip \"Unable to be affected by Big Bad Voodoo again.\", SPELL_ATTR3_ONLY_ON_PLAYER, DurationIndex 4 = 120000 ms) at TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 18 (15 yd) around the caster (Effect[0] TARGET_DEST_CASTER). The \"benefitting\" half of clause 473: an allied player inside the area is marked with the lock. The spirit's field 802718 reaches only the owner (Completion.cpp:491-497, AREA_AURA_PET), so the ally keeps it, as the recorded original-CoA combat log shows (every nearby ally carries 802719 and 803495, catalog witchdoctor-big-bad-voodoo-ally-aura-7400.json). The ally is a grouped second Witch Doctor player fixture spawned at the caster (0 yd, inside 15 yd). Control: the ally reads no 803495 before the cast; after a real Big Bad Voodoo at the caster (instant, 25% of base mana, cooldown reset by the scenario) and 1500 ms: 1. A server that does not trigger the lock on allies reads 0. Replaces the withdrawn lock_lasts, which read the lock on the caster, where the field purges it. Cast timing checked: instant. Player reports: none of the open reports of cycles 5 and 6 names this spell."
+    },
+    {
+      "spell": 807056,
+      "name": "Brew Stew (21 Black Lotus Bisque)",
+      "variant": "items",
+      "label_suffix": "items",
+      "quote": "Brews $s1 Black Lotus Bisque providing the Witch Doctor and their allies with something to eat.",
+      "trigger_spell": 807056,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "metric": "item_count",
+      "fields": {
+        "item": 339008
+      },
+      "before_expected": 0,
+      "expected": 21,
+      "observe_source": "Brew Stew 807056: Effect[0] SPELL_EFFECT_CREATE_ITEM, EffectItemType 339008, BasePoints 20 + 1 = 21 ($s1); CastingTimeIndex 14 (3000 ms), 40% of the base mana (cast_power 2000, ManaCostPercentage 40), StartRecoveryTime 1500, RecoveryTime 0, no reagent. No CoA class code names it (class map: not in the map). The control is the uncast before phase: no 339008 in the bags; one real cast: 21 (item_count, ADR 0425). The pre-pair sweep on build 8754f260 read 0 and 20: Spell::DoCreateItem (SpellEffects.cpp:2716-2718) caps one Create Item at the item's maximum stack size, so item 339008 stacks to 20 in the cloned realm world database (no repository SQL defines its item_template row; rev_20261104_91_ptr_realm_npcs.sql only sells it). The same shape and cause as Brew Cocktail 807076 items (M-50): the tooltip and DBC say 21, the server makes 20, and a fix needs a stack size no source gives, so the entry stays as a recorded low-priority alert (author TB, cycle 9). Coverage note: item_count is a STATE metric whose promise word is \"creat\\w*\", which \"Brews\" does not match, so even an ok read stays data conformant until the owner adds \"brew\\w*\" (tool note T-c9-B16-12). Clause 484. Cast timing checked: 3000 ms cast, wait_ms 3500. Player reports: none of the open reports of cycles 5 and 6 names this spell.",
+      "kind": "metric_delta"
+    },
+    {
+      "spell": 705910,
+      "name": "Voodoo Strings (no extra strikes while the enemy lacks Puppeteer's Threads)",
+      "kind": "metric_delta",
+      "variant": "threads_gate",
+      "label_suffix": "threads_gate",
+      "quote": "it strikes an additional time every $706898T1 sec for 30% of the damage dealt over $706898d as Nature damage.",
+      "expected": 3,
+      "before_expected": 0,
+      "trigger_spell": 802087,
+      "gate_spell": 92084,
+      "learn": [
+        705910
+      ],
+      "setup_casts": [
+        807037
+      ],
+      "setup_wait_ms": 2500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 706898,
+        "target": "dummy"
+      },
+      "wait_ms": 6600,
+      "expire_ms": 4500,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1400,
+      "observe_source": "The condition arm of ticks (AscensionWitchDoctorAbilities.cpp:263-264, OnSpellHitResult: a Juju hit with Voodoo Strings 705910 known strikes only a target that carries the caster's Puppeteer's Threads 572836, which the DBC TargetAuraSpell 572836 on 706898 also requires). The axis of this arm is the Threads source: Voodoo Strings 705910 is learned at the start and stays known in both phases (learn), and Puppeteer's Threads 92084 (passive, aura 4 and 107: the learn applies it) is the gate_spell learned between the phases. The only source of 572836 is the Puppeteer proc (AscensionWitchDoctorEvents.cpp:77-79 and 132-141: any non-periodic damage of the Witch Doctor with 92084 known leaves the Threads), so without 92084 the dummy can carry no Threads at all. Both phases cast a real Malefic Wrath 807037 (CastingTimeIndex 5 = 2000 ms, GCD 1500, 11% base mana; setup_wait_ms 2500) and then a real Bad Juju 802087 (CastingTimeIndex 19 = 2500 ms, 16% base mana, CategoryRecoveryTime 15000 reset by the scenario) at the dummy and read the hits of 706898 6600 ms after the Juju submission (2500 ms cast, about 250 ms of flight, three ticks 1000 ms apart, the last about 5750 ms in): the before phase (705910 known, no Threads source, so the Juju hits an enemy without Threads) reads 0, the after phase (92084 learned, the Wrath leaves the Threads) reads 3 (the count is cumulative, 0 + 3). A server that ignored the Threads condition would strike in the before phase and read 3 there, so the control fails if the behaviour is absent. Repair of the cycle 9 sweep alert (TC): the earlier arm kept 92084 known in both phases and withheld only the Wrath, but the Juju's own hit fires the Puppeteer proc before the Strings check, so its own damage left the Threads and the before phase read 3 (sweep 20261121-051237: 3 before, 6 after). That self-threading is an uncertain expectation (tooltip 'When Bad Juju is used on enemies affected by Puppeteer's Threads'), kept as a lead in cycle9/author-TC.md and not judged here. expire_ms 4500 lets the before phase's casts end. Cast timing checked: Wrath 2000 ms, Juju 2500 ms, wait 6600 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Rank note (pitfall 12): 802087 and 807037 are rank-1 ids (level-60 ranks 501181 and 572336); only the strikes of 706898 are counted, which do not depend on the rank."
+    },
+    {
+      "spell": 572870,
+      "name": "Blessing of Hir'eek (Hexbreak removes two curses instead of one)",
+      "kind": "dispel_count",
+      "variant": "curses",
+      "label_suffix": "curses",
+      "quote": "removes an additional curse effect",
+      "cast_spell": 806240,
+      "debuffs": [
+        [
+          2,
+          [
+            18267,
+            8282,
+            13583
+          ]
+        ]
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "expected": [
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "name": "passive",
+          "auras": [
+            [
+              572870,
+              1
+            ]
+          ],
+          "expected": [
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ],
+      "trials": 2,
+      "wait_ms": 800,
+      "observe_source": "Hexbreak 806240 (instant, CastingTimeIndex 1, GCD 1500, 25% base mana, no cooldown, Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue 2 = Curse, EffectDieSides 1 and BasePoints 0 so $s1 = 1 curse, TARGET_UNIT_TARGET_ALLY; tooltip \"dispelling $s1 curse effect$?s572870[s][]\"). Blessing of Hir'eek 572870 Effect[0] aura 107 SPELLMOD_FLAT, EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectSpellClassMask word 1 8388608 = Hexbreak SpellFamilyFlags[1], BasePoints 0 + 1 = +1: a native modifier of the dispel count, no class code (script_touch False). The Disciplined Mind 681483 dispel_count entry is the precedent for the harness set_aura of the modifier passive on the caster as a precondition fixture: the subject is the number of curses the real Hexbreak cast removes, not the passive itself. Cost reason of that fixture: dispel_count arms take auras only (no learn option, tool note T-TC-1 in cycle9/author-TC.md), and a learn of the passive 572870 (Attributes 64) applies the same aura 107 (pitfall 9), so the set state equals the learned one. The ally carries three curse fixtures set by harness set_aura (never the claim's subject), all SpellFamilyName 0 so none is a SPELL_SPECIFIC_CURSE: Curse of Weakness 18267 (aura 79, DurationIndex 9 = 30 s, the Witch Hunter 802278 curses fixture), Curse of Blood 8282 (aura 14, DurationIndex 4) and Curse of the Deadwood 13583 (aura 118, DurationIndex 4), each Spell.dbc Dispel 2, TARGET_UNIT_TARGET_ENEMY (negative), no spell_group row in the base data. Repair of the cycle 9 sweep result (TC): the earlier fixtures were three warlock curses (702, 1714, 1490, SpellFamilyName 5), which SpellInfo::GetSpellSpecific (SpellInfo.cpp:2453-2457) makes SPELL_SPECIFIC_CURSE, exclusive per caster (IsAuraExclusiveBySpecificPerCasterWith, SpellInfo.cpp:1737-1750): each set_aura replaced the one before, so the ally carried only 1490 before every cast ([1, 1], unmeasured). Each cast is made for real (reset cooldown, cast, wait the GCD) and each fixture is read before and 800 ms after it. Control arm: no passive, exactly 1 of the 3 curses is removed per cast; passive arm: exactly 2 (never 3, so \"an additional\" is one, not all). 2 trials per arm keep four Hexbreak casts (about 374 mana each) inside the 1497 base mana pool. Cast timing checked: instant, 800 ms read after each cast. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     }
   ],
   "player_observations": [],

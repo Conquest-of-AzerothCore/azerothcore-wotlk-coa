@@ -7803,9 +7803,10 @@
     "labels": [
       "802719 spell_duration 803495 #5",
       "802719 behaviour_metric_delta lock_blocks",
-      "802719 behaviour_metric_delta lock_lasts"
+      "802719 behaviour_aura_presence lock_ally"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cycle 9 author TB: \"802719 behaviour_aura_presence lock_ally\" proves that a benefitting ally is marked with Waning Wuju 803495, and \"802719 behaviour_metric_delta lock_blocks\" that a Big Bad Voodoo cast under the lock is refused (22). The dropped label \"802719 behaviour_metric_delta lock_lasts\" read the lock on the caster, where the spirit's field 802718 purges it (incorrect test, withdrawn); the 120 s it measured is linked to the passing data label \"802719 spell_duration 803495 #5\" (guide 9.4). Tool note T-c9-TB-1 (a grouped ally player as metric_delta measure_actor) would let the duration be read on the ally."
   },
   {
     "spell": 803325,
