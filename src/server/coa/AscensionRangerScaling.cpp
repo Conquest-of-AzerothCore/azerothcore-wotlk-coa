@@ -152,6 +152,23 @@ class spell_ascension_ranger_burning_toxin : public SpellScript
         OnEffectLaunchTarget += SpellEffectFn(spell_ascension_ranger_burning_toxin::ScaleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
 };
+
+class ranger_quick_witted_scaling : public UnitScript
+{
+public:
+    ranger_quick_witted_scaling() : UnitScript("ranger_quick_witted_scaling", true,
+        {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE}) { }
+
+    void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
+    {
+        constexpr uint32 QuickWittedStab = 704314;
+        Player const* player = caster ? caster->ToPlayer() : nullptr;
+        if (info->Id != QuickWittedStab || index != EFFECT_1 || !player || player->getClass() != CLASS_RANGER)
+            return;
+        value += std::max(0.0f, player->GetTotalAttackPowerValue(BASE_ATTACK));
+        value = std::min(value, float(std::numeric_limits<int32>::max() / 2));
+    }
+};
 }
 
 void AddAscensionRangerScalingScripts()
@@ -159,4 +176,5 @@ void AddAscensionRangerScalingScripts()
     RegisterSpellScript(spell_ascension_ranger_skullpiercer);
     RegisterSpellScript(spell_ascension_ranger_nerve_venom);
     RegisterSpellScript(spell_ascension_ranger_burning_toxin);
+    new ranger_quick_witted_scaling();
 }

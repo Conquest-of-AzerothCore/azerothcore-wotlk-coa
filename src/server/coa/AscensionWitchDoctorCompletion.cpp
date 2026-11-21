@@ -398,6 +398,8 @@ void ApplyContracts(SpellInfo* info)
         info->StackAmount = 1;
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
     }
+    if (id == ThistleField)
+        info->PreventionType = SPELL_PREVENTION_TYPE_NONE;
     if (id == Crystal)
         dummy(EFFECT_0);
     if (id == Beast)
