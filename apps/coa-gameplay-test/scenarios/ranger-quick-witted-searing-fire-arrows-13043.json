@@ -6,8 +6,9 @@
     "the stab did not apply the quiver's effects. Searing Quiver 500103 tooltips that ranged abilities deal $s1%",
     "(15%) additional direct Fire damage as Fire Arrows 681109, computed from the damage the hit actually dealt;",
     "the stab is DmgClass 3 (ranged) but triggered, which the Ranger quiver hit handler skipped. Expected: the",
-    "first stab is followed by exactly one Fire Arrows worth 15% of the stab's dealt damage. Crit rating fixtures",
-    "make every Fire Arrows a critical hit (twice the amount for a ranged damage class spell), so the",
+    "first stab is followed by exactly one Fire Arrows worth 15% of the stab's dealt damage. Melee, ranged and",
+    "spell crit rating fixtures make every Fire Arrows a critical hit (a damage class 3 spell outside the Hunter",
+    "family rolls on the main hand attack type) (twice the amount for a ranged damage class spell), so the",
     "critical/non-critical ambiguity is removed and the pair must land between 10% and 31%: 30% unresisted, less",
     "partial Fire resists (a non-critical first run measured 10.8%, about 28% resisted). A doubled percentage",
     "would be 60% unresisted and still about 43% at the measured resist, so it fails unless at least 48% of it is",
@@ -21,7 +22,8 @@
   "players": [
     {
       "id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false, "ranged_hit_rating": 100000,
-      "spell_hit_rating": 100000, "ranged_crit_rating": 100000, "spell_crit_rating": 100000
+      "spell_hit_rating": 100000, "ranged_crit_rating": 100000, "spell_crit_rating": 100000,
+      "melee_crit_rating": 100000
     }
   ],
   "creatures": [
