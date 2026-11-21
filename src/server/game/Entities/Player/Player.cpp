@@ -17042,6 +17042,8 @@ void Player::RefundItem(Item* item)
             ASSERT(msg == EQUIP_ERR_OK); /// Already checked before
             Item* it = StoreNewItem(dest, itemid, true, true);
             SendNewItem(it, count, true, false, true);
+            if (itemid == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                AscensionBazaarTokenReserve::AddReserve(this, count);
         }
     }
 
