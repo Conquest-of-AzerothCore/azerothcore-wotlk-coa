@@ -4659,6 +4659,7 @@ private:
 
     for (auto const &[itemId, price] : prices)
       LOG_ERROR("coa", "coa_client_vanity_collection {} has no VanityCollection.dbc row", itemId);
+    LOG_INFO("coa", "{} VanityCollection price rows stream at login", rows.size());
     return rows;
   }
 
