@@ -1,0 +1,310 @@
+{
+  "schema": 1,
+  "name": "A game master in GM mode can .appear inside a player's Manastorm run",
+  "contract": "A Manastorm run is a scripted private copy that admits only its own members. .appear from a game master in GM mode must land in that exact copy (same map and instance id, next to the player) instead of a separate copy of the same dungeon, without joining the run: the runner stays in the run. Without GM mode the command is refused. Leaving with .recall returns the game master to the open world and ends the observer state, so a second .appear works again. From the run, .appear at a player in an ordinary copy of the same map id and .recall to such a copy both leave the run for that ordinary copy. Uses the deterministic test segment 1; the runner's account security only unlocks the GM-gated `.manastorm segment test` authoring command, its GM mode stays off.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "runner",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "visitor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "visitor",
+      "map": 389,
+      "x": 3.81,
+      "y": -14.82,
+      "z": -17.84,
+      "o": 0,
+      "ignore_access": true,
+      "label": "The visitor enters an ordinary copy of Ragefire Chasm, the map the test segment uses"
+    },
+    {
+      "action": "snapshot",
+      "actor": "gm",
+      "metric": "map_id",
+      "save_as": "gm_start_map",
+      "label": "The game master's open-world map before the visit"
+    },
+    {
+      "action": "command",
+      "actor": "runner",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "private_instance",
+      "equals": 1,
+      "within_ms": 10000,
+      "label": "The runner entered a private Manastorm copy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "runner",
+      "metric": "instance_id",
+      "save_as": "run_instance",
+      "label": "The run's private instance id"
+    },
+    {
+      "action": "snapshot",
+      "actor": "runner",
+      "metric": "map_id",
+      "save_as": "run_map",
+      "label": "The run's map id"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".gm off"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessa",
+      "rejected": true,
+      "label": "Without GM mode the game master cannot follow the runner into the run"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "label": "The refused .appear left the game master in the open world"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".gm on"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessa"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 1,
+      "within_ms": 10000,
+      "label": "The game master arrived in a private copy"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "instance_id",
+      "relative_to": "run_instance",
+      "equals": 0,
+      "label": "It is the runner's own copy, not a second copy of the same dungeon"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "map_id",
+      "relative_to": "run_map",
+      "equals": 0,
+      "label": "The game master is on the run's map"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "distance",
+      "target": "runner",
+      "max": 10,
+      "label": "The game master stands next to the runner"
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "private_instance",
+      "equals": 1,
+      "label": "The observer did not disturb the run: the runner is still in it"
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "instance_id",
+      "relative_to": "run_instance",
+      "equals": 0,
+      "label": "The runner is still in the same copy"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".recall"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": ".recall takes the game master out of the run"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "map_id",
+      "relative_to": "gm_start_map",
+      "equals": 0,
+      "label": "The game master is back on the open-world map it came from"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessa"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "instance_id",
+      "relative_to": "run_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "Leaving ended the observer state cleanly: a second .appear reaches the same copy again"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".recall"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "The game master leaves the run again"
+    },
+    {
+      "action": "assert",
+      "actor": "visitor",
+      "metric": "map_id",
+      "relative_to": "run_map",
+      "equals": 0,
+      "label": "The visitor stands on the run's map id (Ragefire Chasm entrance)"
+    },
+    {
+      "action": "assert",
+      "actor": "visitor",
+      "metric": "private_instance",
+      "equals": 0,
+      "label": "The visitor's copy is the ordinary dungeon, not the run"
+    },
+    {
+      "action": "snapshot",
+      "actor": "visitor",
+      "metric": "instance_id",
+      "save_as": "visitor_instance",
+      "label": "The ordinary copy's instance id"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessa"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "instance_id",
+      "relative_to": "run_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "The game master observes the run again"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessc"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": ".appear at a player in an ordinary copy of the same map id leaves the run"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "instance_id",
+      "relative_to": "visitor_instance",
+      "equals": 0,
+      "label": "The game master is in the visitor's copy"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "distance",
+      "target": "visitor",
+      "max": 10,
+      "label": "The game master stands next to the visitor"
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "private_instance",
+      "equals": 1,
+      "label": "The runner is still in the run"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".appear Harnessa"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "instance_id",
+      "relative_to": "run_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "From the ordinary copy the game master reaches the run's own copy"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".recall"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": ".recall onto the same map id leaves the run instead of moving inside it"
+    },
+    {
+      "action": "assert",
+      "actor": "gm",
+      "metric": "map_id",
+      "relative_to": "run_map",
+      "equals": 0,
+      "label": "The game master is back in the ordinary copy of that dungeon"
+    }
+  ]
+}
