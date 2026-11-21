@@ -42,7 +42,11 @@
  *                                     that grows with them
  *   Fierce Blow         every 9s      tank
  *
- * The Will of Soggoth
+ * The Will of Soggoth (he shows himself once his three heralds are dead)
+ *   Corla               Mind Flay every 6s, Shadow Nova every 20s
+ *   Azil                Horror Bolt every 3s, Waking Tear every 20s
+ *   Drahga              Scorching Ray every 3s, Meteor every 20s
+ *   all three           Fierce Blow every 8s, Blink to a player every 25s
  *   Void Beam           every 2s      a random player
  *   Waking Tear         every 22.1s   3s cast: a tear at a player for 20s
  *   Waking Nightmare    every 33.1s   six Psychophages rise around a player
@@ -847,8 +851,15 @@ namespace
         SPELL_TEAR_ZONE         = 2119317,
         SPELL_TEAR_HIT          = 2119319,
         SPELL_WAKING_NIGHTMARE  = 2119320,
+        SPELL_HOVER_FALL        = 2119354,
         NPC_PSYCHOPHAGE         = 454004,
+        NPC_CORLA               = 64606,
+        NPC_AZIL                = 64607,
+        NPC_DRAHGA              = 64608,
     };
+
+    constexpr std::array<uint32, 3> SoggothHeralds = { NPC_CORLA, NPC_AZIL, NPC_DRAHGA };
+    constexpr float HERALD_RANGE = 200.0f;
 
     enum SoggothEvents
     {
@@ -869,6 +880,46 @@ namespace
             _summons.DespawnAll();
             _tears.clear();
             ApplyFlexHealth(me);
+            if (HeraldsAlive())
+                Hide(true);
+        }
+
+        bool HeraldsAlive()
+        {
+            for (uint32 entry : SoggothHeralds)
+                if (me->FindNearestCreature(entry, HERALD_RANGE, true))
+                    return true;
+            return false;
+        }
+
+        void Hide(bool hide)
+        {
+            _hidden = hide;
+            me->SetVisible(!hide);
+            me->SetReactState(hide ? REACT_PASSIVE : REACT_AGGRESSIVE);
+            if (hide)
+                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            else
+            {
+                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                DoCastSelf(SPELL_HOVER_FALL, true);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_hidden)
+            {
+                _heraldCheck -= Milliseconds(diff);
+                if (_heraldCheck <= 0ms)
+                {
+                    _heraldCheck = 1s;
+                    if (!HeraldsAlive())
+                        Hide(false);
+                }
+                return;
+            }
+            custom_world_boss_coa::UpdateAI(diff);
         }
 
         void JustEngagedWith(Unit* who) override
@@ -978,10 +1029,173 @@ namespace
         }
 
     private:
+        bool _hidden = false;
+        Milliseconds _heraldCheck = 1s;
         SummonList _summons;
         Position _tearSpot;
         Position _nightmare;
         uint8 _phages = 0;
+        std::vector<std::pair<Position, uint32>> _tears;
+    };
+
+    enum HeraldSpells
+    {
+        SPELL_BLINK             = 2119353,
+        SPELL_MIND_FLAY         = 2119361,
+        SPELL_MIND_FLAY_HIT     = 2119363,
+        SPELL_MIND_FLAY_INFO    = 2119360,
+        SPELL_SHADOW_NOVA       = 254454,
+        SPELL_HORROR_BOLT       = 2119371,
+        SPELL_HORROR_BOLT_HIT   = 2119372,
+        SPELL_HORROR_BOLT_INFO  = 2119370,
+        SPELL_HERALD_TEAR       = 2119373,
+        SPELL_HERALD_TEAR_ZONE  = 2119375,
+        SPELL_HERALD_TEAR_HIT   = 2119377,
+        SPELL_SCORCHING_RAY     = 2119381,
+        SPELL_SCORCHING_INFO    = 2119380,
+        SPELL_HERALD_METEOR     = 2119384,
+        SPELL_METEOR_HIT        = 2119387,
+        SPELL_METEOR_INFO       = 2119383,
+    };
+
+    enum HeraldEvents
+    {
+        EH_FIERCE = 1, EH_BLINK, EH_MAIN, EH_SECOND, TH_FLAY, TH_TEAR, TH_METEOR,
+    };
+
+    constexpr float METEOR_RADIUS = 8.0f;
+
+    struct npc_soggoth_herald_coa : public custom_world_boss_coa
+    {
+        explicit npc_soggoth_herald_coa(Creature* creature) : custom_world_boss_coa(creature) { }
+
+        void Reset() override
+        {
+            custom_world_boss_coa::Reset();
+            ApplyFlexHealth(me);
+            _tears.clear();
+        }
+
+        void JustEngagedWith(Unit* who) override
+        {
+            ApplyFlexHealth(me);
+            custom_world_boss_coa::JustEngagedWith(who);
+        }
+
+        void Schedule() override
+        {
+            events.ScheduleEvent(EH_FIERCE, 8s);
+            events.ScheduleEvent(EH_BLINK, 20s);
+            events.ScheduleEvent(EH_MAIN, 3s);
+            events.ScheduleEvent(EH_SECOND, 12s);
+            _clock.ScheduleEvent(TH_TEAR, 1s);
+        }
+
+        void Execute(uint32 eventId) override
+        {
+            Unit* t = RandomPlayer(false);
+            switch (eventId)
+            {
+                case EH_FIERCE:
+                    DoCastVictim(SPELL_FIERCE_BLOW);
+                    events.Repeat(8s);
+                    break;
+                case EH_BLINK:
+                    if (t)
+                    {
+                        DoCastSelf(SPELL_BLINK, true);
+                        Position pos = t->GetNearPosition(5.0f, frand(0.0f, 2 * float(M_PI)));
+                        me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(),
+                            me->GetAngle(t));
+                    }
+                    events.Repeat(25s);
+                    break;
+                case EH_MAIN:
+                    if (t)
+                    {
+                        _target = t->GetGUID();
+                        if (me->GetEntry() == NPC_CORLA)
+                        {
+                            DoCast(t, SPELL_MIND_FLAY);
+                            _flays = 3;
+                            _clock.ScheduleEvent(TH_FLAY, 1s);
+                        }
+                        else if (me->GetEntry() == NPC_AZIL)
+                            DoCast(t, SPELL_HORROR_BOLT);
+                        else
+                            Hit(me, t, SPELL_SCORCHING_RAY, Info(me, SPELL_SCORCHING_INFO));
+                    }
+                    events.Repeat(me->GetEntry() == NPC_CORLA ? 6s : 3s);
+                    break;
+                case EH_SECOND:
+                    if (me->GetEntry() == NPC_CORLA)
+                        DoCastSelf(SPELL_SHADOW_NOVA);
+                    else if (t && me->GetEntry() == NPC_AZIL)
+                    {
+                        _spot = t->GetPosition();
+                        DoCast(t, SPELL_HERALD_TEAR);
+                    }
+                    else if (t)
+                    {
+                        _meteor = t->GetPosition();
+                        CastAt(_meteor, SPELL_HERALD_METEOR);
+                        _clock.ScheduleEvent(TH_METEOR, 3s);
+                    }
+                    events.Repeat(20s);
+                    break;
+            }
+        }
+
+        void OnSpellCast(SpellInfo const* spell) override
+        {
+            if (spell->Id == SPELL_HORROR_BOLT)
+                Hit(me, ObjectAccessor::GetUnit(*me, _target), SPELL_HORROR_BOLT_HIT, Info(me, SPELL_HORROR_BOLT_INFO));
+            else if (spell->Id == SPELL_HERALD_TEAR)
+            {
+                CastAt(_spot, SPELL_HERALD_TEAR_ZONE);
+                _tears.push_back({ _spot, TEAR_SECONDS });
+            }
+        }
+
+        void Tick(uint32 tick) override
+        {
+            switch (tick)
+            {
+                case TH_FLAY:
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        Hit(me, ObjectAccessor::GetUnit(*me, _target), SPELL_MIND_FLAY_HIT,
+                            Info(me, SPELL_MIND_FLAY_INFO));
+                    if (--_flays)
+                        _clock.ScheduleEvent(TH_FLAY, 1s);
+                    break;
+                case TH_TEAR:
+                    for (auto it = _tears.begin(); it != _tears.end();)
+                    {
+                        Position const& spot = it->first;
+                        for (Player* p : Players(me, [&](Player* x) { return x->IsWithinDist3d(&spot, TEAR_RADIUS); }))
+                            me->CastSpell(p, SPELL_HERALD_TEAR_HIT, true);
+                        it = --it->second ? std::next(it) : _tears.erase(it);
+                    }
+                    _clock.ScheduleEvent(TH_TEAR, 1s);
+                    break;
+                case TH_METEOR:
+                {
+                    std::vector<Player*> hit = Players(me, [&](Player* x)
+                    {
+                        return x->IsWithinDist3d(&_meteor, METEOR_RADIUS);
+                    });
+                    for (Player* p : hit)
+                        Hit(me, p, SPELL_METEOR_HIT, Info(me, SPELL_METEOR_INFO) / int32(hit.size()));
+                    break;
+                }
+            }
+        }
+
+    private:
+        ObjectGuid _target;
+        Position _spot;
+        Position _meteor;
+        uint8 _flays = 0;
         std::vector<std::pair<Position, uint32>> _tears;
     };
 
@@ -1551,6 +1765,7 @@ void AddCoaCustomWorldBossScripts()
     new custom_script<boss_snowgrave_coa>("boss_snowgrave_coa");
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
+    new custom_script<npc_soggoth_herald_coa>("npc_soggoth_herald_coa");
     new custom_script<boss_atalzul_coa>("boss_atalzul_coa");
     new custom_script<boss_zulrogg_coa>("boss_zulrogg_coa");
     new custom_script<npc_soul_vessel_coa>("npc_soul_vessel_coa");
