@@ -2195,3 +2195,5 @@ Options with a module:
   counted over a window in each phase, for an enemy that a debuff stops attacking (ADR 1027, provisional)
 - [`refusable_target_casts`](metric_delta_options/refusable_target_casts.md): dummy casts after each trigger that may
   be refused with one stated code, their results read (ADR 1027, provisional)
+- [`after_trigger_casts`](metric_delta_options/after_trigger_casts.md): real casts by the caster after the treatment
+  trigger, at a unit or at a unit's position (ADR 1028, provisional)

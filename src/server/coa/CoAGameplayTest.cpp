@@ -8715,6 +8715,14 @@ private:
             if (auto destination = step.get_child_optional("destination"))
                 targets.SetDst(destination->get<float>("x"), destination->get<float>("y"),
                     destination->get<float>("z"), caster->GetOrientation());
+            else if (auto anchor = step.get_optional<std::string>("destination_unit"))
+            {
+                Unit const* unit = GetUnit(*anchor);
+                targets.SetDst(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(),
+                    caster->GetOrientation());
+                record.put("destination_x", unit->GetPositionX());
+                record.put("destination_y", unit->GetPositionY());
+            }
             record.put("spell_active", caster->IsPlayer() ? caster->ToPlayer()->HasActiveSpell(spell) :
                 caster->HasSpell(spell));
             record.put("line_of_sight", caster->IsWithinLOSInMap(target));

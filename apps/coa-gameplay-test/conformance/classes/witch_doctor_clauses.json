@@ -769,11 +769,17 @@
     "claims": [
       {
         "claim": "While channeling, you can instantly cast Potion Toss,",
-        "labels": []
+        "labels": [
+          "501117 behaviour_metric_delta potion_in_channel",
+          "501117 behaviour_metric_delta potion_keeps_beam"
+        ]
       },
       {
         "claim": "Splash Potion",
-        "labels": []
+        "labels": [
+          "501117 behaviour_metric_delta splash_in_channel",
+          "501117 behaviour_metric_delta splash_keeps_beam"
+        ]
       },
       {
         "claim": "and Spirit in a Bottle",
@@ -791,19 +797,7 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "Splash Potion 802710 is a ground-targeted spell (Targets 64, destination target 87) and the metric_delta cast step sends a unit target only; the harness cast action accepts a destination (README, cast) but metric_delta emits none, so a real cast of Splash Potion during the channel cannot be made. Potion Toss and Spirit in a Bottle are cast for real (potion_cast, bottle_cast).",
-      "attempts": [
-        {
-          "agent": "cycle5/author-B2",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle5/author-B2-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle5/author-B2.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Potion Toss and Splash Potion are cast for real 1700 ms into a Mojo Beam channel (option after_trigger_casts; the Splash Potion with the caster's position as its destination, destination_unit of ADR 1028, provisional): each completes (potion_in_channel, splash_in_channel) and the Beam still channels 500 ms later (potion_keeps_beam, splash_keeps_beam); the uncast before phase is the control. Spirit in a Bottle keeps bottle_instant; the cost claim keeps its four labels. Closes the cycle 5 tool gap (no destination in a metric_delta cast)."
   },
   {
     "spell": 501117,

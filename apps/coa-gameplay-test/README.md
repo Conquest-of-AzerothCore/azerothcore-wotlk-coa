@@ -622,7 +622,9 @@ must assert consumption and recovery after normal casts; restoring fixture charg
 For absence checks, wait through the relevant cast/proc window first, then assert. `relative_to` subtracts
 a previously named snapshot of the same metric; it is available on snapshots and assertions.
 `ratio_to` then divides by a nonzero snapshot, including a different numeric metric such as healing/damage.
-`cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
+`cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target, or
+`destination_unit` (a player or creature id) to send that unit's current position as the ground target; `use_item`
+and `cast_charm` accept both as well.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
 `target_owned_entry` in place of `target` sends it at the player's living creature of that entry; a creature actor's
 cast names the owning player as `target_owner` with it (test-only, ADR 0530).

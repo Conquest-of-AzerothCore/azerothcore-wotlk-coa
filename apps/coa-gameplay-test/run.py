@@ -321,7 +321,8 @@ ACTIONS = {
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
-                                  'target_gameobject', 'target_owned_entry', 'target_owner', 'allowed_refusal'}),
+                                  'target_gameobject', 'target_owned_entry', 'target_owner', 'allowed_refusal',
+                                  'destination_unit'}),
     'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
@@ -340,7 +341,7 @@ ACTIONS = {
     'leave_group': ({'actor'}, {'actor'}),
     'die': ({'actor'}, {'actor', 'revived', 'pet'}),
     'release_spirit': ({'actor'}, {'actor'}),
-    'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination'}),
+    'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination', 'destination_unit'}),
     'gossip_hello': ({'actor'}, {'actor', 'target', 'entry'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'personal_bank_open': ({'actor', 'entry'}, {'actor', 'entry'}),
@@ -394,7 +395,7 @@ ACTIONS = {
     'fill_bags': ({'actor'}, {'actor', 'slots'}),
     'equip': ({'actor', 'item', 'slot'}, {'actor', 'item', 'slot', 'rejected'}),
     'use_item': ({'actor', 'item', 'spell'}, {'actor', 'item', 'spell', 'target', 'target_item',
-                                              'target_gameobject', 'destination'}),
+                                              'target_gameobject', 'destination', 'destination_unit'}),
     'use_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
     'summon_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'distance', 'duration_s'}),
     'loot_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
@@ -779,7 +780,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(step['actor'] not in player_ids, f'{where}: allowed_refusal is for a creature cast')
                 number(step['allowed_refusal'], f'{where}.allowed_refusal', 1, 254, True)
             if action == 'cast' and step['actor'] not in player_ids:
-                require('destination' not in step, f'{where}: creature cast has no destination')
+                require('destination' not in step and 'destination_unit' not in step,
+                        f'{where}: creature cast has no destination')
             if action == 'cast' and 'target_item' in step:
                 require(step['actor'] in player_ids and 'target' not in step and 'target_pet' not in step,
                         f'{where}: item targets cast from a player at an owned item')
@@ -800,6 +802,9 @@ def validate(scenario, clock=REAL_CLOCK):
         for key in ('target', 'caster'):
             if key in step:
                 require(step[key] in actor_ids, f'{where}: unknown {key}')
+        if 'destination_unit' in step:
+            require(step['destination_unit'] in actor_ids and 'destination' not in step,
+                    f'{where}: destination_unit names a scenario unit, in place of destination')
         if 'destination' in step:
             destination = step['destination']
             keys(destination, {'x', 'y', 'z'}, {'x', 'y', 'z'}, f'{where}.destination')

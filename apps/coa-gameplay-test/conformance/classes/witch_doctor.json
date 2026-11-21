@@ -23169,6 +23169,168 @@
         "refusal": 22,
         "delay_ms": 3500
       }
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "variant": "potion_in_channel",
+      "label_suffix": "potion_in_channel",
+      "name": "Mojo Beam (Potion Toss is cast during the channel)",
+      "quote": "you can instantly cast",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        92085,
+        801664,
+        801661
+      ],
+      "setup_casts": [
+        801664
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "gate_spell": 92085,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 801661,
+          "target": "caster",
+          "delay_ms": 1700
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801661
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Mojo Beam 501117 (instant, StartRecoveryTime 1500, CategoryRecoveryTime 14000 reset by the scenario, ManaCostPercentage 15, DurationIndex 31 = 8000 ms channel, one heal every 500 ms) is cast for real at the caster; Unit::CanCastDuringChannel (Unit.cpp:5096-5121) lets Potion Toss 801661, Splash Potion 802710 and Spirit in a Bottle 801696 be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and the Beam aura 573288 makes their cast time 0 (Effect[1] SPELLMOD_CASTING_TIME -10001, AscensionWitchDoctorBrewing.cpp:113-127, Completion.cpp:347-354). A potion needs a brewed Ingredient (AscensionWitchDoctorAbilities.cpp:74-75 refuses it otherwise): the Cauldron Brewer 92085 is learned and Ingredient: Bloodthistle 801664 is cast first (setup, instant, 1700 ms settle), and the CasterAuraSpell 801702 is set before the potion (a precondition fixture, the potion_lasts precedent). The potion is cast 1700 ms after the Beam, past the Beam's 1500 ms global cooldown and the 400 ms spell queue (option after_trigger_casts, ADR 1028, its cooldown reset), and the reading follows 500 ms later. Mana: cast_power 2000 before the Ingredient (5%, about 74); the Beam opening 224 and the ticks at 500, 1000 and 1500 ms (158, 174 and 190, AscensionWitchDoctorBrewing.cpp:191-196) leave about 1180, the potion costs 20% more under the Beam (Potion Toss about 323, Splash Potion about 359) and the 2000 ms tick 206, so the channel still runs at the reading and ends near 3500 ms. Control: the uncast before phase (no Beam, no potion). Without the allowance a cast during a channel is refused or interrupts the channel, so the pair of entries (the potion completes, the Beam still channels) proves the claim. Read: the completed casts of Potion Toss 801661 (spell_cast_count, cumulative), 0 before and 1 after. Potion Toss: instant, 18% mana, StartRecoveryTime 1500, CategoryRecoveryTime 15000, a unit target (the caster). Clause 46 claim \"While channeling, you can instantly cast Potion Toss,\". Cast timing checked: all instant, 1700 ms apart. Player reports: #11216 and #10994 concern the Beam drain, not this claim."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "variant": "potion_keeps_beam",
+      "label_suffix": "potion_keeps_beam",
+      "name": "Mojo Beam (the channel continues after a Potion Toss)",
+      "quote": "you can instantly cast",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        92085,
+        801664,
+        801661
+      ],
+      "setup_casts": [
+        801664
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "gate_spell": 92085,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 801661,
+          "target": "caster",
+          "delay_ms": 1700
+        }
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Mojo Beam 501117 (instant, StartRecoveryTime 1500, CategoryRecoveryTime 14000 reset by the scenario, ManaCostPercentage 15, DurationIndex 31 = 8000 ms channel, one heal every 500 ms) is cast for real at the caster; Unit::CanCastDuringChannel (Unit.cpp:5096-5121) lets Potion Toss 801661, Splash Potion 802710 and Spirit in a Bottle 801696 be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and the Beam aura 573288 makes their cast time 0 (Effect[1] SPELLMOD_CASTING_TIME -10001, AscensionWitchDoctorBrewing.cpp:113-127, Completion.cpp:347-354). A potion needs a brewed Ingredient (AscensionWitchDoctorAbilities.cpp:74-75 refuses it otherwise): the Cauldron Brewer 92085 is learned and Ingredient: Bloodthistle 801664 is cast first (setup, instant, 1700 ms settle), and the CasterAuraSpell 801702 is set before the potion (a precondition fixture, the potion_lasts precedent). The potion is cast 1700 ms after the Beam, past the Beam's 1500 ms global cooldown and the 400 ms spell queue (option after_trigger_casts, ADR 1028, its cooldown reset), and the reading follows 500 ms later. Mana: cast_power 2000 before the Ingredient (5%, about 74); the Beam opening 224 and the ticks at 500, 1000 and 1500 ms (158, 174 and 190, AscensionWitchDoctorBrewing.cpp:191-196) leave about 1180, the potion costs 20% more under the Beam (Potion Toss about 323, Splash Potion about 359) and the 2000 ms tick 206, so the channel still runs at the reading and ends near 3500 ms. Control: the uncast before phase (no Beam, no potion). Without the allowance a cast during a channel is refused or interrupts the channel, so the pair of entries (the potion completes, the Beam still channels) proves the claim. Read: casting (Unit::IsNonMeleeSpellCast, channels included) of the caster 500 ms after the Potion Toss, 0 before and 1 after: the Beam channel runs on. Clause 46 claim \"While channeling, you can instantly cast Potion Toss,\". Cast timing checked: all instant, 1700 ms apart. Player reports: none on this claim."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "variant": "splash_in_channel",
+      "label_suffix": "splash_in_channel",
+      "name": "Mojo Beam (Splash Potion is cast at a location during the channel)",
+      "quote": "you can instantly cast",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        92085,
+        801664,
+        802710
+      ],
+      "setup_casts": [
+        801664
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "gate_spell": 92085,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 802710,
+          "target": "caster",
+          "destination_unit": "caster",
+          "delay_ms": 1700
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 802710
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Mojo Beam 501117 (instant, StartRecoveryTime 1500, CategoryRecoveryTime 14000 reset by the scenario, ManaCostPercentage 15, DurationIndex 31 = 8000 ms channel, one heal every 500 ms) is cast for real at the caster; Unit::CanCastDuringChannel (Unit.cpp:5096-5121) lets Potion Toss 801661, Splash Potion 802710 and Spirit in a Bottle 801696 be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and the Beam aura 573288 makes their cast time 0 (Effect[1] SPELLMOD_CASTING_TIME -10001, AscensionWitchDoctorBrewing.cpp:113-127, Completion.cpp:347-354). A potion needs a brewed Ingredient (AscensionWitchDoctorAbilities.cpp:74-75 refuses it otherwise): the Cauldron Brewer 92085 is learned and Ingredient: Bloodthistle 801664 is cast first (setup, instant, 1700 ms settle), and the CasterAuraSpell 801702 is set before the potion (a precondition fixture, the potion_lasts precedent). The potion is cast 1700 ms after the Beam, past the Beam's 1500 ms global cooldown and the 400 ms spell queue (option after_trigger_casts, ADR 1028, its cooldown reset), and the reading follows 500 ms later. Mana: cast_power 2000 before the Ingredient (5%, about 74); the Beam opening 224 and the ticks at 500, 1000 and 1500 ms (158, 174 and 190, AscensionWitchDoctorBrewing.cpp:191-196) leave about 1180, the potion costs 20% more under the Beam (Potion Toss about 323, Splash Potion about 359) and the 2000 ms tick 206, so the channel still runs at the reading and ends near 3500 ms. Control: the uncast before phase (no Beam, no potion). Without the allowance a cast during a channel is refused or interrupts the channel, so the pair of entries (the potion completes, the Beam still channels) proves the claim. Read: the completed casts of Splash Potion 802710 (spell_cast_count, cumulative), 0 before and 1 after. Splash Potion: instant, 20% mana, Targets 64 (a destination), Effect[0..2] TARGET_DEST_DEST (87) with TARGET_UNIT_DEST_AREA_ALLY; the cast step sends the caster's own position as the destination (destination_unit, ADR 1028), the shape a client cast at the caster's feet sends. Clause 46 claim \"Splash Potion\". Cast timing checked: all instant, 1700 ms apart. Player reports: none on this claim."
+    },
+    {
+      "spell": 501117,
+      "kind": "metric_delta",
+      "variant": "splash_keeps_beam",
+      "label_suffix": "splash_keeps_beam",
+      "name": "Mojo Beam (the channel continues after a Splash Potion)",
+      "quote": "you can instantly cast",
+      "trigger_spell": 501117,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        92085,
+        801664,
+        802710
+      ],
+      "setup_casts": [
+        801664
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "gate_spell": 92085,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 802710,
+          "target": "caster",
+          "destination_unit": "caster",
+          "delay_ms": 1700
+        }
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Mojo Beam 501117 (instant, StartRecoveryTime 1500, CategoryRecoveryTime 14000 reset by the scenario, ManaCostPercentage 15, DurationIndex 31 = 8000 ms channel, one heal every 500 ms) is cast for real at the caster; Unit::CanCastDuringChannel (Unit.cpp:5096-5121) lets Potion Toss 801661, Splash Potion 802710 and Spirit in a Bottle 801696 be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and the Beam aura 573288 makes their cast time 0 (Effect[1] SPELLMOD_CASTING_TIME -10001, AscensionWitchDoctorBrewing.cpp:113-127, Completion.cpp:347-354). A potion needs a brewed Ingredient (AscensionWitchDoctorAbilities.cpp:74-75 refuses it otherwise): the Cauldron Brewer 92085 is learned and Ingredient: Bloodthistle 801664 is cast first (setup, instant, 1700 ms settle), and the CasterAuraSpell 801702 is set before the potion (a precondition fixture, the potion_lasts precedent). The potion is cast 1700 ms after the Beam, past the Beam's 1500 ms global cooldown and the 400 ms spell queue (option after_trigger_casts, ADR 1028, its cooldown reset), and the reading follows 500 ms later. Mana: cast_power 2000 before the Ingredient (5%, about 74); the Beam opening 224 and the ticks at 500, 1000 and 1500 ms (158, 174 and 190, AscensionWitchDoctorBrewing.cpp:191-196) leave about 1180, the potion costs 20% more under the Beam (Potion Toss about 323, Splash Potion about 359) and the 2000 ms tick 206, so the channel still runs at the reading and ends near 3500 ms. Control: the uncast before phase (no Beam, no potion). Without the allowance a cast during a channel is refused or interrupts the channel, so the pair of entries (the potion completes, the Beam still channels) proves the claim. Read: casting (Unit::IsNonMeleeSpellCast, channels included) of the caster 500 ms after the Splash Potion, 0 before and 1 after: the Beam channel runs on. Clause 46 claim \"Splash Potion\". Cast timing checked: all instant, 1700 ms apart. Player reports: none on this claim."
     }
   ],
   "player_observations": [],
