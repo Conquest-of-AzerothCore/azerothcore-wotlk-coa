@@ -1252,7 +1252,7 @@ def interrupt(signum, frame):
 
 
 def parser():
-    result = argparse.ArgumentParser(description=CLI_DESCRIPTION,
+    result = argparse.ArgumentParser(description=CLI_DESCRIPTION, fromfile_prefix_chars='@',
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     result.add_argument('--worldserver', type=Path, required=True)
     result.add_argument('--config', type=Path, required=True, help='Source worldserver config; never changed')
