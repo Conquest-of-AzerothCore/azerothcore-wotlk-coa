@@ -13362,6 +13362,8 @@ void Unit::SetAnimTier(AnimTier animTier)
 
 uint32 Unit::GetCreatureType() const
 {
+    if (HasAura(500952))
+        return CREATURE_TYPE_BEAST;
     if (IsPlayer())
     {
         if (getClass() == 17 && HasAura(804345))

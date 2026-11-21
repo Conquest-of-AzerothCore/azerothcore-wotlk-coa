@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Base: Beast Blood shields grouped allies within 40 yd",
+  "contract": [
+    "Base: Beast Blood 705870: '15% of the direct Physical damage taken by party and raid members within $a1",
+    "yds' (EffectRadiusIndex 23 = 40 yd) is dealt over time. The DBC force-casts 547573 at",
+    "TARGET_UNIT_CASTER_AREA_RAID, so every member casts the stagger shield on itself. The server turns Effect[0]",
+    "into a raid area dummy aura (AscensionWitchDoctorCompletion.cpp:416-422) and the aura script then called",
+    "Cast(player, target, BeastShield) for each member (AscensionWitchDoctorAuras.cpp:220-226): 547573 has",
+    "TargetA 1 TARGET_UNIT_CASTER on both effects, so the shield landed on the doctor again and a grouped ally",
+    "35 yd away read 0 in both final06 runs (lead L-S-1). The fix makes the member cast 547573 on itself with",
+    "the doctor as the original caster, so the shield, its absorb and its stagger ticks belong to the doctor's",
+    "aura script as on the doctor. Expected 1500 ms after the instant cast: the doctor and a grouped ally 10 yd",
+    "away carry the area aura 705870 and the shield 547573 of the doctor; a grouped ally 45 yd away carries",
+    "neither."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "far_ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Base: Beast Blood",
+      "actor": "doctor",
+      "spell": 705870
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "far_ally"
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 10
+    },
+    {
+      "action": "relocate",
+      "actor": "far_ally",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "far_ally",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "far_ally",
+      "dx": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally stands 10 yd from the Witch Doctor",
+      "actor": "ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 9.8,
+      "max": 10.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the far ally stands 45 yd from the Witch Doctor",
+      "actor": "far_ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 44.8,
+      "max": 45.2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally has no Beast Blood shield before the cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 547573,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 705870
+    },
+    {
+      "action": "cast",
+      "label": "Base: Beast Blood",
+      "actor": "doctor",
+      "spell": 705870,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "The area aura reaches the group",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Doctor carries the Beast Blood area aura",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 705870,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Doctor carries the shield 547573",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 547573,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the area aura 705870 reaches the ally 10 yd away",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 705870,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the ally 10 yd away carries the doctor's shield 547573",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 547573,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the area aura does not reach the ally 45 yd away",
+      "actor": "far_ally",
+      "metric": "aura",
+      "spell": 705870,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally 45 yd away, beyond 40 yd, has no shield",
+      "actor": "far_ally",
+      "metric": "aura",
+      "spell": 547573,
+      "caster": "doctor",
+      "equals": 0
+    }
+  ]
+}

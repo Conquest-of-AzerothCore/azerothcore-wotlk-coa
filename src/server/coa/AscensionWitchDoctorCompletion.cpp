@@ -80,6 +80,11 @@ int32 Amount(uint32 id, uint8 effect, Unit* caster)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(id);
     return info ? info->Effects[effect].CalcValue(caster) : 0;
 }
+float Radius(uint32 id, uint8 effect)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(id);
+    return info ? info->Effects[effect].CalcRadius() : 0.0f;
+}
 void Cast(Unit* caster, Unit* target, uint32 id)
 {
     if (caster && target && target->IsAlive())
@@ -260,12 +265,22 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
         info->Effects[EFFECT_0].TriggerSpell = 0;
     }
+    if (Family(info, 1, 262144) && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
+        info->Effects[EFFECT_0].ChainTarget = 0;
     if (id == CallSseratus && info->Effects[EFFECT_1].TriggerSpell == TrueSpiritReady)
         info->Effects[EFFECT_1].Effect = 0;
     if (id == ShadowhunterCost)
         info->Effects[EFFECT_0].Effect = info->Effects[EFFECT_1].Effect = 0;
     if (id == Spirit)
         periodic(EFFECT_2, 500);
+    if (id == ThistleField)
+        info->PreventionType = SPELL_PREVENTION_TYPE_NONE;
+    if ((id == PotentMixes || id == PotentMixesGreater) &&
+        info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_TOTAL_THREAT)
+    {
+        info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_THREAT;
+        info->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    }
     if (id == SpiritCast || id == SpiritChance || id == SpiritVisual)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             dummy(i);
@@ -522,6 +537,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK;
         info->Effects[EFFECT_1].Effect = 0;
+        info->AttributesEx5 &= ~SPELL_ATTR5_LIMIT_N;
     }
     if (id == WardHaste)
     {
@@ -641,7 +657,12 @@ class witch_doctor_scaling : public UnitScript
                                  : c.school == 12 ? std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE),
                                                              player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE))
                                                   : player->SpellBaseDamageBonusDone(SpellSchoolMask(c.school)));
-                value += std::max(0.0f, sp) * c.sp + player->GetStat(STAT_SPIRIT) * c.spirit +
+                float coefficient = c.sp;
+                if (!IsArrow(info))
+                    if (AuraEffect const* juju = player->GetAuraEffect(OverflowingJuju, EFFECT_0))
+                        if (juju->IsAffectedOnSpell(info))
+                            coefficient *= 1.0f + float(juju->GetAmount()) / 100.0f;
+                value += std::max(0.0f, sp) * coefficient + player->GetStat(STAT_SPIRIT) * c.spirit +
                          player->GetTotalAttackPowerValue(RANGED_ATTACK) * c.rap +
                          player->GetTotalAttackPowerValue(BASE_ATTACK) * c.ap;
             }

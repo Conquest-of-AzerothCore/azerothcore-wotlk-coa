@@ -64,6 +64,10 @@ class witch_doctor_casts : public AllSpellScript
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
     {
         SnapshotBuffs(spell, spell->GetCaster());
+        if (result == SPELL_CAST_OK && spell->GetCaster()->HasAura(EyeDebuff) &&
+            (spell->GetSpellInfo()->HasAura(SPELL_AURA_MOD_STEALTH) ||
+             spell->GetSpellInfo()->HasAura(SPELL_AURA_MOD_INVISIBILITY)))
+            result = SPELL_FAILED_CASTER_AURASTATE;
         Player* player = Owner(spell->GetCaster());
         if (!player || spell->GetCaster() != player || spell->IsTriggered() || result != SPELL_CAST_OK)
             return;
@@ -126,18 +130,6 @@ class witch_doctor_casts : public AllSpellScript
                             break;
                     }
             }
-        if (player->HasAura(DarkEffigy) && (IsJuju(info) || Family(info, 1, 262144)))
-            if (Unit* target = spell->m_targets.GetUnitTarget())
-            {
-                uint32 added = 0;
-                for (Unit* unit : Nearby(target, 10.0f))
-                    if (unit != target && player->IsValidAttackTarget(unit) && player->IsWithinLOSInMap(unit))
-                    {
-                        spell->AddUnitTargetForScript(unit, 1 << EFFECT_0);
-                        if (++added == 2)
-                            break;
-                    }
-            }
     }
 
     void OnCalcMaxDuration(Aura const* aura, int32& duration) override
@@ -155,6 +147,8 @@ class witch_doctor_casts : public AllSpellScript
 
     void OnSpellCalculatedTarget(Spell* spell, Unit* target, TargetInfo& hit) override
     {
+        if (target && spell->GetSpellInfo()->Id == MarionetteExplosion && target->HasAura(MarionetteExplosion))
+            hit.effectMask &= ~(1 << EFFECT_1);
         Player* player = Owner(spell->GetCaster());
         if (!player || player != spell->GetCaster() || !target)
             return;
@@ -229,7 +223,8 @@ class witch_doctor_casts : public AllSpellScript
             if (Aura* unstable = target->GetAura(UnstableDebuff, player->GetGUID()))
             {
                 unstable->Remove();
-                for (Unit* ally : Allies(player, target, 10.0f, 5))
+                for (Unit* ally : Allies(player, target, Radius(UnstableHeal),
+                                         sSpellMgr->GetSpellInfo(UnstableHeal)->MaxAffectedTargets))
                     Cast(player, ally, UnstableHeal);
             }
         if ((healing || target->IsAlive()) && (IsPotion(info) || IsSplash(info)))
@@ -292,8 +287,8 @@ class witch_doctor_casts : public AllSpellScript
             for (auto const& [guid, id] : jinxes)
             {
                 caster->RemoveAurasDueToSpell(id, guid);
-                if (Unit* doctor = ObjectAccessor::GetUnit(*caster, guid))
-                    Cast(doctor, caster, JinxSilence);
+                if (caster->IsAlive())
+                    caster->CastSpell(caster, JinxSilence, true, nullptr, nullptr, guid);
             }
         }
         Player* player = Owner(caster);
@@ -358,7 +353,7 @@ class witch_doctor_casts : public AllSpellScript
         if (id == HexfireWrath && target)
             Summon(player, WrathWard, target, target->GetPosition());
         if (IsJuju(info) && player->HasAura(Unleashed))
-            Reduce(player, Puppets, 5000);
+            Reduce(player, Puppets, std::abs(Amount(UnleashedCooldown)));
         if (IsBeam(info) && player->HasAura(Wave))
             for (Unit* ally : Allies(player, player, 40.0f, 10))
                 Cast(player, ally, Replenishment);
