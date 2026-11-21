@@ -3969,6 +3969,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
         return SPELL_MISS_NONE;
     }
 
+    if (victim->HasAura(806295))
+        return SPELL_MISS_MISS;
+
     SpellSchoolMask schoolMask = spellInfo->GetSchoolMask();
     int32 thisLevel = getLevelForTarget(victim);
     if (IsCreature() && ToCreature()->IsTrigger())
@@ -16893,6 +16896,9 @@ float Unit::MeleeSpellMissChance(Unit const* victim, WeaponAttackType attType, i
     {
         return 0.0f;
     }
+
+    if (attType == RANGED_ATTACK && victim->HasAura(806295))
+        return 100.0f;
 
     //calculate miss chance
     float missChance = victim->GetUnitMissChance(attType);
