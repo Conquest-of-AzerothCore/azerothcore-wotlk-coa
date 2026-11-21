@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace AscensionWitchDoctor
 {
@@ -530,7 +531,7 @@ class npc_ascension_witch_doctor : public ScriptedAI
         if (entry == NpcShadow || entry == NpcGraven || entry == NpcCursed)
             for (Unit* enemy : Nearby(me, entry == NpcCursed   ? Radius(CursedField)
                                           : entry == NpcShadow ? Radius(ShadowField)
-                                                               : 10.0f))
+                                                               : float(std::abs(Amount(ShadowField)))))
                 if (player->IsValidAttackTarget(enemy))
                 {
                     Field(enemy, entry == NpcShadow   ? ShadowField

@@ -26,3 +26,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0017](0017-amphibimorph-makes-a-frog-a-beast.md) | Amphibimorph makes a frogged unit a Beast | proposed (owner question); engine file `Unit.cpp` |
 | [0018](0018-voodoo-unleashed-cuts-shadow-puppets-by-504607.md) | Voodoo Unleashed cuts Shadow Puppets by 504607's 3 sec | accepted |
 | [0019](0019-voodoo-strings-needs-threads-when-bad-juju-is-used.md) | Voodoo Strings needs Puppeteer's Threads on the enemy when Bad Juju is used | accepted |
+| [0020](0020-graven-effigy-reaches-enemies-within-20-yd.md) | Graven Effigy reaches enemies within 20 yd | accepted; possible tooltip token slip noted |
