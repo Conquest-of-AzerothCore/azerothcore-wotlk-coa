@@ -8,15 +8,17 @@ override tables. See [ADR 1012](../adr/1012-static-client-data-ships-in-the-clie
 ## Where each table lives
 
 The client loads its archives in order and the last archive carrying a table wins (`archive_rank` in
-`apps/coa-dbc/client_dbc.py`). The rows the server used to stream were baked into these winning files:
+`apps/coa-dbc/client_dbc.py`). The rows the server used to stream live in these winning files:
 
 - `patch-M.MPQ`: CreatureModelData, CreatureDisplayInfo, Item, SoundEntries, SuperTrack, QuestSuperTrack,
-  SkillLineAbility, VanityCollection (prices still stream, see below), Vehicle, VehicleSeat, WorldMapArea, WorldMapOverlay, Map, MapDifficulty,
+  SkillLineAbility, Vehicle, VehicleSeat, WorldMapArea, WorldMapOverlay, Map, MapDifficulty,
   GameObjectDisplayInfo
-- `patch-S.MPQ`: SpellVisual, SpellVisualKit, SpellVisualKitModelAttach, SpellVisualEffectName,
-  SpellShapeshiftForm
-- `patch-T.MPQ`: Spell
-- `patch-ZG.MPQ`: ItemDisplayInfo
+- `patch-S.MPQ`: SpellVisual, SpellVisualKit, SpellVisualKitModelAttach, SpellShapeshiftForm
+- `patch-ZG.MPQ`: Spell, SpellVisualEffectName, ItemDisplayInfo, VanityCollection (prices still stream, see below)
+
+`patch-ZG.MPQ` loads after `patch-M.MPQ`, `patch-S.MPQ` and `patch-T.MPQ`, so it also wins for every other table
+it carries, among them Achievement, AreaTable, ItemAddon, ItemSet, SkillLine and SpellMissileMotion. The copies of
+those tables in the earlier archives are not read; edit the `patch-ZG.MPQ` copy.
 
 `client_dbc.py extract` writes `client-dbc.manifest.json`, which records the archive each table came from; check it
 when a later archive starts carrying one of these tables.
