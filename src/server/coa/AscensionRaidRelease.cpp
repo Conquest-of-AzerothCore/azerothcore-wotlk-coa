@@ -27,6 +27,9 @@ namespace
 constexpr uint32 WorldStateStageOverride = 20120;
 constexpr uint32 WorldStateReleasedStage = 20121;
 constexpr uint32 KelThuzad = 15990;
+constexpr uint32 DreadCitadelHonored = 9121;
+constexpr uint32 DreadCitadelRevered = 9122;
+constexpr uint32 DreadCitadelExalted = 9123;
 constexpr uint32 LegacyReturnToKhadgar = 9837;
 constexpr uint32 KeyToKarazhan = 200837;
 constexpr char KarazhanUnlockSetting[] = "core.coa.karazhan";
@@ -130,10 +133,20 @@ public:
             return false;
         }
 
-        if (entry->MapID != RaidRelease::MapKarazhan || player->GetSession()->IsBot())
+        if (player->GetSession()->IsBot())
             return true;
 
-        if (!player->GetQuestRewardStatus(KeyToKarazhan) && !HasLegacyKarazhanUnlock(player))
+        if (entry->MapID == RaidRelease::MapNaxxramas &&
+            !player->GetQuestRewardStatus(DreadCitadelHonored) && !player->GetQuestRewardStatus(DreadCitadelRevered) &&
+            !player->GetQuestRewardStatus(DreadCitadelExalted))
+        {
+            player->GetSession()->SendAreaTriggerMessage(
+                "Complete The Dread Citadel - Naxxramas from Archmage Angela Dosantos at Light's Hope Chapel.");
+            return false;
+        }
+
+        if (entry->MapID == RaidRelease::MapKarazhan &&
+            !player->GetQuestRewardStatus(KeyToKarazhan) && !HasLegacyKarazhanUnlock(player))
         {
             player->GetSession()->SendAreaTriggerMessage("Complete The Key to Karazhan from Archmage Alturus.");
             return false;

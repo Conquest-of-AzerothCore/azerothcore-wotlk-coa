@@ -9,10 +9,10 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
 
-EXPECTED_STAGES = {309: 3, 880: 3, 881: 3, 409: 4, 889: 4, 890: 4, 249: 5, 469: 6, 509: 7, 531: 7}
+EXPECTED_STAGES = {309: 3, 880: 3, 881: 3, 409: 4, 889: 4, 890: 4, 249: 5, 469: 6, 509: 7, 531: 7, 533: 8, 532: 9}
 DIFFICULTY_STAGES = {0: 0, 1: 1, 2: 2}
-UNGATED_MAPS = (0, 1, 36, 229, 230, 532, 533, 535, 603, 883, 951)
-UNGATED_RAIDS = (532, 533, 535, 603)
+UNGATED_MAPS = (0, 1, 36, 229, 230, 535, 603, 951)
+UNGATED_RAIDS = (535, 603)
 DUNGEONS = (36, 229, 230)
 
 
@@ -46,6 +46,10 @@ def harness(source):
 #include <unordered_map>
 using uint32 = std::uint32_t;
 constexpr uint32 LANG_INSTANCE_CLOSED = 2010;
+constexpr uint32 DreadCitadelHonored = 9121;
+constexpr uint32 DreadCitadelRevered = 9122;
+constexpr uint32 DreadCitadelExalted = 9123;
+constexpr uint32 KeyToKarazhan = 200837;
 enum Difficulty : uint32 {{ DUNGEON_DIFFICULTY_NORMAL, DUNGEON_DIFFICULTY_HEROIC, DUNGEON_DIFFICULTY_EPIC }};
 uint32 const raidMaps[] = {{{raids}}};
 struct MapEntry
@@ -72,11 +76,16 @@ MapDifficulty const* GetDownscaledMapDifficultyData(uint32, Difficulty& difficul
 struct WorldSession
 {{
     uint32 messages = 0;
+    bool bot = false;
+    bool IsBot() const {{ return bot; }}
+    void SendAreaTriggerMessage(char const*) {{ ++messages; }}
     void SendAreaTriggerMessage(uint32 text) {{ assert(text == LANG_INSTANCE_CLOSED); ++messages; }}
 }};
 struct Group {{ }};
 struct Player
 {{
+    uint32 rewardedQuest = 0;
+    bool GetQuestRewardStatus(uint32 quest) const {{ return rewardedQuest == quest; }}
     bool inWorld = true;
     Group* group = nullptr;
     uint32 refreshes = 0;
@@ -88,6 +97,7 @@ struct Player
     WorldSession* GetSession() {{ return &session; }}
     Difficulty GetDifficulty(bool isRaid) const {{ return isRaid ? DUNGEON_DIFFICULTY_NORMAL : dungeonDifficulty; }}
 }};
+bool HasLegacyKarazhanUnlock(Player const*) {{ return false; }}
 uint32 g_raidReleaseStage = RaidRelease::AllReleased;
 struct LFGMgr
 {{
@@ -117,10 +127,12 @@ struct Hook
 {hook}
 }};
 
-bool Enter(Hook& hook, uint32 mapId, Difficulty difficulty, bool login = false)
+bool Enter(Hook& hook, uint32 mapId, Difficulty difficulty, bool login = false, uint32 quest = 0, bool bot = false)
 {{
     Player player;
     player.dungeonDifficulty = difficulty;
+    player.rewardedQuest = quest;
+    player.session.bot = bot;
     MapEntry entry{{ mapId }};
     bool const open = hook.OnPlayerCanEnterMap(&player, &entry, nullptr, nullptr, login);
     assert(player.session.messages == (open ? 0u : 1u));
@@ -155,7 +167,7 @@ int main()
     }}
     assert(online.refreshes == 2);
     ObjectAccessor::players.clear();
-    static_assert(RaidRelease::AllReleased == 8);
+    static_assert(RaidRelease::AllReleased == 9);
     static_assert(RaidRelease::RaidLootStage(309) == RaidRelease::StageZulGurub);
     static_assert(RaidRelease::RaidLootStage(533) == RaidRelease::StageNaxxramas);
     static_assert(RaidRelease::RaidLootStage(36) == 0);
@@ -165,8 +177,9 @@ int main()
         for (auto const& [mapId, raidStage] : expected)
             for (Difficulty selected : {{ DUNGEON_DIFFICULTY_NORMAL, DUNGEON_DIFFICULTY_EPIC }})
             {{
-                assert(Enter(hook, mapId, selected) == (raidStage <= stage));
-                assert(Enter(hook, mapId, selected, true) == (raidStage <= stage));
+                uint32 const quest = mapId == 533 ? DreadCitadelHonored : mapId == 532 ? KeyToKarazhan : 0;
+                assert(Enter(hook, mapId, selected, false, quest) == (raidStage <= stage));
+                assert(Enter(hook, mapId, selected, true, quest) == (raidStage <= stage));
             }}
         for (uint32 mapId : ungated)
             assert(Enter(hook, mapId, DUNGEON_DIFFICULTY_NORMAL));
@@ -179,6 +192,18 @@ int main()
                 assert(Enter(hook, mapId, Difficulty(difficulty), true) == (difficultyStage <= stage));
             }}
     }}
+
+    g_raidReleaseStage = RaidRelease::StageAhnQiraj;
+    assert(!Enter(hook, 533, DUNGEON_DIFFICULTY_NORMAL, false, 9123));
+    assert(!Enter(hook, 533, DUNGEON_DIFFICULTY_NORMAL, false, 0, true));
+
+    g_raidReleaseStage = RaidRelease::StageNaxxramas;
+    assert(!Enter(hook, 533, DUNGEON_DIFFICULTY_NORMAL));
+    assert(!Enter(hook, 533, DUNGEON_DIFFICULTY_NORMAL, false, KeyToKarazhan));
+    assert(!Enter(hook, 532, DUNGEON_DIFFICULTY_NORMAL, false, KeyToKarazhan));
+    for (uint32 quest : {{ 9121u, 9122u, 9123u }})
+        assert(Enter(hook, 533, DUNGEON_DIFFICULTY_NORMAL, false, quest));
+    assert(Enter(hook, 533, DUNGEON_DIFFICULTY_NORMAL, false, 0, true));
 
     g_raidReleaseStage = RaidRelease::StageZulGurub;
     assert(Enter(hook, 309, DUNGEON_DIFFICULTY_NORMAL));
@@ -230,8 +255,9 @@ def main():
         subprocess.run(command(cpp, exe), cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
     print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order (Zul\'Gurub '
-          'before Molten Core, Setis with Zul\'Gurub and Korrim Snowgrave and Atal\'zul with Molten Core), each stage keeps the earlier ones open, closed content refuses entry and login with '
-          '"Instance is closed", normal dungeons, Wrath Naxxramas and other maps stay open, the default opens up to '
+          'before Molten Core, Setis with Zul\'Gurub and Korrim Snowgrave and '
+          'Atal\'zul with Molten Core), each stage keeps the earlier ones open, closed content refuses entry and '
+          'login with "Instance is closed", normal dungeons stay open, Naxxramas requires a Dread Citadel reward or bot exemption, the default opens up to '
           'Molten Core, and the stage comes only from the config or .raidphase, never from raid kills')
 
 
