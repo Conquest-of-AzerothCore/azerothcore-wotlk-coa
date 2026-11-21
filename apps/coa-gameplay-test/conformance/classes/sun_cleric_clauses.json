@@ -758,18 +758,29 @@
   {
     "spell": 301343,
     "clause": "Increases the critical strike chance of Sunflare and Dawnsear by $s1%",
-    "labels": [
-      "301343 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of Sunflare by $s1%",
+        "labels": [
+          "301343 behaviour_metric_delta crit_sunflare"
+        ]
+      },
+      {
+        "claim": "Increases the critical strike chance of Dawnsear by $s1%",
+        "labels": [
+          "301343 behaviour_metric_delta crit_dawnsear"
+        ]
+      }
+    ]
   },
   {
     "spell": 301343,
     "clause": "and reduces spell pushback suffered from damaging attacks by $s2%.",
+    "kind": "claim",
     "labels": [
-      "301343 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "301343 behaviour_metric_delta pushback_game_time"
+    ]
   },
   {
     "spell": 301345,
@@ -2323,10 +2334,21 @@
   {
     "spell": 704916,
     "clause": "Increases your Strength and Intellect by $s1%.",
-    "labels": [
-      "704916 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength",
+        "labels": [
+          "704916 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and Intellect by $s1%",
+        "labels": [
+          "704916 behaviour_metric_delta intellect"
+        ]
+      }
+    ]
   },
   {
     "spell": 704920,
@@ -2349,19 +2371,50 @@
   {
     "spell": 704928,
     "clause": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
-    "labels": [
-      "704928 effect_value 704926e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2} mana",
+        "labels": [
+          "704928 behaviour_metric_delta mana_flat"
+        ]
+      },
+      {
+        "claim": "$SP*.15 spell power term",
+        "labels": [
+          "704928 behaviour_metric_delta mana_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 704928,
     "clause": "and increasing all of your primary stats by $704926s1% for $704926d.",
-    "labels": [
-      "704928 effect_value 704926e0 #1",
-      "704928 spell_duration 704926 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing all of your primary stats by $704926s1%",
+        "labels": [
+          "704928 behaviour_metric_delta strength",
+          "704928 behaviour_metric_delta agility",
+          "704928 behaviour_metric_delta stamina",
+          "704928 behaviour_metric_delta intellect",
+          "704928 behaviour_metric_delta spirit"
+        ]
+      },
+      {
+        "claim": "for $704926d: lasts more than 4.6 s",
+        "labels": [
+          "704928 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "for $704926d: lasts less than 5.3 s",
+        "labels": [
+          "704928 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704929,
@@ -2496,18 +2549,29 @@
   {
     "spell": 704942,
     "clause": "Increases your Strength and maximum mana by $s1%",
-    "labels": [
-      "704942 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength",
+        "labels": [
+          "704942 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and maximum mana by $s1%",
+        "labels": [
+          "704942 behaviour_metric_delta max_mana"
+        ]
+      }
+    ]
   },
   {
     "spell": 704942,
     "clause": "and your expertise by $s2.",
+    "kind": "claim",
     "labels": [
-      "704942 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "704942 behaviour_metric_delta expertise"
+    ]
   },
   {
     "spell": 704945,
@@ -3424,10 +3488,33 @@
   {
     "spell": 805628,
     "clause": "Increases the effectiveness of Gavels and Horusath Blast and reduces their mana cost by $s2%.",
-    "labels": [
-      "805628 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of Gavels (Gavel of Wrath)",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Horusath Blast",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_horusath"
+        ]
+      },
+      {
+        "claim": "reduces the mana cost of Gavels by $s2%",
+        "labels": [
+          "805628 behaviour_metric_delta cost_gavel"
+        ]
+      },
+      {
+        "claim": "reduces the mana cost of Horusath Blast by $s2%",
+        "labels": [
+          "805628 behaviour_metric_delta cost_horusath"
+        ]
+      }
+    ]
   },
   {
     "spell": 807973,
