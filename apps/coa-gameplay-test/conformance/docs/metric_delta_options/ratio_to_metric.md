@@ -13,3 +13,8 @@ Named point: `run_values(values, model)`, as `fields_sum`; `fixtures` adds the r
 
 Witch Doctor: Spiritual Traditions 705911 `regen_casting` (`mana_regen_interrupted` over `mana_regen`, 0 without the
 passive and 0.40 with it).
+
+`increments` (ADR 1101, default false): both reads are running totals (event totals), so the after reading is the
+increase of the reading over the after phase divided by the increase of the base over it; the before reading stays the
+plain ratio. Witch Doctor: Voodoo Strings 705910 `strike_share`, Master of Concoctions 801690 `master_share`, Malefic
+Arrow 707854 `arrow_heal`.

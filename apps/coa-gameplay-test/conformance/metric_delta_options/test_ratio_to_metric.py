@@ -58,6 +58,21 @@ class RatioToMetricTests(unittest.TestCase):
         self.assertEqual(judged(0, 5.5, 2.2, 0), 'alert')
         self.assertEqual(judged(0, 5.5, 2.2, None), 'alert')
 
+    def test_increments_divide_the_after_phase_growth(self):
+        entry = ratio_entry(ratio_to_metric={'metric': 'mana_regen', 'increments': True})
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        before, after = expectation.model['before_label'], expectation.model['after_label']
+
+        def judged(after_value, after_base) -> str:
+            reads = {before: 0, f'{before} ratio base': 500, after: after_value, f'{after} ratio base': after_base}
+            return judge_behaviour(base_verdict(expectation), FakeRun(reads), expectation).status
+
+        self.assertEqual(judged(200, 1000), 'ok')
+        self.assertEqual(judged(200, 500), 'alert')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23),
+                               ratio_entry(ratio_to_metric={'metric': 'mana_regen', 'increments': 1}))
+
 
 if __name__ == '__main__':
     unittest.main()
