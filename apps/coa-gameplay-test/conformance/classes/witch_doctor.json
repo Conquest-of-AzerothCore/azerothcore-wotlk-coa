@@ -15663,6 +15663,39 @@
       "observe_source": "The Bad Juju half of wrath_transform_crit: the transform 807044 Effect[1] (+100 crit chance) mask gains Bad Juju 802087 at Completion.cpp:571-575 (word 1 1024 and bit 2 of word 2). The treatment arm casts a real Marionette 704497 before every Bad Juju (CastingTimeIndex 19 = 2500 ms, CategoryRecoveryTime 15000 reset, 16% base mana, cast_power 1000) and waits 7400 ms after the 1600 ms cast wait, so each Juju starts about 9000 ms after its Marionette and lands inside the 15000 ms transform. Judge (treatment_share, ADR 0760): 160 casts, the treatment's 99% Wilson lower bound must reach 95% (96.0% when every landed hit crits); the control arm (no Marionette) is the contrast below it. 823764 on the caster in both arms; about 2950 s of game time per run. Clause 147, Bad Juju. Player reports: none."
     },
     {
+      "spell": 704497,
+      "name": "Soul Marionette (the caster is rooted for 8 seconds)",
+      "kind": "metric_delta",
+      "variant": "root",
+      "label_suffix": "root",
+      "quote": "Root yourself for 8 sec",
+      "trigger_spell": 704497,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "metric": "rooted",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7800,
+      "expiry_wait_ms": 400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7600,
+          8000
+        ],
+        "expired": [
+          8000,
+          8400
+        ]
+      },
+      "observe_source": "AscensionWitchDoctorCompletion.cpp:443-447 turns Effect[0] of 704497 into SPELL_AURA_MOD_ROOT at load; the aura lasts DurationIndex 793 (8500 ms per the stun entry of this spell), the tooltip says 8 sec (G-19 band 400 ms, so 7600 to 8400). The rooted metric (CoAGameplayTest.cpp:4067, HasUnitState(UNIT_STATE_ROOT)) reads 0 before the cast and 1 inside the band; the expiry read is made 400 ms after the first (7800 + 400 = 8200 ms of game time, inside the expired window 8000 to 8400 ms) and must find the root gone: an 8500 ms root (the stun duration of this spell, DurationIndex 793) is still present at 8200 ms and fails the entry, and is then the candidate defect lead."
+    },
+    {
       "spell": 560545,
       "kind": "hit_ratio",
       "name": "Dark Loa's Blessing (Malefic Wrath deals 3% more damage)",
@@ -23787,6 +23820,100 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Mojo Beam 501117 (instant, StartRecoveryTime 1500, CategoryRecoveryTime 14000 reset by the scenario, ManaCostPercentage 15, DurationIndex 31 = 8000 ms channel, one heal every 500 ms) is cast for real at the caster; Unit::CanCastDuringChannel (Unit.cpp:5096-5121) lets Potion Toss 801661, Splash Potion 802710 and Spirit in a Bottle 801696 be cast during a Mojo Beam channel (SpellFamilyFlags[1] 4194304) and the Beam aura 573288 makes their cast time 0 (Effect[1] SPELLMOD_CASTING_TIME -10001, AscensionWitchDoctorBrewing.cpp:113-127, Completion.cpp:347-354). A potion needs a brewed Ingredient (AscensionWitchDoctorAbilities.cpp:74-75 refuses it otherwise): the Cauldron Brewer 92085 is learned and Ingredient: Bloodthistle 801664 is cast first (setup, instant, 1700 ms settle), and the CasterAuraSpell 801702 is set before the potion (a precondition fixture, the potion_lasts precedent). The potion is cast 1700 ms after the Beam, past the Beam's 1500 ms global cooldown and the 400 ms spell queue (option after_trigger_casts, ADR 1028, its cooldown reset), and the reading follows 500 ms later. Mana: cast_power 2000 before the Ingredient (5%, about 74); the Beam opening 224 and the ticks at 500, 1000 and 1500 ms (158, 174 and 190, AscensionWitchDoctorBrewing.cpp:191-196) leave about 1180, the potion costs 20% more under the Beam (Potion Toss about 323, Splash Potion about 359) and the 2000 ms tick 206, so the channel still runs at the reading and ends near 3500 ms. Control: the uncast before phase (no Beam, no potion). Without the allowance a cast during a channel is refused or interrupts the channel, so the pair of entries (the potion completes, the Beam still channels) proves the claim. Read: casting (Unit::IsNonMeleeSpellCast, channels included) of the caster 500 ms after the Splash Potion, 0 before and 1 after: the Beam channel runs on. Clause 46 claim \"Splash Potion\". Cast timing checked: all instant, 1700 ms apart. Player reports: none on this claim."
+    },
+    {
+      "spell": 705848,
+      "name": "Loa's Blessing (a Loa's Brew heal applies one of four empowerments to the ally)",
+      "kind": "metric_delta",
+      "variant": "empowerment",
+      "label_suffix": "empowerment",
+      "quote": "now applies a random empowerment",
+      "trigger_spell": 801670,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "metric": "carried_aura_count",
+      "fields": {
+        "spells": [
+          802207,
+          802208,
+          802215,
+          802216
+        ]
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:206-221 (OnSpellHit healing branch, Family(info, 1, 131072) = Loa's Brew): with Loa's Blessing 705848 known (Completion.h:140; the passive is an aura 4 dummy and carries the HasAura gate, learned between the phases, pitfall 9) and a heal including overheal above 0 (GetScriptHealingIncludingOverheal), one of Ferocity of Bethekk 802207, Vitality of Sseratus 802208, Cunning of Quetz'lun 802215 and Touch of Torta 802216 is cast on the target at random (urand(0, 3), :219-220), the four tooltip links of the clause (DurationIndex 18 = 20000 ms). A real Loa's Brew 801670 (CastingTimeIndex 5 = 2000 ms, DmgClass 1 so no ranged-slot delay, 33% mana, Effect[0] heal at TARGET_UNIT_TARGET_ALLY, cast at the caster) is made in both phases; the carried_aura_count of the four blessings on the caster (CoAGameplayTest.cpp:4232, the number of listed auras present) reads 0 in the before phase (the control: the passive is not known) and exactly 1 after, 2800 ms after the cast start (cast 2000 ms, 800 ms margin, well inside the 20 s duration): none (a missing script) reads 0, all four reads 4. The pick being random and uniform is a share question over many casts (a pick-share kind, none exists for auras) and is not asserted here. Loa's Brew 801670 is the rank-1 id; the pick does not depend on the heal amount, only on it being above 0. Mana: cast_power 1000, Brew 494 of the 1497 base (pitfall 6). The fields value spells is a list, which the scenario builder passes through as a JSON array; unverified. Player reports: none."
+    },
+    {
+      "spell": 501205,
+      "name": "Loa's Brew (with Loa's Blessing a heal empowers the target with one random effect)",
+      "kind": "metric_delta",
+      "variant": "empowerment",
+      "label_suffix": "empowerment",
+      "quote": "and empowering them with a random effect",
+      "trigger_spell": 501205,
+      "gate_spell": 705848,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "metric": "carried_aura_count",
+      "fields": {
+        "spells": [
+          802207,
+          802208,
+          802215,
+          802216
+        ]
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:206-209 (OnSpellHit healing branch of Family(info, 1, 131072), Loa's Brew): with Loa's Blessing 705848 known and a heal above 0 including overheal (GetScriptHealingIncludingOverheal), one of Ferocity of Bethekk 802207, Vitality of Sseratus 802208, Cunning of Quetz'lun 802215 and Touch of Torta 802216 is cast on the target at random (urand(0, 3)), the tooltip branch $?s705848[ and empowering them with a random effect for $802207d]. A real Loa's Brew 501205 (the rank-60 id, CastingTimeIndex 14 = 3000 ms, 33% of the 1497 base mana, cast_power 1000, Effect[0] heal at TARGET_UNIT_TARGET_ALLY, cast at the caster) is made in both phases; carried_aura_count of the four blessings on the caster (CoAGameplayTest.cpp:4232, the number of listed auras present) is read 3800 ms after the cast start. Control: the before phase, 705848 not known (gate_spell, learned between the phases; the passive is an aura 4 dummy whose HasAura gates the pick, pitfall 9), reads 0; after: exactly 1 (none, a missing script, reads 0; every blessing at once reads 4). The uniform pick is a share question and is not asserted. Evidence: carried_aura_count is a state metric promised by empower words (cycle 10 coverage row, ADR 1029 provisional). Clause 446 'and empowering them with a random effect for $802207d'. Cast timing checked: 3000 ms cast, 800 ms margin. Player reports: none."
+    },
+    {
+      "spell": 501205,
+      "name": "Loa's Brew (the random empowerment lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "empowerment_lasts",
+      "label_suffix": "empowerment_lasts",
+      "quote": "and empowering them with a random effect",
+      "trigger_spell": 501205,
+      "gate_spell": 705848,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "metric": "carried_aura_count",
+      "fields": {
+        "spells": [
+          802207,
+          802208,
+          802215,
+          802216
+        ]
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 22300,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          22000,
+          22700
+        ],
+        "expired": [
+          23400,
+          24200
+        ]
+      },
+      "observe_source": "The duration half of the empowerment entry: each of the four blessings 802207, 802208, 802215 and 802216 has DurationIndex 18 = 20000 ms ($802207d; the siblings share the index), applied when the real Loa's Brew 501205 heal lands about 3000 ms after the cast start (cast at the caster, no flight). With 705848 learned at the start (gate_timing start), carried_aura_count of the four reads 1 at 22300 ms after the cast start (about 19300 ms of aura life, inside the G-19 band of 20000 ms, 19000 to 21000) and 0 1400 ms later (about 20700 ms), both reads stamped in game time (windows 22000 to 22700 and 23400 to 24200 ms after the cast, so the life bracket is about 19000 to 21200 ms). Control: the uncast before phase reads 0 (trigger_only_after). A blessing that ends early (a 15 sec aura) reads 0 at the first read; one that lasts 30 sec reads 1 at the second. Clause 446 'for $802207d'. Cast timing checked: 3000 ms cast. Player reports: none."
     }
   ],
   "player_observations": [],

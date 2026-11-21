@@ -2547,17 +2547,11 @@
   {
     "spell": 704497,
     "clause": "Root yourself for 8 sec",
-    "labels": [],
+    "labels": [
+      "704497 behaviour_metric_delta root"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The entry is written and held in author-B14-held-root.json because the metric rooted (CoAGameplayTest.cpp:4067, HasUnitState(UNIT_STATE_ROOT)) has no coverage.METRIC_EVIDENCE row. Tool: a row for rooted (state, promise root\\w*); the entry then merges as it stands.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Judged by 704497 behaviour_metric_delta root (the cycle 9 held entry of author-B14, merged after the cycle 10 coverage row for rooted, state, promised by root words, ADR 1029 provisional): rooted reads 0 before the cast, 1 inside the 8 sec band and 0 after it, the reads stamped in game time."
   },
   {
     "spell": 704497,
@@ -3140,17 +3134,11 @@
   {
     "spell": 705848,
     "clause": "Healing done by Loa's Brew now applies a random empowerment to the target ally.",
-    "labels": [],
+    "labels": [
+      "705848 behaviour_metric_delta empowerment"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The entry is written and held in author-B14-held-root.json because the metric carried_aura_count (CoAGameplayTest.cpp:4232, the count of listed auras present on the unit) has no coverage.METRIC_EVIDENCE row. Tool: a row for carried_aura_count (state, promise empower\\w*); the held entry (one real Loa's Brew at the caster reads exactly 1 of the four blessings 802207, 802208, 802215 and 802216, the control without the passive reads 0) then merges, and the random pick itself needs a share kind over many casts.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Judged by 705848 behaviour_metric_delta empowerment (the cycle 9 held entry of author-B14, merged after the cycle 10 coverage row for carried_aura_count, state, promised by empower words, ADR 1029 provisional): one real Loa's Brew at the caster carries exactly 1 of the four blessings, the control without the passive 0. The random pick itself (a uniform share) is not judged."
   },
   {
     "spell": 705848,
@@ -7724,20 +7712,7 @@
         ]
       }
     ],
-    "reason": "The not_measured label `800195 effect_value e0 #0` (an aura script hook sets that effect's amount after CalcValue) is dropped; the same value is read by `800195 aura_amount e0 #0`, which stays in the claim and reads the amount of the present aura (guide 9.4, M-19). Cycle 9: `800195 behaviour_metric_delta cost_spent` reads the mana a real cast spends (Cursed Effigy, 16% of the base mana: 239 without, 227 after a real Wuju cast, 1161 and 874 left of 1400). The metric power is a state read promised by mana or cost words and this clause says \"resource costs\" (coverage.STATE_PROMISES power: `\\bcost` does not match \"costs\"), so the part reads data until the owner adds \"costs\" (tool note T-c9-B16-1).",
-    "no_behaviour_route": {
-      "reason": "The cost claim is read by \"800195 behaviour_metric_delta cost_spent\" (a real Wuju, a real Cursed Effigy cost of 239 without and 227 after), but the read is a state metric of mana (\"power\") whose promise words are mana and cost words: coverage.STATE_PROMISES power matches `\\bcost` and the clause says \"costs\", so the part stays data conformant until the owner allows \"costs\" (tool note T-c9-B16-1). The entry is the route; the promise regex is the only block.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B16",
-          "report": "cycle9/author-B16.md"
-        },
-        {
-          "agent": "cycle9/fix-B16",
-          "report": "cycle9/author-B16.md#fix-round"
-        }
-      ]
-    }
+    "reason": "The not_measured label `800195 effect_value e0 #0` (an aura script hook sets that effect's amount after CalcValue) is dropped; the same value is read by `800195 aura_amount e0 #0`, which stays in the claim and reads the amount of the present aura (guide 9.4, M-19). Cycle 9: `800195 behaviour_metric_delta cost_spent` reads the mana a real cast spends (Cursed Effigy, 16% of the base mana: 239 without, 227 after a real Wuju cast, 1161 and 874 left of 1400). The metric power is a state read promised by mana or cost words; since the cycle 10 coverage change (ADR 1029 provisional, tool note T-c9-B16-1) the promise `\\bcosts?` matches \"resource costs\", so the read is behaviour evidence for this claim."
   },
   {
     "spell": 800195,
@@ -7866,19 +7841,13 @@
       },
       {
         "claim": "and empowering them with a random effect for $802207d",
-        "labels": []
+        "labels": [
+          "501205 behaviour_metric_delta empowerment",
+          "501205 behaviour_metric_delta empowerment_lasts"
+        ]
       }
     ],
-    "reason": "The restored health is measured by the applied heals of `501205 hit_mean` (413 usable hits in 3 of 3 parts, mean 1485 against the model 1485.0, final05) besides the readback; the random empowering effect (Loa's Blessing 705848 casts one of four buffs at random) has no entry.",
-    "no_behaviour_route": {
-      "reason": "The conditional \"and empowering them with a random effect for $802207d\" (Loa's Blessing 705848) casts one of four buffs at random on the target (BlessingOne to BlessingFour, 802207 and its three siblings, AscensionWitchDoctorAbilities.cpp:215-219, urand(0, 3)). Every cast carries exactly one of the four, so the claim is the sum of four aura reads being 1, but metric_delta `fields_sum` adds only one second read of the same metric: four auras need three more reads, and a single aura reads present in 1 of 4 casts, which no arm can prove without a chance arm of 25% per buff. The duration $802207d is the lifetime of whichever buff is applied. Tool: a `fields_sum` list of reads (T-sum4), after which the cast reads the four auras together, 705848 learned between the phases and the uncast arm reading 0.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B9-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle8/author-B9.md#fix-round"
-        }
-      ]
-    }
+    "reason": "The restored health is measured by the applied heals of `501205 hit_mean` (413 usable hits in 3 of 3 parts, mean 1485 against the model 1485.0, final05) besides the readback. The random empowering effect is judged by 501205 behaviour_metric_delta empowerment (one real Loa's Brew with Loa's Blessing learned between the phases carries exactly 1 of the four blessings, the control 0) and its duration by empowerment_lasts (present at about 19300 ms of aura life, gone at about 20700 ms), both with carried_aura_count, a state metric promised by empower words since the cycle 10 coverage row (ADR 1029 provisional); this closes the fields_sum tool note T-sum4 without a sum of reads."
   },
   {
     "spell": 501205,
@@ -8510,20 +8479,7 @@
       "807056 behaviour_metric_delta items"
     ],
     "kind": "claim",
-    "reason": "Cycle 9: \"807056 behaviour_metric_delta items\" counts the 21 Black Lotus Bisque (item 339008) one real cast creates, the twin of the Brew Cocktail 807076 items entry. item_count is a state metric promised only by \"creat...\" words and the clause says \"Brews\", so the part stays data conformant until the owner adds \"brew\\w*\" (tool note T-c9-B16-12).",
-    "no_behaviour_route": {
-      "reason": "The creation claim is read by \"807056 behaviour_metric_delta items\" (a real Brew Stew cast creates the 21 Black Lotus Bisque, item 339008, the control reading none), but item_count is a state metric whose promise words are \"creat...\" and the clause says \"Brews\", so the part stays data conformant until the owner adds \"brew\\w*\" to coverage.STATE_PROMISES item_count (tool note T-c9-B16-12). The entry is the route; the promise regex is the only block.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B16",
-          "report": "cycle9/author-B16.md"
-        },
-        {
-          "agent": "cycle9/fix-B16-2",
-          "report": "cycle9/author-B16.md#fix-round-2"
-        }
-      ]
-    }
+    "reason": "Cycle 9: \"807056 behaviour_metric_delta items\" counts the 21 Black Lotus Bisque (item 339008) one real cast creates, the twin of the Brew Cocktail 807076 items entry. item_count is a state metric; since the cycle 10 coverage change (ADR 1029 provisional, tool note T-c9-B16-12) its promise words include \"brew\\w*\", so the read is behaviour evidence for \"Brews\"."
   },
   {
     "spell": 807056,

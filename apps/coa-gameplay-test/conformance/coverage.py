@@ -440,7 +440,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_react_state', 'nearest_creature_distance', 'casting',
                      'item_count', 'track_creature_type', 'owned_creature_stat', 'owned_creature_display',
                      'distance_2d', 'point_distance_2d', 'can_detect', 'temporary_spell_replacement',
-                     'owned_creature_remaining_ms'), STATE),
+                     'owned_creature_remaining_ms', 'rooted', 'carried_aura_count'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
     **dict.fromkeys(('healing_power', 'swim_speed_rate', 'skill_bonus', 'mana_regen_interrupted'), STATE),
     'combat_rating_bonus': STATE,
@@ -455,7 +455,7 @@ STATE_PROMISES = {
     'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
     'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
-    'power': rf'{POWER_WORDS}|\bcost', 'run_speed_rate': r'movement speed|run speed|slow\w*',
+    'power': rf'{POWER_WORDS}|\bcosts?', 'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
     'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
     'ranged_taken_crit_chance': CRIT_WORDS, 'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
@@ -483,7 +483,7 @@ STATE_PROMISES = {
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
     'casting': r'\bcast\w*|haste|all actions',
-    'item_count': r'creat\w*',
+    'item_count': r'creat\w*|brew\w*',
     'distance_2d': r'location|hook\w*|pull\w*',
     'point_distance_2d': r'leap\w*|range|yds?',
     'can_detect': r'seen|detect\w*|stealth\w*',
@@ -492,6 +492,8 @@ STATE_PROMISES = {
     'healing_power': r'healing power|healing done', 'swim_speed_rate': r'swim\w*',
     'skill_bonus': r'skill', 'mana_regen_interrupted': r'mana regenerat\w*',
     'combat_rating_bonus': RATING_WORDS,
+    'rooted': r'root\w*',
+    'carried_aura_count': r'empower\w*',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
