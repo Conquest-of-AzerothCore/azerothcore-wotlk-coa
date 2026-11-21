@@ -524,7 +524,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `stop_attack` | Player `actor`: native melee stop request. |
 | `pvp` | Player `actor`, boolean `enabled`: native PvP toggle request. Disabling retains the ordinary flag-removal timer. |
 | `set_moving` | Player `actor`, boolean `enabled`: fixture the native forward movement flag for cast restriction tests. Optional `flag`: `forward` (default), `backward`, `strafe_left`, `strafe_right` or `falling` (airborne, as during a jump). |
-| `relocate` | Player `actor`, optional `dx`, `dy`, `dz` (yards, -20 to 20): move the actor through the native position update a client movement packet applies, so movement and turning interrupts run; no packet is sent. |
+| `relocate` | Player `actor`, optional `dx`, `dy`, `dz` (yards, -20 to 20): move the actor through the native position update a client movement packet applies, so movement and turning interrupts run; no packet is sent. With `around_owner` (a player) and `around_entry` the actor is placed instead at that player's present owned creature of the entry, `radius` + both combat reaches + `edge_offset` (default 0, -5 to 5) yd away along `bearing` (radians on the world axes, default 0), at the creature's height; the record holds the `distance`. |
 | `move_point` | Fixture creature `actor` (not `stationary`), `dx`, optional `dy` (yards, -100 to 100): a running point move from its position; speed auras apply to the move as it runs. |
 | `fall` | Player `actor`, `height` (yards, 1 to 60): a harness-simulated landing. The fall start is set `height` yards above the actor through `Player::UpdateFallInformationIfNeed` (as a client's first falling packet does), then `Player::HandleFall` is called with a landing `MovementInfo` at the actor's position, as `MSG_MOVE_FALL_LAND` reaches it in `WorldSession::ProcessMovementInfo`. Refused for a dead, GM, god-mode, hovering, feather-falling, flying, in-flight, swimming or physically immune player. The record carries `height`, `fall_time_ms`, `safe_fall` (SPELL_AURA_SAFE_FALL total), `fall_damage_rate` (Rate.Damage.Fall) and `health_lost`. |
 | `group` | `actor`, `target`, optional `loot_method` (0-4) and `master_looter` (a player id, read with `loot_method`) and `raid` (boolean): fixture party; creates the actor's group if needed, adds an ungrouped player and sets the loot method and master looter; `raid: true` then makes the group a raid. |
@@ -921,6 +921,8 @@ with the actor as the attacker, or `pet: true` to run the hooks with the actor's
 `cast` also accepts a creature actor: the creature casts `spell` on `target` (itself by default) with
 `TRIGGERED_FULL_MASK`, like `.cast back ... triggered`, and the step fails unless the cast starts. With
 `allowed_refusal` (a `SpellCastResult` code) the step also passes when the cast is refused with exactly that code.
+`triggered: false` makes the creature cast without trigger flags (`TRIGGERED_NONE`), an ordinary cast that script
+hooks skipping triggered casts see.
 `creature_cast_result` (creature actor, `spell`) reads the result of that creature's last cast of `spell`: 0 for a
 started cast, the refusal code otherwise, -1 when it has not cast it. `creature_attack` (creature actor, `target`)
 sets the creature aggressive and starts its melee on the target (`CreatureAI::AttackStart`, then `Unit::Attack`); the
@@ -1064,7 +1066,7 @@ requires `spell`, accepts `caster` for aura ownership, and returns zero if the p
 `pet_aura_duration_ms` reads the same pet aura's remaining duration, and returns zero if the pet or aura is absent.
 `spell_energize_count` and `spell_energize_total` observe native instant and periodic energize logs, excluding
 ordinary regeneration. They require `spell`; optional `power`, `target`, `pet` and `target_pet` filter
-resource type, recipient and current pets. The total is the logged nominal gain before the resource cap.
+resource type, recipient and current pets; `caster_entry` reads the logs of any creature of that entry instead. The total is the logged nominal gain before the resource cap.
 
 `pet_max_health`, `pet_attack_power` and `pet_run_speed_rate` read the current pet's totals and require a present pet.
 `charm_entry` and `charm_aura_stacks` observe the player's charmed unit in the same way.
@@ -1115,6 +1117,8 @@ It reads whether that target can attack the summon through the native `IsValidAt
 It returns one while that unit is the summon's current victim.
 `owned_creature_distance_2d` requires the owning player, a present creature `entry` and a `target` unit, and
 reads the exact 2D distance from the summon to that unit.
+`owned_creature_combat_reach` and `owned_creature_position_x`, `_y`, `_z` require the owning player and a present
+creature `entry` and read that summon's combat reach and position.
 `pet_casting` requires the player's present native pet and reads its casting flag and active non-melee spell.
 Use it to observe channel completion before submitting another ordinary pet cast;
 aura expiry is a separate event.

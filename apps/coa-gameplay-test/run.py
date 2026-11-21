@@ -137,7 +137,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_count', 'owned_creature_remaining_ms', 'owned_creature_summon_count', 'owned_creature_spacing',
     'owned_creature_weapon_damage_min',
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
-    'owned_creature_distance_2d',
+    'owned_creature_distance_2d', 'owned_creature_combat_reach', 'owned_creature_position_x',
+    'owned_creature_position_y', 'owned_creature_position_z',
     'charm_entry', 'charm_distance', 'charm_aura_stacks', 'controls_self', 'charmed', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'gossip_options', 'gossip_option_text',
     'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale', 'at_homebind', 'summon_pending',
@@ -285,7 +286,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag', 'unit_state'}),
-    'relocate': ({'actor'}, {'actor', 'dx', 'dy', 'dz'}),
+    'relocate': ({'actor'}, {'actor', 'dx', 'dy', 'dz', 'around_owner', 'around_entry', 'radius', 'edge_offset',
+                             'bearing'}),
     'fall': ({'actor', 'height'}, {'actor', 'height'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'client_packet': ({'actor', 'opcode'},
@@ -322,7 +324,7 @@ ACTIONS = {
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
                                   'target_gameobject', 'target_owned_entry', 'target_owner', 'allowed_refusal',
-                                  'destination_unit'}),
+                                  'destination_unit', 'triggered'}),
     'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
@@ -782,6 +784,9 @@ def validate(scenario, clock=REAL_CLOCK):
             if action == 'cast' and step['actor'] not in player_ids:
                 require('destination' not in step and 'destination_unit' not in step,
                         f'{where}: creature cast has no destination')
+            if action == 'cast' and 'triggered' in step:
+                require(step['actor'] not in player_ids and type(step['triggered']) is bool,
+                        f'{where}: triggered is a boolean of a creature cast')
             if action == 'cast' and 'target_item' in step:
                 require(step['actor'] in player_ids and 'target' not in step and 'target_pet' not in step,
                         f'{where}: item targets cast from a player at an owned item')
@@ -868,7 +873,16 @@ def validate(scenario, clock=REAL_CLOCK):
         if action == 'set_moving' and 'flag' in step:
             require(step['flag'] in {'forward', 'backward', 'strafe_left', 'strafe_right', 'falling'},
                 f'{where}: flag must be forward, backward, strafe_left, strafe_right or falling')
-        if action == 'relocate':
+        if action == 'relocate' and 'around_owner' in step:
+            require(step['around_owner'] in player_ids and not ({'dx', 'dy', 'dz'} & step.keys()),
+                    f'{where}: a relocation around an owned creature names its owner player and no offsets')
+            number(step.get('around_entry'), f'{where}.around_entry', 1, 2**32 - 1, True)
+            number(step.get('radius'), f'{where}.radius', 0, 100)
+            number(step.get('edge_offset', 0), f'{where}.edge_offset', -5, 5)
+            number(step.get('bearing', 0), f'{where}.bearing', -7, 7)
+        elif action == 'relocate':
+            require(not ({'around_entry', 'radius', 'edge_offset', 'bearing'} & step.keys()),
+                    f'{where}: around fields need around_owner')
             for key in ('dx', 'dy', 'dz'):
                 number(step.get(key, 0), f'{where}.{key}', -20, 20)
         if action == 'fall':
@@ -1350,7 +1364,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if 'caster_entry' in step:
                 require(metric in SPELL_DAMAGE_METRICS | {'spell_heal_count', 'spell_heal_total',
-                                                          'spell_effective_heal_total'},
+                                                          'spell_effective_heal_total', 'spell_energize_count',
+                                                          'spell_energize_total'},
                         f'{where}: caster_entry only filters spell damage or healing events')
                 require(not ({'entry', 'pet', 'caster'} & step.keys()),
                         f'{where}: caster_entry replaces the entry, pet and caster filters')
@@ -1526,7 +1541,8 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat',
                           'owned_creature_power', 'owned_creature_threat_multiplier',
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
-                          'owned_creature_school_spell_crit_chance'}:
+                          'owned_creature_school_spell_crit_chance', 'owned_creature_combat_reach',
+                          'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric == 'owned_creature_school_spell_crit_chance':
                 require('spell' in step, f'{where}: metric needs a magic probe spell')
@@ -1658,7 +1674,8 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat',
                           'owned_creature_power', 'owned_creature_threat_multiplier',
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
-                          'owned_creature_school_spell_crit_chance',
+                          'owned_creature_school_spell_crit_chance', 'owned_creature_combat_reach',
+                          'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',

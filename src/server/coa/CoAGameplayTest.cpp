@@ -5382,9 +5382,12 @@ private:
                 target = victim->GetGUID();
             }
             auto power = step.get_optional<uint32>("power");
+            auto const casterEntry = step.get_optional<uint32>("caster_entry");
+            Require(!casterEntry || !step.get_optional<bool>("pet"), "Energize query selects a pet or a caster entry");
             uint64 value = 0;
             for (SpellEnergizeEvent const& event : _actors.at(step.get<std::string>("actor")).spellEnergizes)
-                if (caster && event.caster == caster && event.spell == spell &&
+                if ((casterEntry ? event.caster.IsCreatureOrVehicle() && event.caster.GetEntry() == *casterEntry
+                                 : caster && event.caster == caster) && event.spell == spell &&
                     (!target || event.target == target) && (!power || event.power == *power))
                     value += metric == "spell_energize_count" ? 1 : event.amount;
             return double(value);
@@ -6037,6 +6040,16 @@ private:
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Distance observation needs a present owned creature");
             return creature->GetExactDist2d(GetUnit(step.get<std::string>("target")));
+        }
+        if (metric == "owned_creature_combat_reach" || metric == "owned_creature_position_x" ||
+            metric == "owned_creature_position_y" || metric == "owned_creature_position_z")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Geometry observation needs a present owned creature");
+            if (metric == "owned_creature_combat_reach")
+                return double(creature->GetCombatReach());
+            return double(metric == "owned_creature_position_x" ? creature->GetPositionX() :
+                metric == "owned_creature_position_y" ? creature->GetPositionY() : creature->GetPositionZ());
         }
         if (metric == "owned_creature_weapon_damage_min")
         {
@@ -7664,7 +7677,8 @@ private:
                 target = GetOwnedCreature(GetPlayer(step.get<std::string>("target_owner")), *ownedEntry);
                 Require(target != nullptr, "Creature cast at an owned creature needs a living creature of that entry");
             }
-            SpellCastResult result = creature->CastSpell(target, spell, TRIGGERED_FULL_MASK);
+            SpellCastResult result = creature->CastSpell(target, spell,
+                step.get<bool>("triggered", true) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
             record.put("cast_result", uint32(result));
             _creatureCastResults[{ id, spell }] = uint32(result);
             auto const allowedRefusal = step.get_optional<uint32>("allowed_refusal");
@@ -7776,6 +7790,19 @@ private:
             record.put("safe_fall", player->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL));
             record.put("fall_damage_rate", sWorld->getRate(RATE_DAMAGE_FALL));
             record.put("health_lost", healthBefore - player->GetHealth());
+        }
+        else if (action == "relocate" && step.get_optional<std::string>("around_owner"))
+        {
+            Creature* centre = GetOwnedCreature(GetPlayer(step.get<std::string>("around_owner")),
+                step.get<uint32>("around_entry"));
+            Require(centre != nullptr, "Relocation around an owned creature needs a living creature of that entry");
+            float const distance = step.get<float>("radius") + centre->GetCombatReach() + player->GetCombatReach() +
+                step.get<float>("edge_offset", 0.0f);
+            float const bearing = step.get<float>("bearing", 0.0f);
+            player->UpdatePosition(centre->GetPositionX() + distance * std::cos(bearing),
+                centre->GetPositionY() + distance * std::sin(bearing), centre->GetPositionZ(),
+                player->GetOrientation());
+            record.put("distance", distance);
         }
         else if (action == "relocate")
         {
