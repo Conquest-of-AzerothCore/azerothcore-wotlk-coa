@@ -4127,7 +4127,9 @@
       "expected_gain": 2,
       "tolerance": 0.05,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). The caster's block chance (PLAYER_BLOCK_PERCENTAGE) is read after the heal lands (wait 2600 ms from the cast start): the gain must be 2 within 0.05, which excludes 1 and 3. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). The caster's block chance (PLAYER_BLOCK_PERCENTAGE) is read after the heal lands (wait 2600 ms from the cast start): the gain must be 2 within 0.05, which excludes 1 and 3. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 704562,
@@ -4174,7 +4176,9 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). One fulfilment: 1 stack of 680672. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). One fulfilment: 1 stack of 680672. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 704562,
@@ -4226,7 +4230,9 @@
       "before_expected": 0,
       "expected": 5,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 704562,
@@ -4278,7 +4284,9 @@
       "expected_gain": 10,
       "tolerance": 0.05,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 704562,
@@ -4325,7 +4333,9 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 16600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is on the caster 14600 ms after the fulfilling heal landed (2000 ms cast + 14600): its duration is above 14.6 s, which excludes 13.5 s (-10% of 15 s). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is on the caster 14600 ms after the fulfilling heal landed (2000 ms cast + 14600): its duration is above 14.6 s, which excludes 13.5 s (-10% of 15 s). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 704562,
@@ -4372,22 +4382,517 @@
       "before_expected": 0,
       "expected": 0,
       "wait_ms": 18400,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is gone 16400 ms after the heal landed: its duration is below 16.4 s, which excludes 16.5 s (+10%). With duration_held it lies in (14.6, 16.4) s around 15 s. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC."
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is gone 16400 ms after the heal landed: its duration is below 16.4 s, which excludes 16.5 s (+10%). With duration_held it lies in (14.6, 16.4) s around 15 s. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 300371,
-      "name": "Censure (Chains of Light chains to a nearby enemy)",
-      "kind": "spread",
-      "variant": "chain",
+      "name": "Censure (one Chains of Light copy per direct hit)",
+      "kind": "spread_per_crit",
       "label_suffix": "chain",
       "quote": "Dealing direct damage to an enemy affected by",
-      "expected": 1,
       "seed_spell": 801524,
       "aura_spell": 806697,
-      "target_rank": 800231,
+      "target_rank": 807870,
+      "hit_spells": [
+        807870
+      ],
+      "spares": 6,
       "radius": 10.0,
-      "radius_reason": "AscensionSunClericEvents.cpp:327-334 Nearby(target, 10) is a hardcoded radius; 300371 and 801582 define no distance the tooltip states.",
-      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer, and :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "force_crit": "spell",
+      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Glare 807870 (Effect[1] SCHOOL_DAMAGE, a direct hit, with a 5 s aura) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (the passive is applied by the learn)",
+      "kind": "metric_delta",
+      "variant": "passive_aura",
+      "label_suffix": "passive_aura",
+      "quote": "Fulfilling a Vow now increases your block chance by",
+      "trigger_spell": 804247,
+      "gate_spell": 704562,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 704562
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Diagnostic: Fulfill (AscensionSunCleric.cpp:296) casts Dawnguard 680672 only when the caster HasAura(704562); the aura of the passive itself is read before and after a real learn."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (damage)",
+      "kind": "script_hit",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$572753m1+$572753ppl1+$SP*1.3} Holyflame Damage",
+      "hit_spell": 572753,
+      "value_spell": 572753,
+      "value_effect": 0,
+      "value_rolls": true,
+      "trials": 15,
+      "minimum_hits": 5,
+      "learn": [
+        572752
+      ],
+      "casts": [
+        [
+          572752,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          804247,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 7000,
+      "cast_power": 1363,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. Every landed, unresisted, non-critical 572753 hit on the dummy is read against ${$572753m1+$572753ppl1} at spell power 0. 984954 removes crits and 823764 partial resists (precondition fixtures on the caster, as the Necromancer Putricide entries). Control: a cast that is not Sun Down, no hit read. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (damage at +100 spell power)",
+      "kind": "script_hit",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$572753m1+$572753ppl1+$SP*1.3} Holyflame Damage",
+      "hit_spell": 572753,
+      "value_spell": 572753,
+      "value_effect": 0,
+      "value_rolls": true,
+      "trials": 15,
+      "minimum_hits": 5,
+      "learn": [
+        572752
+      ],
+      "casts": [
+        [
+          572752,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          804247,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 7000,
+      "cast_power": 1363,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The contrast on the same pair: QA Test +100 SP 10062 (aura 345 flat spell power, every school) on the caster adds $SP*1.3 = +130. 984954 removes crits and 823764 partial resists (precondition fixtures on the caster, as the Necromancer Putricide entries). Control: a cast that is not Sun Down, no hit read. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Solar Flare damage)",
+      "kind": "script_hit",
+      "variant": "flare_damage",
+      "label_suffix": "flare_damage",
+      "quote": "While inside, enemies are struck by a",
+      "hit_spell": 807175,
+      "value_spell": 807175,
+      "value_effect": 1,
+      "value_rolls": true,
+      "trials": 15,
+      "minimum_hits": 5,
+      "learn": [
+        572752
+      ],
+      "casts": [
+        [
+          572752,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          804247,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 13000,
+      "cast_power": 1363,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. Solar Flare 807175 Effect[1] SCHOOL_DAMAGE BasePoints 50: ${$m2+$ppl2+$SP*0.26} at spell power 0, read on every tick of the ground aura. 984954 removes crits and 823764 partial resists (precondition fixtures on the caster, as the Necromancer Putricide entries). Control: a cast that is not Sun Down, no hit read. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Solar Flare damage at +100 spell power)",
+      "kind": "script_hit",
+      "variant": "flare_damage_sp",
+      "label_suffix": "flare_damage_sp",
+      "quote": "While inside, enemies are struck by a",
+      "hit_spell": 807175,
+      "value_spell": 807175,
+      "value_effect": 1,
+      "value_rolls": true,
+      "trials": 15,
+      "minimum_hits": 5,
+      "learn": [
+        572752
+      ],
+      "casts": [
+        [
+          572752,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          804247,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 13000,
+      "cast_power": 1363,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The contrast on the same pair: +100 spell power adds $SP*0.26 = +26. 984954 removes crits and 823764 partial resists (precondition fixtures on the caster, as the Necromancer Putricide entries). Control: a cast that is not Sun Down, no hit read. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (aura lasts 2 s)",
+      "kind": "metric_delta",
+      "variant": "delay_window",
+      "label_suffix": "delay_window",
+      "quote": "Bring the wrath of the sun down upon an enemy after $d,",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 572752
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3900,
+      "expire_ms": 500,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The Sun Down aura 572752 on the dummy (the delay 'after $d': the DBC gives 572752 no duration, the contract sets 2 s and the logs show 1.95 to 2.0 s) is present when read 3850..3950 ms after the cast starts (the aura starts when the 2000 ms cast ends, so it is at least 1.85 s old: duration above 1.85 s, which excludes 1.8 s, -10%) and gone when read 4100..4200 ms (at most 2.2 s old: below 2.2 s, which excludes +10%). Control: no cast, absent. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "measure_actor": "dummy",
+      "expiry_wait_ms": 250,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          3850,
+          3950
+        ],
+        "expired": [
+          4100,
+          4200
+        ]
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (ground aura still present at 8.2 s)",
+      "kind": "metric_delta",
+      "variant": "ground_held",
+      "label_suffix": "ground_held",
+      "quote": "and scorching the earth beneath them for $572754d.",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 572754
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 12200,
+      "expire_ms": 500,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The ground aura 572754 starts when the Sun Down aura expires (about 4000 ms after the cast starts) and is on the dummy 8.2 s later: its duration is above 8.2 s, which excludes 8.1 s (-10% of 9 s). Control (the phase before the learn): no cast, absent. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (ground aura gone at 9.8 s)",
+      "kind": "metric_delta",
+      "variant": "ground_gone",
+      "label_suffix": "ground_gone",
+      "quote": "and scorching the earth beneath them for $572754d.",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 572754
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 13900,
+      "expire_ms": 500,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The ground aura 572754 is gone 9.9 s after it starts (13900 ms after the cast starts): its duration is below 9.9 s, which excludes +10% (9.9 s). With ground_held it lies in (8.2, 9.9) s around 9 s. Control (the phase before the learn): no cast, absent. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (first Solar Flare not before 2.75 s)",
+      "kind": "metric_delta",
+      "variant": "period_held",
+      "label_suffix": "period_held",
+      "quote": "every $572754t1 sec",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 6750,
+      "expire_ms": 500,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. Solar Flare 807175 hits on the dummy counted 6750 ms after the cast starts, 2.75 s after the ground aura starts (about 4000 ms): none, so the period is above 2.75 s (excludes 2.7 s, -10% of 3 s). Control (the phase before the learn): no cast, 0. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (first Solar Flare by 3.25 s)",
+      "kind": "metric_delta",
+      "variant": "period_done",
+      "label_suffix": "period_done",
+      "quote": "every $572754t1 sec",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7250,
+      "expire_ms": 500,
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The same hits counted 7250 ms after the cast starts, 3.25 s after the ground aura starts: exactly one, so the period is at most 3.25 s (excludes 3.3 s, +10%). With period_held it lies in (2.75, 3.25] s around 3 s. Control (the phase before the learn): no cast, 0. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Horusath Blast damage taken inside the ground aura)",
+      "kind": "hit_ratio",
+      "variant": "taken_horusath",
+      "label_suffix": "taken_horusath",
+      "quote": "and take $572754s2% increased damage from",
+      "expected": 1.15,
+      "observe_spell": 500154,
+      "control": {
+        "auras": [],
+        "casts": [
+          800231
+        ]
+      },
+      "treatment": {
+        "auras": [],
+        "casts": [
+          572752,
+          800231
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "parts": 13,
+      "cast_power": 1363,
+      "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Horusath Blast 500154 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Rapture damage taken inside the ground aura)",
+      "kind": "hit_ratio",
+      "variant": "taken_rapture",
+      "label_suffix": "taken_rapture",
+      "quote": "and take $572754s2% increased damage from",
+      "expected": 1.15,
+      "observe_spell": 806477,
+      "control": {
+        "auras": [],
+        "casts": [
+          800231
+        ]
+      },
+      "treatment": {
+        "auras": [],
+        "casts": [
+          572752,
+          800231
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "parts": 13,
+      "cast_power": 1363,
+      "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Rapture 806477 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Solar Flare aura still on the dummy 9.15 s after the last tick)",
+      "kind": "metric_delta",
+      "variant": "flare_aura_held",
+      "label_suffix": "flare_aura_held",
+      "quote": "reduces the target's chance to hit by",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 807175
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 22150,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. Solar Flare 807175 (aura 54 MOD_HIT_CHANCE, DurationIndex 1 = 10000 ms, $d) is refreshed by each tick of the ground aura (3 ticks at about 7, 10 and 13 s after the cast starts, the 45 hits of flare_damage over 15 trials); it is on the dummy 22150 ms after the cast starts, 9.15 s after the last tick: its duration is above 9.15 s, which excludes 9 s (-10% of 10 s). Control: no cast, absent. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts); nothing else beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (Solar Flare aura gone 10.85 s after the last tick)",
+      "kind": "metric_delta",
+      "variant": "flare_aura_gone",
+      "label_suffix": "flare_aura_gone",
+      "quote": "reduces the target's chance to hit by",
+      "trigger_spell": 572752,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 807175
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 23850,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The same aura is gone 23850 ms after the cast starts, 10.85 s after the last tick: its duration is below 10.85 s, which excludes 11 s (+10%). With flare_aura_held it lies in (9.15, 10.85) s around 10 s. Control: no cast, absent. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts); nothing else beyond the tooltip and the server DBC (guide section 4)."
     }
   ],
   "player_observations": [],
