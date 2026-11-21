@@ -1,0 +1,3 @@
+interface:
+  display_name: "CoA Dungeon Rescale"
+  short_description: "Convert a zone’s dungeons to level-60 progression"

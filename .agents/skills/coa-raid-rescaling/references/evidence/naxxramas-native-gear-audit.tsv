@@ -1,0 +1,24 @@
+ItemLevel	pieces	with_spell	socketed	weapon
+200	114	5	26	15
+213	212	18	54	33
+226	15	0	1	8
+label	offset_ids_in_use	matching_name
+Ascended	73	0
+Mythic	40	0
+Heroic	216	7
+entry	name	ItemLevel	RequiredLevel	chest_loot_id
+39393	Claymore of Ancient Power	200	80	25192
+39394	Charmed Cierge	200	80	25192
+39395	Thane's Tainted Greathelm	200	80	25192
+39396	Gown of Blaumeux	200	80	25192
+39397	Pauldrons of Havoc	200	80	25192
+40286	Mantle of the Corrupted	213	80	25193
+40343	Armageddon	213	80	25193
+40344	Helm of the Grave	213	80	25193
+40345	Broken Promise	213	80	25193
+40346	Final Voyage	213	80	25193
+40347	Zeliek's Gauntlets	213	80	25193
+40348	Damnation	213	80	25193
+40349	Gloves of Peaceful Death	213	80	25193
+40350	Urn of Lost Memories	213	80	25193
+40352	Leggings of Voracious Shadows	213	80	25193

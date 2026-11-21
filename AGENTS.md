@@ -19,6 +19,10 @@ references below.
 `.agents/skills/coa-development/SKILL.md` is the repository's development skill: task routing, the issue queue
 workflow, gameplay scenarios, PR descriptions, the CoA Knowledge MCP and the optional guide tooling.
 
+- Raid conversions and rescaling → `.agents/skills/coa-raid-rescaling/SKILL.md`
+- Outdoor zone conversions and rescaling → `.agents/skills/coa-zone-rescaling/SKILL.md`
+- Five-player dungeon conversions by zone → `.agents/skills/coa-dungeon-rescale/SKILL.md`
+
 ## Task references
 
 Read the relevant sections when needed for the work. Do not read every guide or turn examples into extra tasks.

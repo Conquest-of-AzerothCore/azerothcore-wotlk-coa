@@ -27,6 +27,9 @@ the reference that holds this repository's procedure. Creating or editing this s
 | Task | Read |
 |---|---|
 | Feature, behavior change, refactor | brainstorming → `writing-plans` (plan in `.agents/plans/<task>/`), then the relevant `.agents/docs/` guide |
+| Raid conversion or rescaling | [coa-raid-rescaling](../coa-raid-rescaling/SKILL.md) |
+| Outdoor zone conversion or rescaling | [coa-zone-rescaling](../coa-zone-rescaling/SKILL.md) |
+| Five-player dungeon conversion by zone | [coa-dungeon-rescale](../coa-dungeon-rescale/SKILL.md) |
 | One reported bug or issue | `.agents/rules/defects.md`, systematic-debugging, then [gameplay-test](references/gameplay-test.md) for its regression |
 | Issue queue, topic batch, triage table, resuming a batch | [issue-queue](references/issue-queue.md) and [batch-scheduling](references/batch-scheduling.md) |
 | Gameplay scenario design or runtime validation | [gameplay-test](references/gameplay-test.md) |

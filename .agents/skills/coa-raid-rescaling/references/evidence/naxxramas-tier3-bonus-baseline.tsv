@@ -1,0 +1,73 @@
+Set ID	Set	Pieces	Spell ID	Spell name	Client description
+405	Frozen Vrykul's Battlegarb	3	523372	Frozen Vrykul - 3 Set Bonus	Taking physical damage has a chance to increase your armor by $523373s1%.
+405	Frozen Vrykul's Battlegarb	5	523374	Frozen Vrykul - 5 Set Bonus	Attack power increased by $s1% of Stamina.
+405	Frozen Vrykul's Battlegarb	6	523375	Frozen Vrykul - 6 Set Bonus	While above 75% health, your dodge rating is increased by $523376s1.
+405	Frozen Vrykul's Battlegarb	8	523378	Frozen Vrykul - 8 Set Bonus	Avoiding damage has a chance to reduce the next instance of incoming damage by $523379s1%.
+521	Dreamwalker Raiment	2	966243	Dreamwalker's Seed	Your damage and healing spells have a chance to plant a seed in the target, which will heal friendly or damage enemy target after 3 seconds. These effect share a cooldown.
+521	Dreamwalker Raiment	4	966153	Dreamwalker's Alacrity	Spell haste increased by $s1%.
+521	Dreamwalker Raiment	6	966155	Dreamwalker's Vitality	While shapeshifted you gain $966189s1% of your health every $966189t1 sec.
+521	Dreamwalker Raiment	8	966156	Light of Elune	Your damage and healing spells have a chance to summon a beam of light at your location, which increases your spell haste rating by $966190s1 and your healing done by $966190s3% for $966190d.
+523	Dreadnaught's Battlegear	2	966185	Dreadnaught's Honor	Increases the threat bonus of Defensive Stance by $s2% and its damage reduction effect by $s1%.
+523	Dreadnaught's Battlegear	4	966186	Dreadnaught's Precision	Increases your Stamina by $s1 and your hit rating by $s2.
+523	Dreadnaught's Battlegear	6	966187	Unyielding	Fully avoiding damage from an attack increases your Stamina by $966234s1 for $966234d, and taking direct damage increases your armor by $966235s1 for $966235d. Each effect stacks 5 times.
+523	Dreadnaught's Battlegear	8	966188	Cheat Death	When your health drops below 30% you trigger Cheat Death. Cheat Death absorbs the next $966237s1 damage you would take and gives you a $966236s1% chance to dodge the next attack within $966236d. This effect cannot occur more than once every 3 min.
+524	Bonescythe Armor	2	966173	Deathstalker	Dealing melee damage to targets below 20% health increases your melee haste by $966216s1 for $966216d. You cannot benefit from this effect more than once every 4 sec.
+524	Bonescythe Armor	4	966174	Battle Harmony	If you have more Strength than Agility you gain $966214s1 crit rating. If you have more Agility than Strength you gain $966215s1 attack power.
+524	Bonescythe Armor	6	966175	Darting Shadows	Increases your dodge rating by $s1.
+524	Bonescythe Armor	8	966176	Opportunist	Your direct damage melee abilities have a $h% chance to deal an additional $s1% damage.
+525	Vestments of Faith	2	966170	Epiphany of Faith	Each spell you cast can trigger an Epiphany, increasing your mana regeneration by $966208s1 for $966208d.
+525	Vestments of Faith	4	966169	Fervor of Faith	You gain $s1% of your Spirit as spell crit rating.
+525	Vestments of Faith	6	966171	Miracle of Faith	When you drop below 30% health you are instantly healed for $s1% of your spell power as Holy. This effect cannot occur more than once every 2 min.
+525	Vestments of Faith	8	966172	Celerity of Faith	Healing a target with a direct heal below 50% health grants you Power Word: Celerity, which grants you $966249s1 spell haste rating for $966249d. This effect cannot occur more than once every 15 sec.
+526	Frostfire Regalia	2	966161	Spell Barrage	Dealing direct damage with a spell has a chance to trigger Spell Barrage, which deals additional spell damage of a random school. This effect cannot occur more than once every 10 sec.
+526	Frostfire Regalia	4	966162	Frostfire Brilliance	You gain $s1% of your Intellect as spell damage.
+526	Frostfire Regalia	6	966163	Frostfire Efficiency	When your mana drops below $s1% you gain $966200s1% of your maximum mana. This effect cannot occur more than once per min.
+526	Frostfire Regalia	8	966164	Empowered Spell Barrage	Increases the damage of your Spell Barrage by $s1% and gives it a $h% chance to trigger an additional time.
+527	The Earthshatterer	2	966177	Earthshatter 2 Set Bonus	Your direct damaging spells and abilities have a chance to grant you Totemic Power for $966219d.
+527	The Earthshatterer	4	966178	Earthshatter 4 Set Bonus	Your direct damaging spells increase your Agility by $909794s1, stacking $909794u times.
+527	The Earthshatterer	6	966179	Earthshatter 6 Set Bonus	You take $s1% less Non-Physical damage.
+527	The Earthshatterer	8	966180	Earthshatter 8 Set Bonus	Dealing direct damage with an ability increases your spell damage by $966223s1% for $966223d. Dealing direct damage with a spell increases your Agility by $406001s1 for $406001d.
+528	Redemption Regalia	2	966165	Glory of Redemption	While above 75% health your healing spells are $s1% more effective and while below 25% health you gain $s2% increased cast speed.
+528	Redemption Regalia	4	966166	Fervor of Redemption	Spell critical strike rating increased by $s1.
+528	Redemption Regalia	6	966167	Redemption's Blessing	You heal yourself for $s1% of your healing done to others when your target is at a health deficit.
+528	Redemption Regalia	8	966168	Redemption's Judgement	Your direct healing spells have a chance to consecrate the ground at your target's feet for $966207d in an 8 yard radius, healing all allies standing within every $966207t1 sec.
+529	Plagueheart Raiment	2	966181	Wanton Destruction	Your damaging spells deal $s1% more damage to targets below 35% health.
+529	Plagueheart Raiment	4	966182	Blood Magic	Your Life Tap increases your spell power by $966229s1 for $966229d.
+529	Plagueheart Raiment	6	966183	Plagueheart	You receive $s1% more healing from all sources.
+529	Plagueheart Raiment	8	966184	Absolute Destruction	Your damage over time spells have a chance to increase your spell haste rating by $966231s1 for $966231d, and your direct damage spells have a chance to increase your spell crit rating by $966232s1 for $966232d.
+530	Cryptstalker Armor	2	966157	Stalker's Ferocity	Your ranged and melee abilities have a chance to increase your ranged and melee attack speed by $954613s1% and your tamed pet's attack speed and focus regeneration by $966191s1% for $966191d. This effect cannot occur more than once every 10 sec.
+530	Cryptstalker Armor	4	966158	Stalker's Force	Increases melee and ranged attack power by $s1 for both you and your tamed pet.
+530	Cryptstalker Armor	6	966159	Stalker's Deception	Feign Death heals you for $966192s2% of your maximum health and an additional $966192s1% every 2 sec while you remain feigning.
+530	Cryptstalker Armor	8	966160	Stalker's Power	Increases the duration of your Black Arrow by $/1000;s1 sec.
+1222	Earthshatter Raiment	2	802544	T3 Earthshatter Healer - 2 Set Bonus	Bringing an ally to full health with a critical heal increases critical strike rating by $802548s1 for the next cast.
+1222	Earthshatter Raiment	4	802545	T3 Earthshatter Healer - 4 Set Bonus	Increases your haste rating by $s1.
+1222	Earthshatter Raiment	6	802546	T3 Earthshatter Healer - 6 Set Bonus	Reduces the damage taken from area of effect attacks by $S1%.
+1222	Earthshatter Raiment	8	802547	T3 Earthshatter Healer - 8 Set Bonus	Your direct healing criticals radiate outward from the target, healing allies within 8 yards for $m1% of the healing. Shared among 5 targets.
+1531	Dreadborne Armor	2	414086	Dreadborne T3 2 Set	Dealing periodic damage with bleeds has a 4% chance to turn you Dreadborne, increasing your Strength by 50 for 10 seconds.
+1531	Dreadborne Armor	4	414088	Dreadborne T3 4 set	You gain 5% of your Strength as Armor Penetration Rating.
+1531	Dreadborne Armor	6	414089	Dreadborne 6 set	Increases your armor by 2000, but reduces your chance to dodge by 5%.
+1531	Dreadborne Armor	8	414091	Dreadborne 8 set	Dealing direct melee damage increases your Haste Rating by 8 and Dealing periodic damage with bleeds increases your Armor Penetration Rating by 4. Both effects stack 10 times and have separate 2 second ICD.
+2001	Dreamwalker Garb	2	413010	Naxx balance druid 2 set	Your direct damaging spells have a chance to increase your Spirit and spell power by 30.
+2001	Dreamwalker Garb	4	413012	Naxx balance druid 4 set	You gain 4% of your Spirit as spell hit rating.
+2001	Dreamwalker Garb	6	413013	Naxx balance druid 6 set	Taking magic damage has a chance to increase your magic damage dealt by 3%.
+2001	Dreamwalker Garb	8	413015	Naxx balance druid 8 set	Your spell casts have a chance to inspire you with the Grace of Elune, increasing your Spirit by 10% and your Spell Damage by 10% of your spirit.
+2002	Regalia of Faith	2	413020	Of Faith 2 Set Bonus (Tier 3)	While above 75% mana, your Spirit is increased by 25.
+2002	Regalia of Faith	4	413023	Of Faith 4 Set Bonus (Tier 3)	Your Spell Damage is increased by 5% of your Spirit.
+2002	Regalia of Faith	6	413024	Of Faith 6 Set Bonus (Tier 3)	Resistances increased by $s1. Armor increased by $s2.
+2002	Regalia of Faith	8	413025	Of Faith 8 Set Bonus (Tier 3)	Every 6 seconds in combat, you gain 50 Spell Damage and Critical Strike Rating or 50 Spirit and Haste Rating. Both effects can not occur simultaneously.
+2003	Earthshatter Regalia	2	413050	Earthshatter ELE 2 Set Bonus (Tier 3)	Your direct damage spells have a chance to trigger an Elemental Burst, hitting up to 3 targets within 8 yards.
+2003	Earthshatter Regalia	4	413052	Earthshatter ELE 4 Set Bonus (Tier 4)	Spell haste increased by 3%.
+2003	Earthshatter Regalia	6	413053	Earthshatter ELE 6 Set Bonus (Tier 4)	Resource cost of spells and abilities reduced by $S1%.
+2003	Earthshatter Regalia	8	413054	Earthshatter ELE 8 Set Bonus (Tier 3)	Your direct spell criticals infuse you with the elements, increasing your critical strike damage by 2% and critical strike chance by 1%. This effect stacks up to 5 times and lasts for 5 seconds.
+2004	Dreadnaught's Plate	2	413030	Dreadnaught 2 Set Bonus (Tier 3)	After parrying an attack, you take 3% less damage for 4 seconds.
+2004	Dreadnaught's Plate	4	413032	Dreadnaught 4 Set Bonus (Tier 3)	Increases your stamina by $s1 and your Hit Rating by $s2.
+2004	Dreadnaught's Plate	6	413033	Dreadnaught 6 Set Bonus (Tier 3)	Every 6 seconds in combat, you gain either 125 Attack Power or 75 Parry Rating. Both effects can not occur simultaneously.
+2004	Dreadnaught's Plate	8	413037	Dreadnaught 8 Set (Tier 3)	When your health drops below 35% your defense rating is increased by 100 and any active Stagger effect from your Tactical Mastery capstone is cleared. This effect lasts for 8 seconds and can only occur every 60 seconds.
+2005	Redemption Armor	2	413040	Redemption 2 Set Bonus (Tier 3)	Your damaging spell and melee attacks have a chance to deal high-theat holy damage to the target.
+2005	Redemption Armor	4	413042	Redemption 2 Set Bonus (Tier 3)	Spell Damage increased by $s1% of your Stamina.
+2005	Redemption Armor	6	413043	Of Redemption 6 Set (Tier 3)	While above 75% mana, your Block Value is increased by 60.
+2005	Redemption Armor	8	413047	Redemption 8 Set Bonus (Tier 3)	Dealing Direct Magic Damage with spells or abilities decreases all damage taken by 1%, stacks up to 7 times and lasting for 10 seconds.
+2006	Redemption Battleplate	2	413060	Redemption 2 Set Bonus (Tier 3)	Your damaging melee and ranged attacks has a chance to trigger a Divine Smite dealing your highest scaled magic school as damage to the target.
+2006	Redemption Battleplate	4	413062	Redemption 4 Set Bonus (Tier 3)	Your magic damaging spells and abilities increase your Strength by 10. This effect stacks up to 5 times and lasts for 10 seconds.
+2006	Redemption Battleplate	6	413064	Redemption 4 Set Bonus (Tier 3)	Your Healing Power is increased by 5% of your strength.
+2006	Redemption Battleplate	8	413065	Redemption 8 Set Bonus (Tier 3)	Doubles the chance to trigger the Divine Smite and decreases the cooldown by 66% and increases the damage dealt by 100%.
