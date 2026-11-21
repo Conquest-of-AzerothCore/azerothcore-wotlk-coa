@@ -253,7 +253,7 @@ class witch_doctor_casts : public AllSpellScript
                 Cast(player, target, MarkOfMalice);
             if (Aura* threads = target->GetAura(Threads, player->GetGUID()))
                 if (player->HasAura(Strings) && threads->GetScriptValue(Strings))
-                    Copy(player, target, StringsDamage, uint64(damage) * 30 / 100);
+                    Copy(player, target, StringsDamage, uint64(damage) * 10 / 100);
         }
         if (damage && Family(info, 1, 262144) && player->HasAura(VoodooSpirits))
             if (Aura* threads = target->GetAura(Threads, player->GetGUID()))

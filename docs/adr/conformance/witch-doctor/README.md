@@ -30,3 +30,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0021](0021-spirit-eclipse-splash-reaches-5-yd.md) | Spirit Eclipse splash reaches 5 yd | accepted |
 | [0022](0022-spirit-speed-lasts-while-spirits-are-held.md) | Spirit speed lasts while Spirits are held | accepted; dormant path (M-52) |
 | [0023](0023-spirit-out-of-the-bottle-reaches-three-additional-allies.md) | Spirit Out Of The Bottle reaches three additional allies | accepted |
+| [0024](0024-voodoo-strings-strikes-total-thirty-percent.md) | Voodoo Strings strikes total 30% over 3 sec | accepted; decision M-70 |
