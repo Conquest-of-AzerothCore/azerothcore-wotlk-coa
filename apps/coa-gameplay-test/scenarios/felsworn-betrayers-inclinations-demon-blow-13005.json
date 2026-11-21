@@ -11,12 +11,18 @@
     "and 50% of spell power, and applies its stun. The felsworn swings at a Felguard (6115, Demon) until the",
     "first blow, which is near certain within 120 swings (0.9^120 is about 3e-6). The control swings at a wolf",
     "(299, Beast) for 120 seconds, about 60 swings, and must never deliver it (without the Demon restriction at",
-    "least one blow would follow with about 99.8% probability). Armor reduces the Physical hit, so the damage",
-    "floor is 15% of the felsworn's attack power, which the base damage alone cannot reach."
+    "least one blow would follow with about 99.8% probability). The felsworn carries fixture bonuses of 2000",
+    "attack power and 1000 spell power on a naked level 80 character (444 base attack power, checked), so one",
+    "non-critical blow is 25.5 + 0.25 * 2444 + 0.5 * 1000, about 1137, before armor. The check accepts 850 to",
+    "1145: armor can take up to a quarter, while missing either coefficient (about 636 or 526), swapped",
+    "coefficients (about 1497) or doubled scaling (over 2200) fail. Critical blows are excluded."
   ],
   "timeout_ms": 600000,
   "players": [
-    {"id": "felsworn", "race": 1, "class": 14, "level": 80, "melee_hit_rating": 100000, "expertise_rating": 100000},
+    {
+      "id": "felsworn", "race": 1, "class": 14, "level": 80, "melee_hit_rating": 100000, "expertise_rating": 100000,
+      "attack_power": 2000, "spell_power": 1000
+    },
     {"id": "control", "race": 1, "class": 14, "level": 80, "melee_hit_rating": 100000, "expertise_rating": 100000}
   ],
   "creatures": [
@@ -45,22 +51,35 @@
       "action": "assert", "label": "SETUP: Betrayer's Inclinations is active on the control", "actor": "control",
       "metric": "aura", "spell": 804758, "equals": 1, "within_ms": 2000
     },
-    {"action": "snapshot", "actor": "felsworn", "metric": "attack_power", "save_as": "felsworn_ap"},
+    {
+      "action": "assert", "label": "SETUP: attack power is the 2000 fixture plus the naked level 80 base (444)",
+      "actor": "felsworn", "metric": "attack_power", "min": 2440, "max": 2450
+    },
+    {
+      "action": "assert", "label": "SETUP: Fire spell power is the 1000 fixture", "actor": "felsworn",
+      "metric": "spell_power", "school": 2, "min": 1000, "max": 1010
+    },
+    {
+      "action": "assert", "label": "SETUP: Shadow spell power is the 1000 fixture", "actor": "felsworn",
+      "metric": "spell_power", "school": 5, "min": 1000, "max": 1010
+    },
     {"action": "attack", "actor": "felsworn", "target": "felguard"},
     {"action": "attack", "actor": "control", "target": "wolf"},
     {
-      "action": "assert", "label": "#13005: an attack against a Demon delivers Betrayer's Blow", "actor": "felsworn",
-      "metric": "spell_damage_count", "spell": 804766, "target": "felguard", "min": 1, "within_ms": 240000
+      "action": "assert", "label": "#13005: an attack against a Demon delivers a non-critical Betrayer's Blow",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 804766, "target": "felguard", "critical": false,
+      "min": 1, "within_ms": 240000
     },
     {"action": "stop_attack", "actor": "felsworn"},
     {
-      "action": "assert", "label": "SETUP: the damage check sees at most two blows", "actor": "felsworn",
-      "metric": "spell_damage_count", "spell": 804766, "target": "felguard", "max": 2
+      "action": "assert", "label": "SETUP: the damage check sees exactly one non-critical blow", "actor": "felsworn",
+      "metric": "spell_damage_count", "spell": 804766, "target": "felguard", "critical": false, "equals": 1
     },
     {
-      "action": "assert", "label": "#13005: the blow adds attack power and spell power to its base damage",
-      "actor": "felsworn", "metric": "spell_damage_total", "spell": 804766, "target": "felguard",
-      "ratio_to": "felsworn_ap", "min": 0.15
+      "action": "assert",
+      "label": "#13005: one non-critical blow deals 25.5 + 25% of AP + 50% of SP (about 1137), less armor",
+      "actor": "felsworn", "metric": "spell_damage_total", "spell": 804766, "target": "felguard", "critical": false,
+      "min": 850, "max": 1145
     },
     {
       "action": "assert", "label": "#13005: the blow stuns the Demon", "actor": "felguard",

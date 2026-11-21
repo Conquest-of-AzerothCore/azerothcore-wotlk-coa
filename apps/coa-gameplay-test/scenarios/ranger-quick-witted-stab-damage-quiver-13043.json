@@ -11,12 +11,14 @@
     "power to its 1 base damage and an active Poison Quiver (800260) applies its poison (500104) to the stabbed",
     "enemy. Evasion (5277, +50% dodge) and 40 seconds of melee from a hostile mob make at least one avoided",
     "attack near certain (about 20 swings at over 50% dodge). The ranger never attacks, so the poison can only",
-    "come from the stab. Armor reduces the Physical hit, so the damage floor is 30% of the ranger's attack power."
+    "come from the stab. The ranger carries a 2000 attack power fixture, and the check reads one non-critical",
+    "stab: 1 + 100% of attack power before armor, so it must land between 50% and 101% of the ranger's attack",
+    "power. A missing coefficient (about 0.04%) or a doubled one (about 200% before armor) fails."
   ],
   "timeout_ms": 120000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
   "players": [
-    {"id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false}
+    {"id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false, "attack_power": 2000}
   ],
   "creatures": [
     {"id": "mob", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2}
@@ -54,13 +56,18 @@
       "metric": "melee_attacks_taken", "target": "mob", "victim_state": 2, "min": 1, "within_ms": 40000
     },
     {
-      "action": "assert", "label": "SETUP: an avoided attack fires the Quick-Witted stab", "actor": "ranger",
-      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "periodic": false, "min": 1, "within_ms": 5000
+      "action": "assert", "label": "SETUP: an avoided attack fires a non-critical Quick-Witted stab",
+      "actor": "ranger", "metric": "spell_damage_count", "spell": 704314, "target": "mob", "critical": false, "min": 1,
+      "within_ms": 40000
     },
     {
-      "action": "assert", "label": "#13043: the stab adds the ranger's attack power to its damage", "actor": "ranger",
-      "metric": "spell_damage_total", "spell": 704314, "target": "mob", "periodic": false, "ratio_to": "ranger_ap",
-      "min": 0.3
+      "action": "assert", "label": "SETUP: the damage check sees exactly one non-critical stab", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "critical": false, "equals": 1
+    },
+    {
+      "action": "assert", "label": "#13043: one non-critical stab deals 1 + 100% of attack power, less armor",
+      "actor": "ranger", "metric": "spell_damage_total", "spell": 704314, "target": "mob", "critical": false,
+      "ratio_to": "ranger_ap", "min": 0.5, "max": 1.01
     },
     {
       "action": "assert", "label": "#13043: the stab applies the Poison Quiver poison", "actor": "mob",
