@@ -28,6 +28,9 @@ EVENT_METRICS = ('spell_cast_count', 'owned_creature_summon_count', 'owned_creat
 OWNED_METRICS = ('owned_creature_spell_cast_count',)
 TARGETS = (TARGET, CASTER)
 EDGES = ('start trials', 'start events', 'end trials', 'end events')
+RATING_FIXTURES = ('spell_hit_rating', 'spell_crit_rating', 'melee_crit_rating', 'ranged_crit_rating',
+                   'ranged_hit_rating', 'melee_hit_rating', 'expertise_rating')
+MAX_COMBAT_RATING = 24
 
 
 @dataclass(frozen=True)
@@ -51,6 +54,13 @@ class Setup:
 class Step:
     token: str
     wait_ms: int
+
+
+@dataclass(frozen=True)
+class RatingBonus:
+    rating: int
+    expected_pct: float
+    tolerance: float
 
 
 @dataclass(frozen=True)
@@ -82,6 +92,29 @@ class FlatChanceSpec:
     label_suffix: str
     dummy_distance: float | None
     isolation: Isolation = Isolation(1, DUMMY_DISTANCE, 0.0, '', ())
+    player_ratings: tuple[tuple[str, int], ...] = ()
+    rating_bonus: RatingBonus | None = None
+
+
+def player_ratings_of(entry: dict) -> tuple[tuple[str, int], ...]:
+    raw = entry.get('player_ratings', {})
+    if not isinstance(raw, dict) or set(raw) - set(RATING_FIXTURES) or any(
+            type(value) is not int or value < 0 for value in raw.values()):
+        raise ValueError(f'{entry["spell"]} {KIND} player_ratings maps {RATING_FIXTURES} to non-negative integers, '
+                         f'not {raw!r}')
+    return tuple(sorted(raw.items()))
+
+
+def rating_bonus_of(entry: dict) -> RatingBonus | None:
+    raw = entry.get('rating_bonus')
+    if raw is None:
+        return None
+    if not isinstance(raw, dict) or set(raw) != {'rating', 'expected_pct', 'tolerance'} or \
+            type(raw['rating']) is not int or not 0 <= raw['rating'] <= MAX_COMBAT_RATING or \
+            float(raw['tolerance']) <= 0:
+        raise ValueError(f'{entry["spell"]} {KIND} rating_bonus is {{"rating": 0..{MAX_COMBAT_RATING}, '
+                         f'"expected_pct": n, "tolerance": n > 0}}, not {raw!r}')
+    return RatingBonus(raw['rating'], float(raw['expected_pct']), float(raw['tolerance']))
 
 
 def read_of(entry: dict, allowed: tuple[str, ...], role: str, spell: int) -> Read:
@@ -149,8 +182,11 @@ def flat_chance_spec(entry: dict) -> FlatChanceSpec:
         int(entry.get('events_per_proc', 1)), int(entry['cycles']), int(entry['unlearned_cycles']),
         float(entry['trials_per_cycle']), int(entry.get('parts', 1)), bool(entry.get('pilot', False)),
         entry.get('label_suffix', 'flat_chance'),
-        float(entry['dummy_distance']) if entry.get('dummy_distance') is not None else None)
+        float(entry['dummy_distance']) if entry.get('dummy_distance') is not None else None,
+        player_ratings=player_ratings_of(entry), rating_bonus=rating_bonus_of(entry))
     spec = replace(spec, isolation=isolation_of(entry, KIND, spec.dummy_distance))
+    if spec.rating_bonus is not None and spec.isolation.streams > 1:
+        raise ValueError(f'{spell} {KIND} reads a rating bonus on the first caster only, so it runs one stream')
     streams = spec.isolation.streams
     chance = spec.chance_pct / 100
     if not 0 < chance < 1 or spec.events_per_proc < 1 or spec.trials_per_cycle <= 0:
@@ -166,6 +202,8 @@ def flat_chance_spec(entry: dict) -> FlatChanceSpec:
     if spec.dummy_distance is not None and not 0 < spec.dummy_distance <= METRIC_DELTA_MAX_DUMMY_DISTANCE:
         raise ValueError(f'{spell} {KIND} places the dummy {spec.dummy_distance:g} yd away, outside (0, '
                          f'{METRIC_DELTA_MAX_DUMMY_DISTANCE}] yd')
+    if spec.rating_bonus is not None and not spec.player_ratings:
+        raise ValueError(f'{spell} {KIND} reads a rating bonus without a player_ratings fixture')
     if (spec.unlearned_setup is not None or spec.unlearned_entry is not None) and spec.setup is None:
         raise ValueError(f'{spell} {KIND} overrides the unlearned setup of an entry with no setup')
     planned = spec.cycles * spec.trials_per_cycle * spec.parts * streams
@@ -340,6 +378,9 @@ def flat_chance_scenario(class_file: dict, spec: FlatChanceSpec) -> tuple[dict, 
     steps = stream_base_steps(armed, streams) + each_stream(
         [{'action': 'learn', 'actor': CASTER, 'spell': spell}
          for spell in dict.fromkeys((spec.trigger_spell, *spec.learn))], streams)
+    if spec.rating_bonus is not None:
+        steps.append(measurement(chance_mark(spec, 'rating bonus'), CASTER, 'combat_rating_bonus',
+                                 rating=spec.rating_bonus.rating))
     steps += placement_steps(spec.isolation, streams, lambda text: chance_mark(spec, text))
     cast = {'ward': False}
     unlearned_steps, unlearned_segments = arm_plan(records, spec, UNLEARNED, spec.unlearned_cycles, streams, cast)
@@ -370,7 +411,9 @@ def flat_chance_scenario(class_file: dict, spec: FlatChanceSpec) -> tuple[dict, 
                          + ([f'the caster held at {spec.caster_health_pct}% of the 10000 health fixture before every '
                              f'trigger cast'] if spec.caster_health_pct is not None else [])
                          + ([f'{spec.trigger_spell} removed from the dummy after each cast wait (harness set_aura 0)']
-                            if spec.stop_trigger_aura else []))
+                            if spec.stop_trigger_aura else [])
+                         + ([f'player ratings {dict(spec.player_ratings)} on the caster for both arms']
+                            if spec.player_ratings else []))
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour flat chance rate',
@@ -381,13 +424,20 @@ def flat_chance_scenario(class_file: dict, spec: FlatChanceSpec) -> tuple[dict, 
                      f'{spec.event.spell or spec.event.entry} ({spec.events_per_proc} per proc), and the rate must '
                      f'hold {spec.chance_pct:g}% in a {interval_name(spec.parts)} inside its G-19 band'
                      + (f'; fixtures: {fixtures}' if fixtures else '')),
-        'players': [player_fixture(armed)],
+        'players': [{**player_fixture(armed), **dict(spec.player_ratings)}],
         'creatures': [dummy],
         'steps': steps}
     scenario = stream_scenario(scenario, armed, spec.isolation, streams)
     model = {'kind': KIND, 'metric': METRIC, 'evidence_metric': METRIC, 'quote': entry.quote,
              'chance_pct': spec.chance_pct, 'events_per_proc': spec.events_per_proc, 'fixtures': fixtures,
              'trial': spec.trial.metric, 'event': spec.event.metric, 'arms': arms}
+    if spec.rating_bonus is not None:
+        model['rating_bonus'] = {'label': chance_mark(spec, 'rating bonus'), 'rating': spec.rating_bonus.rating,
+                                 'expected_pct': spec.rating_bonus.expected_pct,
+                                 'tolerance': spec.rating_bonus.tolerance}
+        scenario['contract'] += (f'; the bonus of combat rating {spec.rating_bonus.rating} is read once per part and '
+                                 f'must be {spec.rating_bonus.expected_pct:g} points within '
+                                 f'{spec.rating_bonus.tolerance:g}, else the part is not the stated arm')
     if spec.isolation.streams > 1:
         model.update(streams=spec.isolation.streams, isolation=isolation_bounds(steps))
     expectation = Expectation(chance_mark(spec, ''), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
@@ -410,10 +460,26 @@ def arm_counts(runs: list[Run], arm: dict, per_proc: int) -> list[tuple[float, f
     return parts
 
 
+def rating_bonus_reading(runs: list[Run], bonus: dict) -> str | None:
+    values = [run.values.get(bonus['label']) for run in runs]
+    missing = next((run for run, value in zip(runs, values) if value is None), None)
+    if missing is not None:
+        return missing_measurement(missing, bonus['label'])
+    off = [value for value in values if abs(value - bonus['expected_pct']) > bonus['tolerance']]
+    if off:
+        return (f'the combat rating {bonus["rating"]} fixture gives a bonus of {off[0]:g} points, not the stated '
+                f'{bonus["expected_pct"]:g} within {bonus["tolerance"]:g}, so the part is not the stated arm')
+    return None
+
+
 def flat_chance_judgement(base: Verdict, runs: list[Run], model: dict) -> Verdict:
     isolation = isolation_reading(runs, model.get('isolation', []))
     if isolation:
         return replace(base, status=isolation[0], explanation=isolation[1])
+    if model.get('rating_bonus') is not None:
+        off = rating_bonus_reading(runs, model['rating_bonus'])
+        if off is not None:
+            return replace(base, status='unmeasured', explanation=off)
     detail, controls_held, deciding = [], True, {}
     for arm in model['arms']:
         parts = arm_counts(runs, arm, int(model['events_per_proc']))

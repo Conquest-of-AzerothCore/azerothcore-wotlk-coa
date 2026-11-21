@@ -4778,17 +4778,11 @@
   {
     "spell": 707329,
     "clause": "Chance increased based on your ranged critical strike rating.",
-    "labels": [],
+    "labels": [
+      "707329 behaviour_metric_delta viper_rating_rate"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The rating term of the Viper roll (Summons.cpp:486-488: ProcChance of 712374 + GetRatingBonusValue(CR_CRIT_RANGED)) needs a treatment arm with a set ranged critical strike rating and the expected chance from the rating bonus at level 60. The flat_chance_rate kind sets one player fixture for both arms, and no read gives GetRatingBonusValue(CR_CRIT_RANGED) to derive the expected chance (never invented). The 50% end at rating 0 is judged by 707329 behaviour_metric_delta viper_rate, which does not prove the increase. Tool note P-T5 (harness read, owner): a combat_rating_bonus read (GetRatingBonusValue of one rating) and a per-part player_ratings field in the contributor kind; then a second viper_rate entry at a rating whose bonus makes about 70%.",
-      "attempts": [
-        {
-          "agent": "cycle10/author-P",
-          "report": "cycle10/author-P.md"
-        }
-      ]
-    }
+    "reason": "\"707329 behaviour_metric_delta viper_rating_rate\" runs the viper_rate layout with 280 ranged critical strike rating on the caster (player_ratings of flat_chance_rate, ADR 1048, provisional) and reads the rating bonus each part (combat_rating_bonus, 20 points from the DBC rating tables): the Hexfire Blast rate must hold 70%, against the 50% of viper_rate at rating 0. Closes tool note P-T5."
   },
   {
     "spell": 707331,

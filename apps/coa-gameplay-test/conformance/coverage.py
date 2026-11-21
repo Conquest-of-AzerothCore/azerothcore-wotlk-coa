@@ -443,6 +443,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_remaining_ms'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
     **dict.fromkeys(('healing_power', 'swim_speed_rate', 'skill_bonus', 'mana_regen_interrupted'), STATE),
+    'combat_rating_bonus': STATE,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -490,6 +491,7 @@ STATE_PROMISES = {
     'owned_creature_remaining_ms': r'lasts?|duration',
     'healing_power': r'healing power|healing done', 'swim_speed_rate': r'swim\w*',
     'skill_bonus': r'skill', 'mana_regen_interrupted': r'mana regenerat\w*',
+    'combat_rating_bonus': RATING_WORDS,
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})

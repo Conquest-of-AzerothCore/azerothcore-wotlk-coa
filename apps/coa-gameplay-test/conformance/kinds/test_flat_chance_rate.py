@@ -286,6 +286,45 @@ class FlatChanceRateTests(unittest.TestCase):
         del part.values[expectation.model['isolation'][-1]['label']]
         verdict = flat_chance_verdict(base_verdict(expectation), part, expectation.model)
         self.assertEqual(verdict.status, 'unmeasured')
+    def test_a_rating_fixture_sets_the_caster_and_reads_its_bonus_once(self):
+        rated = {**TICK, 'player_ratings': {'ranged_crit_rating': 280},
+                 'rating_bonus': {'rating': 9, 'expected_pct': 20.0, 'tolerance': 0.01}}
+        scenario, [expectation] = self.built(rated)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertEqual(scenario['players'][0]['ranged_crit_rating'], 280)
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'combat_rating_bonus']
+        self.assertEqual([(read['rating'], read['label']) for read in reads],
+                         [(9, expectation.model['rating_bonus']['label'])])
+        _, [plain] = self.built(TICK)
+        self.assertNotIn('rating_bonus', plain.model)
+
+    def test_a_rating_bonus_off_its_statement_is_unmeasured(self):
+        rated = {**TICK, 'player_ratings': {'ranged_crit_rating': 280},
+                 'rating_bonus': {'rating': 9, 'expected_pct': 20.0, 'tolerance': 0.01}}
+        _, [expectation] = self.built(rated)
+        label = expectation.model['rating_bonus']['label']
+
+        def judged(bonus):
+            runs = []
+            for index in range(rated['parts']):
+                fake = counted_run(expectation, {'unlearned': (10, 0), 'treatment': (900, 180 + (6 if index % 2
+                                                                                                else -6))})
+                fake.values[label] = bonus
+                runs.append(fake)
+            return POOLED_JUDGE(base_verdict(expectation), runs, expectation.model).status
+
+        self.assertEqual(judged(20.000002), 'ok')
+        self.assertEqual(judged(10.0), 'unmeasured')
+
+    def test_refused_rating_inputs(self):
+        for changes in ({'player_ratings': {'haste_rating': 10}}, {'player_ratings': {'ranged_crit_rating': -1}},
+                        {'rating_bonus': {'rating': 9, 'expected_pct': 20.0, 'tolerance': 0.01}},
+                        {'player_ratings': {'ranged_crit_rating': 280},
+                         'rating_bonus': {'rating': 25, 'expected_pct': 20.0, 'tolerance': 0.01}},
+                        {'player_ratings': {'ranged_crit_rating': 280},
+                         'rating_bonus': {'rating': 9, 'expected_pct': 20.0}}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.built(TICK, **changes)
 
     def test_events_per_proc_divide_the_events(self):
         verdict = self.pooled({**HEAL, 'events_per_proc': 2}, {'unlearned': (10, 0), 'treatment': (1000, 160)},

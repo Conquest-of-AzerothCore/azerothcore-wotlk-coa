@@ -25,6 +25,13 @@ Reads: `trial` is `spell_damage_count` (with `periodic` and `target`), `spell_he
 spaced by its cast time and global cooldown (`stack_chance_rate.minimum_wait_ms`), a costed cast names its power,
 and the talents are never learned up front.
 
+`player_ratings` (a map of the player fixture's rating fields, such as `ranged_crit_rating`, to non-negative integers)
+sets those ratings on the caster for both arms of every part, for a chance that a rating raises. With it,
+`rating_bonus` (`{"rating": CombatRating, "expected_pct": n, "tolerance": n}`) reads `combat_rating_bonus` of that
+rating once per part, after the learns; a part whose bonus is missing or off the stated percentage points by more
+than the tolerance makes the verdict `unmeasured` (the fixture is not the stated arm). The entry's `chance_pct` is
+then the stated base chance plus that bonus (ADR 1048, provisional).
+
 The judge pools the parts: a Wilson interval below 10 parts, the between-part t interval from 10 parts, inside the
 G-19 band of the chance (`compare.banded_rate`). Sizing is the flip-proof rule of `stack_chance_rate` (mentor M-14):
 `cycles x trials_per_cycle x parts` must reach `arm_trials_needed(chance, 1, parts)`, unless `pilot`; the judge
@@ -72,7 +79,8 @@ once, rest on the asserted placement).
 Witch Doctor: Darkspear Traditionalist 503707, Hexfire Mass 807450 and Berserking 705925 (one Hex of Malice tick per
 cycle, the Hex removed after 3500 ms), Mojo Madness 705871 and Loa Spirits 804620 and 807904 (a Loa's Brew self heal
 at 30% health), Voodoo Fire 802262 and 803846 and Spirit Striker 806286 (one Serpent Ward per cycle, its attacks the
-trials), Viper Ward 707329 (one Viper Ward per cycle, a plain Serpent Ward in the control), Overflowing
-Juju 705844 (the five Shadow Puppet 802745 hits of one Shadow Puppets cast per cycle). Streams: 8 for
-503707, 705844 and the three heal entries; 4 for 705925 and the three Voodoo Fire entries (a Serpent Ward 3 yd in
-front of a caster 25 yd from its dummy); 3 for 807450 and 707329 (a ward at the dummy itself).
+trials), Viper Ward 707329 (one Viper Ward per cycle, a plain Serpent Ward in the control; `viper_rating_rate` at 280
+ranged critical strike rating, one stream), Overflowing Juju 705844 (the five Shadow Puppet 802745 hits of one Shadow
+Puppets cast per cycle). Streams: 8 for 503707, 705844 and the three heal entries; 4 for 705925 and the three Voodoo
+Fire entries (a Serpent Ward 3 yd in front of a caster 25 yd from its dummy); 3 for 807450 and 707329 (a ward at the
+dummy itself).

@@ -719,7 +719,9 @@ skill line for that spell.
 therefore writes `PLAYER_CRIT_PERCENTAGE`, which later melee crit rolls read. `melee_crit_taken_chance` and
 `daze_taken_chance` require `target`, the attacker, and return its main-hand critical chance against the player and
 its chance to daze the player with a landed hit from behind (`Unit::GetMeleeDazeChance`). `expertise` reads main-hand
-expertise; `combat_rating` requires `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires
+expertise; `combat_rating` requires `rating` (0..24, native `CombatRating`) and reads the rating value;
+`combat_rating_bonus` takes the same `rating` and reads `Player::GetRatingBonusValue`, the rating converted to
+percentage points at the player's level and class. `stat` requires
 `stat` (0..4), `resistance` requires `school` (1..6); `item_armor_by_subclass` requires `subclass`
 (`ITEM_SUBCLASS_ARMOR_*`, 0..10) and reads a player's `Player::GetItemArmorBySubclass`, the raw item-sourced
 Armor of that subclass, independent of any armor-percent aura; `armor`, `attack_power`, `ranged_attack_power`, the hasted

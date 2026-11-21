@@ -22985,6 +22985,87 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Natural Alchemist 536213 (passive, Attributes 80) Effect[0]: aura 98 SPELL_AURA_MOD_SKILL_TALENT, EffectMiscValue 171 (Alchemy), BasePoints 14 + 1 = 15 ($s1). AuraEffect::HandleAuraModSkill (SpellAuraEffects.cpp:3544-3559) calls Player::ModifySkillBonus with talent true, which adds the amount to the permanent bonus of the skill line (Player.cpp:5822-5838) and does nothing for a line the player lacks. The reference character has no Alchemy (skill_lines 44, 48, 49, 51 and 118), so the option skill_line (ADR 1030) gives the caster line 171 at 1 of 300 at the start of the before phase, a precondition fixture. The read is skill_bonus (the permanent plus the temporary bonus of the line, Player::GetSkillPermBonusValue + GetSkillTempBonusValue, ADR 1030; skill_value reads the pure value without it): 0 before the learn (the control, 536213 learned between the phases; a passive learn applies its aura) and 15 after, exact. Trigger: Frog Bones 801663, instant, as in sp_agility. Cast timing checked: instant. Player reports: none names this spell."
+    },
+    {
+      "spell": 707329,
+      "kind": "flat_chance_rate",
+      "variant": "viper_rating_rate",
+      "label_suffix": "viper_rating_rate",
+      "name": "Viper Ward (280 ranged critical strike rating raises the Hexfire Blast chance to 70%)",
+      "quote": "Transforms Call of Sseratus into Viper Ward.@s:712373:0@",
+      "chance_pct": 70,
+      "talents": [
+        707329
+      ],
+      "learn": [
+        712373,
+        500960
+      ],
+      "trigger_spell": 801693,
+      "trigger_target": "dummy",
+      "cast_power": 1400,
+      "setup": {
+        "spell": 712373,
+        "target": "dummy",
+        "power": 1400,
+        "every": 1
+      },
+      "unlearned": {
+        "setup": {
+          "spell": 500960,
+          "target": "caster",
+          "power": 1400,
+          "every": 1
+        },
+        "entry": 50105
+      },
+      "layout": [
+        {
+          "do": "trigger",
+          "wait_ms": 1600
+        },
+        {
+          "do": "setup",
+          "wait_ms": 100
+        },
+        {
+          "do": "start"
+        },
+        {
+          "do": "wait",
+          "ms": 18900
+        },
+        {
+          "do": "end"
+        },
+        {
+          "do": "wait",
+          "ms": 1500
+        }
+      ],
+      "trial": {
+        "metric": "owned_creature_spell_cast_count",
+        "spell": 573055,
+        "entry": 51105
+      },
+      "event": {
+        "metric": "owned_creature_spell_cast_count",
+        "spell": 712415,
+        "entry": 51105
+      },
+      "cycles": 40,
+      "unlearned_cycles": 1,
+      "trials_per_cycle": 17,
+      "parts": 12,
+      "observe_source": "The rating term of the Viper roll, in the viper_rate layout (one Hex of Malice 801693 at the dummy, 1600 ms later a Viper Ward 712373 at the dummy, its cast counts read 100 ms after it spawns and at about 19000 ms, a 1500 ms wait past its 20000 ms; control: one unlearned cycle per part with a plain Serpent Ward 500960, which never casts a Hexfire Blast, Summons.cpp:486). The Viper Ward attack rolls roll_chance_f(ProcChance of 712374 + GetRatingBonusValue(CR_CRIT_RANGED)) (Summons.cpp:486-488): 712374 ProcChance 50 ($712374h). The caster carries 280 ranged critical strike rating (player_ratings, ADR 1048; the harness applies it with ApplyRatingMod(CR_CRIT_RANGED)). The bonus of the rating at level 60 is read from the DBC: gtCombatRatings row 9 x 100 + 59 = 14.0 rating per point and gtOCTClassCombatRatingScalar row (13 - 1) x 32 + 10 = 1.0 for the Witch Doctor, so 280 / 14 = 20 points (Player::GetRatingMultiplier); each part reads combat_rating_bonus of rating 9 after the learns and must find 20 within 0.01 (float32 280 x 0.0714286 = 20.000002), else the part is unmeasured. The stated chance is then 50 + 20 = 70%: \"Chance increased based on your ranged critical strike rating\" means the rating's percentage is added to the base chance, and viper_rate reads the 50% base at rating 0, so the pair proves the increase. Sizing (flip-proof, mentor M-14): the band is 3.5 points (5% of 70%); 12 parts give a between-part t quantile of 3.106, so n >= 0.21 x ((3.106 + 3.719) / 0.035)^2 = 7985 trials; the entry plans 40 cycles x 17 trials x 12 parts = 8160. A server that adds no rating term reads 50% (20 points off, about 36 standard deviations of the pooled rate) and alerts. Game time about 22.1 s per cycle, 905 s per part, 3.0 h per run. Clause 270. Cast timing checked: Hex and Viper Ward instant, the Viper Ward 1600 ms after the Hex. Player reports: none names this spell.",
+      "player_ratings": {
+        "ranged_crit_rating": 280
+      },
+      "rating_bonus": {
+        "rating": 9,
+        "expected_pct": 20.0,
+        "tolerance": 0.01
+      }
     }
   ],
   "player_observations": [],

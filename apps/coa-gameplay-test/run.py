@@ -223,6 +223,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
     'healing_power', 'swim_speed_rate', 'skill_bonus',
+    'combat_rating_bonus',
 }
 MELEE_OUTCOME_METRICS = {'melee_damage_count', 'melee_damage_total'}
 MAX_VICTIM_STATE = 8
@@ -236,7 +237,7 @@ PLAYER_STAT_METRICS = {
     'melee_damage_total',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'melee_crit_chance', 'melee_crit_chance_refreshed', 'dodge_chance', 'parry_chance', 'expertise',
-    'combat_rating',
+    'combat_rating', 'combat_rating_bonus',
     'spell_modifier', 'spell_cast_time_ms', 'client_cast_time_ms', 'client_attributes', 'client_spell_targets', 'spell_max_range', 'spell_ignores_los', 'spell_max_stacks', 'spell_healing_done',
     'spell_duration_ms',
     'spell_family_flags',
@@ -1402,7 +1403,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step.get('school'), f'{where}.school', 1, 6, True)
             if metric == 'spell_resist_chance':
                 require('target' in step, f'{where}: {metric} metric needs target')
-            if metric == 'combat_rating':
+            if metric in {'combat_rating', 'combat_rating_bonus'}:
                 number(step.get('rating'), f'{where}.rating', 0, 24, True)
             if metric == 'aoe_damage_taken':
                 number(step.get('school'), f'{where}.school', 0, 6, True)
