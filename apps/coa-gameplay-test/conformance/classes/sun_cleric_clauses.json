@@ -140,10 +140,23 @@
   {
     "spell": 300321,
     "clause": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
-    "labels": [
-      "300321 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm in each entry (reading before the learn, 3500 ms cast). Expected 3500 x 0.8 = 2800 ms from the tooltip and CastingTimes 22. Reference search: bindmysoul snapshot carries the same sentence and figure; nothing else found. ALERT, lead (fix note in the b3b report): dawn_done and dawn_cast_time read 3500 ms under Dawn with the talent learned (expected 2800). Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "Reduces the cast time of Dawnsear by $s1% (20%: still casting at 2740 ms, finished by 2855 ms)",
+        "labels": [
+          "300321 behaviour_metric_delta dawn_held",
+          "300321 behaviour_metric_delta dawn_done"
+        ]
+      },
+      {
+        "claim": "while Dawn is active (no cut without Dawn)",
+        "labels": [
+          "300321 behaviour_metric_delta nodawn_held"
+        ]
+      }
+    ]
   },
   {
     "spell": 300322,
@@ -233,8 +246,9 @@
   {
     "spell": 300334,
     "clause": "Increases your spell power by 3 for every 125 Armor you have.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not final: two designs tried, see the b3b report. Reference search: bindmysoul snapshot carries an older state (1 per 125); nothing else found.",
+    "labels": []
   },
   {
     "spell": 300336,
@@ -335,18 +349,37 @@
   {
     "spell": 300351,
     "clause": "Increases your mana by $s2% of your Intellect,",
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn. Expected gain 150% x Intellect 119 = 178.5 (Spell.dbc effect 1 of 300351), judged to one point. Reference search: bindmysoul snapshot has an older Ancient Rites state; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "300351 effect_value e1 #0"
-    ],
-    "kind": "claim"
+      "300351 behaviour_metric_delta max_mana"
+    ]
   },
   {
     "spell": 300351,
     "clause": "and causes you to regenerate mana equal to 2% of your maximum mana every $t1 sec.",
-    "labels": [
-      "300351 aura_amplitude_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = count and total 0 before the learn. 2% x (2868 + 178.5) = 60.93, the maximum mana being the reference character fixture, judged to one point. Reference search: bindmysoul older state only; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "regenerates mana equal to 2% of your maximum mana",
+        "labels": [
+          "300351 behaviour_metric_delta regen_amount"
+        ]
+      },
+      {
+        "claim": "every 15 sec: one tick by 16.4 s",
+        "labels": [
+          "300351 behaviour_metric_delta period_upper"
+        ]
+      },
+      {
+        "claim": "every 15 sec: no second tick by 27.5 s",
+        "labels": [
+          "300351 behaviour_metric_delta period_lower"
+        ]
+      }
+    ]
   },
   {
     "spell": 300353,
@@ -742,10 +775,13 @@
   {
     "spell": 301295,
     "clause": "Reduces the cooldown of Sun Stride by $/1000;s1 sec.",
+    "kind": "claim",
+    "reason": "Control arm = the attempt without the passive, refused. The reads at 20300 ms (accepted) and 19700 ms (refused) bound the cut to [3700, 4300] ms, excluding 3600 and 4400 ms. Reference search: bindmysoul snapshot carries the same sentence and figure; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "301295 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "301295 cost_gate 680700 cooldown without",
+      "301295 cost_gate 680700 cooldown with",
+      "301295 cost_gate 680700 cooldown beyond"
+    ]
   },
   {
     "spell": 301313,
@@ -809,18 +845,37 @@
   {
     "spell": 301817,
     "clause": "Increases your mana by $s2% of your Intellect,",
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn. Expected gain 450% x Intellect 119 = 535.5 (Spell.dbc effect 1 of 301817), judged to one point. Reference search: bindmysoul snapshot has an older Ancient Rites state; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "301817 effect_value e1 #0"
-    ],
-    "kind": "claim"
+      "301817 behaviour_metric_delta max_mana"
+    ]
   },
   {
     "spell": 301817,
     "clause": "and causes you to regenerate mana equal to 6% of your maximum mana every $t1 sec.",
-    "labels": [
-      "301817 aura_amplitude_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = count and total 0 before the learn. 6% x (2868 + 535.5) = 204.2, the maximum mana being the reference character fixture, judged to one point. Reference search: bindmysoul older state only; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "regenerates mana equal to 6% of your maximum mana",
+        "labels": [
+          "301817 behaviour_metric_delta regen_amount"
+        ]
+      },
+      {
+        "claim": "every 15 sec: one tick by 16.4 s",
+        "labels": [
+          "301817 behaviour_metric_delta period_upper"
+        ]
+      },
+      {
+        "claim": "every 15 sec: no second tick by 27.5 s",
+        "labels": [
+          "301817 behaviour_metric_delta period_lower"
+        ]
+      }
+    ]
   },
   {
     "spell": 302914,
@@ -841,22 +896,40 @@
   {
     "spell": 503624,
     "clause": "2 Charges,",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm: the third cast is refused with charges at 0. SpellChargesCategory 548 MaxCharges 2. Reference search: nothing found beyond the DBC. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "labels": [
+      "503624 behaviour_charge_recharge"
+    ]
   },
   {
     "spell": 503624,
     "clause": "10 sec recharge",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The recharge is bracketed at 9500 ms (no charge) and 10500 ms (one charge), excluding 9000 and 11000 ms. SpellChargesCategory 548 RecoveryTime 10000. Reference search: nothing found beyond the DBC. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "labels": [
+      "503624 behaviour_charge_recharge"
+    ]
   },
   {
     "spell": 503624,
     "clause": "Make a prayer, healing an ally for ${$m1+0+$BH*0.595}.",
-    "labels": [
-      "503624 effect_value #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm: no cast, 0, and the heal at 0 spell power as the contrast of the spell power arm on the same build. Expected from Spell.dbc and the tuning aura 887015 (-20% healing done at level 60). Reference search: bindmysoul snapshot carries the rank 1 figure with the same 59.5% coefficient; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "healing for $m1 (598..629 x 0.8 at 0 spell power)",
+        "labels": [
+          "503624 behaviour_metric_delta heal_plain"
+        ]
+      },
+      {
+        "claim": "plus $BH*0.595 (the bonus healing term, at +2000 spell power)",
+        "labels": [
+          "503624 behaviour_metric_delta heal_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 572801,
@@ -1191,34 +1264,65 @@
   {
     "spell": 560276,
     "clause": "Damage dealt by Solar Flares now grants you 1 Solar Power",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the same Solar Flare in the phase before the learn. Code route AscensionClassMechanics26To32.cpp:63-72. Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "grants you Solar Power on a Solar Flare damage hit (cast of Gain 1 Solar Power)",
+        "labels": [
+          "560276 behaviour_metric_delta grant_cast"
+        ]
+      },
+      {
+        "claim": "1 Solar Power (the stack gain)",
+        "labels": [
+          "560276 behaviour_metric_delta solar_power"
+        ]
+      }
+    ]
   },
   {
     "spell": 560276,
     "clause": "and increase the targets chance to be critically struck by spells by $706733s1% for $706733d.",
-    "labels": [
-      "560276 effect_value 706733e0 #0",
-      "560276 spell_duration 706733 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn in each entry. Gain 3 points from Spell.dbc 706733 effect 0 (BasePoints 2 + 1); duration 8000 ms: remaining duration after a direct Solar Flare within 6850..7550, excluding 7200 and 8800 ms. Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "increase the targets chance to be critically struck by spells by $706733s1% (3 points)",
+        "labels": [
+          "560276 behaviour_metric_delta crit_taken"
+        ]
+      },
+      {
+        "claim": "for $706733d (8 s, remaining duration read)",
+        "labels": [
+          "560276 behaviour_metric_delta debuff_remaining"
+        ]
+      }
+    ]
   },
   {
     "spell": 560276,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
+    "kind": "claim",
+    "reason": "Solar Flare 807175 is the same spell whose damage Solar Concord 301266 launches; its flare_damage (163.8 with the Sunrise fixture, base value) and flare_damage_sp (spell power term) entries prove the formula on this build (base pair 5, ok in both runs). Reference search: bindmysoul snapshot reads 137 + 26% SP; nothing else found.",
     "labels": [
-      "560276 effect_value 807175e1 #2"
-    ],
-    "kind": "claim"
+      "560276 effect_value 807175e1 #2",
+      "301266 behaviour_metric_delta flare_damage",
+      "301266 behaviour_metric_delta flare_damage_sp"
+    ]
   },
   {
     "spell": 560276,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
+    "kind": "claim",
+    "reason": "Same Solar Flare 807175: the 301266 entries flare_hit_chance (aura amount -3 on the dummy) and flare_duration (present at 9500 ms) are ok on the base pair 5. Reference search: bindmysoul snapshot carries the same text; nothing else found.",
     "labels": [
       "560276 effect_value 807175e0 #3",
-      "560276 spell_duration 807175 #4"
-    ],
-    "kind": "claim"
+      "560276 spell_duration 807175 #4",
+      "301266 behaviour_metric_delta flare_hit_chance",
+      "301266 behaviour_metric_delta flare_duration"
+    ]
   },
   {
     "spell": 560492,
@@ -2059,18 +2163,20 @@
   {
     "spell": 681468,
     "clause": "Increases the critical strike chance of Dawnbreak by $s2%",
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn. Gain 20 points from Spell.dbc effect 1 (BasePoints 19 + 1) on the Dawnbreak 800654 class mask. Reference search: bindmysoul snapshot has the older rank 1 figure (10%); nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "681468 effect_value e1 #0"
-    ],
-    "kind": "claim"
+      "681468 behaviour_metric_delta dawnbreak_crit"
+    ]
   },
   {
     "spell": 681468,
     "clause": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
+    "kind": "claim",
+    "reason": "Control arm = the 5 charges before the learn (ProcCharges 5), 9 after (+4, BasePoints 3 + 1). Reference search: bindmysoul snapshot has the older rank 1 figure (2 blocks); nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "681468 effect_value e0 #1"
-    ],
-    "kind": "claim"
+      "681468 behaviour_metric_delta bulwark_charges"
+    ]
   },
   {
     "spell": 681469,
@@ -2091,18 +2197,20 @@
   {
     "spell": 681470,
     "clause": "Increases your Holy critical strike chance by $s1%",
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn. Gain 4 points of Holy spell crit from Spell.dbc effect 0 (BasePoints 3 + 1). Reference search: bindmysoul snapshot has the older rank 1 state (2%); nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "681470 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "681470 behaviour_metric_delta holy_crit"
+    ]
   },
   {
     "spell": 681470,
     "clause": "and reduces spell pushback suffered from damaging attacks by $s3%.",
+    "kind": "claim",
+    "reason": "Control arm = the hit cast without the passive (it pushes back), compared with the hit cast after the learn. Spell.dbc 681470 effect 2 REDUCE_PUSHBACK 100%. Reference search: bindmysoul snapshot has the older rank 1 figure (50%); nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "681470 effect_value e2 #1"
-    ],
-    "kind": "claim"
+      "681470 behaviour_metric_delta pushback_game_time"
+    ]
   },
   {
     "spell": 704562,
@@ -3829,32 +3937,47 @@
   {
     "spell": 807343,
     "clause": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
-    "labels": [
-      "807343 spell_duration 807523 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
+    "claims": [
+      {
+        "claim": "grants you Light of Absolution on Horusath Blast damage",
+        "labels": [
+          "807343 behaviour_metric_delta light_granted"
+        ]
+      },
+      {
+        "claim": "for $807523d (10 s, remaining duration read)",
+        "labels": [
+          "807343 behaviour_metric_delta light_remaining"
+        ]
+      }
+    ]
   },
   {
     "spell": 807343,
     "clause": "Damage dealt by Solar Flares now restores $807525s1% missing health,",
+    "kind": "claim",
+    "reason": "ALERT, lead (fix note in the b3b report): a Solar Flare hit under Light of Absolution restores nothing (heal total 0, both runs, against 79..81 expected: 2% of 5000 missing health x 0.8 class tuning). The code marks Radiant Flame 806060 casts only (AscensionSunClericAbilities.cpp:42, :374-375). A route diagnostic with Radiant Flame read 480 in both runs of diagnostic pair 20261121-234811 / 20261121-234846 (build bda46d17), not 80 (see the report). Pair 20261121-235218 / 20261121-235256, build bda46d17, server commit 2bf56c66da42+, no flip.",
     "labels": [
-      "807343 effect_value 807525e0 #1"
-    ],
-    "kind": "claim"
+      "807343 behaviour_metric_delta flare_heal"
+    ]
   },
   {
     "spell": 807343,
     "clause": "Energy, Focus, Runic Power, and Rage to allies within $807524a1 yds.",
+    "kind": "claim",
+    "reason": "No behaviour route yet: the radius is on allies, radius_edge strikes enemies, and the Solar Flare route fires no heal (flare_heal alert). Not final.",
     "labels": [
       "807343 effect_radius 807524e0 #2"
-    ],
-    "kind": "claim"
+    ]
   },
   {
     "spell": 807343,
     "clause": "Can only occur once every 0.5 sec.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "No behaviour route yet: no code or data names a 0.5 s gate on 807524 or 807525, and the route itself does not fire (flare_heal alert). Not final.",
+    "labels": []
   },
   {
     "spell": 807507,
