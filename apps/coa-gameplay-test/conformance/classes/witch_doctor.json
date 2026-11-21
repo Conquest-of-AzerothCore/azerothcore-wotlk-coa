@@ -23066,6 +23066,109 @@
         "expected_pct": 20.0,
         "tolerance": 0.01
       }
+    },
+    {
+      "spell": 500952,
+      "kind": "metric_delta",
+      "name": "Amphibimorph (a frog dummy stops attacking the caster)",
+      "variant": "frog_pacified",
+      "label_suffix": "frog_pacified",
+      "quote": "making them unable to attack or cast spells",
+      "trigger_spell": 500952,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "melee_attacks_taken",
+      "fields": {
+        "target": "dummy"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "target_attack_window": {
+        "engage_ms": 1000,
+        "land_ms": 1300
+      },
+      "before_expected": 2,
+      "expected": 0,
+      "expected_ratio": 0,
+      "tolerance": 0.01,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "Amphibimorph 500952: CastingTimeIndex 4 = 1000 ms, RecoveryTime 120000 (reset by the scenario), 18% mana, RangeIndex 4 (30 yd), DurationIndex 64 = 40000 ms ($d), Mechanic 17; Effect[1] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE (UNIT_FLAG_PACIFIED and UNIT_FLAG_SILENCED) at TARGET_UNIT_DEST_AREA_ENEMY of 8 yd around the target; AscensionWitchDoctorCompletion.cpp:579-580 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE, and the dummy is never damaged. Unit::AttackerStateUpdate returns before any swing while the attacker holds UNIT_FLAG_PACIFIED (Unit.cpp:3083-3086). The dummy (creature 36, 3 yd, stationary, level 60) melees the caster from the start of the control phase (the harness creature_attack of ADR 1027: react state aggressive, CreatureAI::AttackStart), 1000 ms to engage; the reading is melee_attacks_taken of the caster from the dummy (the SMSG_ATTACKERSTATEUPDATE swings the caster receives, any outcome) over a 6000 ms window, from a snapshot (option target_attack_window). Control (the before phase, no frog): the 2000 ms swing timer of the level 60 dummy gives about 3 swings in 6000 ms, at least 2 (before_expected 2 is that floor). Treatment: the frog is cast for real at the dummy (1000 ms cast) and the window starts 1300 ms after the cast starts, so the pacified dummy swings 0 times: the ratio of the treatment count to the control count is 0 within 0.01, so a single swing alerts. Clause 45 \"making them unable to attack\" (key new 45.1); \"or cast spells\" is frog_silenced. Cast timing checked: 1000 ms cast, the window opens 300 ms after it ends, inside the 40 s frog. Player reports: none of the open reports of cycles 5 and 6 names this spell."
+    },
+    {
+      "spell": 503714,
+      "name": "Eye of Kimbul (a marked enemy cannot use stealth)",
+      "kind": "metric_delta",
+      "variant": "no_stealth",
+      "label_suffix": "no_stealth",
+      "quote": "Critical strikes now apply Eye of Kimbul to enemies",
+      "trigger_spell": 801669,
+      "target": "dummy",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          2144558,
+          0,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 2144558
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Eye of Kimbul 503714: AscensionWitchDoctorEvents.cpp:88 and :151-157 (aura_ascension_witch_doctor_event): a non-derived critical damage hit by the owner casts Eye of Kimbul 802707 (DurationIndex 8 = 15000 ms; auras 271 and 308 only) on the target. Since fix 6cdbd8c441 (cycle 8) the Proc then removes SPELL_AURA_MOD_STEALTH and SPELL_AURA_MOD_INVISIBILITY from the marked target, and AscensionWitchDoctorAbilities.cpp:67-70 (OnSpellCheckCast, every caster, triggered or not) refuses a spell with a stealth or invisibility aura from a caster holding 802707 with SPELL_FAILED_CASTER_AURASTATE. The marked unit is the dummy: a forced spell crit rating (the curse_crit pattern of Hexfire Adept) makes a real Shadowflare 801669 (CastingTimeIndex 5 = 2000 ms, StartRecoveryTime 1500, 31% mana, cast_power 2000) at the dummy critical, so the Eye lands through its own proc about 2000 ms after the cast start. After each Shadowflare the dummy casts Stealth Dummy 2144558 (aura 16, BasePoints 999999) on itself (a real triggered cast by the creature, option refusable_target_casts of ADR 1027, delay_ms 3500) 3500 ms after the Shadowflare cast start, read 500 ms later, and the aura is read on the dummy; the aura is removed at the start of each phase (phase_auras stacks 0) so the before phase aura cannot leak. Before phase (503714 not learned, no Eye): the dummy takes the aura, 1 (the control: the cast works). After phase (503714 learned between the phases): the dummy holds the Eye and the tooltip promises the same self cast now fails to apply, 0. final05 (build da2e0a75d434, before the fix) read 1 and 1 in both runs, the confirmed defect the fix addresses. The quote is the 503714 sentence because behaviour_entry requires the quote inside the cleaned Description of the entry's own spell, and the clause 74 words stand only in the embedded 802707 description (the @s:802707:0 token of the 503714 tooltip, not expanded); the ledger row ties the labels to clause 74 (T-B4-8). Readback: the eye_at_stealth_cast entry runs this layout without the creature cast and reads 802707 on the dummy at the moment the creature cast would start (3500 ms after the Shadowflare), 0 before and 1 after, so the Eye is shown on the dummy when it stealths (G-3, SKEPTIC R3-b). On the fixed server (6cdbd8c441) the after phase cast is refused by OnSpellCheckCast, which Spell::CheckCast runs first (Spell.cpp:5814) even under TRIGGERED_FULL_MASK, with SPELL_FAILED_CASTER_AURASTATE (22): the option accepts exactly that refusal and records it (creature_cast_result, read after each judged reading), any other refusal still fails the scenario, and a refused control cast makes the verdict unmeasured. The entry was held in cycle 8 for want of this (tool note T2); the T catalog regression cycle8/catalog/witch-doctor-eye-of-kimbul-blocks-stealth.json proves the same block for an enemy player. Clause 74 \"While affected, enemies cannot stealth or turn invisible.\" Player reports: none on this talent. Repair (cycle 8, author R): the readback entry is added and this text follows the fix; the values are unchanged.",
+      "refusable_target_casts": {
+        "spells": [
+          2144558
+        ],
+        "refusal": 22,
+        "delay_ms": 3500
+      }
+    },
+    {
+      "spell": 503714,
+      "name": "Eye of Kimbul (a marked enemy cannot use invisibility)",
+      "kind": "metric_delta",
+      "variant": "no_invisibility",
+      "label_suffix": "no_invisibility",
+      "quote": "Critical strikes now apply Eye of Kimbul to enemies",
+      "trigger_spell": 801669,
+      "target": "dummy",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          8149,
+          0,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 8149
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Eye of Kimbul 503714: AscensionWitchDoctorEvents.cpp:88 and :151-157 (aura_ascension_witch_doctor_event): a non-derived critical damage hit by the owner casts Eye of Kimbul 802707 (DurationIndex 8 = 15000 ms; auras 271 and 308 only) on the target. Since fix 6cdbd8c441 (cycle 8) the Proc then removes SPELL_AURA_MOD_STEALTH and SPELL_AURA_MOD_INVISIBILITY from the marked target, and AscensionWitchDoctorAbilities.cpp:67-70 (OnSpellCheckCast, every caster, triggered or not) refuses a spell with a stealth or invisibility aura from a caster holding 802707 with SPELL_FAILED_CASTER_AURASTATE. The marked unit is the dummy: a forced spell crit rating (the curse_crit pattern of Hexfire Adept) makes a real Shadowflare 801669 (CastingTimeIndex 5 = 2000 ms, StartRecoveryTime 1500, 31% mana, cast_power 2000) at the dummy critical, so the Eye lands through its own proc about 2000 ms after the cast start. After each Shadowflare the dummy casts Super Invis 8149 (aura 18, BasePoints 9999) on itself (a real triggered cast by the creature, option refusable_target_casts of ADR 1027, delay_ms 3500) 3500 ms after the Shadowflare cast start, read 500 ms later, and the aura is read on the dummy; the aura is removed at the start of each phase (phase_auras stacks 0) so the before phase aura cannot leak. Before phase (503714 not learned, no Eye): the dummy takes the aura, 1 (the control: the cast works). After phase (503714 learned between the phases): the dummy holds the Eye and the tooltip promises the same self cast now fails to apply, 0. final05 (build da2e0a75d434, before the fix) read 1 and 1 in both runs, the confirmed defect the fix addresses. The quote is the 503714 sentence because behaviour_entry requires the quote inside the cleaned Description of the entry's own spell, and the clause 74 words stand only in the embedded 802707 description (the @s:802707:0 token of the 503714 tooltip, not expanded); the ledger row ties the labels to clause 74 (T-B4-8). Readback: the eye_at_stealth_cast entry runs this layout without the creature cast and reads 802707 on the dummy at the moment the creature cast would start (3500 ms after the Shadowflare), 0 before and 1 after, so the Eye is shown on the dummy when it stealths (G-3, SKEPTIC R3-b). On the fixed server (6cdbd8c441) the after phase cast is refused by OnSpellCheckCast, which Spell::CheckCast runs first (Spell.cpp:5814) even under TRIGGERED_FULL_MASK, with SPELL_FAILED_CASTER_AURASTATE (22): the option accepts exactly that refusal and records it (creature_cast_result, read after each judged reading), any other refusal still fails the scenario, and a refused control cast makes the verdict unmeasured. The entry was held in cycle 8 for want of this (tool note T2); the T catalog regression cycle8/catalog/witch-doctor-eye-of-kimbul-blocks-stealth.json proves the same block for an enemy player. Clause 74 \"While affected, enemies cannot stealth or turn invisible.\" Player reports: none on this talent. Repair (cycle 8, author R): the readback entry is added and this text follows the fix; the values are unchanged.",
+      "refusable_target_casts": {
+        "spells": [
+          8149
+        ],
+        "refusal": 22,
+        "delay_ms": 3500
+      }
     }
   ],
   "player_observations": [],

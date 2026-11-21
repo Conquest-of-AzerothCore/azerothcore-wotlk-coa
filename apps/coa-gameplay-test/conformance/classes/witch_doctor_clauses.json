@@ -827,7 +827,9 @@
       },
       {
         "claim": "making them unable to attack",
-        "labels": []
+        "labels": [
+          "500952 behaviour_metric_delta frog_pacified"
+        ]
       },
       {
         "claim": "or cast spells",
@@ -856,16 +858,7 @@
         ]
       }
     ],
-    "reason": "The former label 500952 aura_duration_ms #1 (unmodelled) is dropped: the duration is read in game time by frog_lasts (40 s on a creature) and frog_player_lasts (8 s on a player). The transform is read as the display the dummy wears (frog_display, 106677 against 10913 before), not as the presence of the aura; \"or cast spells\" is the silenced Renew of an enemy player (frog_silenced).",
-    "tool_gap": {
-      "reason": "\"making them unable to attack\" (Effect[1] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE sets UNIT_FLAG_PACIFIED) has no read: nothing in the harness makes an enemy swing at the caster while a window of melee_attacks_taken on the caster is read. enemy_casts issues casts only; the `attack` action (CoAGameplayTest.cpp:8444) is the harness player's own swing; taken_outcome reads outcome rates of swings the caster takes with an aura on the caster, and its attacker_auras is a set_aura fixture of the claim's own spell, not a read of an absent swing; no metric reads UNIT_FLAG_PACIFIED. Tool note T-b13-9: an enemy_attacks option on metric_delta (an enemy player that melees the caster for a window, melee_attacks_taken of the caster read in the window, control arm without the frog).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B13-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle9/author-B13.md#fix-round"
-        }
-      ]
-    }
+    "reason": "The former label 500952 aura_duration_ms #1 (unmodelled) is dropped: the duration is read in game time by frog_lasts (40 s on a creature) and frog_player_lasts (8 s on a player). The transform is read as the display the dummy wears (frog_display, 106677 against 10913 before), not as the presence of the aura; \"or cast spells\" is the silenced Renew of an enemy player (frog_silenced). \"making them unable to attack\" is read by \"500952 behaviour_metric_delta frog_pacified\": the dummy melees the caster (creature_attack, ADR 1027, provisional) and swings at least twice in a 6000 ms control window and 0 times in the same window under the frog. Closes tool note T-b13-9."
   },
   {
     "spell": 500952,
@@ -1406,16 +1399,7 @@
       "503714 behaviour_metric_delta eye_at_stealth_cast"
     ],
     "kind": "claim",
-    "reason": "Labels kept: no_stealth and no_invisibility carry the claim (their final05 verdicts read 1 and 1 on build da2e0a75d434, before fix 6cdbd8c441); eye_at_stealth_cast is the precondition label (the Eye on the dummy at the point of the stealth cast). The two claim entries are withdrawn for pair final06 (author-R-held-fragment.json), and the fix is proven by the T catalog regression cycle8/catalog/witch-doctor-eye-of-kimbul-blocks-stealth.json (an enemy player marked by a forced-crit Hexfire: cast_failure 22 for stealth and invisibility, control without the talent).",
-    "tool_gap": {
-      "reason": "On the fixed server the block refuses the stealth cast itself (AscensionWitchDoctorAbilities.cpp OnSpellCheckCast, every caster, triggered or not), and the only class-file route to a marked creature stealthing is metric_delta target_casts, whose harness creature cast requires SPELL_CAST_OK (CoAGameplayTest.cpp:7627-7642): the refusal fails the scenario instead of reading 0. target_casts_before cannot replace it: a dummy stealthed before the trigger (Stealth Dummy 2144558 BasePoints 999999, Super Invis 8149 BasePoints 9999) cannot be seen or targeted by the doctor, so no Eye lands. The enemy-player route of metric_delta (enemy_casts, where a refused cast is a cast result) fails on the control: the enemy that stealths in the before phase stays stealthed and untargetable into the after phase (phase_auras cannot clear an aura on the enemy), so the after-phase trigger cannot mark it; the T catalog regression runs that route with its own control. Tool note T2 (owner, CoAGameplayTest.cpp creature cast and behaviours.py target_casts): a target cast that may be refused and records its cast result, so the held entries read aura 0 with cast result 22.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-R",
-          "report": "cycle8/author-R.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Labels: no_stealth and no_invisibility carry the claim: a dummy marked by a forced-crit Shadowflare casts Stealth Dummy 2144558 and Super Invis 8149 at itself, the aura lands without the talent (the control) and not with it; the creature cast may be refused with SPELL_FAILED_CASTER_AURASTATE and is recorded (option refusable_target_casts, ADR 1027, provisional), which closes tool note T2 and returns the two entries held in cycle 8. eye_at_stealth_cast is the precondition label (the Eye on the dummy at the point of the stealth cast). The T catalog regression cycle8/catalog/witch-doctor-eye-of-kimbul-blocks-stealth.json proves the same block for an enemy player."
   },
   {
     "spell": 503727,

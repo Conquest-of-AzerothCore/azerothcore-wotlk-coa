@@ -3541,6 +3541,11 @@ private:
         if (metric == "spell_hit_chance")
             return unit->m_modSpellHitChance;
         uint32 spell = step.get<uint32>("spell", 0);
+        if (metric == "creature_cast_result")
+        {
+            auto const found = _creatureCastResults.find({ step.get<std::string>("actor"), spell });
+            return found == _creatureCastResults.end() ? -1.0 : double(found->second);
+        }
         if (metric == "victim")
             return unit->GetVictim() == GetUnit(step.get<std::string>("target")) ? 1.0 : 0.0;
         if (metric == "has_redirects")
@@ -7661,7 +7666,32 @@ private:
             }
             SpellCastResult result = creature->CastSpell(target, spell, TRIGGERED_FULL_MASK);
             record.put("cast_result", uint32(result));
-            Require(result == SPELL_CAST_OK, "Creature cast failed: " + std::to_string(result));
+            _creatureCastResults[{ id, spell }] = uint32(result);
+            auto const allowedRefusal = step.get_optional<uint32>("allowed_refusal");
+            Require(result == SPELL_CAST_OK || (allowedRefusal && uint32(result) == *allowedRefusal),
+                "Creature cast failed: " + std::to_string(result));
+            return;
+        }
+        if (action == "creature_attack")
+        {
+            Creature* attacker = GetUnit(id)->ToCreature();
+            Require(attacker && attacker->IsAlive() && attacker->AI(),
+                "Creature attack needs a living fixture creature");
+            if (step.get<bool>("stop", false))
+            {
+                attacker->AttackStop();
+                attacker->SetReactState(REACT_PASSIVE);
+                record.put("attacking", false);
+                return;
+            }
+            Unit* victim = GetUnit(step.get<std::string>("target"));
+            Require(attacker->IsValidAttackTarget(victim), "Creature attack needs a valid victim");
+            attacker->SetReactState(REACT_AGGRESSIVE);
+            attacker->AI()->AttackStart(victim);
+            if (attacker->GetVictim() != victim)
+                attacker->Attack(victim, true);
+            Require(attacker->GetVictim() == victim, "Creature did not start attacking its victim");
+            record.put("attacking", true);
             return;
         }
         Player* player = GetPlayer(id);
@@ -9208,6 +9238,7 @@ private:
     std::map<std::string, Actor> _actors;
     std::map<std::string, Target> _targets;
     std::map<std::string, double> _snapshots;
+    std::map<std::pair<std::string, uint32>, uint32> _creatureCastResults;
     std::optional<Target> _encounterBoss;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;

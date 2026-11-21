@@ -224,6 +224,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
     'healing_power', 'swim_speed_rate', 'skill_bonus',
     'combat_rating_bonus',
+    'creature_cast_result',
 }
 MELEE_OUTCOME_METRICS = {'melee_damage_count', 'melee_damage_total'}
 MAX_VICTIM_STATE = 8
@@ -320,7 +321,8 @@ ACTIONS = {
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
-                                  'target_gameobject', 'target_owned_entry', 'target_owner'}),
+                                  'target_gameobject', 'target_owned_entry', 'target_owner', 'allowed_refusal'}),
+    'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
@@ -764,9 +766,18 @@ def validate(scenario, clock=REAL_CLOCK):
             actor_ids.add(step['as'])
         if 'actor' in step:
             require(step['actor'] in actor_ids, f'{where}: unknown actor')
-            require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature', 'move_point'}
+            require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature', 'move_point',
+                               'creature_attack'}
                     or step['actor'] in player_ids,
                     f'{where}: action needs a player')
+            if action == 'creature_attack':
+                require(step['actor'] not in player_ids, f'{where}: creature_attack needs a creature actor')
+                require(('target' in step) != (step.get('stop') is True)
+                        and step.get('stop', True) is True,
+                        f'{where}: creature_attack names a target to attack or stop: true, not both')
+            if action == 'cast' and 'allowed_refusal' in step:
+                require(step['actor'] not in player_ids, f'{where}: allowed_refusal is for a creature cast')
+                number(step['allowed_refusal'], f'{where}.allowed_refusal', 1, 254, True)
             if action == 'cast' and step['actor'] not in player_ids:
                 require('destination' not in step, f'{where}: creature cast has no destination')
             if action == 'cast' and 'target_item' in step:
@@ -1151,6 +1162,9 @@ def validate(scenario, clock=REAL_CLOCK):
                         and type(step['periodic']) is bool,
                         f'{where}: periodic requires a damage/healing calculation and a boolean')
             require(metric in METRICS, f'{where}: unknown metric')
+            if metric == 'creature_cast_result':
+                require(step['actor'] not in player_ids and 'spell' in step,
+                        f'{where}: creature_cast_result needs a creature actor and a spell')
             if metric in {'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'skill_bonus'}:
                 require(step['actor'] in player_ids, f'{where}: XP/skill metric needs a player')
                 if metric in {'skill_value', 'skill_maximum', 'skill_bonus'}:

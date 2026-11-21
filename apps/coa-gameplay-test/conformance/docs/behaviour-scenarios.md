@@ -2191,3 +2191,7 @@ Options with a module:
   same unit, for a stated share (ADR 1030, provisional)
 - [`skill_line`](metric_delta_options/skill_line.md): a skill line given to the caster at the start of the before
   phase, for an aura that modifies a line (ADR 1030, provisional)
+- [`target_attack_window`](metric_delta_options/target_attack_window.md): the dummy melees the caster, its swings
+  counted over a window in each phase, for an enemy that a debuff stops attacking (ADR 1027, provisional)
+- [`refusable_target_casts`](metric_delta_options/refusable_target_casts.md): dummy casts after each trigger that may
+  be refused with one stated code, their results read (ADR 1027, provisional)

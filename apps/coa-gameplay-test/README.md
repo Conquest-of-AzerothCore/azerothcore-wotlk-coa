@@ -917,7 +917,13 @@ damage hooks, as `Unit::CalculateMeleeDamage` applies them.
 with the actor as the attacker, or `pet: true` to run the hooks with the actor's current pet as the attacker instead.
 `set_health` also accepts a creature actor, or `pet: true` with a player actor to set its current pet's health.
 `cast` also accepts a creature actor: the creature casts `spell` on `target` (itself by default) with
-`TRIGGERED_FULL_MASK`, like `.cast back ... triggered`, and the step fails unless the cast starts.
+`TRIGGERED_FULL_MASK`, like `.cast back ... triggered`, and the step fails unless the cast starts. With
+`allowed_refusal` (a `SpellCastResult` code) the step also passes when the cast is refused with exactly that code.
+`creature_cast_result` (creature actor, `spell`) reads the result of that creature's last cast of `spell`: 0 for a
+started cast, the refusal code otherwise, -1 when it has not cast it. `creature_attack` (creature actor, `target`)
+sets the creature aggressive and starts its melee on the target (`CreatureAI::AttackStart`, then `Unit::Attack`); the
+step fails unless the target becomes its victim. `creature_attack` with `stop: true` stops the melee and sets the
+creature passive. Its swings are read with `melee_attacks_taken` on the victim, `target` the creature.
 `open_item` takes `actor` and `item` and submits the native container-open packet, offering it to the
 packet hooks first as `WorldSession::Update` does. `close_loot` takes `actor`
 and closes its current loot window. `collect_loot` takes `actor`, collects slot zero, verifies that its full rolled
