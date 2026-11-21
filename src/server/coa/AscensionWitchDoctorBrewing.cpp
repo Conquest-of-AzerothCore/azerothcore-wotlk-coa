@@ -2,7 +2,6 @@
 
 #include "AscensionWitchDoctorCompletion.h"
 #include "ObjectAccessor.h"
-#include "Log.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -33,8 +32,6 @@ void SyncIngredients(Player* player)
     while (ingredients.size() > capacity)
     {
         uint32 id = ingredients.front();
-        LOG_ERROR("coa", "DIAG13071 sync drops {} size {} capacity {} mojoPair {} mixologist {}", id, ingredients.size(),
-            capacity, state.mojoPair, player->HasAura(Mixologist));
         ingredients.erase(ingredients.begin());
         player->RemoveAurasDueToSpell(id);
     }
@@ -54,7 +51,6 @@ void IngredientChanged(Player* player, uint32 id, bool apply)
     if (state.swapping)
         return;
     auto& ingredients = state.ingredients;
-    LOG_ERROR("coa", "DIAG13071 changed {} apply {} size {}", id, apply, ingredients.size());
     ingredients.erase(std::remove(ingredients.begin(), ingredients.end(), id), ingredients.end());
     if (apply)
     {
