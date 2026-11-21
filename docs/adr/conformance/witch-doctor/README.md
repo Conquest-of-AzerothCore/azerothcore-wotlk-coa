@@ -29,3 +29,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0020](0020-graven-effigy-reaches-enemies-within-20-yd.md) | Graven Effigy reaches enemies within 20 yd | accepted; possible tooltip token slip noted |
 | [0021](0021-spirit-eclipse-splash-reaches-5-yd.md) | Spirit Eclipse splash reaches 5 yd | accepted |
 | [0022](0022-spirit-speed-lasts-while-spirits-are-held.md) | Spirit speed lasts while Spirits are held | accepted; dormant path (M-52) |
+| [0023](0023-spirit-out-of-the-bottle-reaches-three-additional-allies.md) | Spirit Out Of The Bottle reaches three additional allies | accepted |

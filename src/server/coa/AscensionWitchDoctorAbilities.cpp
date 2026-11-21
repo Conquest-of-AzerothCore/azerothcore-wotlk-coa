@@ -108,13 +108,13 @@ class witch_doctor_casts : public AllSpellScript
             {
                 auto allies = Allies(player, target, 15.0f);
                 allies.remove(target);
-                uint32 added = 0;
+                int32 const cap = Amount(OutOfBottle, EFFECT_1) - 1;
+                int32 added = 0;
                 for (Unit* ally : allies)
-                    if (player->IsWithinDistInMap(ally, 40.0f))
+                    if (added < cap && player->IsWithinDistInMap(ally, 40.0f))
                     {
                         spell->AddUnitTargetForScript(ally, 1 << EFFECT_0);
-                        if (++added == 2)
-                            break;
+                        ++added;
                     }
             }
         if (info->Id == HexfireWrath || info->Id == Umbral)
