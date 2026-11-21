@@ -711,7 +711,7 @@ class EvidenceStatusTest(unittest.TestCase):
         label = '1 behaviour_metric_delta block_value'
         metric = 'block_value'
         self.assertEqual(METRIC_EVIDENCE[metric], STATE)
-        promised = [claim('Increases the amount of damage blocked by your shield by 30%', label)]
+        promised = [claim('Increases your shield block value by 30%', label)]
         unpromised = [claim('Increases your Holy damage by 5%', label)]
         learned = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
         self.assertEqual(evidence_of(promised, [learned])[0], [BEHAVIOUR])
