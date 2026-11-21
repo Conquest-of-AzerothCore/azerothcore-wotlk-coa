@@ -48,6 +48,7 @@
 #include "AscensionAverageItemLevel.h"
 #include "AscensionPersonalBank.h"
 #include "AscensionVanityOwnership.h"
+#include "AscensionIncarnation.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionCollectibleSpellData.h"
 #include "AscensionCustomClassData.h"
@@ -10435,6 +10436,12 @@ class aura_ascension_venomancer_sea_serpent_incarnation : public AuraScript
     }
 };
 
+}
+
+bool AscensionIncarnation::HasActiveFormIncarnation(Player* player)
+{
+    return player &&
+        AscensionCollectionService::Instance().GetActiveFormIncarnation(player, player->GetShapeshiftForm());
 }
 
 std::vector<WorldPacket> AscensionClientFileSpellRows()
