@@ -290,6 +290,7 @@ ACTIONS = {
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag', 'unit_state'}),
     'relocate': ({'actor'}, {'actor', 'dx', 'dy', 'dz', 'around_owner', 'around_entry', 'radius', 'edge_offset',
                              'bearing'}),
+    'relocate_to_creature': ({'actor', 'entry'}, {'actor', 'entry', 'radius'}),
     'fall': ({'actor', 'height'}, {'actor', 'height'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'client_packet': ({'actor', 'opcode'},
@@ -893,6 +894,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     f'{where}: around fields need around_owner')
             for key in ('dx', 'dy', 'dz'):
                 number(step.get(key, 0), f'{where}.{key}', -20, 20)
+        if action == 'relocate_to_creature':
+            number(step.get('radius', 20), f'{where}.radius', 1, 60)
         if action == 'fall':
             require(step['actor'] in player_ids, f'{where}: fall needs a player')
             number(step['height'], f'{where}.height', 1, 60)
