@@ -3,7 +3,7 @@ import math
 from pathlib import Path
 import re
 
-from bonus import bonus_band
+from bonus import POINT_BAND, bonus_band
 import control_excluded
 import hit_ratio_versus
 from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS,
@@ -21,7 +21,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     FORCE_CRIT_RATINGS, RANGED_FORCE_CRIT,
                     FORCED_CRIT_RATING, GCD_WAIT_MS, TARGET_STATE_AURAS, Expectation, TARGET, armed_for,
                     cast_distance, closes_distance, dataset, facts_of,
-                    FIXTURE_MAX_HEALTH, cast_aura_steps, fixture_health_step, required_aura_steps,
+                    FIXTURE_MAX_HEALTH, fixture_health_step, required_aura_steps,
                     required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
@@ -4198,7 +4198,8 @@ def cost_gate_label(spec: CostGateSpec, arm: str) -> str:
 
 
 def cost_gate_aura_steps(spec: CostGateSpec, spell: int) -> list[dict]:
-    return cast_aura_steps({'cast_auras': spec.cast_auras}, spell)
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': item.get('stacks', 1)}
+            for item in spec.cast_auras if item['spell'] == spell for aura in item['auras']]
 
 
 def cost_gate_base(spec: CostGateSpec, facts) -> float:
@@ -4565,7 +4566,11 @@ def cost_gate_cast_auras(entry: dict) -> tuple[dict, ...]:
                 isinstance(aura, int) for aura in item['auras']):
             raise ValueError(f'{entry["spell"]} cost_gate cast_auras entries are {{spell, auras, reason}} with '
                              f'integer spells and auras')
-    return tuple({'spell': item['spell'], 'auras': list(item['auras'])} for item in found)
+    for item in found:
+        if 'stacks' in item and (type(item['stacks']) is not int or item['stacks'] < 1):
+            raise ValueError(f'{entry["spell"]} cost_gate cast_auras stacks is a positive integer')
+    return tuple({'spell': item['spell'], 'auras': list(item['auras']),
+                  **({'stacks': item['stacks']} if 'stacks' in item else {})} for item in found)
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
@@ -6328,6 +6333,7 @@ class HitRatioSpec:
     versus: hit_ratio_versus.Versus | None = None
     caster_entry: int | None = None
     owned_auras: tuple[tuple[int, int, int], ...] = ()
+    band_points: float | None = None
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6724,6 +6730,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
              'quote': entry.quote}
     if spec.expected_token:
         model['expected_delta'] = delta
+    if spec.band_points is not None:
+        model['band_points'] = spec.band_points
     if spec.versus is not None:
         mask = hit_ratio_versus.versus_mask(records, spec.versus)
         model[hit_ratio_versus.NAME] = hit_ratio_versus.model(spec.versus, mask, hit_ratio_label(spec.spell,
@@ -6809,7 +6817,18 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         (control_excluded.parse(entry.get(control_excluded.NAME)) or {}).get('residual'),
                         hit_ratio_versus.parse(entry.get(hit_ratio_versus.NAME)), entry.get('caster_entry'),
                         tuple((int(spell), int(stacks), int(owned))
-                              for spell, stacks, owned in entry.get('owned_auras', ())))
+                              for spell, stacks, owned in entry.get('owned_auras', ())),
+                        hit_ratio_band_points(entry))
+
+
+def hit_ratio_band_points(entry: dict) -> float | None:
+    points = entry.get('band_points')
+    if points is None:
+        return None
+    if type(points) not in (int, float) or not 0 < points < POINT_BAND:
+        raise ValueError(f'{entry["spell"]} hit_ratio band_points {points!r} is a number of points above 0 and below '
+                         f'the {POINT_BAND:g}-point band it narrows')
+    return float(points)
 
 
 CRIT_RATE_TRIALS = 300

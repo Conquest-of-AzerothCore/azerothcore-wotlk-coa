@@ -422,7 +422,8 @@ METRIC_EVIDENCE = {
                      'spell_done_crit_chance', 'spell_taken_crit_chance', 'melee_damage_done', 'aoe_damage_taken',
                      'script_spell_damage_taken', 'spell_damage_taken', 'melee_damage_taken',
                      'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune',
-                     'owned_aura', 'owned_creature_aura_max_duration_ms'),
+                     'owned_aura', 'owned_creature_aura_max_duration_ms', 'armor_reduced_damage',
+                     'script_melee_damage_dealt', 'spell_done_crit_chance_scripted'),
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',
@@ -440,7 +441,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_react_state', 'nearest_creature_distance', 'casting',
                      'item_count', 'track_creature_type', 'owned_creature_stat', 'owned_creature_display',
                      'distance_2d', 'point_distance_2d', 'can_detect', 'temporary_spell_replacement',
-                     'owned_creature_remaining_ms'), STATE),
+                     'owned_creature_remaining_ms', 'block_value'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
@@ -455,7 +456,8 @@ STATE_PROMISES = {
     'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
     'power': rf'{POWER_WORDS}|\bcost', 'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
-    'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
+    'block_chance': r'block', 'block_value': r'block value',
+    'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
     'ranged_taken_crit_chance': CRIT_WORDS, 'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
     'owned_creature_attack_time_ms': r'haste|attack speed', 'owned_creature_crit_chance': CRIT_WORDS,

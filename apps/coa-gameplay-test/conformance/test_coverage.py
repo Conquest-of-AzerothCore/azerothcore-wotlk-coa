@@ -689,6 +689,42 @@ class EvidenceStatusTest(unittest.TestCase):
                 self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
         self.assertEqual(METRIC_EVIDENCE['spell_absorb_total'], EVENT)
 
+    def test_the_armor_script_melee_and_scripted_crit_probes_are_readbacks(self):
+        label = '1 behaviour_metric_delta probe'
+        cases = {'armor_reduced_damage': "Glorious Execution ignores 25% of the target's armor",
+                 'script_melee_damage_dealt': 'increases your melee damage done by 10%',
+                 'spell_done_crit_chance_scripted': 'increases the critical strike chance of Gift of the Sun by 50%'}
+        for metric, text in cases.items():
+            with self.subTest(metric=metric):
+                self.assertEqual(METRIC_EVIDENCE[metric], READBACK)
+                self.assertNotIn(metric, CONTRAST_PROOF)
+                clauses = [claim(text, label)]
+                read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+                self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
+                with mock.patch.dict(METRIC_EVIDENCE, {metric: EVENT}):
+                    self.assertEqual(evidence_of(clauses, [read])[0], [BEHAVIOUR])
+                unclassed = {key: kind for key, kind in METRIC_EVIDENCE.items() if key != metric}
+                with mock.patch.dict(METRIC_EVIDENCE, unclassed, clear=True), self.assertRaises(EvidenceError):
+                    evidence_of(clauses, [read])
+
+    def test_a_block_value_is_a_state_read_where_the_clause_promises_block_value(self):
+        label = '1 behaviour_metric_delta block_value'
+        metric = 'block_value'
+        self.assertEqual(METRIC_EVIDENCE[metric], STATE)
+        promised = [claim('Increases your shield block value by 30%', label)]
+        unpromised = [claim('Increases your Holy damage by 5%', label)]
+        chance = [claim('Increases your chance to block by 5%', label)]
+        learned = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of(promised, [learned])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of(unpromised, [learned])[0], [DATA])
+        self.assertEqual(evidence_of(chance, [learned])[0], [DATA])
+        self.assertEqual(evidence_of(promised, [judged(label, BEHAVIOUR_METRIC_DELTA, metric)])[0], [DATA])
+        with mock.patch.dict(METRIC_EVIDENCE, {metric: READBACK}):
+            self.assertEqual(evidence_of(promised, [learned])[0], [DATA])
+        unclassed = {key: kind for key, kind in METRIC_EVIDENCE.items() if key != metric}
+        with mock.patch.dict(METRIC_EVIDENCE, unclassed, clear=True), self.assertRaises(EvidenceError):
+            evidence_of(promised, [learned])
+
     def test_a_threat_read_counts_only_where_the_clause_promises_threat(self):
         label = '1 behaviour_metric_delta'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'threat', contrast=LEARNED_CONTRAST)

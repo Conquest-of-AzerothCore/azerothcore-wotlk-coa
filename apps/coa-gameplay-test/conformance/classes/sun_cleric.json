@@ -143,6 +143,35 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 806021,
+      "name": "Searing Light",
+      "min_parts": 10,
+      "tooltip": "Casting |cffffffffDawnsear|r and |cffffffffSunflare|r now have a $h% chance to grant |cffffffffScorch Marks|r for $807059d.@s:807059:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 502396
+      },
+      "trigger_text": "Casting Dawnsear and Sunflare",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807059,
+      "proc_spell_source": "Cast(player, player, 807059) (AscensionSunClericAbilities.cpp:200-201, OnSpellCast for 500146/800231 with Chance(player, 806021)); Sunflare 502396 is a rank of 800231 (AscensionSpellProgressionData.h)",
+      "events_per_proc": 1,
+      "handler": "AscensionSunClericAbilities.cpp:200-201: a non-triggered cast of Dawnsear or Sunflare with Chance(player, 806021) (ProcChance 40, no internal cooldown) casts Scorch Marks 807059 on the caster. Trigger: Sunflare 502396, the one of the two casts with the shorter cast time. Residual failure probability of the pooled proof at most 0.1% per pair.",
+      "dbc": {
+        "806021": {
+          "ProcChance": 40,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "base_mana_per_attempt": true
     }
   ],
   "triggers": [],
@@ -2101,6 +2130,2506 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 300322,
+      "kind": "metric_delta",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Swift Justice (spell haste)",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "expected": 0.970874,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "observe_source": "300322 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1), TARGET_UNIT_CASTER. A spell haste of 3% casts 3% faster: the caster's cast speed multiplier reads 1 before the learn (control) and 1 / 1.03 around a Holy Form 805301 cast."
+    },
+    {
+      "spell": 300322,
+      "kind": "metric_delta",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Swift Justice (melee haste)",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "expected": 2233,
+      "before_expected": 2300,
+      "expected_ratio": 0.970874,
+      "tolerance": 0.001,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "observe_source": "300322 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE +3 ($s1). The main-hand base attack time (Seraphim one-hand, 2300 ms) is read before and after the learn; with +3% haste the ratio is 1/1.03."
+    },
+    {
+      "spell": 680645,
+      "name": "Gavel critical damage",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "expected": 1.075,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680645
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "$s2 = 15 (680645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Light 800611, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. Control: passive not learned.",
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      }
+    },
+    {
+      "spell": 680645,
+      "name": "Gavel of Grace critical damage",
+      "kind": "hit_ratio",
+      "variant": "crit_damage_grace",
+      "label_suffix": "crit_damage_grace",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "expected": 1.075,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680645
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "$s2 = 15 (680645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Grace 800614, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. The three scripted Gavels 800611, 800614 and 800617 (Gavel(), AscensionSunCleric.cpp:171-174) share SpellFamilyFlags[1] 32 and the one passive effect: each is tested (G-23). Control: passive not learned.",
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      }
+    },
+    {
+      "spell": 680645,
+      "name": "Gavel of Wrath critical damage",
+      "kind": "hit_ratio",
+      "variant": "crit_damage_wrath",
+      "label_suffix": "crit_damage_wrath",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "expected": 1.075,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680645
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "$s2 = 15 (680645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 14). The engine applies op 15 to the bonus above the base hit only (passive-effects.md, spell-modifier op 15 'bonus' reading; ApplySpellMod SPELLMOD_CRIT_DAMAGE_BONUS), so a crit of 2x base becomes 2 + 1 x 0.15 = 2.15x: whole-hit ratio 1.075. Forced melee crits of Gavel of Wrath 800617, critical hits only, attack power fixture 20000 so the AP part dominates the weapon die. The three scripted Gavels 800611, 800614 and 800617 (Gavel(), AscensionSunCleric.cpp:171-174) share SpellFamilyFlags[1] 32 and the one passive effect: each is tested (G-23). Control: passive not learned.",
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      }
+    },
+    {
+      "spell": 504070,
+      "name": "Grace (Dawnsear)",
+      "kind": "hit_ratio",
+      "variant": "dawnsear",
+      "label_suffix": "dawnsear",
+      "quote": "Increases the spell damage bonus of Dawnsear by $s1%",
+      "expected": 1.1831,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          504070
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "$s1 = 20 (504070 Effect[0] aura 107 on Dawnsear). Dawnsear 554406 Description: ${$m1+0+$spfi*0.765222}; $m1 = 668 + 1 .. 668 + 80 (EffectBasePoints 668, EffectDieSides 80): mean (669 + 748) / 2 = 708.5. With a spell power fixture of 10000 the coefficient part is 10000 x 0.765222 = 7652.22 and the bonus scales that part by 1.2: (708.5 + 7652.22 x 1.2) / (708.5 + 7652.22) = 1.1831. Control: Grace not learned. 823764 removes the dummy's magic resistance as in the Templar entries.",
+      "cast_power": 1000,
+      "critical": false
+    },
+    {
+      "spell": 504070,
+      "name": "Grace (Sunflare)",
+      "kind": "hit_ratio",
+      "variant": "sunflare",
+      "label_suffix": "sunflare",
+      "quote": "and Sunflare by $s2%.",
+      "expected": 1.0815,
+      "observe_spell": 502396,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          504070
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "$s2 = 10 (504070 Effect[1] aura 107 SPELLMOD op 24 on Sunflare, EffectBasePoints 9). Sunflare 502396 Effect[0]: EffectBasePoints 553, EffectDieSides 28, BaseLevel 60 (no per-level term at 60): m1 = 554..581, mean 567.5. The coefficient is the recorded local choice 'Sunflare uses the first recovered rank's 0.25 SP coefficient for all ranks' (docs/coa/sun-cleric-completion.md:50; AscensionSunClericData.h row 800231 sp 0.25), so with the spell power fixture 10000 the coefficient part is 2500 and the bonus scales it by 1.1: (567.5 + 2750) / (567.5 + 2500) = 1.0815. Control: Grace not learned. 823764 removes the dummy's magic resistance as in the Templar entries. Reference search: nothing found for Sunflare's coefficient beyond the recorded choice.",
+      "cast_power": 1000,
+      "critical": false
+    },
+    {
+      "spell": 301345,
+      "name": "Ancient Rites (maximum mana)",
+      "kind": "metric_delta",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "quote": "Increases your mana by $s2% of your Intellect,",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 357,
+      "before_expected": 0,
+      "expected_gain": 357,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301345 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 299 + 1 = 300 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119 (class file stat 3): 300% x 119 = 357 added to the maximum mana. Maximum mana read before and after the learn; expected_gain judges the difference, control = reading before the learn."
+    },
+    {
+      "spell": 301345,
+      "kind": "metric_delta",
+      "quote": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites (regeneration amount)",
+      "variant": "regen_amount",
+      "label_suffix": "regen_amount",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 301368
+      },
+      "expected": 129,
+      "before_expected": 0,
+      "wait_ms": 16000,
+      "observe_source": "301345 Effect[0] aura 227 periodic trigger, EffectBasePoints 3 + 1 = 4 (4%), EffectAmplitude 15000, triggers 301368 whose Effect[0] is ENERGIZE_PCT. One tick after 16000 ms: 4% of the maximum mana with the aura learned = 4% x (2868 + 357) = 129. 2868 = BaseMana 1363 (player_class_stats class 27 level 60, CoA.ClassLevelSixtyStats.Enable off) + 20 + (Intellect 119 - 20) x 15 (StatSystem.cpp:421-429). Control: nothing energized before the learn."
+    },
+    {
+      "spell": 301345,
+      "kind": "metric_delta",
+      "quote": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "name": "Ancient Rites (first tick by 16.4 s)",
+      "variant": "period_upper",
+      "label_suffix": "period_upper",
+      "expected": 1,
+      "wait_ms": 16400,
+      "observe_source": "301345 Effect[0] EffectAmplitude 15000 ($t1 = 15 sec). Energize events of 301368 counted 16400 ms after the learn and cast: exactly 1, so the period is at most 16.4 s (excludes 16.5 s, +10%). Control: 0 before the learn."
+    },
+    {
+      "spell": 301345,
+      "kind": "metric_delta",
+      "quote": "and causes you to regenerate mana equal to 4% of your maximum mana every $t1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "name": "Ancient Rites (no second tick by 27.5 s)",
+      "variant": "period_lower",
+      "label_suffix": "period_lower",
+      "expected": 1,
+      "wait_ms": 27500,
+      "observe_source": "Same events counted 27500 ms after the learn: still exactly 1, so the period is above 13.75 s (excludes 13.5 s, -10%). With period_upper the period lies in (13.75, 16.4] s around the stated 15 s. Control: 0 before the learn."
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage dealt by $s2% and your critical strikes grant allies Replenishment.",
+      "expected": 2.5,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300943
+        ]
+      },
+      "critical": true,
+      "force_crit": "spell",
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1000,
+      "expected_source": "$s2 = 150 (300943 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 149, EffectMiscValue 127 all schools, MiscValueB 2). Tooltip: 'Increases your critical damage dealt by 150%'; the reference snapshots (coabuildhub spells_master_index) carry the same sentence 'by 150%' with no semantics, nothing found on whole-hit against bonus-only. The recorded choice (docs/coa/sun-cleric-completion.md:53) is 'native semantics for aura 163, no new total-critical-damage multiplier invented'. Native here is Unit::SpellCriticalDamageBonus (Unit.cpp:10654-10663): crit_bonus = damage + damage/2 for a spell crit, AddPct(crit_bonus, 150) on that whole figure, then minus damage, so a crit hit of 1.5x becomes 3.75x and the ratio to the same crit without the aura is 2.5 (the Templar Chivalric 705272 reading). Forced spell crits of Dawnsear 554406, critical hits only, spell power fixture 10000; control: passive not learned."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "Increases your critical damage dealt by $s2% and your critical strikes grant allies Replenishment.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment on a critical strike)",
+      "variant": "proc_aura",
+      "label_suffix": "proc_aura",
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 4000,
+      "observe_source": "300943 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, trigger 1257670 (Replenishment); AscensionSunClericEvents.cpp:117 names 300943 for a critical damage or healing hit. A forced-crit Dawnsear 554406 is cast at the dummy before and after the learn; Replenishment 1257670 on the caster 500 ms later: 0 before, 1 after. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment amount per tick)",
+      "variant": "replenish_tick",
+      "label_suffix": "replenish_tick",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 143,
+      "before_expected": 0,
+      "wait_ms": 9100,
+      "observe_source": "1257670 Effect[0] aura 24 periodic energize, EffectBasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000 ms: one tick by 5600 ms energizes 5% of the maximum mana, 5 x 2868 / 100 = 143 (integer percent of the maximum mana; 2868 = BaseMana 1363 (player_class_stats class 27 level 60, CoA.ClassLevelSixtyStats.Enable off) + 20 + (Intellect 119 - 20) x 15 (StatSystem.cpp:421-429)). Control: 0 before the learn. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (no Replenishment tick by 4.6 s)",
+      "variant": "replenish_none",
+      "label_suffix": "replenish_none",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 0,
+      "before_expected": 0,
+      "wait_ms": 8100,
+      "observe_source": "No energize event of Replenishment 1257670 4600 ms after the crit: the period is above 4.6 s, so it excludes 4.5 s (-10% of 5 sec). With replenish_tick (one tick, 143, by 5600 ms) and replenish_total (429 = 3 ticks by 16000 ms, which a period of 5.5 s cannot give) the period lies in (4.6, 5.33] s. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment total over its duration)",
+      "variant": "replenish_total",
+      "label_suffix": "replenish_total",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 429,
+      "before_expected": 0,
+      "wait_ms": 19500,
+      "observe_source": "Three ticks at 5000, 10000 and 15000 ms (EffectAmplitude 5000, DurationIndex 8 = 15000 ms): 3 x 143 = 429 read 16000 ms after the crit. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment still active at 14.5 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 18000,
+      "observe_source": "Replenishment 1257670 is on the caster 14500 ms after the crit: its duration is above 14.5 s (excludes 13.5 s, -10% of $1257669d = 15 s). The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 300943,
+      "kind": "metric_delta",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "name": "Pious (Replenishment gone at 16.4 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 0,
+      "before_expected": 0,
+      "wait_ms": 19900,
+      "observe_source": "Replenishment 1257670 is gone 16400 ms after the crit: its duration is below 16.4 s (excludes 16.5 s, +10%). With duration_held the duration lies in (14.5, 16.4] s around 15 s. The trigger is Dawnsear 554406, cast time 3500 ms (SpellCastTimes 22), so every wait is the stated time plus 3500 ms after the cast starts."
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "after a $704930d delay",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "name": "Solar Eclipse (no burst at 950 ms)",
+      "variant": "delay_held",
+      "label_suffix": "delay_held",
+      "expected": 0,
+      "wait_ms": 950,
+      "observe_source": "704929 Effect[0] aura 42 triggers 704930 (Solar Eclipse), DurationIndex 36 = 1000 ms ($704930d); AscensionSunClericAuras.cpp:184-185 casts the burst 704931 when it expires. Damage events of 704931 on the dummy 950 ms after the instant Dawnbreak 800654 cast: 0 (the delay is above 0.95 s, so it excludes 900 ms, -10% of $704930d = 1000 ms). Before the learn: 0."
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "after a $704930d delay",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "name": "Solar Eclipse (burst by 1150 ms)",
+      "variant": "delay_done",
+      "label_suffix": "delay_done",
+      "expected": 1,
+      "wait_ms": 1050,
+      "observe_source": "Same events 1050 ms after the instant Dawnbreak 800654 cast: exactly 1, so the delay is at most 1.05 s and excludes 1100 ms (+10% of $704930d = 1000 ms). Before the learn: 0."
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame costs no mana)",
+      "variant": "free_cast",
+      "label_suffix": "free_cast",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "before_expected": 660,
+      "expected": 919,
+      "observe_source": "Power set to 1000 before each cast, regeneration off. Without Scorch Marks Radiant Flame spends 25 x 1363 / 100 = 340 mana (660 left). With it, the setup Sun Ray 504764 (6% of base mana: 6 x 1363 / 100 = 81, 919 left) grants Scorch Marks for real, and Radiant Flame then costs nothing: 919. 807059 Effect[2] SPELLMOD op 14 -100% on Radiant Flame 806060 (class mask 134217728). Control = the before phase without Scorch Marks.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 400,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame casts with no mana)",
+      "variant": "free_gate",
+      "label_suffix": "free_gate",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 806060
+      },
+      "cast_power": 182,
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "Radiant Flame 806060 costs 25% of base mana 1363 = 340; Sun Ray 504764, the real cast that grants Scorch Marks, costs 6% = 81. The caster's mana is set to 182 before each phase's casts (regeneration off): the before phase (no Sun Ray, no Scorch Marks) cannot pay 340 and casts 0 times; the after phase pays 81 for the Sun Ray, keeps about 101, and Radiant Flame goes through (1 cast of 806060 by the caster) because the next Radiant Flame has no mana cost. Control: the before phase.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 5000,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame ticks 50% faster)",
+      "variant": "faster_ticks",
+      "label_suffix": "faster_ticks",
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 807058,
+        "caster": "caster",
+        "target": "dummy",
+        "since_spell": 806060
+      },
+      "cast_power": 1000,
+      "before_expected": 1000,
+      "expected": 500,
+      "tolerance": 50,
+      "observe_source": "Median interval between the damage events of 807058 on the dummy since the last cast of Radiant Flame 806060 (since_spell, so each phase reads its own events): 1000 ms without Scorch Marks, 500 ms with it (ticks 50% faster), within 50 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 on each of the three effects = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is granted to the caster by a real Sun Ray 504764 cast (setup_casts), no set_aura: the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 50,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame lasts 50% less)",
+      "variant": "shorter_duration",
+      "label_suffix": "shorter_duration",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 806060
+      },
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "before_expected": 3944,
+      "expected": 1944,
+      "tolerance": 100,
+      "observe_source": "Remaining duration of the Radiant Flame aura on the dummy 50 ms after the cast: 4000 - 50 without Scorch Marks, 2000 - 50 with it, within 100 ms (excludes 10% either side). 807059 (Scorch Marks) Effect[0] aura 108 SPELLMOD op 1 (-50%), Effect[1] op 19 (-50%), Effect[2] op 14 (-100%), class mask 134217728 = Radiant Flame 806060 (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, 25% of base mana 1363). Scorch Marks is granted to the caster by a real Sun Ray 504764 cast (setup_casts), no set_aura: the subject is Radiant Flame, cast for real in both phases; control = the before phase without the aura.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 1900,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame still on at 1.9 s)",
+      "variant": "shorter_held",
+      "label_suffix": "shorter_held",
+      "metric": "aura",
+      "fields": {
+        "spell": 806060
+      },
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "before_expected": 1,
+      "expected": 1,
+      "observe_source": "Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -50% on class mask 134217728 gives 2000 ms), read 1900 ms after the cast: present with and without Scorch Marks, so the reduced duration is above 1.9 s and excludes 1.8 s (-10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts); control = the before phase without it.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "wait_ms": 2150,
+      "expire_ms": 5000,
+      "name": "Searing Light (Radiant Flame gone by 2.15 s)",
+      "variant": "shorter_gone",
+      "label_suffix": "shorter_gone",
+      "metric": "aura",
+      "fields": {
+        "spell": 806060
+      },
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "before_expected": 1,
+      "expected": 0,
+      "observe_source": "Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -50% on class mask 134217728 gives 2000 ms), read 2150 ms after the cast: present without Scorch Marks (the 4000 ms control) and gone with it, so the reduced duration is at most 2.15 s and excludes 2.2 s (+10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts); control = the before phase without it.",
+      "setup_casts": [
+        504764
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "name": "Searing Light (Scorch Marks duration)",
+      "variant": "scorch_duration",
+      "label_suffix": "scorch_duration",
+      "trigger_spell": 504764,
+      "target": "dummy",
+      "cast_power": 1000,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 807059
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 9950,
+      "tolerance": 100,
+      "wait_ms": 50,
+      "expire_ms": 500,
+      "observe_source": "$807059d = 10000 ms. Sun Ray 504764 grants Scorch Marks 807059 on the caster by script (AscensionSunClericAbilities.cpp:215-216); the remaining duration on the caster 50 ms after the cast reads 9950 within 100 ms (excludes 10% either side). Control: no cast, no aura, 0. The 40% chance roll itself is the proc entry."
+    },
+    {
+      "spell": 504848,
+      "name": "Mercy (aura lasts 12 s)",
+      "kind": "metric_delta",
+      "variant": "duration_window",
+      "label_suffix": "duration_window",
+      "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
+      "trigger_spell": 504848,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 11300,
+      "expiry_wait_ms": 1300,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          11000,
+          11600
+        ],
+        "expired": [
+          12400,
+          13000
+        ]
+      },
+      "observe_source": "504848 DurationIndex 29 = 12000 ms ($d). One real self cast of 504848: its aura is present when read 11000..11600 ms after the cast (game time) and gone when read 12400..13000 ms after it, so the duration lies between 11000 and 13000 ms, inside 10% of 12000 (10800..13200) on both sides. Control (before): no cast, absent."
+    },
+    {
+      "spell": 504848,
+      "kind": "metric_delta",
+      "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Mercy (one dispel by 2.65 s)",
+      "variant": "period_held",
+      "label_suffix": "period_held",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 503650
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2750,
+      "observe_source": "504848 Effect[0] aura 23 periodic trigger of 503650, EffectAmplitude 3000 ($t1 = 3 sec). Casts of 503650 counted 2750 ms after the self cast: 1 (the application cast only: the period is above 2.75 s, so it excludes 2.7 s, -10%). Control: no cast, 0.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 504848,
+      "kind": "metric_delta",
+      "quote": "abolishing $503650s1 disease effects, repeating every $t1 sec for $d",
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Mercy (second dispel by 3.35 s)",
+      "variant": "period_done",
+      "label_suffix": "period_done",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 503650
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3250,
+      "observe_source": "Casts of 503650 counted 3250 ms after the self cast: 2 (the second cast has come: the period is at most 3.25 s, so it excludes 3.3 s, +10%). Each cast removes $503650s1 = 2 disease effects (the removal count is its own claim). Control: no cast, 0.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (healing done)",
+      "kind": "hit_ratio",
+      "variant": "healing",
+      "label_suffix": "healing",
+      "quote": "Ascend into a holy form, increasing your healing done by $s1%",
+      "expected": 1.1,
+      "observe_spell": 503624,
+      "metric": "spell_heal_total",
+      "target": "ally",
+      "control": {},
+      "treatment": {
+        "casts": [
+          805301
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "cast_power": 1000,
+      "expected_source": "$s1 = 10 (805301 Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1, EffectMiscValue 127 all schools): healing done x 1.10. Daybreak 503624 heals the ally for ${$m1+0+$BH*0.595}; non-critical heals only, bonus healing fixture 5000. Treatment: Holy Form is cast for real before every heal (no Bless on the ally, so the extra mana-for-healing part stays out); control: no Holy Form.",
+      "cast_wait_ms": 10500
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (threat multiplier readback)",
+      "kind": "metric_delta",
+      "variant": "threat_mult",
+      "label_suffix": "threat_mult",
+      "quote": "reducing your threat generated by $s3%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "metric": "threat_multiplier",
+      "fields": {
+        "school_mask": 2
+      },
+      "cast_in_before": false,
+      "before_expected": 1.0,
+      "expected": 0.5,
+      "tolerance": 0.001,
+      "wait_ms": 300,
+      "expire_ms": 300,
+      "observe_source": "Probe: the caster's total SPELL_AURA_MOD_THREAT multiplier for the Holy school mask 2 before any cast and after Holy Form (readback)."
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Solar Eclipse (burst damage)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 62.5,
+      "after_at_least": 62,
+      "after_at_most": 63,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "704931 Effect[1] SCHOOL_DAMAGE: EffectBasePoints 21, EffectDieSides 2, EffectRealPointsPerLevel 1.0 from BaseLevel 27, MaxLevel 0 (no cap). At level 60 $704931m2 = 21 + 33 + (1..2) = 55..56 (per-level term truncated, SpellInfo.cpp:497). The tooltip adds $sph*0.125 = 0 at spell power 0 and $AP*0.1 = 7 at the reference attack power 70: [62, 63]. Non-critical hit read on the dummy 2500 ms after the instant Dawnbreak 800654 cast. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Solar Eclipse (burst damage at +20000 attack power)",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 2062.5,
+      "after_at_least": 2062,
+      "after_at_most": 2063,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "As damage with 20000 more attack power (player_attack_power, harness fixture): 55..56 + int(0.1 x (70 + 20000)) = 55..56 + 2007 = [2062, 2063], against [62, 63] at the reference attack power; the contrast on the same build is the damage entry. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 704929,
+      "kind": "metric_delta",
+      "quote": "dealing ${$704931m2+$sph*0.125+$AP*0.1} Holy damage to nearby enemies.",
+      "trigger_spell": 800654,
+      "target": "dummy",
+      "cast_power": 1000,
+      "expire_ms": 500,
+      "name": "Solar Eclipse (burst damage at +10000 spell power)",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 704931,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 1312.5,
+      "after_at_least": 1312,
+      "after_at_most": 1313,
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "observe_source": "As damage with 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 55..56 + 7 + 0.125 x 10000 = [1312, 1313], against [62, 63] at spell power 0; the contrast on the same build is the damage entry. 823764 removes the dummy's magic resistance. Control: 0 before the learn.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 241.5,
+      "after_at_least": 225,
+      "after_at_most": 258,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 204 + int(2 x 1.34444) + (1..34) = 207..240 at level 60 (rounding 3), the AP term 0.1 x 70 = 7, spell power 0, plus the block value 11 read in block_value at the server's coefficient 1.0 (the tooltip states none, see damage_block): [225, 258] for a non-critical hit. 823764 removes the dummy's magic resistance. Control: no cast, 0."
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage at +2000 Strength)",
+      "kind": "metric_delta",
+      "variant": "damage_block",
+      "label_suffix": "damage_block",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 1641.5,
+      "after_at_least": 1625,
+      "after_at_most": 1658,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          8118,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Strength 8118 effect 0 (aura 29, harness precondition fixture, amount 2000) takes Strength to 2040. Sun Cleric attack power = 2 x Strength - 10 = 4070 (StatSystem.cpp:532, reference 70 at Strength 40), block value = (1 + 2040 x 0.5 - 10) = 1011 (Player.cpp:5616). m1 = 207..240 (see damage), AP term 0.1 x 4070 = 407, spell power 0, and the block value at the coefficient the server uses, 1.0 (AscensionSunClericContracts.cpp:312): [207 + 407 + 1011, 240 + 407 + 1011] = [1625, 1658]. The tooltip gives no coefficient, so this entry measures that coefficient: 0 would read [614, 647]. Control: no cast, 0; the contrast on the same build is the damage entry at block value 11. The block values 11 and 1011 were read with the harness metric block_value (CoAGameplayTest.cpp:5114) in the counted pair 20261120-220241 / 20261120-220458 and equal these figures; the metric has no row in coverage.py METRIC_EVIDENCE (shared tool, source stage cross-class guard), so those two read entries are kept in the pair's archive only.",
+      "phase_aura_amounts": [
+        [
+          8118,
+          0,
+          2000
+        ]
+      ]
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (threat per damage, control without the form)",
+      "kind": "metric_delta",
+      "variant": "threat_base",
+      "label_suffix": "threat_base",
+      "quote": "increasing your healing done by $s1% and reducing your threat generated by $s3%",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.00718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Control: Dawnsear 554406 without Holy Form, one phase, spell power 10000. Threat of one hit = damage x 1 (school modifier 1) + the flat initial threat of the cast, the spell level 60 (Spell::HandleThreatSpells, Spell.cpp:5737, added with ignoreModifiers true, Spell.cpp:5765). Damage mean 708.5 + 10000 x 0.765222 = 8360.7 (Description ${$m1+0+$spfi*0.765222}): 1 + 60 / 8360.7 = 1.00718.",
+      "cast_in_before": false,
+      "player_spell_power": 10000
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (threat generated)",
+      "kind": "metric_delta",
+      "variant": "threat",
+      "label_suffix": "threat",
+      "quote": "increasing your healing done by $s1% and reducing your threat generated by $s3%",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_only_after": false,
+      "setup_wait_ms": 1600,
+      "cast_power": 1000,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0.50718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "$s3 = 50 (805301 Effect[2] aura 10 SPELL_AURA_MOD_THREAT, EffectBasePoints -51 + 1 = -50, EffectMiscValue 127): the threat of the damage x 0.5 (Dawnsear is Fire, school mask 4, included in misc 127; ThreatManager.cpp:750). A real Holy Form 805301 cast on the caster before Dawnsear 554406 with spell power 10000, one phase. The flat initial threat of the cast (spell level 60, Spell.cpp:5737) is added with ignoreModifiers true (Spell.cpp:5765) and is not halved, so threat per damage = 0.5 + 60 / 8360.7 = 0.50718 (damage mean 708.5 + 10000 x 0.765222). Control: threat_base (same cast without the form, 1.00718) in the same pair. The first probe of the chunk (spell power 0, damage about 740) read 0.5817 against 0.5 = 0.5 + 60 / 734: the flat 60 share.",
+      "cast_in_before": false,
+      "player_spell_power": 10000,
+      "setup_in_before": true
+    },
+    {
+      "spell": 570120,
+      "name": "Solar Might (Strength)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases your Strength and Intellect by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 570120,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 40,
+      "expected": 44.0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "570120 Solar Might: Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), Effect[1] the same with MiscValue 3 (Intellect), BasePoints 9 (+1 = 10, $s1). The caster's Strength read before and after the passive is learned (a real learn; the before arm is the control without it). Reference stat 0 40 (class file reference_stats), expected 40 x 1.10 = 44; tolerance 1 for the integer rounding of the stat read. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 570120,
+      "name": "Solar Might (Intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases your Strength and Intellect by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 570120,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 119,
+      "expected": 130.9,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "570120 Solar Might: Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), Effect[1] the same with MiscValue 3 (Intellect), BasePoints 9 (+1 = 10, $s1). The caster's Intellect read before and after the passive is learned (a real learn; the before arm is the control without it). Reference stat 3 119 (class file reference_stats), expected 119 x 1.10 = 130.9; tolerance 1 for the integer rounding of the stat read. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300327,
+      "name": "Swift Justice (melee haste)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 300327,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "expected": 2169.8113,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300327 Swift Justice Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 5 (+1 = 6, $s1). The main-hand attack time of the reference weapon 2027 (2300 ms, class file weapon) before and after the passive is learned: 2300 / 1.06 = 2169.8113 ms; tolerance 1 ms. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300327,
+      "name": "Swift Justice (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 300327,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.943396,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300327 Swift Justice Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 5 (+1 = 6, $s1). The caster's cast speed multiplier (UNIT_MOD_CAST_SPEED) before and after the passive is learned: 1 / 1.06 = 0.943396. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 807964,
+      "name": "Soul of Light (An'she's Blessing cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of An'she's Blessing by $/1000;s1 sec",
+      "gated_spell": 804058,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "observe_source": "807964 Soul of Light Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (cooldown), BasePoints -60001 (-60000 ms, $/1000;s1 = 60 s), class mask word 1 = 33554432 = An'she's Blessing 804058's SpellFamilyFlags[1] (RecoveryTime 180000, CategoryRecoveryTime 180000, target caster, no power cost). Behaviour route: An'she's Blessing is cast and attempted again 120500 ms after the cast (60000 ms less than its cooldown plus 500 ms): refused without Soul of Light (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 119500 ms after the cast, so the cut lies within 500 ms (0.8%) of 60000 ms, inside 10% on both sides. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 804058 shows 9 SPELL_AURA_APPLIED events in 5 logs and no cooldown figure; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 300318,
+      "name": "Light's Blessing (Pendant of the Sun cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Casting Sunslam now reduces the cooldown of Pendant of the Sun by $/1000;570145s2 sec.",
+      "gated_spell": 680630,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "target": "caster",
+      "after_casts": [
+        [
+          805629,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "observe_source": "300318 Light's Blessing Effect[0] PROC_TRIGGER_SPELL 570145; 570145 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -10001 (-10000 ms, $/1000;570145s2 = 10 s), MiscValue 680630 Pendant of the Sun (RecoveryTime 60000, target caster). Behaviour route: Pendant of the Sun is cast, Sunslam 805629 is cast at the dummy 1600 ms later (in every arm; Light's Blessing is learned only in the arms with it), and Pendant is attempted again 50500 ms after its cast (10000 ms less than its cooldown plus 500 ms): refused without the talent (control arm), accepted with it, and refused again 49500 ms after the cast, so the cut lies within 500 ms (5%) of 10000 ms, inside 10% on both sides. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 680630 shows 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 707414,
+      "name": "It's Always Sunny (Radiance cooldown)",
+      "kind": "cost_gate",
+      "variant": "radiance",
+      "label_suffix": "radiance",
+      "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+      "gated_spell": 800054,
+      "resource": "cooldown",
+      "reduction": 11920.0,
+      "target": "caster",
+      "after_casts": [
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
+        }
+      ],
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Radiance (cooldown 120000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Radiance is attempted again 108330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 107830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 11840 ms at the Dawn cast) or of the full cooldown (12000 ms) the tooltip does not say; the stated cut is taken as their midpoint 11920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 707414,
+      "name": "It's Always Sunny (Valkyr's Calling cooldown)",
+      "kind": "cost_gate",
+      "variant": "valkyrs_calling",
+      "label_suffix": "valkyrs_calling",
+      "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+      "gated_spell": 520024,
+      "resource": "cooldown",
+      "reduction": 17920.0,
+      "target": "dummy",
+      "after_casts": [
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
+        }
+      ],
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Valkyr's Calling (cooldown 180000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Valkyr's Calling is attempted again 162330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 161830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 17840 ms at the Dawn cast) or of the full cooldown (18000 ms) the tooltip does not say; the stated cut is taken as their midpoint 17920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 707414,
+      "name": "It's Always Sunny (Sunslam cooldown)",
+      "kind": "cost_gate",
+      "variant": "sunslam",
+      "label_suffix": "sunslam",
+      "quote": "Activating Dawn now reduces the cooldowns of Radiance, Valkyr's Calling, and Sunslam by $712380s1%.",
+      "gated_spell": 805629,
+      "resource": "cooldown",
+      "reduction": 4340.0,
+      "target": "dummy",
+      "after_casts": [
+        [
+          804584,
+          "caster"
+        ],
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
+        }
+      ],
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (cooldown 45000 ms) is cast with the Dawn state aura 807440 present (Sunslam is refused without it, AscensionSunClericAbilities.cpp:90, so the harness sets it before each Sunslam cast), then Dawn 804584 is cast twice at the caster, 1600 ms and 3200 ms after it, with 20 Solar Power each time (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it): the first cast finds Dawn present and cancels it, the second activates it (AscensionSunClericAbilities.cpp:417-423) and applies the cut. Sunslam is attempted again 40910 ms after its cast (4340 ms less than its cooldown plus 250 ms): refused without the passive (control arm), accepted with it, and refused again 40410 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 4180 ms at the second Dawn cast) or of the full cooldown (4500 ms) the tooltip does not say; the stated cut is taken as their midpoint 4340 ms with a margin of 250 ms (6% of 4340 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
+      "after_cast_gap_ms": 1600
+    },
+    {
+      "spell": 804269,
+      "name": "Solemn Priest (melee attack power)",
+      "kind": "metric_delta",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "Increases your melee attack power by $s1% of your Intellect",
+      "trigger_spell": 804247,
+      "gate_spell": 804269,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 70,
+      "expected": 218.75,
+      "expected_gain": 148.75,
+      "tolerance": 1.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804269 Solemn Priest Effect[0] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 3 (Intellect), BasePoints 124 (+1 = 125, $s1). The caster's melee attack power before and after the passive is learned: reference attack power 70 (class file reference_stats), Intellect 119, gain 1.25 x 119 = 148.75; tolerance 1.5 for the integer rounding of the read. Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC (the community snapshots carry the spell name only)."
+    },
+    {
+      "spell": 804269,
+      "name": "Solemn Priest (attack power follows Intellect)",
+      "kind": "metric_delta",
+      "variant": "attack_power_int",
+      "label_suffix": "attack_power_int",
+      "quote": "Increases your melee attack power by $s1% of your Intellect",
+      "trigger_spell": 804247,
+      "gate_spell": 804269,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 70,
+      "expected": 278.75,
+      "expected_gain": 208.75,
+      "tolerance": 1.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "As attack_power, with Intellect 48100 set in both phases (a precondition fixture by harness set_aura; Intellect reads 167 against the reference 119, as the Solar Discernment entries measured): the gain is 1.25 x 167 = 208.75, so the 125% is of Intellect, not a flat value. Control: the phase without the passive. Reference search 2026-11-20: bindmysoul has no Solemn Priest entry (advancement.tsv lists the name only); coa-history spell 804269: 0 events in 186 logs; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 805816,
+      "name": "Valkyrie's Watch (damage taken while below 35% health)",
+      "kind": "taken_hit",
+      "variant": "below",
+      "label_suffix": "below",
+      "judge": "damage_ratio",
+      "expected": 0.75,
+      "quote": "and damage taken while below 35% health is reduced by $s1%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 20,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805816 Valkyrie's Watch (a passive; Effect[0] SCHOOL_ABSORB dummied by AscensionSunClericContracts.cpp, BasePoints 24 (+1 = 25, $s1)). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the damage taken is judged against 0.75 (25% less). The caster holds 20% of 100000 health before every strike: 20000 health, already below 35%, 1100 damage leaves it below. Reference search: the community snapshot repeats the tooltip, nothing found on how the 35% threshold is read. The health the caster loses to each strike is read (health_loss), not the logged damage: the first run read 1100 logged in every arm, because the passive's OnDamage hook lowers the damage after the log is built.",
+      "health_loss": true
+    },
+    {
+      "spell": 805816,
+      "name": "Valkyrie's Watch (damage that would take you below 35% health)",
+      "kind": "taken_hit",
+      "variant": "crossing",
+      "label_suffix": "crossing",
+      "judge": "damage_ratio",
+      "expected": 0.75,
+      "quote": "Damage that would take you below 35% health",
+      "strike_spell": 41394,
+      "caster_health_pct": 35,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805816 Valkyrie's Watch (a passive; Effect[0] SCHOOL_ABSORB dummied by AscensionSunClericContracts.cpp, BasePoints 24 (+1 = 25, $s1)). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the damage taken is judged against 0.75. The caster holds 35% of 100000 health before every strike: 35% is 35000: at exactly 35000 health a 1100 strike leaves 33900, below the threshold, so the strike itself is reduced. Reference search: the community snapshot repeats the tooltip, nothing found on how the 35% threshold is read. The health the caster loses to each strike is read (health_loss), not the logged damage: the first run read 1100 logged in every arm, because the passive's OnDamage hook lowers the damage after the log is built.",
+      "health_loss": true
+    },
+    {
+      "spell": 805816,
+      "name": "Valkyrie's Watch (control: damage that stays above 35% health)",
+      "kind": "taken_hit",
+      "variant": "above",
+      "label_suffix": "above",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "and damage taken while below 35% health is reduced by $s1%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 60,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805816
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805816,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805816 Valkyrie's Watch (a passive; Effect[0] SCHOOL_ABSORB dummied by AscensionSunClericContracts.cpp, BasePoints 24 (+1 = 25, $s1)). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the damage taken is judged against 1.0 (no reduction). The caster holds 60% of 100000 health before every strike: 60000 health, a 1100 strike leaves it far above 35%, so the passive must not reduce it (the contrast arm of the threshold). Reference search: the community snapshot repeats the tooltip, nothing found on how the 35% threshold is read. The health the caster loses to each strike is read (health_loss), not the logged damage: the first run read 1100 logged in every arm, because the passive's OnDamage hook lowers the damage after the log is built.",
+      "health_loss": true
+    },
+    {
+      "spell": 707077,
+      "name": "Faith (target's Armor)",
+      "kind": "metric_delta",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
+      "trigger_spell": 500143,
+      "gate_spell": 707077,
+      "target": "caster",
+      "cast_power": 1360,
+      "caster_health_pct": 50,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 50,
+      "expected": 55,
+      "expected_ratio": 1.1,
+      "tolerance": 0.02,
+      "wait_ms": 2600,
+      "expire_ms": 23000,
+      "observe_source": "707077 Faith Effect[0] PROC_TRIGGER_SPELL 804405 (AscensionSunClericEvents.cpp:318 casts 804405 at the target of a direct heal); 804405 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints 9 (+1 = 10, $804405s1), target ally. Illumination 500143 (a direct heal) is cast on the caster at 50% health in both phases; 707077 is learned between them. The caster's armor is read after each phase and judged as a ratio of the first reading (1.10, tolerance 0.02 = the 2-point band); the before reading must reach 50. Control: the phase without the passive. Pause 21000 ms between the phases so that the aura of the first phase cannot leak. Reference search: the community snapshot repeats the tooltip, nothing else found. Illumination has a 2000 ms cast time (CastingTimes 5), so the heal and Faith land 2000 ms after the cast starts: the armor is read 2600 ms after it (the first run read at 500 ms, before the heal, 83 and 83)."
+    },
+    {
+      "spell": 707077,
+      "name": "Faith (lasts 20 s)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
+      "trigger_spell": 500143,
+      "gate_spell": 707077,
+      "target": "caster",
+      "cast_power": 1360,
+      "caster_health_pct": 50,
+      "metric": "aura",
+      "fields": {
+        "spell": 804405
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 21300,
+      "expiry_wait_ms": 1500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          21000,
+          21600
+        ],
+        "expired": [
+          22400,
+          23000
+        ]
+      },
+      "observe_source": "804405 DurationIndex 18 (20000 ms, $804405d). One real Illumination 500143 on the caster at 50% health with Faith learned at the start; the cast time is 2000 ms (CastingTimes 5), so Faith lands about 2000 ms after the cast starts (the first run, windows 19000..21000, still read the aura at 20818 ms). The aura 804405 is present when read 21000..21600 ms after the cast starts and gone when read 22400..23000 ms after it, that is about 19000..19600 and 20400..21000 ms after it landed: the duration lies between 19000 and 21000 plus the landing delay, inside 10% of 20000 (18000..22000) on both sides. Control (before): no cast, absent. Reference search 2026-11-20: coa-history spell 707077: 0 events in 186 logs; Faith 804405 shows 6950 applications and 32671 refreshes in 25-26 logs, no duration reading taken from them; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Dawnsear cast still running at 3090 ms)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_held",
+      "label_suffix": "dawnsear_held",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 3090,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          3085,
+          3140
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Dawnsear has a 3500 ms cast time (CastingTimes), 10% less is 3150 ms; the percent band (2 points) is 3080..3220 ms. The caster's cast is read still running at 3090 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 3500 ms). Still running at 3090 ms: the cast is longer than 3080 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Dawnsear cast done at 3210 ms)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_done",
+      "label_suffix": "dawnsear_done",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 3210,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          3200,
+          3220
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Dawnsear has a 3500 ms cast time (CastingTimes), 10% less is 3150 ms; the percent band (2 points) is 3080..3220 ms. The caster's cast is read finished at 3210 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 3500 ms). Finished by 3210 ms: the cast is shorter than 3220 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Sunflare cast still running at 1770 ms)",
+      "kind": "metric_delta",
+      "variant": "sunflare_held",
+      "label_suffix": "sunflare_held",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1770,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1765,
+          1810
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Sunflare has a 2000 ms cast time (CastingTimes), 10% less is 1800 ms; the percent band (2 points) is 1760..1840 ms. The caster's cast is read still running at 1770 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 2000 ms). Still running at 1770 ms: the cast is longer than 1760 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Sunflare cast done at 1830 ms)",
+      "kind": "metric_delta",
+      "variant": "sunflare_done",
+      "label_suffix": "sunflare_done",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1830,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1820,
+          1840
+        ]
+      },
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Sunflare has a 2000 ms cast time (CastingTimes), 10% less is 1800 ms; the percent band (2 points) is 1760..1840 ms. The caster's cast is read finished at 1830 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 2000 ms). Finished by 1830 ms: the cast is shorter than 1840 ms. Mana is set to the class base mana 1363 (player_class_stats class 27 level 60) before each cast, regeneration off. Reference search: the community snapshots read -10%, nothing else found."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Dawnsear mana spent)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_cost",
+      "label_suffix": "dawnsear_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1158.55,
+      "expected": 1178.99,
+      "tolerance": 1.5,
+      "wait_ms": 4200,
+      "expire_ms": 4500,
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Dawnsear costs 15% of the class base mana 1363 (player_class_stats class 27 level 60 BaseMana), 204.45; 10% less is 184.005. Mana is set to 1363 before the cast, regeneration off, and read after the cast completes: 1158.55 without the passive (control phase), 1178.99 with it; tolerance 1.5 for the integer cost. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 560859,
+      "name": "Burning Cascade (Sunflare mana spent)",
+      "kind": "metric_delta",
+      "variant": "sunflare_cost",
+      "label_suffix": "sunflare_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 560859,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1226.7,
+      "expected": 1240.33,
+      "tolerance": 1.5,
+      "wait_ms": 2500,
+      "expire_ms": 4500,
+      "observe_source": "560859 Burning Cascade Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST), BasePoints -11 (-10 percent, $s1), class mask word 1 = 1282 = 2 (Dawnsear's SpellFamilyFlags[1]) + 256 (Sunflare's) + 1024 (a third family bit, see the observation in the report). Sunflare costs 10% of the class base mana 1363 (player_class_stats class 27 level 60 BaseMana), 136.3; 10% less is 122.67. Mana is set to 1363 before the cast, regeneration off, and read after the cast completes: 1226.7 without the passive (control phase), 1240.33 with it; tolerance 1.5 for the integer cost. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (disarm lasts 6 s)",
+      "kind": "metric_delta",
+      "variant": "disarm_duration",
+      "label_suffix": "disarm_duration",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804057,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). The aura 804057 on the dummy (Harvest Golem 36, immunity set -93 = fear and horror only) is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it: the duration lies in 5500..6500, inside 10% of 6000 (5400..6600) on both sides. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "wait_ms": 5700,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          5500,
+          5900
+        ],
+        "expired": [
+          6100,
+          6500
+        ]
+      }
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Undead pacified and rooted 6 s)",
+      "kind": "metric_delta",
+      "variant": "undead_duration",
+      "label_suffix": "undead_duration",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Brittlebones Skeleton 201 (type 6 Undead, immunity set -93 = fear and horror only): the aura 807778 is present when read 5500..5900 ms after the cast and gone when read 6100..6500 ms after it, inside 10% of 6000 on both sides. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "target_entry": 201,
+      "wait_ms": 5700,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          5500,
+          5900
+        ],
+        "expired": [
+          6100,
+          6500
+        ]
+      }
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Demon pacified and rooted)",
+      "kind": "metric_delta",
+      "variant": "demon_effect",
+      "label_suffix": "demon_effect",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Target Imp 416 (type 3 Demon, no immunities): the aura 807778 is present 1000 ms after the cast. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "target_entry": 416,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Humanoid not pacified)",
+      "kind": "metric_delta",
+      "variant": "humanoid_unaffected",
+      "label_suffix": "humanoid_unaffected",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Control for the Undead and Demon clause: Kobold Vermin 6 (type 7 Humanoid, no immunities) is disarmed by the same cast (the disarm_humanoid entry) but the aura 807778 reads 0 1000 ms after it. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "target_entry": 6,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (Humanoid disarmed)",
+      "kind": "metric_delta",
+      "variant": "disarm_humanoid",
+      "label_suffix": "disarm_humanoid",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804057,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Kobold Vermin 6 (type 7 Humanoid): the disarm aura 804057 is present 1000 ms after the cast; the pairing arm of the humanoid_unaffected control. Control (before): no cast, absent. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "target_entry": 6,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (silence-immune enemy not affected)",
+      "kind": "metric_delta",
+      "variant": "silence_immune",
+      "label_suffix": "silence_immune",
+      "quote": "Enemies that are immune to silence effects cannot be affected by this.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804057,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543 (Undead, level 34, creature_immunities -273, MechanicsMask 1234599606 = 0x24CB3F5B, which lists SILENCE and not DISARM; the first run used 11446 Gordok Spirit by a wrong join, its immunity set -96 is fear and horror only): the aura 804057 reads 0 1000 ms after the cast, while the same Undead type Brittlebones Skeleton 201, not silence immune, carries 807778 (undead_duration) and a disarm. Control arm: undead_duration and disarm_humanoid show the cast lands on enemies without the immunity. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "target_entry": 4543,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 804057,
+      "name": "Calm (silence-immune enemy not pacified)",
+      "kind": "metric_delta",
+      "variant": "silence_immune_pacify",
+      "label_suffix": "silence_immune_pacify",
+      "quote": "Enemies that are immune to silence effects cannot be affected by this.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND, DurationIndex 32 (6000 ms, $d); Effect[0] TRIGGER_SPELL 807778 (DurationIndex 32, 6000 ms, $807778d; Effect[0] aura 25 MOD_PACIFY, Effect[1] aura 26 MOD_ROOT). Bloodmage Thalnos 4543, as silence_immune: the aura 807778 reads 0 1000 ms after the cast although it is an Undead (the control of undead_duration, 201, carries it). Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence (melee and ranged weapons, Undead or Demon, immune to silence); coa-history spell 804057 and 807778: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "target_entry": 4543,
+      "wait_ms": 1000
+    },
+    {
+      "spell": 704938,
+      "name": "Vindicator (10% of the armor ignored with Vow of the Valkyr)",
+      "kind": "hit_ratio",
+      "variant": "ignores_armor",
+      "label_suffix": "ignores_armor",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "expected": 1.0528,
+      "observe_spell": 800691,
+      "control": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "learn": [
+          704938
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 12,
+      "cast_power": 1363,
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Treatment arm: Vindicator learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, Vindicator not learned. Ignoring 10% of 5528 armor leaves 4975.2: the mean hit ratio is (5528 + 5500) / (4975.2 + 5500) = 1.0528 (+5.28%). The band is that of the stated 10% (G-19: the larger of 5% of it and 2 points, 8% to 12%), mapped through the same formula: 8% gives (5528 + 5500) / (5085.76 + 5500) = 1.0418 (+4.18%) and 12% gives (5528 + 5500) / (4864.64 + 5500) = 1.0640 (+6.40%), so the judged band is +-1.1 points on +5.28% (band_points 1.1, the smaller side), and a server ignoring 5% (+2.57%) or 15% (+8.13%) lies outside it. The 99% half-width at 498 trials per arm was 0.87 points (prove1, 3 parts of 166), so about 1930 trials per arm give the 0.44 the pilot sizes to: 12 parts of 166. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence (\"ignores -10%\", the sign an export artefact); coa-history spell 704938: 0 events in 186 logs, 803913 Glorious Execution 929 casts in 6 logs, no armor figure; nothing found beyond the tooltip and the DBC.",
+      "cast_spell": 803913,
+      "band_points": 1.1
+    },
+    {
+      "spell": 704938,
+      "name": "Vindicator (no armor ignored without Vow of the Valkyr)",
+      "kind": "hit_ratio",
+      "variant": "vow_inactive",
+      "label_suffix": "vow_inactive",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "expected": 1.0,
+      "observe_spell": 800691,
+      "control": {
+        "auras": [],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          704938
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Contrast arm of the Vow condition: Vindicator learned in the treatment arm, Vow of the Valkyr on the caster in neither arm; the hit must not change, expected mean ratio 1.0 (band 2 points). Reference search 2026-11-20: as ignores_armor; nothing found beyond the tooltip and the DBC.",
+      "cast_spell": 803913
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (lasts 15 s)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "trigger_spell": 301266,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 301266
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          14200,
+          14800
+        ],
+        "expired": [
+          15300,
+          15900
+        ]
+      },
+      "observe_source": "301266 DurationIndex 8 (15000 ms, $d, Lasts $d.). One real cast of 301266 on the caster: its aura is present when read 14200..14800 ms after the cast (game time) and gone when read 15300..15900 ms after it, so the duration lies between 14200 and 15900, inside 10% of 15000 (13500..16500) on both sides. Control (before): no cast, absent. Reference search: the community snapshot repeats the tooltip (15 seconds), nothing else found."
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare damage)",
+      "kind": "metric_delta",
+      "variant": "flare_damage",
+      "label_suffix": "flare_damage",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[1] SCHOOL_DAMAGE, BasePoints 50 (+1), RealPointsPerLevel 1.9, DieSides 1: $m2+$ppl2 = 136.5 at the reference level and spell power 0 (the tooltip reading of the reference character). The damage of 807175 on the dummy is read after one Horusath Blast, in a window of 1 around the stated 136.5 for the integer step; the control phase reads 0 (no Solar Concord, no Solar Flare). Reference search: the community snapshot reads 137 + 26% SP, nothing else found. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: 136.5 x 1.20 = 163.8, read as 163 (truncated). Order of revision: the first run read 163 and 3283 against an expectation without the Sunrise factor; the x1.20 factor (500477 Effect[0] aura 79, BasePoints 19, from the DBC) was added to the expectation afterwards, from the DBC and not from the measured value.",
+      "expected": 163.8,
+      "after_at_least": 163,
+      "after_at_most": 164
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "flare_damage_sp",
+      "label_suffix": "flare_damage_sp",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. As flare_damage at +10000 spell power (the player fixture, both phases): 136.5 + 0.26 x 10000 = 2736.5, the contrast that proves the $SP*0.26 term; the control phase reads 0. The Sunrise fixture 500477 is itself +20% Holy damage dealt (Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 2, BasePoints 19, +1 = 20%, 'Increases all Holy Damage dealt by $s1%'), and Solar Flare is Holy, so the expected reading is the tooltip value times 1.20 (found in the first run, which read 163 and 3283 against the unscaled 136.5 and 2736.5; the ratio of the two readings to the tooltip values is the Sunrise factor, 1.194 and 1.200, int truncation of the product). Expected: (136.5 + 2600) x 1.20 = 3283.8, read as 3283. Reference search 2026-11-20: bindmysoul Solar Concord text gives Solar Flare '137 + 26% SP Holyflame Damage ... reduces the target's chance to hit by -3% for 10 seconds' (the same figures, the sign an export artefact); coa-history spell 807175: 15499 SPELL_DAMAGE events in 29 logs, 3..3191, no hit-chance reading; nothing found beyond the tooltip and the DBC. Order of revision: the first run read 163 and 3283 against an expectation without the Sunrise factor; the x1.20 factor (500477 Effect[0] aura 79, BasePoints 19, from the DBC) was added to the expectation afterwards, from the DBC and not from the measured value.",
+      "expected": 3283.8,
+      "after_at_least": 3283,
+      "after_at_most": 3284,
+      "player_spell_power": 10000
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare reduces the target's chance to hit)",
+      "kind": "metric_delta",
+      "variant": "flare_hit_chance",
+      "label_suffix": "flare_hit_chance",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 807175,
+        "effect": 0
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE, BasePoints -4 (+1 = -3, $s1 = 3). The live amount of effect 0 of the aura 807175 on the dummy is read after one Horusath Blast: -3 with Solar Concord, no aura (0) in the control phase. The amount is a read of the live aura, not of a hit roll. Reference search 2026-11-20: bindmysoul Solar Concord text gives Solar Flare '137 + 26% SP Holyflame Damage ... reduces the target's chance to hit by -3% for 10 seconds' (the same figures, the sign an export artefact); coa-history spell 807175: 15499 SPELL_DAMAGE events in 29 logs, 3..3191, no hit-chance reading; nothing found beyond the tooltip and the DBC.",
+      "expected": -3,
+      "tolerance": 0.5,
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare lasts 10 s)",
+      "kind": "metric_delta",
+      "variant": "flare_duration",
+      "label_suffix": "flare_duration",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": false,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807175,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131 rolls the proc on a damaging hit of Horusath Blast 500154 while the caster has Sunrise 500477 (or of Rapture 806477 with Sunset 500511) and :250 casts Solar Flare 807175 at the target. Sunrise 500477 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Horusath Blast 572801 alone, is the control. 807175 DurationIndex 1 (10000 ms, $d of the spell 807175). The aura 807175 on the dummy is present when read 9200..9800 ms after the Horusath Blast cast and gone when read 10300..10900 ms after it, inside 10% of 10000 (9000..11000) on both sides; the control phase reads it absent. Reference search 2026-11-20: bindmysoul Solar Concord text gives Solar Flare '137 + 26% SP Holyflame Damage ... reduces the target's chance to hit by -3% for 10 seconds' (the same figures, the sign an export artefact); coa-history spell 807175: 15499 SPELL_DAMAGE events in 29 logs, 3..3191, no hit-chance reading; nothing found beyond the tooltip and the DBC.",
+      "expected": 1,
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          9200,
+          9800
+        ],
+        "expired": [
+          10300,
+          10900
+        ]
+      }
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (damage to the target)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 908.5,
+      "after_at_least": 876,
+      "after_at_most": 941,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Spell power 0 (the reference character): the damage of 807372 on the dummy lies in 876.7 + 0..64 = 876.7..940.7, read as 876..941 for the integer steps. Control: no cast, 0. Reference search: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 11282.5,
+      "after_at_least": 11250,
+      "after_at_most": 11315,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. As damage at +10000 spell power (player fixture, both phases): + 1.03734 x 10000 = 10373.4, so 11250.1..11314.1, read as 11250..11315; the contrast that proves the $spfi*1.03734 term. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
+      "player_spell_power": 10000
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (nearer enemy struck first, full damage)",
+      "kind": "metric_delta",
+      "variant": "second_enemy",
+      "label_suffix": "second_enemy",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 908.5,
+      "after_at_least": 876,
+      "after_at_most": 941,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. A second dummy (area1) stands 4 yd from the caster, nearer than the target dummy, inside the radius. At spell power 0 each hit reads its own roll: the enemy struck first takes the full 876.7..940.7 (read 876..941). The enemy struck second is read by second_enemy_primary: 0.85 of a roll, 745.2..799.6 (EffectDamageMultiplier[0] 0.85), below the first. The first-run reads at +20000 spell power (40940 on area1, 34748 on the target = 0.85 of 40880) showed the 0.85 step; the order of the two enemies is the engine's, not a claim of the tooltip. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
+      "area_dummies": [
+        4.0
+      ]
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (enemy struck second, less damage)",
+      "kind": "metric_delta",
+      "variant": "second_enemy_primary",
+      "label_suffix": "second_enemy_primary",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 772.4,
+      "after_at_least": 745,
+      "after_at_most": 800,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. The same cast as second_enemy, read on the target dummy (struck second): 0.85 x (876.7..940.7) = 745.2..799.6, read 745..800; the full roll would be at least 876, so a reading of 1.0 fails. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
+      "area_dummies": [
+        4.0
+      ]
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (pierces an immunity (fire-immune target))",
+      "kind": "metric_delta",
+      "variant": "immune_fire",
+      "label_suffix": "immune_fire",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807372,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 908.5,
+      "after_at_least": 876,
+      "after_at_most": 941,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Target Fire Elemental 575 (immunity set -300: school 0x4 FIRE and mechanics): Rapture still deals 876.7..940.7, read 876..941; the contrast (control) is Dawnsear 554406, a Fire spell without the attribute, which deals 0 to the same creature (immune_fire_control). Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
+      "target_entry": 575
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (a fire spell without the attribute is stopped by the same immunity)",
+      "kind": "metric_delta",
+      "variant": "immune_fire_control",
+      "label_suffix": "immune_fire_control",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "expected": 0.0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
+      "target_entry": 575
+    },
+    {
+      "spell": 804269,
+      "name": "Solemn Priest (Gavel of Light heals twice as much)",
+      "kind": "metric_delta",
+      "variant": "gavel_heal",
+      "label_suffix": "gavel_heal",
+      "quote": "and causes Gavel of Light to heal you for an additional $s2% of its damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 804269,
+      "target": "dummy",
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 100,
+      "expected": 300,
+      "expected_ratio": 3.0,
+      "tolerance": 0.15,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Gavel of Light 800611 hits the dummy and the server copies a share of its damage to the caster as 707522 (AscensionSunClericAbilities.cpp:283-290): the share is the effect value of the passive 707521, BasePoints 49 + 1 = 50 ($707521s1, 'heal yourself equal to $707521s1% of the damage dealt'). Solemn Priest 804269 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) BasePoints 49 + 1 = 50 ($s2) on the class mask of 707521 (SpellFamilyFlags[0] 2097152): 'an additional 50% of its damage dealt', so 100% of the damage with the passive against 50% without. Both phases cast one Gavel of Light at the dummy with the caster at 50% health and +20000 attack power (a harness fixture) so that the hit is the same to 0.4% from one cast to the next (the weapon roll of 17..29 is lost against about 3400 of attack power (20000 / 14 x 2.4)); the first run, as a hit_ratio of the heals, could not read a heal on the caster (a hit_ratio reads the heals on the target of the cast). spell_heal_total sums every matching heal event since the scenario started (the leech_ratio note), so the after reading carries the before heal: (H + 2H) / H = 3.0, tolerance 0.15 (the 5-point band on +100%). Both phases carry the class tuning aura 887015 (-20% healing done) alike. Control: the phase without the passive. Reference search 2026-11-20: bindmysoul has no Solemn Priest entry (advancement.tsv lists the name only); coa-history spell 804269: 0 events in 186 logs; nothing found beyond the tooltip and the DBC. Fixture 984954 ('Reg\u2019s Test Aura') carries Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints 100 (+101% weapon crit), so every Gavel hit (800611, DmgClass 2, melee) is a critical strike in both phases; the heal is a share of the damage dealt, so the ratio of the two phases is unaffected."
+    },
+    {
+      "spell": 807964,
+      "name": "Soul of Light (Vow of Light value doubled)",
+      "kind": "metric_delta",
+      "variant": "vow_value",
+      "label_suffix": "vow_value",
+      "quote": "and the value of Vow of Light is doubled.",
+      "trigger_spell": 804247,
+      "gate_spell": 807964,
+      "target": "caster",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 41394,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 505197,
+        "target": "caster"
+      },
+      "before_expected": 50,
+      "expected": 150,
+      "expected_ratio": 3.0,
+      "tolerance": 0.15,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "807964 Soul of Light Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 99 (+1 = +100%) on the class mask word 2 = 536870912 = 807750's SpellFamilyFlags[2]: 807750 Effect[0] BasePoints 9 + 1 = 10 ($807750s1, 'heals the nearest nearby ally for $s1% of the value'). Vow of Light 807547 is cast on the caster in both phases; Light of the Naaru 41394 (1100 Holy) then hits the caster (50% health), and the Vow's copy heal 505197 (the script heals the nearest ally, the caster itself when alone: AscensionSunClericEvents.cpp:236-240, Amount(807750, 0, player) with the caster so spell mods apply) is read. spell_heal_total sums every heal event since the scenario started, so the second reading carries the first: (H + 2H) / H = 3.0 if the value is doubled, 2.0 if not (tolerance 0.15, the 5-point band on +100%). Both phases carry the class tuning aura 887015 alike. Crit forced out by 984954. Control: the phase without Soul of Light. Reference search: nothing found beyond the tooltip and the DBC. Fixture 823764 ('beeg spellpen') carries a second effect, Effect[1] aura 108 ADD_PCT_MODIFIER SPELLMOD_EFFECT1 (MiscValue 3) +100% on family 33 mask word 2 0x20000000, which is Vow of Light 807750's value; it is not applied in this entry, and the entry must not carry it, or the doubling would be present in both phases."
+    },
+    {
+      "spell": 300327,
+      "name": "Swift Justice (ranged haste)",
+      "kind": "metric_delta",
+      "variant": "ranged_haste",
+      "label_suffix": "ranged_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 300327,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 2
+      },
+      "before_expected": 1000,
+      "expected": 943.3962,
+      "tolerance": 0.001,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "300327 Swift Justice Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 5 (+1 = 6, $s1). The ranged attack time (hand 2) is read after a Dawnsear 554406 cast, before and after the passive is learned, and judged as a ratio: 1 / 1.06 = 0.9434 (tolerance 0.001); the before reading must reach 1000. The first run read 2000 ms then 1886.79 ms, the ratio 0.9434: the ranged timer reads 2000 ms in this phase (the class file's wand 477 has delay 1800 ms in item_template; the read does not show it, so no base value is claimed). Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC.",
+      "expected_ratio": 0.9434
     }
   ],
   "player_observations": [],
