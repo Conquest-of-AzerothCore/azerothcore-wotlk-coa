@@ -14,6 +14,10 @@ ENTRY = {'spell': 500961, 'kind': 'summon_edge', 'label_suffix': 'ally_edge',
 ENEMY_ENTRY = {**ENTRY, 'spell': 505339, 'label_suffix': 'enemy_edge', 'quote': 'Enemies within $504761a1 yds',
                'summon_spell': 505339, 'summon_entry': 50119, 'role': 'enemy', 'metric': 'aura',
                'fields': {'spell': 504761}, 'witness': False, 'wait_ms': 4500}
+OWNER_ENTRY = {**ENTRY, 'spell': 802719, 'label_suffix': 'field_owner_beyond', 'quote': 'While within $802718a1 yds,',
+               'summon_spell': 802719, 'summon_entry': 310659, 'radius': 15, 'role': 'owner',
+               'owner_side': 'beyond', 'cell_search': False, 'metric': 'aura', 'fields': {'spell': 802718},
+               'witness': False, 'wait_ms': 3000}
 CENTRE = (-8900.0, -120.0, 82.0)
 REACH = {'centre': 0.5, 'inside': 1.5, 'beyond': 1.5}
 
@@ -27,13 +31,15 @@ class SummonEdgeTests(unittest.TestCase):
         values = {}
         for moment, reads in model['reads'].items():
             gained = moment == 'end'
-            values[reads['inside']] = inside if gained else 0.0
-            values[reads['beyond']] = beyond if gained else 0.0
+            for side, value in (('inside', inside), ('beyond', beyond)):
+                if side in reads:
+                    values[reads[side]] = value if gained else 0.0
             if 'witness' in reads:
                 values[reads['witness']] = witness if gained else 0.0
         for moment, units in model['geometry'].items():
             for unit, reads in units.items():
-                along = 0.0 if unit == 'centre' else 30 + REACH['centre'] + REACH[unit] + offsets[unit == 'beyond']
+                along = 0.0 if unit == 'centre' else (model['radius'] + REACH['centre'] + REACH[unit]
+                                                      + offsets[unit == 'beyond'])
                 values[reads['x']] = centre[0] + along
                 values[reads['y']] = centre[1]
                 values[reads['z']] = centre[2] + (dz if unit != 'centre' else 0.0)
@@ -60,6 +66,19 @@ class SummonEdgeTests(unittest.TestCase):
         self.assertEqual(self.judged(ENTRY, 2, 2).status, 'alert')
         self.assertEqual(self.judged(ENTRY, 0, 0).status, 'alert')
         self.assertEqual(self.judged(ENEMY_ENTRY, 1, 1).status, 'alert')
+
+    def test_the_owner_stands_on_one_side_without_a_grid_check(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), OWNER_ENTRY)
+        run.validate(scenario)
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster'])
+        moves = [step for step in scenario['steps'] if step['action'] == 'relocate']
+        self.assertEqual([(step['actor'], step['edge_offset']) for step in moves], [('caster', 0.5)])
+        cell = 533.3333 / 8
+        on_edge = (-56 * cell - 15.75, CENTRE[1], CENTRE[2])
+        self.assertEqual(self.judged(OWNER_ENTRY, 0, 0, centre=on_edge).status, 'ok')
+        self.assertEqual(self.judged(OWNER_ENTRY, 0, 1).status, 'alert')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**OWNER_ENTRY, 'owner_side': None})
 
     def test_a_silent_summon_is_unmeasured(self):
         self.assertEqual(self.judged(ENTRY, 0, 0, witness=0).status, 'unmeasured')
