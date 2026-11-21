@@ -19,6 +19,11 @@ constexpr uint32 ChosenKing = 707079;
 constexpr uint32 HammerOfKings = 804751;
 constexpr uint32 Anointed = 524998;
 constexpr uint32 SolemnPriest = 804269;
+constexpr uint32 Calm = 804057;
+bool SilenceImmune(Unit const* target)
+{
+    return target->m_spellImmune[IMMUNITY_MECHANIC].count(MECHANIC_SILENCE) > 0;
+}
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -129,6 +134,9 @@ public:
             if (!target || !target->HasAura(Bless, player->GetGUID()))
                 result = SPELL_FAILED_BAD_TARGETS;
         }
+        if (info->Id == Calm)
+            if (Unit* target = spell->m_targets.GetUnitTarget(); target && SilenceImmune(target))
+                result = SPELL_FAILED_IMMUNE;
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
