@@ -54,3 +54,31 @@ Counts are compared exactly; `reach`, `offsets` and `per_source` read the metric
 Witch Doctor: Mojo Beam 501117 branches (`branch_grow`, `branch_heals`, clauses 40 and 41), Mojo Wave 707617
 (`wave_lowest`, `wave_cap`, `wave_share`, clause 281) and Unstable Concoction 802487 (`unstable_radius`, a 20 yd
 bracket of grouped allies around the marked caster, clause 331).
+
+## Ally effects (ADR 1100, provisional)
+
+Opt-in fields for claims that are not heals:
+
+- Fixtures: `auras` on an ally and `caster_auras` on the entry (`[spell, stacks]`, set with `set_aura` at each phase
+  start), `caster_health` (`[health, maximum]`, regeneration off) and `gate_settle_ms` (a wait after the gate learn,
+  for a talent whose replacement syncs on a timer).
+- Cast fields: `power_reads` (the caster's power right before the cast and at the end of its watch), `gap_ms` (a wait
+  after the cast) and `probes` (ms after the cast, whole polls of the watch: every fixture aura is set again with a
+  refusable `set_aura`, which leaves an immune unit without it, and the judged auras are read).
+- `count`: the `reference` ally's heals of `spell` in the treatment window equal `expected` (a whole number); with a
+  gate the control window reads 0.
+- `aura_reach`: at the end of each phase the `reference` unit (an ally or `caster`) has lost `aura` (else unmeasured:
+  the cast did not run), each `removed` unit lost it in the treatment only, each `kept` unit keeps it.
+- `immune_window`: the `immune` units refuse `aura` at the `early_ms` probe and take it at `late_ms` in the treatment,
+  and take it at `early_ms` in the control.
+- `drain`: the power spent over the watch of `high_cast` exceeds that of `low_cast` (cast indexes with `power_reads`);
+  a `low_cast` that spent nothing is unmeasured. Evidence metric `power`, contrast `own_cast`.
+- `health_share`: the `levelled` units (allies with a health fixture, or `caster` with `caster_health`) end the window
+  within `tolerance` health points of each other from a start spread of at least ten tolerances (else unmeasured), and
+  the `apart` units move by no more than the tolerance.
+- `reach` takes `control_allowed`: allies whose control heals are allowed (a gated claim about the allies beyond a
+  target the control heals too).
+
+Witch Doctor: Disciple of Sseratus 300660 `hex_jump`, For Da Loa! 705906 `mass_reach` and `mass_immune`, Spirit Link
+Idol 706369 `link_share`, Mojo Beam 501117 `beam_lasts` and `beam_drain`, Spirit Out Of The Bottle 301175
+`bottle_allies`.

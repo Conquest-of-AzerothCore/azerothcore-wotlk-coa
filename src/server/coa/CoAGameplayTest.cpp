@@ -8558,18 +8558,24 @@ private:
                 Aura* aura = recipient->GetAura(spell, casterGuid);
                 if (!aura)
                     aura = auraCaster->AddAura(spell, recipient);
-                Require(aura != nullptr, "Could not apply fixture aura");
-                aura->SetStackAmount(uint8(stacks));
-                if (aura->GetMaxDuration() == 0)
+                bool const refusable = step.get<bool>("refusable", false);
+                if (refusable)
+                    record.put("applied", aura != nullptr);
+                Require(aura != nullptr || refusable, "Could not apply fixture aura");
+                if (aura)
                 {
-                    aura->SetMaxDuration(60000);
-                    aura->SetDuration(60000);
-                }
-                if (auto amount = step.get_optional<int32>("amount"))
-                {
-                    AuraEffect* effect = aura->GetEffect(uint8(step.get<uint32>("effect", EFFECT_0)));
-                    Require(effect != nullptr, "Fixture aura has no such effect");
-                    effect->ChangeAmount(*amount);
+                    aura->SetStackAmount(uint8(stacks));
+                    if (aura->GetMaxDuration() == 0)
+                    {
+                        aura->SetMaxDuration(60000);
+                        aura->SetDuration(60000);
+                    }
+                    if (auto amount = step.get_optional<int32>("amount"))
+                    {
+                        AuraEffect* effect = aura->GetEffect(uint8(step.get<uint32>("effect", EFFECT_0)));
+                        Require(effect != nullptr, "Fixture aura has no such effect");
+                        effect->ChangeAmount(*amount);
+                    }
                 }
             }
         }

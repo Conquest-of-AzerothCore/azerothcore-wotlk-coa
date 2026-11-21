@@ -257,5 +257,65 @@ class AllyHealReachJudgeTests(unittest.TestCase):
         self.assertEqual(judged(self.wave[1], wave_heals(overheal=50)).status, 'unmeasured')
 
 
+HEXBREAK, CURSE = 806240, 702
+DISPEL_ENTRY = {
+    'spell': 300660, 'kind': 'ally_heal_reach', 'variant': 'hex_jump', 'name': 'Hexbreak jump',
+    'quote': 'now affects an additional nearby ally', 'gate_spell': 300660,
+    'allies': [{'id': 'p', 'dx': 22, 'dy': 0, 'auras': [[CURSE, 1]]},
+               {'id': 'n', 'dx': 22, 'dy': -6, 'auras': [[CURSE, 1]]},
+               {'id': 'f', 'dx': 22, 'dy': -24, 'auras': [[CURSE, 1]]}],
+    'casts': [{'spell': HEXBREAK, 'target': 'p', 'watch_ms': 1000}],
+    'checks': [{'name': 'hex_jump', 'judge': 'aura_reach', 'spell': HEXBREAK, 'aura': CURSE, 'reference': 'p',
+                'removed': ['n'], 'kept': ['f']}]}
+DRAIN_ENTRY = {
+    'spell': BEAM, 'kind': 'ally_heal_reach', 'variant': 'drain', 'name': 'Mojo Beam drain',
+    'quote': 'For every sprouted the branch, you consume more and more mana.',
+    'allies': [{'id': 'lone', 'dx': -10, 'dy': -30}, {'id': 'a', 'dx': 22, 'dy': 0},
+               {'id': 'b', 'dx': 22, 'dy': -12}],
+    'casts': [{'spell': BEAM, 'target': 'lone', 'watch_ms': 1250, 'power_reads': True, 'gap_ms': 500},
+              {'spell': BEAM, 'target': 'a', 'watch_ms': 1250, 'power_reads': True}],
+    'checks': [{'name': 'drain', 'judge': 'drain', 'spell': BEAM, 'low_cast': 0, 'high_cast': 1}]}
+
+
+def aura_values(expectation, present: dict) -> dict:
+    return {label: float(present.get((phase, moment, unit), 1))
+            for phase, moments in expectation.model['aura_reads'].items()
+            for moment, units in moments.items() for unit, label in units.items()}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AllyEffectJudgeTests(unittest.TestCase):
+    def test_a_dispel_jump_is_read_on_the_ally_auras(self):
+        scenario, [expectation] = scenario_of(DISPEL_ENTRY)
+        run.validate(scenario)
+        fixtures = [step for step in scenario['steps'] if step['action'] == 'set_aura']
+        self.assertEqual(len(fixtures), 6)
+        jumped = {('control', 'end', 'p'): 0, ('treatment', 'end', 'p'): 0, ('treatment', 'end', 'n'): 0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(aura_values(expectation, jumped)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+        stayed = {('control', 'end', 'p'): 0, ('treatment', 'end', 'p'): 0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(aura_values(expectation, stayed)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_drain_compares_the_power_spent_by_two_casts(self):
+        scenario, [expectation] = scenario_of(DRAIN_ENTRY)
+        run.validate(scenario)
+        (low_start, low_end), (high_start, high_end) = expectation.model['power_reads']['treatment'].values()
+        values = {low_start: 1497, low_end: 941, high_start: 1497, high_end: 767}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'ok')
+        values[high_end] = 941
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
+
+    def test_refused_layouts(self):
+        for check in ({'judge': 'aura_reach', 'aura': 1, 'reference': 'p', 'removed': ['n']},
+                      {'judge': 'drain', 'low_cast': 0, 'high_cast': 0},
+                      {'judge': 'count', 'reference': 'p'}):
+            entry = {**DISPEL_ENTRY, 'checks': [{'name': 'x', 'spell': HEXBREAK, **check}]}
+            with self.subTest(check=check), self.assertRaises(ValueError):
+                scenario_of(entry)
+
+
 if __name__ == '__main__':
     unittest.main()

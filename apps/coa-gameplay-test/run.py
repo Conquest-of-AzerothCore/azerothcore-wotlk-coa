@@ -317,7 +317,7 @@ ACTIONS = {
     'repair_at': ({'actor', 'owner', 'entry'}, {'actor', 'owner', 'entry'}),
     'durability_loss': ({'actor', 'percent'}, {'actor', 'percent'}),
     'set_aura': ({'actor', 'spell', 'stacks'}, {'actor', 'spell', 'stacks', 'pet', 'owned_entry', 'caster', 'target',
-                                              'effect', 'amount'}),
+                                              'effect', 'amount', 'refusable'}),
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
@@ -848,6 +848,9 @@ def validate(scenario, clock=REAL_CLOCK):
         if action == 'set_aura':
             require(sum(bool(step.get(key)) for key in ('target', 'pet', 'owned_entry')) <= 1,
                     f'{where}: aura fixture selects one recipient')
+        if action == 'set_aura' and 'refusable' in step:
+            require(type(step['refusable']) is bool and step['stacks'] > 0,
+                    f'{where}: refusable is a boolean on an aura fixture that applies stacks')
         if action == 'set_aura' and ('effect' in step or 'amount' in step):
             require('amount' in step, f'{where}: an aura effect fixture needs an amount')
             require(step['stacks'] > 0, f'{where}: an aura amount needs a present aura')
