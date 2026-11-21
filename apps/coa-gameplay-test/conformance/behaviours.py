@@ -296,6 +296,7 @@ class FixedTargetCountSpec:
     swing_cleave: tuple[int, int, int, int, tuple[int, ...]] | None = None
     swing_dummy_auras: tuple[tuple[int, int, int], ...] = ()
     swing_ms: int = 0
+    dummy_distance: float | None = None
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -432,6 +433,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
                                                or spec.gate is not None):
         raise ValueError(f'{spec.spell} fixed_count swing_ms {spec.swing_ms} replaces each cast with an auto attack '
                          f'on the primary: a positive time, cast_target {TARGET}, no layout, swing_cleave or gate')
+    if spec.dummy_distance is not None and (spec.cast_target == CASTER or spec.layout == CASTER
+                                            or spec.behind_yd is not None or spec.swing_cleave or spec.swing_ms):
+        raise ValueError(f'{spec.spell} fixed_count dummy_distance stands the primary away from the caster, which '
+                         f'needs a cast at the primary, no caster layout, behind_yd, swing_cleave or swing_ms')
     headroom = 0 if spec.uncapped else (COUNT_HEADROOM if spec.headroom is None else spec.headroom)
     dummy_count = spec.expected + 1 + headroom
     if spec.gate is not None:
@@ -440,7 +445,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         distances = [spec.radius * (index + 1) / (dummy_count + 1) for index in range(dummy_count)]
         distances.append(spec.radius + FIXED_COUNT_FAR_MARGIN_YD)
     else:
-        primary_distance = 3.0
+        primary_distance = (3.0 if spec.dummy_distance is None
+                            else dummy_placement(records, spec.spell, spec.dummy_distance, None))
         spread = spec.radius if spec.cluster_yd is None else spec.cluster_yd
         distances = [primary_distance] + [
             primary_distance + spread * (index / dummy_count) for index in range(1, dummy_count)]
@@ -564,6 +570,9 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if primary_distances:
         scenario['contract'] += (f' Every additional dummy\'s distance to the primary is read before the casts and '
                                  f'must be under {within:g} yd.')
+    if spec.dummy_distance is not None:
+        scenario['contract'] += (f' The primary dummy stands {float(spec.dummy_distance):g} yd from the caster, the '
+                                 f'other dummies beyond it on the same line.')
     model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'far_label': far_label, 'expected': spec.expected,
              'headroom': headroom, 'quote': entry.quote}
     if spec.uncapped:
@@ -1452,7 +1461,7 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 fixed_count_gate(entry.get('gate')), bool(entry.get('push_reads', False)),
                                 fixed_count_swing_cleave(entry.get('swing_cleave')),
                                 fixed_count_swing_dummy_auras(entry.get('swing_cleave')),
-                                int(entry.get('swing_ms', 0)))
+                                int(entry.get('swing_ms', 0)), entry.get('dummy_distance'))
 
 
 def fixed_count_gate(raw) -> tuple[str, str, int] | None:

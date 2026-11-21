@@ -1295,13 +1295,15 @@
       {
         "claim": "and up to $i enemies",
         "labels": [
-          "503712 effect_value #3"
+          "503712 effect_value #3",
+          "503712 volley_targets behaviour_fixed_count"
         ]
       },
       {
         "claim": "within $a1 yds",
         "labels": [
-          "503712 effect_radius 504582e0 #4"
+          "503712 effect_radius 504582e0 #4",
+          "503712 volley_targets behaviour_fixed_count"
         ]
       },
       {
@@ -1312,7 +1314,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Two stated claims have no behaviour read. \"up to $i enemies\" (3): a fixed_count scenario needs the Volley cast at a primary beyond the minimum range of the ranged slot (dummy_distance, 15 yd) with the ready aura 505158 on the caster before every cast and the extra dummies within 8 yd of the primary; fixed_count places the primary at 3 yd and the extras around it with no ranged distance option, so every Volley is refused as SPELL_FAILED_TOO_CLOSE (Spell.cpp:7355-7359). Tool: dummy_distance for fixed_count (it exists for metric_delta, stack_chance_rate and procs). The damage formula \"${$m1+0+$RAP*.285}\" reads 409..426 against 334..408 (mean 390 against 371, +5%, a numeric delta of the kind the rule leaves as a note); the hit_ratio entries of this spell read ratios, not the formula. Cycle 9 (author-B13, fix round): a fixed_count entry volley_targets was written and withdrawn. (a) fixed_count always puts the primary at 3 yd (behaviours.py:443; the other dummies stand at 3.0 to 9.7 yd and one at 16 yd), so the ranged Volley (DmgClass 3, Spell.cpp:7355-7359) is refused TOO_CLOSE and every check is unmeasured. (b) compare.per_cast_breadths (compare.py:3072-3081) counts only the extra dummies (index 1 and up) on casts that hit the primary, so on a correct server the widest cast reads 3 against an expected 4 and would alert and raise a false defect lead. Tool note T-b13-8: dummy_distance for fixed_count. Built later, the entry needs expected 3 without count_primary and a sized repeat count (with 5 candidates a cast misses the 3-wide breadth with probability 0.6 each). Report #7393 names the ready aura consumption of claim 67, not this count.",
+      "reason": "The Volley count and its radius are judged by \"503712 volley_targets behaviour_fixed_count\" (cycle 10 tool build, fixed_count dummy_distance, ADR 1031 provisional): the primary 15 yd away past the ranged minimum, four dummies within 8 yd of it, one beyond, 30 casts with the ready aura, the widest cast hitting 3 extra dummies and the far one never. Still unproven: the damage formula \"${$m1+0+$RAP*.285}\" reads 409..426 against 334..408 (mean 390 against 371, +5%, a numeric delta of the kind the rule leaves as a note); the hit_ratio entries of this spell read ratios, not the formula.",
       "attempts": [
         {
           "agent": "cycle7/author-B5",

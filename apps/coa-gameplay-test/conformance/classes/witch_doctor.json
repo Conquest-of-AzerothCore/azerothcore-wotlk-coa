@@ -5800,6 +5800,33 @@
       }
     },
     {
+      "spell": 503712,
+      "kind": "fixed_count",
+      "variant": "volley_targets",
+      "label_suffix": "volley_targets",
+      "name": "Spirit Volley (the target and up to 3 enemies within 8 yd)",
+      "quote": "transform your next",
+      "expected": 3,
+      "cast_spell": 504582,
+      "target_rank": 504582,
+      "radius": 8,
+      "radius_reason": "Spirit Volley 504582 Effect[0] SCHOOL_DAMAGE, TargetA 6 (the enemy target) and TargetB 16 (TARGET_UNIT_DEST_AREA_ENEMY) with RadiusIndex 14 = 8 yd ($a1) around the target, MaxAffectedTargets 3 ($i)",
+      "repeats": 30,
+      "auras": [
+        [
+          505158,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "dummy_distance": 15,
+      "settle_ms": 1500,
+      "observe_source": "Spirit Volley 504582 (the spell Spirit Volley 503712 makes of the next Reclamation while 505158 holds; ranged slot, DmgClass 3, CastingTimeIndex 23 = 1800 ms, about 2300 ms on this server, RangeIndex 4 = 0-30 yd, missile speed 25): Effect[0] SCHOOL_DAMAGE at TargetA 6 (the explicit target) and TargetB 16 (the enemies within $a1 = 8 yd of the target, RadiusIndex 14), MaxAffectedTargets 3 = $i, the area list trimmed at random to 3. The primary dummy stands 15 yd from the caster (dummy_distance, cycle 10 tool build, ADR 1031 provisional: fixed_count placed it at 3 yd, where every Volley was refused SPELL_FAILED_TOO_CLOSE, Spell.cpp:7355-7359), four more dummies 1.6 to 6.4 yd beyond it on the same line (inside 8 yd plus both 1.275 yd combat reaches, pitfall 23) and one 13 yd beyond it (outside 8 + 2.55 yd), which must stay unhit: the limit 'within $a1 yds'. The ready aura 505158 and 823764 (no partial resists) are set before every cast (precondition fixtures: the Volley needs the transform, which each cast consumes). Expected 3 extra dummies per cast, without count_primary (compare.per_cast_breadths counts the extra dummies of casts that hit the primary): 'to them and up to $i enemies'. When the random 3 of the area list include the primary, a cast hits only 2 extras (probability 0.6 with 5 candidates), so the widest of 30 casts misses 3 with probability 0.6^30 = 2.2e-7 on a correct server; a server that hits 2 enemies besides the target, or more than 3, alerts. 30 casts, each waiting the cast time, the 500 ms margin and a 1500 ms settle (the flight of at most 0.9 s from 21.4 yd). Clause 68 'and up to $i enemies' and 'within $a1 yds'. Player reports: #7393 names the ready aura consumption of another claim."
+    },
+    {
       "spell": 503714,
       "name": "Eye of Kimbul (the Eye lasts 15 sec)",
       "kind": "metric_delta",

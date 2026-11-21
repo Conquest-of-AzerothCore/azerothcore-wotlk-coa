@@ -939,6 +939,25 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertEqual(spec.cast_spell, 1)
         self.assertEqual(spec.target_rank, 2)
 
+    def test_dummy_distance_stands_the_primary_away_and_keeps_the_others_beyond_it(self):
+        entry = holy_cleave_entry()
+        plain, _ = behaviour_scenario(CLASS_FILE, entry)
+        distant, _ = behaviour_scenario(CLASS_FILE, {**entry, 'dummy_distance': 15})
+        run.validate(distant)
+        near = [creature['distance'] for creature in plain['creatures']]
+        far = [creature['distance'] for creature in distant['creatures']]
+        self.assertEqual(far[0], 15.0)
+        self.assertEqual([round(distance - 12.0, 6) for distance in far], [round(distance, 6) for distance in near])
+        self.assertIn('The primary dummy stands 15 yd from the caster', distant['contract'])
+        self.assertNotIn('The primary dummy stands', plain['contract'])
+
+    def test_dummy_distance_conflicting_with_the_layout_is_refused(self):
+        entry = holy_cleave_entry()
+        for change in ({'cast_target': 'caster'}, {'layout': 'caster'}, {'behind_yd': 2.0}, {'dummy_distance': 0},
+                       {'dummy_distance': 1000}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, {**entry, 'dummy_distance': 15, **change})
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class PartyStatRatioScenarioTests(unittest.TestCase):
