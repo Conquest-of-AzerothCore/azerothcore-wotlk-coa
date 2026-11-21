@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Being silenced keeps the Witch Doctor's second ingredient (#13071)",
+  "contract": [
+    "#13071 (Witch Doctor) reports that being silenced removes the second Cauldron ingredient, such as",
+    "Bloodthistle 801664, while the first ingredient, Jungle Shrooms 801660, stays. Mixologist 561069 tooltips",
+    "that you can add an additional ingredient to your Cauldron. The ingredients are permanent self auras",
+    "(SpellDuration 21 after the class contract) with no AuraInterruptFlags and no dispel type, so nothing in",
+    "Spell.dbc ties them to a silence. Expected: with Cauldron Brewer 92085 and Mixologist, brewing Jungle",
+    "Shrooms then Bloodthistle keeps both, and a hostile Silence (15487, 5 sec) neither removes either ingredient",
+    "while it lasts nor after it ends. This scenario reproduces the report."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "doctor", "race": 1, "class": 13, "level": 80}
+  ],
+  "creatures": [
+    {
+      "id": "caster", "owner": "doctor", "entry": 36, "level": 80, "health": 1000000, "distance": 5, "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "doctor", "spell": 92085},
+    {"action": "learn", "actor": "doctor", "spell": 561069},
+    {"action": "learn", "actor": "doctor", "spell": 801660},
+    {"action": "learn", "actor": "doctor", "spell": 801664},
+    {"action": "set_power", "actor": "doctor", "power": 0, "value": 2500},
+    {"action": "cast", "label": "Brew Jungle Shrooms first", "actor": "doctor", "spell": 801660},
+    {
+      "action": "assert", "label": "SETUP: Jungle Shrooms is brewed", "actor": "doctor", "metric": "aura",
+      "spell": 801660, "equals": 1, "within_ms": 1500
+    },
+    {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
+    {"action": "cast", "label": "Brew Bloodthistle second", "actor": "doctor", "spell": 801664},
+    {
+      "action": "assert", "label": "SETUP: Bloodthistle is brewed", "actor": "doctor", "metric": "aura",
+      "spell": 801664, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "SETUP: Mixologist keeps Jungle Shrooms beside it", "actor": "doctor",
+      "metric": "aura", "spell": 801660, "equals": 1
+    },
+    {
+      "action": "cast", "label": "A hostile caster silences the Witch Doctor", "actor": "caster", "spell": 15487,
+      "target": "doctor"
+    },
+    {
+      "action": "assert", "label": "SETUP: the Witch Doctor is silenced", "actor": "doctor", "metric": "aura",
+      "spell": 15487, "equals": 1, "within_ms": 1500
+    },
+    {"action": "wait", "label": "Let the silence settle", "ms": 1000},
+    {
+      "action": "assert", "label": "#13071: the silence keeps the second ingredient", "actor": "doctor",
+      "metric": "aura", "spell": 801664, "equals": 1
+    },
+    {
+      "action": "assert", "label": "#13071: the silence keeps the first ingredient", "actor": "doctor",
+      "metric": "aura", "spell": 801660, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the silence ends", "actor": "doctor", "metric": "aura", "spell": 15487,
+      "equals": 0, "within_ms": 6000
+    },
+    {"action": "wait", "label": "Let the Cauldron tick after the silence", "ms": 2000},
+    {
+      "action": "assert", "label": "#13071: the second ingredient survives the silence", "actor": "doctor",
+      "metric": "aura", "spell": 801664, "equals": 1
+    },
+    {
+      "action": "assert", "label": "#13071: the first ingredient survives the silence", "actor": "doctor",
+      "metric": "aura", "spell": 801660, "equals": 1
+    }
+  ]
+}
