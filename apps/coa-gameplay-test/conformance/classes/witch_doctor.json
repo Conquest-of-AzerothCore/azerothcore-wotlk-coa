@@ -13546,40 +13546,6 @@
       "observe_source": "The cleared-state read of spirit_stat (G-22: the stat returns after the Spirits end, verified by a read): the same Mirage 501136 casts as spirit_stat (five Spirits of 12000 ms, Spirit 561136 DurationIndex 29), the Spirit stat read 13000 ms after the cast, 1000 ms after the last Spirit has ended: the ratio after over before must be 1.0 within 0.02, with the talent known (no Spirit left to scale the stat) as without it. Same mana and timing as spirit_stat. Clause 384. Cast timing checked: Mirage instant, read at 13000 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell."
     },
     {
-      "spell": 811117,
-      "name": "Spirit Eclipse (each hit deals the stated Shadow damage)",
-      "kind": "script_hit",
-      "variant": "eclipse_tick",
-      "label_suffix": "eclipse_tick",
-      "quote": "dealing ${$m1+0+$RAP*.07+$sps*.15} Shadow damage",
-      "hit_spell": 802717,
-      "value_spell": 811117,
-      "value_effect": 0,
-      "casts": [
-        [
-          811117,
-          "dummy"
-        ]
-      ],
-      "control_casts": [],
-      "cast_power": 2000,
-      "caster_auras": [
-        [
-          984954,
-          1
-        ],
-        [
-          823764,
-          1
-        ]
-      ],
-      "unresisted": true,
-      "settle_ms": 1500,
-      "trials": 20,
-      "minimum_hits": 12,
-      "observe_source": "Spirit Eclipse 811117 (rank 7): Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 250 ms ($t1), BasePoints 74 + 1 (and 0.52 per level) is the value the tick passes to Spirit Eclipse 802717 (Effect[0] SCHOOL_DAMAGE Shadow, no base points of its own): AscensionWitchDoctorAuras.cpp:285-296 casts EclipseHit 802717 with the aura amount as base points (CastCustomSpell SPELLVALUE_BASE_POINT0), coefficients 0.15 spell power and 0.07 ranged attack power (AscensionWitchDoctorCoefficients.h:164). One Spirit 561136 (CasterAuraSpell, set by the generator): one hit per cast, 20 casts, a real cast at the dummy each trial (instant, CategoryRecoveryTime 10000 reset by the harness, 12% base mana). The control arm casts nothing: 802717 must hit 0 times. The mean non-critical hit is judged against the tooltip formula read with the measured stats, value_spell 811117 carrying the base points the hit spell lacks (the Necromancer Ice Barrage 501997 tick shape). 984954 and 823764 on the caster: no partial resist, no forced crit field. Clause 297. Cast timing checked: instant, the hit lands within 1500 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell."
-    },
-    {
       "spell": 801664,
       "name": "Ingredient: Bloodthistle (the Cauldron buff raises healing received 8%)",
       "kind": "hit_ratio",
@@ -25646,6 +25612,428 @@
         "destroy_item": 576135,
         "lead_ms": 2000
       }
+    },
+    {
+      "spell": 811117,
+      "name": "Spirit Eclipse (each hit deals the stated Shadow damage)",
+      "kind": "script_hit",
+      "variant": "eclipse_tick",
+      "label_suffix": "eclipse_tick",
+      "quote": "dealing ${$m1+0+$RAP*.07+$sps*.15} Shadow damage",
+      "hit_spell": 802717,
+      "value_spell": 811117,
+      "value_effect": 0,
+      "casts": [
+        [
+          811117,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "cast_power": 2000,
+      "caster_auras": [
+        [
+          64481,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "trials": 20,
+      "minimum_hits": 12,
+      "observe_source": "Spirit Eclipse 811117 (rank 7): Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 250 ms ($t1), BasePoints 74 + 1 (and 0.52 per level) is the value the tick passes to Spirit Eclipse 802717 (Effect[0] SCHOOL_DAMAGE Shadow, no base points of its own): AscensionWitchDoctorAuras.cpp:285-296 casts EclipseHit 802717 with the aura amount as base points (CastCustomSpell SPELLVALUE_BASE_POINT0), coefficients 0.15 spell power and 0.07 ranged attack power (AscensionWitchDoctorCoefficients.h:164). One Spirit 561136 (CasterAuraSpell, set by the generator): one hit per cast, 20 casts, a real cast at the dummy each trial (instant, CategoryRecoveryTime 10000 reset by the harness, 12% base mana). The control arm casts nothing: 802717 must hit 0 times. The mean non-critical hit is judged against the tooltip formula read with the measured stats, value_spell 811117 carrying the base points the hit spell lacks (the Necromancer Ice Barrage 501997 tick shape). 64481 and 823764 on the caster: no partial resist, no crit. Clause 297. Cast timing checked: instant, the hit lands within 1500 ms. Player reports: none of the open reports of cycles 5 and 6 names this spell. Cycle 11 author C repair (insufficient_trials in both final07 runs: 0 usable hits, 20 of 20 critical): 802717 is DmgClass 3 (ranged), so its crit roll reads the ranged weapon crit chance (SpellDoneCritChance, melee and ranged damage classes), and Reg's Test Aura 984954 carries Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 beside its Effect[1] aura 57 spell crit -1000, so every hit crit and the non-critical mean had no sample. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 -999, the Templar Blade of Faith precondition fixture of ADR 0245) holds the ranged crit at 0 instead; it is a precondition fixture, the crit is not the claim."
+    },
+    {
+      "spell": 811117,
+      "kind": "hit_period",
+      "variant": "eclipse_period",
+      "label_suffix": "eclipse_period",
+      "name": "Spirit Eclipse (one hit every 0.25 sec, five Spirits)",
+      "quote": "every $t1 sec",
+      "trigger_spell": 811117,
+      "hit_spell": 802717,
+      "expected_ms": 250,
+      "window": [
+        50,
+        2000
+      ],
+      "poll_ms": 1,
+      "setup_casts": [
+        {
+          "actor": "caster",
+          "spell": 501136,
+          "target": "caster",
+          "wait_ms": 1700
+        },
+        {
+          "actor": "dummy",
+          "spell": 132,
+          "target": "dummy",
+          "wait_ms": 300
+        }
+      ],
+      "observe_source": "Spirit Eclipse 811117 (rank 7): Effect[0] aura 227 PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 250 ms ($t1); AscensionWitchDoctorCompletion.cpp:343-349 keeps the 250 ms period, AscensionWitchDoctorAbilities.cpp:143-149 makes the aura last 250 ms per Spirit, and AscensionWitchDoctorAuras.cpp:285-296 casts one Spirit Eclipse 802717 hit per tick until the stored Spirit count (one per Spirit) is reached, then removes the aura. Five Spirits are made for real, as in the passing spirit_hits entry: Mirage 501136 (instant, 29% base mana, RecoveryTime 180000 reset, GCD 1500; Abilities.cpp:345-346 GainSpirit 5, capped at 5) at the caster, 1700 ms later the dummy casts Detect Invisibility 132 at itself (a harness creature cast; Mirage makes the caster invisible, and an invisible caster sees only targets that detect it, Object.cpp:2036-2039; precondition of the target, the spirit_hits repair), 300 ms later the Eclipse is cast at the dummy (CasterAuraSpell 561136 held by the real Spirits, CategoryRecoveryTime 10000 reset). The 802717 hits on the dummy and the game time are polled about every 10 ms over 50 to 2000 ms after the cast: five hits, (last - first) / 4 must lie in 250 +- 12.5 ms (G-19, 5%); the missile flight (Speed 25, 3 yd, about 120 ms) is the same for every hit and cancels. A 500 ms period reads 500, a single tick (no period) is unmeasured, two ticks in one update alert (the polls must bracket each hit). Control: no 802717 hit on the dummy before the cast. Closes the cycle 8 tool note (setup casts for hit_period, ADR 1120). Cast timing checked: Mirage and Eclipse instant, GCD 1500 inside the 2000 ms setup. Player reports: none."
+    },
+    {
+      "spell": 560545,
+      "kind": "hit_period",
+      "variant": "puppets_period",
+      "label_suffix": "puppets_period",
+      "name": "Dark Loa's Blessing (Shadow Puppets hits every 600 ms)",
+      "quote": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
+      "trigger_spell": 501087,
+      "hit_spell": 802745,
+      "expected_ms": 600,
+      "window": [
+        300,
+        2900
+      ],
+      "poll_ms": 1,
+      "learn": [
+        560545
+      ],
+      "observe_source": "Dark Loa's Blessing 560545 (passive) Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER on misc 1 (SPELLMOD_DURATION) and 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -21 + 1 = -20 (the token spell Dark Loyalty 706548 carries the same pair, $706548s1 = 20); no EffectSpellClassMask, so the modifier reaches every family 19 spell, Shadow Puppets 501087 among them. Shadow Puppets 501087: instant, RecoveryTime 18000 reset by the kind, 15% base mana, DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms; AscensionWitchDoctorCompletion.cpp:338-341 keeps that period and drops Effect[1], and AscensionWitchDoctorAuras.cpp:279-283 casts one Shadow Puppet 802745 hit per tick (Speed 26, 3 yd, about 115 ms of flight, the same for every hit). No Mirage and no Spirit: Puppets needs neither, so the caster stays visible. The 802745 hits on the dummy and the game time are polled about every 10 ms; (last - first) / (hits - 1) must lie inside the stated period +- 5% (G-19). Treatment: 560545 learned at the start (a passive learn applies its aura): four hits 600 ms apart (750 x 0.8; the 2400 ms duration keeps four ticks), so 600 +- 30 ms; the control entry puppets_period_control reads 750 ms without the talent. A 10% cut (675 ms) or none alerts. Closes the cycle 9 tool gap (B14). Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 560545,
+      "kind": "hit_period",
+      "variant": "puppets_period_control",
+      "label_suffix": "puppets_period_control",
+      "name": "Dark Loa's Blessing (control: Shadow Puppets every 750 ms)",
+      "quote": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
+      "trigger_spell": 501087,
+      "hit_spell": 802745,
+      "expected_ms": 750,
+      "window": [
+        300,
+        3600
+      ],
+      "poll_ms": 1,
+      "observe_source": "Dark Loa's Blessing 560545 (passive) Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER on misc 1 (SPELLMOD_DURATION) and 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -21 + 1 = -20 (the token spell Dark Loyalty 706548 carries the same pair, $706548s1 = 20); no EffectSpellClassMask, so the modifier reaches every family 19 spell, Shadow Puppets 501087 among them. Shadow Puppets 501087: instant, RecoveryTime 18000 reset by the kind, 15% base mana, DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms; AscensionWitchDoctorCompletion.cpp:338-341 keeps that period and drops Effect[1], and AscensionWitchDoctorAuras.cpp:279-283 casts one Shadow Puppet 802745 hit per tick (Speed 26, 3 yd, about 115 ms of flight, the same for every hit). No Mirage and no Spirit: Puppets needs neither, so the caster stays visible. The 802745 hits on the dummy and the game time are polled about every 10 ms; (last - first) / (hits - 1) must lie inside the stated period +- 5% (G-19). Control of puppets_period: 560545 not known, four hits 750 ms apart (750 +- 37.5 ms), so the 600 ms of the treatment is the talent and not the spell itself. Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 500957,
+      "kind": "ally_heal_reach",
+      "variant": "ward_cap",
+      "label_suffix": "ward_cap",
+      "name": "Healing Ward (heals 8 of 9 nearby allies, the 8 lowest)",
+      "quote": "healing 8 nearby allies",
+      "allies": [
+        {
+          "id": "ward_low0",
+          "dx": 4,
+          "dy": -3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low1",
+          "dx": 6,
+          "dy": -3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low2",
+          "dx": 8,
+          "dy": -3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low3",
+          "dx": 10,
+          "dy": -3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low4",
+          "dx": 4,
+          "dy": 3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low5",
+          "dx": 6,
+          "dy": 3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low6",
+          "dx": 8,
+          "dy": 3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_low7",
+          "dx": 10,
+          "dy": 3,
+          "health": 10000,
+          "maximum": 100000
+        },
+        {
+          "id": "ward_ninth",
+          "dx": 4.5,
+          "dy": -3,
+          "health": 60000,
+          "maximum": 100000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 500957,
+          "target": "caster",
+          "watch_ms": 6000,
+          "poll_ms": 500
+        }
+      ],
+      "checks": [
+        {
+          "name": "ward_cap",
+          "judge": "reach",
+          "spell": 805403,
+          "reference": "ward_low0",
+          "minimum": 2,
+          "healed": [
+            "ward_low0",
+            "ward_low1",
+            "ward_low2",
+            "ward_low3",
+            "ward_low4",
+            "ward_low5",
+            "ward_low6",
+            "ward_low7"
+          ],
+          "unhealed": [
+            "ward_ninth"
+          ]
+        }
+      ],
+      "observe_source": "Healing Ward 500957 summons creature 50104 (instant, StartRecoveryTime 1000, 18% base mana, DurationIndex 3 = 60000 ms). The ward AI (AscensionWitchDoctorSummons.cpp:493-497) casts Healing Ward 805403 on every unit of Allies(player, me, 30.0f, 8) at once and every 2500 ms; Allies() (AscensionWitchDoctorCompletion.cpp:62-77) keeps living units Friendly() to the doctor (the doctor itself or a unit IsInRaidWith it) in line of sight of the ward, sorts them by health percent, lowest first (ties by GUID), and keeps the first 8. Nine grouped ally players stand 4 to 10 yd from the caster (the ward stands 1.5 yd from the caster, AscensionWitchDoctorSummons.cpp:195-197), all inside 30 yd: ward_low0 to ward_low7 at 10000 of 100000 health (10%), ward_ninth at 60000 of 100000 (60%), regeneration off; the caster, the ward itself and every other friendly unit stand at 100%. So ward_ninth is the ninth unit in the sort and the first one past the cap: a cap of 9 or none heals it, a cap of 8 does not. One heal of 51 is 0.05% of 100000, so three pulses never reorder the allies. Healed: the eight low allies, each at least one 805403 heal in the 6000 ms window (three pulses, at about 0, 2500 and 5000 ms; reference ward_low0 at least 2); unhealed: ward_ninth, 0. ward_ninth has no witness spell and stands 0.5 yd from ward_low0 on its line, so its 0 is not a placement or line of sight fault. Nine allies exceed a party: the group step converts it to a raid, which Friendly() (IsInRaidWith) still sees; the scenario uses schema 2 (up to 25 players, ADR 1122). Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 500957,
+      "kind": "script_hit",
+      "variant": "ward_heal",
+      "label_suffix": "ward_heal",
+      "name": "Healing Ward (each pulse heals for the stated amount)",
+      "quote": "for ${$805403m1+$805403ppl1+$SP*0.185+$RAP*0.08}",
+      "hit_spell": 805403,
+      "casts": [
+        [
+          500957,
+          "caster"
+        ]
+      ],
+      "control_casts": [],
+      "receiver": "caster",
+      "cast_power": 1400,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ]
+      ],
+      "settle_ms": 1200,
+      "trials": 20,
+      "minimum_hits": 15,
+      "observe_source": "Healing Ward 500957 summons creature 50104; its AI heals Allies(player, me, 30.0f, 8) at its first update and every 2500 ms after (AscensionWitchDoctorSummons.cpp:493-497, _timer starts at 1), casting Healing Ward 805403 with the doctor as original caster, so the heal logs under the caster (pitfall 14); the doctor is its own ally (Friendly(), Completion.cpp:57-62). 805403 Effect[0] SPELL_EFFECT_HEAL, BasePoints 4 + 1 and 0.85 per level; coefficients 0.185 spell power and 0.08 ranged attack power (AscensionWitchDoctorCoefficients.h:143). Each trial casts a real Healing Ward at the caster (instant, no cooldown, 18% base mana; cast_power 1400 before each cast, the 801678 stasis_burst shape) and waits 1200 ms: the new ward replaces the old one (one Ward at a time) and heals the caster once at its first update; the next pulse would come at 2500 ms. The mean non-critical 805403 heal on the caster is judged against the tooltip figure read with the measured stats. 805403 has DmgClass 1, so a heal rolls the spell crit: Reg's Test Aura 984954 (Effect[1] aura 57 spell crit -1000) on the caster holds it at 0 (its weapon crit Effect[0] does not reach a magic heal), a precondition fixture. Control: 20 trials that learn 500957 and never cast it, no 805403 heal on the caster. Closes the amount half of the cycle 7 no-route note (design note D-wh: a non-critical read instead of a forced crit). Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 506635,
+      "kind": "aura_window",
+      "variant": "graven_cc",
+      "label_suffix": "graven_cc",
+      "name": "Graven Effigy (a snare on an enemy in the field lasts 25% longer)",
+      "quote": "have the duration of crowd control effects on them increased by $504767s1%",
+      "trigger_spell": 802065,
+      "aura": 802065,
+      "control_ms": 10000,
+      "treatment_ms": 12500,
+      "control_windows": [
+        [
+          20,
+          400
+        ],
+        [
+          9700,
+          10400
+        ]
+      ],
+      "treatment_windows": [
+        [
+          20,
+          400
+        ],
+        [
+          12200,
+          12900
+        ]
+      ],
+      "trigger_power": 1400,
+      "poll_ms": 1,
+      "setup_casts": [
+        {
+          "spell": 506635,
+          "target": "caster",
+          "wait_ms": 1200
+        }
+      ],
+      "treatment_band_ms": 200,
+      "observe_source": "Graven Effigy 506635 (instant, StartRecoveryTime 1000, 12 + 20% base mana, DurationIndex 3 = 60000 ms) summons creature 50122 1.5 yd from the caster (AscensionWitchDoctorSummons.cpp:195-197); its AI (:530-540, NpcGraven) casts Graven Effigy 504767 on every attackable enemy within |Amount(ShadowField)| = 20 yd at its first update and every 1000 ms, with a 2200 ms duration (Field(), :379-384; the 20 yd since fix 52720d2e3e). 504767: three aura 232 SPELL_AURA_MECHANIC_DURATION_MOD on mechanics 7, 11 and 2, BasePoints 24 + 1 = +25% ($504767s1). The vehicle is Lethargy Jinx 802065 (instant, 10 + 15% base mana, trigger_power 1400, Speed 50, Mechanic 11 snare, DurationIndex 1 = 10000 ms): Unit::ModSpellDuration lengthens a negative aura of a mechanic by the target's aura 232 amount of that mechanic at its application, so 12500 ms on a dummy in the field. Control phase: the Jinx at the dummy (3 yd) without an effigy, its aura on the dummy stamped from the first read with it to the first read without it: 10000 ms +- 500 (G-19). Treatment phase: a real Graven Effigy at the caster, 1200 ms later (504767 on the dummy, which stands within 4.5 yd of the effigy) the Jinx again: 12500 ms, judged inside +-200 ms, the G-19 band of the stated +25% (the larger of 5% of 25 and 2 points, 2 points of the 10000 ms base), so +23% or +27% alert. Both reads are stamped in game time about every 10 ms (aura_window, ADR 0551; the setup cast and the narrower band are ADR 1121). Closes tool note T-b13-7. Observation kept from cycle 9: the data covers roots, snares and disorients, the tooltip says \"crowd control effects\". Cast timing checked: both instant, GCD 1600 wait after the effigy. Player reports: none."
+    },
+    {
+      "spell": 500947,
+      "kind": "strike_miss_share",
+      "variant": "slither_spell_miss",
+      "label_suffix": "slither_spell_miss",
+      "name": "Slither (spells cannot hit the caster; no attack, no cast)",
+      "quote": "You cannot attack or cast spells, but chance to be hit by ranged attacks and spells is reduced by $806295s1% for the duration.",
+      "trigger_spell": 500947,
+      "trigger_aura": 806295,
+      "strike_spell": 41394,
+      "strikes": 12,
+      "strike_wait_ms": 300,
+      "trigger_wait_ms": 200,
+      "burst_ms": 5400,
+      "control_bursts": 10,
+      "treatment_bursts": 58,
+      "control_minimum_share": 0.5,
+      "refused": {
+        "spell": 573026,
+        "result": 104,
+        "attack_ms": 3000
+      },
+      "observe_source": "Slither 500947: instant, StartRecoveryTime 1500, CategoryRecoveryTime 60000 (reset before each cast), 19% of the base mana plus 25 (base mana set before each cast), DurationIndex 28 = 5000 ms, Effect[2] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE; AscensionWitchDoctorAbilities.cpp:342-345 (OnSpellCast) casts the avoidance aura 806295 on the caster (DurationIndex 28 = 5000 ms): Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE misc 126 (every magic school) and Effect[1] aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE, both BasePoints -101 + 1 = -100 ($806295s1). A passive striker (creature 36, level 60, 3 yd, reaction 0, no spell_hit_bonus, so no attacker hit bonus offsets the aura) casts the strike at the caster (a harness creature cast, TRIGGERED_FULL_MASK, still rolled by Unit::SpellHitResult); each strike is counted sent by the striker's SPELL_GO and landed by its damage log at the caster (a miss sends no SMSG_SPELLNONMELEEDAMAGELOG). Bursts of 12 strikes 300 ms apart start 200 ms after a real Slither cast and end 3600 ms later, inside its 5000 ms; 806295 is read on the caster after every burst (present in each treatment burst, absent in each control burst), and the next burst starts 5400 ms after the cast, past both auras (a new Slither under the old silence would be refused). The caster holds 1,000,000 health with regeneration off. Strike: Light of the Naaru 41394 (Holy, DmgClass 1 magic, a fixed 1100 base, no attributes), rolled by Unit::MagicSpellHitResult: the striker's hit chance is 96 - 0 (equal levels) plus the victim's aura 186 amount (Unit.cpp:4007-4008). Control: 10 bursts (120 strikes) without Slither must land at least half (about 96% expected). Treatment: 58 bursts (696 strikes), each after a real Slither, must land none. Sizing: the claimed 100% reduction lands exactly 0; the engine clamps the magic hit chance to at least 1% (Unit.cpp:4034-4035, HitChance < 100 is raised to 100), and a 1% landing chance shows no landed strike in 696 with probability 0.99^696 = 0.0009, so that failure alerts in more than 99.9% of runs. Refusals (the \"cannot attack or cast spells\" half): before the bursts of each arm the caster attempts Hexfire 573026 (instant, PreventionType 1 silence, 17% base mana) at the striker and auto-attacks it for 3000 ms (2600 ms weapon speed); the control casts it (one SPELL_GO, no failure) and swings at least once, the treatment, 200 ms after its own Slither cast, is refused with SPELL_FAILED_SILENCED 104 (Spell.cpp:7160-7161, UNIT_FLAG_SILENCED and PreventionType silence) and makes no swing (UNIT_FLAG_PACIFIED). Labels slither_spell_miss, slither_spell_miss_cast and slither_spell_miss_attack. Cast timing checked: Slither and Hexfire instant, GCD 1500 inside the 5400 ms bursts. Player reports: none."
+    },
+    {
+      "spell": 500947,
+      "kind": "strike_miss_share",
+      "variant": "slither_ranged_miss",
+      "label_suffix": "slither_ranged_miss",
+      "name": "Slither (ranged attacks cannot hit the caster)",
+      "quote": "You cannot attack or cast spells, but chance to be hit by ranged attacks and spells is reduced by $806295s1% for the duration.",
+      "trigger_spell": 500947,
+      "trigger_aura": 806295,
+      "strike_spell": 92522,
+      "strikes": 12,
+      "strike_wait_ms": 300,
+      "trigger_wait_ms": 200,
+      "burst_ms": 5400,
+      "control_bursts": 10,
+      "treatment_bursts": 10,
+      "control_minimum_share": 0.5,
+      "observe_source": "Slither 500947: instant, StartRecoveryTime 1500, CategoryRecoveryTime 60000 (reset before each cast), 19% of the base mana plus 25 (base mana set before each cast), DurationIndex 28 = 5000 ms, Effect[2] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE; AscensionWitchDoctorAbilities.cpp:342-345 (OnSpellCast) casts the avoidance aura 806295 on the caster (DurationIndex 28 = 5000 ms): Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE misc 126 (every magic school) and Effect[1] aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE, both BasePoints -101 + 1 = -100 ($806295s1). A passive striker (creature 36, level 60, 3 yd, reaction 0, no spell_hit_bonus, so no attacker hit bonus offsets the aura) casts the strike at the caster (a harness creature cast, TRIGGERED_FULL_MASK, still rolled by Unit::SpellHitResult); each strike is counted sent by the striker's SPELL_GO and landed by its damage log at the caster (a miss sends no SMSG_SPELLNONMELEEDAMAGELOG). Bursts of 12 strikes 300 ms apart start 200 ms after a real Slither cast and end 3600 ms later, inside its 5000 ms; 806295 is read on the caster after every burst (present in each treatment burst, absent in each control burst), and the next burst starts 5400 ms after the cast, past both auras (a new Slither under the old silence would be refused). The caster holds 1,000,000 health with regeneration off. Strike: Cannon Shot 92522 (Physical, DmgClass 3 ranged, BasePoints 1 + DieSides 10 + 2 per level, Speed 28, no attribute that skips the miss roll: AttributesEx3 and AttributesEx7 0), rolled by Unit::MeleeSpellHitResult with RANGED_ATTACK: a ranged strike can only miss or be deflected; its miss chance is the victim's GetUnitMissChance(RANGED_ATTACK) = 5 plus the defense difference minus the aura 185 amount (Unit.cpp:4355-4356), so 105 with Slither, then clamped to 60 by MeleeSpellMissChance (Unit.cpp:16939-16943). Control: 10 bursts (120 strikes) without Slither must land at least half (about 95% expected). Treatment: 10 bursts (120 strikes), each after a real Slither, must land none; the 60% cap lands about 40% (48 of 120), and a 40% landing chance shows no landed strike in 120 with probability 0.6^120 < 1e-26: this entry reproduces candidate defect lead L-c11-c1 (fix note in cycle11/author-c.md) and alerts until it is fixed. Cast timing checked: Slither instant, GCD 1500 inside the 5400 ms bursts. Player reports: none."
+    },
+    {
+      "spell": 704497,
+      "kind": "script_hit",
+      "variant": "marionette_explosion",
+      "label_suffix": "marionette_explosion",
+      "name": "Soul Marionette (each explosion deals the stated damage)",
+      "quote": "applying a stack of",
+      "hit_spell": 706553,
+      "casts": [
+        [
+          704497,
+          "caster"
+        ]
+      ],
+      "control_casts": [],
+      "cast_power": 2000,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 9500,
+      "trials": 8,
+      "minimum_hits": 20,
+      "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset before each cast, 22% base mana, cast_power 2000): five clones (creature 300661, a 2.5 yd ring around the caster) stack 807057 on the caster every 2000 ms; at the 20th stack, about 8000 to 8400 ms after the cast, ExplodeClones (AscensionWitchDoctorSummons.cpp:112-119) makes each clone cast Soul Marionette 706553 at itself with the doctor as original caster (:371-376), so the five hits on the dummy (3 yd) log under the caster (Spell.cpp:2674, the explosion_hits diagnostic: 5 per cast). 706553 Effect[0] SCHOOL_DAMAGE Shadow 581 + 1 = 582, no per-level term; AscensionWitchDoctorAbilities.cpp:150-151 strips only the stun effect from a target already stunned by the first explosion (M-51), so every explosion deals damage. Each trial casts a real Marionette and waits 9500 ms; 8 trials, 40 hits, of which at least 20 non-critical are needed. The mean non-critical hit is judged against ${$706553m1+$706553ppl1+$sps*.5} read with the measured stats. 706553 has DmgClass 1: Reg's Test Aura 984954 (spell crit -1000) holds the spell crit at 0, and beeg spellpen 823764 removes partial resists (precondition fixtures; the transform 807044's +100 crit and +30% damage reach only Malefic Wrath and Bad Juju, whose masks 706553 lacks). Control: 8 trials that learn 704497 and never cast it, no 706553 hit. The earlier objection (cycle 7 B8: the casts must finish inside the settle) is met by the 9500 ms settle past the explosions. Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 704497,
+      "kind": "aura_window",
+      "variant": "stun_lasts",
+      "label_suffix": "stun_lasts",
+      "name": "Soul Marionette (the explosion stuns for 4 sec)",
+      "quote": "applying a stack of",
+      "trigger_spell": 704497,
+      "aura": 706553,
+      "control_ms": 4000,
+      "treatment_ms": 4000,
+      "control_windows": [
+        [
+          7500,
+          9000
+        ],
+        [
+          11300,
+          13300
+        ]
+      ],
+      "treatment_windows": [
+        [
+          7500,
+          9000
+        ],
+        [
+          11300,
+          13300
+        ]
+      ],
+      "trigger_power": 2000,
+      "poll_ms": 1,
+      "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset, 22% base mana, trigger_power 2000) explodes its five clones about 8000 to 8400 ms after the cast (the stun entry); the first explosion puts Soul Marionette 706553 Effect[1] SPELL_AURA_MOD_STUN (DurationIndex 35 = 4000 ms, $706553d) on the dummy (3 yd), with the doctor as the aura's caster (original caster), and the four that follow it do not refresh it (AscensionWitchDoctorAbilities.cpp:150-151 strips the stun effect from a stunned target). The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. Closes the cycle 7 tool note (B8-fix: a read relative to the stun's own start). Cast timing checked: instant. Player reports: none."
+    },
+    {
+      "spell": 801678,
+      "kind": "aura_window",
+      "variant": "stun_lasts",
+      "label_suffix": "stun_lasts",
+      "name": "Stasis Ward (the burst stuns for 4 sec)",
+      "quote": "the ward will burst with lightning, stunning nearby enemies for $801677d",
+      "trigger_spell": 801678,
+      "aura": 801677,
+      "control_ms": 4000,
+      "treatment_ms": 4000,
+      "control_windows": [
+        [
+          1700,
+          2600
+        ],
+        [
+          5600,
+          6800
+        ]
+      ],
+      "treatment_windows": [
+        [
+          1700,
+          2600
+        ],
+        [
+          5600,
+          6800
+        ]
+      ],
+      "trigger_power": 1400,
+      "poll_ms": 1,
+      "observe_source": "Stasis Ward 801678 (instant, RecoveryTime 60000 reset, 13% base mana, trigger_power 1400) summons Stasis Ward 50108; at its first update with _age >= 2000 ms (about 2000 to 2100 ms after the cast; burst_held and burst bracket it) it casts Stasis 801677 at itself with the doctor as original caster and despawns (AscensionWitchDoctorSummons.cpp:541-544). 801677 Effect[0] SPELL_AURA_MOD_STUN, DurationIndex 35 = 4000 ms ($801677d), on the dummy 3 yd away inside the 10 yd burst. The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. This separates the 4000 ms stun from the 2000 ms fuse, the objection of the cycle 9 no-route note (B16): the stamps start at the stun, not at the cast. Cast timing checked: instant. Player reports: none."
     }
   ],
   "player_observations": [],

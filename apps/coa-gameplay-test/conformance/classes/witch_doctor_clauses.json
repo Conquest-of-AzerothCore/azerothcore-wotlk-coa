@@ -649,19 +649,25 @@
   {
     "spell": 500947,
     "clause": "You cannot attack or cast spells, but chance to be hit by ranged attacks and spells is reduced by $806295s1% for the duration.",
-    "labels": [
-      "500947 effect_value 806295e0 #2"
-    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Data conformant (effect_value 806295e0 ok: -100, aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE and aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE -100 on the caster while Slither 500947 lasts, 5000 ms). The behaviour is a certain miss of every spell and ranged strike at the caster. taken_hit can cast Slither for real in an arm (arm casts), but its judges need landed strikes (each arm needs half its trials landed) or judge a resist difference against a stated number of points (resist_rate), and no judge reads an absolute 100% miss share; the miss chance of the control is the striker level miss, so the difference is not the stated 100. Tool note P-T3 (behaviours.py taken_hit, owner): a judge \"miss_share\" with an absolute expected share per arm (0 landed of N with Slither cast before each trial, the control landing). A tool gap, not a missing route.",
-      "attempts": [
-        {
-          "agent": "cycle10/author-P",
-          "report": "cycle10/author-P.md"
-        }
-      ]
-    }
+    "claims": [
+      {
+        "claim": "You cannot attack or cast spells",
+        "labels": [
+          "500947 behaviour_metric_delta slither_spell_miss_cast",
+          "500947 behaviour_metric_delta slither_spell_miss_attack"
+        ]
+      },
+      {
+        "claim": "but chance to be hit by ranged attacks and spells is reduced by $806295s1% for the duration.",
+        "labels": [
+          "500947 effect_value 806295e0 #2",
+          "500947 behaviour_metric_delta slither_spell_miss",
+          "500947 behaviour_metric_delta slither_ranged_miss"
+        ]
+      }
+    ],
+    "reason": "Cycle 11 author C (kind strike_miss_share, ADR 1123 provisional; closes tool note P-T3): a passive striker without a hit bonus strikes the caster in bursts, the control without Slither landing, each treatment burst right after a real Slither cast with 806295 read on: slither_spell_miss (Light of the Naaru 41394, 696 treatment strikes, none may land; sized against the engine least magic hit chance of 1%, 0.99^696 = 0.0009) and slither_ranged_miss (Cannon Shot 92522, 120 treatment strikes). The refusal half is read in the spell entry: Hexfire 573026 refused with SPELL_FAILED_SILENCED 104 and no auto-attack swing under Slither, both allowed in the control. Candidate defect lead L-c11-c1 (fix note in cycle11/author-c.md): MeleeSpellMissChance caps a ranged miss at 60% (Unit.cpp:16939-16943), so slither_ranged_miss is expected to alert (about 40% landed), and MagicSpellHitResult keeps a 1% least hit chance (Unit.cpp:4034-4035), which slither_spell_miss is sized to show."
   },
   {
     "spell": 501117,
@@ -859,7 +865,9 @@
     "claims": [
       {
         "claim": "healing 8 nearby allies",
-        "labels": []
+        "labels": [
+          "500957 behaviour_metric_delta ward_cap"
+        ]
       },
       {
         "claim": "within $500955a1 yds",
@@ -870,7 +878,8 @@
       {
         "claim": "for ${$805403m1+$805403ppl1+$SP*0.185+$RAP*0.08}",
         "labels": [
-          "500957 effect_value 805403e0 #2"
+          "500957 effect_value 805403e0 #2",
+          "500957 script_hit 805403 ward_heal"
         ]
       },
       {
@@ -881,7 +890,7 @@
       }
     ],
     "no_behaviour_route": {
-      "reason": "\"healing 8 nearby allies\" has no behaviour read: metric_delta has no ally actor and no ninth grouped player, and the code caps the targets at Allies(player, me, 30, 8) (the radius is the 30 yd of that call, Completion.cpp:507-515 gives the heal child TARGET_UNIT_TARGET_ALLY). The heal amount (effect_value 805403e0 ok, 51.26 at the reference stats) has no entry: Healing Ward 805403 has DmgClass 1, so a pulse may crit and an unforced single read flakes on the caster's spell crit chance; force_crit spell would force every pulse to crit and give a deterministic read of the critical amount (the crit-magnitude pattern), a design not built here because its expected value (the critical multiplier of a ward heal) would be an unread assumption and the amount stays data conformant (low priority, design note D-wh); the period is read by ward_pulses (counts, not amounts). Tool note T-ally.",
+      "reason": "Cycle 11 author C: the cap and the amount now have routes, \"500957 behaviour_metric_delta ward_cap\" (ally_heal_reach with nine grouped allies in schema 2, ADR 1122 provisional: the eight at 10% health healed, the ninth at 60% not) and \"500957 script_hit 805403 ward_heal\" (the mean non-critical pulse on the caster, spell crit held at 0). Only the radius claim \"within $500955a1 yds\" stays data (effect_radius 500955e0 #1 ok, 30): the search is centred on the ward, which stands 1.5 yd from the caster at an angle of its totem slot added to the caster's orientation (AscensionWitchDoctorSummons.cpp:195-197), and Allies() adds both combat reaches, the ward's from creature_model_info of display 15292 (realm database only). Design 1, an ally_heal_reach bracket placed from the caster 0.5 yd inside and beyond 30 yd plus both reaches: the unread ward offset (up to 1.5 yd along the bracket line) and the unread ward reach exceed the 0.5 yd margin, so a pass does not bound the radius inside its G-19 band (1.5 yd). Design 2, a wide bracket (inside at 26 yd, beyond at 36 yd, the Swift Idol field_inside/outside shape): it admits radii from about 24 to 38 yd, far wider than the G-19 band, so it cannot tell 30 from 25 or 35. Tool note T-c8-2 (a radius layout centred on a summoned unit, read from its position and combat reach) is the route; earlier text: \"healing 8 nearby allies\" has no behaviour read: metric_delta has no ally actor and no ninth grouped player, and the code caps the targets at Allies(player, me, 30, 8) (the radius is the 30 yd of that call, Completion.cpp:507-515 gives the heal child TARGET_UNIT_TARGET_ALLY). The heal amount (effect_value 805403e0 ok, 51.26 at the reference stats) has no entry: Healing Ward 805403 has DmgClass 1, so a pulse may crit and an unforced single read flakes on the caster's spell crit chance; force_crit spell would force every pulse to crit and give a deterministic read of the critical amount (the crit-magnitude pattern), a design not built here because its expected value (the critical multiplier of a ward heal) would be an unread assumption and the amount stays data conformant (low priority, design note D-wh); the period is read by ward_pulses (counts, not amounts). Tool note T-ally.",
       "attempts": [
         {
           "agent": "cycle7/author-B7",
@@ -894,6 +903,10 @@
         {
           "agent": "cycle7/author-B7-fix2",
           "report": ".agents/plans/witch-doctor-conformance/cycle7/author-B7.md#fix-round-2"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     },
@@ -1256,7 +1269,6 @@
       {
         "claim": "and up to $i enemies",
         "labels": [
-          "503712 effect_value #3",
           "503712 volley_targets behaviour_fixed_count"
         ]
       },
@@ -1275,7 +1287,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "The Volley count and its radius are judged by \"503712 volley_targets behaviour_fixed_count\" (cycle 10 tool build, fixed_count dummy_distance, ADR 1031 provisional): the primary 15 yd away past the ranged minimum, four dummies within 8 yd of it, one beyond, 30 casts with the ready aura, the widest cast hitting 3 extra dummies and the far one never. Still unproven: the damage formula \"${$m1+0+$RAP*.285}\" reads 409..426 against 334..408 (mean 390 against 371, +5%, a numeric delta of the kind the rule leaves as a note); the hit_ratio entries of this spell read ratios, not the formula.",
+      "reason": "The Volley count and its radius are judged by \"503712 volley_targets behaviour_fixed_count\" (cycle 10 tool build, fixed_count dummy_distance, ADR 1031 provisional): the primary 15 yd away past the ranged minimum, four dummies within 8 yd of it, one beyond, 30 casts with the ready aura, the widest cast hitting 3 extra dummies and the far one never. Still unproven: the damage formula \"${$m1+0+$RAP*.285}\" reads 409..426 against 334..408 (mean 390 against 371, +5%, a numeric delta of the kind the rule leaves as a note); the hit_ratio entries of this spell read ratios, not the formula. Cycle 11 author C: the count claim drops \"503712 effect_value #3\" (unmodelled: $i has no value read; guide 9.4, M-19), so it and the radius claim rest on volley_targets (ok in the cycle 10 sweep, 3 extra dummies, the far one never). The damage claim stays a tool gap: the 409 to 426 reads are CalcValue with the 1.85 per level of 504582 for the 10 levels above its BaseLevel 50 (18.5), which the tool leaves out of helper $m1 (ADR 0014, level 0); M-46 ruled that DBC per-level shape the server's right value and kept the convention an owner tool note. Design 1, a script_hit or hit_mean of the Volley against ${$m1+0+$RAP*.285}: the model reads $m1 at level 0 and alerts by about 5% on the value M-46 accepts. Design 2, the hit_ratio scales_damage shape: a ratio to Reclamation that never reads the formula. Route: the owner settles the helper $m1 per-level convention in tooltip.py (not opt-in, it moves Templar and Necromancer expected values), then the generated hit check judges it.",
       "attempts": [
         {
           "agent": "cycle7/author-B5",
@@ -1284,6 +1296,10 @@
         {
           "agent": "cycle9/author-B13",
           "report": ".agents/plans/witch-doctor-conformance/cycle9/author-B13.md#fix-round"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -1893,18 +1909,12 @@
     "spell": 560545,
     "clause": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
     "labels": [
-      "560545 effect_value 706548e0 #1"
+      "560545 effect_value 706548e0 #1",
+      "560545 behaviour_metric_delta puppets_period",
+      "560545 behaviour_metric_delta puppets_period_control"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The passive 560545 carries two ADD_PCT_MODIFIER effects of -21 on misc values 1 and 19 (Dark Loyalty 706548, the token spell, has the same pair), which the tooltip states as Shadow Puppets dealing damage 20% faster. The proof is the interval between two Puppet hits with and without 560545 (the hit_period shape), which needs the Puppets summoned and their hits stamped as events; no entry for the Puppets hit period exists to copy and none was built this cycle (the data label 560545 effect_value 706548e0 #1 is ok).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author C (hit_period learn, ADR 1120 provisional; closes the cycle 9 tool gap of B14): Shadow Puppets 501087 hits are stamped in game time; with 560545 learned they come 600 ms apart (750 x 0.8, SPELLMOD_ACTIVATION_TIME -20), puppets_period_control reads 750 ms without the talent, each in its G-19 band."
   },
   {
     "spell": 560748,
@@ -2442,11 +2452,15 @@
       }
     ],
     "no_behaviour_route": {
-      "reason": "The claim \"by $504458s1%\" is data conformant and its entry is the route: `704495 behaviour_metric_delta haste_cast` (ok in final07) reads the live cast time of Malefic Wrath 807037 falling from 2000 to 1666.7 ms after a forced-crit Hexfire (ratio 0.8333, haste +20%, Hexplosion 504458 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, spell haste only). The only block is the promise regexp: the read is `spell_cast_time_ms`, a READBACK metric, so the claim classes as data. The state read of the same haste, `cast_speed_multiplier` (UNIT_MOD_CAST_SPEED, 1 / 1.2 = 0.8333), is a STATE metric whose promise regexp is `casting speed|cast speed|spell haste` (coverage.STATE_PROMISES); the clause says \"your haste\" only, so the state read would class data too. The buff does not touch melee swings, so `attack_time_ms` (promise `haste`) does not move. A real cast-time bracket (`casting` read at 1760 ms of a 2000 ms cast) separates 20% (ends 1667) from 10% (ends 1818) by 58 ms on one side and 65 ms on the other, inside the 50 ms update jitter of a stamped read: not built. Tool note (owner-owned coverage.py): add `haste` to the `cast_speed_multiplier` promise regexp (the Necromancer 705750 `cast_haste` and 705943 `cast_haste` entries use the same read), or accept `haste_cast` as the behaviour read of a spell-haste clause.",
+      "reason": "The claim \"by $504458s1%\" is data conformant and its entry is the route: `704495 behaviour_metric_delta haste_cast` (ok in final07) reads the live cast time of Malefic Wrath 807037 falling from 2000 to 1666.7 ms after a forced-crit Hexfire (ratio 0.8333, haste +20%, Hexplosion 504458 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, spell haste only). The only block is the promise regexp: the read is `spell_cast_time_ms`, a READBACK metric, so the claim classes as data. The state read of the same haste, `cast_speed_multiplier` (UNIT_MOD_CAST_SPEED, 1 / 1.2 = 0.8333), is a STATE metric whose promise regexp is `casting speed|cast speed|spell haste` (coverage.STATE_PROMISES); the clause says \"your haste\" only, so the state read would class data too. The buff does not touch melee swings, so `attack_time_ms` (promise `haste`) does not move. A real cast-time bracket (`casting` read at 1760 ms of a 2000 ms cast) separates 20% (ends 1667) from 10% (ends 1818) by 58 ms on one side and 65 ms on the other, inside the 50 ms update jitter of a stamped read: not built. Tool note (owner-owned coverage.py): add `haste` to the `cast_speed_multiplier` promise regexp (the Necromancer 705750 `cast_haste` and 705943 `cast_haste` entries use the same read), or accept `haste_cast` as the behaviour read of a spell-haste clause. Cycle 11 author C, two further designs that cannot work: (1) a stamped game-time read of the cast end of a real Malefic Wrath (event_first_ms or casting) under the buff: 20% ends at 1666.7 ms, the G-19 band of the stated 20 (19 to 21%) is 1652.9 to 1680.7 ms, narrower than one world update of the stamps; (2) a cast_period of repeated Wrath casts inside the 6000 ms buff: three casts, the same 14 ms per cast band against the same jitter. The behaviour is measured (haste_cast, cast_speed_multiplier 0.8333 would read the same); the claim words \"by $504458s1%\" carry no promise word of any state metric, so the block is the promise policy: an owner choice to let a spell haste read promise \"haste\" (STATE_PROMISES cast_speed_multiplier), not a missing route.",
       "attempts": [
         {
           "agent": "cycle10/author-B20",
           "report": ".agents/plans/witch-doctor-conformance/cycle10/author-B20.md#hexplosion-704495"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -2562,19 +2576,12 @@
       {
         "claim": "dealing ${$706553m1+$706553ppl1+$sps*.5} Shadow Damage",
         "labels": [
-          "704497 effect_value 706553e0 #2"
+          "704497 effect_value 706553e0 #2",
+          "704497 script_hit 706553 marionette_explosion"
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The explosion amount 582 = 581 + 1 + 0.5 x spell power has no behaviour route this cycle: script_hit reads the damage a class script casts, but the 706553 hits are cast by the 5 clones (creature 300661) 8000 ms into the cast, die 1 ms later, and script_hit needs the casts of a trial to finish inside its settle; the 5 hits per cast also land at distances the hit model does not know. The stun entry shows the explosion reaches the dummy.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author C: \"704497 script_hit 706553 marionette_explosion\" reads the mean non-critical explosion hit on the dummy over 8 real Marionette casts (9500 ms settle each, past the explosions at about 8000 to 8400 ms), the five hits of a cast logged under the caster; the cycle 7 objection (the casts must finish inside the settle) is met by the settle, and the hit distance does not enter a school-damage model."
   },
   {
     "spell": 704497,
@@ -2593,19 +2600,12 @@
       {
         "claim": "for $706553d",
         "labels": [
-          "704497 spell_duration 706553 #4"
+          "704497 spell_duration 706553 #4",
+          "704497 behaviour_metric_delta stun_lasts"
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The stun duration ('for $706553d', 4000 ms) has no behaviour entry: the stun starts with the 20th Voodoo stack and the transform at about 8000 to 8400 ms after the cast (four clone ticks of 2000 ms, each timer rearmed after its tick), and the G-19 band of a 4000 ms stun is 200 ms, so two game-time windows around its end cannot be placed without knowing the start to that precision (transform_lasts has a 750 ms band on 15000 ms). The data label 706553 spell_duration #4 stays. Tool note: a metric_delta that stamps the first application of an aura on another unit (the dummy's stun) so its end can be read relative to it.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8-fix",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author C: \"704497 behaviour_metric_delta stun_lasts\" (aura_window) stamps the first read with the stun on the dummy and the first without it, about every 10 ms around its start (7500 to 9000 ms) and end, so the 4000 ms are read from the stun's own start, the tool note of cycle 7 (B8-fix); 4000 +- 200 ms (G-19)."
   },
   {
     "spell": 704500,
@@ -3950,11 +3950,15 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The cut of 15 sec on the 180 sec cooldown of Shadowstalker 807040 (712372 Effect[0] 165 MODIFY_COOLDOWN, -15001) is applied by the Glaive cast of Abilities.cpp:366-368 after Eclipse (5 Spirits) made the 707326 buff; reading it takes a Glaive cast after the Eclipse (see the guarantee gap above) and then either cooldown_ms (a readback, data) or a recast attempt of Shadowstalker at about 164 and 166 sec (kinds cooldown_clear_time and heal_cooldown_cut read events of minions and heals, not a cast-driven cut). The data label `705948 effect_value 712372e0 #1` (-15000 read ok) stays. Tool: a cast-driven cooldown cut kind (cut per Glaive cast, attempts of the gated spell every 1-2 sec from 160 to 170 sec) and the same second cast after the trigger.",
+      "reason": "The cut of 15 sec on the 180 sec cooldown of Shadowstalker 807040 (712372 Effect[0] 165 MODIFY_COOLDOWN, -15001) is applied by the Glaive cast of Abilities.cpp:366-368 after Eclipse (5 Spirits) made the 707326 buff; reading it takes a Glaive cast after the Eclipse (see the guarantee gap above) and then either cooldown_ms (a readback, data) or a recast attempt of Shadowstalker at about 164 and 166 sec (kinds cooldown_clear_time and heal_cooldown_cut read events of minions and heals, not a cast-driven cut). The data label `705948 effect_value 712372e0 #1` (-15000 read ok) stays. Tool: a cast-driven cooldown cut kind (cut per Glaive cast, attempts of the gated spell every 1-2 sec from 160 to 170 sec) and the same second cast after the trigger. Cycle 11 author C: not built. The cut needs Eclipse with 5 real Spirits, then a Glaive while 707326 holds, then Shadowstalker 807040 attempts near 165 s. Design 1, cooldown_cut_series: it judges a percent cut per tick of an aura against a stamped series, not one flat cut by one cast. Design 2, metric_delta after_trigger_casts with an Eclipse trigger and a Glaive after it: Shadowstalker would have to be cast before the trigger as a setup cast, and its later cooldown read (cooldown_ms) is a readback, while refusable_target_casts reads creature casts only; the event read needs a recast attempt series of a player spell (attempts every 1 s from 160 to 170 s, the 15 s cut ending the cooldown at 165 s). Tool: that player recast series (or cooldown_cut_series with a one-shot cut).",
       "attempts": [
         {
           "agent": "cycle10/author-B17",
           "report": "cycle10/author-B17.md#tool-gap-price-cooldown"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -4097,11 +4101,15 @@
       }
     ],
     "tool_gap": {
-      "reason": "The crit refusal has no behaviour route this cycle: 506820 Effect[0] is aura 290 (crit chance -100) on the enemy, and proving \"unable to critically strike\" needs an enemy striker inside the field whose crits are counted against a control striker outside it (a striker with a forced crit rating beside an effigy); not built here. The radius claim keeps only its data label: the class-file entry 706542 behaviour_metric_delta effigy_radius_edge reproduces lead R3-e1 (the script searches 10 yd, AscensionWitchDoctorSummons.cpp:530-539, against the tooltip's 15) but is reproduction only and not listed in this claim, because its layout does not meet the G-29 proof conditions (a 2.5 yd margin forced by the grid cell edge at x = -8933.33, and the judge measures from the primary dummy instead of the effigy, reach 1.0, about 1.6 yd off the dummy line); it waits for a mentor ruling on the margin or for tool note T-c8-2 (a radius_edge layout around a summoned centre).",
+      "reason": "The crit refusal has no behaviour route this cycle: 506820 Effect[0] is aura 290 (crit chance -100) on the enemy, and proving \"unable to critically strike\" needs an enemy striker inside the field whose crits are counted against a control striker outside it (a striker with a forced crit rating beside an effigy); not built here. The radius claim keeps only its data label: the class-file entry 706542 behaviour_metric_delta effigy_radius_edge reproduces lead R3-e1 (the script searches 10 yd, AscensionWitchDoctorSummons.cpp:530-539, against the tooltip's 15) but is reproduction only and not listed in this claim, because its layout does not meet the G-29 proof conditions (a 2.5 yd margin forced by the grid cell edge at x = -8933.33, and the judge measures from the primary dummy instead of the effigy, reach 1.0, about 1.6 yd off the dummy line); it waits for a mentor ruling on the margin or for tool note T-c8-2 (a radius_edge layout around a summoned centre). Cycle 11 author C: a route is designed, not built. A real Cursed Effigy beside the caster, a passive striker inside its 15 yd field auto-attacking the caster (creature_attack, ADR 1027) and the striker's critical melee hits on the caster counted against a control without the effigy: if a creature melee crits at about 5% (its control rate must be read, not assumed), 300 control swings show a crit with probability 1 - 0.95^300 > 0.9999999, and 300 treatment swings with none fail a server that ignores 506820 with the same probability. It needs a strike_miss_share variant that counts critical melee hits of the striker (instead of spell logs) and reads the trigger aura on the striker (506820 is put on the enemy); not built this cycle. The crit_rate kind cannot carry it: it reads the caster's own hits. The radius half stays on T-c8-2 (summon centre).",
       "attempts": [
         {
           "agent": "cycle8/author-T",
           "report": "cycle8/author-T.md"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -4954,7 +4962,8 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "811117 aura_amplitude_ms #1"
+          "811117 aura_amplitude_ms #1",
+          "811117 behaviour_metric_delta eclipse_period"
         ]
       },
       {
@@ -4964,16 +4973,7 @@
         ]
       }
     ],
-    "reason": "The former label \"811117 effect_value e0 #0\" is not_measured and is dropped; the stated amount is measured by \"811117 script_hit 802717 eclipse_tick\" on the hits of the real cast (guide 9.4, M-19).",
-    "tool_gap": {
-      "reason": "'every $t1 sec' (EffectAmplitude 250 ms) has only its data label. The hits come one per Spirit, one per tick, and the aura is removed after the last (AscensionWitchDoctorAuras.cpp:285-296), so a period needs at least two Spirits; the hit_period kind sets each fixture aura to one stack, takes no setup casts, and the generator's Spirit is one stack, so its single hit gives no period. Tool note: a setup_casts or fixture-stacks field on hit_period (Mirage 501136 makes the five Spirits as in spirit_hits), then the 250 ms judged on the hit stamps in the G-19 band.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B12",
-          "report": "cycle8/author-B12.md"
-        }
-      ]
-    }
+    "reason": "The former label \"811117 effect_value e0 #0\" is not_measured and is dropped; the stated amount is measured by \"811117 script_hit 802717 eclipse_tick\" on the hits of the real cast (guide 9.4, M-19). Cycle 11 author C: eclipse_tick was insufficient_trials in both final07 runs (20 of 20 hits critical: 802717 is DmgClass 3 and 984954 carries +101 weapon crit), repaired with 64481; \"811117 behaviour_metric_delta eclipse_period\" (hit_period setup casts, ADR 1120 provisional) stamps the five hits of five real Spirits (Mirage 501136, the dummy's Detect Invisibility 132): 250 +- 12.5 ms."
   },
   {
     "spell": 811117,
@@ -5548,11 +5548,15 @@
     ],
     "reason": "The former label \"802262 effect_value #2\" is unreadable (the $500473x1 token) and is dropped from the targets claim, which keeps no label (the tool_gap below); the damage claim is read by \"802262 script_hit 500473 voodoo_fire_damage\" (a real Serpent Ward and Hexfire, the hits of 500473 by the ward, a control arm without 802262 counting none) beside the data label (guide 9.4, M-19).",
     "tool_gap": {
-      "reason": "The count \"up to 3 nearby enemies\" (Voodoo Fire 500473 EffectChainTarget 3) needs four dummies placed around the ward target and the shot counted on each: a script_hit reads the hits on one receiver, and fixed_count (the extra-dummy kind) casts a player spell at a primary dummy, not a minion shot behind a 20% roll without a forced-roll option (a forced roll stays an effect claim, never a rate). Tool note T-c9-B16-18: a forced_roll option for fixed_count, or a minion shot with a chain target count.",
+      "reason": "The count \"up to 3 nearby enemies\" (Voodoo Fire 500473 EffectChainTarget 3) needs four dummies placed around the ward target and the shot counted on each: a script_hit reads the hits on one receiver, and fixed_count (the extra-dummy kind) casts a player spell at a primary dummy, not a minion shot behind a 20% roll without a forced-roll option (a forced roll stays an effect claim, never a rate). Tool note T-c9-B16-18: a forced_roll option for fixed_count, or a minion shot with a chain target count. Cycle 11 author C: not built. Design 1, fixed_count with dummy_distance: it casts a player spell at a primary dummy and counts extra dummies, while Voodoo Fire is a ward shot behind a 20% roll (Summons.cpp:466-480: cap 3 of Nearby(target, 10)). Design 2, flat_chance_rate per ward with extra dummies: it judges the rate of events, not how many dummies one event reaches, and a shot event is not split per receiver. Tool: a minion shot count per event (owned_creature_spell_cast_count of 500473 per Serpent Ward Attack, the per-event judge of ally_heal_reach per_source for damage) with four dummies within 10 yd of the target.",
       "attempts": [
         {
           "agent": "cycle9/fix-B16",
           "report": "cycle9/author-B16.md#fix-round"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     },
@@ -5649,7 +5653,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Cycle 10 author T: the radius claim now has a behaviour label, \"802487 behaviour_metric_delta unstable_radius\" (kind ally_heal_reach, ADR 1021 provisional): grouped ally players 3, 22.5 and 23.5 yd from the marked Witch Doctor (0.5 yd inside and beyond 20 yd plus both 1.5 yd combat reaches), real Frog Bones, Potion Toss and Spirit in a Bottle casts in a control phase without 802487 and a treatment phase with it; the inner two take 802489, the outer one none, the control none. The code searches Radius(UnstableHeal) since fix 61f0d44cf0 (the 10 yd literal of lead R3-e2 is gone). Still unproven: the amount ${$802489m1+$802489ppl1+$BH*0.4}, whose $BH (bonus healing) token has no resolver in tooltip.py, so \"802487 effect_value #2\" stays unreadable and no expected heal exists (proposal-tooltip-reader.md).",
+      "reason": "Cycle 10 author T: the radius claim now has a behaviour label, \"802487 behaviour_metric_delta unstable_radius\" (kind ally_heal_reach, ADR 1021 provisional): grouped ally players 3, 22.5 and 23.5 yd from the marked Witch Doctor (0.5 yd inside and beyond 20 yd plus both 1.5 yd combat reaches), real Frog Bones, Potion Toss and Spirit in a Bottle casts in a control phase without 802487 and a treatment phase with it; the inner two take 802489, the outer one none, the control none. The code searches Radius(UnstableHeal) since fix 61f0d44cf0 (the 10 yd literal of lead R3-e2 is gone). Still unproven: the amount ${$802489m1+$802489ppl1+$BH*0.4}, whose $BH (bonus healing) token has no resolver in tooltip.py, so \"802487 effect_value #2\" stays unreadable and no expected heal exists (proposal-tooltip-reader.md). Cycle 11 author C: not built. Design 1, a script_hit of 802489 on the caster (the marked caster is its own ally): the model reads ${$802489m1+$802489ppl1+$BH*0.4}, and tooltip.py resolves no $BH (CasterStats holds no healing power), so it is NotModelled. Design 2, ally_heal_reach share: it judges a heal against another heal's effective amount, not a formula. Tool: a $BH resolver from the healing_power read (proposal-tooltip-reader.md). The radius claim is judged by unstable_radius.",
       "attempts": [
         {
           "agent": "cycle7/author-B8",
@@ -5662,6 +5666,10 @@
         {
           "agent": "cycle10/author-T",
           "report": "cycle10/author-T.md"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -5922,11 +5930,15 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "A second look at the cycle 7 gap (B8). The aura 117 SPELL_AURA_MOD_MECHANIC_RESISTANCE of 804645 (mechanics 7 and 11, +25) is read by Unit::GetMechanicResistChance (Unit.cpp:3726-3744) on a magic-class strike; the Templar Holy Constitution 706323 disease_resist shape (taken_hit `resist_rate`, 800 trials x 28 parts) would judge it with a magic-class root or snare strike, but its arms set the aura by `auras` (a harness set_aura, the claim's own subject here) while the real source is the idol, which lasts 10000 ms and has a 60000 ms cooldown: about 19 trials of 500 ms per real idol cast against the roughly 12400 treatment trials a 25-point share needs at a 2 point band. Tool note: a taken_hit arm field that makes a real cast (the idol) every N trials with its aura read before each trial, or an idol that the arm sets once and a strike rate that fits its 10 s window by pooling many parts of a real cast each.",
+      "reason": "A second look at the cycle 7 gap (B8). The aura 117 SPELL_AURA_MOD_MECHANIC_RESISTANCE of 804645 (mechanics 7 and 11, +25) is read by Unit::GetMechanicResistChance (Unit.cpp:3726-3744) on a magic-class strike; the Templar Holy Constitution 706323 disease_resist shape (taken_hit `resist_rate`, 800 trials x 28 parts) would judge it with a magic-class root or snare strike, but its arms set the aura by `auras` (a harness set_aura, the claim's own subject here) while the real source is the idol, which lasts 10000 ms and has a 60000 ms cooldown: about 19 trials of 500 ms per real idol cast against the roughly 12400 treatment trials a 25-point share needs at a 2 point band. Tool note: a taken_hit arm field that makes a real cast (the idol) every N trials with its aura read before each trial, or an idol that the arm sets once and a strike rate that fits its 10 s window by pooling many parts of a real cast each. Cycle 11 author C: not built; the design of cycle 8 stands (a taken_hit resist_rate arm with a real idol cast every few trials). strike_miss_share (ADR 1123) does not fit: it reads a zero share, while +25 points of resistance need a share difference with about 12400 treatment trials.",
       "attempts": [
         {
           "agent": "cycle8/author-B12",
           "report": "cycle8/author-B12.md"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -6976,12 +6988,13 @@
       {
         "claim": "have the duration of crowd control effects on them increased by $504767s1%",
         "labels": [
-          "506635 effect_value 504767e0 #2"
+          "506635 effect_value 504767e0 #2",
+          "506635 behaviour_metric_delta graven_cc"
         ]
       }
     ],
     "tool_gap": {
-      "reason": "\"the duration of crowd control effects on them increased by $504767s1%\": 504767 is three aura 232 (SPELL_AURA_MECHANIC_DURATION_MOD) effects on mechanics 7, 11 and 2, BasePoints 24 + 1 = +25%, put on every enemy within 10 yd by the effigy (Summons.cpp:530-540). The route is a vehicle spell of one of those mechanics, the Lethargy Jinx 802065 (snare, 10000 ms), timed with and without the effigy: 12500 ms against 10000 ms. The G-19 band of +25% is 2 points, 12300 to 12700 ms around a true end of 12500 ms, and the present and gone reads need 150 ms of margin each side (a missile and a cast of 100 ms and a clock overhead of 10 to 17 ms per step): no pair of fixed reads fits. aura_window stamps both reads but its treatment is a learn of the entry's spell, not a setup cast of an effigy; metric_delta game_time brackets are fixed. Tool note T-b13-7: aura_window with a setup cast before the treatment cast. Observation: the tooltip says \"crowd control effects\", the data covers three mechanics (no stun, fear or charm). Radius part \"Enemies within $504761s1 yds\" ($504761s1 resolves to 20 yd): candidate defect lead L-b13-6, reported and not fixed here. The Graven field pulses with Nearby(me, 10.0f) (AscensionWitchDoctorSummons.cpp:530-531, NpcGraven), the hard-coded 10 yd that cycle 8 replaced with the tooltip radius for the Cursed Effigy, Unstable Concoction and Godslayer; the label 506635 effect_value 504761e0 #1 reads the data value only. Design by agent: the CC-duration design (aura_window, Lethargy Jinx timed with and without the effigy) is cycle9/author-B13; the radius reading and this lead are cycle9/author-B13-fix. Cross-reference: Summons.cpp:530-531 is one loop shared by the Shadow, Graven and Cursed effigies, and the Shadow Effigy radius fix (Task D, 505339) edits the same line; Graven must keep its own radius, 20 yd (its tooltip reuses the Shadow Effigy slow value $504761s1, -21 + 1 = -20, as a radius of 20 yd), not take the Shadow Effigy 30 yd. Recorded as a tool gap, not a no behaviour route: both halves are blocked only by a tool, T-c8-2 for the radius and T-b13-7 for the CC duration (G-25), as for the Cursed Effigy 706542 radius. No bracket entry is written: a radius_edge around a summon needs tool note T-c8-2 and stays reproduction only (M-55, G-29) until that tool exists.",
+      "reason": "\"the duration of crowd control effects on them increased by $504767s1%\": 504767 is three aura 232 (SPELL_AURA_MECHANIC_DURATION_MOD) effects on mechanics 7, 11 and 2, BasePoints 24 + 1 = +25%, put on every enemy within 10 yd by the effigy (Summons.cpp:530-540). The route is a vehicle spell of one of those mechanics, the Lethargy Jinx 802065 (snare, 10000 ms), timed with and without the effigy: 12500 ms against 10000 ms. The G-19 band of +25% is 2 points, 12300 to 12700 ms around a true end of 12500 ms, and the present and gone reads need 150 ms of margin each side (a missile and a cast of 100 ms and a clock overhead of 10 to 17 ms per step): no pair of fixed reads fits. aura_window stamps both reads but its treatment is a learn of the entry's spell, not a setup cast of an effigy; metric_delta game_time brackets are fixed. Tool note T-b13-7: aura_window with a setup cast before the treatment cast. Observation: the tooltip says \"crowd control effects\", the data covers three mechanics (no stun, fear or charm). Radius part \"Enemies within $504761s1 yds\" ($504761s1 resolves to 20 yd): candidate defect lead L-b13-6, reported and not fixed here. The Graven field pulses with Nearby(me, 10.0f) (AscensionWitchDoctorSummons.cpp:530-531, NpcGraven), the hard-coded 10 yd that cycle 8 replaced with the tooltip radius for the Cursed Effigy, Unstable Concoction and Godslayer; the label 506635 effect_value 504761e0 #1 reads the data value only. Design by agent: the CC-duration design (aura_window, Lethargy Jinx timed with and without the effigy) is cycle9/author-B13; the radius reading and this lead are cycle9/author-B13-fix. Cross-reference: Summons.cpp:530-531 is one loop shared by the Shadow, Graven and Cursed effigies, and the Shadow Effigy radius fix (Task D, 505339) edits the same line; Graven must keep its own radius, 20 yd (its tooltip reuses the Shadow Effigy slow value $504761s1, -21 + 1 = -20, as a radius of 20 yd), not take the Shadow Effigy 30 yd. Recorded as a tool gap, not a no behaviour route: both halves are blocked only by a tool, T-c8-2 for the radius and T-b13-7 for the CC duration (G-25), as for the Cursed Effigy 706542 radius. No bracket entry is written: a radius_edge around a summon needs tool note T-c8-2 and stays reproduction only (M-55, G-29) until that tool exists. Cycle 11 author C: the duration half has a route, \"506635 behaviour_metric_delta graven_cc\" (aura_window with a treatment setup cast and the stated-change band, ADR 1121 provisional; closes T-b13-7): Lethargy Jinx 802065 stamped at 10000 ms without an effigy and 12500 +- 200 ms on a dummy in a real Graven Effigy field. Only the radius half (20 yd since fix 52720d2e3e) stays: the effigy stands 1.5 yd from the caster at an orientation-dependent angle (AscensionWitchDoctorSummons.cpp:195-197) and Nearby() adds the effigy's unread combat reach, so a bracket from the caster cannot hold 0.5 yd margins (design 1) and a wide inside/outside pair admits radii well outside the G-19 band (design 2); tool note T-c8-2.",
       "attempts": [
         {
           "agent": "cycle9/author-B13",
@@ -6990,6 +7003,10 @@
         {
           "agent": "cycle9/author-B13-fix",
           "report": ".agents/plans/witch-doctor-conformance/cycle9/author-B13.md#fix-round"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -7191,16 +7208,7 @@
       "578344 behaviour_metric_delta cost_spent"
     ],
     "kind": "claim",
-    "reason": "The not_measured label \"578344 effect_value e0 #0\" (an aura script hook sets the amount after CalcValue) is dropped; the same value is read by \"578344 aura_amount e0 #0\", which stays in the claim (guide 9.4, M-19). Cycle 10 B19: \"578344 behaviour_metric_delta cost_spent\" reads the mana a real cast spends (Cursed Effigy, 16% of the base mana: 239 without, 227 after a real Wuju cast, 1161 and 1024 left of 1400; the Greater Resourceful Wuju 800195 shape, exact in both final07 runs). The metric power is a state read promised by mana or cost words and this clause says \"resource costs\" (coverage.STATE_PROMISES power: `\\bcost` does not match \"costs\"), so the part reads data until the owner allows \"costs\" (tool note T-c9-B16-1).",
-    "no_behaviour_route": {
-      "reason": "The cost claim is read by \"578344 behaviour_metric_delta cost_spent\" (a real Wuju, a real Cursed Effigy cost of 239 without and 227 after), but the read is a state metric of mana (\"power\") whose promise words are mana and cost words: coverage.STATE_PROMISES power matches `\\bcost` and the clause says \"costs\", so the part stays data conformant until the owner allows \"costs\" (tool note T-c9-B16-1). The entry is the route; the promise regex is the only block. The sibling cost entry reads spell_power_cost, a readback.",
-      "attempts": [
-        {
-          "agent": "cycle10/author-B19",
-          "report": "cycle10/author-B19.md#no-route"
-        }
-      ]
-    }
+    "reason": "The not_measured label \"578344 effect_value e0 #0\" (an aura script hook sets the amount after CalcValue) is dropped; the same value is read by \"578344 aura_amount e0 #0\", which stays in the claim (guide 9.4, M-19). Cycle 10 B19: \"578344 behaviour_metric_delta cost_spent\" reads the mana a real cast spends (Cursed Effigy, 16% of the base mana: 239 without, 227 after a real Wuju cast, 1161 and 1024 left of 1400; the Greater Resourceful Wuju 800195 shape, exact in both final07 runs). Cycle 11 author C: the promise block is gone (coverage.STATE_PROMISES power matches \\bcosts? since ADR 1029, cycle 10 tool build), so cost_spent is the behaviour read of the claim; the no-route record is dropped."
   },
   {
     "spell": 578344,
@@ -7678,24 +7686,12 @@
       {
         "claim": "for $801677d",
         "labels": [
-          "801678 spell_duration 801677 #0"
+          "801678 spell_duration 801677 #0",
+          "801678 behaviour_metric_delta stun_lasts"
         ]
       }
     ],
-    "reason": "The stun landing is behaviour (the aura 801677 on the dummy at the burst, the uncast control). The 4000 ms of the stun keep their data label: the burst comes at about 2050 ms, so a stamped bracket of the stun end would measure the 2000 ms fuse and the 4000 ms stun together (6000 ms, 5% = 300 ms), not the stun alone; no existing kind reads the stun on its own (aura_window needs a talent contrast).",
-    "no_behaviour_route": {
-      "reason": "The 4000 ms of the stun ($801677d) have no isolated read: the burst comes at about 2050 ms, so a stamped bracket of the stun end measures the 2000 ms fuse and the 4000 ms stun together (6000 ms, 5% = 300 ms, not the stun alone, and no existing kind reads a stun duration on its own (aura_window needs a talent contrast). The claim stays data conformant (spell_duration 801677 #0).",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B16",
-          "report": "cycle9/author-B16.md"
-        },
-        {
-          "agent": "cycle9/fix-B16",
-          "report": "cycle9/author-B16.md#fix-round"
-        }
-      ]
-    },
+    "reason": "The stun landing is behaviour (the aura 801677 on the dummy at the burst, the uncast control). The 4000 ms of the stun keep their data label: the burst comes at about 2050 ms, so a stamped bracket of the stun end would measure the 2000 ms fuse and the 4000 ms stun together (6000 ms, 5% = 300 ms), not the stun alone; no existing kind reads the stun on its own (aura_window needs a talent contrast). Cycle 11 author C: \"801678 behaviour_metric_delta stun_lasts\" (aura_window) stamps the stun on the dummy from its first read with it to the first without it, so the 2000 ms fuse is not in the reading: 4000 +- 200 ms. The no-route record is dropped.",
     "labels": []
   },
   {
@@ -8193,18 +8189,11 @@
     "spell": 572336,
     "clause": "Hurl voodoo energy at an enemy, dealing ${$m1+0+$spn*.625+$RAP*0.11} Nature damage.",
     "labels": [
-      "572336 effect_value e0 #0"
+      "572336 effect_value e0 #0",
+      "572336 hit_mean"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The damage is judged by the generated hit_mean check, which loses most of its casts: the hit scenario sets no power for a cost that is a percentage of base mana (hit-scenarios.md, not modelled), so in both final03 runs 720 casts fail with SPELL_FAILED_NO_POWER and 183 and 187 of the 608 hits needed remain (insufficient_trials). The partial means, 503.6 and 493.7, sit about 10% below the computed 560.3, too few trials to call a defect. A single-hit metric_delta read is no route: the reference caster's spell crit chance is not zero, so one hit is a coin flip. Tool: the hit scenarios refilling percent mana before each cast (owner item since cycle 1). Player report #10554 (Malefic Wrath not learnable) lies outside every tooltip clause: lead L2.",
-      "attempts": [
-        {
-          "agent": "cycle6/author-B3-fix",
-          "report": ".agents/plans/witch-doctor-conformance/cycle6/author-B3.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 11 author C: the generated hit check \"572336 hit_mean\" now sets the base mana (1497, class file base_mana, hits.base_mana_steps) before each cast of this 11% base-mana rank, the owner item the cycle 6 tool gap waited for (the generated scenario conformance-witch-doctor-hit-572336-part-1 holds set_power 1497 before each of its casts), so its trials no longer fail with SPELL_FAILED_NO_POWER. The partial final03 means (503.6 and 493.7 against 560.3) are a lead to read at the next run, not a defect yet."
   },
   {
     "spell": 807056,
@@ -8233,16 +8222,7 @@
       "807076 behaviour_metric_delta items"
     ],
     "kind": "claim",
-    "reason": "Cycle 10 B19 (fix round): \"807076 behaviour_metric_delta items\" counts the Primal Loa Cocktails (item 230506) one real cast creates, the twin of the Brew Stew 807056 items entry. It reads 20 against the stated 21 in both final07 runs: Spell::DoCreateItem caps one Create Item at the item's stack size (SpellEffects.cpp:2716-2718), 20 in the realm database. Classification: recorded low-priority candidate defect (M-50, M-60), no fix without a stack size from a source. item_count is a state metric promised only by \"creat...\" words and the clause says \"Brews\", so the part reads data conformant until the owner adds \"brew\\w*\" (tool note T-c9-B16-12).",
-    "no_behaviour_route": {
-      "reason": "The creation claim is read by \"807076 behaviour_metric_delta items\" (a real Brew Cocktail cast creates the Primal Loa Cocktails, item 230506, the control reading none), but item_count is a state metric whose promise words are \"creat...\" and the clause says \"Brews\", so the part stays data conformant until the owner adds \"brew\\w*\" to coverage.STATE_PROMISES item_count (tool note T-c9-B16-12). The entry is the route; the promise regex is the only block. The read of 20 against 21 is the recorded M-50 candidate defect.",
-      "attempts": [
-        {
-          "agent": "cycle10/author-B19",
-          "report": "cycle10/author-B19.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Cycle 10 B19 (fix round): \"807076 behaviour_metric_delta items\" counts the Primal Loa Cocktails (item 230506) one real cast creates, the twin of the Brew Stew 807056 items entry. It reads 20 against the stated 21 in both final07 runs: Spell::DoCreateItem caps one Create Item at the item's stack size (SpellEffects.cpp:2716-2718), 20 in the realm database. Classification: recorded low-priority candidate defect (M-50, M-60), no fix without a stack size from a source; the entry stays an alert. Cycle 11 author C: the promise block is gone (item_count promises \"brew\\w*\" since ADR 1029), so the clause is unproven by that alert, not data; the no-route record is dropped."
   },
   {
     "spell": 807076,
@@ -8252,11 +8232,15 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The sentence says the Witch Doctor and allies get something to drink: the item 230506 (Primal Loa Cocktail) must be a drink an ally can use. Its item_template (spell, class, subclass) is in the realm world database only (no repository SQL names it: grep of data/sql finds a vendor row of rev_20261104_91 and no template), and no kind uses an item on an ally (use_item exists as a step for trigger_item kinds, with the item spell known in advance). Tool: a way to read the item template (spell id, drink aura) and a use_item arm on an ally with the mana read. Not a defect lead.",
+      "reason": "The sentence says the Witch Doctor and allies get something to drink: the item 230506 (Primal Loa Cocktail) must be a drink an ally can use. Its item_template (spell, class, subclass) is in the realm world database only (no repository SQL names it: grep of data/sql finds a vendor row of rev_20261104_91 and no template), and no kind uses an item on an ally (use_item exists as a step for trigger_item kinds, with the item spell known in advance). Tool: a way to read the item template (spell id, drink aura) and a use_item arm on an ally with the mana read. Not a defect lead. Cycle 11 author C: not built. Design 1, a metric_delta item_count read: it shows the item exists, not that it is a drink. Design 2, a trigger_item use on the caster: the item spell is unknown without the realm item_template row. Tool: an item template read (spell id) and a use_item step on a grouped ally with its mana read.",
       "attempts": [
         {
           "agent": "cycle10/author-B19",
           "report": "cycle10/author-B19.md#tool-gaps"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
@@ -8267,11 +8251,15 @@
     "labels": [],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The 15 minute loss after a logout needs a harness logout and login with an offline clock (the item duration is real time in the character item rows); no harness step logs a player out and back in with a chosen offline time. Tool note T-c9-B16-13 (carried from the 807056 Brew Stew twin).",
+      "reason": "The 15 minute loss after a logout needs a harness logout and login with an offline clock (the item duration is real time in the character item rows); no harness step logs a player out and back in with a chosen offline time. Tool note T-c9-B16-13 (carried from the 807056 Brew Stew twin). Cycle 11 author C: not built; no harness step logs a player out and back in with a chosen offline time (T-c9-B16-13).",
       "attempts": [
         {
           "agent": "cycle10/author-B19",
           "report": "cycle10/author-B19.md#tool-gaps"
+        },
+        {
+          "agent": "cycle11/author-c",
+          "report": "cycle11/author-c.md"
         }
       ]
     }
