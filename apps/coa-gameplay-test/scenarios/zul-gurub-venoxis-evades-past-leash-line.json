@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Venoxis evades once he is pulled past the tester's leash line",
+  "contract": [
+    "High Priest Venoxis (14507) must reset once he is pulled past the spot the tester marked (round 11,",
+    "2026-11-20: -11992.385, -1657.1074). The leash is a straight line through that mark, perpendicular to the",
+    "direction from his home (-12029.8, -1707.9) to the mark; the far side is outside his room, so the engine's",
+    "boundary check evades him. In a fresh Normal instance the hero stands 15 yards past the mark along that",
+    "direction, summons Venoxis next to them and pulls him; within two boundary checks (2.5 s each) he evades."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11983.49,
+      "y": -1645.03,
+      "z": 34.8,
+      "o": 0.0,
+      "ignore_access": true,
+      "label": "The hero stands 15 yards past the leash mark, away from his home"
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero stands on the ground by Venoxis's pool",
+      "actor": "hero",
+      "metric": "position_z",
+      "min": 28.0,
+      "max": 42.0
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14507,
+      "as": "venoxis",
+      "distance": 4
+    },
+    {
+      "action": "encounter_start",
+      "actor": "hero",
+      "boss_entry": 14507
+    },
+    {
+      "action": "attack",
+      "label": "Pull Venoxis",
+      "actor": "hero",
+      "target": "venoxis"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis fights",
+      "actor": "venoxis",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Venoxis evades past his leash line",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "evade",
+      "source_entry": 14507,
+      "min": 1,
+      "within_ms": 6000
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 #include "AscensionDungeonRelease.h"
 #include "DBCStores.h"
 #include "Group.h"
+#include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "Map.h"
 #include "ObjectMgr.h"
@@ -11,6 +12,7 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -22,6 +24,15 @@ struct PendingDungeonRelease : DataMap::Base { };
 
 std::mutex g_runStartsLock;
 std::unordered_map<uint32, std::pair<uint32, Position>> g_runStarts;
+
+struct ReleaseCheckpoint
+{
+    uint32 bossId;
+    Position position;
+};
+
+std::mutex g_checkpointsLock;
+std::unordered_map<uint32, std::vector<ReleaseCheckpoint>> g_checkpoints;
 
 bool HasStart(lfg::LFGDungeonData const* dungeon, uint32 mapId)
 {
@@ -38,6 +49,25 @@ void Nearest(Player* player, float x, float y, float z, float o, float& nearestD
     }
 }
 
+bool CheckpointStart(Player* player, Position& start)
+{
+    InstanceScript* instance = player->GetInstanceScript();
+    if (!instance)
+        return false;
+
+    std::lock_guard<std::mutex> guard(g_checkpointsLock);
+    auto itr = g_checkpoints.find(player->GetMapId());
+    if (itr == g_checkpoints.end())
+        return false;
+
+    float nearestDistance = -1.0f;
+    for (ReleaseCheckpoint const& checkpoint : itr->second)
+        if (instance->GetBossState(checkpoint.bossId) == DONE)
+            Nearest(player, checkpoint.position.GetPositionX(), checkpoint.position.GetPositionY(),
+                checkpoint.position.GetPositionZ(), checkpoint.position.GetOrientation(), nearestDistance, start);
+    return nearestDistance >= 0.0f;
+}
+
 bool InstanceStart(Player* player, Position& start)
 {
     Map* map = player->GetMap();
@@ -51,6 +81,9 @@ bool InstanceStart(Player* player, Position& start)
             return true;
         }
     }
+
+    if (CheckpointStart(player, start))
+        return true;
 
     if (Group* group = player->GetGroup(); group && group->isLFGGroup())
     {
@@ -145,6 +178,12 @@ void CoASetDungeonReleaseStart(Map* map, Position const& start)
 {
     std::lock_guard<std::mutex> guard(g_runStartsLock);
     g_runStarts[map->GetInstanceId()] = { map->GetId(), start };
+}
+
+void CoAAddDungeonReleaseCheckpoint(uint32 mapId, uint32 bossId, Position const& position)
+{
+    std::lock_guard<std::mutex> guard(g_checkpointsLock);
+    g_checkpoints[mapId].push_back({ bossId, position });
 }
 
 void AddSC_AscensionDungeonRelease()

@@ -1535,7 +1535,8 @@ client rendering.
 with a base amount of 1000 and requires `spell`; `periodic: true` selects the native HoT path.
 
 `stealth_detection` reads native general stealth detection. `can_detect` requires `target` and invokes
-the observer's native `CanSeeOrDetect` check; neither metric covers client rendering.
+the observer's native `CanSeeOrDetect` check; `pet: true` makes the actor's pet the observer and `owned_entry` the
+actor's creature of that entry. Neither metric covers client rendering.
 
 `school_prohibited` reads a creature's native school lockout (`Creature::IsSpellProhibited`) for `school_mask`
 (1-127): 1 while an interrupt keeps that school locked, 0 otherwise.

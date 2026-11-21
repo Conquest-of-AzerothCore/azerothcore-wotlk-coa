@@ -33,6 +33,7 @@
 #include "ScriptedCreature.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+#include "zg_coa_leash.h"
 
 using namespace coa_zg;
 
@@ -65,7 +66,10 @@ namespace
 
     struct boss_grilek_coa : public BossAI
     {
-        boss_grilek_coa(Creature* creature) : BossAI(creature, DATA_EDGE_OF_MADNESS) { }
+        boss_grilek_coa(Creature* creature) : BossAI(creature, DATA_EDGE_OF_MADNESS)
+        {
+            SetBoundary(coa_zg::LeashFor(DATA_EDGE_OF_MADNESS));
+        }
 
         void Reset() override
         {
