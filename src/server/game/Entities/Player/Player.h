@@ -2180,6 +2180,22 @@ public:
         _scriptedPrivateOwner = owner.IsEmpty() ? GetGUID() : owner;
         _scriptedPrivateMembers = members;
         _scriptedPrivateMembers.insert(GetGUID());
+        _scriptedPrivateObserver = false;
+    }
+    // A game master who follows a player into an existing scripted private instance (.appear). The map
+    // admits the observer by this exact instance; the observer never joins the members its script tracks.
+    void PrepareScriptedPrivateObserver(uint32 mapId, uint32 instanceId, WorldLocation const& returnLocation,
+        ObjectGuid owner, bool databaseSpawns)
+    {
+        PrepareScriptedPrivateInstance(mapId, returnLocation, owner, {}, databaseSpawns);
+        _scriptedPrivateInstanceId = instanceId;
+        _scriptedPrivateObserver = true;
+    }
+    bool IsScriptedPrivateObserver() const { return _scriptedPrivateObserver; }
+    bool IsScriptedPrivateObserverOf(uint32 mapId, uint32 instanceId) const
+    {
+        return _scriptedPrivateObserver && instanceId &&
+            _scriptedPrivateMapId == mapId && _scriptedPrivateInstanceId == instanceId;
     }
     void SetScriptedPrivateInstanceId(uint32 id) { _scriptedPrivateInstanceId = id; }
     bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
@@ -2195,6 +2211,7 @@ public:
         _scriptedPrivateInstanceId = 0;
         _scriptedPrivateOwner.Clear();
         _scriptedPrivateMembers.clear();
+        _scriptedPrivateObserver = false;
     }
     [[nodiscard]] bool IsBeingTeleported() const { return mSemaphoreTeleport_Near != 0 || mSemaphoreTeleport_Far != 0; }
     [[nodiscard]] bool IsBeingTeleportedNear() const { return mSemaphoreTeleport_Near != 0; }
@@ -2927,6 +2944,7 @@ protected:
     Difficulty _scriptedPrivateReturnRaidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
     ObjectGuid _scriptedPrivateOwner;
     std::set<ObjectGuid> _scriptedPrivateMembers;
+    bool _scriptedPrivateObserver = false;
     void _SaveInstanceTimeRestrictions(CharacterDatabaseTransaction trans);
     void _SavePlayerSettings(CharacterDatabaseTransaction trans);
     void UpdateAdditionalSaves(uint32 p_time);

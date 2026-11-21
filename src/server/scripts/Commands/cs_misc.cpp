@@ -785,7 +785,34 @@ public:
             }
 
             Map* map = targetPlayer->GetMap();
-            if (map->IsBattlegroundOrArena())
+            bool privateObserver = false;
+            if (map->IsScriptedPrivateInstance())
+            {
+                // A scripted private copy (Manastorm) admits only its own members. A game master in GM mode
+                // follows the player into that exact copy as an observer and never joins those members.
+                if (!_player->IsGameMaster())
+                {
+                    handler->SendErrorMessage(LANG_CANNOT_GO_TO_INST_GM, nameLink);
+                    return false;
+                }
+
+                if (_player->GetScriptedPrivateMapId() != MAPID_INVALID && !_player->IsScriptedPrivateObserver())
+                {
+                    handler->SendErrorMessage("Leave your own private instance before you appear in another one.", false);
+                    return false;
+                }
+
+                if (_player->GetMap() != map)
+                {
+                    // Observing another copy keeps the location the first observed copy saved for a logout.
+                    WorldLocation const returnLocation = _player->IsScriptedPrivateObserver()
+                        ? _player->GetScriptedPrivateReturn() : WorldLocation(_player->GetMapId(), *_player);
+                    _player->PrepareScriptedPrivateObserver(map->GetId(), map->GetInstanceId(), returnLocation,
+                        map->GetScriptedPrivateOwner(), map->LoadsScriptedPrivateDatabaseSpawns());
+                    privateObserver = true;
+                }
+            }
+            else if (map->IsBattlegroundOrArena())
             {
                 // only allow if gm mode is on
                 if (!_player->IsGameMaster())
@@ -880,13 +907,18 @@ public:
 
                 transport->AddPassenger(_player, false);
 
-                if (_player->TeleportTo(transport->GetMapId(), worldX, worldY, worldZ + 0.25f, worldO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_GM_MODE, targetPlayer))
+                if (_player->TeleportTo(transport->GetMapId(), worldX, worldY, worldZ + 0.25f, worldO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_GM_MODE, targetPlayer, privateObserver))
                     _player->SetPhaseMask(targetPlayer->GetPhaseMask() | 1, false);
+                else if (privateObserver)
+                    _player->ClearScriptedPrivateInstance();
             }
             else
             {
-                if (_player->TeleportTo(targetPlayer->GetMapId(), targetPlayer->GetPositionX(), targetPlayer->GetPositionY(), targetPlayer->GetPositionZ() + 0.25f, _player->GetOrientation(), TELE_TO_GM_MODE, targetPlayer))
+                // A private copy shares its map id with the copy the game master may stand in: force the far transfer.
+                if (_player->TeleportTo(targetPlayer->GetMapId(), targetPlayer->GetPositionX(), targetPlayer->GetPositionY(), targetPlayer->GetPositionZ() + 0.25f, _player->GetOrientation(), TELE_TO_GM_MODE, targetPlayer, privateObserver))
                     _player->SetPhaseMask(targetPlayer->GetPhaseMask() | 1, false);
+                else if (privateObserver)
+                    _player->ClearScriptedPrivateInstance();
             }
         }
         else
