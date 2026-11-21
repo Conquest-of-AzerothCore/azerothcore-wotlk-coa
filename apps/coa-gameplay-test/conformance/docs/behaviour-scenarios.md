@@ -814,6 +814,9 @@ that many yd from the caster, for a stealthed subject that a creature sees only 
 second entry of the same spell keeps its labels apart. An effect with `"lands": true` is a landing control: it is read
 present after the same casts under the immunity (no `words` match with the quote is needed), removed with `set_aura`,
 and has no post-expiry control arm. Both are absent by default and change no other entry.
+`expired_extra_ms` (ADR 1114, provisional) waits that much longer before the expired reading, for a carrier `aura`
+that outlives the spell's duration by a stated linger (Big Bad Voodoo 802719 `field`: the spirit's field 802718 carries
+a 2200 ms duration, 2500 ms); absent by default.
 
 ### Threat-slope scenarios (`behaviour_threat_slope`, `kind: "threat_slope"`)
 
@@ -1191,6 +1194,11 @@ A rate entry (non-swing, the caster's own casts at its own dummy) may set `strea
 rate kinds do (ADR 1048, provisional): each stream makes ceil(`trials` / `streams`) trials per arm and part, every read
 carries its stream suffix, and the judge reads the isolation bounds and then sums the reads of the streams per label
 (`summed_labels`), so the pooled per-part rates and their judge are unchanged.
+`rate: "landed"` (ADR 1116, provisional) counts the observed spell's damage hits over its `spell_go_count` (every
+cast packet, a miss included), the share of casts that land; the `fixture` may set `spell_hit_rating` (0 removes the
+reference character's rating, which hides every miss). Staff of the Coven 807905 `hit_landed`: 96% to 100% against a
+same-level dummy. `warmup_power` (ADR 1116) sets the power before every warmup cast (Eye of Kimbul 503714
+`eye_damage`: five Hexfires in each arm).
 
 `kind: "detection"` (ADR 0197) reads `can_detect` (`Unit::CanSeeOrDetect` of the caster for a dummy `distance` yd
 away) with the dummy shown, hidden by each of `hide_auras`, with `reveal_aura` set on it by the caster, and with it
@@ -1454,6 +1462,9 @@ and reads the logs of `strike_spell` on the ally. `transfer_spell` with each arm
 absorbed amount of that spell the caster takes from the striker after each strike: one log adding up to
 floor(`transfer_pct`% of the strike's damage plus absorbed amount), none at 0. Gaze of the Black Knight 802138
 `gaze_transfer`: 25% of a party member's damage moved to the caster.
+`struck: "ally"` also takes the `damage_ratio` judge (ADR 1115, provisional; no caster health or `health_loss`): the
+non-critical strike logs on the ally are judged as a hit ratio (Big Bad Voodoo 802719 `ally_taken` 0.80, One Armed Waltz
+705909 `waltz_taken` 0.75, both under one real cast in the treatment arm while the caster is immune).
 
 ### Threat-redirect scenarios (`behaviour_threat_redirect`, `kind: "threat_redirect"`)
 

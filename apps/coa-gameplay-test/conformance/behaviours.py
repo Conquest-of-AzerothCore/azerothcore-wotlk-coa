@@ -5333,6 +5333,7 @@ class ImmunitySpec:
     caster_auras: tuple[int, ...] = ()
     dummy_distance: float | None = None
     variant: str | None = None
+    expired_extra_ms: int = 0
 
 
 def immunity_label(spec: ImmunitySpec, subject: int, moment: str) -> str:
@@ -5390,9 +5391,13 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
                          f'only with a permanent one, not {duration_ms} ms with remove_control {spec.remove_control}')
     with_arm_ms = len(spec.effects) * IMMUNITY_CASTS * IMMUNITY_CAST_WAIT_MS
     expired_label = immunity_label(spec, spec.spell, 'expired')
+    if spec.expired_extra_ms < 0 or (spec.expired_extra_ms and (spec.remove_control or spec.aura is None)):
+        raise ValueError(f'{spec.spell} immunity expired_extra_ms waits a non-negative time past the expiry of a '
+                         f'carrier aura other than the spell, which an expiry ends')
     end_steps = ([{'action': 'set_aura', 'actor': subject, 'spell': spec.spell, 'stacks': 0},
                   {'action': 'wait', 'ms': CAST_MARGIN_MS}] if spec.remove_control else
-                 [{'action': 'wait', 'ms': max(CAST_MARGIN_MS, duration_ms + CAST_MARGIN_MS - with_arm_ms)}])
+                 [{'action': 'wait', 'ms': max(CAST_MARGIN_MS, duration_ms + CAST_MARGIN_MS - with_arm_ms)
+                   + spec.expired_extra_ms}])
     steps += end_steps + [measurement(expired_label, subject, 'aura', spell=carrier)]
     for effect in spec.effects:
         if effect.lands:
@@ -5420,6 +5425,9 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
     if spec.dummy_distance is not None:
         scenario['contract'] += (f' The dummy stands {spec.dummy_distance:g} yd from the caster, inside its combat '
                                  f'reach, so it still sees a stealthed target.')
+    if spec.expired_extra_ms:
+        scenario['contract'] += (f' The expired reading waits {spec.expired_extra_ms} ms past the expiry of '
+                                 f'{spec.spell}, the stated linger of the carrier aura {spec.aura}.')
     rule = prose_rule(entry.quote, spec.spell)
     expectations = [Expectation(immunity_label(spec, spec.spell, 'cast'), BEHAVIOUR_IMMUNITY, spec.spell, spec.spell,
                                 None, str(NO_CAST_FAILURE), rule, {'kind': 'immunity', 'quote': entry.quote}),
@@ -5447,7 +5455,7 @@ def immunity_spec(entry: dict) -> ImmunitySpec:
                               for effect in entry['effects']),
                         entry.get('target', CASTER), entry.get('remove_control', False), entry.get('aura'),
                         tuple(int(aura) for aura in entry.get('caster_auras', ())), entry.get('dummy_distance'),
-                        entry.get('variant'))
+                        entry.get('variant'), int(entry.get('expired_extra_ms', 0)))
 
 
 SPELL_EFFECT_THREAT = 63
@@ -6359,6 +6367,7 @@ class HitRatioSpec:
     versus: hit_ratio_versus.Versus | None = None
     caster_entry: int | None = None
     owned_auras: tuple[tuple[int, int, int], ...] = ()
+    warmup_power: int | None = None
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6383,8 +6392,9 @@ ENERGIZE_METRIC = 'spell_energize_total'
 SWING_METRIC = 'melee_damage_total'
 SWING_HANDS = frozenset({MAIN_HAND, 1})
 SWING_SETTLE_MS = 100
-HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power'})
-HIT_RATIO_RATES = ('critical', 'proc')
+HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power', 'spell_hit_rating'})
+HIT_RATIO_RATES = ('critical', 'proc', 'landed')
+LANDED_COUNT_METRIC = 'spell_go_count'
 
 
 def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
@@ -6507,17 +6517,21 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
         fields['caster_entry'] = spec.caster_entry
     total_metric, count_metric = spec.metric, HIT_RATIO_METRICS[spec.metric]
     event_fields = fields
+    count_fields = fields
     if spec.rate:
         total_metric = count_metric
         fields = {key: value for key, value in fields.items() if key != 'critical'}
         event_fields = ({**fields, 'critical': True} if spec.rate == 'critical'
-                        else {**fields, 'spell': spec.rate_spell})
+                        else fields if spec.rate == 'landed' else {**fields, 'spell': spec.rate_spell})
+        count_fields = fields
+        if spec.rate == 'landed':
+            count_metric, count_fields = LANDED_COUNT_METRIC, {'spell': spec.observe_spell}
 
     def reads(labels: tuple[str, str]) -> list[dict]:
         cleared = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.observe_spell, 'stacks': 0,
                      'target': spec.target, 'caster': spec.caster}] if spec.clear_observed else [])
         return cleared + [measurement(labels[0], spec.caster, total_metric, **event_fields),
-                          measurement(labels[1], spec.caster, count_metric, **fields)]
+                          measurement(labels[1], spec.caster, count_metric, **count_fields)]
 
     steps = []
     healed = []
@@ -6567,7 +6581,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
             for spell in spec.warmup:
-                steps += healed + hit_ratio_cast(records, spell, spec.caster, spec.target)
+                steps += healed + hit_ratio_cast(records, spell, spec.caster, spec.target, spec.warmup_power)
         steps += reads(marks[0])
         for trial in range(1, spec.trials + 1):
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
@@ -6649,6 +6663,12 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                       or (spec.rate == 'proc') != (spec.rate_spell is not None) or spec.critical is not None):
         raise ValueError(f'{spec.spell} hit_ratio rate {spec.rate!r} is one of {HIT_RATIO_RATES}, states '
                          f'expected_points, no expected_token or critical filter, and a rate_spell exactly for proc')
+    if spec.rate == 'landed' and (spec.metric != 'spell_damage_total' or spec.swing_hand is not None
+                                  or spec.cast_spell is not None or spec.caster != CASTER):
+        raise ValueError(f'{spec.spell} hit_ratio rate landed reads the damage hits of the observed spell cast by '
+                         f'the caster over its cast count, with no swings or other cast spell')
+    if spec.warmup_power is not None and (not spec.warmup or spec.warmup_power < 1):
+        raise ValueError(f'{spec.spell} hit_ratio warmup_power sets a positive power before each warmup cast')
     if (spec.expected_token or spec.scale_auras) and spec.swing_hand is None:
         raise ValueError(f'{spec.spell} hit_ratio judges a flat expected_token on swings only')
     if spec.scale_auras and not spec.expected_token:
@@ -6811,6 +6831,13 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         model.update({'expected_delta': float(spec.expected_points), 'rate': spec.rate})
         scenario['contract'] += (f'; the arms\' {spec.rate} rate in percent per {HIT_RATIO_WORDS[spec.metric]} '
                                  f'event must differ by the stated {spec.expected_points:g} points')
+        if spec.rate == 'landed':
+            scenario['contract'] = scenario['contract'].replace(
+                f'per {HIT_RATIO_WORDS[spec.metric]} event', f'per cast of {spec.observe_spell} (its damage hits over '
+                f'its {LANDED_COUNT_METRIC})')
+    if spec.warmup_power is not None:
+        scenario['contract'] += (f'; the power is set to {spec.warmup_power} before every warmup cast '
+                                 f'{list(spec.warmup)}')
     if spec.target_auras:
         scenario['contract'] += (f'; the fixture auras {list(spec.target_auras)} are set on the {spec.target} by the '
                                  f'caster before every observed cast')
@@ -6932,7 +6959,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         (control_excluded.parse(entry.get(control_excluded.NAME)) or {}).get('residual'),
                         hit_ratio_versus.parse(entry.get(hit_ratio_versus.NAME)), entry.get('caster_entry'),
                         tuple((int(spell), int(stacks), int(owned))
-                              for spell, stacks, owned in entry.get('owned_auras', ())))
+                              for spell, stacks, owned in entry.get('owned_auras', ())),
+                        entry.get('warmup_power'))
 
 
 CRIT_RATE_TRIALS = 300
@@ -7371,10 +7399,10 @@ def taken_striker_validate(spec: TakenHitSpec):
 def taken_hit_struck_validate(spec: TakenHitSpec):
     if spec.struck not in TAKEN_HIT_STRUCK:
         raise ValueError(f'{spec.spell} taken_hit struck {spec.struck!r} is not one of {TAKEN_HIT_STRUCK}')
-    if spec.struck == ALLY and (spec.judge != 'absorb' or spec.striker_race or spec.debt_spell or
-                                spec.returned_spell or spec.caster_health_pct is not None):
-        raise ValueError(f'{spec.spell} taken_hit strikes an ally only for an absorb judge of a creature striker, '
-                         f'with no debt, returned hit or caster health')
+    if spec.struck == ALLY and (spec.judge not in ('absorb', 'damage_ratio') or spec.striker_race or spec.debt_spell
+                                or spec.returned_spell or spec.caster_health_pct is not None or spec.health_loss):
+        raise ValueError(f'{spec.spell} taken_hit strikes an ally only for an absorb or damage_ratio judge of a '
+                         f'creature striker, with no debt, returned hit, caster health or health loss')
     transferring = [arm.name for arm in spec.arms if arm.transfer_pct is not None]
     if bool(spec.transfer_spell) != bool(transferring) or (transferring and spec.struck != ALLY) or any(
             not 0 <= arm.transfer_pct <= 100 for arm in spec.arms if arm.transfer_pct is not None):
