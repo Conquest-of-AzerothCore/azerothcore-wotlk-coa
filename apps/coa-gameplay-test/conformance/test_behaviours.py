@@ -3968,6 +3968,48 @@ class HitRatioArmLeadTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, {**entry, 'treatment': treatment})
 
 
+def jinx_rate_entry(**changes) -> dict:
+    return {'spell': 300663, 'kind': 'hit_ratio', 'name': 'Will of the Serpent (streams)', 'label_suffix': 'jinx',
+            'quote': 'now increases your critical strike chance against the target by $s1%', 'expected': 1.0,
+            'observe_spell': 573026, 'control': {'casts': [802065]},
+            'treatment': {'casts': [802065], 'learn': [300663]}, 'rate': 'critical', 'expected_points': 10,
+            'trials': 10, 'parts': 4, 'cast_power': 1400, **changes}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioStreamTests(unittest.TestCase):
+    ISOLATION = {'reach_yd': 0, 'source': 'seeded: single-target casts at the own dummy'}
+
+    def test_streams_split_the_trials_and_every_read_carries_its_stream(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, jinx_rate_entry(streams=4, isolation=self.ISOLATION))
+        run.validate(scenario)
+        model = expectation.model
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'caster1', 'caster2', 'caster3'])
+        self.assertEqual(model['trials'], 12)
+        self.assertEqual(model['stream_suffixes'], [' s0', ' s1', ' s2', ' s3'])
+        labels = {step['label'] for step in scenario['steps'] if step['action'] == 'assert'}
+        for arm in model['reads'].values():
+            for pair in arm:
+                for label in pair:
+                    self.assertNotIn(label, labels)
+                    self.assertTrue(all(f'{label}{suffix}' in labels for suffix in model['stream_suffixes']))
+        casts = [step['actor'] for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == 573026]
+        self.assertEqual(sorted(set(casts)), ['caster', 'caster1', 'caster2', 'caster3'])
+        self.assertEqual(len(casts), 2 * 3 * 4)
+        self.assertTrue([item for item in model['isolation'] if item['status'] == 'alert'])
+
+    def test_a_single_stream_rate_entry_is_unchanged(self):
+        plain, _ = behaviour_scenario(CLASS_FILE, jinx_rate_entry())
+        self.assertEqual([player['id'] for player in plain['players']], ['caster'])
+        self.assertNotIn('location', plain)
+
+    def test_streams_need_a_rate_and_an_isolation(self):
+        for entry in (jinx_rate_entry(streams=4), jinx_rate_entry(streams=4, isolation=self.ISOLATION, rate='',
+                                                                  expected_points=None, expected=1.1)):
+            with self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, entry)
+
+
 class HitRatioScenarioTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_pious_sweep_entry_reads_both_arms_after_every_trial(self):

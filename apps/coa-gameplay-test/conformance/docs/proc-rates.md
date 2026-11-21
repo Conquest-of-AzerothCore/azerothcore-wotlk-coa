@@ -443,3 +443,15 @@ blocked (state 5) swings since the engage must be 0: these asserts come before t
 source fails the part instead of being judged. Trials per attempt are the striker count; `trials_per_attempt`,
 `trial_readings` and an internal cooldown are refused. The label is `<aura> proc_rate avoided` and the key ends in
 `avoided`; an avoided entry does not rename a sibling entry of the same aura.
+
+### Caster streams (ADR 1048, provisional)
+
+A cast-trigger entry at the dummy may set `streams` (default 1) with an `isolation` (`reach_yd`, `source`, optional
+`wards`), as the chance rate kinds do (`docs/kinds/flat_chance_rate.md`): stream k is `casterk` and `dummyk` on one
+flat 100 yd line at the Shimmering Flats, every step of the part copied per stream and every read suffixed with its
+stream (` s0` to ` sN-1`). The plan, its parts and `scheduled_attempts` are unchanged; each stream makes ceil(attempts
+per part / streams) attempts and ceil(baseline attempts / streams) baseline attempts, and the model's `part_attempts`
+and baseline `attempts` count all streams. The judge is unchanged: it first reads the isolation bounds (a cross-stream
+damage read alerts, a placement breach is `unmeasured`), then sums every listed read over the streams per part
+(`summed_labels`, `compare.stream_summed`). An entry with charges, extra dummies, minion events, excluded trial spells
+or another trigger is refused with streams.

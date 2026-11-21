@@ -257,7 +257,7 @@ def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[d
     spell, target = trigger_spell(entry), trigger_target(entry)
     facts = facts_of(records_of(class_file), spell)
     events = event_steps(entry)[0]
-    casts = [aimed(step, target) for _ in range(baseline_attempts(plan.chance_pct))
+    casts = [aimed(step, target) for _ in range(stream_baseline_attempts(entry, plan.chance_pct))
              for step in attempt_power_steps(class_file, entry, facts)
              + cast_steps(facts, spell, target, plan.attempt_ms, 1, attempt_fixtures(entry))]
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + casts
@@ -901,9 +901,82 @@ def added_trial_steps(entry: dict) -> list[dict]:
     return [spell_count_step(label, term['metric'], term['spell']) for label, term in terms.items()]
 
 
+STREAMS_FIELD = 'streams'
+
+
+def proc_isolation(entry: dict):
+    from kinds.stack_chance_rate import isolation_of
+    isolation = isolation_of({**entry, 'spell': entry['aura']}, 'procs', proc_dummy_distance(entry))
+    if isolation.streams > 1 and (entry['trigger']['action'] != CAST or trigger_target(entry) != TARGET
+                                  or counts_charges(entry) or entry.get('extra_dummies') or entry.get('event_actor')
+                                  or entry.get('trial_excluded_spells')):
+        raise ValueError(f'Proc {entry["aura"]} runs {isolation.streams} streams, which needs a cast trigger at the '
+                         f'dummy, no charges, extra dummies, minion events or excluded trial spells')
+    return isolation
+
+
+def stream_count(entry: dict) -> int:
+    return proc_isolation(entry).streams
+
+
+def stream_baseline_attempts(entry: dict, chance_pct: float) -> int:
+    return math.ceil(baseline_attempts(chance_pct) / stream_count(entry))
+
+
+def streamed_steps(steps: list[dict], streams: list) -> list[dict]:
+    from kinds.stack_chance_rate import on_stream
+    expanded, run = [], []
+    for step in steps + [None]:
+        if step is not None and step['action'] != 'wait':
+            run.append(step)
+            continue
+        for stream in streams:
+            for item in run:
+                moved = on_stream(item, stream)
+                if moved['action'] == 'assert':
+                    moved['label'] = f'{moved["label"]}{stream.suffix}'
+                expanded.append(moved)
+        run = []
+        if step is not None:
+            expanded.append(step)
+    return expanded
+
+
+def stream_proc_scenario(class_file: dict, entry: dict, scenario: dict, model: dict,
+                         steps: list[dict]) -> dict:
+    from kinds.stack_chance_rate import (crossing_steps, isolation_bounds, placement_steps, stream_base_steps,
+                                         stream_scenario, streams_of, triggered_spells)
+    isolation = proc_isolation(entry)
+    streams = streams_of(isolation)
+    aura = entry['aura']
+
+    def mark(text: str) -> str:
+        return f'{entry_proc_label(class_file, entry)} {text}'
+
+    spell = trigger_spell(entry)
+    damage = tuple(dict.fromkeys((spell, *triggered_spells(records_of(class_file), spell),
+                                  *trigger_spells(entry)[1:])))
+    body = streamed_steps(steps, streams)
+    isolation_steps = placement_steps(isolation, streams, mark)
+    crossing = crossing_steps(isolation, streams, mark, damage, ())
+    scenario['steps'] = stream_base_steps(class_file, streams) + isolation_steps + body + crossing
+    scenario = stream_scenario(scenario, class_file, isolation, streams)
+    model[STREAMS_FIELD] = isolation.streams
+    model['stream_suffixes'] = [stream.suffix for stream in streams]
+    model['summed_labels'] = list(dict.fromkeys(step['label'] for step in steps if step['action'] == 'assert'))
+    model['isolation'] = isolation_bounds(isolation_steps + crossing)
+    scenario['contract'] += (f'; every stream makes {model["part_attempts"] // isolation.streams} attempts of this '
+                             f'part, and the reads of the {isolation.streams} streams are summed per label before '
+                             f'the unchanged proc judge (aura {aura})')
+    return scenario
+
+
 def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                   attempts: int | None = None) -> tuple[dict, list[Expectation]]:
     plan = proc_plan(class_file, entry, attempts)
+    streams = stream_count(entry)
+    if streams > 1:
+        plan = replace(plan, per_part=math.ceil(plan.per_part / streams))
     if entry['trigger']['action'] == CAST:
         class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
     if not 0 <= part < plan.parts:
@@ -960,7 +1033,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         if entry.get(DUMMY_DISTANCE_FIELD) is not None:
             scenario['contract'] += f' The dummy stands {proc_dummy_distance(entry):g} yd from the caster.'
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
-             'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms,
+             'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part * streams,
+             'attempt_ms': plan.attempt_ms,
              'trigger': dict(entry['trigger']), 'proc_spell': entry['proc_spell'],
              **chance_model(entry), **({'chance_modifiers': [list(pair) for pair in chance_modifiers(entry)]}
                                         if chance_modifiers(entry) else {}), **modifier_tooltips(class_file, entry),
@@ -982,7 +1056,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         if grants:
             model['grants'] = grants
     if baseline:
-        model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct)}
+        model['baseline'] = {**baseline_labels(aura),
+                             'attempts': stream_baseline_attempts(entry, plan.chance_pct) * streams}
         if cast_baseline and trigger_spells(entry):
             model['baseline']['added_trials'] = {
                 added_trials_label(aura, term): baseline_trigger_label(aura, term['spell'])
@@ -1036,11 +1111,13 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     label = entry_proc_label(class_file, entry)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{rule}{handler_note(entry)}', model)
-    baseline_ms = baseline_attempts(plan.chance_pct) * plan.attempt_ms + DRAIN_MS if baseline else 0
+    baseline_ms = stream_baseline_attempts(entry, plan.chance_pct) * plan.attempt_ms + DRAIN_MS if baseline else 0
     if avoided:
         from proc_avoided import baseline_ms as avoided_baseline_ms
         baseline_ms = avoided_baseline_ms(entry, plan, part)
     baseline_ms += control_weapon_ms(class_file, entry, plan.chance_pct) if control else 0
+    if streams > 1:
+        scenario = stream_proc_scenario(class_file, entry, scenario, model, steps)
     return (timed(scenario, SETTLE_MS + baseline_ms + plan.per_part * plan.attempt_ms + DRAIN_MS),
             [expectation] + energize_expectations(entry, part, plan.parts))
 

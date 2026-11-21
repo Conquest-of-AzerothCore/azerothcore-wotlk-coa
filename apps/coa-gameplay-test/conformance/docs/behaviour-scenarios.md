@@ -1182,6 +1182,10 @@ trials of every part and needs all of them to have run. `rate: "critical"` (crit
 spell) or `rate: "proc"` (hits of `rate_spell` over them) with `expected_points` judges the arms' difference of rates in
 percent points inside the larger of 5% of it and 2 points. Scourge-Defense Training 520608's crit chance pools 76 parts
 of 166 Argent Blades per arm (`argent_blade_crit_rate`), the pooled proof after the 300-cast `crit_rate` step (ADR 0173).
+A rate entry (non-swing, the caster's own casts at its own dummy) may set `streams` with an `isolation`, as the chance
+rate kinds do (ADR 1048, provisional): each stream makes ceil(`trials` / `streams`) trials per arm and part, every read
+carries its stream suffix, and the judge reads the isolation bounds and then sums the reads of the streams per label
+(`summed_labels`), so the pooled per-part rates and their judge are unchanged.
 
 `kind: "detection"` (ADR 0197) reads `can_detect` (`Unit::CanSeeOrDetect` of the caster for a dummy `distance` yd
 away) with the dummy shown, hidden by each of `hide_auras`, with `reveal_aura` set on it by the caster, and with it

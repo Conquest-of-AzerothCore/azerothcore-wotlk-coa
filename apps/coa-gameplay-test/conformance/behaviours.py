@@ -6850,6 +6850,53 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     return scenario, [expectation]
 
 
+def hit_ratio_streamed(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    from kinds.stack_chance_rate import (crossing_steps, isolation_bounds, isolation_of, placement_steps,
+                                         stream_base_steps, stream_scenario, streams_of, triggered_spells)
+    from procs import streamed_steps
+    spec = hit_ratio_spec(entry)
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    cast = spec.cast_spell or spec.observe_spell
+    distance = dummy_placement(records, spec.spell, spec.dummy_distance, cast)
+    isolation = isolation_of(entry, 'hit_ratio', distance)
+    if not spec.rate or spec.swing_hand is not None or spec.caster != CASTER or spec.target != TARGET \
+            or spec.ally_distance is not None or spec.versus is not None or spec.caster_entry is not None \
+            or spec.owned_auras or spec.target_entry is not None or spec.level is not None:
+        raise ValueError(f'{spec.spell} hit_ratio streams read a rate of the caster\'s own casts at its own dummy: '
+                         f'no swings, ally, versus, owned creature, target entry or level')
+    streams = streams_of(isolation)
+    count = isolation.streams
+    scenario, (expectation,) = hit_ratio_scenario(class_file, replace(spec, trials=math.ceil(spec.trials / count)))
+    armed = armed_for(class_file, records, cast)
+    base = base_steps(armed)
+    if scenario['steps'][:len(base)] != base:
+        raise ValueError(f'{spec.spell} hit_ratio streams expect the scenario to open with the base steps')
+    body = scenario['steps'][len(base):]
+    player = scenario['players'][0]
+
+    def mark(text: str) -> str:
+        return f'{hit_ratio_label(spec.spell, spec.label_suffix)} {text}'
+
+    damage = tuple(dict.fromkeys(spell for used in (cast, spec.observe_spell, *spec.control.casts,
+                                                    *spec.treatment.casts)
+                                 for spell in (used, *triggered_spells(records, used))))
+    isolation_steps = placement_steps(isolation, streams, mark)
+    crossing = crossing_steps(isolation, streams, mark, damage, ())
+    scenario['steps'] = stream_base_steps(armed, streams) + isolation_steps + streamed_steps(body, streams) + crossing
+    scenario = stream_scenario(scenario, armed, isolation, streams)
+    scenario['players'] = [{**player, 'id': stream.caster} for stream in streams]
+    per_stream = math.ceil(spec.trials / count)
+    scenario['contract'] += (f'; each stream makes {per_stream} trials per arm, {per_stream * count} in all, and the '
+                             f'reads of the streams are summed per label before the unchanged hit ratio judge')
+    model = expectation.model
+    model.update(trials=per_stream * count, minimum_hits=max(1, int(per_stream * count * HIT_RATIO_MINIMUM_SHARE)),
+                 trial_limit=model['trial_limit'] * count, streams=count,
+                 stream_suffixes=[stream.suffix for stream in streams],
+                 summed_labels=list(dict.fromkeys(step['label'] for step in body if step['action'] == 'assert')),
+                 isolation=isolation_bounds(isolation_steps + crossing))
+    return scenario, [expectation]
+
+
 def hit_ratio_spec(entry: dict) -> HitRatioSpec:
     observe = entry.get('observe_spell', 0) if entry.get('swing_hand') is not None else entry['observe_spell']
     return HitRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], observe,
@@ -8894,6 +8941,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
     if entry['kind'] == 'absorb_pierce_ratio':
         return absorb_pierce_ratio_scenario(class_file, absorb_pierce_ratio_spec(entry))
     if entry['kind'] == 'hit_ratio':
+        if entry.get('streams', 1) != 1 or 'isolation' in entry:
+            return hit_ratio_streamed(class_file, entry)
         return hit_ratio_scenario(class_file, hit_ratio_spec(entry))
     if entry['kind'] == 'crit_rate':
         common, arms = crit_rate_arm_overrides(entry)

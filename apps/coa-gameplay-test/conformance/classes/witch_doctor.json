@@ -388,7 +388,12 @@
       "dummy_distance": 17.5,
       "residual_target": 0.001,
       "min_detectable": 6,
-      "min_parts": 10
+      "min_parts": 10,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Reclamation 806288 has one target on both effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id, facing it (FacingCasterFlags 1); the Spirit Volley transform 505158 (the event) and the Spirit 561136 are caster auras of the stream's own caster; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the streams are never grouped"
+      }
     },
     {
       "aura": 503712,
@@ -427,7 +432,12 @@
           "stacks": 1,
           "source": "Malefic Arrow needs the Arrow talent aura 707854 known or the Shadowhunter aura at cast (AscensionWitchDoctorAbilities.cpp:83-85, ArrowTalent); a precondition fixture, the subject is the 30% roll"
         }
-      ]
+      ],
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Malefic Arrow 801674 has one target on all three effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id, facing it (FacingCasterFlags 1); the attempt aura 707854 and the transform 505158 are caster auras of the stream's own caster; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the streams are never grouped"
+      }
     },
     {
       "aura": 681242,
@@ -473,7 +483,12 @@
           "stacks": 1,
           "source": "caster aura 680486 (The End Is Near, aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT -101 on every school, permanent): Reclamation costs 8% of the base mana, the class file has no base_mana for base_mana_per_attempt and the thousands of attempts would drain the mana pool within a few dozen casts (the Necromancer and Witch Hunter fixture, a precondition named in the verdict, not the claim)"
         }
-      ]
+      ],
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Reclamation 806288 has one target on both effects (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id, facing it (FacingCasterFlags 1); the attempt aura 680486 and the Umbral Glaive transform 504588 (the event, EffectImplicitTargetA 1) are caster auras of the stream's own caster; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the streams are never grouped"
+      }
     },
     {
       "aura": 804620,
@@ -515,7 +530,12 @@
       "dummy_distance": 17.5,
       "residual_target": 0.001,
       "min_detectable": 6,
-      "min_parts": 10
+      "min_parts": 10,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Malefic Wrath 807037 has one target (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; the Spirit 561136 (the event) is a caster aura of the stream's own caster; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the streams are never grouped"
+      }
     },
     {
       "aura": 807904,
@@ -557,7 +577,12 @@
       "dummy_distance": 17.5,
       "residual_target": 0.001,
       "min_detectable": 6,
-      "min_parts": 10
+      "min_parts": 10,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Malefic Wrath 807037 has one target (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; the Spirit 561136 (the event) is a caster aura of the stream's own caster; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the streams are never grouped"
+      }
     },
     {
       "aura": 705871,
@@ -599,7 +624,12 @@
       "dummy_distance": 17.5,
       "residual_target": 0.001,
       "min_detectable": 6,
-      "min_parts": 10
+      "min_parts": 10,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Malefic Wrath 807037 has one target (EffectImplicitTargetA 6, no radius, no chain) and is cast at the stream's own dummy by id; Mojo Madness 503693 (the event, EffectImplicitTargetA 1) is a caster aura of the stream's own caster; aura_ascension_witch_doctor_event accepts only the owner's own outgoing event (AscensionWitchDoctorEvents.cpp Check: player == GetTarget() and outgoing); the streams are never grouped"
+      }
     }
   ],
   "triggers": [
@@ -19061,7 +19091,12 @@
       "trials": 80,
       "parts": 175,
       "cast_power": 1400,
-      "observe_source": "Will of the Serpent 300663 (passive; Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER on SPELLMOD_EFFECT2, misc 12, BasePoints 9 + 1 = +10 = $s1, class mask SpellFamilyFlags[0] 262144, which Lethargy Jinx 802065 carries): Lethargy Jinx Effect[1] is aura 308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER (0 without the talent), applied by Unit::SpellCritChanceTaken for the caster of the aura on every spell it casts at the target, so the talent makes it +10 and no class code is involved. The pooled proof (hit_ratio rate critical, the Templar Scourge-Defense Training 520608 argent_blade_crit_rate and Necromancer Creeping Crypt 300960 precedents, ADR 0195) replaces the 300-cast pilot `300663 behaviour_crit_rate jinx_crit` (kind crit_rate, which has no pooled parts): final07 read +9.33 and +13.00 points (99% intervals +3.45 to +15.54 and +7.00 to +19.41), control shares 12 and 9 of 300 (about 3.5%), treatment 40 and 48 of 300. Each trial casts a real Lethargy Jinx 802065 (instant, GCD 1500, 15% mana, DurationIndex 1 = 10000 ms) at the dummy, then a real Hexfire 573026 (instant, a single direct Fire hit, CategoryRecoveryTime 10000 reset before each cast, 17% mana, cast_power 1400), so the Jinx is on the dummy at each hit; the control arm lacks 300663, the treatment arm learns it for real and unlearns it at the arm end. The critical shares of the Hexfire hits must differ by 10 points inside the 2-point band. Sizing: the 99% half-width of the difference is 2.576 x sqrt((0.035 x 0.965 + 0.135 x 0.865) / n), at most 1 point (half the band, the judge power rule) from n = 9994 per arm; 175 parts of 80 trials give 14000 per arm, a half-width of about 0.85 points (0.89 if the treatment share reads 16%), and a correct server leaves the band with probability about 2e-9. Game time 3.2 s per trial (two 1600 ms casts), about 512 s per part, 24.9 h per run, about 31 min of wall time per run at the median 48x of final07 run 1 (62 min per counted pair, inside the 90 minutes of G-20 step 3): a budget item for the controller. Clause 13. Cast timing checked: both casts instant, 1600 ms apart. Player reports: none names this spell."
+      "observe_source": "Will of the Serpent 300663 (passive; Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER on SPELLMOD_EFFECT2, misc 12, BasePoints 9 + 1 = +10 = $s1, class mask SpellFamilyFlags[0] 262144, which Lethargy Jinx 802065 carries): Lethargy Jinx Effect[1] is aura 308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER (0 without the talent), applied by Unit::SpellCritChanceTaken for the caster of the aura on every spell it casts at the target, so the talent makes it +10 and no class code is involved. The pooled proof (hit_ratio rate critical, the Templar Scourge-Defense Training 520608 argent_blade_crit_rate and Necromancer Creeping Crypt 300960 precedents, ADR 0195) replaces the 300-cast pilot `300663 behaviour_crit_rate jinx_crit` (kind crit_rate, which has no pooled parts): final07 read +9.33 and +13.00 points (99% intervals +3.45 to +15.54 and +7.00 to +19.41), control shares 12 and 9 of 300 (about 3.5%), treatment 40 and 48 of 300. Each trial casts a real Lethargy Jinx 802065 (instant, GCD 1500, 15% mana, DurationIndex 1 = 10000 ms) at the dummy, then a real Hexfire 573026 (instant, a single direct Fire hit, CategoryRecoveryTime 10000 reset before each cast, 17% mana, cast_power 1400), so the Jinx is on the dummy at each hit; the control arm lacks 300663, the treatment arm learns it for real and unlearns it at the arm end. The critical shares of the Hexfire hits must differ by 10 points inside the 2-point band. Sizing: the 99% half-width of the difference is 2.576 x sqrt((0.035 x 0.965 + 0.135 x 0.865) / n), at most 1 point (half the band, the judge power rule) from n = 9994 per arm; 175 parts of 80 trials give 14000 per arm, a half-width of about 0.85 points (0.89 if the treatment share reads 16%), and a correct server leaves the band with probability about 2e-9. Game time 3.2 s per trial (two 1600 ms casts), about 512 s per part, 24.9 h per run, about 31 min of wall time per run at the median 48x of final07 run 1 (62 min per counted pair, inside the 90 minutes of G-20 step 3): a budget item for the controller. Clause 13. Cast timing checked: both casts instant, 1600 ms apart. Player reports: none names this spell.",
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Lethargy Jinx 802065 (all three effects EffectImplicitTargetA 6, no radius, no chain) and Hexfire 573026 (EffectImplicitTargetA 6, no radius, no chain; the Threads branch needs 704511, never known here) are cast at the stream's own dummy by id; Will of the Serpent 300663 raises the crit chance of its owner against its own Jinxed target only, and the streams are never grouped"
+      }
     },
     {
       "spell": 803700,
