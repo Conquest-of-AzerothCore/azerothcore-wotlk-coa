@@ -6285,6 +6285,13 @@ class HitArm:
     target_health_pct: int | None = None
     aura_amounts: tuple[tuple[int, int, int], ...] = ()
     target_aura_amounts: tuple[tuple[int, int, int], ...] = ()
+    casts_wait_ms: int = 0
+    auras_after_required: tuple[tuple[int, int], ...] = ()
+
+
+HIT_ARM_FIELDS = frozenset({'auras', 'casts', 'learn', 'target_health_pct', 'aura_amounts', 'target_aura_amounts',
+                            'casts_wait_ms', 'auras_after_required'})
+HIT_ARM_MAX_CASTS_WAIT_MS = 30000
 
 
 @dataclass(frozen=True)
@@ -6369,10 +6376,9 @@ def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
 
 
 def hit_arm(raw: dict) -> HitArm:
-    unknown = set(raw) - {'auras', 'casts', 'learn', 'target_health_pct', 'aura_amounts', 'target_aura_amounts'}
+    unknown = set(raw) - HIT_ARM_FIELDS
     if unknown:
-        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras, casts, learn, target_health_pct, '
-                         f'aura_amounts or target_aura_amounts')
+        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not {sorted(HIT_ARM_FIELDS)}')
     health = raw.get('target_health_pct')
     if health is not None and not 0 < int(health) < 100:
         raise ValueError(f'hit_ratio arm target health percent {health} must lie between 0 and 100')
@@ -6386,9 +6392,46 @@ def hit_arm(raw: dict) -> HitArm:
             len({spell for spell, _, _ in target_amounts}) != len(target_amounts):
         raise ValueError(f'hit_ratio arm target_aura_amounts {list(target_amounts)} set one effect 0-2 of distinct '
                          f'auras')
-    return HitArm(auras, tuple(int(spell) for spell in raw.get('casts', ())),
-                  tuple(int(spell) for spell in raw.get('learn', ())),
-                  None if health is None else int(health), amounts, target_amounts)
+    casts = tuple(int(spell) for spell in raw.get('casts', ()))
+    lead = raw.get('casts_wait_ms', 0)
+    if type(lead) is not int or not 0 <= lead <= HIT_ARM_MAX_CASTS_WAIT_MS or (lead and not casts):
+        raise ValueError(f'hit_ratio arm casts_wait_ms {lead!r} is a whole number of 0 to '
+                         f'{HIT_ARM_MAX_CASTS_WAIT_MS} ms after the casts of its arm')
+    after = tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras_after_required', ()))
+    if any(spell < 1 or stacks < 0 for spell, stacks in after) or len({spell for spell, _ in after}) != len(after):
+        raise ValueError(f'hit_ratio arm auras_after_required {list(after)} are [spell, stacks] of distinct spells')
+    return HitArm(auras, casts, tuple(int(spell) for spell in raw.get('learn', ())),
+                  None if health is None else int(health), amounts, target_amounts, lead, after)
+
+
+def checked_arm_leads(records: Records, spec: HitRatioSpec, observed: tuple[int, ...], swinging: bool) -> None:
+    for name in HIT_RATIO_ARMS:
+        arm = getattr(spec, name)
+        if not (arm.casts_wait_ms or arm.auras_after_required):
+            continue
+        if swinging:
+            raise ValueError(f'{spec.spell} hit_ratio {name} arm casts_wait_ms and auras_after_required precede an '
+                             f'observed cast, not a swing')
+        gated = [spell for spell in (*arm.casts, *observed) if facts_of(records, spell).caster_aura_spell]
+        if arm.auras_after_required and not gated:
+            raise ValueError(f'{spec.spell} hit_ratio {name} arm auras_after_required follow the required-aura steps '
+                             f'of a cast, but no cast of the trial has a CasterAuraSpell')
+
+
+def arm_lead_contract(records: Records, spec: HitRatioSpec, observed: tuple[int, ...]) -> str:
+    parts = []
+    for name in HIT_RATIO_ARMS:
+        arm = getattr(spec, name)
+        if arm.casts_wait_ms:
+            parts.append(f'the {name} arm waits {arm.casts_wait_ms} ms after its casts {list(arm.casts)} before the '
+                         f'observed cast of every trial')
+        if arm.auras_after_required:
+            gated = [spell for spell in dict.fromkeys((*arm.casts, *observed))
+                     if facts_of(records, spell).caster_aura_spell]
+            parts.append(f'the {name} arm sets the auras {[list(aura) for aura in arm.auras_after_required]} after '
+                         f'the required-aura step of {gated} (CasterAuraSpell '
+                         f'{[facts_of(records, spell).caster_aura_spell for spell in gated]}) in every trial')
+    return '; ' + '; '.join(parts) if parts else ''
 
 
 def hit_ratio_label(spell: int, suffix: str = '') -> str:
@@ -6417,7 +6460,7 @@ def hit_ratio_scale_label(spec: HitRatioSpec, arm: str, spell: int, effect: int)
 
 
 def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: str = TARGET,
-                   power: int | None = None) -> list[dict]:
+                   power: int | None = None, *, after_required: HitArm | None = None) -> list[dict]:
     facts = facts_of(records, spell)
     steps = []
     if power is not None:
@@ -6425,7 +6468,11 @@ def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: st
     elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
         steps.append({'action': 'set_power', 'actor': actor, 'power': facts.power_type, 'value': facts.mana_cost})
     steps.append({'action': 'reset_cooldown', 'actor': actor, 'spell': spell})
-    steps += [{**step, 'actor': actor} for step in required_aura_steps(facts)]
+    required = [{**step, 'actor': actor} for step in required_aura_steps(facts)]
+    steps += required
+    if required and after_required is not None:
+        steps += [{'action': 'set_aura', 'actor': actor, 'spell': aura, 'stacks': stacks}
+                  for aura, stacks in after_required.auras_after_required]
     steps.append({'action': 'cast', 'actor': actor, 'spell': spell, 'target': target})
     steps.append({'action': 'wait', 'ms': max(GCD_WAIT_MS, facts.cast_time_ms + GCD_WAIT_MS)})
     return steps
@@ -6519,13 +6566,15 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                        'caster': CASTER, 'effect': effect, 'amount': amount}
                       for spell, effect, amount in arm.target_aura_amounts]
             for cast in arm.casts:
-                steps += hit_ratio_cast(records, cast)
+                steps += hit_ratio_cast(records, cast, after_required=arm)
+            if arm.casts_wait_ms:
+                steps.append({'action': 'wait', 'label': f'{name} trial {trial} lead', 'ms': arm.casts_wait_ms})
             if arm.target_health_pct is not None:
                 steps += [{'action': 'set_health', 'actor': TARGET,
                            'value': arm.target_health_pct * DUMMY_HEALTH // 100},
                           {'action': 'wait', 'ms': HIT_RATIO_HEALTH_SETTLE_MS}]
             steps += healed + hit_ratio_cast(records, spec.cast_spell or spec.observe_spell, spec.caster, spec.target,
-                                             spec.cast_power)
+                                             spec.cast_power, after_required=arm)
             if spec.cast_wait_ms:
                 steps.append({'action': 'wait', 'label': f'{name} trial {trial} hits', 'ms': spec.cast_wait_ms})
             if trial == spec.trials and not spec.clear_observed:
@@ -6642,6 +6691,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                          f'its caster or target and a distance not below 0')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'hit_ratio', spec.quote, spec.expected)
+    checked_arm_leads(records, spec, () if swinging else (spec.cast_spell or spec.observe_spell,), swinging)
     if spec.off_hand_item is not None:
         off_hand = off_hand_weapon(class_file, spec.off_hand_item)
         one_handed = one_hand_main(class_file)
@@ -6714,6 +6764,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     if distance != DUMMY_DISTANCE:
         scenario['contract'] += f'; the dummy stands {distance:g} yd from the caster'
+    if not swinging:
+        scenario['contract'] += arm_lead_contract(records, spec, (spec.cast_spell or spec.observe_spell,))
     if spec.expected_token:
         delta = hit_ratio_level_value(records, class_file, spec)
         scenario['contract'] += (f'; the treatment arm\'s non-critical, non-glancing swings must exceed the control '
@@ -6879,6 +6931,9 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec,
                          f'crit filter, other cast or swing')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'crit_rate', spec.quote, spec.expected)
+    for name in HIT_RATIO_ARMS:
+        checked_arm_leads(records, replace(spec, **{other: HitArm() for other in HIT_RATIO_ARMS if other != name}),
+                          (observed[name],), False)
     for spell in dict.fromkeys((spec.observe_spell, *observed.values())):
         class_file = armed_for(class_file, records, spell)
     extra_observed = tuple(spell for spell in observed.values() if spell != spec.observe_spell)
@@ -6908,8 +6963,11 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec,
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
-                steps += hit_ratio_cast(records, cast)
-            steps += hit_ratio_cast(records, observed[name], spec.caster, spec.target, spec.cast_power)
+                steps += hit_ratio_cast(records, cast, after_required=arm)
+            if arm.casts_wait_ms:
+                steps.append({'action': 'wait', 'label': f'{name} lead', 'ms': arm.casts_wait_ms})
+            steps += hit_ratio_cast(records, observed[name], spec.caster, spec.target, spec.cast_power,
+                                    after_required=arm)
             if waits[name]:
                 steps.append({'action': 'wait', 'label': f'{name} ticks', 'ms': waits[name]})
         steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
@@ -6931,7 +6989,10 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec,
                     f'every cast; the landed hits and the critical ones are counted at the start and the end of each '
                     f'arm; {judged}'
                     + crit_rate_arm_contract(observed, waits, spec.observe_spell)
-                    + crit_rate_learn_contract(spec, distance),
+                    + crit_rate_learn_contract(spec, distance)
+                    + ''.join(arm_lead_contract(records, replace(spec, **{other: HitArm() for other in HIT_RATIO_ARMS
+                                                                         if other != name}), (observed[name],))
+                              for name in HIT_RATIO_ARMS),
         'players': [player],
         'creatures': [creature_fixture(class_file) if distance is None else creature_fixture(class_file, distance)],
         'steps': base_steps(class_file) + steps}

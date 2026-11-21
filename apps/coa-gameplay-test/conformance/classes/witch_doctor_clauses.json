@@ -1968,18 +1968,11 @@
     "spell": 560748,
     "clause": "critical damage by $561137s3%,",
     "labels": [
-      "560748 effect_value 561137e2 #1"
+      "560748 effect_value 561137e2 #1",
+      "560748 behaviour_hit_ratio crit_damage_spirits"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The 5% critical damage per Spirit is Effect[1] of Frenzied Spirits (aura 163, 5 per Spirit counted, Auras.cpp:155-162), valid for 4 s per Spirit consumed with a 20 s cooldown. A hit_ratio arm cannot re-apply the Spirit-count dependent aura between trials (each trial needs a fresh Frenzied Spirits cast with its Spirits, 7 s of real Reclamations), and crit_magnitude judges one reading. Tool: a hit_ratio arm field that casts the setup list before every trial and keeps the trials inside the aura duration.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B14",
-          "report": "cycle9/author-B14.md#fix-round"
-        }
-      ]
-    }
+    "reason": "The 5% per Spirit is judged by 560748 behaviour_hit_ratio crit_damage_spirits (cycle 10 tool build, hit_ratio auras_after_required, ADR 1025 provisional): a real Frenzied Spirits cast before every trial with five Spirits set after its required-aura step, forced crits of Malefic Wrath, expected 1.25. The data label stays."
   },
   {
     "spell": 560748,
@@ -2621,19 +2614,13 @@
       {
         "claim": "increasing the damage of Malefic Wrath and Bad Juju by $807044s1%",
         "labels": [
-          "704497 effect_value 807044e0 #0"
+          "704497 effect_value 807044e0 #0",
+          "704497 behaviour_hit_ratio wrath_transform",
+          "704497 behaviour_hit_ratio juju_transform"
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The +30% on Malefic Wrath and Bad Juju has no behaviour route this cycle (the earlier wrath_damage and juju_damage entries set 807044 by harness set_aura and are withdrawn). A real route needs the transform 807044 on the caster for every observed cast. Marionette 704497 makes it for real, about 8000 ms after the cast (four clone ticks of 2000 ms, Summons.cpp:307-308 and 563-566) and for 15000 ms, but the arm `casts` of hit_ratio and crit_rate are made right before each observed cast and wait only the global cooldown (hit_ratio_cast), so no field gives a trial its 8000 ms lead, while a harness set_aura of 807044 would be the claim's own subject (Effect[0] is the 30% and Effect[1] the +100 crit chance; guide 3.4, G-21 point 6) and is not used. Tool note: a hit_ratio/crit_rate arm field that waits a stated time after its casts (a `casts_wait_ms`), so that a timed buff can precede the observed cast.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8-fix",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "The +30% is judged on both spells by 704497 behaviour_hit_ratio wrath_transform and juju_transform (cycle 10 tool build, hit_ratio casts_wait_ms, ADR 1025 provisional): a real Marionette before every trial and a 7400 ms lead, so the observed cast lands inside the real transform; forced crits in both arms, expected 1.30. The data label stays."
   },
   {
     "spell": 704497,
@@ -2643,7 +2630,10 @@
     "claims": [
       {
         "claim": "and guaranteeing it to critically strike",
-        "labels": []
+        "labels": [
+          "704497 behaviour_crit_rate wrath_transform_crit",
+          "704497 behaviour_crit_rate juju_transform_crit"
+        ]
       },
       {
         "claim": "for $807044d",
@@ -2653,15 +2643,7 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The guaranteed critical strike has no behaviour route this cycle (the earlier wrath_crit and juju_crit entries set 807044 by harness set_aura and are withdrawn). A real route needs the transform 807044 on the caster for every observed cast. Marionette 704497 makes it for real, about 8000 ms after the cast (four clone ticks of 2000 ms, Summons.cpp:307-308 and 563-566) and for 15000 ms, but the arm `casts` of hit_ratio and crit_rate are made right before each observed cast and wait only the global cooldown (hit_ratio_cast), so no field gives a trial its 8000 ms lead, while a harness set_aura of 807044 would be the claim's own subject (Effect[0] is the 30% and Effect[1] the +100 crit chance; guide 3.4, G-21 point 6) and is not used. A crit_rate entry also needs at least 127 landed hits per arm: 120 all-critical hits give a 99% Wilson lower bound of 94.76%, below the 95% floor (the precedent 680255 uses 160). Tool note: a hit_ratio/crit_rate arm field that waits a stated time after its casts (a `casts_wait_ms`), so that a timed buff can precede the observed cast.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8-fix",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "The guaranteed crit is judged by 704497 behaviour_crit_rate wrath_transform_crit and juju_transform_crit (cycle 10 tool build, crit_rate arm casts_wait_ms, ADR 1025 provisional): 160 casts per arm, each Wrath or Juju cast inside the transform of its own real Marionette, the treatment share judged against 100% (ADR 0760). The duration claim keeps its labels."
   },
   {
     "spell": 704497,
@@ -3554,18 +3536,12 @@
       },
       {
         "claim": "and Spirit Eclipse by $s2% for each active Spirit on you",
-        "labels": []
+        "labels": [
+          "705894 behaviour_hit_ratio eclipse_spirits"
+        ]
       }
     ],
-    "tool_gap": {
-      "reason": "The Spirit Eclipse half has no route: Spirit Eclipse 811117 has CasterAuraSpell Spirit 561136, so the generator sets that aura (one stack) before every cast, which replaces the five Spirit stacks a hit_ratio arm sets, and five real Spirits per trial cost five casts against a Spirit aura of 12000 ms. The Arrow half is proven by arrow_spirits at 1.25 with five Spirits set (a precondition fixture, guide 3.4). Tool: a hit_ratio arm field that sets an aura after the required-aura steps of the observed cast (a cast_auras_after_required list), so that the Eclipse hits are read with five Spirits.",
-      "attempts": [
-        {
-          "agent": "cycle9/author-B15",
-          "report": "cycle9/author-B15.md"
-        }
-      ]
-    }
+    "reason": "The Arrow half is judged by arrow_spirits; the Spirit Eclipse half by 705894 behaviour_hit_ratio eclipse_spirits (cycle 10 tool build, hit_ratio auras_after_required, ADR 1025 provisional): five Spirits set after the Eclipse's required-aura step, the five EclipseHit 802717 hits per cast read, expected 1.25."
   },
   {
     "spell": 705899,
@@ -4065,18 +4041,11 @@
     "spell": 705942,
     "clause": "Increases the damage of your next Malefic Arrow by $s1%,",
     "labels": [
-      "705942 effect_value 807213e0 #1"
+      "705942 effect_value 807213e0 #1",
+      "705942 behaviour_hit_ratio arrow_hunger"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The +10% per stack on the next Malefic Arrow has no behaviour route this cycle (the earlier arrow_one and arrow_ten entries set 807213 by harness set_aura, the claim's own subject: its Effect[0] is the 10%, and are withdrawn). A real Shadowstalker 807040 cast gives a stack every 500 ms, but the arm `casts` of hit_ratio wait only the global cooldown (1500 ms) after the cast, so the Arrow follows at 2 or 3 stacks, never at exactly one and never at ten (5000 ms), and the next Arrow consumes the stacks, so every trial needs its own cast and lead. The 'next Arrow' consumption is not tested. Tool note: a hit_ratio/crit_rate arm field that waits a stated time after its casts (a `casts_wait_ms`), so that a timed buff can precede the observed cast.",
-      "attempts": [
-        {
-          "agent": "cycle7/author-B8-fix",
-          "report": "cycle7/author-B8.md"
-        }
-      ]
-    }
+    "reason": "Judged by 705942 behaviour_hit_ratio arrow_hunger (cycle 10 tool build, hit_ratio casts_wait_ms, ADR 1025 provisional): a real Shadowstalker before every Arrow in both arms and a 5400 ms lead, so the treatment's Arrow carries the cap of 10 real stacks, expected 2.0. The data label stays; the consumption by the next Arrow is not judged."
   },
   {
     "spell": 705942,
@@ -4332,22 +4301,11 @@
     "spell": 706543,
     "clause": "Increases magic damage dealt by $s3%",
     "labels": [
-      "706543 effect_value 706544e2 #0"
+      "706543 effect_value 706544e2 #0",
+      "706543 behaviour_hit_ratio lesser_damage"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The Lesser Shadow Avatar aura 706544 exists only for 8000 ms after a 15000 ms Shadow Avatar ends. A hit_ratio arm can set 706544 only with set_aura, which would make the harness-set aura the claim's subject (guide 3.4), and its arm casts run right before each observed cast with no lead time. Tool: a hit_ratio arm field that waits a stated time after the arm's casts (the B8 note on 704497, a casts_wait_ms), so that a real Avatar cast, its 15000 ms and the Lesser Avatar's 8000 ms window bracket every observed Malefic Wrath. The stated 706544 e2 amount keeps its data label.",
-      "attempts": [
-        {
-          "agent": "cycle8/author-B11",
-          "report": "cycle8/author-B11.md#no-behaviour-route"
-        },
-        {
-          "agent": "cycle9/author-B15 fix round",
-          "report": "cycle9/author-B15.md#fix-round"
-        }
-      ]
-    }
+    "reason": "Judged by 706543 behaviour_hit_ratio lesser_damage (cycle 10 tool build, hit_ratio casts_wait_ms, ADR 1025 provisional): a real Shadow Avatar before every trial in both arms and a 14000 ms lead, so Malefic Wrath lands inside the real Lesser Shadow Avatar of the treatment, expected 1.10. The data label stays."
   },
   {
     "spell": 706543,

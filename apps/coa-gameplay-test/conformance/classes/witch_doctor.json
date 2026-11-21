@@ -15085,6 +15085,50 @@
       "observe_source": "Frenzied Spirits 560748 (instant, CastingTimeIndex 1, RecoveryTime 20000 reset by the scenario, 14% base mana, SelfTarget aura): AscensionWitchDoctorAuras.cpp:155-162 (Calculate: Effect[0] 10, Effect[1] 5 and Effect[2] 2 per Spirit counted, recalculate false), AscensionWitchDoctorAbilities.cpp:154-155 (OnCalcMaxDuration: 4000 ms per Spirit) and :337-341 (OnSpellCast: the Spirit aura 561136 is removed), Auras.cpp:168-175 (Periodic: Effect[2] ticks every 1000 ms) and :325-329 (Tick: GainSpirit). Effect[0] aura 189 SPELL_AURA_MOD_RATING misc 512 (CR_CRIT_RANGED, bit 9), Effect[1] aura 163 crit damage, Effect[2] aura 354 with the heal of AscensionWitchDoctorEvents.cpp:201-203. The Spirits are made by two real Reclamation 806288 casts at a dummy 20 yd away (the ranged slot needs a distance beyond the minimum range; Reclamation 1800 ms reads 2300 ms on this server, so 2600 ms between casts (300 ms spare after the 2300 ms cast)) each gaining one Spirit (Abilities.cpp:312-314). Frenzied Spirits needs a Spirit active (CasterAuraSpell 561136): the scenario builder gives the trigger cast that required aura as a harness set_aura of 1 stack that the generated steps set before the two setup Reclamation casts, which then add to it, and then the trigger cast (required_aura_steps, a precondition fixture of the cast and not the claim subject, the cost reason being that the cast is refused without it). The Spirit duration is 12 s, so none expires during the setup. Mana: Reclamation 8% and Frenzy 14% of the 1497 base, set to 1000 before each cast (pitfall 6). The setup cast runs in the uncast before phase too (setup_in_before). One Reclamation makes 1 Spirit (the before phase, no Frenzied Spirits cast, reads 1 stack of 561136); the after phase holds the fixture Spirit and the real one. The cast removes both and the active aura, 8000 ms for 2 Spirits, gains one every 1000 ms (Auras.cpp:168-175 and :325-329), the first tick one period after the apply: read 3500 ms after the cast (game time 3300 to 3700) it holds 3 stacks (ticks at 1000, 2000 and 3000 ms, the fourth at 4000 ms). A period of 500 ms would read 5 (the cap), of 2000 ms 1. Cast timing checked: Reclamation 2300 ms, Frenzied Spirits instant. Player reports: none. Rank: Reclamation 806288 is the rank-1 id; the Spirit gain is family-based (Family(info, 1, 4), Abilities.cpp:312-314) and does not depend on rank or spell power, so the rank does not change the count."
     },
     {
+      "spell": 560748,
+      "kind": "hit_ratio",
+      "name": "Frenzied Spirits (critical damage +5% per Spirit consumed: five Spirits, 1.25)",
+      "variant": "crit_damage_spirits",
+      "label_suffix": "crit_damage_spirits",
+      "quote": "Consumes your Spirits",
+      "expected": 1.25,
+      "observe_spell": 807037,
+      "force_crit": "spell",
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          560748
+        ],
+        "auras_after_required": [
+          [
+            561136,
+            5
+          ]
+        ]
+      },
+      "critical": true,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 2500,
+      "observe_source": "Frenzied Spirits 560748 (instant, CastingTimeIndex 1, StartRecoveryTime 0, RecoveryTime 20000 reset before every cast by hit_ratio_cast, 14% base mana, CasterAuraSpell Spirit 561136): AscensionWitchDoctorAuras.cpp:155-162 (Calculate, recalculate false: Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS misc 127 = 5 x the Spirits counted, $561137s3 = 4 + 1 = 5 per Spirit), Abilities.cpp:154-155 (4000 ms per Spirit, 20000 ms with five) and :337-341 (the Spirit aura is removed after the amounts are counted, as the rating entry reads 30 with three). Unit::SpellCriticalDamageBonus (Unit.cpp:10624-10663) multiplies the whole spell crit (1.5 x the hit) by 1 + crit_mod/100, so five Spirits give every critical Malefic Wrath 1.25 times the control's, as the Juju Spirits 807296 crit_damage entry reads 2.0 for +100%. The treatment arm casts a real Frenzied Spirits before every trial (the arm cast, cost reason: the aura amounts are counted once per cast, so every trial needs its own cast); its CasterAuraSpell step sets one Spirit (a precondition fixture of the cast, refused without Spirits at Abilities.cpp:76), and the arm's auras_after_required set the Spirit aura to five stacks after that step and before the cast (a precondition fixture under guide 3.4: the subject is the crit damage the consumed Spirits give, not the Spirits; the cost reason, as in the 705894 arrow_spirits entry: five real Spirits take five Reclamations per trial against a 20000 ms cooldown). The observed Malefic Wrath 807037 (CastingTimeIndex 5 = 2000 ms, 11% base mana, cast_power 1000) lands about 3700 ms after the Frenzied Spirits cast, inside its 20000 ms. Control: no Frenzied Spirits cast (a plain Wrath). Forced spell crits (spell_crit_rating) and critical hits only in both arms, 20000 spell power so the stat term dominates the 21-26 die, 823764 on the caster in both arms (no partial resists), 20 trials per arm. The mean critical hit ratio must be 1.25 inside the G-19 band; a Frenzy that adds a flat 5% (1.05) or no crit damage (1.0) alerts. Clause 110 'critical damage by $561137s3%,'. Cast timing checked: Frenzied Spirits instant with the 1600 ms cast wait, Wrath 2000 ms plus the 1600 ms wait and cast_wait_ms 2500 (the Ritual Hexing wrath entries). Player reports: none."
+    },
+    {
       "spell": 705841,
       "kind": "hit_ratio",
       "name": "Ritual Hexing (rank 2) (Malefic Wrath against Hex of Malice)",
@@ -15430,6 +15474,152 @@
       "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset by the scenario, 22% base mana): AscensionWitchDoctorAuras.cpp:240-246 (summon the 5 clones; the 20th stack of 807057 casts the transform 807044 and removes the stacks) and Summons.cpp:307-308 and :563-566 (each clone casts the stack aura at about 2000, 4000, 6000 and 8000 ms: 5, 10, 15 and 20 stacks). At 7000 ms the caster holds 15 stacks and no transform. cast_power 1400 stays at or below the 1497 base mana (pitfall 6). The transform 807044 reads 0 at 7000 ms with 15 stacks (the transform_not_early read, 0 in both phases) while the existing transform entry reads it present at 9500 ms: the transform follows the 20th stack and not an earlier one. A server that transformed at 5, 10 or 15 stacks reads 1 here and alerts. Cast timing checked: instant. Player reports: none."
     },
     {
+      "spell": 704497,
+      "kind": "hit_ratio",
+      "name": "Soul Marionette (the transform: Malefic Wrath +30%)",
+      "variant": "wrath_transform",
+      "label_suffix": "wrath_transform",
+      "quote": "applying a stack of Soul Marionette.",
+      "expected": 1.3,
+      "observe_spell": 807037,
+      "force_crit": "spell",
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          704497
+        ],
+        "casts_wait_ms": 7400
+      },
+      "critical": true,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 2500,
+      "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset before every cast by hit_ratio_cast, 22% base mana): Auras.cpp:239-246 (the 20th stack of 807057 casts the transform 807044 on the caster, explodes the clones and removes the stacks), Summons.cpp:307-308 and :563-568 (each of the 5 clones casts a stack at about 2000, 4000, 6000 and 8000 ms). 807044 (DurationIndex 8 = 15000 ms) Effect[0] aura 108 SPELLMOD_DAMAGE BasePoints 29 + 1 = +30% ($807044s1), Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +100; Completion.cpp:571-575 adds Bad Juju (bit 2 of word 2) to both masks, whose word 1 holds Malefic Wrath 32768. The existing transform entries read 807044 present at 9500 ms and absent at 7000 ms after the cast, with its end at about 23000 ms (transform_lasts). The treatment arm casts a real Marionette before every trial and waits casts_wait_ms 7400 after the 1600 ms cast wait, so the observed Malefic Wrath 807037 (2000 ms, 11% base mana, cast_power 1000) starts about 9000 ms after the Marionette, at least 600 ms after the 20th stack, and lands about 11000 ms after it, well inside the 15000 ms transform (no set_aura of 807044: the transform is the subject, guide 3.4). The transform guarantees the crit, so both arms force spell crits (spell_crit_rating) and compare critical hits only, as the Juju Spirits 807296 crit_damage entry does. Control: no Marionette cast. 20000 spell power so the stat term dominates the die, 823764 on the caster in both arms, 20 trials per arm. The per-hit mean ratio must be 1.30 inside the G-19 band; a transform that leaves Wrath unchanged (1.0) or a wrong amount alerts. The clone explosions 706553 hit the dummy as another spell and are not read. Clause 146 'increasing the damage of Malefic Wrath and Bad Juju by $807044s1%', Malefic Wrath half. Cast timing checked: Marionette instant, 1600 + 7400 ms lead, Wrath 2000 + 1600 ms and cast_wait_ms 2500. Player reports: none."
+    },
+    {
+      "spell": 704497,
+      "kind": "hit_ratio",
+      "name": "Soul Marionette (the transform: Bad Juju +30%)",
+      "variant": "juju_transform",
+      "label_suffix": "juju_transform",
+      "quote": "applying a stack of Soul Marionette.",
+      "expected": 1.3,
+      "observe_spell": 802087,
+      "force_crit": "spell",
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          704497
+        ],
+        "casts_wait_ms": 7400
+      },
+      "critical": true,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 2800,
+      "observe_source": "The Bad Juju half of wrath_transform: the same real Marionette 704497 before every treatment trial and the same 7400 ms lead after its 1600 ms cast wait, so the observed Bad Juju 802087 (CastingTimeIndex 19 = 2500 ms, CategoryRecoveryTime 15000 reset by hit_ratio_cast, 16% base mana, cast_power 1000, missile speed 20) starts about 9000 ms after the Marionette and lands about 11600 ms after it, inside the 15000 ms transform 807044 that follows the 20th stack at about 8000 ms. Completion.cpp:571-575 adds bit 2 of word 2 to the 807044 Effect[0] and Effect[1] masks; word 1 33792 also holds Bad Juju 1024, so the +30% ($807044s1) and the guaranteed crit apply to it. Forced spell crits and critical hits only in both arms; control: no Marionette cast; 20000 spell power, 823764 on the caster, 20 trials per arm, cast_wait_ms 2800 (the Ritual Hexing badjuju entries). The ratio must be 1.30 inside the G-19 band; a server that drops the Bad Juju bit reads 1.0. Clause 146, Bad Juju half. Player reports: none."
+    },
+    {
+      "spell": 704497,
+      "kind": "crit_rate",
+      "name": "Soul Marionette (the transform guarantees the Malefic Wrath crit)",
+      "variant": "wrath_transform_crit",
+      "label_suffix": "wrath_transform_crit",
+      "quote": "applying a stack of Soul Marionette.",
+      "expected": 100,
+      "treatment_share": 100,
+      "observe_spell": 807037,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          704497
+        ],
+        "casts_wait_ms": 7400
+      },
+      "cast_power": 1000,
+      "trials": 160,
+      "observe_source": "Soul Marionette 704497: the transform 807044 (15000 ms, from the 20th clone stack at about 8000 ms after the cast, Auras.cpp:239-246, Summons.cpp:563-568) carries Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 99 + 1 = +100 on Malefic Wrath 807037 (word 1 32768) and Bad Juju (Completion.cpp:571-575): 'guaranteeing it to critically strike'. The treatment arm casts a real Marionette before every cast and waits casts_wait_ms 7400 after the 1600 ms cast wait, so every Malefic Wrath (2000 ms, cast_power 1000) is cast about 9000 ms after its Marionette and lands inside the transform; the transform is never set by set_aura (guide 3.4). Judge (treatment_share, ADR 0760): the treatment's 99% Wilson lower bound must reach 95%; 160 casts give 96.0% when every landed hit crits (the 680255 guaranteed_crit precedent; 120 would give 94.76%); the control arm (no Marionette) is the contrast below it at the reference character's spell crit. 823764 on the caster in both arms. Game time about 13.2 s per treatment cast and 3.6 s per control cast, 2700 s per run. Clause 147 'and guaranteeing it to critically strike', Malefic Wrath. Cast timing checked: Marionette instant, 1600 + 7400 ms lead, Wrath 2000 + 1600 ms. Player reports: none."
+    },
+    {
+      "spell": 704497,
+      "kind": "crit_rate",
+      "name": "Soul Marionette (the transform guarantees the Bad Juju crit)",
+      "variant": "juju_transform_crit",
+      "label_suffix": "juju_transform_crit",
+      "quote": "applying a stack of Soul Marionette.",
+      "expected": 100,
+      "treatment_share": 100,
+      "observe_spell": 802087,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          704497
+        ],
+        "casts_wait_ms": 7400
+      },
+      "cast_power": 1000,
+      "trials": 160,
+      "observe_source": "The Bad Juju half of wrath_transform_crit: the transform 807044 Effect[1] (+100 crit chance) mask gains Bad Juju 802087 at Completion.cpp:571-575 (word 1 1024 and bit 2 of word 2). The treatment arm casts a real Marionette 704497 before every Bad Juju (CastingTimeIndex 19 = 2500 ms, CategoryRecoveryTime 15000 reset, 16% base mana, cast_power 1000) and waits 7400 ms after the 1600 ms cast wait, so each Juju starts about 9000 ms after its Marionette and lands inside the 15000 ms transform. Judge (treatment_share, ADR 0760): 160 casts, the treatment's 99% Wilson lower bound must reach 95% (96.0% when every landed hit crits); the control arm (no Marionette) is the contrast below it. 823764 on the caster in both arms; about 2950 s of game time per run. Clause 147, Bad Juju. Player reports: none."
+    },
+    {
       "spell": 560545,
       "kind": "hit_ratio",
       "name": "Dark Loa's Blessing (Malefic Wrath deals 3% more damage)",
@@ -15770,6 +15960,56 @@
       "observe_source": "Soul Feeder 705894 (passive, Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 12, BasePoints 4 + 1 = 5 = $s2; Effect[0] aura 107 misc 11): AscensionWitchDoctorAuras.cpp:148-151 gives the Spirit helper aura (SpiritStats, synced to the Spirit stack count by SyncSpirits at AscensionWitchDoctorAuras.cpp:216-217 on every apply of the Spirit aura 561136) effect 1 the amount Amount(SoulFeeder, EFFECT_1) = 5 while the talent is known; the tooltip states +5% per active Spirit on Malefic Arrow and Spirit Eclipse. This entry reads the Arrow half: Malefic Arrow 801674 (instant, CastingTimeIndex 18, ranged slot so the dummy stands 15 yd away past the minimum range, the reference character has ranged_hit_rating 10000, bow equipped by armed_for, CategoryRecoveryTime 8000 reset by the harness, 5% base mana) with five stacks of the Spirit aura 561136 set by the harness before every cast in both arms (set_aura, a precondition fixture under guide 3.4: the subject is the damage the Spirits add; the cost reason, as in the 707650 volley_spirits entry: five real Spirits take five casts per trial against a Spirit aura of 12000 ms, DurationIndex 29). The Arrow talent Malefic Arrow 707854 is learned in both arms (AscensionWitchDoctorAbilities.cpp:87 refuses every non-triggered Arrow without 92086 or 707854). Control arm: 705894 not learned (a plain Arrow with five Spirits); treatment: learned (a real learn before the set_aura of each trial, so the SpiritStats effect is computed with the talent known). 20000 ranged attack power so the RAP term dominates the die, 823764 on the caster, non-critical hits only, 20 trials per arm. The per-hit mean ratio must be 1 + 5 x 5% = 1.25 inside the G-19 band (2 points: 1.23 to 1.27); no effect (1.0) or +5% in all (1.05) alerts. The Spirit Eclipse half is not read: Eclipse sets its own Spirit aura before every cast (CasterAuraSpell 561136, the generator's required_aura_steps), which would replace the five stacks. Cast timing checked: Arrow instant, GCD 1500, cast wait from hit_ratio_cast. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the data-conformant clause 195 (Arrow half)."
     },
     {
+      "spell": 705894,
+      "kind": "hit_ratio",
+      "name": "Soul Feeder (Spirit Eclipse +5% per active Spirit: five Spirits, 1.25)",
+      "variant": "eclipse_spirits",
+      "label_suffix": "eclipse_spirits",
+      "quote": "Increases the damage dealt by Malefic Arrow and Spirit Eclipse by $s2% for each active Spirit on you.",
+      "expected": 1.25,
+      "observe_spell": 802717,
+      "cast_spell": 811117,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "auras_after_required": [
+          [
+            561136,
+            5
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "auras_after_required": [
+          [
+            561136,
+            5
+          ]
+        ],
+        "learn": [
+          705894
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "ranged_attack_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 500,
+      "observe_source": "Soul Feeder 705894 (passive, dummied at Completion.cpp:297-299; $s2 = 4 + 1 = 5): AscensionWitchDoctorAuras.cpp:148-151 gives the Spirit helper aura SpiritStats 561299 Effect[1] the amount 5 while the talent is known; Completion.cpp:287-290 makes that effect aura 108 SPELLMOD_DAMAGE on word 0 536870912 (the Spirit Eclipse family, Family(info, 0, 536870912)) and word 1 2147483648 (Malefic Arrow); SyncSpirits keeps it stacked with the Spirit count (Auras.cpp:216-217). Spirit Eclipse 811117 (instant, CategoryRecoveryTime 10000 reset by hit_ratio_cast, 12% base mana, cast_power 1000, CasterAuraSpell Spirit 561136): Completion.cpp:339-344 makes Effect[0] periodic every 250 ms with Duration 1 and speed 0; at apply (Auras.cpp:227-237) the script counts the Spirits (_spirits) and each tick (Auras.cpp:288-297) casts EclipseHit 802717 with the Effect[0] amount until _spirits ticks are done; 802717 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Completion.cpp:346), so the damage modifier enters once, through the Eclipse amount. Both arms set the Spirit aura to five stacks after the cast's required-aura step (which sets one stack, the cost reason of the earlier tool note) and before the cast (auras_after_required, a precondition fixture under guide 3.4 as in arrow_spirits: the subject is the damage the Spirits add). Control: 705894 not learned; treatment: learned. Five 802717 hits per cast, non-critical ones only, 20 trials per arm; 20000 ranged attack power so the RAP term ($RAP*.07) dominates the fixed base (DieSides 1), 823764 on the caster. The per-hit mean ratio must be 1 + 5 x 5% = 1.25 inside the G-19 band; a server that misses the Eclipse word reads 1.0. Clause 195, the Spirit Eclipse half. Cast timing checked: Eclipse instant, the 1600 ms cast wait covers five 250 ms ticks, cast_wait_ms 500. Player reports: none."
+    },
+    {
       "spell": 707331,
       "kind": "hit_ratio",
       "name": "Dark Effigy (Shadowflare without Puppeteer's Threads)",
@@ -15873,6 +16113,51 @@
       ],
       "arm_wait_ms": 2000,
       "observe_source": "Quote note: the builder needs a quote inside the spell's own tooltip, and the words of clause 248 sit in the embedded tooltip of 706544 (@s:706544:0@), so the quote names the subject of that clause, not clause 246's sentence. Lesser Shadow Avatar 706544 (DurationIndex 31 = 8000 ms, cast on the caster when Shadow Avatar 705943 expires with Residual Energy 706543 known, AscensionWitchDoctorAuras.cpp:417-419) carries Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($706489t1 is the Avatar 706489 amplitude, the same 1 sec), trigger spell 706803, whose Effect[0] is SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT 192 on misc 806289 (Spirit Glaive), BasePoints 19 + 1 = 20% ($706803s1): native, no script. This entry is a PRESENCE read of clause 248 (the Lesser Avatar cuts the Glaive cooldown), not a measure of the 20% or the 1 sec period: an integer replay shows that the attempts cannot tell 20% from nearby rates (the with attempt passes any cut of about 14% or more; the cooldown ends about 200 ms apart at 19% and 21%, inside the tick-phase uncertainty), so the amount and the period keep their data labels and the clause's tool_gap. The route is the one cycle 8 (B11) named: the Avatar is a setup cast made BEFORE the priming Glaive (cost_gate setup_casts, one global cooldown wait of 1600 ms before the priming cast) so the Lesser Avatar's ticks fall on the running cooldown. Replay (remaining // 5 per tick): Avatar cast at -1600 ms (the priming submission is 0), Lesser Avatar from 13400 ms, ticks at 14400 ... 21400 ms. The Avatar's own spell haste (20%, while it lasts, until 13400 ms) shortens the priming Glaive cast from 2000 to about 1667 ms, so the uncut cooldown ends at about 21667 ms and, with the 20% cut, at about 18421 ms (about 18530 ms without the haste). reduction 1970 and margin_ms 1500 turn the generator's levels into the attempts at 19530 ms (about 1100 ms after that end: with 706543 it goes through, 0) and 16530 ms (refused at 20%, the cooldown then runs to about 18421 ms; an almost complete reset, a cut of 60% a tick or more, ends near 16160 ms and would alert). Control: without 706543 the Avatar ends with no Lesser Avatar and the attempt at 19530 ms is refused (SPELL_FAILED_NOT_READY 67, about 2100 ms left, the Avatar is cast in every arm). The earlier 13530 ms beyond attempt was inert (the Lesser Avatar forms at 13400 and first ticks at 14400, so it was refused at any rate) and is replaced by the 16530 ms one. arm_wait_ms 2000 lets the previous arm's Lesser Avatar end before the next arm's priming cast. The talent is learned before the Avatar, so the real Lesser Avatar forms (no set_aura). Limits, stated in the verdict: the bracket shows that the Lesser Avatar cuts the cooldown by about 3 s or more and does not reset it. Cast timing checked: Avatar instant (GCD none), Glaive 2000 ms (about 1667 ms hasted), attempts 19530 and 16530 ms after the priming submission, 15% base mana Avatar, power set to 1400 before each cast. Player reports: none of the open reports of cycles 5 and 6 names this spell. Behaviour route for the presence of the cooldown cut in clause 248."
+    },
+    {
+      "spell": 706543,
+      "kind": "hit_ratio",
+      "name": "Residual Energy (the Lesser Shadow Avatar: magic damage +10%)",
+      "variant": "lesser_damage",
+      "label_suffix": "lesser_damage",
+      "quote": "you become a",
+      "expected": 1.1,
+      "observe_spell": 807037,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          705943
+        ],
+        "casts_wait_ms": 14000
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          705943
+        ],
+        "casts_wait_ms": 14000,
+        "learn": [
+          706543
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 2500,
+      "observe_source": "Residual Energy 706543 (passive): Auras.cpp:417-419 casts Lesser Shadow Avatar 706544 on the caster when Shadow Avatar 705943 is removed by AURA_REMOVE_BY_EXPIRE with the talent known. 706544 (DurationIndex 31 = 8000 ms) Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE misc 126 (the magic schools), BasePoints 9 + 1 = +10% ($s3). The existing lesser and lesser_lasts entries read 706544 present 600 ms after the 15000 ms Avatar and gone at about 23000 ms. Both arms cast a real Shadow Avatar 705943 (instant, RecoveryTime 90000 reset by hit_ratio_cast, 15% base mana, DurationIndex 8 = 15000 ms) before every trial and wait casts_wait_ms 14000 after the 1600 ms cast wait: the observed Malefic Wrath 807037 (Nature, 2000 ms, cast_power 1000) starts about 15600 ms after the Avatar, when it has expired, and lands about 17600 ms after it, inside the Lesser Avatar's 8000 ms window (no set_aura of 706544, the claim's subject, guide 3.4). The previous trial's Lesser Avatar ends at about 23000 ms after its Avatar, before the next trial's Wrath at about 37300 ms. Control: 706543 not learned (the Avatar ends with no Lesser Avatar); treatment: learned. 20000 spell power so the stat term dominates the die, 823764 on the caster, non-critical hits only, 10 trials per arm (21.7 s each, the scenario cap). The per-hit mean ratio must be 1.10 inside the G-19 band; no Lesser Avatar (1.0) or a wrong amount alerts. Clause 247 'Increases magic damage dealt by $s3%'. Cast timing checked: Avatar instant, 1600 + 14000 ms lead, Wrath 2000 + 1600 ms and cast_wait_ms 2500. Player reports: none."
     },
     {
       "spell": 707162,
@@ -19882,6 +20167,54 @@
           4800
         ]
       }
+    },
+    {
+      "spell": 705942,
+      "kind": "hit_ratio",
+      "name": "Voodoo Hunger (ten real stacks before every Malefic Arrow, 2.0)",
+      "variant": "arrow_hunger",
+      "label_suffix": "arrow_hunger",
+      "quote": "you now gain a stack of",
+      "expected": 2.0,
+      "observe_spell": 801674,
+      "dummy_distance": 15,
+      "learn": [
+        707854
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          807040
+        ],
+        "casts_wait_ms": 5400
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          807040
+        ],
+        "casts_wait_ms": 5400,
+        "learn": [
+          705942
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "ranged_attack_power": 20000
+      },
+      "cast_power": 1000,
+      "observe_source": "Voodoo Hunger 705942 (passive): Auras.cpp:333-335 casts HungerBuff 807213 on the caster at every 500 ms tick ($807214T2) of the Shadowstalker speed aura 807214 while the talent is known and Shadowstalker 807040 or Mirage holds. 807213: StackAmount 10 ($u), DurationIndex 31 = 8000 ms refreshed by every stack, Effect[0] aura 108 SPELLMOD_DAMAGE BasePoints 9 + 1 = +10% ($s1) per stack on word 1 2147483648 (Malefic Arrow), ProcCharges 1 (the next Arrow consumes it). The existing stack_rate, stack_rate_tight and stack_cap entries read 5 stacks at 2750 ms, 9 at 4700 ms and the cap of 10. Both arms cast a real Shadowstalker 807040 (instant, RecoveryTime 180000 reset by hit_ratio_cast, 30% base mana) before every Arrow and wait casts_wait_ms 5400 after the 1600 ms cast wait: the Arrow is cast about 7000 ms after the Shadowstalker, 14 ticks in, so the treatment holds exactly the cap of 10 stacks whatever the tick phase (10 stacks at 5000 ms) and never a stale stack (each Arrow consumes the buff, each trial rebuilds it). Malefic Arrow 801674 (instant ranged slot, dummy at 15 yd past the minimum range, CategoryRecoveryTime 8000 reset, 5% base mana, cast_power 1000) needs 707854 known in both arms (Abilities.cpp:87). Control: 705942 not learned (no stacks); treatment: learned. 20000 ranged attack power, 823764 on the caster, non-critical hits only, 20 trials per arm. The per-hit mean ratio must be 1 + 10 x 10% = 2.0 inside the G-19 band; +10% in all (1.1) or no effect (1.0) alerts. No set_aura of 807213 (the earlier arrow_one and arrow_ten entries set it and were withdrawn, guide 3.4). Clause 227 'Increases the damage of your next Malefic Arrow by $s1%,'. Cast timing checked: Shadowstalker instant, 1600 + 5400 ms lead, Arrow instant with the cast wait of hit_ratio_cast. Player reports: none."
     },
     {
       "spell": 506634,
