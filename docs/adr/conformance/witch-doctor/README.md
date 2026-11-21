@@ -25,3 +25,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0016](0016-overflowing-juju-scales-the-folded-spell-power-coefficient.md) | Overflowing Juju scales the folded spell power coefficient | accepted; mentor ruling M-59, owner question Q-TA-1 |
 | [0017](0017-amphibimorph-makes-a-frog-a-beast.md) | Amphibimorph makes a frogged unit a Beast | proposed (owner question); engine file `Unit.cpp` |
 | [0018](0018-voodoo-unleashed-cuts-shadow-puppets-by-504607.md) | Voodoo Unleashed cuts Shadow Puppets by 504607's 3 sec | accepted |
+| [0019](0019-voodoo-strings-needs-threads-when-bad-juju-is-used.md) | Voodoo Strings needs Puppeteer's Threads on the enemy when Bad Juju is used | accepted |

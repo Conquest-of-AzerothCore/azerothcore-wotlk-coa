@@ -153,6 +153,9 @@ class witch_doctor_casts : public AllSpellScript
         if (!player || player != spell->GetCaster() || !target)
             return;
         SpellInfo const* info = spell->GetSpellInfo();
+        if (IsJuju(info) && player->HasAura(Strings))
+            if (Aura* threads = target->GetAura(Threads, player->GetGUID()))
+                threads->SetScriptValue(Strings, 1);
         float factor = 1.0f;
         if (OwnedHex(player, target) && (IsJuju(info) || Family(info, 1, 32768 | 262144)))
         {
@@ -248,8 +251,9 @@ class witch_doctor_casts : public AllSpellScript
                 hexed |= IsHex(app->GetBase()->GetSpellInfo());
             if (hexed)
                 Cast(player, target, MarkOfMalice);
-            if (player->HasAura(Strings) && target->HasAura(Threads, player->GetGUID()))
-                Copy(player, target, StringsDamage, uint64(damage) * 30 / 100);
+            if (Aura* threads = target->GetAura(Threads, player->GetGUID()))
+                if (player->HasAura(Strings) && threads->GetScriptValue(Strings))
+                    Copy(player, target, StringsDamage, uint64(damage) * 30 / 100);
         }
         if (damage && Family(info, 1, 262144) && player->HasAura(VoodooSpirits))
             if (Aura* threads = target->GetAura(Threads, player->GetGUID()))
