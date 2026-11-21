@@ -1,0 +1,65 @@
+{
+  "schema": 2,
+  "name": "Hellfire outdoor scaling leaves Ramparts unchanged",
+  "contract": [
+    "Enter the native Normal Ramparts map with an access bypass used only by this exclusion fixture.",
+    "The same template scaled outdoors retains its original budget inside a dungeon."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 2296.01,
+    "y": -5340.98,
+    "z": 90.8799
+  },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tester",
+      "maximum": 2000000000,
+      "value": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "tester",
+      "map": 543,
+      "x": -1206.08,
+      "y": 1440.92,
+      "z": 68.6282,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "map_id",
+      "equals": 543
+    },
+    {
+      "action": "summon",
+      "actor": "tester",
+      "as": "unscaled",
+      "entry": 16972,
+      "distance": 8,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "unscaled",
+      "metric": "max_health",
+      "max": 99999
+    }
+  ]
+}

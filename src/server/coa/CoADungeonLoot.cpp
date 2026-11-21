@@ -5,6 +5,7 @@
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "DungeonLoot.h"
+#include "CoADungeonRescale.h"
 #include "MiscScript.h"
 #include "Item.h"
 #include "ItemEnchantmentMgr.h"
@@ -263,6 +264,9 @@ public:
         ObjectGuid const source = loot->sourceWorldObjectGUID;
         Creature* creature = source.IsCreatureOrVehicle() ? map->GetCreature(source) : nullptr;
         if (!creature && !(source.IsGameObject() && map->GetGameObject(source)))
+            return;
+
+        if (DungeonRescale::ApplyLoot(*loot, map))
             return;
 
         uint8 const difficulty = DungeonLoot::Difficulty(map->GetId(), uint8(map->GetSpawnMode()), true);

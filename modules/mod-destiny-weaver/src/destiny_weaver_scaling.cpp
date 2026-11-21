@@ -49,6 +49,7 @@
 #include "Group.h"
 #include "LFGMgr.h"
 #include "LocalLevelScaling.h"
+#include "CoADungeonRescale.h"
 #include "Log.h"
 #include "Map.h"
 #include "ObjectMgr.h"
@@ -236,7 +237,7 @@ namespace
     /// scale it a second time.
     bool ScaledDungeon(Map const* map)
     {
-        return map && map->IsDungeon() && !map->IsRaid() && !map->IsBattlegroundOrArena() &&
+        return map && !DungeonRescale::FixedMap(map) && map->IsDungeon() && !map->IsRaid() && !map->IsBattlegroundOrArena() &&
                !map->IsScriptedPrivateInstance() && map->IsRegularDifficulty() && DungeonBandFor(map);
     }
 
@@ -258,6 +259,8 @@ namespace
     LocalLevelScaling::DungeonScaling InScaledDungeonForCore(Player const* player)
     {
         Map const* map = player ? player->FindMap() : nullptr;
+        if (DungeonRescale::FixedMap(map))
+            return LocalLevelScaling::DungeonScaling::WalkedIn;
         if (!ScaledDungeon(map))
             return LocalLevelScaling::DungeonScaling::None;
         return FinderScaledDungeon(player, map) ? LocalLevelScaling::DungeonScaling::Finder

@@ -1,0 +1,83 @@
+{
+  "schema": 2,
+  "name": "Hellfire dungeon conversion: shattered-halls normal health and corpse loot",
+  "contract": [
+    "Use the real instance and native difficulty selection. Access is bypassed only by this fixture; live requirements are unchanged.",
+    "The boss has its exact level-63 per-mode health budget and the corpse offers equipment at the selected item level."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 2296.01,
+    "y": -5340.98,
+    "z": 90.8799
+  },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "tester",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_health",
+      "actor": "tester",
+      "maximum": 2000000000,
+      "value": 2000000000
+    },
+    {
+      "action": "teleport",
+      "actor": "tester",
+      "map": 540,
+      "x": 234.25,
+      "y": -83.6449,
+      "z": 5.02341,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "nearby_creature_max_health",
+      "entry": 16808,
+      "equals": 1016968
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "tester",
+      "entry": 16808,
+      "kill": true
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "tester",
+      "entry": 16808
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "loot_gear_item_level",
+      "equals": 65
+    }
+  ]
+}

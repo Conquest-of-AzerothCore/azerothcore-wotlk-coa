@@ -1,0 +1,16 @@
+UPDATE `dungeon_access_template`
+SET `min_level` = 60
+WHERE `map_id` IN (540, 542, 543) AND `difficulty` IN (0, 1, 2) AND `min_level` > 60;
+
+DELETE FROM `lfgdungeons_dbc` WHERE `ID` IN (136, 137, 138, 187, 188, 189, 268, 269, 270);
+INSERT INTO `lfgdungeons_dbc` (`ID`, `Name_Lang_enUS`, `Name_Lang_enGB`, `Name_Lang_koKR`, `Name_Lang_frFR`, `Name_Lang_deDE`, `Name_Lang_enCN`, `Name_Lang_zhCN`, `Name_Lang_enTW`, `Name_Lang_zhTW`, `Name_Lang_esES`, `Name_Lang_esMX`, `Name_Lang_ruRU`, `Name_Lang_ptPT`, `Name_Lang_ptBR`, `Name_Lang_itIT`, `Name_Lang_Unk`, `Name_Lang_Mask`, `MinLevel`, `MaxLevel`, `Target_Level`, `Target_Level_Min`, `Target_Level_Max`, `MapID`, `Difficulty`, `Flags`, `TypeID`, `Faction`, `TextureFilename`, `ExpansionLevel`, `Order_Index`, `Group_Id`, `Description_Lang_enUS`, `Description_Lang_enGB`, `Description_Lang_koKR`, `Description_Lang_frFR`, `Description_Lang_deDE`, `Description_Lang_enCN`, `Description_Lang_zhCN`, `Description_Lang_enTW`, `Description_Lang_zhTW`, `Description_Lang_esES`, `Description_Lang_esMX`, `Description_Lang_ruRU`, `Description_Lang_ptPT`, `Description_Lang_ptBR`, `Description_Lang_itIT`, `Description_Lang_Unk`, `Description_Lang_Mask`)
+VALUES
+(136, 'Hellfire Ramparts', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 58, 70, 60, 60, 60, 543, 0, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 2, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(137, 'Blood Furnace', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 58, 70, 60, 60, 60, 542, 0, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 2, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(138, 'Shattered Halls', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 58, 70, 60, 60, 60, 540, 0, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 2, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(187, 'Blood Furnace', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 60, 70, 60, 60, 60, 542, 1, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 3, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(188, 'Hellfire Ramparts', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 60, 70, 60, 60, 60, 543, 1, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 3, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(189, 'Shattered Halls', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 60, 70, 60, 60, 60, 540, 1, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 3, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(268, 'Blood Furnace', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 60, 70, 60, 60, 60, 542, 2, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 10, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(269, 'Hellfire Ramparts', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 60, 70, 60, 60, 60, 543, 2, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 10, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188),
+(270, 'Shattered Halls', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712190, 60, 70, 60, 60, 60, 540, 2, 3, 1, -1, 'HELLFIRECITADEL', 1, 0, 10, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 16712188);

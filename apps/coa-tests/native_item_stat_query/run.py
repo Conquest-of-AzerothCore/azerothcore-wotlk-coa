@@ -42,6 +42,7 @@ def main():
     source = (ROOT / 'src/server/coa/AscensionNativeItemScaling.cpp').read_text(encoding='utf-8')
     check_wiring(source)
     harness = (HERE / 'harness.cpp').read_text(encoding='utf-8')
+    harness = harness.replace('// ACTUAL_CLIENT_LEVEL', method(source, 'uint32 ClientLevel('))
     harness = harness.replace('// ACTUAL_PENDING_QUERIES', pending_queries(source))
     compiler = shutil.which(os.environ.get('CXX', 'cl.exe' if os.name == 'nt' else 'c++'))
     assert compiler, 'Enable a C++20 compiler.'

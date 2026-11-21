@@ -14,6 +14,7 @@
 #include "AscensionRemovedSpellActionBars.h"
 #include "AscensionRulesets.h"
 #include "AscensionItemScaling.h"
+#include "CoADungeonRescale.h"
 #include "AscensionPyromancer.h"
 #include "AscensionCultist.h"
 #include "AscensionVenomancer.h"
@@ -4879,7 +4880,8 @@ private:
 
     static std::optional<ItemPatchRow> FindItemRow(PreparedPatchRows const& rows, uint32 itemId)
     {
-        if (rows.SqlItemIds.contains(itemId) && !Ascension::ClientItemPatches::Instance().Contains(itemId))
+        if (rows.SqlItemIds.contains(itemId) && !Ascension::ClientItemPatches::Instance().Contains(itemId) &&
+            !DungeonRescale::OwnsItem(itemId))
             return std::nullopt;
         if (auto const row = rows.ItemRowIndexById.find(itemId); row != rows.ItemRowIndexById.end())
             return rows.Items[row->second];

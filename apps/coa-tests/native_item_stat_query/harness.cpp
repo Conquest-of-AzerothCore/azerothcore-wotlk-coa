@@ -11,12 +11,20 @@
 #include <vector>
 
 using uint32 = std::uint32_t;
+using uint8 = std::uint8_t;
 
 struct ItemTemplate
 {
     uint32 ItemId = 0;
     uint32 ItemLevel = 0;
     uint32 Armor = 0;
+};
+
+struct Item
+{
+    ItemTemplate const* proto;
+    uint8 stored;
+    ItemTemplate const* GetTemplate() const { return proto; }
 };
 
 class WorldPacket
@@ -29,6 +37,9 @@ public:
 
     template <typename T>
     T read(std::size_t position) const { return T(words.at(position / sizeof(uint32))); }
+
+    template <typename T>
+    void put(std::size_t position, T value) { words.at(position / sizeof(uint32)) = uint32(value); }
 
     std::vector<uint32> words;
     bool stock = false;
@@ -99,10 +110,17 @@ Row StockRow(ItemTemplate const& proto, uint32 armorReborn)
 WorldPacket BuildItemStatResponse(uint32 itemId, uint32 level, Row const& row, ItemTemplate const*)
 {
     WorldPacket packet(itemId, level);
+    packet.words.insert(packet.words.end(), {itemId, level});
     packet.stock = row.Armor == objectMgr.items.at(itemId).Armor;
     packet.armorReborn = row.ArmorReborn;
     return packet;
 }
+}
+
+namespace ZoneScaling
+{
+std::set<uint32> owned;
+bool OwnsItem(uint32 entry) { return owned.contains(entry); }
 }
 
 namespace NativeItemScaling
@@ -137,6 +155,11 @@ public:
     std::map<std::pair<uint32, uint32>, ItemLadder::Row> rows;
 };
 
+uint8 StoredLevel(Item const* item) { return item->stored; }
+bool IsScalingItem(ItemTemplate const* proto) { return !ZoneScaling::OwnsItem(proto->ItemId); }
+
+// ACTUAL_CLIENT_LEVEL
+
 // ACTUAL_PENDING_QUERIES
 }
 
@@ -158,6 +181,8 @@ void Check(bool value, char const* name)
 
 void Reset()
 {
+    NativeItemScaling::enabled = true;
+    ZoneScaling::owned.clear();
     NativeItemScaling::preview = true;
     NativeItemScaling::rebornArmor = false;
     for (uint32 account = 0; account < 64; ++account)
@@ -270,6 +295,40 @@ void TestMalformedAndUnknownQueriesAreIgnored()
         "short, level-zero, unknown and session-less queries are ignored");
 }
 
+void TestFixedItemsBypassNativeLadders()
+{
+    Reset();
+    WorldSession session(10);
+    ZoneScaling::owned.insert(Helm);
+    NativeItemScaling::rebornArmor = true;
+    for (uint32 budget : {65u, 68u, 71u})
+    {
+        objectMgr.items[Helm].ItemLevel = budget;
+        for (uint8 stored : {uint8(0), uint8(2)})
+        {
+            Item item{&objectMgr.items.at(Helm), stored};
+            Check(NativeItemScaling::ClientLevel(&item) == budget,
+                "fixed owned items advertise their actual budget instead of a stale native key");
+        }
+        for (uint32 key : {2u, 30u, 65u, 71u})
+        {
+            NativeItemScaling::HandleItemStatQuery(&session, WorldPacket(Helm, key));
+            Check(!session.sent.empty() && session.sent.back().stock &&
+                session.sent.back().read<uint32>(4) == key && session.sent.back().read<uint32>(12) == budget,
+                "fixed gear preserves the preview cache key but sends its actual budget and stock stats");
+            Check(session.sent.back().armorReborn == objectMgr.items.at(Helm).Armor,
+                "fixed gear does not regain original unscaled reborn armor");
+        }
+    }
+    NativeItemScaling::enabled = false;
+    NativeItemScaling::HandleItemStatQuery(&session, WorldPacket(Helm, 2));
+    Check(session.sent.size() == 13 && session.sent.back().stock,
+        "fixed budget replies remain available when native scaling is disabled");
+    Check(!session.playerReads && !NativeItemScaling::pendingStatQueries.Size(),
+        "fixed budget replies do not read character state or wait for ownership checks");
+    objectMgr.items[Helm].ItemLevel = BaseLevel;
+}
+
 void TestDeferredSetIsBounded()
 {
     Reset();
@@ -327,6 +386,7 @@ int main()
     TestPreviewOffAnswersAtOnce();
     TestStockRowKeepsRebornArmor();
     TestMalformedAndUnknownQueriesAreIgnored();
+    TestFixedItemsBypassNativeLadders();
     TestDeferredSetIsBounded();
     TestConcurrentQueriesAndUpdates();
     std::cout << checks - failures << '/' << checks << " native item stat query checks passed\n";

@@ -1,0 +1,120 @@
+{
+  "schema": 2,
+  "name": "Hellfire scope: restore excluded shared equipment affixes",
+  "contract": [
+    "A previously converted shared world drop restores its original valid affix on inventory load.",
+    "Repeated relogs preserve the restored affix. Unrelated Tier 1 gear is unchanged."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 2296.01,
+    "y": -5340.98,
+    "z": 90.8799
+  },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 24575
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "tester",
+      "item": 24575,
+      "property": 400
+    },
+    {
+      "action": "equip",
+      "actor": "tester",
+      "item": 24575,
+      "slot": 5
+    },
+    {
+      "action": "relog",
+      "actor": "tester"
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "item_random_property",
+      "item": 24575,
+      "equals": 8600
+    },
+    {
+      "action": "relog",
+      "actor": "tester"
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "item_random_property",
+      "item": 24575,
+      "equals": 8600
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 24589
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "tester",
+      "item": 24589,
+      "property": 8600
+    },
+    {
+      "action": "relog",
+      "actor": "tester"
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "item_random_property",
+      "item": 24589,
+      "equals": 8600
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 25030
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "item_suffix_factor",
+      "item": 25030,
+      "equals": 21
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 16800
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "tester",
+      "item": 16800,
+      "property": 8600
+    },
+    {
+      "action": "relog",
+      "actor": "tester"
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "item_random_property",
+      "item": 16800,
+      "equals": 8600
+    }
+  ]
+}
