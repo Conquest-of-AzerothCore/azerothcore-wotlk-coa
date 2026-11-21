@@ -105,6 +105,26 @@
       "within_ms": 1000
     },
     {
+      "action": "wait",
+      "label": "Past the next Venomancer and cosmetic refresh ticks",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation is still shown after the refresh ticks",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 1083
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form Lord is still applied after the refresh ticks",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805139,
+      "equals": 1
+    },
+    {
       "action": "apply_appearances",
       "label": "Clear the selection inside Beetle Form",
       "actor": "v",

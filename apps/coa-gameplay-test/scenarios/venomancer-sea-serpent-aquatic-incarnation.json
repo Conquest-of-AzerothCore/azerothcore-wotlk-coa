@@ -85,6 +85,18 @@
       "within_ms": 1000
     },
     {
+      "action": "wait",
+      "label": "Past the next Venomancer and cosmetic refresh ticks",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation is still shown after the refresh ticks",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887
+    },
+    {
       "action": "cancel_aura",
       "label": "Leave Sea Serpent Form",
       "actor": "v",
@@ -129,6 +141,18 @@
       "metric": "display_id",
       "equals": 48887,
       "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Past the next Venomancer and cosmetic refresh ticks",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation stays after logging in again",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887
     },
     {
       "action": "apply_appearances",
