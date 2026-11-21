@@ -32,9 +32,11 @@ swap placement rows (rank text) for custom classes (0x092A, built from the serve
 (0x064A), spellbook custom attributes (0x05F4), Mythic+ data and `QuestSuperTrack` rows with race restrictions
 (0x06BF; the client file carries the all-race version). The server owns Vanity Store prices: at login it streams a
 `VanityCollection` row (0x0573) for every `coa_client_vanity_collection` item that has a client row, with the
-realm's Donation Point, Seasonal Point and Bazaar Token prices in fields 4 to 6, and it charges a purchase from the
-same table, never from a price the client sends. The client file's prices are only a fallback for a client that
-has not received the stream. Lua hot patches, global strings, Tutorial, cosmetic pets, Destiny Weaver displays,
+realm's Donation Point, Seasonal Point and Bazaar Token prices in fields 4 to 6. The client file's prices are only
+a fallback for a client that has not received the stream. Only Bazaar Token purchases are charged in game: the
+server takes the price from `coa_client_vanity_collection` (or the DBC when the item has no row), never from the
+client. A Donation Point request only delivers an item the account already owns, and Seasonal Point requests are
+ignored. Lua hot patches, global strings, Tutorial, cosmetic pets, Destiny Weaver displays,
 Manastorm rows and woodworking appearances still stream.
 `CoA.SendDisplayPatches` gates the per-player rows.
 
