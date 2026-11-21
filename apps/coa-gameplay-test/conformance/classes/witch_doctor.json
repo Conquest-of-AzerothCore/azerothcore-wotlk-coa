@@ -24046,6 +24046,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "before_expected": 0,
@@ -24053,7 +24059,7 @@
       "tolerance": 0.01,
       "wait_ms": 6600,
       "expire_ms": 4500,
-      "observe_source": "The ticks entry layout (92084 learned at the start, a real Malefic Wrath 807037 lays the Threads, a real Bad Juju 802087 2500 ms later, 705910 learned between the phases, read 6600 ms after the Juju: 2750 ms to the hit plus three 1000 ms ticks plus margin). Reading: the Voodoo Strings 706898 damage on the dummy divided by the Bad Juju 802087 damage on the dummy; both are running totals, so the after reading divides the after-phase increase of each (ratio_to_metric increments). Expected (tooltip, read as a per-strike amount): \"strikes an additional time every $706898T1 sec for 30% of the damage dealt over $706898d\" states the amount of each strike as in the stock \"deals X every T sec over D\" form, so three strikes carry 3 x 30% = 0.90 of the Juju hit; the code gives each tick damage x 30 / 100 (AscensionWitchDoctorAbilities.cpp:263-264, Copy: the base point is the tick amount). The other reading (30% in all) would read 0.30: the entry separates the two and records the per-strike reading; if the owner rules 30% in all, expected becomes 0.30 and the server alerts. Reg's Test Aura 984954 (spell crit -1000, pitfall 21) on the caster in both phases keeps the ticks and the Juju non-critical, a precondition fixture. Tolerance 0.01: each tick truncates to an integer (at most 3 / Juju damage, about 0.006). Control: the before phase without 705910 reads no strike, 0. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Cycle 11 decision M-70: \"for 30% of the damage dealt over $706898d\" is the total over the three strikes, the stock \"X over D\" form, and the live Details aggregate agrees (about 10% per strike: a 2068 critical Juju gave strikes up to 206), so the expected ratio is 0.30."
+      "observe_source": "The ticks entry layout (92084 learned at the start, a real Malefic Wrath 807037 lays the Threads, a real Bad Juju 802087 2500 ms later, 705910 learned between the phases, read 6600 ms after the Juju: 2750 ms to the hit plus three 1000 ms ticks plus margin). Reading: the Voodoo Strings 706898 damage on the dummy divided by the Bad Juju 802087 damage on the dummy; both are running totals, so the after reading divides the after-phase increase of each (ratio_to_metric increments). Expected (tooltip, read as a per-strike amount): \"strikes an additional time every $706898T1 sec for 30% of the damage dealt over $706898d\" states the amount of each strike as in the stock \"deals X every T sec over D\" form, so three strikes carry 3 x 30% = 0.90 of the Juju hit; the code gives each tick damage x 30 / 100 (AscensionWitchDoctorAbilities.cpp:263-264, Copy: the base point is the tick amount). The other reading (30% in all) would read 0.30: the entry separates the two and records the per-strike reading; if the owner rules 30% in all, expected becomes 0.30 and the server alerts. Reg's Test Aura 984954 (spell crit -1000, pitfall 21) on the caster in both phases keeps the ticks and the Juju non-critical, a precondition fixture. Tolerance 0.01: each tick truncates to an integer (at most 3 / Juju damage, about 0.006). Control: the before phase without 705910 reads no strike, 0. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Cycle 11 decision M-70: \"for 30% of the damage dealt over $706898d\" is the total over the three strikes, the stock \"X over D\" form, and the live Details aggregate agrees (about 10% per strike: a 2068 critical Juju gave strikes up to 206), so the expected ratio is 0.30. Repair (cycle 11, run 20261121-232009): the strikes are Nature damage and the dummy partially resisted them at random (55 of the 63 the three floor(212 x 10%) strikes give), so the caster carries 823764 (target resistance -9999 on the magic schools) in both phases, a precondition fixture; three strikes of 21 on a 212 Juju read 0.297."
     },
     {
       "spell": 801690,
