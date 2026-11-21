@@ -28,6 +28,7 @@ class HitPeriodSpec:
     poll_ms: int = 1
     label_suffix: str = 'hit_period'
     setup_casts: tuple[tuple[str, int, str, int], ...] = ()
+    learn: tuple[int, ...] = ()
 
 
 SETUP_ACTORS = (CASTER, TARGET)
@@ -60,7 +61,8 @@ def hit_period_spec(entry: dict) -> HitPeriodSpec:
                          tuple(int(value) for value in entry['window']),
                          tuple((int(spell), str(on)) for spell, on in entry.get('fixtures', ())),
                          int(entry.get('poll_ms', 1)), entry.get('label_suffix', 'hit_period'),
-                         tuple(setup_cast(raw) for raw in entry.get('setup_casts', ())))
+                         tuple(setup_cast(raw) for raw in entry.get('setup_casts', ())),
+                         tuple(int(spell) for spell in entry.get('learn', ())))
     low, high = spec.window
     if not 0 <= low < high or high - low < 2 * spec.expected_ms:
         raise ValueError(f'{spec.spell} hit_period polls a window of at least two periods after the cast')
@@ -75,7 +77,7 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
                  **({'target': on, 'caster': CASTER} if on != CASTER else {})} for spell, on in spec.fixtures]
     control = cast_period_label(spec, 'control')
     start = cast_period_label(spec, 'start')
-    learned = dict.fromkeys([spec.trigger_spell,
+    learned = dict.fromkeys([spec.trigger_spell, *spec.learn,
                              *(spell for actor, spell, _, _ in spec.setup_casts if actor == CASTER)])
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
              + fixtures + [measurement(control, CASTER, PULSE_TARGETS_METRIC, spell=spec.hit_spell, target=TARGET)]
@@ -118,11 +120,12 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
 
 
 def setup_text(spec: HitPeriodSpec) -> str:
+    learned = f'; {list(spec.learn)} learned at the start' if spec.learn else ''
     if not spec.setup_casts:
-        return ''
+        return learned
     casts = ', '.join(f'{actor} casts {spell} at {target}, {wait_ms} ms' for actor, spell, target, wait_ms
                       in spec.setup_casts)
-    return f'; real setup casts after the control read, before the cast: {casts}'
+    return f'{learned}; real setup casts after the control read, before the cast: {casts}'
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

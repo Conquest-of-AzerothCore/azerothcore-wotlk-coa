@@ -67,3 +67,10 @@ class HitPeriodTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(load_class_file(13), {**ECLIPSE_PERIOD, 'setup_casts': [
                 {'actor': 'ally', 'spell': 132, 'target': 'dummy', 'wait_ms': 300}]})
+
+    def test_learn_adds_learned_spells_before_the_control_read(self):
+        entry = {**ECLIPSE_PERIOD, 'setup_casts': [], 'learn': [560545]}
+        scenario, _ = behaviour_scenario(load_class_file(13), entry)
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learned, [811117, 560545])
+        self.assertIn('[560545] learned at the start', scenario['contract'])

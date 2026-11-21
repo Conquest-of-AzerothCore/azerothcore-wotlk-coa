@@ -9,3 +9,7 @@ A cast's hits on the dummy are polled with game-time stamps; (last - first) / (n
 wait; a caster cast gets its base mana (or flat cost) and a cooldown reset first, and its spell is learned at the
 start. Use it when the period needs a state a real cast makes (Spirit Eclipse 811117 `eclipse_period`: a real Mirage
 501136 makes five Spirits, and the dummy casts Detect Invisibility 132 so the invisible caster can target it).
+
+`learn` (absent by default): spells learned at the start with the trigger, for a period a passive talent changes; a
+second entry without it is the control (Dark Loa's Blessing 560545 `puppets_period` and `puppets_period_control`:
+Shadow Puppets 501087 hits every 600 ms with the talent, 750 ms without).
