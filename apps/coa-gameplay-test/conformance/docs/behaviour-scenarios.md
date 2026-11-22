@@ -2121,7 +2121,7 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`disease_copy`](kinds/disease_copy.md): a disease copied by a snapshot ability, its amount and duration kept against
   a fresh cast after a spell power raise (ADR 0622)
 - [`effectiveness_delta`](kinds/effectiveness_delta.md): an effect cast without and with the modifier that raises its
-  effectiveness (ADR 0601)
+  effectiveness (ADR 0601; a slow read as the run speed rate, ADR 1160, provisional)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`extra_strikes`](kinds/extra_strikes.md): the strikes an off-hand proc adds, counted per proc against a control
   without the talent (ADR 0693, provisional)
@@ -2149,6 +2149,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   0550)
 - [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast
   ends (ADR 0543, ADR 0546, ADR 0570)
+- [`pick_effect`](kinds/pick_effect.md): each aura of a random pick, read for its stated change in the trials of a
+  real cast that left it and for no change in the others (ADR 1163, provisional)
 - [`radius_edge`](kinds/radius_edge.md): an area radius bracketed by dummies 0.5 yd inside and beyond its edge (ADR
   0592)
 - [`shot_ramp`](kinds/shot_ramp.md): each shot of a chained channel against its first, by the stacks the earlier
@@ -2234,7 +2236,10 @@ Options with a module:
 - [`refusable_target_casts`](metric_delta_options/refusable_target_casts.md): dummy casts after each trigger that may
   be refused with one stated code, their results read (ADR 1027, provisional)
 - [`after_trigger_casts`](metric_delta_options/after_trigger_casts.md): real casts by the caster after the treatment
-  trigger, at a unit or at a unit's position (ADR 1028, provisional)
+  trigger, at a unit or at a unit's position (ADR 1028, provisional); per cast also in the control phase and with
+  its cooldown left running (ADR 1161, provisional)
+- [`ally_player`](metric_delta_options/ally_player.md): a grouped ally player of another class as the trigger target
+  and measured unit, its power emptied per phase (ADR 1162, provisional)
 - [`phase_since`](metric_delta_options/phase_since.md): each judged reading and its ratio base counted from right
   before its own phase's trigger cast (ADR 1130, provisional)
 - [`after_target_health`](metric_delta_options/after_target_health.md): the dummy's health set in the treatment phase
