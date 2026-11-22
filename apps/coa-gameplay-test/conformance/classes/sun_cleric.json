@@ -4764,7 +4764,7 @@
       },
       "critical": false,
       "trials": 20,
-      "parts": 45,
+      "parts": 72,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Rapture 806477 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
