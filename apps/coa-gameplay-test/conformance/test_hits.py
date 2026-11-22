@@ -1839,6 +1839,7 @@ class ValueSpellRollTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(self.witch_hunter, self.entry(value_rolls='yes'))
 
+from test_script_hit_engage import ScriptHitEngageTests  # noqa: E402,F401
 from test_tooltip_corrections import OnlyInsertedTests, TooltipCorrectionTests  # noqa: E402,F401
 
 

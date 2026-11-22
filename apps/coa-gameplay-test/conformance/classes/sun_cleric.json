@@ -37566,7 +37566,7 @@
       "name": "Censure (chain to a nearby enemy, with a control arm before the learn)",
       "kind": "timer_spacing_arms",
       "variant": "chain_control",
-      "label_suffix": "chain",
+      "label_suffix": "chain_control",
       "quote": "Dealing direct damage to an enemy affected by Chains of Light will now cause it to chain to a nearby enemy.",
       "timer_ms": 1000,
       "gaps": [

@@ -36,3 +36,7 @@ The one correction recorded (Sun Cleric, D-166):
 - The client tooltip still lacks the operator: a cosmetic typo for the owner.
 - Seeded tests: the correction yields a readable amount, the bare class file stays unreadable, a changed figure or a
   missing ruling is refused.
+
+## Addendum 2026-11-22: the script hit striker is engaged (round B design 2)
+
+The first run of the 560492 entries read no 560493 hit in either arm: with `caster_avoidance`, `script_hit` set the avoidance but nothing engaged its hostile striker, so it never swung (no entry had used the option before). The caster now engages it once (`set_combat_avoidance`, `attack`, 2800 ms, `stop_attack`, the `proc_avoided` engage) before the control trials, and an assert at the end requires 0 own melee swings since the engage, so the caster's auto attack cannot be a trigger source. Only entries with `caster_avoidance` change; no finished class has one.
