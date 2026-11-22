@@ -26003,18 +26003,23 @@
       "fields": {
         "spell": 806477
       },
-      "before_expected": 14500,
-      "expected": 7583,
+      "before_expected": 15000,
+      "expected": 7838,
       "tolerance": 300,
-      "wait_ms": 8500,
+      "wait_ms": 8000,
       "expire_ms": 26000,
       "game_time": {
         "after": [
-          8400,
-          8700
+          7900,
+          8200
         ]
       },
-      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: 7624 at eps 0, 7583 at eps 100, 7542 at eps 200 ms, the cooldown starting at the end of the 3000 ms cast, five ticks after it. A tick of 8% reads 8761 and 12% reads 6591 (eps 0), more than 1000 ms away; tolerance 300 ms is below 10% of the reading (758 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50)."
+      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: 7624 at eps 0, 7583 at eps 100, 7542 at eps 200 ms, the cooldown starting at the end of the 3000 ms cast, five ticks after it. A tick of 8% reads 8761 and 12% reads 6591 (eps 0), more than 1000 ms away; tolerance 300 ms is below 10% of the reading (758 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50). Design 2 (the first run read 6436 against 7583: the tick grid fell on the end of the 3000 ms cast, a sixth tick landed at the cooldown start). A setup cast of Holy Form 805301 and its 1600 ms wait before the Rapture cast shift the grid by 600 ms, so after the cooldown starts (read 5000 ms later, 8000 ms after the cast) the ticks fall at about 400, 1400, 2400, 3400 and 4400 ms minus eps (0 to 200): 7797, 7838 and 7879 at eps 200, 100 and 0; 8% reads about 9000 and 12% about 6760, more than 1000 ms away; the read before the learn is 20000 - 5000 = 15000.",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600
     },
     {
       "spell": 300361,
@@ -26039,18 +26044,23 @@
       "fields": {
         "spell": 806477
       },
-      "before_expected": 14500,
-      "expected": 14500,
+      "before_expected": 15000,
+      "expected": 15000,
       "tolerance": 300,
-      "wait_ms": 8500,
+      "wait_ms": 8000,
       "expire_ms": 26000,
       "game_time": {
         "after": [
-          8400,
-          8700
+          7900,
+          8200
         ]
       },
-      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: no tick reduces it: 20000 - (8500 - 3000) = 14500. A tick of 8% reads 8761 and 12% reads 6591 (eps 0), more than 1000 ms away; tolerance 300 ms is below 10% of the reading (1450 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50)."
+      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: no tick reduces it: 20000 - (8500 - 3000) = 14500. A tick of 8% reads 8761 and 12% reads 6591 (eps 0), more than 1000 ms away; tolerance 300 ms is below 10% of the reading (1450 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50).",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600
     },
     {
       "spell": 704585,
@@ -26148,7 +26158,7 @@
         "spell_power": 5000
       },
       "cast_power": 1000,
-      "cast_wait_ms": 1700,
+      "cast_wait_ms": 3500,
       "expected_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[0] aura 136 MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1 = +10% healing, so with 800602 the effect is +20%: a Daybreak 503624 heal (non-critical, bonus healing fixture 5000) is x1.20 with the passive and x1.10 without, ratio 1.20 / 1.10 = 1.090909. Holy Form is set on the caster before every heal as a named precondition (set_aura of 805301, not the claim's own aura 800602; a real cast every trial would wait out its 10 s cooldown, beyond one scenario at the 20-trial pilot): its effect amount is computed with the spell modifiers in force. Control arm: 800602 not known; treatment: 800602 learned. The 10-trial pair of the Holy Form healing entry holds the same shape (805301 healing, expected 1.1). Reference search 2026-11-22: coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only \"Doubles the effectiveness of your Holy Form.\" (agrees; the Ancient Rites sentence is a later state)."
     },
     {

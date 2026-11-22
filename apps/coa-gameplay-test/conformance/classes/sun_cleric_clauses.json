@@ -631,7 +631,7 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "the remaining cooldown of Rapture is reduced by $301176s2% (10%, 20000 ms Rapture read 8500 ms after its cast: 7583 within 300 ms against 8761 at 8% and 6591 at 12%)",
+        "claim": "the remaining cooldown of Rapture is reduced by $301176s2% (10%, 20000 ms Rapture read 5000 ms after its cooldown starts: about 7838 within 300 ms against about 9000 at 8% and 6760 at 12%)",
         "labels": [
           "300361 effect_value 301176e1 #2",
           "300361 behaviour_metric_delta sunset_rapture",
