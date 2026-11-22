@@ -1761,10 +1761,6 @@ class ControlWeaponCompareTest(unittest.TestCase):
         self.assertIn('control weapon was not judged', verdict.explanation)
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 HEAL_GUARDS = {'ally total': '92111 proc heal ally total', 'ally effective': '92111 proc heal ally effective',
                'caster effective': '92111 proc heal caster effective'}
 
@@ -1844,3 +1840,7 @@ class EffectiveHealCompareTest(unittest.TestCase):
 
     def test_mutant_counting_events_that_never_roll_alerts(self):
         self.assertEqual(self.verdict(events=680).status, 'alert')
+
+
+if __name__ == '__main__':
+    unittest.main()
