@@ -185,7 +185,7 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
         'contract': (f'{spec.spell} is learned. Control trials cancel {spec.aura} and cast {spec.effect_spell}; '
                      f'treatment trials cast {spec.feed_spell} every {spec.every_ms} ms (cast_until_aura, at most '
                      f'{max_casts} casts: miss chance per cast {miss:.4f} from ProcChance and '
-                     f'{feed_ticks(records, spec.feed_spell)} ticks, residual target {spec.residual_target:g} per '
+                     f'{feed_ticks(records, spec.feed_spell, spec.variant)} ticks, residual target {spec.residual_target:g} per '
                      f'pair) until {spec.aura} is on the caster, then cast {spec.effect_spell}; the aura is never '
                      f'set by the harness. Each trial reads {spec.aura} right before the judged cast; a trial whose '
                      f'read disagrees with its arm makes the run unmeasured. {expected_text}.'),
