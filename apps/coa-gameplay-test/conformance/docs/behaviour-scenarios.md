@@ -1494,6 +1494,8 @@ it, the ally gains none and the caster some: the whole of the ally's threat goes
 
 ### Script-cast hits (`hit_mean`, `kind: "script_hit"`)
 
+The class file key `tooltip_corrections` (`{"<spell>": {"text": ..., "ruling": ...}}`, ADR 1042, provisional) replaces the Description that a script hit reads its amount from, only for a spell with a recorded ruling and only when the text is the DBC Description with `+` operators inserted; anything else is refused. Sun Cleric: Protector of the Flame 560492 (D-166). No finished class uses it.
+
 A tooltip may state the amount of a hit that a class script casts on an event, such as a pulse on a heal or a
 strike when a shield breaks (ADR 0160). `hit_spell` is the spell the script casts and `spell` the passive whose
 tooltip shows its amount. Every trial sets `caster_auras` on the caster, holds the caster at `caster_health_pct`
@@ -1502,7 +1504,7 @@ and, with `strike_spell`, has a passive, stationary striker (creature `striker_e
 caster; with `caster_avoidance` (`{"dodge": percent, "parry": percent}`, ADR 1028) it instead sets the caster's
 avoidance with `set_combat_avoidance` at the start of every trial while a hostile, stationary melee striker (creature
 `striker_entry`, `reaction` 2) swings at it, so an avoided swing can set off the script, and the striker can be the
-`receiver` (refused with `strike_spell`); it then waits `settle_ms` (default 500). `trials` trials run without
+`receiver` (refused with `strike_spell`). The caster engages that striker once with its auto attack for 2800 ms before the control trials (ADR 1042, provisional, round B design 2: without it the striker never swings), and its own melee swings after the engage must be 0 at the end, or the run fails before its reads; it then waits `settle_ms` (default 500). `trials` trials run without
 `spell` known (the control arm,
 whose `hit_spell` hits on the `receiver` must count 0) and `trials` with it. The `receiver` is the dummy or the
 striker; its armor, view level and resistances are read for the mitigation model. `weapon_only: true` (ADR 0742,

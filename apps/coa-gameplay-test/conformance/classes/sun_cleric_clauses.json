@@ -927,9 +927,9 @@
     "clause": "Dealing direct damage to an enemy affected by Chains of Light will now cause it to chain to a nearby enemy.",
     "kind": "claim",
     "labels": [
-      "300371 behaviour_metric_delta chain"
+      "300371 behaviour_metric_delta chain_control"
     ],
-    "reason": "Open: label 300371 behaviour_metric_delta chain is unmeasured; row 59 shows copies spreading but without a no-300371 control. Tool need: a spread_per_crit hit-count mode, or a control arm without 300371 on timer_spacing_arms. Reference search 2026-11-22: coa-history spell 300371: 0 events in 186 logs (a passive); nothing else found."
+    "reason": "Measured, no final status written (the mentor reads first). Pair 20261122 rb2 A / B (round B b2; build sha256 cd51ba647a8b, server commit 0cee211aace1, batches defaee5d682d / 841687ce9607, simulated clock), no flip, cast_failures empty in every result. Entry timer_spacing_arms variant chain_control (ADR 1044, provisional): a control arm before 300371 is learned seeds Chains of Light 801524 and makes two Horusath Blast 572801 hits 1062 / 1062 ms apart: 0 new copies on the six spares in both runs; then 1 copy at 952 / 968 ms and 2 at 1064 / 1045 ms with 300371 learned; ok in both runs. The earlier label 300371 behaviour_metric_delta chain (spread_per_crit, no critical hit in its control) stays unmeasured and is no longer cited. Reference search: see the entry observe_source; nothing new found."
   },
   {
     "spell": 300371,
@@ -2358,17 +2358,28 @@
     "spell": 560492,
     "clause": "Avoiding an attack now also deals ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} Fire damage to the attacker.",
     "labels": [
-      "560492 effect_value #0"
+      "560492 script_hit 560493 flame",
+      "560492 script_hit 560493 flame_sp",
+      "560492 script_hit 560493 flame_ap"
     ],
     "kind": "claim",
-    "reason": "Open (tool need, no entry written): (1) the token ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} has no '+' before $spfi, so the tool reads it as unreadable and no expected amount comes from data; the coefficients 0.12 and 0.03 match the class data (AscensionSunClericData.h:82), so the likely intended form is base x $<scalingbp> + $spfi x 0.12 + $AP x 0.03, a text correction that needs an owner ruling (only 'srtike' of 572885 is ruled, D-162). Reference search 2026-11-22: coa-history spell 560492: 0 events (a passive); 560493 Protector of the Flame: 1,083 SPELL_DAMAGE (min 1, max 1052, mean 233.0, 228 crits) and 2 SPELL_MISSED in 6 logs, which carry no coefficient, so they neither confirm nor contradict the 0.12 and 0.03; nothing else found. (2) script_hit has no avoided-attack trigger: Protector fires on a Miss, Dodge or Parry of the caster (AscensionSunClericEvents.cpp:72,100, one per 1000 ms), and the only avoidance forcing is set_combat_avoidance (caster_avoidance of taken_outcome, ADR 0900 procs), which script_hit does not take: a tool addition, held for a design note."
+    "reason": "Measured, no final status written (the mentor reads first). Pair 20261122 rb2 A / B (round B b2; build sha256 cd51ba647a8b, server commit 0cee211aace1, batches defaee5d682d / 841687ce9607, simulated clock), no flip, cast_failures empty in every result. Three script_hit entries read the non-critical 560493 hits on one engaged striker 36 (caster dodge 50 / parry 50, 1100 ms trials, control arm without 560492: 0 hits in all six arms), against the tooltip read as corrected by D-166 at the measured stats and mitigation: base 48.54 / 47.42 against 48.65 (13 / 12 hits), +SP (10062 x6) 112.0 / 105.17 against 112.2 (14 / 12), +AP (10031) 76.75 / 76.15 against 75.05 (12 / 13), all ok. Divided by the modelled mitigation 0.878 (48.65 / 55.42), the measured gains give a spell power slope of 0.1205 / 0.1096 and an attack power slope of 0.0321 / 0.0327 (D-166 asks 0.12 and 0.03; sample means of 12 to 14 hits, so these slopes are indications, the verdicts are the judged values). First design (script_hit caster_avoidance without an engage) read 0 hits in both arms; design 2 engages the striker once and guards the caster's own swings at 0. The effect_value #0 label (unreadable token) is no longer cited. Reference search: see the entry observe_source; nothing new found.",
+    "text_source": {
+      "basis": "text_correction",
+      "spell": 560492,
+      "ruling": "D-166 (mentor): the token is read as '+$spfi*0.12'; no client text change",
+      "dbc_differs": "Description: no '+' before $spfi; read with it through the class file tooltip_corrections (ADR 1042, provisional); no figure changes",
+      "record": "ledger clause keeps the DBC text; the corrected reading lives in tooltip_corrections"
+    }
   },
   {
     "spell": 560492,
     "clause": "Can only occur once per sec.",
-    "labels": [],
+    "labels": [
+      "560492 behaviour_metric_delta icd"
+    ],
     "kind": "claim",
-    "reason": "Open (tool need): the avoided-swing proc kind refuses swings spaced inside the 1000 ms cooldown (procs.py:567) and the internal_cooldown_gate kind casts its own trigger, which an avoided attack is not."
+    "reason": "Measured, no final status written (the mentor reads first). Pair 20261122 rb2 A / B (round B b2; build sha256 cd51ba647a8b, server commit 0cee211aace1, batches defaee5d682d / 841687ce9607, simulated clock), no flip, cast_failures empty in every result. Kind avoided_icd (ADR 1043, provisional): ten engaged strikers, every swing dodged, parried or missed; 10 control windows before the learn give 0 hits of 560493; after it 33 hits over 618 / 619 avoided swings, shortest interval 1006 / 1006 ms, median 1018 / 1018 ms, inside [950, 1050] (excludes a 900 or 1100 ms timer); ok in both runs. Residual stated in the contract: at most 2^-20 per run under independent uniform swing phases (an assumption). Reference search: see the entry observe_source; nothing new found."
   },
   {
     "spell": 560534,
@@ -3666,8 +3677,10 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Avoiding an attack now has a $h1% (25%) chance to regenerate mana (held open: see reason)",
-        "labels": []
+        "claim": "Avoiding an attack now has a $h1% (25%) chance to regenerate mana",
+        "labels": [
+          "680663 proc_rate avoided"
+        ]
       },
       {
         "claim": "$504876s1% (5) of your base mana: the amount restored per proc",
@@ -3677,7 +3690,7 @@
         ]
       }
     ],
-    "reason": "Held open (I-1 of the b9a review). The handler rolls the 25% on every avoided swing, miss, dodge or parry (AscensionSunClericEvents.cpp:72, PROC_HIT_MISS | PROC_HIT_DODGE | PROC_HIT_PARRY), while the avoided trigger counts dodge and parry only (proc_avoided.py TRIAL_STATES = dodged, parried) and no option puts the misses in the denominator or forces them to 0. The measured 21880 / 83444 = 0.2622 and 21932 / 83322 = 0.2632 sit above 0.25 by the structural factor 1 / (1 - m), m being the miss share, which the 2-point band hides. Tool need returned to the controller: count state 0 (miss) as a trial, or force the miss chance to 0 and guard it. Lead only, not a defect: the mana of the proc is energized under 504877 (Vow of Grace, AscensionSunCleric.h:51 default source) while the tooltip names 504876; coa-history spell 504876 has 0 events, so there is no live evidence and nothing is changed."
+    "reason": "Measured, no final status written (the mentor reads first). Pair 20261122 rb2 A / B (round B b2; build sha256 cd51ba647a8b, server commit 0cee211aace1, batches defaee5d682d / 841687ce9607, simulated clock), no flip, cast_failures empty in every result. count_misses (mentor D-175, ADR 1041 provisional): the trials are dodged + parried + missed swings, and every counted part read as many attacks taken as that sum (else void). 21950 / 87829 = 0.2499 and 21861 / 87837 = 0.2489, Wilson 0.9995 intervals [0.2449, 0.2550] and [0.2438, 0.2540] inside the band [0.23, 0.27], ok in both runs (residual target 0.001 per pair). The earlier 0.2622 / 0.2632 held the misses' procs over dodges and parries only (I-1 of the b9a review). Amount: 68 per energize in both runs (proc_energize_amount 0 ok). Reference search: see the entry observe_source; nothing new found."
   },
   {
     "spell": 680670,

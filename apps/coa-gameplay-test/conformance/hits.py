@@ -918,7 +918,8 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
                      value_rolls: bool = False) -> HitModel:
     records = records_of(class_file)
     facts = facts_of(records, hit_spell)
-    readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), value_spell or hit_spell)
+    from tooltip_corrections import tooltip_readout
+    readout = triggered_readout(tooltip_readout(class_file, records, tooltip_spell, caster), value_spell or hit_spell)
     if hit_effect is not None:
         readout = replace(readout, values=[value for value in readout.values if value.effect_index == hit_effect])
     if normalized_percent:
