@@ -1181,6 +1181,10 @@ plain (not critical unless `critical` says so, not glancing) hits of that hand. 
 swing from landing between the total and the count. An off-hand `swing_hand` needs `off_hand_item`; a swing entry
 takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
 
+`void_on_cast_failure: true` (ADR 1054, provisional) voids the trial when the run's `cast_failures` lists a refused
+cast: the verdict is `unmeasured`, never ok or alert, and the contract says so. Absent by default; it changes no
+step, so a run without a refusal is judged as without the option.
+
 `versus_creature_type` (ADR 0782; main-hand swings, pooled `parts` allowed) judges attack power that a creature-type aura adds to
 swings: `aura`/`effect` name an aura 102 effect (SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS) whose creature type mask is
 read from the DBC; `treatment_entry`/`treatment_type` must lie in the mask and `control_entry`/`control_type` outside

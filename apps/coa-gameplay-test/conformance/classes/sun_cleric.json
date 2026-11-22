@@ -19724,7 +19724,8 @@
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Holy damage: Horusath Blast 500154 (SchoolMask 2 Holy) is read per arm after two Radiant Flame casts 1600 ms apart (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real twice before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same two casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Sizing (round 3): base pair 8 ran 10 trials per arm (9 treatment hits in the second run) and read +7.679% with a 99% half-width of 1.07 points, above the 1 point (half the 2-point band) the judge requires; the first run passed it. 20 trials per arm are the most one scenario holds (the 30 trials first tried exceed the 23 allowed, MAX_SCENARIO_MS 600000). The scaled projection 1.07 x sqrt(9/18) = 0.76 points is not what the residual rests on (at 0.76 the chance of a half-width above 1 is about 3% per run); it rests on the measured half-widths of four 20-trial runs on two pairs (0.46, 0.43, 0.42 and 0.48), under normal theory with about 16 degrees of freedom a half-width above 1 is about 2e-8 per run, and the estimate edge lies about 11 standard errors away, so the residual failure probability of a pair is far below the 0.1% limit on the measured spread. The sizing uses only the spread of base pair 8 and the pilot, never a mean as an expected value. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Two casts now fit (2 x 25% = 50% of the pool; the observed cast of the previous trial costs 33% (Horusath Blast) or 15% (Dawnsear)) and the pool is set to 1363 before every observed cast; a first design with three casts still refused the third in the Horusath Blast entry."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Holy damage: Horusath Blast 500154 (SchoolMask 2 Holy) is read per arm after two Radiant Flame casts 1600 ms apart (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real twice before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same two casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Sizing (round 3): base pair 8 ran 10 trials per arm (9 treatment hits in the second run) and read +7.679% with a 99% half-width of 1.07 points, above the 1 point (half the 2-point band) the judge requires; the first run passed it. 20 trials per arm are the most one scenario holds (the 30 trials first tried exceed the 23 allowed, MAX_SCENARIO_MS 600000). The scaled projection 1.07 x sqrt(9/18) = 0.76 points is not what the residual rests on (at 0.76 the chance of a half-width above 1 is about 3% per run); it rests on the measured half-widths of four 20-trial runs on two pairs (0.46, 0.43, 0.42 and 0.48), under normal theory with about 16 degrees of freedom a half-width above 1 is about 2e-8 per run, and the estimate edge lies about 11 standard errors away, so the residual failure probability of a pair is far below the 0.1% limit on the measured spread. The sizing uses only the spread of base pair 8 and the pilot, never a mean as an expected value. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Two casts now fit (2 x 25% = 50% of the pool; the observed cast of the previous trial costs 33% (Horusath Blast) or 15% (Dawnsear)) and the pool is set to 1363 before every observed cast; a first design with three casts still refused the third in the Horusath Blast entry. void_on_cast_failure (round dawn, D-222, hit_ratio option of the same name): a refused cast in the run voids the trial (unmeasured).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 806024,
@@ -19774,7 +19775,8 @@
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after three Radiant Flame casts 1600 ms apart, the 3500 ms Dawnsear cast landing after them (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real three times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same three casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, added by e94d29e22b) and then by SpellFamilyName 33 and the class mask (:1223, IsAffectedOnSpell called from Unit.cpp:10113); Fire Blast is Fire but family 3, so the family check excludes it. The claim is read on a class Fire spell (Dawnsear, family 33); Fire damage of the caster outside family 33 is an open expectation, not measured. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Three casts now fit (3 x 25% = 75% of the pool; the observed Dawnsear of the previous trial costs 15%) and the pool is set to 1363 before every observed cast; a design with two casts read insufficient_trials (99% half-width 1.46 points above the limit of 1), so three casts it is."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after three Radiant Flame casts 1600 ms apart, the 3500 ms Dawnsear cast landing after them (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real three times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same three casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, added by e94d29e22b) and then by SpellFamilyName 33 and the class mask (:1223, IsAffectedOnSpell called from Unit.cpp:10113); Fire Blast is Fire but family 3, so the family check excludes it. The claim is read on a class Fire spell (Dawnsear, family 33); Fire damage of the caster outside family 33 is an open expectation, not measured. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Three casts now fit (3 x 25% = 75% of the pool; the observed Dawnsear of the previous trial costs 15%) and the pool is set to 1363 before every observed cast; a design with two casts read insufficient_trials (99% half-width 1.46 points above the limit of 1), so three casts it is. void_on_cast_failure (round dawn, D-222, hit_ratio option of the same name): a refused cast in the run voids the trial (unmeasured).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 806024,
@@ -27654,8 +27656,9 @@
         "spell_power": 5000
       },
       "cast_power": 1000,
-      "cast_wait_ms": 3500,
-      "expected_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[0] aura 136 MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1 = +10% healing, so with 800602 the effect is +20%: a Daybreak 503624 heal (non-critical, bonus healing fixture 5000) is x1.20 with the passive and x1.10 without, ratio 1.20 / 1.10 = 1.090909. Holy Form is cast for real before every heal in both arms (review c5 I-3: 805301 has an infinite duration and the harness resets its cooldown before each cast, so a real cast costs the same as a fixture aura and its amount is computed by the real cast path with the spell modifiers in force). Only the healing effect (Effect[0]) is measured; the threat (Effect[2], -50%) and the Bless mana sacrifice (Effect[1], 49) are not (review c5 I-2). Control arm: 800602 not known; treatment: 800602 learned. The 10-trial pair of the Holy Form healing entry holds the same shape (805301 healing, expected 1.1). Reference search 2026-11-22: coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only \"Doubles the effectiveness of your Holy Form.\" (agrees; the Ancient Rites sentence is a later state)."
+      "cast_wait_ms": 6900,
+      "expected_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[0] aura 136 MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1 = +10% healing, so with 800602 the effect is +20%: a Daybreak 503624 heal (non-critical, bonus healing fixture 5000) is x1.20 with the passive and x1.10 without, ratio 1.20 / 1.10 = 1.090909. Holy Form is cast for real before every heal in both arms (review c5 I-3: 805301 has an infinite duration and the harness resets its cooldown before each cast, so a real cast costs the same as a fixture aura and its amount is computed by the real cast path with the spell modifiers in force). Only the healing effect (Effect[0]) is measured; the threat (Effect[2], -50%) and the Bless mana sacrifice (Effect[1], 49) are not (review c5 I-2). Control arm: 800602 not known; treatment: 800602 learned. The 10-trial pair of the Holy Form healing entry holds the same shape (805301 healing, expected 1.1). Reference search 2026-11-22: coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only \"Doubles the effectiveness of your Holy Form.\" (agrees; the Ancient Rites sentence is a later state). void_on_cast_failure (round dawn, D-222, hit_ratio option of the same name): a refused cast in the run voids the trial (unmeasured). Daybreak spacing (round dawn, D-222): Daybreak 503624 has 2 charges and a 10000 ms recharge (SpellCharges.dbc 503624 -> SpellChargesCategory 548: 2, 10000; the description reads \"2 Charges, 10 sec recharge\"), which reset_cooldown does not restore. At 6700 ms per trial (1600 + 1600 + 3500) the charges ran out at the trials whose Daybreak was refused NOT_READY in pair 12 and round rc (casts 10, 16, 24, 30, 36, as a charge simulation predicts). cast_wait_ms 6900 makes each trial 10100 ms, one recharge per cast.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680648,
@@ -28108,7 +28111,7 @@
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -28124,7 +28127,7 @@
       "caster_health_pct": 81,
       "before_expected": 1500,
       "expected": 0,
-      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 81% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 0 ms, the helper 561396 Effect[0] ADD_PCT_MODIFIER MiscValue 10 BasePoints -101 on the Glare family flag is kept above 80% health. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 81% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 0 ms, the helper 561396 Effect[0] ADD_PCT_MODIFIER MiscValue 10 BasePoints -101 on the Glare family flag is kept above 80% health. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Holy Form is also the setup cast here, so trigger_reset_after_setup clears its 10000 ms cooldown (RecoveryTime) after the 1600 ms setup wait, past its 1500 ms global cooldown.",
       "caster_health": [
         7000,
         10000
@@ -28135,35 +28138,14 @@
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "disable_regeneration": true,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
       "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "trigger_reset_after_setup": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -28179,7 +28161,7 @@
       "caster_health_pct": 80,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 80% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 80% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Holy Form is also the setup cast here, so trigger_reset_after_setup clears its 10000 ms cooldown (RecoveryTime) after the 1600 ms setup wait, past its 1500 ms global cooldown.",
       "caster_health": [
         7000,
         10000
@@ -28190,35 +28172,14 @@
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "disable_regeneration": true,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
       "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "trigger_reset_after_setup": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -28234,7 +28195,7 @@
       "caster_health_pct": 79,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 79% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 79% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Holy Form is also the setup cast here, so trigger_reset_after_setup clears its 10000 ms cooldown (RecoveryTime) after the 1600 ms setup wait, past its 1500 ms global cooldown.",
       "caster_health": [
         7000,
         10000
@@ -28245,29 +28206,8 @@
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "disable_regeneration": true,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
       "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "trigger_reset_after_setup": true
     },
     {
       "spell": 300347,
@@ -31980,7 +31920,7 @@
       "variant": "dawnsear_cost",
       "label_suffix": "dawnsear_cost",
       "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561329,
       "target": "caster",
       "metric": "spell_power_cost",
@@ -31992,36 +31932,14 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "dawnsear_cost",
         "sunflare_cost",
         "cascade_cost"
       ],
       "expected_gain": -41,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561329,
@@ -32030,7 +31948,7 @@
       "variant": "sunflare_cost",
       "label_suffix": "sunflare_cost",
       "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561329,
       "target": "caster",
       "metric": "spell_power_cost",
@@ -32042,36 +31960,14 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "dawnsear_cost",
         "sunflare_cost",
         "cascade_cost"
       ],
       "expected_gain": -27.200000000000003,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561329,
@@ -32080,7 +31976,7 @@
       "variant": "sunflare_cast_time",
       "label_suffix": "sunflare_cast_time",
       "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561329,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -32092,36 +31988,14 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "dawnsear_cast_time",
         "sunflare_cast_time",
         "cascade_cast_time"
       ],
       "expected_gain": -400,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561329,
@@ -32130,7 +32004,7 @@
       "variant": "dawnsear_cast_time",
       "label_suffix": "dawnsear_cast_time",
       "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561329,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -32142,36 +32016,14 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "dawnsear_cast_time",
         "sunflare_cast_time",
         "cascade_cast_time"
       ],
       "expected_gain": -700,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561329,
@@ -32180,7 +32032,7 @@
       "variant": "cascade_cast_time",
       "label_suffix": "cascade_cast_time",
       "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561329,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -32192,36 +32044,14 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19), read before and after the real learn: 2500 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19), read before and after the real learn: 2500 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "dawnsear_cast_time",
         "sunflare_cast_time",
         "cascade_cast_time"
       ],
       "expected_gain": 0,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561329,
@@ -32230,7 +32060,7 @@
       "variant": "cascade_cost",
       "label_suffix": "cascade_cost",
       "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561329,
       "target": "caster",
       "metric": "spell_power_cost",
@@ -32242,36 +32072,14 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade costs ManaCostPercentage 31 of BaseMana 1363 (player_class_stats class 27 level 60) = 422 (int32 of 422.53, as 204 for 15% and 136 for 10%), read before and after the real learn: 422 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade costs ManaCostPercentage 31 of BaseMana 1363 (player_class_stats class 27 level 60) = 422 (int32 of 422.53, as 204 for 15% and 136 for 10%), read before and after the real learn: 422 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "dawnsear_cost",
         "sunflare_cost",
         "cascade_cost"
       ],
       "expected_gain": 0,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 804625,
@@ -33094,7 +32902,7 @@
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -33110,41 +32918,19 @@
       "caster_health_pct": 90,
       "before_expected": 1500,
       "expected": 0,
-      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "glare_healthy",
         "glare_wounded"
       ],
       "expected_gain": -1500,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -33160,41 +32946,19 @@
       "caster_health_pct": 50,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "use_time_contrast": [
         "glare_healthy",
         "glare_wounded"
       ],
       "expected_gain": 0,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -33210,7 +32974,7 @@
       "caster_health_pct": 81,
       "before_expected": 1500,
       "expected": 0,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "caster_health_from": 50,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33220,35 +32984,13 @@
         "glare_edge_off_at_75"
       ],
       "expected_gain": -1500,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -33264,7 +33006,7 @@
       "caster_health_pct": 79,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side. Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "caster_health_from": 90,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33274,35 +33016,13 @@
         "glare_edge_off_at_75"
       ],
       "expected_gain": 0,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -33318,7 +33038,7 @@
       "caster_health_pct": 75,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "caster_health_from": 90,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33328,35 +33048,13 @@
         "glare_edge_off_at_75"
       ],
       "expected_gain": 0,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 561328,
       "kind": "metric_delta",
       "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
+      "trigger_spell": 805301,
       "gate_spell": 561328,
       "target": "caster",
       "metric": "spell_cast_time_ms",
@@ -33372,7 +33070,7 @@
       "caster_health_pct": 79,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Trigger (round dawn, D-222, 2026-11-22): the claim does not need Dawn; Dawn 804584 was only the trigger cast between the two reads (chosen at the entry's creation, 9e2f148009), and it was refused in both phases in every retained run before round rc (CASTER_AURASTATE 22: no Solar Power). The read is a static spell modifier read that no trigger effect reaches, so Dawn and its fixtures (Solar Power 500149 x20, Dawn removed at the after start, its absent read) are taken out and Holy Form 805301 is the trigger, as for the class's other stat and modifier reads: its effects are healing done (aura 136), a dummy (aura 4, the Bless mana sacrifice on heals, AscensionSunClericAbilities.cpp:390) and threat (aura 10), none a spell modifier of cast time or cost. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
       "caster_health_from": 50,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33382,29 +33080,7 @@
         "glare_edge_off_at_75"
       ],
       "expected_gain": 0,
-      "after_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "after_start_reads": [
-        {
-          "spell": 807440,
-          "expected": 0
-        }
-      ],
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ]
-      ]
+      "void_on_cast_failure": true
     },
     {
       "spell": 300360,

@@ -6,6 +6,7 @@ import re
 from bonus import POINT_BAND, bonus_band
 import control_excluded
 import hit_ratio_versus
+import hit_ratio_void
 from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS,
                   TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
@@ -6541,6 +6542,7 @@ class HitRatioSpec:
     caster_entry: int | None = None
     owned_auras: tuple[tuple[int, int, int], ...] = ()
     band_points: float | None = None
+    void_on_cast_failure: bool = False
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6939,6 +6941,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         model['expected_delta'] = delta
     if spec.band_points is not None:
         model['band_points'] = spec.band_points
+    if spec.void_on_cast_failure:
+        model[hit_ratio_void.NAME] = True
+        scenario['contract'] += hit_ratio_void.CONTRACT
     if spec.versus is not None:
         mask = hit_ratio_versus.versus_mask(records, spec.versus)
         model[hit_ratio_versus.NAME] = hit_ratio_versus.model(spec.versus, mask, hit_ratio_label(spec.spell,
@@ -7025,7 +7030,7 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         hit_ratio_versus.parse(entry.get(hit_ratio_versus.NAME)), entry.get('caster_entry'),
                         tuple((int(spell), int(stacks), int(owned))
                               for spell, stacks, owned in entry.get('owned_auras', ())),
-                        hit_ratio_band_points(entry))
+                        hit_ratio_band_points(entry), hit_ratio_void.parse(entry.get(hit_ratio_void.NAME)))
 
 
 def hit_ratio_band_points(entry: dict) -> float | None:
