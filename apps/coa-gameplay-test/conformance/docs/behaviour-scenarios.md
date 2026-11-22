@@ -2193,3 +2193,5 @@ Options with a module:
   point of damage judged equal in both phases, by its own verdict (ADR 1004)
 - [`stop_shooting_after_ms`](metric_delta_options/stop_shooting_after_ms.md): the caster moved out of range a set
   time after an auto-repeat shot, its hits read so no shot fires after the move (ADR 1005)
+- [`ally_arm`](metric_delta_options/ally_arm.md): grouped ally players to read or target, their health and casts at
+  the ally in both phases, a timed no-cast control, and stated extra reads judged beside the main one (ADR 1016)
