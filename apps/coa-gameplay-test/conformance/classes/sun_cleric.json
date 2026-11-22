@@ -30128,10 +30128,10 @@
       "name": "Solar Nova (one hit at +20000 spell power)",
       "variant": "nova_sp",
       "label_suffix": "nova_sp",
-      "after_at_least": 20283,
-      "after_at_most": 20396,
-      "expected": 20339,
-      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE BasePoints 279, DieSides 113, no RealPointsPerLevel: one hit rolls 279 + irand(1, 113) = 280 to 392 (SpellInfo CalcValue), plus 0.5 x spell power and 0.050575 x attack power (the tooltip token). The reference character has spell power 0 and attack power 70 (class file reference_stats), so the base arm reads 280 + int(0.050575 x 70 = 3.54) to 392 + 3.54: 283 to 395. 984954 on the caster removes the natural crit chance (Effect[1] aura 57; Effect[0] aura 52 is inert for this magic-class spell) and 823764 removes the dummy's resistance: precondition fixtures, never the subject; the Humanoid dummy has no crit guarantee. One cast, one hit on the dummy at 3 yd, read as spell_damage_total of 681433 on the dummy (a landed hit). Spell power arm: the spell power fixture 20000 adds 0.5 x 20000 = 10000, window 20283 to 20396 (280 + 10000 + 3.54 to 392 + 10000 + 3.54, rounded outwards by 1); it excludes a coefficient 5% off (10000 +-500) on both sides because the roll spans only 112. The attack power term (3.54) is the reference one, so the arm shows the spell power term apart from the attack power term; its contrast is nova_base and nova_ap. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+      "after_at_least": 10283,
+      "after_at_most": 10396,
+      "expected": 10339.5,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE BasePoints 279, DieSides 113, no RealPointsPerLevel: one hit rolls 279 + irand(1, 113) = 280 to 392 (SpellInfo CalcValue), plus 0.5 x spell power and 0.050575 x attack power (the tooltip token). The reference character has spell power 0 and attack power 70 (class file reference_stats), so the base arm reads 280 + int(0.050575 x 70 = 3.54) to 392 + 3.54: 283 to 395. 984954 on the caster removes the natural crit chance (Effect[1] aura 57; Effect[0] aura 52 is inert for this magic-class spell) and 823764 removes the dummy's resistance: precondition fixtures, never the subject; the Humanoid dummy has no crit guarantee. One cast, one hit on the dummy at 3 yd, read as spell_damage_total of 681433 on the dummy (a landed hit). Spell power arm: the spell power fixture 20000 adds 0.5 x 20000 = 10000, window 10283 to 10396 (280 + 10000 + 3.54 to 392 + 10000 + 3.54, rounded outwards by 1); it excludes a coefficient 5% off (10000 +-500) on both sides because the roll spans only 112. The attack power term (3.54) is the reference one, so the arm shows the spell power term apart from the attack power term; its contrast is nova_base and nova_ap. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 681433,
@@ -30283,28 +30283,6 @@
       "after_wait_ms": 1600,
       "cast_power": 2868,
       "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known reduces the Solar Invocation roots by 1000 ms; AscensionSunCleric.cpp:213-217). Conquest 800764 is cast, Illumination 500143 is cast at the caster 1600 ms later in every arm (the talent is learned in the with arms only), and Conquest is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the talent, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% (100 ms) on both sides. This replaces the cooldown_ms readbacks cd_cut_* of the same claim by a cast refused then accepted. Reference search 2026-11-22: coa-history spell 681253: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
-    },
-    {
-      "spell": 681253,
-      "name": "Together In Conquest (Illumination cuts Ascension by 1 s, cast refused then accepted)",
-      "kind": "cost_gate",
-      "variant": "cd_gate_500152",
-      "label_suffix": "cd_gate_500152",
-      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
-      "gated_spell": 500152,
-      "resource": "cooldown",
-      "reduction": 1000,
-      "target": "caster",
-      "margin_ms": 60,
-      "after_casts": [
-        [
-          500143,
-          "caster"
-        ]
-      ],
-      "after_wait_ms": 1600,
-      "cast_power": 2868,
-      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known reduces the Solar Invocation roots by 1000 ms; AscensionSunCleric.cpp:213-217). Ascension 500152 is cast, Illumination 500143 is cast at the caster 1600 ms later in every arm (the talent is learned in the with arms only), and Ascension is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the talent, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% (100 ms) on both sides. This replaces the cooldown_ms readbacks cd_cut_* of the same claim by a cast refused then accepted. Reference search 2026-11-22: coa-history spell 681253: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 681253,

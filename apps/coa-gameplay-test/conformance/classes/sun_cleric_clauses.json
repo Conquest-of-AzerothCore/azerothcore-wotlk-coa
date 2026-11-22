@@ -3607,18 +3607,17 @@
       "681253 cost_gate 800764 cd_gate_800764 without",
       "681253 cost_gate 800764 cd_gate_800764 with",
       "681253 cost_gate 800764 cd_gate_800764 beyond",
-      "681253 cost_gate 500152 cd_gate_500152 without",
-      "681253 cost_gate 500152 cd_gate_500152 with",
-      "681253 cost_gate 500152 cd_gate_500152 beyond",
       "681253 cost_gate 503651 cd_gate_503651 without",
       "681253 cost_gate 503651 cd_gate_503651 with",
       "681253 cost_gate 503651 cd_gate_503651 beyond",
       "681253 cost_gate 806159 cd_gate_806159 without",
       "681253 cost_gate 806159 cd_gate_806159 with",
-      "681253 cost_gate 806159 cd_gate_806159 beyond"
+      "681253 cost_gate 806159 cd_gate_806159 beyond",
+      "681253 behaviour_metric_delta cd_cut_500152",
+      "681253 behaviour_metric_delta cd_cut_control_500152"
     ],
     "kind": "claim",
-    "reason": "The cooldown_ms readbacks cd_cut_* (data) are replaced by the cost_gate arms: each Solar Invocation spell is attempted 60 ms before and 60 ms after the reduced cooldown, without the talent (refused), with it (accepted)."
+    "reason": "The cooldown_ms readbacks cd_cut_* (data) are replaced by the cost_gate arms: each Solar Invocation spell is attempted 60 ms before and 60 ms after the reduced cooldown, without the talent (refused), with it (accepted). Ascension 500152 stays on its cooldown_ms readbacks (data): it casts for 2500 ms and its cooldown starts at the cast end, so the cut from the cast start is -1500 ms, and cost_gate refuses a negative cooldown reduction with after_casts (tool need)."
   },
   {
     "spell": 681337,
