@@ -10,7 +10,7 @@ from test_behaviours import FakeRun, base_verdict
 DANCE = 804912
 STACKS = 560651
 RATIO = {'metric': 'melee_damage_count', 'fields': {}, 'ratio': 1, 'tolerance': 0.05, 'least': 5,
-         'main_below': 5, 'source': 'example tooltip "1 stack per auto attack"'}
+         'main_below': 20, 'source': 'example tooltip "1 stack per auto attack"'}
 
 
 def ratio_entry(**changes) -> dict:
@@ -42,7 +42,7 @@ class SameArmRatioTests(unittest.TestCase):
         self.assertNotIn('same_arm_ratio', expectation.model)
         self.assertFalse(any('same_arm_ratio' in str(step.get('label')) for step in scenario['steps']))
 
-    def judged(self, main=(0.0, 4.0), part=(4.0, 8.0), drop=None):
+    def judged(self, main=(0.0, 6.0), part=(10.0, 16.0), drop=None):
         _, [expectation] = self.built()
         recorded = expectation.model['same_arm_ratio']
         found = {expectation.model['before_label']: main[0], expectation.model['after_label']: main[1],
@@ -52,23 +52,23 @@ class SameArmRatioTests(unittest.TestCase):
         return judge_behaviour(base_verdict(expectation), FakeRun(found), expectation)
 
     def test_one_stack_per_landed_swing_is_ok(self):
-        verdict = self.judged(main=(0.0, 4.0), part=(10.0, 14.0))
+        verdict = self.judged()
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 1.0)
         self.assertEqual((verdict.low, verdict.high), (0.95, 1.05))
-        self.assertEqual(verdict.detail['same_arm_gains'], [4.0, 4.0])
+        self.assertEqual(verdict.detail['same_arm_gains'], [6.0, 6.0])
 
     def test_two_stacks_per_swing_alerts(self):
-        verdict = self.judged(main=(0.0, 4.0), part=(10.0, 12.0))
+        verdict = self.judged(main=(0.0, 12.0), part=(10.0, 16.0))
         self.assertEqual(verdict.status, 'alert')
         self.assertAlmostEqual(verdict.measured, 2.0)
 
     def test_a_count_off_by_one_alerts(self):
-        self.assertEqual(self.judged(main=(0.0, 4.0), part=(5.0, 10.0)).status, 'alert')
-        self.assertEqual(self.judged(main=(1.0, 4.0), part=(5.0, 9.0)).status, 'alert')
+        self.assertEqual(self.judged(main=(0.0, 6.0), part=(5.0, 12.0)).status, 'alert')
+        self.assertEqual(self.judged(main=(1.0, 8.0), part=(5.0, 11.0)).status, 'alert')
 
     def test_an_arm_that_cannot_judge_the_ratio_is_unmeasured(self):
-        for reads in ({'part': (10.0, 13.0), 'main': (0.0, 3.0)}, {'main': (0.0, 5.0), 'part': (0.0, 5.0)},
+        for reads in ({'part': (10.0, 14.0), 'main': (0.0, 4.0)}, {'main': (0.0, 20.0), 'part': (0.0, 20.0)},
                       {'drop': 'after'}, {'drop': 'before'}):
             with self.subTest(reads=reads):
                 self.assertEqual(self.judged(**reads).status, 'unmeasured')
