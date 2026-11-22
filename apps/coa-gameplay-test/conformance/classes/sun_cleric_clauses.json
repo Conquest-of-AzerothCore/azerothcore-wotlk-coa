@@ -130,7 +130,8 @@
       {
         "claim": "within $704911a1 yds",
         "labels": [
-          "92136 effect_radius 704911e0 #1"
+          "92136 effect_radius 704911e0 #1",
+          "92136 behaviour_metric_delta radius_edge"
         ]
       },
       {
@@ -292,7 +293,9 @@
     "clause": "Allows Dawn to affect $s1 additional casts.",
     "labels": [
       "300324 effect_value e0 #0",
-      "300324 behaviour_metric_delta dawn_casts"
+      "300324 behaviour_metric_delta dawn_casts",
+      "300324 behaviour_metric_delta consume_12",
+      "300324 behaviour_metric_delta consume_13"
     ],
     "kind": "claim",
     "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 13 against 10 + 3 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 2 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
@@ -3497,7 +3500,10 @@
     "spell": 681252,
     "clause": "Direct Physical damage dealt now reduces the cooldown of Champion of the Sun by $/1000;681263s1 sec.",
     "labels": [
-      "681252 effect_value 681263e0 #0"
+      "681252 effect_value 681263e0 #0",
+      "681252 cost_gate 800612 cooldown_cut without",
+      "681252 cost_gate 800612 cooldown_cut with",
+      "681252 cost_gate 800612 cooldown_cut beyond"
     ],
     "kind": "claim"
   },
@@ -5051,22 +5057,29 @@
         "claim": "Start anew, reseting the cooldown of Paragon",
         "labels": [
           "800600 behaviour_metric_delta reset_680639",
-          "800600 behaviour_metric_delta reset_680639_control"
+          "800600 behaviour_metric_delta reset_680639_control",
+          "800600 cost_gate 680639 reset_680639_cast without",
+          "800600 cost_gate 680639 reset_680639_cast with"
         ]
       },
       {
         "claim": "Chosen of the Light",
         "labels": [
           "800600 behaviour_metric_delta reset_800622",
-          "800600 behaviour_metric_delta reset_800622_control"
+          "800600 behaviour_metric_delta reset_800622_control",
+          "800600 cost_gate 800622 reset_800622_cast without",
+          "800600 cost_gate 800622 reset_800622_cast with"
         ]
       },
       {
         "claim": "and Judgement Day spells",
-        "labels": []
+        "labels": [
+          "800600 cost_gate 806121 reset_806121 without",
+          "800600 cost_gate 806121 reset_806121 with"
+        ]
       }
     ],
-    "reason": "Open for Judgement Day: the reset_806121 arms and their control are withdrawn (archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json): the control read cooldown 0 against 58400 in all 4 runs of pairs 2 and 4, so the setup cast of 806121 leaves no cooldown (RecoveryTime 60000, Spell.dbc) and the reset arm's 0 proves nothing. One design so far (cast at the caster, then at the dummy are two targets of the same design), so no status 3. Lead: establish that 806121 is cast and on cooldown right after the setup cast (cast-count or cooldown read) before New Day. Paragon and Chosen of the Light are proven by their own labels."
+    "reason": "Second design for Judgement Day: a cost_gate resets arm (primer cast of 806121 with a dummy in its area, New Day cast after it, 806121 attempted again inside its 60000 ms cooldown: refused 67 without, accepted with), replacing the withdrawn cooldown read (b10c4: the primer found no enemy and left no cooldown). Paragon and Chosen of the Light get the same cast-attempt arms beside their cooldown readbacks."
   },
   {
     "spell": 800602,
@@ -6617,6 +6630,9 @@
           "807343 behaviour_metric_delta light_remaining"
         ]
       }
+    ],
+    "labels": [
+      "807343 behaviour_metric_delta light_held"
     ]
   },
   {

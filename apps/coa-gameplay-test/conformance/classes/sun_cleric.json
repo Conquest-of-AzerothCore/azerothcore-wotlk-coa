@@ -30021,6 +30021,360 @@
       "expire_ms": 500,
       "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 36
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (a direct Physical hit cuts the cooldown of Champion of the Sun by 1 s)",
+      "kind": "cost_gate",
+      "variant": "cooldown_cut",
+      "label_suffix": "cooldown_cut",
+      "quote": "Direct Physical damage dealt now reduces the cooldown of Champion of the Sun by $/1000;681263s1 sec.",
+      "gated_spell": 800612,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 80,
+      "after_casts": [
+        [
+          800617,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 3,
+      "observe_source": "681252 Effect[0] aura 42 PROC_TRIGGER_SPELL 681263; 681263 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN MiscValue 800612, BasePoints -1001 + 1 = -1000 ms ($/1000;681263s1 = 1 s). Script: AscensionSunClericEvents.cpp:122 accepts a damage event that is direct with SchoolMask NORMAL, :289 reduces 800612 by abs(Amount(681263)). Champion of the Sun 800612 has RecoveryTime 120000 ms (SchoolMask 1, no cost). Route: Champion is cast as the primer in each arm; 1600 ms later one Gavel of Wrath 800617 (SchoolMask 1 Physical, melee weapon strike, the same hit as the wrath_extra entries) is cast at the dummy; Champion is attempted again 119080 ms (without, with: 1000 ms cut plus 80 ms) or 118920 ms (beyond: 1000 ms cut less 80 ms) after the primer. Without 681252 the 120000 ms cooldown runs on and the attempt is refused (SPELL_FAILED_NOT_READY); with it the cooldown ends at 119000 ms, so the 119080 ms attempt goes through and the 118920 ms attempt is refused. A cut of 900 ms ends at 119100 ms and fails the with arm; a cut of 1100 ms ends at 118900 ms and lets the beyond arm through, so +-10% on both sides is excluded. The Gavel lands: hit and expertise ratings of the class file exclude a miss, dodge or parry, and the with arm going through proves the hit was dealt (a missed Gavel leaves the 120000 ms cooldown). The class-file weapon set of the spell is Valkyr (681252 / 800612). Reference search 2026-11-22: coa-history spell 681252 and 800612, git log origin/main --grep 681252, merged PRs: nothing beyond the tooltip and the DBC (see the report)."
+    },
+    {
+      "spell": 300324,
+      "name": "Guiding Glow (Dawn is still active after 12 casts)",
+      "kind": "metric_delta",
+      "variant": "consume_12",
+      "label_suffix": "consume_12",
+      "quote": "Allows Dawn to affect $s1 additional casts.",
+      "gate_spell": 300324,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804584,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143
+      ],
+      "setup_wait_ms": 2600,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Illumination 500143 casts on the caster, each its own heal; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+    },
+    {
+      "spell": 300324,
+      "name": "Guiding Glow (Dawn is gone after the 13th cast)",
+      "kind": "metric_delta",
+      "variant": "consume_13",
+      "label_suffix": "consume_13",
+      "quote": "Allows Dawn to affect $s1 additional casts.",
+      "gate_spell": 300324,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804584,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143
+      ],
+      "setup_wait_ms": 2600,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Illumination 500143 casts on the caster, each its own heal; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+    },
+    {
+      "spell": 800600,
+      "name": "New Day (Judgement Day cooldown reset)",
+      "kind": "cost_gate",
+      "variant": "reset_806121",
+      "label_suffix": "reset_806121",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gated_spell": 806121,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "after_casts": [
+        [
+          800600,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "margin_ms": 1600,
+      "cast_power": 1363,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Cooldown cost_gate (resets), second design for the claim: the spell is cast as the priming cast, New Day 1600 ms later in the with arm only (without it the arm makes no after cast), then the spell is attempted again 3200 ms after the priming cast, inside its 60000 ms cooldown: refused without 800600 (SPELL_FAILED_NOT_READY 67, the event proves the primer started the cooldown), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Judgement Day 806121 (RecoveryTime 60000 ms, StartRecoveryTime 1500, TargetA 22 caster area, TargetB 15 enemies, Effect[0] 183): the earlier metric_delta arm (withdrawn, b10c4) read cooldown 0 in its control because the primer cast at the caster found no enemy in the area; here the dummy stands within the area, and a refusal without 800600 other than 67 (for example no valid target) alerts. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "name": "New Day (Paragon cooldown reset, cast attempt)",
+      "kind": "cost_gate",
+      "variant": "reset_680639_cast",
+      "label_suffix": "reset_680639_cast",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gated_spell": 680639,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "caster",
+      "after_casts": [
+        [
+          800600,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 500,
+      "cast_power": 1363,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Cooldown cost_gate (resets), second design for the claim: the spell is cast as the priming cast, New Day 2000 ms later in the with arm only (without it the arm makes no after cast), then the spell is attempted again 2500 ms after the priming cast, inside its 300000 ms cooldown: refused without 800600 (SPELL_FAILED_NOT_READY 67, the event proves the primer started the cooldown), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Paragon 680639 has RecoveryTime 300000 ms, no global cooldown; the behaviour sibling of the cooldown_ms readbacks reset_680639 and its control. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "name": "New Day (Chosen of the Light cooldown reset, cast attempt)",
+      "kind": "cost_gate",
+      "variant": "reset_800622_cast",
+      "label_suffix": "reset_800622_cast",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gated_spell": 800622,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "caster",
+      "after_casts": [
+        [
+          800600,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 500,
+      "cast_power": 1363,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Cooldown cost_gate (resets), second design for the claim: the spell is cast as the priming cast, New Day 2000 ms later in the with arm only (without it the arm makes no after cast), then the spell is attempted again 2500 ms after the priming cast, inside its 180000 ms cooldown: refused without 800600 (SPELL_FAILED_NOT_READY 67, the event proves the primer started the cooldown), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Chosen of the Light 800622 has RecoveryTime 180000 ms, no global cooldown; the behaviour sibling of the cooldown_ms readbacks reset_800622 and its control. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "measure_actor": "caster",
+      "dummy_distance": 5,
+      "name": "Lights of Absolution (Light of Absolution is held to 9.6 s and gone by 10.7 s)",
+      "variant": "light_held",
+      "label_suffix": "light_held",
+      "gate_spell": 807343,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 807523,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9650,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9500,
+          9800
+        ],
+        "expired": [
+          10700,
+          11000
+        ]
+      },
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "observe_source": "807523 Light of Absolution DurationIndex 1 = 10000 ms ($807523d), granted to the caster when a damaging Horusath Blast 572801 hit lands (AscensionSunClericEvents.cpp:125 and :298); the aura starts at the hit, 100 to 450 ms after the cast (dummy 5 yd away, missile speed 20 yd/s). One real Horusath Blast with 807343 learned: the aura is present when read 9500..9800 ms after the cast (game time) and gone when read 10700..11000 ms after it. The aura started at the hit, at most 450 ms after the cast, so a present read at 9500 or later excludes a duration of 9000 (10% under 10000) and a gone read at 11000 or earlier, with a hit at least 100 ms after the cast, excludes 11000 (10% over). A true duration of 10000 ends between 10100 and 10450 ms after the cast, inside neither window. Control: the without-passive phase of light_granted reads 0 for the same cast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'grants you Light of Absolution for 10 seconds'; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 704911,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (ally at 39 yd healed, ally at 41 yd not)",
+      "variant": "radius_edge",
+      "label_suffix": "radius_edge",
+      "expected": 1,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 stands 41 yd from the caster, outside the 40 yd radius of 704911 (SpellRadius 23, RadiusMin and RadiusMax 40 yd; Radius(704911) of AscensionSunCleric.cpp:298-300 feeds Nearby, an AnyUnitInObjectRangeCheck at that range); it would be healed (it is at 50% health, among the lowest) if the edge reached it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 39,
+            "expected": 39,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally 39 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 41,
+            "expected": 41,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally2 41 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the heal fired: the caster at 50% health is among the lowest and heals once (positive control of the arm of ally2)"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 39,
+        "ally2": 41
+      },
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets) (:149-165: Nearby(center, range) then raid and friendly filters, sorted by health percentage). 704911 EffectRadiusIndex 23 = 40 yd ($704911a1 = 40; SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC, so the edge is 39 and 41 yd as for 807343 ally_radius, ADR 1026). Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489 before it, Illumination 500143 on the caster at 50% health, 92136 learned between the phases); the two allies are grouped and moved by ally_offsets (39 and 41 yd, dz 0, caster at the spawn, 2D distances read in arms), held at 5000 of 10000 health in each phase, a pool that regeneration does not refill. Expected: 1 Sunlight heal on the ally at 39 yd, 0 on the ally at 41 yd, 1 on the caster; the cap of five is not reached (three candidates). Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
