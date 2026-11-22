@@ -8872,72 +8872,6 @@
       "observe_source": "704935 Clarity of the Heavens Effect[0] aura 23 periodic trigger of Miraculous 707776 (BasePoints 19 + 1 = 20 is unused; the script makes 707776 a MOD_SHIELD_BLOCKVALUE aura whose amount is the caster's Intellect: AscensionSunCleric.cpp:385-386, AscensionSunClericContracts.cpp:187-190). The tooltip's 100% of the Intellect is the reference Intellect 119 (reference_stats stat 3): the block value is read before the learn (control) and after, gain 119 within 1."
     },
     {
-      "spell": 707517,
-      "name": "Sun Strength (Radiant Cascade critical strike on a Blessed ally)",
-      "kind": "metric_delta",
-      "variant": "bless_ally",
-      "label_suffix": "bless_ally",
-      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
-      "trigger_spell": 805301,
-      "gate_spell": 707517,
-      "target": "ally",
-      "cast_in_before": false,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "learn": [
-        804247
-      ],
-      "metric": "spell_done_crit_chance_scripted",
-      "fields": {
-        "spell": 500141,
-        "target": "ally"
-      },
-      "before_expected": 0,
-      "expected": 100,
-      "expected_gain": 100,
-      "tolerance": 0.05,
-      "ally_arm": {
-        "allies": 1,
-        "ally_casts": [
-          {
-            "spell": 804247,
-            "spell_go_per_cast": 2,
-            "source": "AscensionSunClericAuras.cpp:68-75 Bless recast on the caster"
-          }
-        ],
-        "control_wait": true
-      },
-      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100). The before reading is the engine's natural crit chance (4.6781 in two runs); fixture 984954 (-1001% spell crit) was tried and reads -995.322, not 0: a tool need (a before range), see the report."
-    },
-    {
-      "spell": 707517,
-      "name": "Sun Strength (control: an ally without Bless)",
-      "kind": "metric_delta",
-      "variant": "no_bless",
-      "label_suffix": "no_bless",
-      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
-      "trigger_spell": 805301,
-      "gate_spell": 707517,
-      "target": "ally",
-      "cast_in_before": false,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "metric": "spell_done_crit_chance_scripted",
-      "fields": {
-        "spell": 500141,
-        "target": "ally"
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "expected_gain": 0,
-      "tolerance": 0.05,
-      "ally_arm": {
-        "allies": 1,
-        "control_wait": true
-      },
-      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target). The before reading is the engine's natural crit chance (4.6781 in two runs); fixture 984954 (-1001% spell crit) was tried and reads -995.322, not 0: a tool need (a before range), see the report."
-    },
-    {
       "spell": 560123,
       "name": "Sunwell (party pulse dispel)",
       "kind": "periodic_dispel",
@@ -24502,6 +24436,350 @@
         "spell_power": 10000
       },
       "expected_source": "Reading 3: 300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186). Dawnsear 500146 (Fire, SchoolMask 4) is cast at the dummy 40 times without and 40 times with 300723 learned, non-critical hits at 10000 spell power, the dummy's magic resistance removed by 823764 in both arms (precondition fixture, as the Flames of the Father entry): the mean ratio is 1.30 within the 2-point band (G-19), the control arm being the casts without the passive. A first design that read one cumulative total over both phases read 2.30 (10099 then 23230): the second read included the first hit, a fault of the design, not of the server. HELD, uncertain expectation sent to the mentor: the value has three readings and no source picks one. (1) Tooltip text with ruling G-13 ('spell damage' names the spell power stat): spell power x 1.30, which adds 0 at the reference spell power 0 and +3000 at a 10000 spell power fixture (Justicar's Wrath 806980, spell power coefficient 0.55: +1650 on 6036, +27%). (2) DBC 300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, BasePoints 29 (+1 = 30), MiscValue 6 (Holy|Fire), MiscValueB 3 (Intellect): 30% of the reference Intellect 119 = 35.7 spell power (x 0.55 = +19.6 on the 536 hit, +3.7%). (3) Server rewrite at load: AscensionSunClericContracts.cpp:185-186 replaces Effect[2] with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire (commit e36bc50aad, which gives no source): 536 x 1.30 = 696.8 (+160.8, +30%). This arm measures reading 3 only, so it shows what the server does, not what the tooltip or the DBC say. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found for the value. Residual failure probability of a correct server per pair: below 1e-9 (the 99% interval of the measured ratio is +29.94..+30.02 on 40 non-critical trials per arm, 0.04 points wide against the band of 2, so the band lies 50 interval half-widths away; normal approximation)."
+    },
+    {
+      "spell": 707517,
+      "name": "Sun Strength (Radiant Cascade critical strike on a Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "bless_ally",
+      "label_suffix": "bless_ally",
+      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
+      "trigger_spell": 500141,
+      "gate_spell": 707517,
+      "target": "ally",
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500141,
+        "target": "ally",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "AscensionSunClericAuras.cpp:68-75 Bless recast on the caster"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500141,
+              "target": "ally",
+              "critical": false
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the non-critical Radiant Cascade heals on the Blessed ally: the first phase's heal, none added after the learn (cumulative count 1 and 1)"
+          }
+        ]
+      },
+      "observe_source": "AscensionSunClericAbilities.cpp:210-212 (OnSpellCritChance): a Radiant Cascade (named 500141) cast by a caster who knows 707517 at a target carrying that caster's Bless 804247 sets the crit chance to 100. The check reads the applied heals of Radiant Cascade 500141 on the ally (spell_heal_count, target ally) with the critical filter, cumulative over both phases. Fixture 984954 on the caster in both phases (DBC: effect 1 aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, -1001, a precondition fixture, never the subject) removes the natural crit chance, so the first phase (talent not learned, the control) heals without a crit and any crit after the learn comes from the guarantee. Radiant Cascade 500141 is cast at the ally in both phases (CastingTimeIndex 19 = 2500 ms, read after 3000 ms); the second target of its chain heal is the caster and is not read. Bless 804247 is cast at the grouped ally in both phases (a real cast). Critical heals on the ally: 0 before the learn (control) and 1 after it; non-critical heals: 1 before and still 1 after. A heal that is not a guarantee would read 0 critical after the learn. Reference search 2026-11-22: coa-history spell 707517: 0 events (a passive leaves no event); the tooltip and the DBC carry the sentence, nothing else found."
+    },
+    {
+      "spell": 707517,
+      "name": "Sun Strength (control: an ally without Bless)",
+      "kind": "metric_delta",
+      "variant": "no_bless",
+      "label_suffix": "no_bless",
+      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
+      "trigger_spell": 500141,
+      "gate_spell": 707517,
+      "target": "ally",
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500141,
+        "target": "ally",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500141,
+              "target": "ally",
+              "critical": false
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the non-critical Radiant Cascade heals on the unblessed ally: one per phase (cumulative count 1 and 2), so the heal landed after the learn and did not crit"
+          }
+        ]
+      },
+      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally. AscensionSunClericAbilities.cpp:210-212 (OnSpellCritChance): a Radiant Cascade (named 500141) cast by a caster who knows 707517 at a target carrying that caster's Bless 804247 sets the crit chance to 100. The check reads the applied heals of Radiant Cascade 500141 on the ally (spell_heal_count, target ally) with the critical filter, cumulative over both phases. Fixture 984954 on the caster in both phases (DBC: effect 1 aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, -1001, a precondition fixture, never the subject) removes the natural crit chance, so the first phase (talent not learned, the control) heals without a crit and any crit after the learn comes from the guarantee. Radiant Cascade 500141 is cast at the ally in both phases (CastingTimeIndex 19 = 2500 ms, read after 3000 ms); the second target of its chain heal is the caster and is not read. Critical heals on the ally stay 0 after the learn (no Bless on the target, no guarantee) and the non-critical heals reach 2, so the second heal landed. Reference search 2026-11-22: coa-history spell 707517: 0 events (a passive leaves no event); the tooltip and the DBC carry the sentence, nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "spell": 704903,
+      "name": "Adjudicator (a lone enemy takes 50% of the hit, increased by 50%)",
+      "kind": "metric_delta",
+      "variant": "lone_damage",
+      "label_suffix": "lone_damage",
+      "quote": "If you only hit one target, the damage dealt is increased to that target by 50%.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707774,
+        "target": "dummy"
+      },
+      "expected": 402,
+      "after_at_least": 397,
+      "after_at_most": 407,
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated is Holy (SchoolMask 2) with targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd; its DBC Effect[0] is SPELL_EFFECT_HEALTH_LEECH (EffectValueMultiplier 0.1), but the class code rewrites it to SPELL_EFFECT_SCHOOL_DAMAGE at load (AscensionSunClericContracts.cpp:76-77), so the engine leech heal never runs; the class code passes the damage amount and casts the 10% heal separately as Gavel of Light 707522 (Effect[0] SPELL_EFFECT_HEAL) on the caster (AscensionSunClericAbilities.cpp:287-288: damage / 10). AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). One dummy only: 0.5 x (532..540) = 266..270, then AddPct 50 gives 399..405, read within 397..407. The first phase casts Wrath without 704903 (control, 0). Fixture 823764 on the caster keeps the dummy's Holy resistance out and fixture 33143 on the dummy (DBC: aura 197, -1001) keeps a critical strike out, both in both phases. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "spell": 704903,
+      "name": "Adjudicator (with a second enemy in range the target takes 50% of the hit, not increased)",
+      "kind": "metric_delta",
+      "variant": "group_target",
+      "label_suffix": "group_target",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707774,
+        "target": "dummy"
+      },
+      "expected": 268,
+      "after_at_least": 264,
+      "after_at_most": 272,
+      "area_dummies": [
+        4.0
+      ],
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated is Holy (SchoolMask 2) with targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd; its DBC Effect[0] is SPELL_EFFECT_HEALTH_LEECH (EffectValueMultiplier 0.1), but the class code rewrites it to SPELL_EFFECT_SCHOOL_DAMAGE at load (AscensionSunClericContracts.cpp:76-77), so the engine leech heal never runs; the class code passes the damage amount and casts the 10% heal separately as Gavel of Light 707522 (Effect[0] SPELL_EFFECT_HEAL) on the caster (AscensionSunClericAbilities.cpp:287-288: damage / 10). AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). A second dummy (area1) stands 4 yd from the caster, the target dummy 3 yd, 1 yd apart: both inside the 5 yd radius; fixtures 823764 on the caster and 33143 on the dummy as in lone_damage, so the target takes 0.5 x (532..540) = 266..270 with no increase (read within 264..272; the lone-target amount would be at least 399). Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "spell": 704903,
+      "name": "Adjudicator (an enemy around the target takes 50% of the hit)",
+      "kind": "metric_delta",
+      "variant": "group_around",
+      "label_suffix": "group_around",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707774,
+        "target": "area1"
+      },
+      "expected": 268,
+      "after_at_least": 264,
+      "after_at_most": 272,
+      "area_dummies": [
+        4.0
+      ],
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated is Holy (SchoolMask 2) with targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd; its DBC Effect[0] is SPELL_EFFECT_HEALTH_LEECH (EffectValueMultiplier 0.1), but the class code rewrites it to SPELL_EFFECT_SCHOOL_DAMAGE at load (AscensionSunClericContracts.cpp:76-77), so the engine leech heal never runs; the class code passes the damage amount and casts the 10% heal separately as Gavel of Light 707522 (Effect[0] SPELL_EFFECT_HEAL) on the caster (AscensionSunClericAbilities.cpp:287-288: damage / 10). AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). The enemy around the target (area1, 4 yd from the caster, 1 yd from the target dummy at 3 yd, inside the 5 yd radius); fixtures 823764 on the caster and 33143 on the dummy as in lone_damage takes 0.5 x (532..540) = 266..270, read within 264..272. Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "spell": 704903,
+      "name": "Adjudicator (a lone enemy: the caster is healed for 10% of the damage dealt)",
+      "kind": "metric_delta",
+      "variant": "heal_lone",
+      "label_suffix": "heal_lone",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "expected": 39.5,
+      "after_at_least": 39,
+      "after_at_most": 40,
+      "observe_source": "AscensionSunClericAbilities.cpp:287-288: a damage hit of Adjudicated 707774 on the caster's target casts Gavel of Light 707522 (DBC Effect[0] SPELL_EFFECT_HEAL, BasePoints 0) at the caster with the amount damage / 10 (integer division), one heal per Adjudicated hit; 707774 Effect[0] is rewritten to SPELL_EFFECT_SCHOOL_DAMAGE at load (AscensionSunClericContracts.cpp:76-77), so the engine leech heal never runs. The caster's applied heals of 707522 are read with spell_heal_total (target caster, raw amounts, the caster stays at full health), cumulative over both phases; the first phase casts Justicar's Wrath 806980 without 704903 and reads 0 (control). Fixtures as in lone_damage: 823764 on the caster, 33143 on the dummy. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); the tooltip and the DBC carry the 10% figure; nothing else found. One dummy only: the Adjudicated hit is 399..405 (lone_damage), so the heal is int(399 / 10) .. int(405 / 10) = 39..40, read within 39..40 (a heal of 5% or 20% of the damage reads 20 or 80)."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "spell": 704903,
+      "name": "Adjudicator (two enemies in range: the caster is healed for 10% of each hit)",
+      "kind": "metric_delta",
+      "variant": "heal_group",
+      "label_suffix": "heal_group",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "expected": 53,
+      "after_at_least": 52,
+      "after_at_most": 54,
+      "area_dummies": [
+        4.0
+      ],
+      "observe_source": "AscensionSunClericAbilities.cpp:287-288: a damage hit of Adjudicated 707774 on the caster's target casts Gavel of Light 707522 (DBC Effect[0] SPELL_EFFECT_HEAL, BasePoints 0) at the caster with the amount damage / 10 (integer division), one heal per Adjudicated hit; 707774 Effect[0] is rewritten to SPELL_EFFECT_SCHOOL_DAMAGE at load (AscensionSunClericContracts.cpp:76-77), so the engine leech heal never runs. The caster's applied heals of 707522 are read with spell_heal_total (target caster, raw amounts, the caster stays at full health), cumulative over both phases; the first phase casts Justicar's Wrath 806980 without 704903 and reads 0 (control). Fixtures as in lone_damage: 823764 on the caster, 33143 on the dummy. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); the tooltip and the DBC carry the 10% figure; nothing else found. Two dummies in range: each Adjudicated hit is 266..270 (group_target and group_around), so each heal is 26..27 and the two heals sum to 52..54, read within 52..54 (a heal of the lone-target amount only would read 26..27)."
+    },
+    {
+      "spell": 804257,
+      "name": "Glaring Rays (does not stack with Runes of Quickness)",
+      "kind": "metric_delta",
+      "variant": "ally_haste_cap",
+      "label_suffix": "ally_haste_cap",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 805301,
+      "gate_spell": 804257,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 0.970874,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804257 Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3%; data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql spell_group 2000182 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) lists 804257 with 560628 Runes of Quickness (Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216, BasePoints 2 + 1 = 3%, passive, Attributes 320). Runes of Quickness is learned first (the ally reads 1/1.03 = 0.970874 alone: before), then Glaring Rays: the exclusive group keeps the highest value, so the grouped ally still reads 0.970874; a stack would read 1/(1.03 x 1.03) = 0.942596. Tolerance 0.0001. The ally_haste entry shows Glaring Rays alone gives the ally 3%. Reference search 2026-11-22: coa-history spell 804257: 0 events in 186 logs (a passive); nothing else found.",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "learn": [
+        560628
+      ]
     }
   ],
   "player_observations": [],
