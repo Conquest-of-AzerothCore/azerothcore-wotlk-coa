@@ -6347,7 +6347,7 @@
     "spell": 807343,
     "clause": "Damage dealt by Solar Flares now restores $807525s1% missing health,",
     "kind": "claim",
-    "reason": "Owner ruling O-13 (Q-sc-2, option a; mentor decision log 2026-11-22; class ADR 0028): the restore is triggered by Solar Flare damage, from missing health, once every 0.5 sec; the Radiant Flame trigger is removed. flare_heal: a Solar Flare (Solar Concord 301266 on a real Horusath Blast) under Light of Absolution heals 80 = 2% of 5000 missing x 0.8 class tuning 887015 (judged 79..81), 0 before the learn. radiant_none: Radiant Flame under the buff heals 0 while its five 807058 ticks land and the buff is held (arms). Expected values from Spell.dbc 807525 (HEAL_PCT BasePoints 1 + DieSides 1) and the 5000 missing health fixture. Before the fix (pair 20261122-001533 / -001615, build aed1b333): flare_heal 0. Pair 20261122-125031 / 20261122-125814, build 0fa2658b, server commit 0f40a60f4102+, no flip on the 807343 labels.",
+    "reason": "Owner ruling O-13 (Q-sc-2, option a; mentor decision log 2026-11-22; class ADR 0028): the restore is triggered by Solar Flare damage, from missing health, once every 0.5 sec; the Radiant Flame trigger is removed. flare_heal: a Solar Flare (Solar Concord 301266 on a real Horusath Blast, which grants 807523 for real) heals the caster at 3000 of 10000 health (7000 missing) for 112 = 2% of 7000 x 0.8 class tuning 887015, judged 111..113, 0 before the learn; the interval excludes a current-health base (48) and a maximum-health base (160). radiant_none: Radiant Flame under the buff heals 0 while its five 807058 ticks land and the buff is held (arms). Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture in radiant_none; the heal is the subject. Expected values from Spell.dbc 807525 (HEAL_PCT BasePoints 1 + DieSides 1) and the 3000 of 10000 health fixture. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences and no other value; nothing else found. Before the fix (pair 20261122-001533 / -001615, build aed1b333): flare_heal 0. Pair 20261122-132914 / 20261122-132947, build c32ead7b, server commit c372a87e4918+ (server source identical to c372a87e49), no flip on the 807343 labels.",
     "labels": [
       "807343 behaviour_metric_delta flare_heal",
       "807343 behaviour_metric_delta radiant_none"
@@ -6357,17 +6357,26 @@
     "spell": 807343,
     "clause": "Energy, Focus, Runic Power, and Rage to allies within $807524a1 yds.",
     "kind": "claim",
-    "reason": "Owner ruling O-13 (Q-sc-2, option a; mentor decision log 2026-11-22; class ADR 0028): the restore is triggered by Solar Flare damage, from missing health, once every 0.5 sec; the Radiant Flame trigger is removed. ally_radius: 807524 TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd, no leeway and no reach for a player target (Spell.cpp:1388-1394, :9440-9448), so the edge is 40.0 yd: an ally moved 39 yd (ally_offsets, ADR 1025) is healed 80 and one moved 41 yd is not (arms, with the distances read); no heal before the buff. The Energy, Focus, Runic Power and Rage restores (807525 Effect[1]/[2], 807526) are not read here. Pair 20261122-125031 / 20261122-125814, build 0fa2658b, server commit 0f40a60f4102+, no flip on the 807343 labels.",
-    "labels": [
-      "807343 effect_radius 807524e0 #2",
-      "807343 behaviour_metric_delta ally_radius"
+    "reason": "Owner ruling O-13 (Q-sc-2, option a; mentor decision log 2026-11-22; class ADR 0028): the restore is triggered by Solar Flare damage, from missing health, once every 0.5 sec; the Radiant Flame trigger is removed. Split by part (G-16). Radius: 807524 TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd, no leeway and no reach for a player target (Spell.cpp:1388-1394, :9440-9448), so the edge is 40.0 yd: ally_radius moves one ally 39 yd and one 41 yd (ally_offsets, ADR 1026), all at 3000 of 10000 health; the 39 yd ally is healed 112 (111..113) and the 41 yd ally 0, with both distances read (arms 39 / 41, tolerance 0.25); the distance arms and the 0-heal arm are the guard that the offsets were applied (no mutant run recorded); no heal before the buff. Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture in ally_radius; the heal at range is the subject. Resources: the Energy, Focus, Runic Power and Rage restores (807525 Effect[1]/[2], 807526) are not read; this claim stays open (open expectation: 807525 Effect[1] ENERGIZE_PCT MiscValue 0 restores mana, a percent of maximum power, while the tooltip reads missing resources). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences and no other value; nothing else found. Pair 20261122-132914 / 20261122-132947, build c32ead7b, server commit c372a87e4918+ (server source identical to c372a87e49), no flip on the 807343 labels.",
+    "claims": [
+      {
+        "claim": "to allies within $807524a1 yds (40 yd, the area of the restore)",
+        "labels": [
+          "807343 effect_radius 807524e0 #2",
+          "807343 behaviour_metric_delta ally_radius"
+        ]
+      },
+      {
+        "claim": "restores Energy, Focus, Runic Power, and Rage",
+        "labels": []
+      }
     ]
   },
   {
     "spell": 807343,
     "clause": "Can only occur once every 0.5 sec.",
     "kind": "claim",
-    "reason": "Owner ruling O-13 (Q-sc-2, option a; mentor decision log 2026-11-22; class ADR 0028): the restore is triggered by Solar Flare damage, from missing health, once every 0.5 sec; the Radiant Flame trigger is removed. gate_once: two Solar Flares landing about 200 ms apart under the buff give one 807525 heal; gate_after (control): 800 ms apart give two; both read two flare hits per phase (arm) and no heal without the buff. The gate is Chance(player, 807523, 500) in AscensionSunClericAbilities.cpp. Pair 20261122-125031 / 20261122-125814, build 0fa2658b, server commit 0f40a60f4102+, no flip on the 807343 labels.",
+    "reason": "Owner ruling O-13 (Q-sc-2, option a; mentor decision log 2026-11-22; class ADR 0028): the restore is triggered by Solar Flare damage, from missing health, once every 0.5 sec; the Radiant Flame trigger is removed. gate_once: two Solar Flares cast 470 ms apart (generated steps cast, wait 470, cast; same 3 yd flight, so the hits land 470 ms apart) under the buff give one 807525 heal; gate_after (control): 530 ms apart give two; both read two flare hits per phase (arm) and no heal without the buff. Excluded interval: a gate below about 0.47 s gives two heals in gate_once and one above about 0.53 s gives one in gate_after, so 0.45 s and 0.55 s (10% off) both fail. Tick granularity: the gate is a 500 ms EventMap timer per caster updated by OnPlayerUpdate (AscensionSunCleric.cpp:433) after Unit::Update in the same player update (PlayerUpdates.cpp:81, :324); waits advance game time in steps of at most 25 ms. The gate is Chance(player, 807523, 500) in AscensionSunClericAbilities.cpp. Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture in gate_once and gate_after; the gate is the subject. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences and no other value; nothing else found. Pair 20261122-132914 / 20261122-132947, build c32ead7b, server commit c372a87e4918+ (server source identical to c372a87e49), no flip on the 807343 labels.",
     "labels": [
       "807343 behaviour_metric_delta gate_once",
       "807343 behaviour_metric_delta gate_after"

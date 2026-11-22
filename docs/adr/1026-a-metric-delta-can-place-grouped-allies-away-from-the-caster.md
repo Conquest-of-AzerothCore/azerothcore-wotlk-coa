@@ -1,4 +1,4 @@
-# 1025. A metric delta can place grouped allies away from the caster
+# 1026. A metric delta can place grouped allies away from the caster
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-22
