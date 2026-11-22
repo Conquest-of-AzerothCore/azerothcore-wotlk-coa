@@ -7389,6 +7389,25 @@
       "expected_source": "804629 Spears of Glory Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 15 ($h), EffectTriggerSpell 807299; 807299 Effect[0] aura 108 SPELLMOD CASTING_TIME -100% and Effect[1] aura 108 +25% (BasePoints 24 + 1, $s2) on class mask word 1 = 2 = Dawnsear's SpellFamilyFlags[1], DurationIndex 1 ($d = 10000 ms). The tooltip states +25% damage on the next Dawnsear: the whole non-critical hit of Dawnsear 554406 is expected at 1.25 times the control hit, spell power fixture 10000 so the coefficient and the base part are both present. Spears of Glory 807299 is set on the caster before every treatment cast as a named precondition fixture (harness set_aura): the subject of this entry is the aura's effect, its grant by the proc is the proc entry and the instant entry. Control: the same cast without 807299. 823764 removes the dummy's magic resistance as in the Grace entries. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Damage dealt by Radiant Flame now has an 15% chance to grant you Spears of Glory. Your next Dawnsear within 10 seconds is instant cast and deals 25% increased damage.' for 804629; ascension-data advancement.tsv lists Spears of Glory as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values."
     },
     {
+      "spell": 804632,
+      "name": "Flames of Absolution (radius edge around the struck target: 5 yd plus both object sizes, 10% bracket)",
+      "kind": "radius_edge",
+      "label_suffix": "flare_edge_target",
+      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
+      "gate_spell": 804632,
+      "cast_spell": 500154,
+      "hit_spell": 807175,
+      "power": 1363,
+      "radius": 5,
+      "dummy_reach": 1.275,
+      "center_reach": 1.275,
+      "margin_yd": 0.755,
+      "repeats": 3,
+      "settle_ms": 3000,
+      "reach_source": "the dummy entry 36 combat reach 1.275 yd (read 1.275 on every dummy in diagnostic run 20261122-081052; the judge reads each reach again and refuses a layout that does not bracket the edge). The centre is the struck target, as the tooltip says (\"of your target\"): the handler of case 804632 lists Nearby(target, Radius(573449)) (AscensionSunClericEvents.cpp:314, AscensionSunCleric.cpp:138-146), whose AnyUnitInObjectRangeCheck uses IsWithinDistInMap with both object sizes (GridNotifiers.h:1061-1070, Object.cpp:1257-1264, GetObjectSize = combat reach, Object.cpp:2898-2901), so the edge is 5 + 1.275 + 1.275 = 7.55 yd centre to centre; the rule is the accepted effective radius (class-conformance.md section 5, both object sizes for script checks, G-29). Margin 0.755 = 10% of 7.55: inside 6.795 yd, outside 8.305 yd from the primary, which stands 3 yd from the caster. The wait after each cast is 3000 ms: the flares travel (diagnostic runs 20261122-215449 to -215850: a flare reads 0 at 1000 ms when the caster-to-dummy path is long and 1 at 4000 ms). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found.",
+      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5, radius index 8 = 5 yd = $573449a1); the handler fires on damage by Horusath Blast 500154. Centre named by the tooltip: the target. Centre used by the code: the struck target. Bracket 10% either side of 5 + both sizes. Control: the first arm, without the passive, strikes neither dummy. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
+    },
+    {
       "spell": 704941,
       "kind": "metric_delta",
       "trigger_spell": 805301,
@@ -23228,90 +23247,6 @@
       "area_sum": true,
       "expected": 2,
       "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5 = $573449i, radius index 8 = 5 yd = $573449a1); the handler (AscensionSunClericEvents.cpp:126 and :303-312) fires on damage by Horusath Blast 500154, lists the living units within 5 yd of the target sorted by GUID (the target added if absent) and casts Solar Flare 807175 at each valid enemy until the count of 5 is spent. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, 0 Solar Flare damage events). Crit and resist fixtures 984954 and 823764 in both phases. The Solar Flare damage events of 807175 are counted over every dummy (area_sum). Layout: the target at 10 yd and two dummies 4.9 and 7.8 yd from it (14.9 and 17.8 yd from the caster, in line). Bounds from the data and the code, not a +-10% bracket: the radius is 5 yd (SpellRadius 8, RadiusMin = RadiusMax 5, no per-level term; SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639), so a dummy 4.9 yd away is inside under every reading that adds a reach of 0 or more; the largest edge any code path gives is 5 + 2 x 1.275 = 7.55 yd (Nearby() lists with IsWithinDistInMap, which adds both combat reaches: GridNotifiers.h:1061-1070, Object.cpp:1257-1264, defaults at Object.h:550; dummy entry 36 combat reach 1.275 yd, read 1.275 in the diagnostic run 20261122-081052), so a dummy 7.8 yd away is outside under every reading. Expected exactly 2 events (the target and the inside dummy); it excludes 1 (a radius under 4.9 yd) and 3 (an edge past 7.8 yd). Control: the first phase, without the passive, reads 0. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no cap can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
-    },
-    {
-      "spell": 804632,
-      "name": "Flames of Absolution (a dummy 4.5 yd from the target is struck, the tooltip's 5 yd less 10%)",
-      "kind": "metric_delta",
-      "variant": "flare_edge_tooltip_in",
-      "label_suffix": "flare_edge_tooltip_in",
-      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
-      "trigger_spell": 500154,
-      "gate_spell": 804632,
-      "target": "dummy",
-      "dummy_distance": 10,
-      "area_dummies": [
-        14.5
-      ],
-      "cast_power": 1363,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 0,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 807175,
-        "target": "dummy"
-      },
-      "area_sum": true,
-      "expected": 2,
-      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5, radius index 8 = 5 yd = $573449a1; 573449 Effect[0] TRIGGER_SPELL 807175, TargetA 6, TargetB 16). Expectation from the tooltip's 5 yd with a 10% band (4.5 to 5.5 yd), not from a reading. Layout: the target at 10 yd and one dummy 4.5 yd beyond it on the line (centre distance 4.5 yd; equal ground height, as in diagnostic run 20261122-081052). Expected exactly 2 events (the target and the dummy at 4.5 yd). Control: the first phase, without the passive, reads 0. Crit and resist fixtures 984954 and 823764 in both phases. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found.",
-      "void_on_cast_failure": true
-    },
-    {
-      "spell": 804632,
-      "name": "Flames of Absolution (a dummy 5.5 yd from the target is not struck, the tooltip's 5 yd plus 10%)",
-      "kind": "metric_delta",
-      "variant": "flare_edge_tooltip_out",
-      "label_suffix": "flare_edge_tooltip_out",
-      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
-      "trigger_spell": 500154,
-      "gate_spell": 804632,
-      "target": "dummy",
-      "dummy_distance": 10,
-      "area_dummies": [
-        15.5
-      ],
-      "cast_power": 1363,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 0,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 807175,
-        "target": "dummy"
-      },
-      "area_sum": true,
-      "expected": 1,
-      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5, radius index 8 = 5 yd = $573449a1; 573449 Effect[0] TRIGGER_SPELL 807175, TargetA 6, TargetB 16). Expectation from the tooltip's 5 yd with a 10% band (4.5 to 5.5 yd), not from a reading. Layout: the target at 10 yd and one dummy 5.5 yd beyond it on the line (centre distance 5.5 yd; equal ground height, as in diagnostic run 20261122-081052). Expected exactly 1 event (the target only): the dummy at 5.5 yd lies past 5 yd plus 10%. Control: the first phase, without the passive, reads 0. Crit and resist fixtures 984954 and 823764 in both phases. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found.",
-      "void_on_cast_failure": true
     },
     {
       "spell": 704941,
