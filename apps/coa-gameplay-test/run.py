@@ -1406,8 +1406,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step['owned_entry'], f'{where}.owned_entry', 1, 2**32 - 1, True)
             if metric == 'school_prohibited':
                 number(step.get('school_mask'), f'{where}.school_mask', 1, 127, True)
-            elif 'school_mask' in step:
-                require(metric in SPELL_DAMAGE_METRICS, f'{where}: school_mask only filters spell damage events')
+            elif metric in SPELL_DAMAGE_METRICS and 'school_mask' in step:
                 number(step['school_mask'], f'{where}.school_mask', 1, 127, True)
             if metric == 'aura_proc_rate':
                 require('target' in step, f'{where}: {metric} metric needs target')

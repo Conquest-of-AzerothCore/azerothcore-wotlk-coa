@@ -12,10 +12,10 @@ def scenario(*steps) -> dict:
 
 
 class SchoolMaskAndUnitFlagTests(unittest.TestCase):
-    def test_school_mask_filters_spell_damage_reads_only(self):
+    def test_school_mask_is_a_range_checked_filter_of_spell_damage_reads(self):
         for metric in ('spell_damage_count', 'spell_damage_total'):
             run.validate(scenario(step(metric=metric, spell=572850, school_mask=1, target='caster')))
-        for changes in ({'school_mask': 0}, {'school_mask': 128}, {'metric': 'spell_heal_total'}):
+        for changes in ({'school_mask': 0}, {'school_mask': 128}):
             with self.subTest(changes=changes), self.assertRaises(Exception):
                 run.validate(scenario(step(**{'metric': 'spell_damage_count', 'spell': 572850, 'school_mask': 1,
                                               'target': 'caster', **changes})))
