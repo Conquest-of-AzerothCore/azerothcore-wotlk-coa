@@ -4986,7 +4986,7 @@
         ]
       }
     ],
-    "reason": "OPEN radius: the expected edge is 8 + 2.66 leeway (Spell.cpp:1394, Object.cpp:1787-1808, a player caster on TARGET_UNIT_SRC_AREA_ENEMY) + 1.275 target combat reach = 11.935 yd (Spell.cpp:9434-9448), inside the measured bracket (stunned near 11.4 yd, not at 12.5 yd). radius_edge cannot model the leeway term yet (tool question to the mentor); its entry adds the caster's reach instead and alerts, so the radius labels do not close. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
+    "reason": "Radius: the edge is 8 yd ($a1) + 2.66 yd leeway of a player caster on TARGET_UNIT_SRC_AREA_ENEMY (Spell.cpp:1388-1394, Object.cpp:1787-1808) + 1.275 yd target combat reach (Spell.cpp:9434-9448) = 11.935 yd. The radius_edge entry uses the opt-in leeway term (tool ADR 1020): ok on pair 20261122-055336 / 20261122-055559 (build f58af4a631b7, no flip, control 0); the near / 12.5 yd / 16 yd arms were ok on pair 20261122-051135 / 20261122-051226. The labels come from two builds, so the claim counts at the next base pair. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
   },
   {
     "spell": 805628,
