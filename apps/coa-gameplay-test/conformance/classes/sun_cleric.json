@@ -11977,38 +11977,39 @@
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "trigger_spell": 805301,
       "target": "caster",
-      "cast_in_before": false,
       "strike": {
         "spell": 8379,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
         "wait_ms": 4995,
-        "in_before": true,
+        "after_trigger_ms": 100,
         "striker_entry": 36
       },
       "metric": "aura",
       "fields": {
         "spell": 8379
       },
-      "before_expected": 1,
+      "before_expected": 0,
       "expected": 1,
       "wait_ms": 25,
       "expire_ms": 21000,
       "game_time": {
         "after": [
-          30,
-          85
+          1,
+          20000
         ],
         "expired": [
-          115,
-          170
+          1,
+          20000
         ]
       },
       "void_on_cast_failure": true,
       "observe_source": "Valkyr's Grip 807507: window arm, see the ledger reason.",
       "expiry_wait_ms": 100,
-      "after_expiry_expected": 0
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 807507,
@@ -12055,38 +12056,39 @@
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "trigger_spell": 805301,
       "target": "caster",
-      "cast_in_before": false,
       "strike": {
         "spell": 8379,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
         "wait_ms": 4075,
-        "in_before": true,
+        "after_trigger_ms": 100,
         "striker_entry": 36
       },
       "metric": "aura",
       "fields": {
         "spell": 8379
       },
-      "before_expected": 1,
+      "before_expected": 0,
       "expected": 1,
       "wait_ms": 25,
       "expire_ms": 21000,
       "game_time": {
         "after": [
-          30,
-          85
+          1,
+          20000
         ],
         "expired": [
-          145,
-          285
+          1,
+          20000
         ]
       },
       "void_on_cast_failure": true,
       "observe_source": "Valkyr's Grip 807873: window arm, see the ledger reason.",
       "expiry_wait_ms": 150,
-      "after_expiry_expected": 0
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 807873,
