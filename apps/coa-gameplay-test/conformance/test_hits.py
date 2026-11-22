@@ -25,7 +25,7 @@ from mitigation import (REFERENCE_TARGET, MitigationModel, TargetProfile, armor_
 from profile import load_class_file, load_fixture_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD,
-                    TARGET, UNREADABLE, armed_for, cast_distance, missile_wait_ms)
+                    TARGET, UNREADABLE, Expectation, armed_for, cast_distance, missile_wait_ms)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -1738,6 +1738,35 @@ class RankHitEffectsFieldTest(unittest.TestCase):
             damage = [step for step in steps if str(step.get('metric', '')).startswith('spell_damage')]
             self.assertEqual(len(damage), 4)
             self.assertTrue(all(step['periodic'] is periodic for step in damage))
+
+
+class MeasuredHitModelRoleTest(unittest.TestCase):
+    MODEL = HitModel(kind='periodic_damage', mean=140.6, sigma=12.7, tooltip_mean=159.06)
+
+    def roles(self, check: str) -> list[str]:
+        roles = []
+
+        def modelled(class_file, rank_id, caster, target, auras, learned=None, role='hit_mean'):
+            roles.append(role)
+            return types.SimpleNamespace(model=self.MODEL)
+
+        expectation = Expectation(label=f'{TORMENTOR_TOP_RANK} effect_value #1', check=check,
+                                  spell_id=TORMENTOR_TOP_RANK, rank_id=TORMENTOR_TOP_RANK, effect_index=0,
+                                  displayed='$o1', rule='', model={'kind': 'periodic_damage', 'measurements': {}})
+        with (mock.patch('hits.armed_for', side_effect=lambda class_file, records, rank_id: class_file),
+              mock.patch('hits.records_of'), mock.patch('hits.caster_stats_from'),
+              mock.patch('hits.rank_hit', side_effect=modelled)):
+            self.assertEqual(measured_hit_model({}, expectation, {}), self.MODEL)
+        return roles
+
+    def test_a_periodic_total_models_its_own_hit_role(self):
+        self.assertEqual(self.roles('periodic_total'), ['periodic_total'])
+
+    def test_a_direct_hit_models_the_direct_role(self):
+        self.assertEqual(self.roles('hit_mean'), ['hit_mean'])
+
+    def test_another_check_keeps_the_direct_role(self):
+        self.assertEqual(self.roles('script_hit'), ['hit_mean'])
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

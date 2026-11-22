@@ -1006,7 +1006,9 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
                                     expectation.model.get('value_rolls', False))
         factor = expectation.model.get('gate_multiplier', 1.0)
         return scripted if factor == 1.0 else replace(scripted, mean=scripted.mean * factor)
-    model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
+    role = expectation.check if expectation.check in HIT_ROLES else 'hit_mean'
+    model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned'),
+                     role).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
         * expectation.model.get('gate_multiplier', 1.0)
