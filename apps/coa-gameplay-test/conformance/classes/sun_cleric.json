@@ -10453,17 +10453,17 @@
       "target": "caster",
       "cast_in_before": false,
       "strike": {
-        "spell": 8379,
+        "spell": 13534,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 5010,
+        "wait_ms": 8380,
         "in_before": true,
         "striker_entry": 36
       },
       "metric": "aura",
       "fields": {
-        "spell": 8379
+        "spell": 13534
       },
       "before_expected": 1,
       "expected": 1,
@@ -10477,7 +10477,7 @@
       },
       "void_on_cast_failure": true,
       "vehicle_landed": true,
-      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): Disarm 8379 (Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the strike's target, the caster; aura 67 MOD_DISARM, DurationIndex 32 = 6000 ms, Speed 0) lasts 6000 x 85% = 5100 ms with the talent. A 15% cut 10% larger (16.5%) would end it at 5010 ms. Held arm: the striker casts 8379 at the caster, 5010 ms pass, the game time is stamped, Holy Form 805301 (the trigger) is cast, 25 ms pass and the after reading is stamped; the reading's age since the strike is at least 5010 + the stamped gap (window 20..60 ms), so at least 5030 ms, less at most one world tick if the aura is applied a tick after the strike step; held at that age proves the reduced end is past 5010 ms. The before phase, without the talent, reads the same disarm held. vehicle_landed voids a phase whose 8379 did not apply (DmgClass 2, melee: it can miss, be dodged or parried). The gone arm (window_gone) excludes the other side. Expected from the installed DBC and the tooltip; nothing from a run."
+      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the strike's target, the caster; aura 67 MOD_DISARM, DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0 with only an aura effect, so Unit::SpellHitResult never rolls a miss) lasts 10000 x 85% = 8500 ms with the talent. A 15% cut 10% larger (16.5%) would end it at 8350 ms. Held arm: the striker casts 13534 at the caster, 8380 ms pass, the game time is stamped, Holy Form 805301 (the trigger) is cast, 25 ms pass and the after reading is stamped; the reading's age since the strike is at least 8380 + the stamped gap (window 20..60 ms), so at least 8400 ms, and at least 8375 ms if the aura were applied one world step (25 ms, each run's max_step_ms) after the strike step; held at that age proves the reduced end is past 8350 ms. The before phase, without the talent, reads the same disarm held. vehicle_landed voids a phase whose 13534 did not apply (a first design with Disarm 8379, DmgClass 2 melee, can be missed, dodged or parried: round B4 read no aura after about 4 of 40 first strikes and rc6 draft pair 20261123-002432 1 of 16 strikes). The gone arm (window_gone) excludes the other side. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 807507,
@@ -10489,17 +10489,17 @@
       "trigger_spell": 805301,
       "target": "caster",
       "strike": {
-        "spell": 8379,
+        "spell": 13534,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 5080,
+        "wait_ms": 8500,
         "after_trigger_ms": 100,
         "striker_entry": 36
       },
       "metric": "aura",
       "fields": {
-        "spell": 8379
+        "spell": 13534
       },
       "before_expected": 1,
       "expected": 0,
@@ -10507,13 +10507,13 @@
       "expire_ms": 21000,
       "game_time": {
         "after": [
-          5205,
-          5272
+          8625,
+          8720
         ]
       },
       "void_on_cast_failure": true,
       "vehicle_landed": true,
-      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): Disarm 8379 (Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the caster; DurationIndex 32 = 6000 ms, Speed 0) lasts 5100 ms with the talent. A 15% cut 10% smaller (13.5%) would end it at 5190 ms. Gone arm: the game time is stamped, Holy Form 805301 is cast, 100 ms pass, the striker casts 8379 at the caster, 5080 ms and 25 ms pass and the after reading is stamped and read on the next step; the reading's age since the strike is at most the stamped gap less the 100 ms wait plus one world tick, so with the window 5205..5272 ms at most 5172 ms plus that tick (the run's max_step_ms, at most 17 ms), below 5190 ms; gone at that age proves the reduced end is before 5190 ms. Control: the before phase, without the talent, runs the same steps and reads the disarm still held at an age of at least 5080 + 25 = 5105 ms, past the reduced end 5100 ms. vehicle_landed voids a phase whose 8379 did not apply. Expected from the installed DBC and the tooltip; nothing from a run."
+      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the caster; DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0) lasts 8500 ms with the talent. A 15% cut 10% smaller (13.5%) would end it at 8650 ms. Gone arm: the game time is stamped, Holy Form 805301 is cast, 100 ms pass, the striker casts 13534 at the caster, 8500 ms and 25 ms pass and the after reading is stamped and read on the next step; the reading's age since the strike is at most the stamped gap less the 100 ms wait plus one world tick, so with the window 8625..8720 ms at most 8620 + 25 = 8645 ms (25 ms: each run's max_step_ms), below 8650 ms; gone at that age proves the reduced end is before 8650 ms. Control: the before phase, without the talent, runs the same steps and reads the disarm still held at an age of at least 8500 + 25 = 8525 ms, past the reduced end 8500 ms. vehicle_landed voids a phase whose 13534 did not apply. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 807873,
@@ -10538,17 +10538,17 @@
       "target": "caster",
       "cast_in_before": false,
       "strike": {
-        "spell": 8379,
+        "spell": 13534,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 4050,
+        "wait_ms": 6750,
         "in_before": true,
         "striker_entry": 36
       },
       "metric": "aura",
       "fields": {
-        "spell": 8379
+        "spell": 13534
       },
       "before_expected": 1,
       "expected": 1,
@@ -10562,7 +10562,7 @@
       },
       "void_on_cast_failure": true,
       "vehicle_landed": true,
-      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): Disarm 8379 (Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the strike's target, the caster; aura 67 MOD_DISARM, DurationIndex 32 = 6000 ms, Speed 0) lasts 6000 x 70% = 4200 ms with the talent. A 30% cut 10% larger (33%) would end it at 4020 ms. Held arm: the striker casts 8379 at the caster, 4050 ms pass, the game time is stamped, Holy Form 805301 (the trigger) is cast, 25 ms pass and the after reading is stamped; the reading's age since the strike is at least 4050 + the stamped gap (window 20..60 ms), so at least 4070 ms, less at most one world tick if the aura is applied a tick after the strike step; held at that age proves the reduced end is past 4020 ms. The before phase, without the talent, reads the same disarm held. vehicle_landed voids a phase whose 8379 did not apply (DmgClass 2, melee: it can miss, be dodged or parried). The gone arm (window_gone) excludes the other side. Expected from the installed DBC and the tooltip; nothing from a run."
+      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the strike's target, the caster; aura 67 MOD_DISARM, DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0 with only an aura effect, so Unit::SpellHitResult never rolls a miss) lasts 10000 x 70% = 7000 ms with the talent. A 30% cut 10% larger (33%) would end it at 6700 ms. Held arm: the striker casts 13534 at the caster, 6750 ms pass, the game time is stamped, Holy Form 805301 (the trigger) is cast, 25 ms pass and the after reading is stamped; the reading's age since the strike is at least 6750 + the stamped gap (window 20..60 ms), so at least 6770 ms, and at least 6745 ms if the aura were applied one world step (25 ms, each run's max_step_ms) after the strike step; held at that age proves the reduced end is past 6700 ms. The before phase, without the talent, reads the same disarm held. vehicle_landed voids a phase whose 13534 did not apply (a first design with Disarm 8379, DmgClass 2 melee, can be missed, dodged or parried: round B4 read no aura after about 4 of 40 first strikes and rc6 draft pair 20261123-002432 1 of 16 strikes). The gone arm (window_gone) excludes the other side. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 807873,
@@ -10574,17 +10574,17 @@
       "trigger_spell": 805301,
       "target": "caster",
       "strike": {
-        "spell": 8379,
+        "spell": 13534,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 4220,
+        "wait_ms": 7020,
         "after_trigger_ms": 100,
         "striker_entry": 36
       },
       "metric": "aura",
       "fields": {
-        "spell": 8379
+        "spell": 13534
       },
       "before_expected": 1,
       "expected": 0,
@@ -10592,13 +10592,13 @@
       "expire_ms": 21000,
       "game_time": {
         "after": [
-          4345,
-          4462
+          7145,
+          7370
         ]
       },
       "void_on_cast_failure": true,
       "vehicle_landed": true,
-      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): Disarm 8379 (Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the caster; DurationIndex 32 = 6000 ms, Speed 0) lasts 4200 ms with the talent. A 30% cut 10% smaller (27%) would end it at 4380 ms. Gone arm: the game time is stamped, Holy Form 805301 is cast, 100 ms pass, the striker casts 8379 at the caster, 4220 ms and 25 ms pass and the after reading is stamped and read on the next step; the reading's age since the strike is at most the stamped gap less the 100 ms wait plus one world tick, so with the window 4345..4462 ms at most 4362 ms plus that tick (the run's max_step_ms, at most 17 ms), below 4380 ms; gone at that age proves the reduced end is before 4380 ms. Control: the before phase, without the talent, runs the same steps and reads the disarm still held at an age of at least 4220 + 25 = 4245 ms, past the reduced end 4200 ms. vehicle_landed voids a phase whose 8379 did not apply. Expected from the installed DBC and the tooltip; nothing from a run."
+      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the caster; DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0) lasts 7000 ms with the talent. A 30% cut 10% smaller (27%) would end it at 7300 ms. Gone arm: the game time is stamped, Holy Form 805301 is cast, 100 ms pass, the striker casts 13534 at the caster, 7020 ms and 25 ms pass and the after reading is stamped and read on the next step; the reading's age since the strike is at most the stamped gap less the 100 ms wait plus one world tick, so with the window 7145..7370 ms at most 7270 + 25 = 7295 ms (25 ms: each run's max_step_ms), below 7300 ms; gone at that age proves the reduced end is before 7300 ms. Control: the before phase, without the talent, runs the same steps and reads the disarm still held at an age of at least 7020 + 25 = 7045 ms, past the reduced end 7000 ms. vehicle_landed voids a phase whose 13534 did not apply. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 807507,
