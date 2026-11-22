@@ -457,6 +457,7 @@ void RemoveFromInventory(CharacterDatabaseTransaction trans, Player* player, uin
 void MoveIntoInventory(CharacterDatabaseTransaction trans, Player* player, ItemPosCountVec const& dest, Item* item)
 {
     ObjectGuid const guid = item->GetGUID();
+    AscensionVanityOwnership::CollectItem(player, item);
     player->MoveItemToInventory(dest, item, true);
     player->SaveInventoryAndGoldToDB(trans);
     Item* stored = player->GetItemByGuid(guid);
@@ -663,6 +664,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 uint32 const room = destItem->GetMaxStackCount() - destItem->GetCount();
                 uint32 const amount = std::min<uint32>(room, source->GetCount());
 
+                AscensionVanityOwnership::CollectItem(player, source);
                 destItem->SetCount(destItem->GetCount() + amount);
                 destItem->SetState(ITEM_CHANGED, player);
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);

@@ -7374,7 +7374,9 @@ private:
                 "Relogged character did not enter the world");
             Reach(actor, ActorStage::Ready);
         }
-        else if ((action == "login_hooks" || action == "forget_vanity") && !QueuedCharacterWorkDone())
+        else if (action == "login_hooks" && !QueuedCharacterWorkDone())
+            return;
+        else if (action == "forget_vanity" && !VanityRowStored(step))
             return;
         else
             Act(step, record);
@@ -7382,6 +7384,17 @@ private:
         record.put("elapsed_ms", GameElapsed(_stepTime));
         _records.push_back({ "", record });
         Advance();
+    }
+
+    bool VanityRowStored(Tree const& step)
+    {
+        Player* player = _actors.at(step.get<std::string>("actor")).session->GetPlayer();
+        uint32 const item = step.get<uint32>("item");
+        if (!player || !AscensionVanityOwnership::OwnsItem(player, item))
+            return true;
+        return bool(CharacterDatabase.Query(
+            "SELECT 1 FROM `account_vanity_collection` WHERE `account_id` = {} AND `item_id` = {}",
+            player->GetSession()->GetAccountId(), item));
     }
 
     bool QueuedCharacterWorkDone()
