@@ -22,7 +22,7 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0013](0013-beast-blood-is-cast-by-each-grouped-member-on-itself.md) | Beast Blood is cast by each grouped member on itself | accepted |
 | [0014](0014-growing-malice-grows-the-hex-through-aura-271-alone.md) | Growing Malice grows the Hex through aura 271 alone | accepted |
 | [0015](0015-dark-effigy-adds-two-enemies-through-its-jump-targets-alone.md) | Dark Effigy adds two enemies through its jump targets alone | accepted; mentor ruling M-58 |
-| [0016](0016-overflowing-juju-scales-the-folded-spell-power-coefficient.md) | Overflowing Juju scales the folded spell power coefficient | accepted; mentor ruling M-59, owner question Q-TA-1 |
+| [0016](0016-overflowing-juju-scales-the-folded-spell-power-coefficient.md) | Overflowing Juju scales the folded spell power coefficient | accepted; mentor ruling M-59, amended by 0031 |
 | [0017](0017-amphibimorph-makes-a-frog-a-beast.md) | Amphibimorph makes a frogged unit a Beast | accepted (contributor decision 2026-11-22); engine file `Unit.cpp`, gated on Witch Doctor ids |
 | [0018](0018-voodoo-unleashed-cuts-shadow-puppets-by-504607.md) | Voodoo Unleashed cuts Shadow Puppets by 504607's 3 sec | accepted |
 | [0019](0019-voodoo-strings-needs-threads-when-bad-juju-is-used.md) | Voodoo Strings needs Puppeteer's Threads on the enemy when Bad Juju is used | accepted |
@@ -37,3 +37,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0028](0028-voodoo-cauldron-heals-allies-within-fifteen-yards.md) | Voodoo Cauldron heals allies within 15 yd | accepted |
 | [0029](0029-graven-effigy-lengthens-crowd-control.md) | Graven Effigy lengthens crowd control | accepted (contributor decision 2026-11-22); engine file `Unit.cpp`, gated on Witch Doctor ids |
 | [0030](0030-soul-marionette-roots-for-eight-seconds.md) | Soul Marionette roots for 8 sec | accepted (contributor decision 2026-11-22) |
+| [0031](0031-overflowing-juju-scales-malefic-arrow.md) | Overflowing Juju scales Malefic Arrow | accepted (contributor decision 2026-11-22); amends 0016 |

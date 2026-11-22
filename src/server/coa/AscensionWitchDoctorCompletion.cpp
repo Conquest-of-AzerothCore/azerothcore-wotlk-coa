@@ -663,10 +663,9 @@ class witch_doctor_scaling : public UnitScript
                                                              player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE))
                                                   : player->SpellBaseDamageBonusDone(SpellSchoolMask(c.school)));
                 float coefficient = c.sp;
-                if (!IsArrow(info))
-                    if (AuraEffect const* juju = player->GetAuraEffect(OverflowingJuju, EFFECT_0))
-                        if (juju->IsAffectedOnSpell(info))
-                            coefficient *= 1.0f + float(juju->GetAmount()) / 100.0f;
+                if (AuraEffect const* juju = player->GetAuraEffect(OverflowingJuju, EFFECT_0))
+                    if (juju->IsAffectedOnSpell(info))
+                        coefficient *= 1.0f + float(juju->GetAmount()) / 100.0f;
                 value += std::max(0.0f, sp) * coefficient + player->GetStat(STAT_SPIRIT) * c.spirit +
                          player->GetTotalAttackPowerValue(RANGED_ATTACK) * c.rap +
                          player->GetTotalAttackPowerValue(BASE_ATTACK) * c.ap;

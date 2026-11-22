@@ -1,6 +1,6 @@
 # 0016. Overflowing Juju scales the folded spell power coefficient
 
-- Status: accepted
+- Status: accepted; amended by 0031 (Malefic Arrow is scaled)
 - Date: 2026-11-20
 
 ## Context
