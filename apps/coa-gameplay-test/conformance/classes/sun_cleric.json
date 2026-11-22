@@ -23762,6 +23762,29 @@
         }
       ],
       "observe_source": "704585 Gleaming Vigil Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 1 (Physical), BasePoints -6 (-5 as read, $s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms (aura 87 MiscValue 1, BasePoints -6, -5, $s2), the helper aura kept on the caster only while it is above 80% health (the Gleaming Armor 805267 pattern). Void Zone 92559 (1000 Physical direct damage, no cooldown, no cost) strikes the caster in a control arm (passive unlearned) and in an arm with 704585 learned; the ratio of the damage taken is judged against the stated value. Reference search 2026-11-22: coa-history spell 704585 has no cast event (a passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800054,
+      "name": "Radiance (a burst every 2 sec)",
+      "kind": "hit_period",
+      "variant": "burst_period",
+      "label_suffix": "burst_period",
+      "quote": "Every $/1000;t1 sec you burst with light,",
+      "trigger_spell": 800054,
+      "hit_spell": 800038,
+      "expected_ms": 2000,
+      "window": [
+        1500,
+        10500
+      ],
+      "fixtures": [
+        [
+          823764,
+          "caster"
+        ]
+      ],
+      "poll_ms": 25,
+      "observe_source": "800054 Radiance Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 2000 ($/1000;t1 = 2 sec), triggers 800038 (Effect[1] SCHOOL_DAMAGE on enemies within its radius), DurationIndex 1 (10000 ms). One real cast at the dummy; the damage hits of 800038 on the dummy are polled with game-time stamps and (last - first) / (hits - 1) must read 2000 ms inside the G-19 band; a hit before the cast alerts. Resistance fixture 823764 on the caster. Reference search 2026-11-22: coa-history spell 800054 has 257 casts; bindmysoul and the tooltip give 2 sec; nothing else found."
     }
   ],
   "player_observations": [],

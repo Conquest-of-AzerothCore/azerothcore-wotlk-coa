@@ -4629,7 +4629,7 @@
     "spell": 800054,
     "clause": "Every $/1000;t1 sec you burst with light,",
     "labels": [
-      "800054 effect_value #3"
+      "800054 behaviour_metric_delta burst_period"
     ],
     "kind": "claim"
   },
@@ -4823,10 +4823,26 @@
   {
     "spell": 802161,
     "clause": "This leaves behind a Sun Gate for $d that allies can interact with to blink themselves the same distance forward.",
-    "labels": [
-      "802161 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "This leaves behind a Sun Gate (the gate creature is owned after the cast)",
+        "labels": [
+          "802161 behaviour_metric_delta gate_held"
+        ]
+      },
+      {
+        "claim": "for $d (15 s: present at 13.6 s, gone at 16.4 s)",
+        "labels": [
+          "802161 behaviour_metric_delta gate_held",
+          "802161 behaviour_metric_delta gate_gone"
+        ]
+      },
+      {
+        "claim": "that allies can interact with to blink themselves the same distance forward",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 802161,
@@ -5250,12 +5266,22 @@
   {
     "spell": 804628,
     "clause": "Your Judgement Day now applies Suncharged to the target every $807080t2 sec,",
-    "labels": [
-      "804628 aura_amplitude_ms #0",
-      "804628 behaviour_metric_delta suncharge_period"
-    ],
     "kind": "claim",
-    "reason": "Control arm = the phase before the learn (0 stacks). Read 4500-4900 ms after the cast: 9 stacks, which excludes the 10 of a 0.45 s period and the 8 of a 0.55 s period (stated 0.5 s from 807080 Effect[1] EffectAmplitude 500; the bindmysoul 1 sec is an older state). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the phase before the learn (0 stacks). Read 4500-4900 ms after the cast: 9 stacks, which excludes the 10 of a 0.45 s period and the 8 of a 0.55 s period (stated 0.5 s from 807080 Effect[1] EffectAmplitude 500; the bindmysoul 1 sec is an older state). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
+    "claims": [
+      {
+        "claim": "Your Judgement Day now applies Suncharged to the target",
+        "labels": [
+          "804628 behaviour_metric_delta suncharge_period"
+        ]
+      },
+      {
+        "claim": "every $807080t2 sec (0.5 s: 9 stacks read 4.5 to 4.9 s after the cast, which excludes 8 and 10)",
+        "labels": [
+          "804628 behaviour_metric_delta suncharge_period"
+        ]
+      }
+    ]
   },
   {
     "spell": 804628,
