@@ -2128,6 +2128,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
 - [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
   parts (ADR 0544, ADR 0546)
+- [`swing_reset_rate`](kinds/swing_reset_rate.md): a talent's chance to reset a cooldown, from the clear-cooldown
+  packets per landed auto-attack hit, pooled over parts (ADR 1017, provisional)
 
 ## Metric-delta option modules
 
