@@ -336,7 +336,11 @@
         "labels": [
           "300336 spell_duration 300337 #1",
           "300336 behaviour_metric_delta illumination_duration",
-          "300336 behaviour_metric_delta shine_duration"
+          "300336 behaviour_metric_delta shine_duration",
+          "300336 behaviour_metric_delta illumination_expiry",
+          "300336 behaviour_metric_delta shine_expiry",
+          "300336 behaviour_metric_delta illumination_expiry_control",
+          "300336 behaviour_metric_delta shine_expiry_control"
         ]
       }
     ]
@@ -612,7 +616,8 @@
       "300363 behaviour_metric_delta day_haste"
     ],
     "kind": "claim",
-    "reason": "Control arm = the same read before the learn (1.0) and the night arm; 1/(1.03 x 1.01) = 0.961261 at hour 12. Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = the same read before the learn (1.0) and the night arm; 1/(1.03 x 1.01) = 0.961261 at hour 12. Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip.",
+    "promise_of": "Increases your spell haste by $s1%,"
   },
   {
     "spell": 300365,
@@ -701,7 +706,8 @@
       "300621 behaviour_metric_delta night_haste"
     ],
     "kind": "claim",
-    "reason": "Control arm = the night entry at hour 0 (0.943396) and the reading before the learn (1). Realm-local hour 12: 1/(1.06 x 1.02) = 0.924883 within 0.002, which excludes the night value; the 2% comes from 300364 whose amount the script sets to $s2 = 2 in the day (AscensionSunCleric.cpp:378-382). Reference search 2026-11-22: coa-history spell 300621: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 300621 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm = the night entry at hour 0 (0.943396) and the reading before the learn (1). Realm-local hour 12: 1/(1.06 x 1.02) = 0.924883 within 0.002, which excludes the night value; the 2% comes from 300364 whose amount the script sets to $s2 = 2 in the day (AscensionSunCleric.cpp:378-382). Reference search 2026-11-22: coa-history spell 300621: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 300621 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip.",
+    "promise_of": "Increases your spell haste by $s1%,"
   },
   {
     "spell": 300626,
@@ -1705,7 +1711,9 @@
     "spell": 560111,
     "clause": "Casting Horusath Blast now resets the cooldown of Glorious Execution.",
     "labels": [
-      "560111 behaviour_metric_delta ge_reset"
+      "560111 behaviour_metric_delta ge_reset",
+      "560111 cost_gate 800626 ge_gate without",
+      "560111 cost_gate 800626 ge_gate with"
     ],
     "kind": "claim",
     "reason": "Control arm = the same cast sequence before the learn: Glorious Execution 800626 cast, then Horusath Blast, remaining cooldown 7491 ms; after the learn 0. Scripted reset (AscensionSunClericAbilities.cpp:236-241). Spell chain read: 560111 -> 706870 (aura) -> 2414058 (delayed CDR payload, effect 165), the reset itself is the script. Reference search 2026-11-22: coa-history spell 560111: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 560111 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
@@ -2058,7 +2066,9 @@
     "clause": "Increases the duration of Radiance by $/1000;s1 sec.",
     "kind": "claim",
     "labels": [
-      "561204 behaviour_metric_delta radiance_duration"
+      "561204 behaviour_metric_delta radiance_duration",
+      "561204 behaviour_metric_delta radiance_expiry",
+      "561204 behaviour_metric_delta radiance_expiry_control"
     ],
     "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance duration 9944 ms without the passive and 15944 with it (10000 + 6000), band 100 ms."
   },
@@ -2067,7 +2077,9 @@
     "clause": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
     "kind": "claim",
     "labels": [
-      "561204 behaviour_metric_delta dawn_gain"
+      "561204 behaviour_metric_delta dawn_gain",
+      "561204 behaviour_metric_delta dawn_gain_expiry",
+      "561204 behaviour_metric_delta dawn_gain_expiry_control"
     ],
     "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance applied by Dawn reads 5945 ms (6001 - 50) with the passive and is absent without it; the batch 1b lead (Radiance not applied after a Dawn cast) does not reproduce."
   },
@@ -2076,7 +2088,9 @@
     "clause": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
     "kind": "claim",
     "labels": [
-      "561204 behaviour_metric_delta dawn_extend"
+      "561204 behaviour_metric_delta dawn_extend",
+      "561204 behaviour_metric_delta dawn_extend_expiry",
+      "561204 behaviour_metric_delta dawn_extend_expiry_control"
     ],
     "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance cast, Dawn 1600 ms later: duration 8338 without the passive (control, no extension) and 20339 with it (16000 + 6001 - 1650), band 300 ms, no extension would read 14350."
   },
@@ -3051,7 +3065,8 @@
     "clause": "and reduces the duration of movement slowing effects by $s1%.",
     "labels": [
       "680670 effect_value e0 #1",
-      "680670 behaviour_duration_ratio"
+      "680670 behaviour_duration_ratio",
+      "680670 behaviour_expiry"
     ],
     "kind": "claim",
     "reason": "Control arm = the Hamstring 1715 duration before the learn (14494 ms remaining, read about 500 ms after the last landing). After the learn 11494 ms: a cut of exactly 3000 ms in both runs, 20.0% of the 15000 ms duration from Effect[0] aura 232 MiscValue 11 BasePoints -21 + 1 (18% and 22% would cut 2700 and 3300 ms, 300 ms away; the reads agree to the ms across the two runs). The judge's own margin is 525 ms, wider than the 10% rule: stated as a tool limit (the margin is not an entry field). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence with -20%; nothing else found. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
