@@ -480,8 +480,11 @@
   {
     "spell": 300349,
     "clause": "Can occur only once per sec.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300349 behaviour_metric_delta icd_spacing"
+    ],
+    "kind": "claim",
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Two forced-crit Daybreak 503624 heals per arm, the second cast with ignore_gcd (owner ruling O-17): measured 955 ms apart, Conquest 800764 cut once (1 whole cut in the summed elapsed window), and 1065 ms apart, cut twice, in both runs; bands [900, 1000) and (1000, 1100] (review b7a I3). Tool: kind timer_spacing_arms, ADR 1025 (provisional)."
   },
   {
     "spell": 300351,
@@ -707,8 +710,9 @@
     "clause": "Can only occur once per sec.",
     "kind": "claim",
     "labels": [
-      "300371 behaviour_metric_delta chain"
-    ]
+      "300371 behaviour_metric_delta icd_spacing"
+    ],
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Two Horusath Blast 572801 hits per arm on a Chains of Light 806697 target, the second cast with ignore_gcd (owner ruling O-17): 952 ms apart give 1 new copy on the spares and 1048 / 1060 ms apart give 2, in both runs; bands [900, 1000) and (1000, 1100]. The chain label alone cited no time read (review b7b). Tool: kind timer_spacing_arms, ADR 1025 (provisional)."
   },
   {
     "spell": 300621,
@@ -5493,7 +5497,9 @@
     "claims": [
       {
         "claim": "Your next Dawnsear is instant cast",
-        "labels": []
+        "labels": [
+          "804629 behaviour_metric_delta fed_instant"
+        ]
       },
       {
         "claim": "within $d",
@@ -5502,14 +5508,16 @@
         ]
       }
     ],
-    "reason": "Held (review b7c C1): the entries instant, instant_once and damage set the claim's own aura 807299 with set_aura, which guide 3.4 forbids when the aura is the subject, so no label counts. The real route is the 15% Radiant Flame tick proc (proc_rate entry), and the harness has no conditional repeat step: a fixed sequence of Radiant Flame casts reaches at most about one tick per second on one dummy (tick period 1000 ms, 3 ticks landed per cast in the proc entry sizing) inside the 10 s life of 807299, which leaves 0.85^n failures with n near 10, far above 0.1% per pair. Forcing the roll failed once (SPELLMOD_CHANCE_OF_SUCCESS does not reach roll_chance_i, AscensionSunCleric.cpp:196-204). Tool need: a step that repeats a cast until an aura is present on the caster, then continues. Open; the 'within $d' claim carries only its data label (807299 DurationIndex 1 = 10000 ms), a data-level readback with a behaviour route through the same real grant, not status 3 (no second design failed)."
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional)."
   },
   {
     "spell": 804629,
     "clause": "and deals $s2% increased damage.",
-    "labels": [],
+    "labels": [
+      "804629 behaviour_metric_delta fed_damage"
+    ],
     "kind": "claim",
-    "reason": "Held (review b7c C1): the entries instant, instant_once and damage set the claim's own aura 807299 with set_aura, which guide 3.4 forbids when the aura is the subject, so no label counts. The real route is the 15% Radiant Flame tick proc (proc_rate entry), and the harness has no conditional repeat step: a fixed sequence of Radiant Flame casts reaches at most about one tick per second on one dummy (tick period 1000 ms, 3 ticks landed per cast in the proc entry sizing) inside the 10 s life of 807299, which leaves 0.85^n failures with n near 10, far above 0.1% per pair. Forcing the roll failed once (SPELLMOD_CHANCE_OF_SUCCESS does not reach roll_chance_i, AscensionSunCleric.cpp:196-204). Tool need: a step that repeats a cast until an aura is present on the caster, then continues. Open."
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Six control and six fed Dawnsear 554406 hits, non-critical only, spell power 10000: the mean fed hit reads 1.2510 and 1.2506 times the control mean against 1.25 within the 80 die sides band; each fed trial earns 807299 through cast_until_aura (owner ruling O-17) and reads it before the cast. Tool: kind aura_fed_effect, ADR 1025 (provisional)."
   },
   {
     "spell": 804630,
