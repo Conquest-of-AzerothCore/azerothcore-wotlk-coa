@@ -30567,6 +30567,33 @@
     },
     {
       "spell": 681433,
+      "name": "Solar Nova (Solar Invocation: Conquest cooldown cut by 1 s for each of three targets struck)",
+      "kind": "cost_gate",
+      "variant": "cd_conquest_area",
+      "label_suffix": "cd_conquest_area",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 3000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          681433,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "area_dummies": [
+        5.0,
+        5.0
+      ],
+      "cast_power": 1363,
+      "observe_source": "524858 Seraphim's Light CD reduc Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 (1000 ms, $/1000;524858s1 = 1 sec) on 800764 Conquest, 503651 Revelation and 806159 Resplendence; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:54-77) casts 524858 once per successful offensive hit of Solar Nova, so per target struck. Conquest 800764 (RecoveryTime 30000 ms) is cast, Solar Nova strikes the dummy and two copies of it standing at the same 5 yd (cost_gate area_dummies, tool ADR 1049), three targets, 1600 ms later, so the stated cut is 3 x 1000 = 3000 ms (the DBC per-target amount times the targets struck, never from a run). The gated spell is attempted 3000 ms less its cooldown plus 60 ms after the priming cast (refused without Solar Nova, the control arm; accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms of 3000 ms, so a cut for two targets (2000 ms) or four (4000 ms) is excluded, as is any cut outside 3000 +-10%. The one-target entry cd_conquest (1000 ms) runs in the same pair. cost_gate judges the cast result itself, so void_on_cast_failure (a metric_delta option refused for a cast_failure reading) does not apply. Deterministic: no roll, residual 0 per pair. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
       "name": "Solar Nova (Solar Invocation: Revelation cooldown cut by 1 s for the target struck)",
       "kind": "cost_gate",
       "variant": "cd_revelation",
