@@ -3468,7 +3468,11 @@
   {
     "spell": 704579,
     "clause": "Does not work on bosses.",
-    "labels": [],
+    "labels": [
+      "704579 behaviour_metric_delta boss_blind_stacks",
+      "704579 behaviour_metric_delta boss_hit",
+      "704579 behaviour_metric_delta blind_stacks"
+    ],
     "kind": "claim"
   },
   {
@@ -3544,12 +3548,30 @@
     "spell": 704903,
     "clause": "and enemies around them, healing you for 10% of the damage dealt.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and enemies around them",
+        "labels": [
+          "704903 behaviour_metric_delta group_target",
+          "704903 behaviour_metric_delta group_around"
+        ]
+      },
+      {
+        "claim": "healing you for 10% of the damage dealt",
+        "labels": [
+          "704903 behaviour_metric_delta lone_heal"
+        ]
+      }
+    ]
   },
   {
     "spell": 704903,
     "clause": "If you only hit one target, the damage dealt is increased to that target by 50%.",
-    "labels": [],
+    "labels": [
+      "704903 behaviour_metric_delta lone_damage",
+      "704903 behaviour_metric_delta group_target"
+    ],
     "kind": "claim"
   },
   {
@@ -5081,7 +5103,10 @@
   {
     "spell": 804257,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "804257 behaviour_metric_delta ally_haste_cap",
+      "804257 behaviour_metric_delta ally_haste"
+    ],
     "kind": "claim"
   },
   {

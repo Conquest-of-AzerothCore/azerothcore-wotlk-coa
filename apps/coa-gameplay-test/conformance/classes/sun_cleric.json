@@ -23324,6 +23324,280 @@
       "minimum_hits": 15,
       "cast_power": 1363,
       "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "spell": 704903,
+      "name": "Adjudicator (a lone enemy takes 50% of the hit, increased by 50%)",
+      "kind": "metric_delta",
+      "variant": "lone_damage",
+      "label_suffix": "lone_damage",
+      "quote": "If you only hit one target, the damage dealt is increased to that target by 50%.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707774,
+        "target": "dummy"
+      },
+      "expected": 402,
+      "after_at_least": 397,
+      "after_at_most": 407,
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). One dummy only: 0.5 x (532..540) = 266..270, then AddPct 50 gives 399..405, read within 397..407. The first phase casts Wrath without 704903 (control, 0). Fixture 823764 keeps the dummy's Holy resistance out and 984954 keeps a critical strike out, both in both phases. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "spell": 704903,
+      "name": "Adjudicator (with a second enemy in range the target takes 50% of the hit, not increased)",
+      "kind": "metric_delta",
+      "variant": "group_target",
+      "label_suffix": "group_target",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707774,
+        "target": "dummy"
+      },
+      "expected": 268,
+      "after_at_least": 264,
+      "after_at_most": 272,
+      "dummy_distance": 6,
+      "area_dummies": [
+        4.0
+      ],
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). A second dummy (area1) stands 4 yd from the caster, the target dummy 6 yd: both inside the 5 yd radius, so the target takes 0.5 x (532..540) = 266..270 with no increase (read within 264..272; the lone-target amount would be at least 399). Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "spell": 704903,
+      "name": "Adjudicator (an enemy around the target takes 50% of the hit)",
+      "kind": "metric_delta",
+      "variant": "group_around",
+      "label_suffix": "group_around",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707774,
+        "target": "area1"
+      },
+      "expected": 268,
+      "after_at_least": 264,
+      "after_at_most": 272,
+      "dummy_distance": 6,
+      "area_dummies": [
+        4.0
+      ],
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). The enemy around the target (area1, 4 yd from the caster, inside the 5 yd radius of the dummy at 6 yd) takes 0.5 x (532..540) = 266..270, read within 264..272. Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "spell": 704903,
+      "name": "Adjudicator (the caster is healed for 10% of the damage dealt)",
+      "kind": "metric_delta",
+      "variant": "lone_heal",
+      "label_suffix": "lone_heal",
+      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707774,
+        "target": "caster"
+      },
+      "caster_health_pct": 50,
+      "expected": 40,
+      "after_at_least": 39,
+      "after_at_most": 41,
+      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). The caster is held at 50% of the health fixture before each cast so the heal is not capped. One dummy: the leech deals 399..405 and heals the caster for its EffectValueMultiplier 0.1 = 39.9..40.5, read within 39..41. Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (a boss gains no Blinded stacks)",
+      "kind": "metric_delta",
+      "variant": "boss_blind_stacks",
+      "label_suffix": "boss_blind_stacks",
+      "quote": "Does not work on bosses.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:312: Blinded 505342 is cast only when Twilight 704579 is known and the target is not a dungeon boss (Creature::IsDungeonBoss). The target is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, the Templar Sacred Defense dungeon_boss arm's striker), against the non-boss dummy of the blind_stacks entry (5 stacks, same casts). Vow of the Eclipse 807435 is set on the caster as a named precondition fixture, never the subject. Six Sunflare 800231 hits (five setup casts and the trigger, 2400 ms apart) at the boss: the stacks of 505342 read 0 before and after the learn; the boss_hit entry shows the Sunflare hits land on that creature. Control: blind_stacks reads 5 on the non-boss dummy in the same pair. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip words; nothing else found. ",
+      "target_entry": 31146
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (the Sunflare hits land on the boss)",
+      "kind": "metric_delta",
+      "variant": "boss_hit",
+      "label_suffix": "boss_hit",
+      "quote": "Does not work on bosses.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800231,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:312: Blinded 505342 is cast only when Twilight 704579 is known and the target is not a dungeon boss (Creature::IsDungeonBoss). The target is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, the Templar Sacred Defense dungeon_boss arm's striker), against the non-boss dummy of the blind_stacks entry (5 stacks, same casts). Vow of the Eclipse 807435 is set on the caster as a named precondition fixture, never the subject. Reads the damage count of Sunflare 800231 on the boss after the six casts: at least one landed (the chance that all six miss is under 1e-4 at any miss chance below 0.2), so the 0 stacks of boss_blind_stacks is not a missed cast. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip words; nothing else found. ",
+      "target_entry": 31146,
+      "after_at_least": 1,
+      "after_at_most": 6,
+      "setup_only_after": true,
+      "cast_in_before": false
+    },
+    {
+      "spell": 804257,
+      "name": "Glaring Rays (does not stack with Runes of Quickness)",
+      "kind": "metric_delta",
+      "variant": "ally_haste_cap",
+      "label_suffix": "ally_haste_cap",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 805301,
+      "gate_spell": 804257,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 0.970874,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804257 Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3%; data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql spell_group 2000182 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) lists 804257 with 560628 Runes of Quickness (Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216, BasePoints 2 + 1 = 3%, passive, Attributes 320). Runes of Quickness is learned first (the ally reads 1/1.03 = 0.970874 alone: before), then Glaring Rays: the exclusive group keeps the highest value, so the grouped ally still reads 0.970874; a stack would read 1/(1.03 x 1.03) = 0.942596. Tolerance 0.0001. The ally_haste entry shows Glaring Rays alone gives the ally 3%. Reference search 2026-11-22: coa-history spell 804257: 0 events in 186 logs (a passive); nothing else found.",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "learn": [
+        560628
+      ]
     }
   ],
   "player_observations": [],
