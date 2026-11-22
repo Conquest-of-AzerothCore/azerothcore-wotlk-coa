@@ -3149,7 +3149,10 @@
           "680645 behaviour_metric_delta crit_undead_grace",
           "680645 behaviour_metric_delta crit_humanoid_grace",
           "680645 behaviour_metric_delta crit_undead_wrath",
-          "680645 behaviour_metric_delta crit_humanoid_wrath"
+          "680645 behaviour_metric_delta crit_humanoid_wrath",
+          "680645 behaviour_hit_ratio crit_undead_hits_light",
+          "680645 behaviour_hit_ratio crit_undead_hits_grace",
+          "680645 behaviour_hit_ratio crit_undead_hits_wrath"
         ]
       }
     ],
@@ -4884,7 +4887,9 @@
     "spell": 707773,
     "clause": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
     "labels": [
-      "707773 behaviour_metric_delta armor_ignore"
+      "707773 behaviour_metric_delta armor_ignore",
+      "707773 behaviour_hit_ratio ignores_armor",
+      "707773 behaviour_hit_ratio vow_inactive"
     ],
     "kind": "claim"
   },
@@ -6303,7 +6308,8 @@
     "spell": 806116,
     "clause": "stacking $807061u times.",
     "labels": [
-      "806116 max_stacks 807061 #2"
+      "806116 max_stacks 807061 #2",
+      "806116 behaviour_metric_delta sunset_stack_cap"
     ],
     "kind": "claim"
   },
@@ -6339,7 +6345,8 @@
     "spell": 806116,
     "clause": "stacking $807077u times.",
     "labels": [
-      "806116 max_stacks 807077 #5"
+      "806116 max_stacks 807077 #5",
+      "806116 behaviour_metric_delta sunrise_stack_cap"
     ],
     "kind": "claim"
   },
@@ -6415,7 +6422,8 @@
       {
         "claim": "causing your Illuminations to be instant cast",
         "labels": [
-          "806159 behaviour_metric_delta instant_cast"
+          "806159 behaviour_metric_delta instant_cast",
+          "806159 behaviour_metric_delta instant_cast_control"
         ]
       },
       {
@@ -6430,7 +6438,8 @@
       {
         "claim": "but cost 100% more mana",
         "labels": [
-          "806159 behaviour_metric_delta cost"
+          "806159 behaviour_metric_delta cost",
+          "806159 behaviour_metric_delta cost_control"
         ]
       }
     ],
