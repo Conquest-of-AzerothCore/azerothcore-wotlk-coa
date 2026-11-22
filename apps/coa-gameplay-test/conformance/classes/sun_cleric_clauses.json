@@ -3468,8 +3468,9 @@
   {
     "spell": 704579,
     "clause": "Does not work on bosses.",
+    "labels": [],
     "kind": "claim",
-    "labels": []
+    "reason": "Open. A harness fixture is not an owned boss: Creature::IsDungeonBoss() is false only for a player-owned creature (Creature.cpp:3627-3628, owner = UNIT_FIELD_SUMMONEDBY), and player->SummonCreature(entry, position) stores no owner (TemporarySummon.cpp:27-37, 229-230), so the flag read is the template's. Training dummy 31146 reads as a non-boss because CREATURE_FLAG_EXTRA_DUNGEON_BOSS is set only for kill-credit creatures of non-raid instance_encounters (ObjectMgr.cpp:6846-6862). Next design: a 5-man encounter kill-credit creature as the target (entry not checked, nor whether its AI tolerates the harness). Lead (observation, no change): AscensionSunCleric.cpp:312 tests only IsDungeonBoss(), and raid encounter creatures never get the flag (ObjectMgr.cpp:6856-6862), so a raid or world boss is not excluded although the tooltip says 'Does not work on bosses.'"
   },
   {
     "spell": 704579,
@@ -3536,9 +3537,11 @@
     "spell": 704903,
     "clause": "Your Justicar's Wrath now deals an additional $s1% of its damage dealt to the target",
     "labels": [
-      "704903 effect_value e0 #0"
+      "704903 effect_value e0 #0",
+      "704903 behaviour_metric_delta group_target"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "group_target measures the second-target amount: 0.5 x the Wrath hit on the target (266..270) in the Adjudicator pair, which is the additional $s1% stated by effect 0 (50)."
   },
   {
     "spell": 704903,
@@ -3555,10 +3558,13 @@
       },
       {
         "claim": "healing you for 10% of the damage dealt",
-        "labels": []
+        "labels": [
+          "704903 behaviour_metric_delta heal_lone",
+          "704903 behaviour_metric_delta heal_group"
+        ]
       }
     ],
-    "reason": "Enemies around the target: proven (group_target, group_around). Pair 20261122-100356 / 20261122-100442, same build, no flip. The heal part (10% of the damage dealt) stays unproven: spell_heal_total and spell_heal_count of 707774 read 0 while the damage lands; cause not found."
+    "reason": "Enemies around the target: proven (group_target, group_around). The heal part reads the caster's applied heals of Gavel of Light 707522: the class code rewrites 707774 Effect[0] to SCHOOL_DAMAGE at load (AscensionSunClericContracts.cpp:76-77) and casts 707522 at the caster with damage / 10 (AscensionSunClericAbilities.cpp:287-288), so 707774 itself never heals; the earlier reads of spell_heal_total/spell_heal_count of 707774 (0) were reads of the wrong spell. heal_lone and heal_group read 707522 with the phase before the learn as control. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-102257 / 20261122-102343, build 765bdf42e33e, no flip. Lone heal reads 40 / 40 (hit 399..405 gives 39..40), two enemies 52 / 54 (each 26..27)."
   },
   {
     "spell": 704903,
@@ -4128,7 +4134,8 @@
           "707072 effect_value e1 #0"
         ]
       }
-    ]
+    ],
+    "reason": "Open: no label covers the dual-wield and two-handed wield part; the hit-chance part has its own labels."
   },
   {
     "spell": 707077,
@@ -4303,7 +4310,8 @@
       "707517 behaviour_metric_delta bless_ally",
       "707517 behaviour_metric_delta no_bless"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Applied heals of Radiant Cascade 500141 on the ally, fixture 984954 (aura 57, -1001) removing the natural crit chance in both phases: with Bless on the ally the critical heals read 0 before the learn (control) and 1 after, the non-critical ones 1 and 1; without Bless the critical heals stay 0 and the non-critical ones go 1 and 2. The earlier spell_done_crit_chance_scripted entries were a test fault (the metric starts at the caster's own chance and the hook assigns 100, so a +100 gain cannot pass) and are replaced. Pair 20261122-102257 / 20261122-102343, build 765bdf42e33e, no flip. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 707528,
@@ -4616,7 +4624,8 @@
         "claim": "and Judgement Day spells",
         "labels": []
       }
-    ]
+    ],
+    "reason": "Open: no label covers the Judgement Day cooldown; Paragon and Chosen of the Light have their own labels."
   },
   {
     "spell": 800602,
@@ -4638,7 +4647,8 @@
           "800602 effect_value e1 #0"
         ]
       }
-    ]
+    ],
+    "reason": "Open: no label covers the Holy Form doubling; the Ancient Rites tick-rate part has its own labels."
   },
   {
     "spell": 800612,
@@ -4831,7 +4841,8 @@
           "804057 behaviour_metric_delta disarm_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Open: no label covers the ranged weapon part; the melee weapon disarm and the duration have their own labels."
   },
   {
     "spell": 804057,
@@ -5103,7 +5114,8 @@
       "804257 behaviour_metric_delta ally_haste_cap",
       "804257 behaviour_metric_delta ally_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counts as data, not behaviour: ally_haste_cap reads cast_speed_multiplier, a state metric, and the clause carries none of its promise words (casting speed|cast speed|spell haste, coverage.py:439,471). The measurement is sound (Runes of Quickness alone reads 0.970874 on the grouped ally; learning Glaring Rays leaves it at 0.970874, a stack would read 0.942596; spell_group 2000182, stack_rule 3) and is kept as data evidence."
   },
   {
     "spell": 804269,
