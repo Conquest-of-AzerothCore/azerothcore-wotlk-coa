@@ -4,15 +4,15 @@
   "race": 1,
   "level": 60,
   "weapon": {
-    "item": 2027,
+    "item": 2524,
     "slot": 15,
-    "subclass": 7,
-    "min_damage": 17.25,
-    "max_damage": 28.75,
-    "speed_ms": 2300,
-    "inventory_type": 13,
+    "subclass": 4,
+    "min_damage": 34.61,
+    "max_damage": 55.4,
+    "speed_ms": 2500,
+    "inventory_type": 21,
     "normalized_speed": 2.4,
-    "skill_line": 43
+    "skill_line": 54
   },
   "skill_lines": [
     43,
@@ -24825,15 +24825,15 @@
     },
     "Seraphim": {
       "main_hand": {
-        "item": 2027,
+        "item": 2524,
         "slot": 15,
-        "subclass": 7,
-        "min_damage": 17.25,
-        "max_damage": 28.75,
-        "speed_ms": 2300,
-        "inventory_type": 13,
+        "subclass": 4,
+        "min_damage": 34.61,
+        "max_damage": 55.4,
+        "speed_ms": 2500,
+        "inventory_type": 21,
         "normalized_speed": 2.4,
-        "skill_line": 43
+        "skill_line": 54
       },
       "off_hand": {
         "item": 2129,
@@ -24850,17 +24850,27 @@
     },
     "Piety": {
       "main_hand": {
-        "item": 2030,
+        "item": 2524,
         "slot": 15,
-        "subclass": 10,
-        "min_damage": 30.45,
-        "max_damage": 50.75,
-        "speed_ms": 2900,
-        "inventory_type": 17,
-        "normalized_speed": 3.3,
-        "skill_line": 136
+        "subclass": 4,
+        "min_damage": 34.61,
+        "max_damage": 55.4,
+        "speed_ms": 2500,
+        "inventory_type": 21,
+        "normalized_speed": 2.4,
+        "skill_line": 54
       },
-      "off_hand": null,
+      "off_hand": {
+        "item": 2129,
+        "slot": 16,
+        "subclass": 6,
+        "min_damage": 0.0,
+        "max_damage": 0.0,
+        "speed_ms": 0,
+        "inventory_type": 14,
+        "normalized_speed": null,
+        "skill_line": 433
+      },
       "ranged": {
         "item": 477,
         "slot": 17,
@@ -24875,17 +24885,27 @@
     },
     "Blessings": {
       "main_hand": {
-        "item": 2027,
+        "item": 2524,
         "slot": 15,
-        "subclass": 7,
-        "min_damage": 17.25,
-        "max_damage": 28.75,
-        "speed_ms": 2300,
-        "inventory_type": 13,
+        "subclass": 4,
+        "min_damage": 34.61,
+        "max_damage": 55.4,
+        "speed_ms": 2500,
+        "inventory_type": 21,
         "normalized_speed": 2.4,
-        "skill_line": 43
+        "skill_line": 54
       },
-      "off_hand": null,
+      "off_hand": {
+        "item": 2129,
+        "slot": 16,
+        "subclass": 6,
+        "min_damage": 0.0,
+        "max_damage": 0.0,
+        "speed_ms": 0,
+        "inventory_type": 14,
+        "normalized_speed": null,
+        "skill_line": 433
+      },
       "ranged": {
         "item": 477,
         "slot": 17,
