@@ -15,6 +15,10 @@ def buff(spell_id, family, *effects):
     return Buff(spell_id, f'Spell {spell_id}', family, tuple(effects))
 
 
+def persistent_buff(spell_id, family, *effects):
+    return Buff(spell_id, f'Spell {spell_id}', family, tuple(effects), True)
+
+
 def groups(members, rules=None):
     return Groups({key: set(value) for key, value in members.items()}, dict(rules or {}), {})
 
@@ -228,6 +232,70 @@ class PlanTests(unittest.TestCase):
         self.assertEqual([], plan.unclassified)
         self.assertEqual({}, plan.single_class)
 
+    def test_auras_leave_a_category_with_timed_buffs(self):
+        crit = aura('SPELL_AURA_MOD_CRIT_PCT')
+        buffs = [buff(10, 19, crit), buff(11, 22, crit), persistent_buff(12, 20, crit), persistent_buff(13, 21, crit)]
+        plan = self.plan(buffs)
+        self.assertEqual({10, 11}, plan.members[2113001])
+        self.assertEqual({12, 13}, plan.members[2113002])
+        self.assertEqual(plan.categories[2113001], plan.categories[2113002])
+        self.assertEqual({2113002}, plan.auras)
+
+    def test_aura_categories_follow_every_timed_category(self):
+        crit, fire = aura('SPELL_AURA_MOD_CRIT_PCT'), aura('SPELL_AURA_MOD_RESISTANCE', 4)
+        buffs = [buff(10, 19, crit), buff(11, 22, crit), persistent_buff(12, 20, crit), persistent_buff(13, 21, crit),
+                 buff(14, 19, fire), buff(15, 22, fire)]
+        plan = self.plan(buffs)
+        self.assertEqual({10, 11}, plan.members[2113001])
+        self.assertEqual({14, 15}, plan.members[2113002])
+        self.assertEqual({12, 13}, plan.members[2113003])
+
+    def test_lone_aura_beside_timed_buffs_gets_no_category(self):
+        fire = aura('SPELL_AURA_MOD_RESISTANCE', 4)
+        plan = self.plan([buff(10, 19, fire), buff(11, 22, fire), persistent_buff(12, 20, fire)])
+        self.assertEqual({10, 11}, plan.members[2113001])
+        self.assertEqual(set(), plan.auras)
+        self.assertNotIn(12, set().union(*plan.members.values()))
+
+    def test_one_family_auras_beside_timed_buffs_are_listed(self):
+        fire = aura('SPELL_AURA_MOD_RESISTANCE', 4)
+        plan = self.plan([buff(10, 19, fire), buff(11, 22, fire), persistent_buff(12, 20, fire),
+                          persistent_buff(13, 20, fire)])
+        self.assertEqual(set(), plan.auras)
+        self.assertEqual([12, 13], plan.single_class[frozenset({'resistance:4', 'aura'})])
+
+    def test_auras_keep_the_id_when_the_timed_buff_stands_alone(self):
+        shadow, fire = aura('SPELL_AURA_MOD_RESISTANCE', 32), aura('SPELL_AURA_MOD_RESISTANCE', 64)
+        plan = self.plan([buff(10, 25, shadow), persistent_buff(11, 20, shadow), persistent_buff(12, 21, shadow),
+                          buff(13, 19, fire), buff(14, 22, fire)])
+        self.assertEqual({11, 12}, plan.members[2113001])
+        self.assertEqual({2113001}, plan.auras)
+        self.assertEqual({13, 14}, plan.members[2113002])
+        self.assertEqual([10], plan.single_class[frozenset({'resistance:32'})])
+
+    def test_signature_with_only_auras_keeps_one_category(self):
+        fire = aura('SPELL_AURA_MOD_RESISTANCE', 4)
+        plan = self.plan([persistent_buff(12, 20, fire), persistent_buff(13, 21, fire)])
+        self.assertEqual({12, 13}, plan.members[2113001])
+        self.assertEqual({2113001}, plan.auras)
+
+    def test_aura_stays_out_of_an_existing_timed_category(self):
+        state = groups({2110001: {300857}}, {2110001: 1})
+        agility = aura('SPELL_AURA_MOD_STAT', 1)
+        plan = self.plan([buff(300857, 23, agility), persistent_buff(20, 30, agility),
+                          persistent_buff(21, 31, agility)], state=state)
+        self.assertEqual({300857}, plan.members[2110001])
+        self.assertEqual({20, 21}, plan.members[2113001])
+        self.assertEqual({2113001}, plan.auras)
+
+    def test_apply_plan_names_aura_categories(self):
+        crit = aura('SPELL_AURA_MOD_CRIT_PCT')
+        buffs = [buff(10, 19, crit), buff(11, 22, crit), persistent_buff(12, 20, crit), persistent_buff(13, 21, crit)]
+        after = model.apply_plan(self.existing(), self.plan(buffs))
+        self.assertTrue(after.descriptions[2113001].startswith('CoA class buffs: '))
+        self.assertTrue(after.descriptions[2113002].startswith('CoA class auras: '))
+        self.assertEqual(1, after.rules[2113002])
+
     def test_apply_plan_adds_members_and_rules(self):
         buffs = [buff(10, 19, aura('SPELL_AURA_MOD_RESISTANCE', 4)), buff(11, 22, aura('SPELL_AURA_MOD_RESISTANCE', 4)),
                  buff(40, 33, aura('SPELL_AURA_MOD_STAT', 3))]
@@ -254,8 +322,8 @@ def trigger(spell_id):
                   spell_id)
 
 
-def record(family, *effects, passive=False, name='Spell'):
-    return model.Record(name, family, model.PASSIVE_ATTRIBUTE if passive else 0, tuple(effects))
+def record(family, *effects, passive=False, name='Spell', duration_index=0):
+    return model.Record(name, family, model.PASSIVE_ATTRIBUTE if passive else 0, tuple(effects), duration_index)
 
 
 class SelectionTests(unittest.TestCase):
@@ -284,6 +352,19 @@ class SelectionTests(unittest.TestCase):
         void = record(31, area('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32), passive=True)
         selected = model.select_buffs({1: dark_aura, 2: void}, {1, 2})
         self.assertEqual([frozenset({'resistance:32'})] * 2, [model.signature(buff) for buff in selected])
+
+    def test_passive_and_endless_buffs_are_persistent(self):
+        records = {1: record(20, area('SPELL_AURA_MOD_CRIT_PCT'), passive=True),
+                   2: record(20, area('SPELL_AURA_MOD_CRIT_PCT'), duration_index=21),
+                   3: record(20, area('SPELL_AURA_MOD_CRIT_PCT'), duration_index=30),
+                   4: record(20, aura('SPELL_AURA_MOD_CRIT_PCT'))}
+        selected = model.select_buffs(records, {1, 2, 3, 4}, frozenset({21}))
+        self.assertEqual([True, True, False, False], [buff.persistent for buff in selected])
+
+    def test_spell_dbc_row_keeps_its_duration(self):
+        row = {'ID': 10, 'Name_Lang_enUS': 'Override', 'SpellClassSet': 25, 'Attributes': 0, 'DurationIndex': 21,
+               'Effect_1': 6, 'EffectAura_1': 29, 'EffectMiscValue_1': 2, 'EffectBasePoints_1': 9}
+        self.assertEqual(21, model.apply_overrides({}, [row])[10].duration_index)
 
     def test_triggered_spell_inherits_learnability(self):
         records = {1: record(20, trigger(2)), 2: record(20, trigger(3)), 3: record(20, aura('SPELL_AURA_MOD_STAT', 1)),

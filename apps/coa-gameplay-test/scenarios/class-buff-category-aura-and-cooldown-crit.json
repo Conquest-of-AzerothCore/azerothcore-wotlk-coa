@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "name": "Class buffs: a crit cooldown stacks with another class's crit aura",
+  "contract": [
+    "Maintainer decision 2026-11-22: area cooldowns must not skip a player who carries another class's",
+    "aura; a permanent aura and a cooldown stack. Slayer 300968 (Witch Hunter, family 21, passive raid area",
+    "aura, SPELL_AURA_MOD_CRIT_PCT base points 2: +3%) is in the crit aura category, spell_group 2113024.",
+    "Horn of War 800086 (Ranger, family 27, raid area aura for 30 seconds on a 60 second cooldown,",
+    "SPELL_AURA_MOD_CRIT_PCT base points 4: +5%) is in the timed crit category, spell_group 2113005. Slayer's",
+    "rule-3 group 2000181 does not hold Horn of War, so no shared group decides the pair. Expected: both",
+    "auras stay applied on a grouped ally and on the Ranger, and the Ranger's melee crit rises by 8. Crit is",
+    "measured on the Ranger because Horn of War's crit effect currently reaches only its caster: the direct",
+    "effect 1 application gives party members their own Horn of War aura, and the Ranger's area effect then",
+    "skips them in Aura::UpdateTargetMap. A fresh character's crit field reads 0 until a crit aura first",
+    "recomputes it, so Night Stalker 300792 primes the field first."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "witch_hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "witch_hunter",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "witch_hunter",
+      "target": "ranger"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 800086
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit field with a learn",
+      "actor": "ally",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit field with an unlearn",
+      "actor": "ally",
+      "spell": 300792
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit field with a learn",
+      "actor": "witch_hunter",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit field with an unlearn",
+      "actor": "witch_hunter",
+      "spell": 300792
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit field with a learn",
+      "actor": "ranger",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit field with an unlearn",
+      "actor": "ranger",
+      "spell": 300792
+    },
+    {
+      "action": "wait",
+      "label": "Let the recomputed fields settle",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranger melee critical chance before any buff",
+      "actor": "ranger",
+      "metric": "melee_crit_chance",
+      "save_as": "crit_before"
+    },
+    {
+      "action": "learn",
+      "actor": "witch_hunter",
+      "spell": 300968
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Slayer raid aura reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300968,
+      "caster": "witch_hunter",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Slayer raid aura reaches the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 300968,
+      "caster": "witch_hunter",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "label": "The Ranger sounds Horn of War",
+      "actor": "ranger",
+      "spell": 800086
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Horn of War reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800086,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Give the area aura updates time to drop either aura",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Horn of War leaves the Slayer aura on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300968,
+      "caster": "witch_hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Slayer aura leaves Horn of War on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800086,
+      "caster": "ranger",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Horn of War leaves the Slayer aura on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 300968,
+      "caster": "witch_hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ranger keeps Horn of War",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 800086,
+      "caster": "ranger",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ranger melee crit adds both, 3 from Slayer and 5 from Horn of War",
+      "actor": "ranger",
+      "metric": "melee_crit_chance",
+      "relative_to": "crit_before",
+      "min": 7.99,
+      "max": 8.01
+    }
+  ]
+}
