@@ -1259,6 +1259,48 @@
     },
     {
       "spell": 804247,
+      "name": "Bless (self tick mana logged as Bless 805360)",
+      "kind": "metric_delta",
+      "variant": "mana_tick_source",
+      "label_suffix": "mana_tick_source",
+      "quote": "and 5% of your maximum mana every 10 sec for 5 min.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 805360
+      },
+      "before_expected": 0,
+      "expected": 143,
+      "observe_source": "Sun Cleric ADR 0020: the caster's own Bless tick (AscensionSunClericAuras.cpp:219-225, target == player) restores CalculatePct(maximum mana, Amount(805360, 1)) through Mana() with source 805360 (Bless, Effect[1] ENERGIZE_PCT BasePoints 4 + 1 = 5, AttributesEx SPELL_ATTR1_NO_THREAT). Same scenario as mana_tick (Bless 804247 cast on the caster, regeneration off, read 10500 ms later after one 10000 ms period). The energize events of 805360 are summed: 0 in the uncast before phase (control, no Bless), and 5% of the reference maximum mana 2868 = 143.4, truncated to 143 (the same 143 mana_tick reads as 1234 - (1363 - 272)). Live: 805360 has 2930 SPELL_ENERGIZE events in 12 logs from 4 players (2026-08-17..2026-08-31, D-100 sweep).",
+      "cast_in_before": false
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (self tick mana not logged as Vow of Grace)",
+      "kind": "metric_delta",
+      "variant": "mana_tick_not_vow",
+      "label_suffix": "mana_tick_not_vow",
+      "quote": "and 5% of your maximum mana every 10 sec for 5 min.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "observe_source": "Sun Cleric ADR 0020: the mana of the caster's own Bless tick (AscensionSunClericAuras.cpp:224) is energized under 805360, not under Mana()'s default source Vow of Grace 504877. The same scenario as the positive entry, with the treatment phase's energize events of 504877 summed from the start of the scenario: 0 before the passive is learned and 0 after it, while the positive entry reads the unchanged amount under 805360. 504877 would read the amount here before this change (Mana() default, AscensionSunCleric.h:52).",
+      "cast_in_before": false
+    },
+    {
+      "spell": 804247,
       "name": "Bless (mana tick period)",
       "kind": "metric_delta",
       "variant": "mana_period",
@@ -7127,7 +7169,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Strength (stat 0, reference 40) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Strength (stat 0, reference 40) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -7150,7 +7192,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Agility (stat 1, reference 35) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Agility (stat 1, reference 35) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -7173,7 +7215,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Stamina (stat 2, reference 56) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Stamina (stat 2, reference 56) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -7196,7 +7238,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Intellect (stat 3, reference 119) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Intellect (stat 3, reference 119) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -7219,7 +7261,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Spirit (stat 4, reference 128) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Spirit (stat 4, reference 128) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -7235,13 +7277,35 @@
       "expire_ms": 500,
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 704926
       },
       "before_expected": 0,
       "expected": 40.5,
       "tolerance": 1,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The energize events of 504877 are summed from the start of the scenario: 0 before the learn (control), then the mana of one blessed critical hit. Expected ${$704926m2+$704926ppl2+$SP*.15} = 40.5 with no spell power (reference_stats spell_power 0), tolerance 1 for the engine's integer. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The energize events of 704926 are summed from the start of the scenario: 0 before the learn (control), then the mana of one blessed critical hit. Expected ${$704926m2+$704926ppl2+$SP*.15} = 40.5 with no spell power (reference_stats spell_power 0), tolerance 1 for the engine's integer. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+    },
+    {
+      "spell": 704928,
+      "name": "Bastion of Hope (critical-strike mana not logged as Vow of Grace)",
+      "kind": "metric_delta",
+      "variant": "mana_flat_not_vow",
+      "label_suffix": "mana_flat_not_vow",
+      "quote": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 3000,
+      "observe_source": "Sun Cleric ADR 0020: the mana of Bastion of Hope (AscensionSunClericEvents.cpp:294) is energized under 704926, not under Mana()'s default source Vow of Grace 504877. The same scenario as the positive entry, with the treatment phase's energize events of 504877 summed from the start of the scenario: 0 before the passive is learned and 0 after it, while the positive entry reads the unchanged amount under 704926. 504877 would read the amount here before this change (Mana() default, AscensionSunCleric.h:52)."
     },
     {
       "spell": 704928,
@@ -7257,14 +7321,14 @@
       "expire_ms": 500,
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 704926
       },
       "before_expected": 0,
       "expected": 3040.5,
       "tolerance": 1.5,
       "wait_ms": 3000,
       "player_spell_power": 20000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The contrast of mana_flat on the same pair: with 20000 more Holy spell power the same hit regenerates 40.5 + 0.15 x 20000 = 3040.5 ($SP*.15), so the spell power term is measured as its own difference. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The contrast of mana_flat on the same pair: with 20000 more Holy spell power the same hit regenerates 40.5 + 0.15 x 20000 = 3040.5 ($SP*.15), so the spell power term is measured as its own difference. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704928,
@@ -7285,7 +7349,7 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 6700,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is on the caster 4700 ms after the hit (the Sunflare cast time is 2000 ms, SpellCastTimes 5, plus about 70 ms of flight at 70 yd/s from 5 yd): its duration is above 4.6 s, which excludes 4.5 s (-10% of 5 s). Control: absent before the learn. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is on the caster 4700 ms after the hit (the Sunflare cast time is 2000 ms, SpellCastTimes 5, plus about 70 ms of flight at 70 yd/s from 5 yd): its duration is above 4.6 s, which excludes 4.5 s (-10% of 5 s). Control: absent before the learn. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704928,
@@ -7306,7 +7370,7 @@
       "before_expected": 0,
       "expected": 0,
       "wait_ms": 7300,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is gone 5300 ms after the hit: its duration is below 5.3 s, which excludes 5.5 s (+10%). With duration_held it lies in (4.6, 5.3) s around 5 s. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (source 704926, Sun Cleric ADR 0020). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is gone 5300 ms after the hit: its duration is below 5.3 s, which excludes 5.5 s (+10%). With duration_held it lies in (4.6, 5.3) s around 5 s. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704562,
@@ -8111,10 +8175,10 @@
       "label_suffix": "no_crit_mana",
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 704926
       },
       "tolerance": 0.5,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926; AscensionSunClericEvents.cpp:117 accepts an own damage or healing hit only when it is a critical strike. Contrast arm of the crit-gated entries (mana_flat, strength..spirit): the same real Sunflare 800231 cast at the dummy, 704928 learned, with no forced crit and Reg's Test Aura 984954 on the caster in both phases (DBC: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000, so the Holy hit cannot crit; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT is a weapon-crit term that a spell hit ignores). A server that blessed on every hit would read 40 mana and the aura here. Energize events of 504877 summed from the start: 0 expected after the learn. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926; AscensionSunClericEvents.cpp:117 accepts an own damage or healing hit only when it is a critical strike. Contrast arm of the crit-gated entries (mana_flat, strength..spirit): the same real Sunflare 800231 cast at the dummy, 704928 learned, with no forced crit and Reg's Test Aura 984954 on the caster in both phases (DBC: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000, so the Holy hit cannot crit; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT is a weapon-crit term that a spell hit ignores). A server that blessed on every hit would read 40 mana and the aura here. Energize events of 704926 summed from the start: 0 expected after the learn. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704928,
@@ -13745,7 +13809,7 @@
       "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 504679
       },
       "before_expected": 0,
       "expected": 93,
@@ -13753,7 +13817,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Resplendence 806159 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Resplendence 806159 has no energize effect (Spell.dbc Effect[0..2] are 6, 6, 6, aura effects; the energize effects are 30 and 137), so no refund precedes Devoted's energize and the mana read is the 1000 set. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Resplendence 806159 is cast with the mana set to 1000, regeneration off; the energize events of source 504679, Sun Cleric ADR 0020 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Resplendence 806159 has no energize effect (Spell.dbc Effect[0..2] are 6, 6, 6, aura effects; the energize effects are 30 and 137), so no refund precedes Devoted's energize and the mana read is the 1000 set. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
     },
     {
       "spell": 681436,
@@ -13768,7 +13832,7 @@
       "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 504679
       },
       "before_expected": 0,
       "expected": 93,
@@ -13776,7 +13840,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Revelation 503651 has no energize effect of its own (Spell.dbc Effect[0..1] are 64, TRIGGER_SPELL of 680702 and 680701; the energize effects are 30 and 137), so no refund precedes Devoted's energize and the mana read is the 1000 set. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off; the energize events of source 504679, Sun Cleric ADR 0020 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Revelation 503651 has no energize effect of its own (Spell.dbc Effect[0..1] are 64, TRIGGER_SPELL of 680702 and 680701; the energize effects are 30 and 137), so no refund precedes Devoted's energize and the mana read is the 1000 set. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
     },
     {
       "spell": 681436,
@@ -13791,7 +13855,7 @@
       "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 504679
       },
       "before_expected": 0,
       "expected": 79,
@@ -13799,7 +13863,30 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Conquest 800764 Effect[0] is SPELL_EFFECT_ENERGIZE_PCT (137) on the caster, BasePoints 9 + 1 = 10% of the maximum mana ($504722s1 in the description), so it refunds CalculatePct(2868, 10) = 286 (SpellEffects.cpp:3044) even when Devoted makes the Invocation free; that refund runs in handle_immediate (Spell.cpp:4141) and Devoted's energize in the OnSpellCast hook (Spell.cpp:4191), so Devoted reads the mana after the refund, 1000 + 286 = 1286, and gives 5 x (2868 - 1286) / 100 = 79.1, truncated to 79 (CalculatePct, Util.h:52-55). Conquest 800764 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 79 after, within 1.5; the refund itself is logged under 800764 and is not in that sum. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Conquest 800764 Effect[0] is SPELL_EFFECT_ENERGIZE_PCT (137) on the caster, BasePoints 9 + 1 = 10% of the maximum mana ($504722s1 in the description), so it refunds CalculatePct(2868, 10) = 286 (SpellEffects.cpp:3044) even when Devoted makes the Invocation free; that refund runs in handle_immediate (Spell.cpp:4141) and Devoted's energize in the OnSpellCast hook (Spell.cpp:4191), so Devoted reads the mana after the refund, 1000 + 286 = 1286, and gives 5 x (2868 - 1286) / 100 = 79.1, truncated to 79 (CalculatePct, Util.h:52-55). Conquest 800764 is cast with the mana set to 1000, regeneration off; the energize events of source 504679, Sun Cleric ADR 0020 on the caster are summed 500 ms later: 0 before the learn (control) and 79 after, within 1.5; the refund itself is logged under 800764 and is not in that sum. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 800764,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 2100,
+      "name": "Devoted to the Light (Conquest mana not logged as Vow of Grace)",
+      "variant": "energize_conquest_not_vow",
+      "label_suffix": "energize_conquest_not_vow",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 1.5,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "Sun Cleric ADR 0020: the mana of Devoted to the Light (AscensionSunClericAbilities.cpp:233) is energized under 504679, not under Mana()'s default source Vow of Grace 504877. The same scenario as the positive entry, with the treatment phase's energize events of 504877 summed from the start of the scenario: 0 before the passive is learned and 0 after it, while the positive entry reads the unchanged amount under 504679. 504877 would read the amount here before this change (Mana() default, AscensionSunCleric.h:52)."
     },
     {
       "spell": 681436,
@@ -13814,7 +13901,7 @@
       "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 504679
       },
       "before_expected": 0,
       "expected": 93,
@@ -13822,7 +13909,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Ascension 500152 has no energize effect (Spell.dbc Effect[0] 10 and Effect[1] 168; the energize effects are 30 and 137), so no refund precedes Devoted's energize and the mana read is the 1000 set. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. Solar Invocation: Ascension 500152 casts for 2500 ms (SpellCastTimes 19) and has StartRecoveryTime 1500 ms (Spell.dbc), so each phase reads 3000 ms after its cast, when the cast has completed and spent its mana."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651, Ascension 500152, Conquest 800764); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) with an empty class mask; the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:230-233, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off; the energize events of source 504679, Sun Cleric ADR 0020 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Ascension 500152 has no energize effect (Spell.dbc Effect[0] 10 and Effect[1] 168; the energize effects are 30 and 137), so no refund precedes Devoted's energize and the mana read is the 1000 set. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. Solar Invocation: Ascension 500152 casts for 2500 ms (SpellCastTimes 19) and has StartRecoveryTime 1500 ms (Spell.dbc), so each phase reads 3000 ms after its cast, when the cast has completed and spent its mana."
     },
     {
       "spell": 681436,
@@ -13845,7 +13932,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Resplendence 806159 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 258.97 = 741.03 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Resplendence 806159 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 258.97 = 741.03 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
     },
     {
       "spell": 681436,
@@ -13868,7 +13955,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 190.82 = 809.18 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 190.82 = 809.18 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
     },
     {
       "spell": 681436,
@@ -13891,7 +13978,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 477.05 = 522.95 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. Solar Invocation: Ascension 500152 casts for 2500 ms (SpellCastTimes 19) and has StartRecoveryTime 1500 ms (Spell.dbc), so each phase reads 3000 ms after its cast, when the cast has completed and spent its mana."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504679, Sun Cleric ADR 0020). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 477.05 = 522.95 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. Solar Invocation: Ascension 500152 casts for 2500 ms (SpellCastTimes 19) and has StartRecoveryTime 1500 ms (Spell.dbc), so each phase reads 3000 ms after its cast, when the cast has completed and spent its mana."
     },
     {
       "spell": 302914,
@@ -14696,6 +14783,77 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Control arm of heal_missing: the same two phases and the same Radiant Flame cast with 301239 not known; the passive learned between the phases is Exorcism 300341 (an unrelated Sanctify modifier). No heal of 707522 lands: 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (3% of missing mana restored by a Radiant Flame tick)",
+      "kind": "metric_delta",
+      "variant": "mana_missing",
+      "label_suffix": "mana_missing",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 301239,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 302896
+      },
+      "before_expected": 0,
+      "expected": 55,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Cleric ADR 0020: AscensionSunClericEvents.cpp:254-257 gives CalculatePct(maximum mana - mana, Amount(302896)) through Mana() with source 302896 (City of Light, Effect[1] ENERGIZE_PCT BasePoints 2 + 1 = 3 = $302896s1, AttributesEx SPELL_ATTR1_NO_THREAT) on an own damage hit of Radiant Flame's tick 807058 (:116). Radiant Flame 806060 is cast at the dummy with the mana set to 1363 and regeneration off; it costs ManaCostPercentage 25 of BaseMana 1363 = 340, so 1023 mana remains at its initial tick (SPELL_ATTR5_EXTRA_INITIAL_PERIOD) and the reference maximum mana is 2868: 3% of 1845 = 55.35, truncated to 55, within 1. Read 500 ms after the cast, before the second tick at 1000 ms (heal_missing reads one tick's 150 the same way). Before phase: 301239 not known (control), 0. Live: 302896 has 1489 SPELL_ENERGIZE events in 6 logs from 5 players (2026-05-25..2026-08-09, D-100 sweep).",
+      "disable_regeneration": true
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (mana not logged as Vow of Grace)",
+      "kind": "metric_delta",
+      "variant": "mana_missing_not_vow",
+      "label_suffix": "mana_missing_not_vow",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 301239,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Cleric ADR 0020: the mana of City of Light (AscensionSunClericEvents.cpp:255) is energized under 302896, not under Mana()'s default source Vow of Grace 504877. The same scenario as the positive entry, with the treatment phase's energize events of 504877 summed from the start of the scenario: 0 before the passive is learned and 0 after it, while the positive entry reads the unchanged amount under 302896. 504877 would read the amount here before this change (Mana() default, AscensionSunCleric.h:52).",
+      "disable_regeneration": true
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (control: no mana without it)",
+      "kind": "metric_delta",
+      "variant": "mana_missing_control",
+      "label_suffix": "mana_missing_control",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 300341,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 302896
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of mana_missing: the same two phases and the same Radiant Flame cast with 301239 not known; the passive learned between the phases is Exorcism 300341 (an unrelated Sanctify modifier). No energize of 302896 lands: 0.",
+      "disable_regeneration": true
     },
     {
       "spell": 800600,
@@ -19243,7 +19401,7 @@
       "cast_power": 1360,
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 300345
       },
       "before_expected": 0,
       "expected": 88.6,
@@ -19264,7 +19422,43 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "tolerance": 1,
-      "observe_source": "300344 Sanctified Effect[0] aura 42 PROC_TRIGGER_SPELL 300345 and Effect[1] aura 112 OVERRIDE_CLASS_SCRIPTS, both dummied at load (AscensionSunClericContracts.cpp:199-203); the real effect is AscensionSunClericAbilities.cpp:364-368: a non-triggered healing cast of the caster whose target carries the caster's own Bless 804247 gives back CalculatePct(GetPowerCost(), Amount(300344, 1)) mana through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52), once per cast. Amount(300344, 1) = BasePoints 24 + 1 = 25 ($s2). Daybreak 503624 costs ManaCostPercentage 26 of BaseMana 1363 (player_class_stats class 27 level 60) = 354.38, so 25% is 88.6. Bless 804247 is cast for real on the caster in both phases before the timed Daybreak heal on the caster (health held at 30%); the mana energized under source 504877 is read: 0 in the phase before 300344 is learned and about 88.6 after it, within 1. Fixtures on the caster in both phases and both Sanctified entries: phase_auras 984954 (a test aura: Effect[0] aura 52 +101% weapon crit, Effect[1] aura 57 -1000 spell crit; never the subject, the refund depends on the power cost) and 823764 (target resistance, never the subject). Control arm: the same read before 300344 is learned (0), and the entry refund_no_bless without Bless. Reference search 2026-11-22: coa-history spell 300344: 0 events in 186 logs (a passive); spell 300345 (Sanctified, the live energize) has 13,775 SPELL_ENERGIZE events in 20 logs, min 18, max 140, mean 135.0 (the players' spell costs differ, so no figure decides; the live event carries id 300345 where this server's Mana() source is 504877, observed only); the bindmysoul talents snapshot lists the name only; nothing else found."
+      "observe_source": "300344 Sanctified Effect[0] aura 42 PROC_TRIGGER_SPELL 300345 and Effect[1] aura 112 OVERRIDE_CLASS_SCRIPTS, both dummied at load (AscensionSunClericContracts.cpp:199-203); the real effect is AscensionSunClericAbilities.cpp:364-368: a non-triggered healing cast of the caster whose target carries the caster's own Bless 804247 gives back CalculatePct(GetPowerCost(), Amount(300344, 1)) mana through Mana() (source 300345, Sun Cleric ADR 0020), once per cast. Amount(300344, 1) = BasePoints 24 + 1 = 25 ($s2). Daybreak 503624 costs ManaCostPercentage 26 of BaseMana 1363 (player_class_stats class 27 level 60) = 354.38, so 25% is 88.6. Bless 804247 is cast for real on the caster in both phases before the timed Daybreak heal on the caster (health held at 30%); the mana energized under source 300345 is read: 0 in the phase before 300344 is learned and about 88.6 after it, within 1. Fixtures on the caster in both phases and both Sanctified entries: phase_auras 984954 (a test aura: Effect[0] aura 52 +101% weapon crit, Effect[1] aura 57 -1000 spell crit; never the subject, the refund depends on the power cost) and 823764 (target resistance, never the subject). Control arm: the same read before 300344 is learned (0), and the entry refund_no_bless without Bless. Reference search 2026-11-22: coa-history spell 300344: 0 events in 186 logs (a passive); spell 300345 (Sanctified, the live energize) has 13,775 SPELL_ENERGIZE events in 20 logs, min 18, max 140, mean 135.0 (the players' spell costs differ, so no figure decides; the live event carries id 300345, the source Mana() uses since Sun Cleric ADR 0020); the bindmysoul talents snapshot lists the name only; nothing else found."
+    },
+    {
+      "spell": 300344,
+      "name": "Sanctified (refund not logged as Vow of Grace)",
+      "kind": "metric_delta",
+      "variant": "refund_bless_not_vow",
+      "label_suffix": "refund_bless_not_vow",
+      "quote": "Healing a target affected by Bless refunds $s2% of the mana cost of the spell.",
+      "trigger_spell": 503624,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1360,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "gate_spell": 300344,
+      "setup_casts": [
+        804247
+      ],
+      "setup_wait_ms": 1600,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "tolerance": 1,
+      "observe_source": "Sun Cleric ADR 0020: the mana of Sanctified (AscensionSunClericAbilities.cpp:369) is energized under 300345, not under Mana()'s default source Vow of Grace 504877. The same scenario as the positive entry, with the treatment phase's energize events of 504877 summed from the start of the scenario: 0 before the passive is learned and 0 after it, while the positive entry reads the unchanged amount under 300345. 504877 would read the amount here before this change (Mana() default, AscensionSunCleric.h:52)."
     },
     {
       "spell": 300344,
@@ -19279,7 +19473,7 @@
       "cast_power": 1360,
       "metric": "spell_energize_total",
       "fields": {
-        "spell": 504877
+        "spell": 300345
       },
       "before_expected": 0,
       "expected": 0,
@@ -19296,7 +19490,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "tolerance": 1,
-      "observe_source": "300344 Sanctified Effect[0] aura 42 PROC_TRIGGER_SPELL 300345 and Effect[1] aura 112 OVERRIDE_CLASS_SCRIPTS, both dummied at load (AscensionSunClericContracts.cpp:199-203); the real effect is AscensionSunClericAbilities.cpp:364-368: a non-triggered healing cast of the caster whose target carries the caster's own Bless 804247 gives back CalculatePct(GetPowerCost(), Amount(300344, 1)) mana through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52), once per cast. Amount(300344, 1) = BasePoints 24 + 1 = 25 ($s2). Daybreak 503624 costs ManaCostPercentage 26 of BaseMana 1363 (player_class_stats class 27 level 60) = 354.38, so 25% is 88.6. Control: the same Daybreak heal on the caster with 300344 learned and no Bless on it refunds nothing (the aura check target->HasAura(Bless, player) fails), 0 mana energized under 504877. Reference search 2026-11-22: coa-history spell 300344: 0 events in 186 logs (a passive); spell 300345 (Sanctified, the live energize) has 13,775 SPELL_ENERGIZE events in 20 logs, min 18, max 140, mean 135.0 (the players' spell costs differ, so no figure decides; the live event carries id 300345 where this server's Mana() source is 504877, observed only); the bindmysoul talents snapshot lists the name only; nothing else found."
+      "observe_source": "300344 Sanctified Effect[0] aura 42 PROC_TRIGGER_SPELL 300345 and Effect[1] aura 112 OVERRIDE_CLASS_SCRIPTS, both dummied at load (AscensionSunClericContracts.cpp:199-203); the real effect is AscensionSunClericAbilities.cpp:364-368: a non-triggered healing cast of the caster whose target carries the caster's own Bless 804247 gives back CalculatePct(GetPowerCost(), Amount(300344, 1)) mana through Mana() (source 300345, Sun Cleric ADR 0020), once per cast. Amount(300344, 1) = BasePoints 24 + 1 = 25 ($s2). Daybreak 503624 costs ManaCostPercentage 26 of BaseMana 1363 (player_class_stats class 27 level 60) = 354.38, so 25% is 88.6. Control: the same Daybreak heal on the caster with 300344 learned and no Bless on it refunds nothing (the aura check target->HasAura(Bless, player) fails), 0 mana energized under 300345. Reference search 2026-11-22: coa-history spell 300344: 0 events in 186 logs (a passive); spell 300345 (Sanctified, the live energize) has 13,775 SPELL_ENERGIZE events in 20 logs, min 18, max 140, mean 135.0 (the players' spell costs differ, so no figure decides; the live event carries id 300345, the source Mana() uses since Sun Cleric ADR 0020); the bindmysoul talents snapshot lists the name only; nothing else found."
     },
     {
       "spell": 300325,

@@ -221,7 +221,7 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
                 int32 mana = Amount(805360,1);
                 if (player->HasAura(300357))
                     mana *= 2;
-                Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),mana));
+                Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),mana),805360);
             }
         }
         if (id == 300361)
