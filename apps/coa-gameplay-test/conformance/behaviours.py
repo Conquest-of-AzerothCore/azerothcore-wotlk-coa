@@ -7809,9 +7809,18 @@ def script_hit_validate(spec: ScriptHitSpec):
                          f'their timing needs them')
 
 
+def script_hit_clean_start(spec: ScriptHitSpec, trial: int) -> list[dict]:
+    label = f'{script_hit_label(spec)} SETUP clean {trial}'
+    return [{'action': 'assert', 'label': f'{label} {spell}', 'actor': TARGET, 'metric': 'aura', 'spell': spell,
+             'equals': 0} for spell, _ in spec.receiver_aura_removals] + \
+        [{'action': 'assert', 'label': f'{label} {spec.stacks_read_before_removal[0]}', 'actor': TARGET,
+          'metric': 'aura_stacks', 'spell': spec.stacks_read_before_removal[0], 'equals': 0}]
+
+
 def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
-    steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
-             for spell, stacks in spec.caster_auras]
+    steps = script_hit_clean_start(spec, trial) if spec.stacks_read_before_removal and arm == 'treatment' else []
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+              for spell, stacks in spec.caster_auras]
     if spec.caster_health_pct is not None:
         steps.append({'action': 'set_health', 'actor': CASTER,
                       'value': spec.caster_health_pct * FIXTURE_MAX_HEALTH // 100, 'maximum': FIXTURE_MAX_HEALTH})
@@ -7831,7 +7840,8 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
     if spec.receiver_auras_after_casts:
         steps += held
     if spec.receiver_aura_removals:
-        if spec.stacks_read_before_removal and arm == 'treatment':
+        gated = bool(spec.stacks_read_before_removal) and arm == 'treatment'
+        if gated:
             read_spell, read_stacks = spec.stacks_read_before_removal
             steps.append({'action': 'assert', 'label': f'{script_hit_label(spec)} SETUP stacks {trial}',
                           'actor': TARGET, 'metric': 'aura_stacks', 'spell': read_spell, 'equals': read_stacks,
@@ -7839,6 +7849,9 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
         for spell, delay in spec.receiver_aura_removals:
             if delay:
                 steps.append({'action': 'wait', 'label': f'{arm} before removing {spell} {trial}', 'ms': delay})
+            if gated:
+                steps.append({'action': 'assert', 'label': f'{script_hit_label(spec)} SETUP {spell} present {trial}',
+                              'actor': TARGET, 'metric': 'aura', 'spell': spell, 'equals': 1})
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0, 'target': spec.receiver})
     if spec.strike_spell and spec.strike_owned_entry is None:
         steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
@@ -7906,8 +7919,11 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     for trial in range(1, spec.trials + 1):
         steps += script_hit_trial(records, spec, 'control', trial)
     steps += [{'action': 'wait', 'label': 'control drain', 'ms': DRAIN_MS},
-              measurement(control_label, CASTER, f'{family}_count', spell=spec.hit_spell, **receiver),
-              {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+              measurement(control_label, CASTER, f'{family}_count', spell=spec.hit_spell, **receiver)]
+    if spec.stacks_read_before_removal:
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0, 'target': spec.receiver}
+                  for spell, _ in spec.receiver_aura_removals]
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
     for trial in range(1, spec.trials + 1):
         steps += script_hit_trial(records, spec, 'treatment', trial)
     steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
@@ -7956,9 +7972,12 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                     + (f' After the casts of every trial of both arms the harness removes the auras '
                        f'{[spell for spell, _ in spec.receiver_aura_removals]} from the {spec.receiver} '
                        f'(delays {[delay for _, delay in spec.receiver_aura_removals]} ms)'
-                       + (f'; in the treatment arm it first reads that {spec.stacks_read_before_removal[0]} holds '
-                          f'{spec.stacks_read_before_removal[1]} stacks, and a trial that does not reach them '
-                          f'voids the arm' if spec.stacks_read_before_removal else '') + '.'
+                       + (f'; in the treatment arm it removes them once more before {spec.spell} is learned, every '
+                          f'trial starts only if they are absent and {spec.stacks_read_before_removal[0]} holds no '
+                          f'stack on the {spec.receiver}, and each removal follows a read that the aura is present '
+                          f'and that {spec.stacks_read_before_removal[0]} holds '
+                          f'{spec.stacks_read_before_removal[1]} stacks; a trial that breaks one of these voids the '
+                          f'arm' if spec.stacks_read_before_removal else '') + '.'
                        if spec.receiver_aura_removals else '')
                     + (f' The auras {list(spec.receiver_auras)} are set on the {spec.receiver} in every trial of both '
                        f'arms, {"after the casts" if spec.receiver_auras_after_casts else "before the casts"}.'

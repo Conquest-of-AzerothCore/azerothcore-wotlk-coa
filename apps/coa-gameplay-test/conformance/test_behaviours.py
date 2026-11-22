@@ -12048,12 +12048,61 @@ class ScriptHitReceiverAuraRemovalTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_stack_read_precedes_the_removal_in_the_treatment_arm_only(self):
         steps = self.steps(no_wait_after_casts=True, stacks_read_before_removal=[self.STACKED, 5])
-        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'aura_stacks']
+        reads = [index for index, step in enumerate(steps)
+                 if step.get('metric') == 'aura_stacks' and step.get('equals') == 5]
         self.assertEqual(len(reads), self.entry()['trials'])
-        self.assertTrue(all(steps[index]['equals'] == 5 and steps[index]['actor'] == 'dummy'
-                            and 'SETUP' in steps[index]['label'] for index in reads))
+        self.assertTrue(all(steps[index]['actor'] == 'dummy' and 'SETUP' in steps[index]['label'] for index in reads))
         removals = self.removals(steps)
-        self.assertEqual([index + 1 for index in reads], removals[len(removals) // 2:])
+        self.assertEqual([index + 2 for index in reads], removals[-self.entry()['trials']:])
+
+    def gated(self) -> list[dict]:
+        return self.steps(no_wait_after_casts=True, stacks_read_before_removal=[self.STACKED, 5])
+
+    def learn_of_the_tooltip_spell(self, steps: list[dict]) -> int:
+        spell = self.entry()['spell']
+        return max(index for index, step in enumerate(steps) if step.get('action') == 'learn'
+                   and step.get('spell') == spell)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_every_treatment_trial_starts_only_with_the_auras_absent(self):
+        steps = self.gated()
+        learned = self.learn_of_the_tooltip_spell(steps)
+        trials = self.entry()['trials']
+        clean = [index for index, step in enumerate(steps) if 'SETUP clean' in step.get('label', '')]
+        self.assertEqual(len(clean), 2 * trials)
+        self.assertTrue(all(index > learned for index in clean))
+        for index in clean[0::2]:
+            self.assertEqual((steps[index]['metric'], steps[index]['spell'], steps[index]['equals'],
+                              steps[index]['actor']), ('aura', self.REMOVED, 0, 'dummy'))
+            self.assertNotIn('within_ms', steps[index])
+            self.assertEqual((steps[index + 1]['metric'], steps[index + 1]['spell'], steps[index + 1]['equals']),
+                             ('aura_stacks', self.STACKED, 0))
+            self.assertTrue(steps[index + 2]['action'] == 'set_aura' and steps[index + 2]['spell'] != self.REMOVED)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_control_leftover_is_removed_after_its_drain_and_before_the_learn(self):
+        steps = self.gated()
+        learned = self.learn_of_the_tooltip_spell(steps)
+        self.assertEqual((steps[learned - 1]['action'], steps[learned - 1]['spell'], steps[learned - 1]['stacks'],
+                          steps[learned - 1]['target']), ('set_aura', self.REMOVED, 0, 'dummy'))
+        self.assertEqual(steps[learned - 3]['label'], 'control drain')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_aura_is_read_present_just_before_each_treatment_removal_only(self):
+        steps = self.gated()
+        removals = self.removals(steps)
+        trials = self.entry()['trials']
+        for index in removals[-trials:]:
+            self.assertEqual((steps[index - 1]['metric'], steps[index - 1]['spell'], steps[index - 1]['equals'],
+                              steps[index - 1]['actor']), ('aura', self.REMOVED, 1, 'dummy'))
+            self.assertNotIn('within_ms', steps[index - 1])
+        self.assertEqual(sum(1 for step in steps if 'present' in step.get('label', '')), trials)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_gates_exist_only_with_a_stack_read(self):
+        steps = self.steps(no_wait_after_casts=True)
+        self.assertFalse([step for step in steps if 'SETUP' in step.get('label', '')])
+        self.assertEqual(len(self.removals(steps)), 2 * self.entry()['trials'])
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_delay_waits_before_the_removal_and_the_contract_names_it(self):
