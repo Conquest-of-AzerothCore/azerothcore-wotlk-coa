@@ -38,6 +38,12 @@ by any data, and the mana is truncated per strike.
   times (tooltip ratio - 1), never a reading; the margin is `margin_ms` plus the tick overshoot; the trial is void
   (unmeasured) unless the before read plus its elapsed time equals the full duration and both reads share one landing
   offset, each within the margin, and unmeasured unless the margin stays below 10% of the expected delta.
+  Fix round (review I3/I4, controller approval): the judged delta is the one between the landing-corrected durations,
+  each read plus its elapsed time, so a difference of the landing offsets no longer adds to the tolerance, and a
+  margin at or above 10% of the expected delta is refused (unmeasured) whatever the reads, so the 10% exclusion holds
+  by construction. The verdict's `measured` is the ratio of the landing-corrected durations, on the same scale as its
+  `low` and `high` (full duration x ratio +- margin over the full duration), so an ok verdict always reads inside its
+  band (704581, pair2 reads: 8003 / 10003 = 0.80006 against 0.7925 to 0.8075, where the raw read ratio was 0.789).
 - `off_hand_weapons` entries may state `grants`, spell ids the `hit_ratio` off-hand path learns right before the
   equip (other off-hand callers ignore them).
 - `dispel_count` arms: `learns` (learned before the arm, unlearned after) and `cast: false` (a no-cast control that
@@ -60,7 +66,9 @@ by any data, and the mana is truncated per strike.
 ## Consequences
 
 - Witch Hunter 15, Templar 19 (with `--stack`) and Necromancer 23 regenerate byte-identical and their coverage audits
-  are identical before and after.
+  are identical before and after. The fix round's verdict change is reachable only through a model carrying
+  `margin_ms`, which no finished-class entry states (their `duration_ratio` entries have none), and it leaves the
+  generated scenarios unchanged.
 - An unmeasured ratio is not behaviour evidence (tested through `clause_coverage`).
 - Known limit of the default path, for the owner (G-39), unchanged here: without `margin_ms` the judge expects
   `before x (ratio - 1)`, a reduction of the remaining time read after the settle, while both reads are taken the same

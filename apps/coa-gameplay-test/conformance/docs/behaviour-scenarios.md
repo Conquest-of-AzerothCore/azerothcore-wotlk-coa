@@ -460,7 +460,9 @@ delta-margin scale's usual 0.5%-of-expected floor.
 Two opt-in fields (ADR 1028) leave every other entry unchanged. `attempts` (1 to 3, default 3) lands the vehicle that
 many times per phase; 1 reads a single landing, never a diminished re-application. `margin_ms` (absent by default)
 replaces `CAST_MARGIN_MS` in the judge's margin, `margin_ms + run.max_step_ms`, and the verdict is `unmeasured` when
-that margin is not below 10% of `|expected_delta|`, so a stated margin never passes a 10% deviation.
+that margin is not below 10% of `|expected_delta|`, so a stated margin never passes a 10% deviation. With
+`margin_ms` the judge compares the landing-corrected durations (each read plus the game time elapsed since its
+landing) and reports their ratio as `measured`, on the scale of its own `low` and `high`.
 
 ### Duration-refresh scenarios (`behaviour_duration_refresh`, `kind: "duration_refresh"`)
 

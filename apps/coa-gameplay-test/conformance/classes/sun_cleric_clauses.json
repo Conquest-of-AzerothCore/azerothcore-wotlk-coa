@@ -445,9 +445,16 @@
     "spell": 300341,
     "clause": "Sanctify now dispels $s1 additional effect.",
     "labels": [
-      "300341 effect_value e0 #0"
+      "300341 effect_value e0 #0",
+      "300341 behaviour_dispel_count additional base disease",
+      "300341 behaviour_dispel_count additional base poison",
+      "300341 behaviour_dispel_count additional base magic",
+      "300341 behaviour_dispel_count additional learned disease",
+      "300341 behaviour_dispel_count additional learned poison",
+      "300341 behaviour_dispel_count additional learned magic"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "dispel_count additional (mentor D-172): the ally carries three debuffs of each Sanctify dispel type (diseases 55095, 55078, 3427; poisons 2818, 25810, 3409; magic 31589, 15487, 1130). Base arm, nothing learned: 1 of 3 of each type removed per cast, three casts; learned arm, Exorcism 300341 learned: 2 of 3 of each type, one left, so an over-dispel alerts as an under-dispel does; in both runs. Pair 20261122-170837 / 20261122-170911 (t10 fix pair5), build e425da0f75d5, server commit 6b9100f18eeb, no flip, 11 of 11 verdicts ok in each run. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 300343,
@@ -997,11 +1004,12 @@
       {
         "claim": "for 100% of the amount it heals you ($s1 value 100)",
         "labels": [
-          "301011 effect_value e0 #0"
+          "301011 effect_value e0 #0",
+          "301011 behaviour_metric_delta amount_ratio"
         ]
       }
     ],
-    "reason": "Count half: Gavel of Light 800611 at the dummy with the caster at 50% health: 0 heal events of 301012 cast by the caster before the learn (control) and 5 after with 6 grouped allies, 3 with 3 grouped allies, in both runs. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip (both runs the same statuses), 12 of 12 scenarios passed natively in each run. Amount half (100% of the Gavel of Light self heal): no kind reads two amounts of one cast when the claim's own passive must be learned: amount_match learns only its cast spell and sets auras with set_aura (the claim's own aura, never), and metric_delta judges one reading against floors or its own before reading (tool need, returned: amount_match with a learned gate, or a metric_delta ratio of two heal totals of one phase); the data label reads the value 100 only. Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours.",
+    "reason": "Count half: Gavel of Light 800611 at the dummy with the caster at 50% health: 0 heal events of 301012 cast by the caster before the learn (control) and 5 after with 6 grouped allies, 3 with 3 grouped allies, in both runs. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip (both runs the same statuses), 12 of 12 scenarios passed natively in each run. Amount half (100% of the Gavel of Light self heal): 301011 amount_ratio, ratio-only ally arms on the same cast: the five 301012 heals over the 707522 self heal read 265 / 53 = 5 and 365 / 73 = 5 against 5 x 100% within 0.05, 0 heals of 301012 in the control before the learn. Pair 20261122-162017 / 20261122-162057 (t10 pair2), build d791db5bf505, server commit 1060147475f2, no flip. Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours.",
     "tool_gap": {
       "reason": "the 100% amount needs amount_match with a learned gate or a two-total ratio read in one phase",
       "attempts": [
@@ -1624,10 +1632,12 @@
     "spell": 504848,
     "clause": "abolishing $503650s1 disease effects,",
     "labels": [
-      "504848 effect_value 503650e0 #0"
+      "504848 effect_value 503650e0 #0",
+      "504848 behaviour_dispel_count abolish no_cast disease",
+      "504848 behaviour_dispel_count abolish cast disease"
     ],
     "kind": "claim",
-    "reason": "Open, data label only: periodic_dispel expects one removal per period and dispel_count has no no-cast control arm; no metric counts dispellable auras (earlier author's report, tool gaps). Not given a final status."
+    "reason": "dispel_count abolish (ADR 1028 no-cast arm): the ally carries three diseases (55095, 55078, 3427); the no_cast control removes 0 of 3, one Mercy cast removes 2 of 3 (one left), in both runs, against $503650s1 = 2. Pair 20261122-162017 / 20261122-162057 (t10 pair2), build d791db5bf505, server commit 1060147475f2, no flip. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 504848,
@@ -3877,7 +3887,7 @@
       "704581 behaviour_duration_ratio"
     ],
     "kind": "claim",
-    "reason": "Not closed. Hammer-of-Justice-style vehicle Stun 2880 (10000 ms) read 1994 ms before and 1494 ms after the learn (ratio 0.749 against 0.8); the harness lands the stun three times 500 ms apart, so the aura read is a diminished re-application, and the judge's 525 ms margin does not exclude 10% off (450 and 550 ms around the stated 500 ms delta). The 10% rule is not met; a single-landing or exact-total design is needed (tool need, returned). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "duration_ratio single landing (attempts 1) with margin_ms 50 (ADR 1028, D-170 and the fix round): Stun 2880 read 9491 ms before and 7491 ms after the learn, 509 ms after each landing in both phases; landing-corrected durations 10000 and 8000 ms, delta -2000 ms against 10000 x (0.8 - 1) within 75 ms (50 stated plus 25 ms tick overshoot), ratio 0.8 inside 0.7925 to 0.8075; the margin is below 10% of the expected delta (200 ms), so a 10% deviation either side is excluded; control: the before phase without 704581; in both runs. Pair 20261122-170837 / 20261122-170911 (t10 fix pair5), build e425da0f75d5, server commit 6b9100f18eeb, no flip, 11 of 11 verdicts ok in each run. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 704582,
@@ -4543,7 +4553,9 @@
     "claims": [
       {
         "claim": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand",
-        "labels": []
+        "labels": [
+          "707072 behaviour_metric_delta equip"
+        ]
       },
       {
         "claim": "your chance to hit is increased by $707072s2%",
@@ -4554,7 +4566,7 @@
         ]
       }
     ],
-    "reason": "Open: no label covers the dual-wield and two-handed wield part; the hit-chance part has its own labels."
+    "reason": "Dual-wield and two-handed part: kind equip_grant, 4 of 4 main/off-hand item pairs (2524 with 30754, and 2529, 1197 and 11864 in both hands) refused in the off hand without 707072 and held in both hands with it learned, in both runs. Hit-chance part: its own labels. Pair 20261122-163029 / 20261122-163149 (t10 pair4), build fc088bffb287, server commit 1240cb576b94, no flip. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 707077,
@@ -4925,7 +4937,9 @@
     "claims": [
       {
         "claim": "While under the effects of Sunstorm, you can move",
-        "labels": []
+        "labels": [
+          "760379 behaviour_metric_delta move"
+        ]
       },
       {
         "claim": "but cannot perform any other abilities",
@@ -4934,15 +4948,7 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "\"You can move\" needs a step that moves a player for real and a read of the new position under Sunstorm; the harness movement flag fixture cannot move a player (entry dropped in 9ed21c7156 after the Sunstorm move design), and no existing kind drives real movement. Not built: a move step, then position_x read. Tool gap, not a final status (D-114).",
-      "attempts": [
-        {
-          "agent": "sun-cleric-b8a author",
-          "report": ".agents/plans/sun-cleric-b8a-fix/report.md"
-        }
-      ]
-    }
+    "reason": "\"You can move\": kind move_under_aura (mentor D-171) moves the player with client_packet MSG_MOVE_START_FORWARD then MSG_MOVE_STOP; the control without the aura moves 2 yd, the move under Sunstorm moves 2 yd with the aura held at start, after the move and after the stop, in both runs. Earlier attempt: sun-cleric-b8a author (.agents/plans/sun-cleric-b8a-fix/report.md). The refusal of a move under a root rests on code reading (MovementHandler.cpp:603). Pair 20261122-162807 / 20261122-162850 (t10 pair3), build 36c480179229, server commit bfb06ebcdefe, no flip. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 760379,
@@ -5110,10 +5116,12 @@
       },
       {
         "claim": "of 100% of the damage dealt as Holy damage",
-        "labels": []
+        "labels": [
+          "800612 behaviour_metric_delta holy_amount"
+        ]
       }
     ],
-    "reason": "Part 1: the control phase reads 0 Holy strikes of 807853 and the phase with the aura at least 1 over 5 swing intervals with two weapons; one strike per swing is not shown, because no kind reads the swings of the same window and compares (tool need, returned), so the count is not stated and the clause is not status 1. Part 2, the amount (100% of the damage dealt), has no check: no kind compares the extra Holy hit with the swing that caused it (tool need, returned). coa-history: 807853 SPELL_DAMAGE 2114 events in 11 logs, 800612 refreshes 1440 and casts 105 (counts only, no swing link). Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"additional 50% of the damage dealt as Holy damage\" and \"Lasts 20 seconds\" against the installed DBC 100% and 25 s; the installed DBC governs (older reference, guide section 4). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Part 1: the control phase reads 0 Holy strikes of 807853 and the phase with the aura at least 1 over 5 swing intervals with two weapons; one strike per swing is not shown, because no kind reads the swings of the same window and compares (tool need, returned), so the count is not stated and the clause is not status 1. Part 2, the amount: 800612 holy_amount, ratio-only arms on one phase: the Holy strikes of 807853 with their resisted part over the damaging auto attacks of both hands read 678 / 678 and 715 / 715 = 1 against 100% within 0.02 (10 Holy strikes per run), 0 in the control before the learn; the resisted part is the CoA linear monster resistance of the level-60 dummy (entry source). Pair 20261122-162017 / 20261122-162057 (t10 pair2), build d791db5bf505, server commit 1060147475f2, no flip. coa-history: 807853 SPELL_DAMAGE 2114 events in 11 logs, 800612 refreshes 1440 and casts 105 (counts only, no swing link). Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"additional 50% of the damage dealt as Holy damage\" and \"Lasts 20 seconds\" against the installed DBC 100% and 25 s; the installed DBC governs (older reference, guide section 4). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 800612,
@@ -5148,10 +5156,12 @@
       },
       {
         "claim": "the mana restored by the strikes is 5% of the damage they dealt",
-        "labels": []
+        "labels": [
+          "803913 behaviour_metric_delta mana_ratio"
+        ]
       }
     ],
-    "reason": "The value 5 is a data label. The behaviour half compares the 807552 energize with the damage of the same two strikes: the existing kinds do not read that ratio on one phase (amount_match reads damage and heal totals only, not energize; rage_per_damage is a Rage-only option; the Arbiter of Grace entry ge_mana_vow judges a cumulative ratio of 5.0 between two phases that both carry the base 5%, so it does not read the base share). Tool need, returned: an energize-per-damage ratio read for mana, or amount_match with an energize side. Reference search 2026-11-22: coa-history 807552 Glorious Execution: SPELL_ENERGIZE 6772 events in 14 logs (mean 30), 800691 and 802566 damage in the same logs; the Arbiter of Grace entry records mana at 4.77% to 4.97% of damage across 16 player/log pairs in the logs, which agrees with 5% but is not a measurement of ours.",
+    "reason": "The value 5 is a data label. The behaviour half: 803913 mana_ratio, ratio-only arms on the after phase: the 807552 mana over the damage of the two strikes 800691 and 802566 reads 668 / 13392 = 0.04988 and 668 / 13390 = 0.04989 against 5% within 0.001 (low end widened by one mana per truncated energize); the before phase is the control without the cause, no 803913 cast, 0 energize events of 807552. Pair 20261122-170837 / 20261122-170911 (t10 fix pair5), build e425da0f75d5, server commit 6b9100f18eeb, no flip, 11 of 11 verdicts ok in each run. Reference search 2026-11-22: coa-history 807552 Glorious Execution: SPELL_ENERGIZE 6772 events in 14 logs (mean 30), 800691 and 802566 damage in the same logs; the Arbiter of Grace entry records mana at 4.77% to 4.97% of damage across 16 player/log pairs in the logs, which agrees with 5% but is not a measurement of ours.",
     "tool_gap": {
       "reason": "no kind reads an energize amount against the damage of the same strikes",
       "attempts": [
@@ -6663,8 +6673,10 @@
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
     "kind": "claim",
     "labels": [
-      "807507 effect_value e0 #0"
-    ]
+      "807507 effect_value e0 #0",
+      "807507 behaviour_hit_ratio offhand_swing"
+    ],
+    "reason": "hit_ratio off-hand swings with the grant 707072 learned before the equip (off_hand_weapons grants): bonus +31.11% and +31.35% against +31% inside +-2 points, control swings before the learn. Pair 20261122-162017 / 20261122-162057 (t10 pair2), build d791db5bf505, server commit 1060147475f2, no flip. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 807507,
@@ -6752,10 +6764,11 @@
     "spell": 807873,
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
     "labels": [
-      "807873 effect_value e0 #0"
+      "807873 effect_value e0 #0",
+      "807873 behaviour_hit_ratio offhand_swing"
     ],
     "kind": "claim",
-    "reason": "Open, tool need returned: hit_ratio swings the off-hand through the class file off_hand_weapons item, equipped before any learn; the harness refuses item 2027 in the off-hand slot (equip error 20, ITEM_CANT_BE_EQUIPPED) because Sun Cleric has no Dual Wield grant, and the Valkyr set (two-hand items in both hands) is not reachable from hit_ratio. A hit_ratio option learning a spell before the equip, or a weapon-set off-hand swing read, is needed. Not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "hit_ratio off-hand swings with the grant 707072 learned before the equip (off_hand_weapons grants, the Dual Wield grant the earlier refusal lacked): bonus +61.03% and +61.23% against +61% inside +-3.05 points, control swings before the learn. Pair 20261122-162017 / 20261122-162057 (t10 pair2), build d791db5bf505, server commit 1060147475f2, no flip. Reference search (G-11): in the class file entry."
   },
   {
     "spell": 807873,
