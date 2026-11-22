@@ -86,6 +86,16 @@
         "spell": 806060
       },
       "trigger_text": "Damage dealt by Radiant Flame",
+      "trigger_spells": [
+        806060,
+        807058
+      ],
+      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy); 806060 deals no direct damage. A trial is one landed 807058 tick on the dummy: the handler rolls Chance(player, 300369) (ProcChance 10) once per 807058 damage event (AscensionSunClericEvents.cpp:115). Residual failure probability at most 0.1% per pair (residual_target). Sizing: trials_per_attempt 3 (Radiant Flame lasts 4000 ms with a 1000 ms period: 3 ticks land inside a cast window, counted in base pair 6, 38314 ticks over about 12700 casts; the judge refuses fewer trials than the sizing needs).",
+      "trigger_lands_no_hit": "AscensionSunClericEvents.cpp:115: case 300369: case 804629 return damage && info && info->Id == 807058 && Chance(player, id): the handler rolls once per landed Radiant Flame tick 807058, never per cast of 806060 or per aura application",
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "trials_per_attempt": 3,
+      "min_parts": 26,
       "event_metric": "spell_damage_count",
       "proc_spell": 807175,
       "proc_spell_source": "AscensionSunClericEvents.cpp:250: case 300369 casts Solar Flare 807175 at the target; the tooltip names Solar Flare",
@@ -100,20 +110,7 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0,
-      "base_mana_per_attempt": true,
-      "trial_readings": [
-        {
-          "name": "Radiant Flame hits",
-          "meaning": "each landed 807058 hit rolls Chance(player, 300369) once (AscensionSunClericEvents.cpp:115); Radiant Flame 806060 Effect[0] aura 227 every 1000 ms triggers 807058 and 806060 itself deals no damage",
-          "adds": [
-            {
-              "metric": "spell_damage_count",
-              "spell": 807058
-            }
-          ],
-          "minus_events": false
-        }
-      ]
+      "base_mana_per_attempt": true
     },
     {
       "aura": 704908,
@@ -176,7 +173,7 @@
     {
       "aura": 804629,
       "name": "Spears of Glory",
-      "min_parts": 10,
+      "min_parts": 36,
       "tooltip": "Damage dealt by |cffffffffRadiant Flame|r now has an $h% chance to grant you |cffffffffSpears of Glory|r.@s:807299:0@",
       "chance_token": "$h",
       "band": true,
@@ -190,7 +187,11 @@
         806060,
         807058
       ],
-      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy, DmgClass magic): the handler rolls only for a damage event of 807058 (AscensionSunClericEvents.cpp, case 804629: damage && info->Id == 807058 && Chance(player, 804629)), and the cast itself deals no direct damage. A trial is one landed 807058 tick on the dummy (806060 has no hit of its own). Residual failure probability of the pooled proof at most 0.1% per pair (the judge's residual_target). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 15% / 10 seconds / 25% for Spears of Glory, equal to the DBC (ProcChance 15, DurationIndex 1 = 10 s, $s2 25); ascension-data advancement.tsv lists it as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values.",
+      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy, DmgClass magic): the handler rolls only for a damage event of 807058 (AscensionSunClericEvents.cpp, case 804629: damage && info->Id == 807058 && Chance(player, 804629)), and the cast itself deals no direct damage. A trial is one landed 807058 tick on the dummy (806060 has no hit of its own). Residual failure probability of the pooled proof at most 0.1% per pair (the judge's residual_target). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 15% / 10 seconds / 25% for Spears of Glory, equal to the DBC (ProcChance 15, DurationIndex 1 = 10 s, $s2 25); ascension-data advancement.tsv lists it as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values. Sizing: trials_per_attempt 3 (Radiant Flame lasts 4000 ms with a 1000 ms period: 3 ticks land inside a cast window, counted in base pair 6, 38314 ticks over about 12700 casts; the judge refuses fewer trials than the sizing needs).",
+      "trigger_lands_no_hit": "AscensionSunClericEvents.cpp:115: case 300369: case 804629 return damage && info && info->Id == 807058 && Chance(player, id): the handler rolls once per landed Radiant Flame tick 807058, never per cast of 806060 or per aura application",
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "trials_per_attempt": 3,
       "event_metric": "spell_cast_count",
       "proc_spell": 807299,
       "proc_spell_source": "EffectTriggerSpell[0] of 804629; the handler casts it on the caster (Cast(player, player, 807299), AscensionSunClericEvents.cpp case 804629)",
@@ -1279,29 +1280,6 @@
       "observe_source": "The quote is the Bless sentence the doubling applies to; the doubling itself is the 300357 tooltip \"Doubles the healing done and mana restored by Bless\". Bless 804247 is cast on the caster in both phases and read 10500 ms later (one tick), 300357 (Lead Me Not Astray, 'Doubles the healing done and mana restored by Bless') learned between the phases. Plain phase: 1363 - 272 (cost) + 143 (5% of 2868, see mana_tick) = 1234. With 300357, AscensionSunClericAuras.cpp:220-226 doubles the amount: 286, so 1363 - 272 + 286 = 1377. The expected values come from the tooltips and the DBC, not from a run. A single 5% tick in both phases reads 1234 and is excluded. Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs, mean 871 and 974); bindmysoul 804247 reads \"Bless an ally, restoring 5% of their maximum health every 10 sec for 5 minutes\" (no self cast and no mana, an older state, G-9); owner ruling O-4 (2026-11-21) sets the mana to 5% of the maximum per tick, Sun Cleric ADR 0002.",
       "cast_in_before": true,
       "gate_spell": 300357
-    },
-    {
-      "spell": 804247,
-      "name": "Bless (health per tick)",
-      "kind": "metric_delta",
-      "variant": "health_tick",
-      "label_suffix": "health_tick",
-      "quote": "Bless yourself and an ally, restoring 5% of their maximum health",
-      "trigger_spell": 804247,
-      "target": "caster",
-      "cast_in_before": false,
-      "disable_regeneration": true,
-      "wait_ms": 10500,
-      "expire_ms": 1000,
-      "metric": "health",
-      "fields": {},
-      "before_expected": 5000,
-      "expected": 5500,
-      "observe_source": "Bless 804247 Effect[0] aura 227 every 10000 ms triggers 805360; AscensionSunClericAuras.cpp:208-212 heals Copy(player, target, 707522, CalculatePct(target max health, effect 0 amount)) on the aura target only, and adds mana only when the target is the caster. The caster is held at 5000 of the 10000 health fixture in both phases (caster_health), regeneration off, so the control reading (no cast) is the same fixture as the Bless phase: 5000; with Bless on the caster, one tick after 10500 ms: 5000 + 5% of 10000 = 5500 from the tooltip. The ally side of \"yourself and an ally\" is not measured here (metric_delta has no ally cast or read): the clause stays open for it. Whether the class tuning aura 887015 (-20% healing done) scales this percent heal is read from the measured amount. Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs, mean 871 and 974); bindmysoul 804247 reads \"Bless an ally, restoring 5% of their maximum health every 10 sec for 5 minutes\" (no self cast and no mana, an older state, G-9); nothing found that gives a live per tick percent for the mana.",
-      "caster_health": [
-        5000,
-        10000
-      ]
     },
     {
       "spell": 804247,
@@ -4226,95 +4204,6 @@
       "wait_ms": 1000
     },
     {
-      "spell": 704938,
-      "name": "Vindicator (10% of the armor ignored with Vow of the Valkyr)",
-      "kind": "hit_ratio",
-      "variant": "ignores_armor",
-      "label_suffix": "ignores_armor",
-      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
-      "expected": 1.0528,
-      "observe_spell": 800691,
-      "control": {
-        "auras": [
-          [
-            807749,
-            1
-          ]
-        ],
-        "target_aura_amounts": [
-          [
-            673,
-            0,
-            5000
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            807749,
-            1
-          ]
-        ],
-        "learn": [
-          704938
-        ],
-        "target_aura_amounts": [
-          [
-            673,
-            0,
-            5000
-          ]
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 12,
-      "cast_power": 1363,
-      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Treatment arm: Vindicator learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, Vindicator not learned. Ignoring 10% of 5528 armor leaves 4975.2: the mean hit ratio is (5528 + 5500) / (4975.2 + 5500) = 1.0528 (+5.28%). The band is that of the stated 10% (G-19: the larger of 5% of it and 2 points, 8% to 12%), mapped through the same formula: 8% gives (5528 + 5500) / (5085.76 + 5500) = 1.0418 (+4.18%) and 12% gives (5528 + 5500) / (4864.64 + 5500) = 1.0640 (+6.40%), so the judged band is +-1.1 points on +5.28% (band_points 1.1, the smaller side), and a server ignoring 5% (+2.57%) or 15% (+8.13%) lies outside it. The 99% half-width at 498 trials per arm was 0.87 points (prove1, 3 parts of 166), so about 1930 trials per arm give the 0.44 the pilot sizes to: 12 parts of 166. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence (\"ignores -10%\", the sign an export artefact); coa-history spell 704938: 0 events in 186 logs, 803913 Glorious Execution 929 casts in 6 logs, no armor figure; nothing found beyond the tooltip and the DBC.",
-      "cast_spell": 803913,
-      "band_points": 1.1
-    },
-    {
-      "spell": 704938,
-      "name": "Vindicator (no armor ignored without Vow of the Valkyr)",
-      "kind": "hit_ratio",
-      "variant": "vow_inactive",
-      "label_suffix": "vow_inactive",
-      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
-      "expected": 1.0,
-      "observe_spell": 800691,
-      "control": {
-        "auras": [],
-        "target_aura_amounts": [
-          [
-            673,
-            0,
-            5000
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [],
-        "learn": [
-          704938
-        ],
-        "target_aura_amounts": [
-          [
-            673,
-            0,
-            5000
-          ]
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 3,
-      "cast_power": 1363,
-      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Contrast arm of the Vow condition: Vindicator learned in the treatment arm, Vow of the Valkyr on the caster in neither arm; the hit must not change, expected mean ratio 1.0 (band 2 points). Reference search 2026-11-20: as ignores_armor; nothing found beyond the tooltip and the DBC.",
-      "cast_spell": 803913
-    },
-    {
       "spell": 301266,
       "name": "Solar Concord (lasts 15 s)",
       "kind": "metric_delta",
@@ -6202,64 +6091,6 @@
       "trigger_spell": 680700,
       "target": "caster",
       "cast_in_before": false,
-      "expire_ms": 9000,
-      "name": "Sun Stride (frees the caster from a slow)",
-      "variant": "frees_slow",
-      "label_suffix": "frees_slow",
-      "quote": "Also frees the caster from slows and roots.",
-      "metric": "aura",
-      "fields": {
-        "spell": 12323
-      },
-      "measure_actor": "caster",
-      "before_expected": 1,
-      "expected": 0,
-      "wait_ms": 300,
-      "strike": {
-        "spell": 12323,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 300,
-        "in_before": true
-      },
-      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Piercing Howl 12323 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the slow on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the slow gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC."
-    },
-    {
-      "spell": 680700,
-      "kind": "metric_delta",
-      "trigger_spell": 680700,
-      "target": "caster",
-      "cast_in_before": false,
-      "expire_ms": 25000,
-      "name": "Sun Stride (frees the caster from a root)",
-      "variant": "frees_root",
-      "label_suffix": "frees_root",
-      "quote": "Also frees the caster from slows and roots.",
-      "metric": "aura",
-      "fields": {
-        "spell": 47021
-      },
-      "measure_actor": "caster",
-      "before_expected": 1,
-      "expected": 0,
-      "wait_ms": 300,
-      "strike": {
-        "spell": 47021,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 3,
-        "wait_ms": 300,
-        "in_before": true
-      },
-      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Net 47021 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the root gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Net can miss: the striker casts it three times 300 ms apart in each phase (a landed application is enough, the later ones refresh it), and the phases are 25000 ms apart so the diminishing returns of the root reset between them (first run of this entry: the before-phase Net did not land once in five observations)."
-    },
-    {
-      "spell": 680700,
-      "kind": "metric_delta",
-      "trigger_spell": 680700,
-      "target": "caster",
-      "cast_in_before": false,
       "expire_ms": 500,
       "name": "Sun Stride (duration)",
       "variant": "duration",
@@ -7070,52 +6901,6 @@
       "expire_ms": 5000,
       "observe_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Gavel of Wrath 800617: ManaCost 3 + ManaCostPercentage 10 of base mana 1363 = 3 + 136 = 139, 1000 - 139 = 861 without the passive; -20% gives int(139 x 0.8) = 111, so 889 left. Control = the phase before the learn (full cost). Tolerance 1 for the engine's integer truncation of the cost (CalculatePct, then ApplySpellMod on the int cost); a cost cut of 10% or 30% reads 9 or more off. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4).",
       "dummy_distance": 5
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Horusath Blast effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_horusath",
-      "label_suffix": "effect_horusath",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.2,
-      "observe_spell": 500154,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 14,
-      "cast_power": 1363,
-      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Horusath Blast 500154 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4)."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Wrath effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel",
-      "label_suffix": "effect_gavel",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.2,
-      "observe_spell": 800617,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 3,
-      "cast_power": 1363,
-      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Wrath 800617 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report."
     },
     {
       "spell": 301343,
@@ -8287,52 +8072,6 @@
       "expected_gain": 1,
       "tolerance": 0.5,
       "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926; AscensionSunClericEvents.cpp:117 accepts an own damage or healing hit only when it is a critical strike. Contrast arm of the crit-gated entries (mana_flat, strength..spirit): the same real Sunflare 800231 cast at the dummy, 704928 learned, with no forced crit and Reg's Test Aura 984954 on the caster in both phases (DBC: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000, so the Holy hit cannot crit; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT is a weapon-crit term that a spell hit ignores). A server that blessed on every hit would read 40 mana and the aura here. Positive control of the two entries above: the Sunflare hits counted with critical=false, one per phase, so the hit landed and was not a critical strike (gain 1). Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Light effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_light",
-      "label_suffix": "effect_gavel_light",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.2,
-      "observe_spell": 800611,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 8,
-      "cast_power": 1363,
-      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Light 800611 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Grace effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_grace",
-      "label_suffix": "effect_gavel_grace",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.2,
-      "observe_spell": 800614,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 3,
-      "cast_power": 1363,
-      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Grace 800614 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report."
     },
     {
       "spell": 805628,
@@ -11771,6 +11510,816 @@
       "metric": "spell_hit_chance",
       "fields": {},
       "observe_source": "707072 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 (+1 = 6, $707072s2); StatSystem.cpp:1042 m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT). The caster's live value (STATE read) around a Bless 804247 cast, before 707072 is learned (control, gain 0) and after: gain 6. The scenario wears the default weapon set: 707072 is mapped to no set in spell_weapon_sets, so the learn between the phases is the only change. Reference search 2026-11-22: server DBC 707072; the Necromancer entry 803291 (aura 333 hit chance reads); weapon_set_spells.Valkyr; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (health per tick)",
+      "kind": "metric_delta",
+      "variant": "health_tick",
+      "label_suffix": "health_tick",
+      "quote": "Bless yourself and an ally, restoring 5% of their maximum health",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5000,
+      "expected": 5500,
+      "observe_source": "Bless 804247 Effect[0] aura 227 every 10000 ms triggers 805360; AscensionSunClericAuras.cpp:213-217 heals Copy(player, target, 707522, CalculatePct(target max health, effect 0 amount)) on the aura target only, and adds mana only when the target is the caster. The caster is held at 5000 of the 10000 health fixture in both phases (caster_health), regeneration off, so the control reading (no cast) is the same fixture as the Bless phase: 5000; with Bless on the caster, one tick after 10500 ms: 5000 + 5% of 10000 = 5500 from the tooltip. The ally side of \"yourself and an ally\" is not measured here (metric_delta has no ally cast or read): the clause stays open for it. Whether the class tuning aura 887015 (-20% healing done) scales this percent heal is read from the measured amount. Reference search: coa-history spell 804247 (347 casts in 27 logs) and 805360 (5324 heal and 2930 energize events in 30 and 12 logs, mean 871 and 974); bindmysoul 804247 reads \"Bless an ally, restoring 5% of their maximum health every 10 sec for 5 minutes\" (no self cast and no mana, an older state, G-9); nothing found that gives a live per tick percent for the mana.",
+      "caster_health": [
+        5000,
+        10000
+      ]
+    },
+    {
+      "spell": 704938,
+      "name": "Vindicator (10% of the armor ignored with Vow of the Valkyr)",
+      "kind": "hit_ratio",
+      "variant": "ignores_armor",
+      "label_suffix": "ignores_armor",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "expected": 1.0528,
+      "observe_spell": 800691,
+      "control": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "learn": [
+          704938
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 22,
+      "cast_power": 1363,
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Treatment arm: Vindicator learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, Vindicator not learned. Ignoring 10% of 5528 armor leaves 4975.2: the mean hit ratio is (5528 + 5500) / (4975.2 + 5500) = 1.0528 (+5.28%). The band is that of the stated 10% (G-19: the larger of 5% of it and 2 points, 8% to 12%), mapped through the same formula: 8% gives (5528 + 5500) / (5085.76 + 5500) = 1.0418 (+4.18%) and 12% gives (5528 + 5500) / (4864.64 + 5500) = 1.0640 (+6.40%), so the judged band is +-1.1 points on +5.28% (band_points 1.1, the smaller side), and a server ignoring 5% (+2.57%) or 15% (+8.13%) lies outside it. The 99% half-width at 498 trials per arm was 0.87 points (prove1, 3 parts of 166), so about 1930 trials per arm give the 0.44 the pilot sizes to: 12 parts of 166. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence (\"ignores -10%\", the sign an export artefact); coa-history spell 704938: 0 events in 186 logs, 803913 Glorious Execution 929 casts in 6 logs, no armor figure; nothing found beyond the tooltip and the DBC. Sizing (batch 4): the judge reports insufficient_trials when the 99% half-width of the bonus exceeds half the band. Base pairs of this batch (20261122-012954 / -013141) read it not judged at the previous part count (12 parts); the judge's own sized_trials (the count whose half-width is 0.8 of the limit) was 1998 per arm, so the entry now runs 22 parts, at least 1.1 times that count. Residual probability of insufficient_trials per pair: the sample half-width has a relative standard deviation of about 2% at these counts and sits at 0.76 of the limit, 12 standard deviations below it, below 1e-9; a true bonus at the stated value cannot be read outside the band at this size either.",
+      "cast_spell": 803913,
+      "band_points": 1.1
+    },
+    {
+      "spell": 704938,
+      "name": "Vindicator (no armor ignored without Vow of the Valkyr)",
+      "kind": "hit_ratio",
+      "variant": "vow_inactive",
+      "label_suffix": "vow_inactive",
+      "quote": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
+      "expected": 1.0,
+      "observe_spell": 800691,
+      "control": {
+        "auras": [],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          704938
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 15,
+      "cast_power": 1363,
+      "expected_source": "704938 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 on class mask word 2 bit 1048576 (Glorious Execution), BasePoints -11; the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints 9 (+1 = 10, $s1), mask (0, 4096, 4), kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:45-53, :81-88). Glorious Execution 803913 (maximum rank) is cast and its main-hand strike 800691 (Effect[0] of 803913 triggers it; the cast itself logs no damage, the first run counted 0 hits) is observed on the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, armor) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy's armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the Witch Hunter Stake entry). Contrast arm of the Vow condition: Vindicator learned in the treatment arm, Vow of the Valkyr on the caster in neither arm; the hit must not change, expected mean ratio 1.0 (band 2 points). Reference search 2026-11-20: as ignores_armor; nothing found beyond the tooltip and the DBC. Sizing of every arm (batch 4): the judge reports insufficient_trials when the 99% half-width of the bonus exceeds half the 2-point band, 1.0 point. Without Vow of the Valkyr the strike has fewer hits per cast than the main arm, and the base pair 6 control arm (3 parts of 100 casts, 300 trials) read insufficient_trials in one run and ok in the other, because 300 trials give a half-width of about 1.12 points (the main arm's 0.87 points at 498 hits per arm, scaled by the square root of the hit count, a sizing figure and not a claimed value). The arm now runs 15 parts of 100 casts per arm: at 1245 hits per arm (the lower bound, 83% of the casts non-critical with one hit per cast) the half-width is about 0.55 points, 1.8 times below the limit, so a sample variance 3.3 times its expectation would be needed to reach it, about 70 standard deviations at 2490 degrees of freedom; the residual probability of insufficient_trials per pair is below 1e-9, and the residual probability of a false alert, a true bonus of 0 read with the interval beyond the +-2 points band, is the same order (the band is 3.6 half-widths from 0 at that size). The judge still refuses fewer trials than its power needs, so a short arm is never a pass.",
+      "cast_spell": 803913
+    },
+    {
+      "spell": 680700,
+      "kind": "metric_delta",
+      "trigger_spell": 680700,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 9000,
+      "name": "Sun Stride (frees the caster from a slow)",
+      "variant": "frees_slow",
+      "label_suffix": "frees_slow",
+      "quote": "Also frees the caster from slows and roots.",
+      "metric": "aura",
+      "fields": {
+        "spell": 12323
+      },
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "strike": {
+        "spell": 12323,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "in_before": true
+      },
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Piercing Howl 12323 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the slow on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the slow gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Landing proof: an aura_apply_count arm of 12323 on the caster reads 1 then 2 (one landed Piercing Howl per phase, counted before the removal read of the after phase and before Sun Stride, whose immunity refuses a later application); a miss or a refusal turns the verdict to alert, never to a pass on an absent slow. Residual false-alert probability 0: Piercing Howl rolls the magic table, where the striker's spell hit bonus 100 clamps the hit chance to 10000 (Unit.cpp:4036-4050).",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 12323
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Piercing Howl cast per phase: its application on the caster is counted (OnAuraApply, Unit.cpp:5466 and :5607), 1 after the before phase and 2 after the after phase; the Howl cannot miss (magic table, Unit.cpp:4025-4050 with the striker's spell_hit_bonus 100, behaviours.py striker_creature) and Sun Stride is cast after the strike, so the count shows the slow landed in the after phase before the cast, never a refused one"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680700,
+      "kind": "metric_delta",
+      "trigger_spell": 680700,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 25000,
+      "name": "Sun Stride (frees the caster from a root)",
+      "variant": "frees_root",
+      "label_suffix": "frees_root",
+      "quote": "Also frees the caster from slows and roots.",
+      "metric": "aura",
+      "fields": {
+        "spell": 339
+      },
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "strike": {
+        "spell": 339,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 1800,
+        "in_before": true
+      },
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Entangling Roots 339 (Mechanic 7 root, instant effect list of two root auras, 1500 ms cast, magic damage class, Nature) by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 1800 ms after the strike (cast time 1500 ms plus 300 ms) and reads the root gone (0). The phases are 25000 ms apart, past the duration of the before-phase root and the diminishing-returns reset, so the after phase starts from a root applied afresh. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Landing proof: an aura_apply_count arm of 339 on the caster reads 1 then 2 (tolerance 0): one landed Entangling Roots per phase, so the after-phase increment is exactly the root landed before Sun Stride, never read from a cumulative band. The root cannot miss: the striker's spell hit bonus 100 clamps the hit chance to 10000 (Unit.cpp:4025-4050, tmp = 0), and the resist roll after it is zero: no mechanic resist or debuff resistance on the caster, and for the binary root (Nature) the resist chance against a player victim is SpellResistChance with level-based false and resistance 0 = 0 (Unit.cpp:4076-4081, ClassicPlusCombat.h:142-148). Residual false-alert probability 0. Net 47021 (ranged table, 5% miss) was replaced by this root because a cumulative count band over its random landings could not show the after-phase landing without a false-alert chance above 0.1%, and a fourth Net is diminishing-returns immune and removes the aura.",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 339
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Entangling Roots cast per phase: its application on the caster is counted (OnAuraApply, Unit.cpp:5466 and :5607), 1 after the before phase and 2 after the after phase, so the count shows the root landed in the after phase before Sun Stride (cast after the strike, whose immunity refuses a later application); the cast cannot miss or resist (see observe_source)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Horusath Blast effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_horusath",
+      "label_suffix": "effect_horusath",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2,
+      "observe_spell": 500154,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 35,
+      "cast_power": 1363,
+      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Horusath Blast 500154 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Band (mentor D-54): Horusath Blast 500154 has one SCHOOL_DAMAGE effect and no flat weapon term, so the engine arithmetic gives exactly +20% and the stated value is judged in the G-19 band of 2 points (18% to 22%); the pair f1 reads +19.33% with a 99% interval of +18.42% to +20.24%, inside the band and holding the stated +20%. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 3500 trials per arm at 0.76 and 0.76 of the limit and sized 3136 and 3136 trials per arm; the entry now runs 35 parts, 3500 trials per arm, at least 1.1 times the larger sized count (3136). At 3500 trials the half-width is at most 0.760 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.20%, and the limit lies 32% above it, 26 standard deviations, below 1e-9."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Wrath effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel",
+      "label_suffix": "effect_gavel",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2777,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 14,
+      "cast_power": 1363,
+      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Wrath 800617 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 50 (Gavel of Wrath 800617 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 140.827 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 154.35. Expected ratio 1.2 + 0.24 x 50 / 154.35 = 1.2777, a bonus of 27.77%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 800 trials per arm at 0.972 and 0.943 of the limit and sized 1182 and 1113 trials per arm; the entry now runs 14 parts, 1400 trials per arm, at least 1.1 times the larger sized count (1182). At 1400 trials the half-width is at most 0.735 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.89%, and the limit lies 36% above it, 19 standard deviations, below 1e-9."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Light effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light",
+      "label_suffix": "effect_gavel_light",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2246,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 19,
+      "cast_power": 1363,
+      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Light 800611 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 12 (Gavel of Light 800611 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 106.63 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 116.87. Expected ratio 1.2 + 0.24 x 12 / 116.87 = 1.2246, a bonus of 22.46%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1200 trials per arm at 0.939 and 0.939 of the limit and sized 1654 and 1655 trials per arm; the entry now runs 19 parts, 1900 trials per arm, at least 1.1 times the larger sized count (1655). At 1900 trials the half-width is at most 0.746 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.62%, and the limit lies 34% above it, 21 standard deviations, below 1e-9."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Grace effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace",
+      "label_suffix": "effect_gavel_grace",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2454,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Grace 800614 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 24.5 (Gavel of Grace 800614 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 118.173 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 129.52. Expected ratio 1.2 + 0.24 x 24.5 / 129.52 = 1.2454, a bonus of 24.54%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1000 trials per arm at 0.933 and 0.955 of the limit and sized 1361 and 1426 trials per arm; the entry now runs 16 parts, 1600 trials per arm, at least 1.1 times the larger sized count (1426). At 1600 trials the half-width is at most 0.755 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.77%, and the limit lies 32% above it, 18 standard deviations, below 1e-9."
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (health per tick on the ally)",
+      "kind": "metric_delta",
+      "variant": "health_tick_ally",
+      "label_suffix": "health_tick_ally",
+      "quote": "Bless yourself and an ally, restoring 5% of their maximum health",
+      "trigger_spell": 804247,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5000,
+      "expected": 5500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "control_wait": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804247
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Bless 804247 cast at the ally leaves its aura on the ally (Effect[0] target 21 TARGET_UNIT_TARGET_ALLY); absent in the uncast control"
+          }
+        ]
+      },
+      "observe_source": "Bless 804247 Effect[0] aura 227 every 10000 ms triggers 805360 (HEAL_PCT, target 21 ally); AscensionSunClericAuras.cpp:213-217 heals Copy(player, target, 707522, CalculatePct(target max health, effect 0 amount)) on the aura target, and AscensionSunClericAuras.cpp:67-74 (id == Bless && target != player) records the blessed ally and casts Bless on the caster. The ally, grouped with the caster, is held at 5000 of the 10000 health fixture in both phases, regeneration off; the uncast before phase waits the after phase's 10500 ms (timed control) and reads 5000; after a real Bless cast at the ally and 10500 ms, one tick: 5000 + 5% of 10000 = 5500 from the tooltip ($s1 = 5). Arm: the Bless aura on the ally, 0 then 1. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (Replenishment on the ally after a critical strike)",
+      "kind": "metric_delta",
+      "variant": "proc_aura_ally",
+      "label_suffix": "proc_aura_ally",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 4000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "300943 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, trigger 1257670 (Replenishment); AscensionSunClericEvents.cpp:117 names 300943 for a critical hit and :254 casts 1257670 on the caster. 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. A forced-crit Dawnsear 554406 is cast at the dummy before and after the learn; the Replenishment aura read on the grouped ally 500 ms after the 3500 ms cast: 0 before the learn (control: no passive), 1 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (Replenishment energizes the ally)",
+      "kind": "metric_delta",
+      "variant": "replenish_tick_ally",
+      "label_suffix": "replenish_tick_ally",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670,
+        "power": 0,
+        "target": "ally"
+      },
+      "expected": 143,
+      "before_expected": 0,
+      "wait_ms": 9100,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "300943 grants 1257670 (AscensionSunClericEvents.cpp:254). 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. One tick by 5600 ms energizes the ally by 5% of its maximum mana, 5 x 2868 / 100 = 143 (2868 = BaseMana 1363 + 20 + (Intellect 119 - 20) x 15, the grouped ally is the same class fixture as the caster). The energize events of 1257670 given to the ally are read on the caster with fields.target ally. Control: 0 before the learn. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 680656,
+      "name": "Sun's Gift (Replenishment on the ally)",
+      "kind": "metric_delta",
+      "variant": "ally_aura",
+      "label_suffix": "ally_aura",
+      "quote": "grants allies Replenishment.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1363,
+      "before_expected": 0,
+      "expire_ms": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "wait_ms": 5500,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "680656 Sun's Gift Effect[1] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 1257670, class mask word 1 = 64 = Horusath Blast; AscensionSunClericAbilities.cpp:309-310 casts 1257670 on the caster after a Horusath Blast hit. 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. A real Horusath Blast 572801 is cast at the dummy in both phases (680656 learned between them); the aura read on the grouped ally: 0 before the learn (control: no passive), 1 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 680656,
+      "name": "Sun's Gift (Replenishment energizes the ally)",
+      "kind": "metric_delta",
+      "variant": "ally_tick",
+      "label_suffix": "ally_tick",
+      "quote": "grants allies Replenishment.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "before_expected": 0,
+      "expire_ms": 2000,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670,
+        "power": 0,
+        "target": "ally"
+      },
+      "expected": 143,
+      "wait_ms": 5500,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "680656 grants 1257670 (AscensionSunClericAbilities.cpp:309-310). 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. One tick of 5% of the ally's maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15, the same class fixture) = 143.4 within 1.5, summed 5500 ms after the cast and read on the caster with fields.target ally; 0 before the learn (control). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (nearby allies are healed too)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies",
+      "label_suffix": "nearby_allies",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 5,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "ally4"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "ally5"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)",
+            "reach_source": "Heat Wave copies through Allies() (AscensionSunClericEvents.cpp:346), which keeps a unit unless it is not the player and not IsInRaidWith the player (AscensionSunCleric.cpp:149-157): raid members, subgroup 2 included"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          }
+        ]
+      },
+      "observe_source": "534267 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, BasePoints 74 (+1 = 75), EffectTriggerSpell 801215; AscensionSunClericEvents.cpp:136 names four sources: Illumination (500143), Shine (800357), Daybreak (500147, rank 503624) and the Holy Form heal 807994; :344-354 collects Allies(player, target, Radius(801215)), removes the target, and heals each of up to MaxAffectedTargets 5 with Copy(player, ally, 801215, 75% of the heal). This entry is the Daybreak source: Daybreak is cast at ally in both phases (534267 learned between them), the four other allies at 5000 of 10000 health; the heal events of 801215 are read on the caster per recipient. The 75% amount is not expressed (Daybreak rolls a 32-sided die and the option has no arm-to-arm ratio); the cap and the lowest-health order need a sixth candidate (tool need returned). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (nearby allies are healed too, Illumination)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_illumination",
+      "label_suffix": "nearby_allies_illumination",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the other grouped ally and the caster are two candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          }
+        ]
+      },
+      "observe_source": "534267 Effect[0] aura 354, EffectTriggerSpell 801215, BasePoints 74 (+1 = 75). Illumination 500143 is the first of the four sources named at AscensionSunClericEvents.cpp:136; this entry is that source. Illumination (a direct heal, 2000 ms cast, ManaCostPercentage 30) is cast at ally in both phases (534267 learned between them) with the two grouped allies at 5000 of 10000 health; the Heat Wave copy 801215 heals the other ally and the caster once each (Allies, :344-354), read on the caster per recipient; 0 in the phase without the passive. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (nearby allies are healed too, Shine)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_shine",
+      "label_suffix": "nearby_allies_shine",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 800357,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the other grouped ally and the caster are two candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          }
+        ]
+      },
+      "observe_source": "534267 Effect[0] aura 354, EffectTriggerSpell 801215, BasePoints 74 (+1 = 75). Shine 800357 is the second of the four sources named at AscensionSunClericEvents.cpp:136; this entry is that source. Shine (a direct heal, 1500 ms cast, ManaCostPercentage 19) is cast at ally in both phases (534267 learned between them) with the two grouped allies at 5000 of 10000 health; the Heat Wave copy 801215 heals the other ally and the caster once each (Allies, :344-354), read on the caster per recipient; 0 in the phase without the passive. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (nearby allies are healed too, Holy Form heal)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_holy_form",
+      "label_suffix": "nearby_allies_holy_form",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Holy Form extra heal 807994 on the blessed ally: none below the gate, one above it (805301 ally_bless_heal), so the second Heat Wave copy comes from it"
+          }
+        ]
+      },
+      "observe_source": "534267 Effect[0] aura 354, EffectTriggerSpell 801215, BasePoints 74 (+1 = 75). The Holy Form heal 807994 is the fourth of the four sources named at AscensionSunClericEvents.cpp:136; this entry is that source. 534267 is known in both phases (gate_timing start). In both phases Bless 804247 is cast at ally and Holy Form 805301 on the caster, the two grouped allies are at 5000 of 10000 health, and Daybreak 503624 heals ally; the Daybreak heal itself triggers one Heat Wave copy on the other ally in both phases. Only the caster's mana separates the phases (850 then 872 at the Daybreak hook, the Holy Form gate at 860.4, see 805301 ally_bless_heal): above the gate Holy Form adds the heal 807994 on the ally, a second source of a Heat Wave copy, so the cumulative 801215 heals on the other ally read 1 after the first phase (the Daybreak copy) and 3 after the second (1 plus the Daybreak copy and the 807994 copy of that phase). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "gate_timing": "start"
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 800231,
+      "setup_casts": [
+        500154
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 6500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Sun Ray damage at 10000 spell power)",
+      "variant": "sun_ray_sp",
+      "label_suffix": "sun_ray_sp",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504764,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10808.5,
+      "tolerance": 541,
+      "observe_source": "Spell power arm of sun_ray_damage in the same pair: the streamed Sun Ray text ${$m1+0+$sph*1} with Sun Ray 504764 Effect[0] SCHOOL_DAMAGE BasePoints 772, DieSides 72 (a roll 773 to 844, mean 808.5) gives 808.5 at spell power 0 (the sun_ray_damage entry, band 36.5) and 808.5 + int32(1 x 10000) = 10808.5 at 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict as the spell power the hit ran at). Judged in the 5% band (541), which excludes a coefficient of 0.9 or 1.1; the contrast on the same build is the sun_ray_damage entry. The Sun Ray is produced as in variant sun_ray_damage. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 680700,
+      "name": "Sun Stride (aura lasts 2 s)",
+      "kind": "metric_delta",
+      "variant": "duration_window",
+      "label_suffix": "duration_window",
+      "quote": "Increases your movement speed by $s2% for $d.",
+      "trigger_spell": 680700,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 680700
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1900,
+      "expiry_wait_ms": 200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          1810,
+          1990
+        ],
+        "expired": [
+          2050,
+          2190
+        ]
+      },
+      "observe_source": "680700 DurationIndex 39 = 2000 ms ($d). One real cast of 680700 on the caster: its aura is present when read 1810..1990 ms after the cast (game time) and gone when read 2050..2190 ms after it, so the duration lies between 1810 and 2190 ms, inside 10% of 2000 (1800..2200) on both sides. Control (before): no cast, absent. This replaces the aura_duration_ms readback as the measured duration. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (extra heal on the ally affected by Bless, mana gate)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_heal",
+      "label_suffix": "ally_bless_heal",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807994,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],

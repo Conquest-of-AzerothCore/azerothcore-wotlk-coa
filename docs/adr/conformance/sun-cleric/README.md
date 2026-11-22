@@ -10,3 +10,5 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0004](0004-solemn-priest-adds-its-own-share-to-the-gavel-heal.md) | Solemn Priest adds its own share to the Gavel of Light heal |
 | [0005](0005-calm-refused-on-a-silence-immune-target.md) | Calm is refused on a silence-immune target |
 | [0006](0006-sun-ray-unlearn-keeps-scorch-marks.md) | The temporary Sun Ray is unlearned only once Scorch Marks is gone |
+| [0007](0007-fanaticism-compounds-on-the-gavel-flat-damage.md) | Fanaticism compounds its effectiveness on the Gavel flat damage |
+| [0008](0008-fanaticism-expectation-is-the-reproduced-engine-arithmetic.md) | Fanaticism expectation is the reproduced engine arithmetic (supersedes the figures of 0007) |
