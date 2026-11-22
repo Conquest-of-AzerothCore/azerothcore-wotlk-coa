@@ -2703,21 +2703,77 @@
   {
     "spell": 680646,
     "clause": "Read from a scroll of hope, reducing Magic damage taken by party and raid members within $a1 yds by $s1% for $d.",
-    "labels": [
-      "680646 effect_radius e0 #0",
-      "680646 effect_value e0 #1",
-      "680646 aura_amount e0 #1",
-      "680646 aura_duration_ms #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing Magic damage taken by 30%",
+        "labels": [
+          "680646 behaviour_metric_delta reduce_taken"
+        ]
+      },
+      {
+        "claim": "for 10 s",
+        "labels": [
+          "680646 behaviour_metric_delta duration_held",
+          "680646 behaviour_metric_delta duration_gone"
+        ]
+      },
+      {
+        "claim": "by party and raid members",
+        "labels": [
+          "680646 behaviour_metric_delta reach_raid"
+        ]
+      },
+      {
+        "claim": "within 15 yds",
+        "labels": [
+          "680646 behaviour_metric_delta reach_in_edge",
+          "680646 behaviour_metric_delta reach_out_edge"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Damage: judged on the gain against the measured control. The Grave Coil 47632 hit on the caster read 606 in the control phase (DBC base 600; the extra 6 is not explained, cause not established) and 1030 cumulative after the Scroll, a ratio of 1.69967 in both runs against 1.70 within 0.02 (the 2-point band of 28% to 32%: 1.68 to 1.72), so a 33% reduction (1.67) and a 27% one (1.73) fail. Shadow only, no other school and no physical control. Duration: aura on the caster at about 9.1 s and gone by 10.75 s (windows 9050-9400, 10600-10950), excluding 9 and 11 s. Reach: the aura is on ally and on ally2 to ally5 (raid subgroup 2 included), 0 in the control. Radius 15 yd: second design (relocate_before_trigger moves the caster away from the grouped ally, distance_2d read in an ally_arm arm, caster aura read as the cast control). The area check is AnyGroupedUnitInObjectRangeCheck, IsWithinDistInMap with both object sizes (GridNotifiers.h:1051, Object.cpp:1252-1264); the two Human players have combat reach 1.5 each (creature_model_info 49 and 50), so the reach is 18.0 yd. Ally at 17.25 yd (read 17.25 after, 0 before): holds the aura, excluding 13.5 yd (reach 16.5). Ally at 18.75 yd (read 18.75): no aura while the caster holds it, excluding 16.5 yd (reach 19.5). Limit: the 3.0 yd of object sizes comes from the data table, not from a read, because a combat_reach read is not accepted inside ally_arm (no METRIC_EVIDENCE row); a different player size would shift the bracket. Reference search 2026-11-22: coa-history 0 events for 680646, 681383, 47632; bindmysoul reads -30%, 15 yds, 10 seconds; nothing else found."
   },
   {
     "spell": 680646,
     "clause": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
-    "labels": [
-      "680646 effect_value 681383e0 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "healed for 15% of their maximum health",
+        "labels": [
+          "680646 behaviour_metric_delta heal_amount"
+        ]
+      },
+      {
+        "claim": "when falling below 35% of their maximum health",
+        "labels": [
+          "680646 behaviour_metric_delta heal_amount",
+          "680646 behaviour_metric_delta heal_above",
+          "680646 behaviour_metric_delta heal_close_above"
+        ]
+      },
+      {
+        "claim": "healed once (the caster)",
+        "labels": [
+          "680646 behaviour_metric_delta heal_once"
+        ]
+      },
+      {
+        "claim": "any ally, once for each ally",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500 (the five hits are computed from the measured hit, not read). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally\" and \"once for each ally\" stay open as a tool gap, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found.",
+    "tool_gap": {
+      "reason": "The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so no read shows an ally falling below 35% and being healed, nor whether \"once\" is per ally. On this server the once flag is the script value of the shared area Aura (AscensionSunClericEvents.cpp:289, SpellAuras.cpp:664), so one heal per cast for the whole group is possible; a caster-only run reads 1500 either way. Lead only: the tooltip is ambiguous, no server change and no owner question yet.",
+      "attempts": [
+        {
+          "agent": "sc-b8e-fix",
+          "report": ".agents/plans/sun-cleric-b8e-fix/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680647,
@@ -3425,20 +3481,38 @@
   {
     "spell": 704908,
     "clause": "Your next Radiant Flame has no mana cost, ticks $s2% faster,",
-    "labels": [
-      "704908 behaviour_metric_delta scorch_cost",
-      "704908 behaviour_metric_delta scorch_period",
-      "704908 behaviour_metric_delta scorch_next"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your next Radiant Flame has no mana cost",
+        "labels": [
+          "704908 behaviour_metric_delta free_gate"
+        ]
+      },
+      {
+        "claim": "ticks 50% faster",
+        "labels": [
+          "704908 behaviour_metric_delta faster_ticks"
+        ]
+      },
+      {
+        "claim": "only the next Radiant Flame",
+        "labels": [
+          "704908 behaviour_metric_delta next_ticks"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = Radiant Flame without Scorch Marks (before phase). Free cast: mana set to 82, the Sun Ray costs 81 and leaves 1, so Radiant Flame (340) casts only at a cost of at most 1 mana: the control casts 0 times, after a real Sun Ray it casts once, excluding any reduction short of 100% (a 90% one leaves 34). Ticks: median interval of the damage events 1000 ms control, 494 and 487 ms with Scorch Marks, band 465 to 535 (tolerance 35), which excludes 550 and 450 ms (10% off). Only the next: the second Radiant Flame after Sun Ray ticks at 1009.5 and 998 ms, band 950 to 1050. Scorch Marks from a real Sun Ray cast, no set_aura. Reference search 2026-11-22: coa-history 0 events for 806060, 807058, 504764; bindmysoul 806021 text reads the same sentence; nothing else found."
   },
   {
     "spell": 704908,
     "clause": "and its duration is reduced by $s1%.",
     "labels": [
-      "704908 behaviour_metric_delta scorch_duration"
+      "704908 behaviour_metric_delta shorter_held",
+      "704908 behaviour_metric_delta shorter_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control = the before phase: Radiant Flame aura present at 1.9 s and 2.15 s without Scorch Marks (4000 ms). With it the aura is still on at 1.9 s and gone by 2.15 s (windows 1850-1990 and 2100-2190), so its duration lies in (1.85, 2.19] s around 2000 ms, excluding 1.8 and 2.2 s. Reference search: as the previous clause; nothing else found."
   },
   {
     "spell": 704909,
@@ -4155,9 +4229,11 @@
     "spell": 707771,
     "clause": "Reduces the cast time of Ilumination by $/1000;S1 sec.",
     "labels": [
-      "707771 effect_value e0 #0"
+      "707771 behaviour_metric_delta illum_held",
+      "707771 behaviour_metric_delta illum_done"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control arm = Illumination before the learn: still casting at 1470 and 1530 ms (2000 ms). With 707771 the cast is still running at 1470 ms and finished by 1530 ms (game-time windows 1462-1482 and 1522-1540), so the cast time lies in about (1.46, 1.54] s around 1500 ms, which excludes 1.45 and 1.55 s. Reference search 2026-11-22: coa-history spell 707771: 0 events in 186 logs (a passive); nothing else found beyond the tooltip and the DBC."
   },
   {
     "spell": 707772,
