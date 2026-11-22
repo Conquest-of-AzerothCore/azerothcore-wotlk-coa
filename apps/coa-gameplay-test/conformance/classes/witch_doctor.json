@@ -27479,7 +27479,7 @@
       "kind": "metric_delta",
       "variant": "splash_amount",
       "label_suffix": "splash_amount",
-      "name": "Splash Potion (a splash heals 206 to 228 plus 0.224494 of the healing power and 0.08 of Spirit, Spirit raised to 5109)",
+      "name": "Splash Potion (a splash heals 206 to 228 plus 0.224494 of the healing power and 0.08 of Spirit, Spirit raised to 5259)",
       "quote": "for ${$m1+0+$bh*0.224494+$SPI*0.08}",
       "trigger_spell": 567736,
       "target": "caster",
@@ -27490,9 +27490,9 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 5104,
-      "after_at_least": 5104,
-      "after_at_most": 5126,
+      "expected": 5116,
+      "after_at_least": 5116,
+      "after_at_most": 5138,
       "wait_ms": 1500,
       "expire_ms": 500,
       "learn": [
@@ -27522,7 +27522,7 @@
         ]
       ],
       "player_spell_power": 20000,
-      "observe_source": "Splash Potion 567736 rank 7 (BaseLevel and SpellLevel 58, MaxLevel 66, Effect[0] SPELL_EFFECT_HEAL BasePoints 202, DieSides 23, EffectRealPointsPerLevel 1.71772): SpellEffectInfo::CalcValue at level 60 adds int32(2 x 1.71772) = 3 and the roll 1 to 23, so $m1 rolls 206 to 228; the coefficient row {567736, 0, sp 0.224494, spirit 0.08, healing} (AscensionWitchDoctorCoefficients.h:99) adds 0.224494 x the healing power and 0.08 x GetStat(STAT_SPIRIT) in ModifySpellEffectBaseValue (AscensionWitchDoctorCompletion.cpp:653-672, BonusMultiplier zeroed :592-594), and the value is truncated. 567736 is not in ScalingBaseSpells. Fixtures: spell power 20000 (player_spell_power; the 801660 pulse_heal_sp read shows the healing power equal to it) and Spirit 12177 (aura 29 SPELL_AURA_MOD_STAT misc 4) on the caster in both phases with its amount set to 5000 (phase_aura_amounts, the 806563 spirit_share precedent), so Spirit reads the reference 109 (class file reference_stats stat 4; the 801663 bones_shield entry reads it after a real Frog Bones and Potion Toss: 1988 = 350 + 0.35 x 109 + 0.8 x 2000) plus 5000 = 5109; both are precondition fixtures that raise the terms the tooltip scales with. Expected: 206 + 4489.88 + 408.72 = 5104.6 to 228 + 4898.6 = 5126.6, read 5104 to 5126. A splash without the Spirit term reads 4695 to 4717, one with 0.07 or 0.09 of Spirit 5053 to 5075 or 5155 to 5177, one without the healing term 614 to 636: each lies outside the band, so the read proves both stat terms and the roll range of $m1. Spell crit is removed by Reg's Test Aura 984954 (a precondition fixture, the boom_heal precedent). A real Ingredient: Frog Bones 801663 first (setup cast, 1700 ms), then a real Splash Potion at the caster; the heal of 567736 on the caster is read 1500 ms later. Control: the uncast before phase reads 0. Clause 332 (the amount half of \"healing up to $i allies for ...\"). Cycle 12 author A: the former entry read Spirit 109 only, where the 8.72 Spirit term lies inside the 22-point roll range (4704 to 4726 with it, 4695 to 4717 without), so the Spirit term was not told apart; the 5000 Spirit fixture separates it. Cast timing checked: instant, GCD 1500.",
+      "observe_source": "Splash Potion 567736 rank 7 (BaseLevel and SpellLevel 58, MaxLevel 66, Effect[0] SPELL_EFFECT_HEAL BasePoints 202, DieSides 23, EffectRealPointsPerLevel 1.71772): SpellEffectInfo::CalcValue at level 60 adds int32(2 x 1.71772) = 3 and the roll 1 to 23, so $m1 rolls 206 to 228; the coefficient row {567736, 0, sp 0.224494, spirit 0.08, healing} (AscensionWitchDoctorCoefficients.h:99) adds 0.224494 x the healing power and 0.08 x GetStat(STAT_SPIRIT) in ModifySpellEffectBaseValue (AscensionWitchDoctorCompletion.cpp:653-672, BonusMultiplier zeroed :592-594), and the value is truncated. 567736 is not in ScalingBaseSpells. Fixtures: spell power 20000 (player_spell_power; the 801660 pulse_heal_sp read shows the healing power equal to it) and Spirit 12177 (aura 29 SPELL_AURA_MOD_STAT misc 4) on the caster in both phases with its amount set to 5000 (phase_aura_amounts, the 806563 spirit_share precedent), so Spirit reads the reference 109 (class file reference_stats stat 4; the 801663 bones_shield entry reads it after a real Frog Bones and Potion Toss: 1988 = 350 + 0.35 x 109 + 0.8 x 2000) plus 5000 = 5109; both are precondition fixtures that raise the terms the tooltip scales with. Expected: 206 + 4489.88 + 408.72 = 5104.6 to 228 + 4898.6 = 5126.6, read 5104 to 5126. A splash without the Spirit term reads 4695 to 4717, one with 0.07 or 0.09 of Spirit 5053 to 5075 or 5155 to 5177, one without the healing term 614 to 636: each lies outside the band, so the read proves both stat terms and the roll range of $m1. Spell crit is removed by Reg's Test Aura 984954 (a precondition fixture, the boom_heal precedent). A real Ingredient: Frog Bones 801663 first (setup cast, 1700 ms), then a real Splash Potion at the caster; the heal of 567736 on the caster is read 1500 ms later. Control: the uncast before phase reads 0. Clause 332 (the amount half of \"healing up to $i allies for ...\"). Cycle 12 author A: the former entry read Spirit 109 only, where the 8.72 Spirit term lies inside the 22-point roll range (4704 to 4726 with it, 4695 to 4717 without), so the Spirit term was not told apart; the 5000 Spirit fixture separates it. Cast timing checked: instant, GCD 1500. Repair (cycle 12 close-out): final10 run 20261122-084642 read 5137 above the old band 5104 to 5126. A Spirit trace (20261122-093647 and the step trace after it, 36 copies) reads Spirit 5259 from the fixture on, not 5109: the race 1 caster's The Human Spirit (+3% Spirit, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) scales the 5000 fixture too, 109 + 5000 x 1.03 = 5259. Expected: 206 + 4489.88 + 0.08 x 5259 (420.72) = 5116.6 to 5138.6, read 5116 to 5138; the 36 copies read 5116 to 5138. Without the Spirit term 4695 to 4717, with 0.07 or 0.09 of Spirit 5064 to 5086 or 5168 to 5190: still outside the band.",
       "phase_aura_amounts": [
         [
           12177,
