@@ -33,3 +33,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0027](0027-vow-of-the-valkyr-fulfils-once-per-ability-cast.md) | Vow of the Valkyr's Fulfillment triggers one auto attack per weapon per ability cast |
 | [0028](0028-lights-of-absolution-restores-on-solar-flare-damage.md) | Lights of Absolution restores on Solar Flare damage, from missing health, once every 0.5 sec (owner ruling O-13) |
 | [0029](0029-gavel-effectiveness-talents-apply-to-the-whole-hit.md) | Gavel effectiveness talents apply their figure to the whole hit (supersedes 0007 and the Gavel figures of 0008) |
+| [0032](0032-touch-of-light-reduces-damage-of-every-school.md) | Touch of Light 572886 reduces the damage of every school, not Physical only (owner ruling O-25) |

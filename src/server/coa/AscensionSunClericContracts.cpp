@@ -25,6 +25,8 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
     if (id == 803493)
         info->Effects[EFFECT_0].ChainTarget = 0;
+    if (id == 572886)
+        info->Effects[EFFECT_0].MiscValue = SPELL_SCHOOL_MASK_ALL;
     if (id == Rejuvenating)
         for (auto& effect : info->Effects)
             if (effect.IsAura())
