@@ -1697,15 +1697,31 @@
   {
     "spell": 520024,
     "clause": "At the end of the duration, you charge back down, dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage to all enemies within $570034a1 yds.",
-    "labels": [
-      "520024 effect_value 570034e0 #1",
-      "520024 effect_radius 570034e0 #2",
-      "520024 behaviour_metric_delta charge_hit",
-      "520024 behaviour_metric_delta charge_hit_ap",
-      "520024 behaviour_metric_delta charge_cast",
-      "520024 behaviour_metric_delta charge_cast_sp"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "At the end of the duration, you charge back down",
+        "labels": [
+          "520024 behaviour_metric_delta charge_hit",
+          "520024 behaviour_metric_delta charge_hit_ap"
+        ]
+      },
+      {
+        "claim": "dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage",
+        "labels": [
+          "520024 effect_value 570034e0 #1",
+          "520024 behaviour_metric_delta charge_cast",
+          "520024 behaviour_metric_delta charge_cast_sp"
+        ]
+      },
+      {
+        "claim": "to all enemies within $570034a1 yds",
+        "labels": [
+          "520024 effect_radius 570034e0 #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122 (b11d9, build 3c76856cb93e, no flip): the formula arms read on a direct cast of 570034 (the hit arm reads the school of the cast spell, and 520024 has none): 497 at the reference stats, 4997 at 20000 spell power (4997.6 expected), judged in the same pair; the real charge-back reads 0 damage of 570034 on the dummy 5000 ms after a real 520024 cast (charge_hit, charge_hit_ap): an alert, a lead for the fix note, not a verdict on the server."
   },
   {
     "spell": 572848,
