@@ -30186,7 +30186,46 @@
           "caster"
         ]
       ],
-      "observe_source": "Contrast arm of \"When you critically heal your target\": the same Illumination 500143 on the caster at 30% health and the same strike of 47632 at 3200 ms as crit_heal_return, but without force_crit and with the precondition fixture 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000, so no magic spell crits). 300339 learned, the heal 301004 on the caster stays at 0, where crit_heal_return reads 1 in the same pair; noncrit_heal_landed reads the Illumination heal itself (1). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "Contrast arm of \"When you critically heal your target\": the same Illumination 500143 on the caster at 30% health and the same strike of 47632 at 3200 ms as crit_heal_return, but without force_crit and with the precondition fixture 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000, so no magic spell crits). 300339 learned, the heal 301004 on the caster stays at 0, where crit_heal_return reads 1 in the same pair; noncrit_heal_landed reads the Illumination heal itself (1). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). The strike that discriminates is read by noncrit_strike_landed (47632 damage on the caster, 1 per phase)."
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (the striker hit landed in the non-critical arm)",
+      "kind": "metric_delta",
+      "variant": "noncrit_strike_landed",
+      "label_suffix": "noncrit_strike_landed",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "gate_spell": 300339,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "caster_health_pct": 30,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 3200
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "expected": 2,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hit-landed arm of noncrit_heal_return (review I-1): the same scenario reads the damage events of the striker's 47632 on the caster. The scenario casts one strike at 3200 ms after the trigger in each phase, so the cumulative count is 1 after the control phase and 2 after the treatment phase: the 0 returns of noncrit_heal_return are read after a strike that landed, so a missed strike cannot pass it. The striker carries spell_hit_bonus 100 (striker_creature). Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). Reference search 2026-11-22 (round 11 chunk d5 fix round): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
     },
     {
       "spell": 300339,
@@ -30224,7 +30263,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Hit-landed arm of noncrit_heal_return: the same scenario reads the Illumination 500143 heal events on the caster (1: the heal under the no-crit fixture 984954 landed). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. The heal counter is cumulative over the scenario: the control phase heals once (1), the treatment phase once more (2)."
+      "observe_source": "Hit-landed arm of noncrit_heal_return: the same scenario reads the Illumination 500143 heal events on the caster (1: the heal under the no-crit fixture 984954 landed). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. The heal counter is cumulative over the scenario: the control phase heals once (1), the treatment phase once more (2). Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). "
     },
     {
       "spell": 300339,
@@ -30260,7 +30299,7 @@
           18300
         ]
       },
-      "observe_source": "300339 The Redeemer: a forced-critical Illumination 500143 (CastingTimeIndex 5 = 2000 ms, SpellCastTimes.dbc 5) on the caster at 30% health makes the script cast 301005 when the heal lands (AscensionSunClericEvents.cpp:373), so the aura starts about 2000 ms after the trigger cast starts; $301005d = 15000 ms (DurationIndex of 301005). With no damage taken the aura 301005 on the caster is read present 15700..15800 ms of game time after the trigger cast (13700..13800 ms after the heal when it lands at 2000 ms: a total 10% shorter, 13500, would be gone) and gone 18200..18300 ms after it (16200..16300 ms after the heal: a total 10% longer, 16500, would still be present). The latency between the cast start and the heal beyond the 2000 ms cast time is not measured; the windows keep 200 ms of margin on the early side and 200 ms on the late side. Control: before phase, no trigger, 0. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339 / 301005: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "300339 The Redeemer: a forced-critical Illumination 500143 (CastingTimeIndex 5 = 2000 ms, SpellCastTimes.dbc 5) on the caster at 30% health makes the script cast 301005 when the heal lands (AscensionSunClericEvents.cpp:373), so the aura starts about 2000 ms after the trigger cast starts; $301005d = 15000 ms (DurationIndex of 301005). With no damage taken the aura 301005 on the caster is read present 15700..15800 ms of game time after the trigger cast (13700..13800 ms after the heal when it lands at 2000 ms: a total 10% shorter, 13500, would be gone) and gone 18200..18300 ms after it (16200..16300 ms after the heal: a total 10% longer, 16500, would still be present). The latency between the cast start and the heal beyond the 2000 ms cast time is not measured; the windows keep 200 ms of margin on the early side and 200 ms on the late side. Control: before phase, no trigger, 0. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339 / 301005: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Bounds of the unmeasured heal-landing latency L (review M-4): the windows hold for L below about 259 ms (a self-cast has no missile delay, Spell.cpp:2468, and Illumination's cast time is 2000 ms); the stamps are identical in both runs of a pair."
     },
     {
       "spell": 300369,
@@ -30281,21 +30320,21 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 9150,
+      "wait_ms": 9691,
       "expire_ms": 500,
-      "expiry_wait_ms": 1700,
+      "expiry_wait_ms": 991,
       "after_expiry_expected": 0,
       "game_time": {
         "after": [
-          9100,
-          9200
+          9650,
+          9750
         ],
         "expired": [
-          10800,
-          10900
+          10650,
+          10750
         ]
       },
-      "observe_source": "The streamed Solar Flare text (@s:807175:0@, \"and reduces the target's chance to hit by $s1% for $d.\") is not in the Spell.dbc description of 300369, so the quote field names the tooltip sentence the entry hangs under. Solar Flare 807175 (DurationIndex 1 = 10000 ms, $d of the tooltip) cast at the dummy by the player (the spell the passive launches). The aura 807175 on the dummy is read present 9100..9200 ms of game time after the cast and gone 10800..10900 ms after it: a 10% shorter total (9000) is gone before the first read and a 10% longer one (11000) is still present at the second. Control: before phase, no cast, 0. The miss-share part of the sentence is the attacker_miss label of 572752, the same aura 807175 Effect[0] (aura 54 -3). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300369 / 807175: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "The streamed Solar Flare text (@s:807175:0@, \"and reduces the target's chance to hit by $s1% for $d.\") is not in the Spell.dbc description of 300369, so the quote field names the tooltip sentence the entry hangs under. Solar Flare 807175 (DurationIndex 1 = 10000 ms, $d of the tooltip) is cast at the dummy by the player (the spell the passive launches). It is a missile spell, not channeled, with Speed 25: Spell.cpp:2468-2476 delays the hit by floor(max(distance, 5) / 25 x 1000) = 200 ms at the dummy (3 yd, below the 5 yd floor), and the aura starts then (Spell.cpp:4108 sends only non-channeled spells with Speed through the delayed state), so the expiry lies 10000 + 200 = 10200 ms after the cast plus the unmeasured offset d between the stamp origin and the cast. The aura 807175 on the dummy is read present 9650..9750 ms of game time after the cast and gone 10650..10750 ms after it. A total 10% shorter (9000) ends at 9200 + d, before the first read when d < 450 ms; a total 10% longer (11000) ends at 11200 + d, after the second read for any d >= 0; the 10200 + d expiry lies 450..550 ms from each read. The stamps of the reads sit 9 ms after their requested waits in every counted run (first and second read stamps equal in both runs of a pair), which is the evidence that d is far below 450 ms. Control: before phase, no cast, 0. The miss-share part of the sentence is the attacker_miss label of 572752, the same aura 807175 Effect[0] (aura 54 -3); the duration labels of 804630 (flare_hit, flare_duration) ride the same pair. Reference search 2026-11-22 (round 11 chunk d5 fix round): coa-history spell 300369 / 807175: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
     },
     {
       "spell": 680624,
@@ -30348,7 +30387,7 @@
           6950
         ]
       },
-      "observe_source": "680624 Divine Retribution aura DurationIndex 31 = 8000 ms ($d); on expiry the script casts 570147 with a quarter of the accumulated hit (AscensionSunClericAuras.cpp:170-178). 680624 is cast at the dummy as the setup cast, 1600 ms later Solar Flare 807175 is cast (the hit, as unleash_quarter), and the unleash damage 570147 on the dummy is read 0 at 5650..5750 ms after the Solar Flare cast (7250..7350 ms after the setup cast at a setup wait of 1600 ms: a duration 10% shorter, 7200, would have fired) and 34 at 6850..6950 ms (8450..8550 ms after the setup cast: a duration 10% longer, 8800, would not have fired). The step offset between the setup cast and the trigger cast beyond the 1600 ms wait is not measured. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. The setup cast is made in both phases and the trigger hit in the treatment phase only (trigger_only_after): the control phase reads 0 with the aura cast and no hit; the treatment cast refreshes the aura, so the 8000 ms count from the treatment setup cast.",
+      "observe_source": "680624 Divine Retribution aura DurationIndex 31 = 8000 ms ($d); on expiry the script casts 570147 with a quarter of the accumulated hit (AscensionSunClericAuras.cpp:170-178). 680624 is cast at the dummy as the setup cast, 1600 ms later Solar Flare 807175 is cast (the hit, as unleash_quarter), and the unleash damage 570147 on the dummy is read 0 at 5650..5750 ms after the Solar Flare cast (7250..7350 ms after the setup cast at a setup wait of 1600 ms: a duration 10% shorter, 7200, would have fired) and 34 at 6850..6950 ms (8450..8550 ms after the setup cast: a duration 10% longer, 8800, would not have fired). The step offset between the setup cast and the trigger cast beyond the 1600 ms wait is not measured. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. The setup cast is made in both phases and the trigger hit in the treatment phase only (trigger_only_after): the control phase reads 0 with the aura cast and no hit; the treatment cast refreshes the aura, so the 8000 ms count from the treatment setup cast. Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). Fixture 823764 \"beeg spellpen\" is Effect[0] aura 123 -9999 on mask 126 plus Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 mask word 2 0x20000000, which matches neither 807175 (0x40000000) nor 570147 (0x2000), so it does not touch the measured hits.  Bounds of the unmeasured setup-to-trigger offset d (review M-4): the +10% side holds for d below 282 ms and the -10% side for d above -109 ms; the stamps are identical in both runs of a pair.",
       "trigger_only_after": true
     },
     {
@@ -30394,7 +30433,7 @@
         15.0,
         16.0
       ],
-      "observe_source": "Radius 570147 Effect[0] RadiusIndex 13 = 10 yd ($570147a1). The unleash searches Nearby(target, Radius(570147)) (AscensionSunCleric.cpp:137-148), AnyUnitInObjectRangeCheck with IsWithinDistInMap adding both combat reaches (Object.cpp _IsWithinDist): the dummy entry 36 reads 1.275 yd (run 20261112-053731, class file 504734 note), so the edge between two dummies is 10 + 1.275 + 1.275 = 12.55 yd. Dummies stand on the +X axis of the caster (CoAGameplayTest.cpp:3492): the target at 3 yd, area1 at 15 yd (12 yd from the target, inside 12.55 and outside the edge of a 9 yd radius, 11.55), area2 at 16 yd (13 yd, outside 12.55 and inside the edge of an 11 yd radius, 13.55). area1 reads the quarter of the 136 hit (34, as unleash_quarter on the target); radius_out reads 0 on area2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "Radius 570147 Effect[0] RadiusIndex 13 = 10 yd ($570147a1). The unleash searches Nearby(target, Radius(570147)) (AscensionSunCleric.cpp:137-148), AnyUnitInObjectRangeCheck with IsWithinDistInMap adding both combat reaches (Object.cpp _IsWithinDist): the dummy entry 36 reads 1.275 yd (run 20261112-053731, class file 504734 note), so the edge between two dummies is 10 + 1.275 + 1.275 = 12.55 yd. Dummies stand on the +X axis of the caster (CoAGameplayTest.cpp:3492): the target at 3 yd, area1 at 15 yd (12 yd from the target, inside 12.55 and outside the edge of a 9 yd radius, 11.55), area2 at 16 yd (13 yd, outside 12.55 and inside the edge of an 11 yd radius, 13.55). area1 reads the quarter of the 136 hit (34, as unleash_quarter on the target); radius_out reads 0 on area2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). Fixture 823764 \"beeg spellpen\" is Effect[0] aura 123 -9999 on mask 126 plus Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 mask word 2 0x20000000, which matches neither 807175 (0x40000000) nor 570147 (0x2000), so it does not touch the measured hits. "
     },
     {
       "spell": 680624,
@@ -30439,7 +30478,7 @@
         15.0,
         16.0
       ],
-      "observe_source": "Radius 570147 Effect[0] RadiusIndex 13 = 10 yd ($570147a1). The unleash searches Nearby(target, Radius(570147)) (AscensionSunCleric.cpp:137-148), AnyUnitInObjectRangeCheck with IsWithinDistInMap adding both combat reaches (Object.cpp _IsWithinDist): the dummy entry 36 reads 1.275 yd (run 20261112-053731, class file 504734 note), so the edge between two dummies is 10 + 1.275 + 1.275 = 12.55 yd. Dummies stand on the +X axis of the caster (CoAGameplayTest.cpp:3492): the target at 3 yd, area1 at 15 yd (12 yd from the target, inside 12.55 and outside the edge of a 9 yd radius, 11.55), area2 at 16 yd (13 yd, outside 12.55 and inside the edge of an 11 yd radius, 13.55). area1 reads the quarter of the 136 hit (34, as unleash_quarter on the target); radius_out reads 0 on area2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "Radius 570147 Effect[0] RadiusIndex 13 = 10 yd ($570147a1). The unleash searches Nearby(target, Radius(570147)) (AscensionSunCleric.cpp:137-148), AnyUnitInObjectRangeCheck with IsWithinDistInMap adding both combat reaches (Object.cpp _IsWithinDist): the dummy entry 36 reads 1.275 yd (run 20261112-053731, class file 504734 note), so the edge between two dummies is 10 + 1.275 + 1.275 = 12.55 yd. Dummies stand on the +X axis of the caster (CoAGameplayTest.cpp:3492): the target at 3 yd, area1 at 15 yd (12 yd from the target, inside 12.55 and outside the edge of a 9 yd radius, 11.55), area2 at 16 yd (13 yd, outside 12.55 and inside the edge of an 11 yd radius, 13.55). area1 reads the quarter of the 136 hit (34, as unleash_quarter on the target); radius_out reads 0 on area2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). Fixture 823764 \"beeg spellpen\" is Effect[0] aura 123 -9999 on mask 126 plus Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 mask word 2 0x20000000, which matches neither 807175 (0x40000000) nor 570147 (0x2000), so it does not touch the measured hits. "
     },
     {
       "spell": 704910,
@@ -30449,7 +30488,7 @@
       "name": "Sun Worship (a heal carries 15% of Intellect as healing power)",
       "quote": "Increases your healing power by $s1% of your Intellect",
       "gate_spell": 704910,
-      "trigger_spell": 806479,
+      "trigger_spell": 500143,
       "target": "caster",
       "cast_in_before": false,
       "cast_power": 1363,
@@ -30480,15 +30519,15 @@
       ],
       "metric": "spell_heal_total",
       "fields": {
-        "spell": 806479,
+        "spell": 500143,
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 4373.6,
+      "expected": 305,
       "tolerance": 2,
-      "wait_ms": 1500,
+      "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "Solar Prayer 806479 heals 0.8 x (25% of the maximum health 20000 + 150 + healing power x 1) (the heal_sp entry, known aura 887015 -20%). 704910 Effect[0] aura 175 MOD_SPELL_HEALING_OF_STAT_PERCENT, MiscValue 126, MiscValueB 3 (Intellect), BasePoints 14 + 1 = 15 ($s1). Intellect is raised by the fixture 48100 (Effect[0] aura 29 MOD_STAT Intellect, amount set to 2000 on top of the reference 119 = 2119, a precondition fixture, not the subject) in both entries; 984954 keeps the heal from crit. With the passive learned for real the heal is 0.8 x (5000 + 150 + 15% of 2119 = 317) = 4373.6; heal_power_control (an unrelated passive learned in place) reads 4120 in the same pair. A 10% error of the term (16.5%) gives 4399, outside the tolerance of 2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 704910: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "Illumination 500143 heals (base + 1.05 x healing power) x 0.8: Effect[0] SPELL_EFFECT_HEAL BasePoints 38, DieSides 3, RealPointsPerLevel 3.264, MaxLevel 4, BaseLevel and SpellLevel 1, so the level term is int32(3 x 3.264) = 9 (SpellInfo.cpp:486-498) and the base is 38 + 9 + 1..3 = 48..50; the coefficient row of 500143 effect 0 has healing 1.05 (AscensionSunClericData.h:8, tooltip ${$m1+0+$bh*1.05}), added to the effect value by sun_cleric_scaling (AscensionSunClericContracts.cpp:304-306) from SpellBaseHealingBonusDone; the class tuning 887015 healing done is -20% at level 60 (the 704936 shield_base arithmetic). Solar Prayer 806479 was the carrier of the first design and reads 4120 = control: its coefficient row has sp 1.0 and healing 0, so it never reads healing power. 704910 Effect[0] aura 175 MOD_SPELL_HEALING_OF_STAT_PERCENT, MiscValueB 3 (Intellect), BasePoints 14 + 1 = 15: Unit.cpp:11112-11119 adds int32(15% of Intellect) to the healing bonus. Intellect is 119 + 2000 = 2119 with the fixture 48100 (Effect[0] aura 29, amount set to 2000, a precondition fixture, not the subject) in both entries, so the healing power is int32(317.85) = 317. Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). With the passive learned for real the heal is (48..50 + 1.05 x 317 = 380.85..382.85) x 0.8 = 304.68..306.28, int 304..306: expected 305, tolerance 2. A 10% error of the passive (13.5% or 16.5%) moves the term by 26.6 and the heal to 278 or 332, outside the tolerance. Control: heal_power_control, an unrelated passive (Solar Conduit 300321) learned in place, reads 38..40 in the same pair. Reference search 2026-11-22 (round 11 chunk d5 fix round): coa-history spell 704910: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
     },
     {
       "spell": 704910,
@@ -30498,7 +30537,7 @@
       "name": "Sun Worship (control: the same heal without the passive)",
       "quote": "Increases your healing power by $s1% of your Intellect",
       "gate_spell": 300321,
-      "trigger_spell": 806479,
+      "trigger_spell": 500143,
       "target": "caster",
       "cast_in_before": false,
       "cast_power": 1363,
@@ -30529,15 +30568,15 @@
       ],
       "metric": "spell_heal_total",
       "fields": {
-        "spell": 806479,
+        "spell": 500143,
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 4120,
-      "tolerance": 2,
-      "wait_ms": 1500,
+      "expected": 39,
+      "tolerance": 1.5,
+      "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "Solar Prayer 806479 heals 0.8 x (25% of the maximum health 20000 + 150 + healing power x 1) (the heal_sp entry, known aura 887015 -20%). 704910 Effect[0] aura 175 MOD_SPELL_HEALING_OF_STAT_PERCENT, MiscValue 126, MiscValueB 3 (Intellect), BasePoints 14 + 1 = 15 ($s1). Intellect is raised by the fixture 48100 (Effect[0] aura 29 MOD_STAT Intellect, amount set to 2000 on top of the reference 119 = 2119, a precondition fixture, not the subject) in both entries; 984954 keeps the heal from crit. With the passive learned for real the heal is 0.8 x (5000 + 150 + 15% of 2119 = 317) = 4373.6; heal_power_control (an unrelated passive learned in place) reads 4120 in the same pair. A 10% error of the term (16.5%) gives 4399, outside the tolerance of 2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 704910: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+      "observe_source": "Illumination 500143 heals (base + 1.05 x healing power) x 0.8: Effect[0] SPELL_EFFECT_HEAL BasePoints 38, DieSides 3, RealPointsPerLevel 3.264, MaxLevel 4, BaseLevel and SpellLevel 1, so the level term is int32(3 x 3.264) = 9 (SpellInfo.cpp:486-498) and the base is 38 + 9 + 1..3 = 48..50; the coefficient row of 500143 effect 0 has healing 1.05 (AscensionSunClericData.h:8, tooltip ${$m1+0+$bh*1.05}), added to the effect value by sun_cleric_scaling (AscensionSunClericContracts.cpp:304-306) from SpellBaseHealingBonusDone; the class tuning 887015 healing done is -20% at level 60 (the 704936 shield_base arithmetic). Solar Prayer 806479 was the carrier of the first design and reads 4120 = control: its coefficient row has sp 1.0 and healing 0, so it never reads healing power. 704910 Effect[0] aura 175 MOD_SPELL_HEALING_OF_STAT_PERCENT, MiscValueB 3 (Intellect), BasePoints 14 + 1 = 15: Unit.cpp:11112-11119 adds int32(15% of Intellect) to the healing bonus. Intellect is 119 + 2000 = 2119 with the fixture 48100 (Effect[0] aura 29, amount set to 2000, a precondition fixture, not the subject) in both entries, so the healing power is int32(317.85) = 317. Fixture 984954 \"Reg's Test Aura\" has two effects: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crit, the subject of its use here) and Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101 (weapon crit only, no effect on a Holy or Fire spell hit or heal). Without the passive the healing power is 0 and the heal is 0.8 x (48..50) = 38.4..40, int 38..40: expected 39, tolerance 1.5. Reference search 2026-11-22 (round 11 chunk d5 fix round): coa-history spell 704910: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
     },
     {
       "spell": 804625,
@@ -30555,8 +30594,8 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 2,
-      "wait_ms": 1025,
+      "expected": 3,
+      "wait_ms": 1527,
       "setup_casts": [
         804584
       ],
@@ -30570,19 +30609,19 @@
           "caster"
         ]
       ],
-      "observe_source": "Radiant Flame 806060 triggers its tick 807058 every EffectAmplitude 1000 ms; Scorch Marks 807059 Effect[1] SPELLMOD_ACTIVATION_TIME -51 (-50%, $s2) makes it 500 ms (the scorch_period readback). Dawn 804584 is the setup cast (Solar Power 500149 at 20 stacks, precondition fixture), Radiant Flame is the trigger and the damage events of 807058 on the dummy are counted 1010..1040 ms of game time after it (2 at a 500 ms period, ticks at 500 and 1000; a period 10% longer, 550, has ticked once) and again 1370..1410 ms after it (still 2: a period 10% shorter, 450, would have ticked a third time at 1350). The stamp precedes the aura by an unmeasured step latency: a first run read the third tick at a stamp of 1468 ms, so the windows were moved earlier and stay below the third tick of 500 ms (1500) for a latency under 90 ms. Control: scorch_ticks_control, the same cast with the unrelated passive Solar Conduit 300321 in place, counts 1 at 1070 ms (period 1000). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
-      "expiry_wait_ms": 365,
-      "after_expiry_expected": 2,
+      "observe_source": "Tick model from the data (review I-3): Radiant Flame 806060 is channeled (AttributesEx 0x4), so Spell.cpp:4108 applies its aura at the cast without a missile delay (the scorch_duration entry reads 1700 ms remaining 300 ms after the cast of a 2000 ms aura, which shows no start delay). AttributesEx5 8704 = 0x2000 | 0x200: with SPELL_ATTR5_EXTRA_INITIAL_PERIOD the first amplitude is not added (SpellAuraEffects.cpp:758-763), so the first tick fires on apply, then every period P: the scorch_period readback gives 500, SPELLMOD_ACTIVATION_TIME -51 on EffectAmplitude 1000, times the cast speed factor. Each tick casts 807058 (Speed 45, not channeled), whose hit lands floor(max(distance, 5) / 45 x 1000) = 111 ms later (Spell.cpp:2468-2476, dummy at 3 yd). The damage events of 807058 on the dummy therefore land at d + 111 + k x P ms after the cast, d the unmeasured offset between the stamp origin and the channel start, 0 to about 50 ms (the stamps sit 9 to 18 ms after the requested waits in the earlier counted pairs). Landings: P = 450: 111, 561, 1011, 1461, 1911; P = 500: 111, 611, 1111, 1611, 2111; P = 550: 111, 661, 1211, 1761. Reads: 1511..1561 ms after the cast the count is 3 at P = 500 (1611 not yet) and 4 at P = 450 (1461 landed); 1661..1711 ms the count is 4 at P = 500 (1611 landed) and 3 at P = 550 (1761 not yet). Expected 3 then 4: P 10% shorter (450) fails the first read, P 10% longer (550) fails the second, each with a margin of at least 50 ms for d between 0 and 50 ms. The aura lasts 2000 ms with Scorch Marks (scorch_duration), so ticks at 0, 500, 1000 and 1500 ms exist. Control: scorch_ticks_control, the same cast with the unrelated passive Solar Conduit 300321 in place (P = 1000, landings 111, 1111, 2111), counts 2 at both reads. Dawn 804584 is the setup cast (Solar Power 500149 at 20 stacks, precondition fixture). Reference search 2026-11-22 (round 11 chunk d5 fix round): coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
+      "expiry_wait_ms": 141,
+      "after_expiry_expected": 4,
       "gate_timing": "start",
       "trigger_only_after": true,
       "game_time": {
         "after": [
-          1010,
-          1040
+          1511,
+          1561
         ],
         "expired": [
-          1370,
-          1410
+          1661,
+          1711
         ]
       }
     },
@@ -30602,8 +30641,8 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 1025,
+      "expected": 2,
+      "wait_ms": 1527,
       "setup_casts": [
         804584
       ],
@@ -30617,10 +30656,22 @@
           "caster"
         ]
       ],
-      "observe_source": "Radiant Flame 806060 triggers its tick 807058 every EffectAmplitude 1000 ms; Scorch Marks 807059 Effect[1] SPELLMOD_ACTIVATION_TIME -51 (-50%, $s2) makes it 500 ms (the scorch_period readback). Dawn 804584 is the setup cast (Solar Power 500149 at 20 stacks, precondition fixture), Radiant Flame is the trigger and the damage events of 807058 on the dummy are counted 1050..1090 ms of game time after it (2 at a 500 ms period, ticks at 500 and 1000; a period 10% longer, 550, has ticked once) and again 1450..1490 ms after it (still 2: a period 10% shorter, 450, would have ticked a third time at 1350). Control: scorch_ticks_control, the same cast with the unrelated passive Solar Conduit 300321 in place, counts 1 at 1070 ms (period 1000). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
+      "observe_source": "Tick model from the data (review I-3): Radiant Flame 806060 is channeled (AttributesEx 0x4), so Spell.cpp:4108 applies its aura at the cast without a missile delay (the scorch_duration entry reads 1700 ms remaining 300 ms after the cast of a 2000 ms aura, which shows no start delay). AttributesEx5 8704 = 0x2000 | 0x200: with SPELL_ATTR5_EXTRA_INITIAL_PERIOD the first amplitude is not added (SpellAuraEffects.cpp:758-763), so the first tick fires on apply, then every period P: the scorch_period readback gives 500, SPELLMOD_ACTIVATION_TIME -51 on EffectAmplitude 1000, times the cast speed factor. Each tick casts 807058 (Speed 45, not channeled), whose hit lands floor(max(distance, 5) / 45 x 1000) = 111 ms later (Spell.cpp:2468-2476, dummy at 3 yd). The damage events of 807058 on the dummy therefore land at d + 111 + k x P ms after the cast, d the unmeasured offset between the stamp origin and the channel start, 0 to about 50 ms (the stamps sit 9 to 18 ms after the requested waits in the earlier counted pairs). Landings: P = 450: 111, 561, 1011, 1461, 1911; P = 500: 111, 611, 1111, 1611, 2111; P = 550: 111, 661, 1211, 1761. Control of scorch_ticks: Radiant Flame cast at the dummy with the unrelated passive Solar Conduit 300321 in place, so no Scorch Marks and P = 1000 (landings 111, 1111, 2111): the count is 2 at 1511..1561 ms and still 2 at 1661..1711 ms, where scorch_ticks reads 3 and 4. Reference search 2026-11-22 (round 11 chunk d5 fix round): coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
       "gate_timing": "start",
       "trigger_only_after": true,
-      "gate_spell": 300321
+      "gate_spell": 300321,
+      "expiry_wait_ms": 141,
+      "after_expiry_expected": 2,
+      "game_time": {
+        "after": [
+          1511,
+          1561
+        ],
+        "expired": [
+          1661,
+          1711
+        ]
+      }
     }
   ],
   "player_observations": [],

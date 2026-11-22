@@ -430,11 +430,12 @@
         "claim": "When you critically heal your target",
         "labels": [
           "300339 behaviour_metric_delta noncrit_heal_return",
-          "300339 behaviour_metric_delta noncrit_heal_landed"
+          "300339 behaviour_metric_delta noncrit_heal_landed",
+          "300339 behaviour_metric_delta noncrit_strike_landed"
         ]
       }
     ],
-    "reason": "Held open by review I-1: no arm shows that a non-critical heal returns nothing. A critical-only gate (AscensionSunClericEvents.cpp:140) cannot be separated from a server that returns 30% of every heal without a heal that is certainly not critical, and the harness has none: a negative spell_crit_rating clamps at 0 in Player::UpdateRating (PlayerUpdates.cpp:671-672), so the intellect crit stays. Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage); the 'critically' part has no label. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    "reason": "Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage). The \"critically\" part: noncrit_heal_return reads 0 returns for a heal that is certainly not critical (fixture 984954, Effect[1] aura 57 spell crit -1000), against 1 in crit_heal_return, with noncrit_heal_landed (the Illumination heal landed) and noncrit_strike_landed (the 47632 strike landed in the same scenario) so a missed heal or strike cannot pass it. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300339,
