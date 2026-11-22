@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Unlearning Night Hunter's Howl removes its book-only ranks too (#13141)",
+  "contract": [
+    "Night Hunter's Howl 500124 comes from talent entry 9705 (CharacterAdvancement.dbc). Its ranks 2-5",
+    "(501680-501683) have spell_ranks rows, so Player::removeSpell's chain walk removes them with the talent.",
+    "Ranks 6-8 (501684-501686) are sold only through the Books of Ascension upgrade rows in",
+    "modules/mod-spellbook/src/SpellbookRankData.h, which require rank 4 (501682) and have no spell_ranks",
+    "rows, so unlearning the talent left them on the character (#13141: 'removes ranks 1-4 but not 5-6').",
+    "Expected: unlearning the talent removes rank 6 with rank 4. Picking the talent again gives the chain",
+    "ranks back as before, and summoning the Book of Ascension gives rank 6 back for free. Before the fix",
+    "rank 6 stayed known (1) after the talent was unlearned.",
+    "Entry 9705 sits in the Eternal tab (53, specialization 99) behind 8 invested Talent Essence, so the",
+    "character first spends 8 points on ungated one-point talents of that tab."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bm", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "label": "Enter Eternal, the tree that holds the talent", "actor": "bm", "id": 99 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "advancement_rank", "label": "SETUP: invest Talent Essence in Eternal", "actor": "bm", "entry": 13684, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 29541, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 30191, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 30194, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 30198, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 33682, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 33683, "rank": 1 },
+    { "action": "advancement_rank", "actor": "bm", "entry": 33684, "rank": 1 },
+    { "action": "advancement_rank", "label": "Pick Night Hunter's Howl", "actor": "bm", "entry": 9705, "rank": 1 },
+    { "action": "assert", "label": "SETUP: the talent teaches rank 1", "actor": "bm", "metric": "knows_spell", "spell": 500124, "equals": 1, "within_ms": 2000 },
+    { "action": "learn", "label": "Buy rank 2", "actor": "bm", "spell": 501680 },
+    { "action": "learn", "label": "Buy rank 3", "actor": "bm", "spell": 501681 },
+    { "action": "learn", "label": "Buy rank 4", "actor": "bm", "spell": 501682 },
+    { "action": "learn", "label": "Buy rank 6", "actor": "bm", "spell": 501684 },
+    { "action": "assert", "label": "SETUP: rank 6 is known", "actor": "bm", "metric": "knows_spell", "spell": 501684, "equals": 1 },
+    { "action": "set_money", "label": "Fund the native removal price", "actor": "bm", "value": 1000000 },
+    { "action": "advancement_rank", "label": "Unlearn Night Hunter's Howl in the talent window", "actor": "bm", "entry": 9705, "rank": 0 },
+    { "action": "assert", "label": "CONTROL: unlearning the talent removes rank 1", "actor": "bm", "metric": "knows_spell", "spell": 500124, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the chain walk removes rank 4", "actor": "bm", "metric": "knows_spell", "spell": 501682, "equals": 0 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 6 is removed with rank 4",
+      "actor": "bm",
+      "metric": "knows_spell",
+      "spell": 501684,
+      "equals": 0
+    },
+    { "action": "snapshot", "actor": "bm", "metric": "carried_money", "save_as": "money_before_repick" },
+    { "action": "advancement_rank", "label": "Pick Night Hunter's Howl again", "actor": "bm", "entry": 9705, "rank": 1 },
+    { "action": "assert", "label": "Picking the talent again gives rank 4 back", "actor": "bm", "metric": "knows_spell", "spell": 501682, "equals": 1, "within_ms": 2000 },
+    { "action": "learn", "label": "Learn the book companion spell", "actor": "bm", "spell": 97930 },
+    { "action": "cast", "label": "Summon the Book of Ascension", "actor": "bm", "spell": 97930 },
+    {
+      "action": "assert", "label": "SETUP: the book is out", "actor": "bm", "metric": "owned_creature_count",
+      "entry": 75115, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The book gives the remembered rank 6 back", "actor": "bm", "metric": "knows_spell",
+      "spell": 501684, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Getting rank 6 back costs no gold", "actor": "bm", "metric": "carried_money",
+      "relative_to": "money_before_repick", "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Fleshweaver trainers do not list Blood Curse while Sanguine Essence replaces it (#11913, #12420, #12663)",
+  "contract": [
+    "AscensionCompatData::TalentReplacements carries {20, 25, 505188, 562720, {{680692}}}: in Fleshweaver",
+    "specialization 25 the talent 505188 replaces Blood Curse 562720 with Sanguine Essence 680692 through",
+    "Player::SetTemporarySpellReplacement, which sends SMSG_SUPERCEDED_SPELL so the client's spellbook drops",
+    "562720 while the server still holds it. Choosing Fleshweaver grants 505188 with the specialization. The",
+    "Book of Ascension and the Bloodmage class trainer (trainer 900020, Whisp the Silent 50292) kept the row as",
+    "Known (state 2), and the client, judging the row from its own spellbook, drew Blood Curse as learnable:",
+    "Train did nothing and the row took the selection after every purchase. Expected: while the talent",
+    "replaces Blood Curse, neither window lists 562720 at all, and a purchase request for it is still answered",
+    "with a refusal. Before the fix both windows read state 2.",
+    "Control: with Blood Curse held and no specialization chosen, nothing replaces it and both windows list it",
+    "as Known (state 2), so the later absence comes from the replacement, not from the row source."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bm", "race": 1, "class": 20, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "book", "owner": "bm", "entry": 75118, "distance": 2, "faction": 35 },
+    { "id": "whisp", "owner": "bm", "entry": 50292, "distance": 3, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the spawn and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Blood Curse before any specialization", "actor": "bm", "spell": 562720 },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a specialization nothing replaces Blood Curse",
+      "actor": "bm",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 562720
+    },
+    { "action": "gossip_hello", "label": "CONTROL: open the Book of Ascension before the talent", "actor": "bm", "target": "book" },
+    { "action": "assert", "label": "SETUP: the first book window opened", "actor": "bm", "metric": "trainer_list_packets", "equals": 1, "within_ms": 2000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the talent the book lists Blood Curse as known",
+      "actor": "bm",
+      "metric": "trainer_window_state",
+      "spell": 562720,
+      "equals": 2
+    },
+    { "action": "gossip_hello", "label": "CONTROL: talk to the Bloodmage trainer before the talent", "actor": "bm", "target": "whisp" },
+    { "action": "gossip_select", "label": "Ask for training", "actor": "bm", "option": 0 },
+    { "action": "assert", "label": "SETUP: the first trainer window opened", "actor": "bm", "metric": "trainer_list_packets", "equals": 2, "within_ms": 2000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the talent the class trainer lists Blood Curse as known",
+      "actor": "bm",
+      "metric": "trainer_window_state",
+      "spell": 562720,
+      "equals": 2
+    },
+    { "action": "specialization", "label": "Choose Fleshweaver", "actor": "bm", "id": 25 },
+    {
+      "action": "assert",
+      "label": "SETUP: Fleshweaver grants Sanguine Essence",
+      "actor": "bm",
+      "metric": "knows_spell",
+      "spell": 505188,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sanguine Essence stands in for Blood Curse",
+      "actor": "bm",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 680692,
+      "within_ms": 3000
+    },
+    { "action": "assert", "label": "SETUP: the server still holds Blood Curse", "actor": "bm", "metric": "knows_spell", "spell": 562720, "equals": 1 },
+    { "action": "gossip_hello", "label": "Open the Book of Ascension", "actor": "bm", "target": "book" },
+    { "action": "assert", "label": "SETUP: the book window opened", "actor": "bm", "metric": "trainer_list_packets", "equals": 3, "within_ms": 2000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the book does not list Blood Curse",
+      "actor": "bm",
+      "metric": "trainer_window_state",
+      "spell": 562720,
+      "equals": -1
+    },
+    { "action": "trainer_buy", "label": "Try to buy Blood Curse from the book", "actor": "bm", "spell": 562720, "target": "book" },
+    {
+      "action": "assert",
+      "label": "The book answers the request with a refusal",
+      "actor": "bm",
+      "metric": "spellbook_buy_failed",
+      "spell": 562720,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "gossip_hello", "label": "Talk to the Bloodmage trainer", "actor": "bm", "target": "whisp" },
+    { "action": "gossip_select", "label": "Ask for training", "actor": "bm", "option": 0 },
+    { "action": "assert", "label": "SETUP: the trainer window opened", "actor": "bm", "metric": "trainer_list_packets", "equals": 4, "within_ms": 2000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the class trainer does not list Blood Curse",
+      "actor": "bm",
+      "metric": "trainer_window_state",
+      "spell": 562720,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "The windows leave Sanguine Essence in place",
+      "actor": "bm",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 680692
+    }
+  ]
+}
