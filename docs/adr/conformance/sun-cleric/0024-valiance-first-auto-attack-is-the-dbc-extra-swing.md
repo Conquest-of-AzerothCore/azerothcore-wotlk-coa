@@ -38,8 +38,10 @@ procing again.
 ## Consequences
 
 - The extra attack is a white swing: it can glance, takes the swing table and procs auto-attack effects, as in the log.
-- The marker lasts 600000 ms or until the target dies, not until the caster leaves combat. Any Sun Cleric's marker on a
-  target blocks every Valiance on it (`HasAura` without a caster check): a rule of the DBC data, not measured here.
+- The marker lasts 600000 ms or until the target dies, not until the caster leaves combat. A target marked by one Sun
+  Cleric refuses another Sun Cleric's Valiance for 10 min: stock DBC `ExcludeTargetAuraSpell`, no caster check
+  (`SpellInfo.cpp:2158`, via `Spell.cpp:6046`). The live behaviour with two Valiance users is unknown (the only log has
+  one). Mentor decision D-131 keeps the stock rule; it is listed for the owner, who can overturn it.
 - Regression entries (`sun_cleric.json`, 680643): the extra-attack cast and the marker on the first auto, one cast over
   3 swing intervals, the cast in the first interval, no 506824 cast, each against a control without the talent.
 - Not measured, a tool gap in the ledger: a second target gets its own extra attack (autos are driven at the dummy
