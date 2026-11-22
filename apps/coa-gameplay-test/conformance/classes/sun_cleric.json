@@ -20817,6 +20817,52 @@
     {
       "spell": 680641,
       "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802561,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (the non-critical Gavel of Wrath landed)",
+      "variant": "stack_noncrit_landed",
+      "label_suffix": "stack_noncrit_landed",
+      "expected": 2,
+      "observe_source": "Landing read: the same fixtures, casts and waits as stack_noncrit, read as spell_damage_count of Gavel of Wrath 802561 on the dummy with critical false, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and did not crit in each phase, so the 0 read by stack_noncrit is judged on a landed non-critical hit. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ],
+      "tolerance": 0
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
       "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
       "trigger_spell": 800654,
       "gate_spell": 680641,
@@ -20849,6 +20895,45 @@
       "wait_ms": 1500,
       "expected": 0,
       "observe_source": "Dawnbreak 800654 cast at the dummy in front of the caster, the learned passive against a spell that cannot crit (fixture 984954 Effect[1] aura 57, -1000% spell crit; no forced crit rating). (the same fixture) the fixture 984954 (Reg's Test Aura, Effect[0] aura 52 MOD_CRIT_PERCENT, amount set to -1000 as a phase aura on the caster; Effect[1] aura 57 -1000% spell crit), with no forced crit rating, so the passive learned in the after phase meets a hit that cannot crit; the fixture is a precondition, never the subject of the claim. Expected 0 stacks: the proc needs a critical damaging Gavel or Dawnbreak (AscensionSunClericEvents.cpp:125). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800654,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800654,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 1,
+      "expire_ms": 500,
+      "name": "Sun Strider (the non-critical Dawnbreak landed)",
+      "variant": "stack_dawnbreak_noncrit_landed",
+      "label_suffix": "stack_dawnbreak_noncrit_landed",
+      "wait_ms": 1500,
+      "expected": 2,
+      "observe_source": "Landing read: the same fixtures, casts and waits as stack_dawnbreak_noncrit, read as spell_damage_count of Dawnbreak 800654 on the dummy with critical false, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and did not crit in each phase, so the 0 read by stack_dawnbreak_noncrit is judged on a landed non-critical hit. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "tolerance": 0
     },
     {
       "spell": 680641,
@@ -20908,6 +20993,101 @@
       "tolerance": 0.05,
       "wait_ms": 2100,
       "observe_source": "Condition-off arm of consume_block_crit: the Gavel cannot crit (fixture 984954, Effect[0] amount -1000 as a phase aura), so no 680642 stack exists and the Illumination consumes nothing; the critical block chance stays 0 after the learn. The same read and the same 524859 Effect[1] BasePoints 9 + 1 = 10 as consume_block_crit (CoAGameplayTest.cpp:5139-5140, Unit.cpp:3719-3723). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "name": "Sun Strider (the Illumination landed)",
+      "variant": "consume_block_crit_nostack_heal_landed",
+      "label_suffix": "consume_block_crit_nostack_heal_landed",
+      "metric": "spell_heal_count",
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 2100,
+      "observe_source": "Landing read: the same fixtures, casts and waits as consume_block_crit_nostack, read as spell_heal_count of Illumination 500143 on the caster, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and landed, so the 0 read by consume_block_crit_nostack is judged on a landed landed Illumination. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 802561,
+        "target": "dummy",
+        "critical": false
+      },
+      "name": "Sun Strider (the non-critical Gavel before the Illumination landed)",
+      "variant": "consume_block_crit_nostack_gavel_landed",
+      "label_suffix": "consume_block_crit_nostack_gavel_landed",
+      "metric": "spell_damage_count",
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 2100,
+      "observe_source": "Landing read: the same fixtures, casts and waits as consume_block_crit_nostack, read as spell_damage_count of Gavel of Wrath 802561 on the dummy with critical false, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and did not crit in each phase, so the 0 read by consume_block_crit_nostack is judged on a landed non-critical hit. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "phase_auras": [
         [
           984954,
