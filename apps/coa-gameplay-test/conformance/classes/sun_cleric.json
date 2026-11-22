@@ -16457,14 +16457,15 @@
       },
       "before_expected": 8,
       "expected": 1,
-      "wait_ms": 500,
+      "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Pendant 680630 then refreshes all charges to ProcCharges 10 (AscensionSunClericAbilities.cpp:525-531) and nine more heals spend 9: 10 - 9 = 1 charge. Dawn 807440 is a harness phase_auras fixture (the condition Pendant needs, not the subject).",
+      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Pendant 680630 then refreshes all charges to ProcCharges 10 (AscensionSunClericAbilities.cpp:525-531) and nine more heals spend 9: 10 - 9 = 1 charge. Dawn 807440 is a harness phase_auras fixture (the condition Pendant needs, not the subject). Design 3: Illumination 500143 has a 2000 ms cast time (SpellCastTimes 5), so a heal every 1600 ms (first pair d1: 9 casts spent 5 charges, 6 casts spent 3, the alternate casts refused while the previous one was still casting) is refused every other time; the casts are now 2200 ms apart and the charges are read 2600 ms after the last cast, once it has landed.",
       "setup_in_before": true,
       "post_trigger_casts": {
         "spell": 500143,
         "count": 9,
-        "health_pct": 50
+        "health_pct": 50,
+        "gap_ms": 2200
       }
     },
     {
@@ -16517,14 +16518,15 @@
       },
       "before_expected": 8,
       "expected": 0,
-      "wait_ms": 500,
+      "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Control: an Illumination in place of Pendant, so no refresh: 2 + 1 + 8 = 11 heals against 10 charges, the aura is gone at the 10th (0 read).",
+      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Control: an Illumination in place of Pendant, so no refresh: 2 + 1 + 8 = 11 heals against 10 charges, the aura is gone at the 10th (0 read). Design 3: Illumination 500143 has a 2000 ms cast time (SpellCastTimes 5), so a heal every 1600 ms (first pair d1: 9 casts spent 5 charges, 6 casts spent 3, the alternate casts refused while the previous one was still casting) is refused every other time; the casts are now 2200 ms apart and the charges are read 2600 ms after the last cast, once it has landed.",
       "setup_in_before": true,
       "post_trigger_casts": {
         "spell": 500143,
         "count": 8,
-        "health_pct": 50
+        "health_pct": 50,
+        "gap_ms": 2200
       }
     },
     {
@@ -16577,14 +16579,15 @@
       },
       "before_expected": 8,
       "expected": 2,
-      "wait_ms": 500,
+      "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Sizing arm: 2 + 1 + 5 = 8 heals without the refresh: 10 - 8 = 2 charges.",
+      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Sizing arm: 2 + 1 + 5 = 8 heals without the refresh: 10 - 8 = 2 charges. Design 3: Illumination 500143 has a 2000 ms cast time (SpellCastTimes 5), so a heal every 1600 ms (first pair d1: 9 casts spent 5 charges, 6 casts spent 3, the alternate casts refused while the previous one was still casting) is refused every other time; the casts are now 2200 ms apart and the charges are read 2600 ms after the last cast, once it has landed.",
       "setup_in_before": true,
       "post_trigger_casts": {
         "spell": 500143,
         "count": 5,
-        "health_pct": 50
+        "health_pct": 50,
+        "gap_ms": 2200
       }
     },
     {
