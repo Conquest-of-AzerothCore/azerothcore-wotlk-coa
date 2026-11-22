@@ -622,5 +622,137 @@ class AllyArmVerdictTests(unittest.TestCase):
                          (plain.status, plain.measured, plain.expected, plain.explanation))
 
 
+
+ATTACK = {'spell': ALLY_SPELL, 'power': 500, 'source': 'a seeded ally attack'}
+ATTACK_ARM = {'actors': ['ally'], 'metric': 'spell_damage_total', 'count_metric': 'spell_damage_count',
+              'fields': {'spell': ALLY_SPELL}, 'source': 'the ally\'s own seeded attack'}
+STRIKE = {'spell': 47632, 'health': 3800, 'max_health': 10000, 'count': 2, 'wait_ms': 300, 'after_trigger_ms': 1600}
+
+
+def attack_entry(**changes) -> dict:
+    option = {'allies': 1, 'ally_attacks': [ATTACK], 'arms': [COPY_ARM, ATTACK_ARM],
+              'ratios': [{**RATIO, 'denominator': 1}], **changes}
+    return steed_entry(select_dummy=True, ally_arm=option)
+
+
+def strike_entry(**changes) -> dict:
+    return steed_entry(strike=STRIKE, cast_in_before=False,
+                       ally_arm={'allies': 2, 'ally_strikes': True, 'arms': [HEALTH_ARM], **changes})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AllyAttackAndStrikeTests(unittest.TestCase):
+    def steps(self, entry: dict):
+        scenario, [expectation] = behaviour_scenario(templar(), entry)
+        run.validate(scenario)
+        return scenario, expectation
+
+    def test_the_ally_learns_and_attacks_the_dummy_after_the_trigger_with_its_cast_asserted(self):
+        scenario, expectation = self.steps(attack_entry())
+        steps = scenario['steps']
+        attacks = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == 'ally']
+        self.assertEqual(len(attacks), 2)
+        self.assertTrue(all(steps[index]['target'] == 'dummy' for index in attacks))
+        self.assertLess(next(index for index, step in enumerate(steps) if step['action'] == 'learn'
+                             and step['actor'] == 'ally' and step['spell'] == ALLY_SPELL), attacks[0])
+        trigger = max(index for index, step in enumerate(steps) if step['action'] == 'cast'
+                      and step['actor'] == 'caster' and step['spell'] == SPELL)
+        labels = labels_of(scenario)
+        self.assertLess(trigger, attacks[1])
+        self.assertLess(attacks[1], labels.index(expectation.model['after_label']))
+        proofs = [step for step in steps if str(step.get('label', '')).endswith('went off')
+                  and 'ally attack' in step['label']]
+        self.assertEqual([(step['actor'], step['equals']) for step in proofs], [('ally', 1), ('ally', 2)])
+        self.assertEqual(steps[attacks[0] - 2], {'action': 'set_power', 'actor': 'ally', 'power': 0, 'value': 500})
+
+    def test_without_attacks_the_ally_reads_of_its_own_totals_stay_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(templar(), steed_entry(select_dummy=True, ally_arm={
+                'allies': 1, 'arms': [COPY_ARM, ATTACK_ARM], 'ratios': [{**RATIO, 'denominator': 1}]}))
+        other = {**ATTACK_ARM, 'fields': {'spell': SPELL}}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(templar(), attack_entry(arms=[COPY_ARM, other]))
+
+    def test_malformed_attacks_and_strikes_are_refused(self):
+        bad = [attack_entry(ally_attacks=[]), attack_entry(ally_attacks=[{**ATTACK, 'power': -1}]),
+               attack_entry(ally_attacks=[{'spell': ALLY_SPELL, 'source': 'x'}]),
+               attack_entry(control_wait=True), steed_entry(ally_arm={'allies': 1, 'ally_attacks': [ATTACK]}),
+               strike_entry(ally_strikes=False), steed_entry(ally_arm={'allies': 2, 'ally_strikes': True}),
+               steed_entry(strike={**STRIKE, 'dx': 2.0}, cast_in_before=False,
+                           ally_arm={'allies': 1, 'ally_strikes': True})]
+        for entry in bad:
+            with self.subTest(option=entry['ally_arm']):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(templar(), entry)
+
+    def test_each_ally_is_set_and_struck_after_the_caster_with_its_count_read_around(self):
+        scenario, expectation = self.steps(strike_entry())
+        steps = scenario['steps']
+        struck = [step['target'] for step in steps if step['action'] == 'cast' and step['actor'] == 'striker']
+        self.assertEqual(struck, ['ally'] * 2 + ['ally2'] * 2 + ['caster'] * 2 + ['caster'] * 2 + ['ally'] * 2
+                         + ['ally2'] * 2)
+        reads = expectation.model['ally_arm']['strike_reads']
+        self.assertEqual(len(reads), 4)
+        labels = labels_of(scenario)
+        for start, end, count in reads:
+            self.assertEqual(count, 2)
+            read = steps[labels.index(start)]
+            self.assertEqual((read['actor'], read['metric'], read['caster'], read['spell']),
+                             ('caster', 'spell_go_count', 'striker', 47632))
+            self.assertLess(labels.index(start), labels.index(end))
+
+    def test_ally_strike_health_sets_the_allies_only(self):
+        scenario, _ = self.steps(strike_entry(ally_strikes={'health': 9000}))
+        steps = scenario['steps']
+        values = {unit: [step['value'] for step in steps if step['action'] == 'set_health' and step['actor'] == unit]
+                  for unit in ('caster', 'ally', 'ally2')}
+        self.assertEqual(values['ally'], [9000, 9000])
+        self.assertEqual(values['ally2'], [9000, 9000])
+        self.assertEqual(set(values['caster']), {3800})
+        default, _ = self.steps(strike_entry())
+        self.assertEqual({step['value'] for step in default['steps'] if step['action'] == 'set_health'
+                          and step['actor'] == 'ally'} & {3800}, {3800})
+
+    def test_malformed_ally_strike_health_is_refused(self):
+        for bad in ({'health': 0}, {'health': 9.5}, {'health': 20000}, {'hp': 5}, {}):
+            with self.subTest(option=bad):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(templar(), strike_entry(ally_strikes=bad))
+
+    def judged(self, entry: dict, grow=2):
+        _, [expectation] = behaviour_scenario(templar(), entry)
+        values = {expectation.model['before_label']: 1.0, expectation.model['after_label']: 2.0}
+        for arm in expectation.model['ally_arm']['arms']:
+            for moment in ('before', 'after'):
+                for label in arm[moment]:
+                    values[label] = 5000
+        for index, (start, end, _) in enumerate(expectation.model['ally_arm']['strike_reads']):
+            values[start] = 10 * index
+            values[end] = 10 * index + grow
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_landed_strikes_keep_the_verdict(self):
+        self.assertEqual(self.judged(strike_entry()).status, 'ok')
+
+    def test_mutant_a_strike_that_did_not_land_voids_the_trial(self):
+        verdict = self.judged(strike_entry(), grow=1)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('an ally strike did not land', verdict.explanation)
+
+    def test_mutant_an_attack_ratio_off_the_stated_share_alerts(self):
+        _, [expectation] = behaviour_scenario(templar(), attack_entry())
+        model = expectation.model['ally_arm']['arms']
+        values = {expectation.model['before_label']: 1.0, expectation.model['after_label']: 2.0}
+        for moment, copy, damage in (('before', 5000, 0), ('after', 5750, 1000)):
+            values[model[0][moment][0]] = copy
+            values[model[1][moment][0]] = damage
+            values[model[1][f'count_{moment}'][0]] = 0 if moment == 'before' else 1
+        ok = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(ok.status, 'ok')
+        values[model[0]['after'][0]] = 5500
+        off = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(off.status, 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

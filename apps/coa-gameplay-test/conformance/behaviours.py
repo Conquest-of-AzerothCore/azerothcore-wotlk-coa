@@ -6493,6 +6493,43 @@ class HitArm:
     target_health_pct: int | None = None
     aura_amounts: tuple[tuple[int, int, int], ...] = ()
     target_aura_amounts: tuple[tuple[int, int, int], ...] = ()
+    cast_routes: tuple[tuple[int, str, int | None], ...] = ()
+
+
+HIT_ARM_CAST_KEYS = {'spell', 'target', 'power'}
+
+
+def hit_arm_casts(raw: list) -> tuple[tuple[int, ...], tuple[tuple[int, str, int | None], ...]]:
+    if all(not isinstance(item, dict) for item in raw):
+        return tuple(int(spell) for spell in raw), ()
+    routes = []
+    for item in raw:
+        item = item if isinstance(item, dict) else {'spell': item}
+        unknown = set(item) - HIT_ARM_CAST_KEYS
+        power = item.get('power')
+        if unknown or 'spell' not in item or not isinstance(item.get('target', TARGET), str) or \
+                (power is not None and (type(power) is not int or power < 0)):
+            raise ValueError(f'a hit_ratio arm cast is a spell id or {{spell, target?, power?}} with a unit id target '
+                             f'and a power of at least 0, not {item!r}')
+        routes.append((int(item['spell']), item.get('target', TARGET), power))
+    return tuple(spell for spell, _, _ in routes), tuple(routes)
+
+
+def hit_arm_cast_steps(records: 'Records', arm: HitArm) -> list[dict]:
+    if not arm.cast_routes:
+        return [step for cast in arm.casts for step in hit_ratio_cast(records, cast)]
+    return [step for spell, target, power in arm.cast_routes
+            for step in hit_ratio_cast(records, spell, CASTER, target, power)]
+
+
+def hit_arm_route_contract(spec) -> str:
+    routed = {name: getattr(spec, name).cast_routes for name in HIT_RATIO_ARMS}
+    if not any(routed.values()):
+        return ''
+    text = '; '.join(f'{name} casts ' + ', '.join(
+        f'{spell} at {target}' + (f' with its power set to {power}' if power is not None else '')
+        for spell, target, power in routes) for name, routes in routed.items() if routes)
+    return f'; the arm casts are made by the caster at their stated targets ({text})'
 
 
 @dataclass(frozen=True)
@@ -6596,9 +6633,9 @@ def hit_arm(raw: dict) -> HitArm:
             len({spell for spell, _, _ in target_amounts}) != len(target_amounts):
         raise ValueError(f'hit_ratio arm target_aura_amounts {list(target_amounts)} set one effect 0-2 of distinct '
                          f'auras')
-    return HitArm(auras, tuple(int(spell) for spell in raw.get('casts', ())),
-                  tuple(int(spell) for spell in raw.get('learn', ())),
-                  None if health is None else int(health), amounts, target_amounts)
+    casts, routes = hit_arm_casts(list(raw.get('casts', ())))
+    return HitArm(auras, casts, tuple(int(spell) for spell in raw.get('learn', ())),
+                  None if health is None else int(health), amounts, target_amounts, routes)
 
 
 def hit_ratio_label(spell: int, suffix: str = '') -> str:
@@ -6693,8 +6730,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                 if spec.refresh:
                     steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                               for spell, stacks in arm.auras]
-                for cast in arm.casts:
-                    steps += hit_ratio_cast(records, cast)
+                steps += hit_arm_cast_steps(records, arm)
                 if spec.versus is not None:
                     steps += hit_ratio_versus.trial_steps(spec.versus, versus_prefix, name, trial)
                 steps += [{'action': 'attack', 'actor': CASTER, 'target': swing_target},
@@ -6728,8 +6764,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 1, 'target': spec.target,
                        'caster': CASTER, 'effect': effect, 'amount': amount}
                       for spell, effect, amount in arm.target_aura_amounts]
-            for cast in arm.casts:
-                steps += hit_ratio_cast(records, cast)
+            steps += hit_arm_cast_steps(records, arm)
             if arm.target_health_pct is not None:
                 steps += [{'action': 'set_health', 'actor': TARGET,
                            'value': arm.target_health_pct * DUMMY_HEALTH // 100},
@@ -6850,6 +6885,12 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.ally_distance is not None and (ALLY not in (spec.caster, spec.target) or spec.ally_distance < 0):
         raise ValueError(f'{spec.spell} hit_ratio groups the ally at {spec.ally_distance} yd, which needs the ally as '
                          f'its caster or target and a distance not below 0')
+    routed_units = {CASTER, TARGET} | ({ALLY} if ALLY in (spec.caster, spec.target) else set())
+    unrouted = sorted({target for name in HIT_RATIO_ARMS for _, target, _ in getattr(spec, name).cast_routes}
+                      - routed_units)
+    if unrouted:
+        raise ValueError(f'{spec.spell} hit_ratio arm casts target {unrouted}, not a unit of its scenario '
+                         f'{sorted(routed_units)}')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'hit_ratio', spec.quote, spec.expected)
     if spec.off_hand_item is not None:
@@ -6924,6 +6965,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     if distance != DUMMY_DISTANCE:
         scenario['contract'] += f'; the dummy stands {distance:g} yd from the caster'
+    scenario['contract'] += hit_arm_route_contract(spec)
     if spec.expected_token:
         delta = hit_ratio_level_value(records, class_file, spec)
         scenario['contract'] += (f'; the treatment arm\'s non-critical, non-glancing swings must exceed the control '
@@ -7099,6 +7141,8 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec,
     waits = {name: overrides.get(name, CritRateArm()).wait_ms for name in HIT_RATIO_ARMS}
     if spec.trials < 1 or (spec.control == spec.treatment and observed['control'] == observed['treatment']):
         raise ValueError(f'{spec.spell} crit_rate needs trials and two different arms')
+    if spec.control.cast_routes or spec.treatment.cast_routes:
+        raise ValueError(f'{spec.spell} crit_rate casts its arm spells at the dummy, with no stated cast target')
     if spec.force_crit is not None or spec.critical is not None or spec.cast_spell is not None or \
             spec.swing_hand is not None:
         raise ValueError(f'{spec.spell} crit_rate counts every landed hit of its own casts, with no forced crit, '

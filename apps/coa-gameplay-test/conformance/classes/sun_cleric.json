@@ -6958,97 +6958,6 @@
       "expected_source": "804629 Spears of Glory Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 15 ($h), EffectTriggerSpell 807299; 807299 Effect[0] aura 108 SPELLMOD CASTING_TIME -100% and Effect[1] aura 108 +25% (BasePoints 24 + 1, $s2) on class mask word 1 = 2 = Dawnsear's SpellFamilyFlags[1], DurationIndex 1 ($d = 10000 ms). The tooltip states +25% damage on the next Dawnsear: the whole non-critical hit of Dawnsear 554406 is expected at 1.25 times the control hit, spell power fixture 10000 so the coefficient and the base part are both present. Spears of Glory 807299 is set on the caster before every treatment cast as a named precondition fixture (harness set_aura): the subject of this entry is the aura's effect, its grant by the proc is the proc entry and the instant entry. Control: the same cast without 807299. 823764 removes the dummy's magic resistance as in the Grace entries. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Damage dealt by Radiant Flame now has an 15% chance to grant you Spears of Glory. Your next Dawnsear within 10 seconds is instant cast and deals 25% increased damage.' for 804629; ascension-data advancement.tsv lists Spears of Glory as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values."
     },
     {
-      "spell": 804632,
-      "name": "Flames of Absolution (radius edge around the struck target: 5 yd plus both object sizes, 10% bracket)",
-      "kind": "radius_edge",
-      "label_suffix": "flare_edge_target",
-      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
-      "gate_spell": 804632,
-      "cast_spell": 500154,
-      "hit_spell": 807175,
-      "power": 1363,
-      "radius": 5,
-      "dummy_reach": 1.275,
-      "center_reach": 1.275,
-      "margin_yd": 0.755,
-      "repeats": 3,
-      "settle_ms": 3000,
-      "reach_source": "the dummy entry 36 combat reach 1.275 yd (read 1.275 on every dummy in diagnostic run 20261122-081052; the judge reads each reach again and refuses a layout that does not bracket the edge). The centre is the struck target, as the tooltip says (\"of your target\"): the handler of case 804632 lists Nearby(target, Radius(573449)) (AscensionSunClericEvents.cpp:314, AscensionSunCleric.cpp:138-146), whose AnyUnitInObjectRangeCheck uses IsWithinDistInMap with both object sizes (GridNotifiers.h:1061-1070, Object.cpp:1257-1264, GetObjectSize = combat reach, Object.cpp:2898-2901), so the edge is 5 + 1.275 + 1.275 = 7.55 yd centre to centre; the rule is the accepted effective radius (class-conformance.md section 5, both object sizes for script checks, G-29). Margin 0.755 = 10% of 7.55: inside 6.795 yd, outside 8.305 yd from the primary, which stands 3 yd from the caster. The wait after each cast is 3000 ms: the flares travel (diagnostic runs 20261122-215449 to -215850: a flare reads 0 at 1000 ms when the caster-to-dummy path is long and 1 at 4000 ms). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found.",
-      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5, radius index 8 = 5 yd = $573449a1); the handler fires on damage by Horusath Blast 500154. Centre named by the tooltip: the target. Centre used by the code: the struck target. Bracket 10% either side of 5 + both sizes. Control: the first arm, without the passive, strikes neither dummy. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
-    },
-    {
-      "spell": 504580,
-      "name": "Shield Radiance (cone: a dummy 4.5 degrees inside the 90 degree edge is struck, one 4.5 degrees outside and one behind are not)",
-      "kind": "metric_delta",
-      "variant": "cone_edge",
-      "label_suffix": "cone_edge",
-      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
-      "trigger_spell": 504580,
-      "target": "dummy",
-      "cast_power": 1000,
-      "cast_in_before": false,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 504580,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "area_dummies": {
-        "cone": {
-          "angle": 90,
-          "radius": 12,
-          "source": "Spell::SelectImplicitConeTargets, Spell.cpp:1277-1279: 60 degrees unless spell_cone has a row; spell_cone 800654 ConeDegrees 90 covers every rank of Dawnbreak 504580 through GetFirstSpellInChain (data/sql/updates/pending_db_world/rev_20261027_02_dawnbreak_cone.sql); the arc test is Position::HasInArc, Position.cpp:148-179, half the angle either side of the facing; radius index 32 = 12 yd"
-        }
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "504580 Dawnbreak Effect[0] SCHOOL_DAMAGE, EffectImplicitTargetA 24 (TARGET_UNIT_CONE_ENEMY_24), radius index 32 = 12 yd, RangeIndex 2. The cone is 90 degrees (spell_cone 800654, Spell.cpp:1277-1279), so the edge lies 45 degrees either side of the caster's facing; HasInArc tests the centre bearing of the target (Position.cpp:148-179, no target radius is passed by isInFront, Object.cpp:1553-1556). The caster is moved off the dummy line by a relocate step (orientation unchanged and read) so three dummies on the line stand at 40.5 degrees (primary, struck), 49.5 degrees (area1, not struck: 10% of the half angle outside the edge) and 135 degrees (area2, behind the caster, not struck); every bearing is recomputed from the read positions and orientation and a dummy more than 1 degree off its plan, or a height more than 1 yd off the caster's, voids the trial. All three stand 4 to 11 yd from the caster, inside the 12 yd radius. Control: the first phase, without the spell learned, reads 0. Crit and resist fixtures 984954 and 823764 in both phases. Reference search 2026-11-22: coa-history spell 504580 Dawnbreak (angles cannot be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Radiate holy light from your shield on enemies in front of you\" (same text); nothing else found."
-    },
-    {
-      "spell": 504580,
-      "name": "Shield Radiance (no shield equipped: the cast is refused with the equipped item class failure)",
-      "kind": "metric_delta",
-      "variant": "no_shield",
-      "label_suffix": "no_shield",
-      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
-      "trigger_spell": 504580,
-      "target": "dummy",
-      "cast_power": 1000,
-      "learn": [
-        504580
-      ],
-      "cast_in_before": true,
-      "metric": "cast_failure",
-      "fields": {
-        "spell": 504580
-      },
-      "before_expected": 0,
-      "expected": 29,
-      "wait_ms": 2000,
-      "expire_ms": 500,
-      "without_item": {
-        "item": 2129,
-        "source": "504580 EquippedItemClass 4 with EquippedItemSubClassMask 64 (shield, server DBC set), refused through Spell::CheckItems HasItemFitToSpellRequirements, Spell.cpp:7539-7541, as SPELL_FAILED_EQUIPPED_ITEM_CLASS 29 (SharedDefines.h:1079)"
-      },
-      "observe_source": "504580 Dawnbreak requires an equipped shield: EquippedItemClass 4 (armor) with EquippedItemSubClassMask 64 (shield) and EquippedItemInventoryTypeMask 0 (server DBC set). The reference character carries shield 2129 in the off-hand (equip step, slot 16). Both phases cast 504580 at the dummy with the spell learned: the first with the shield, the control, reads cast_failure 0 (accepted); the first cast is read 2000 ms after it, past the 1500 ms global cooldown, then the cooldown of 504580 is reset (harness reset_cooldown step, so the first cast's own cooldown cannot answer first; either would refuse with 67), the shield is destroyed (harness destroy_item step on the equipped item) and the second cast reads 29, SPELL_FAILED_EQUIPPED_ITEM_CLASS (Spell.cpp:7539-7541). Reference search 2026-11-22: coa-history spell 504580 Dawnbreak (angles cannot be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Radiate holy light from your shield on enemies in front of you\" (same text); nothing else found."
-    },
-    {
       "spell": 704941,
       "kind": "metric_delta",
       "trigger_spell": 805301,
@@ -20054,41 +19963,6 @@
       "observe_source": "704941 Light of the Sun Effect[0] aura 42 PROC_TRIGGER_SPELL 707843; 707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), no charges. The scenario is the one of the aura_amount entry (a parried Speed Slash 2118233 in each phase, caster parry chance forced to 100% by harness set_combat_avoidance as a named precondition fixture of both phases, 704941 learned between the phases), but the read is the live unit value: PLAYER_PARRY_PERCENTAGE (CoAGameplayTest.cpp:5133), read 500 ms after the Holy Form 805301 cast and the strike: the gain of the learned phase over the phase without it (the control) is 30 points, within 0.01. Reference search 2026-11-22: coa-history spell 707843 Light of the Sun: 2 SPELL_AURA_APPLIED, 2 SPELL_AURA_REMOVED and 2 SPELL_HEAL (90 to 101) in 2 logs (the aura exists in real play, no parry chance in the events), 704941 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Parrying an attack now restores 3% of your maximum health and increases your chance to parry the next attack by 30%.\" (same figures); nothing else found."
     },
     {
-      "spell": 704941,
-      "kind": "metric_delta",
-      "trigger_spell": 805301,
-      "target": "caster",
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 2000,
-      "strike": {
-        "spell": 2118233,
-        "health": 50000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 300
-      },
-      "caster_avoidance": {
-        "parry": 100
-      },
-      "name": "Light of the Sun (the +30% parry is consumed by the next attack)",
-      "variant": "parry_next",
-      "label_suffix": "parry_next",
-      "quote": "and increases your chance to parry the next attack by $707843s1%.",
-      "metric": "aura_amount",
-      "fields": {
-        "spell": 707843,
-        "effect": 0
-      },
-      "expected": 0,
-      "second_strike": {
-        "spell": 23583,
-        "present": 30
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0 (Spell.dbc, /srv/coa/server-data/dbc); the class code only casts it on a parry (AscensionSunClericEvents.cpp). The scenario is the one of the parry entry (a Speed Slash 2118233 parried at a caster parry chance forced to 100%, harness set_combat_avoidance, a named precondition fixture; Holy Form 805301 the trigger cast; 704941 learned between the phases), then metric_delta second_strike: right after the Holy Form cast the aura amount is read and must be 30 in the treatment phase (the aura the next attack meets), the caster's dodge and parry are set to 0% and the striker casts Night Slaughter 23583 at the caster (SPELL_ATTR0_NO_ACTIVE_DEFENSE: never dodged or parried, so it cannot re-apply the aura through a parry), 300 ms, then the entry's 500 ms wait and the read of the amount of effect 0 of 707843 on the caster. Expected from the tooltip ('the next attack'): 0, the bonus consumed by the attack that followed; control: the phase without 704941 has no aura, 0. The read comes about 1.1 s after the parry, inside the 5000 ms duration, so a 0 cannot be the aura's expiry. The damage logs of 23583 are counted after the after reading: no landed second strike, or a present read other than 30, makes the trial unmeasured. A reading of 30 is a finding against the tooltip (no server change in this entry). Reference search 2026-11-22: as the parry entry (bindmysoul snapshot 2026-07-22 carries the same tooltip; coa-history 707843: 2 SPELL_AURA_APPLIED and 2 SPELL_AURA_REMOVED in 2 logs, no consumption timing); nothing found on consumption."
-    },
-    {
       "spell": 300343,
       "name": "Savior (critical strike chance below 20% health)",
       "kind": "metric_delta",
@@ -20266,208 +20140,6 @@
         }
       ],
       "observe_source": "561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671; 680671 Effect[0] and Effect[1] are SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) with EffectBasePoints -1001 and EffectMiscValue 804751 (Hammer of Kings) and 806479 (Solar Prayer): $/1000;680671s1 = 1 second. AscensionSunClericEvents.cpp:117 gates 561327 on an own, non-derived critical damage or healing event and :324-326 calls Reduce(player, 804751, |Amount(680671)|) and Reduce(player, 806479, ...). Route: the cooldown cost_gate (guide section 2, Lorescribe), a cast attempt the server accepts or refuses, not a cooldown readback. Solar Prayer 806479 (Spell.dbc RecoveryTime 90000) is cast on the caster as the priming cast, then Gavel of Wrath 802561 is cast at the dummy at 5 yd 1600 ms later; the critical-hit fixture 984954 (Effect[0] aura 52 weapon crit +101, Effect[1] aura 57 spell crit -1000) and 823764 (the dummy's resists removed) are set on the caster before that Gavel cast only (cast_auras), a precondition fixture: the claim is the cooldown reduction a real critical hit applies. Class file ratings (melee hit and expertise 10000) leave no miss, dodge or parry: the crit probability is 1 by construction, residual failure probability 0 per pair. The gate attempts the Prayer again 89060 ms after the priming cast (arm with, expected accepted; arm without, 561327 unknown, refused: the control) and 88940 ms after it (arm beyond, refused: the reduction is no larger than 1 s). margin_ms 60 puts the attempts 60 ms either side of the reduced cooldown, so a reduction of 900 ms (refused at the with attempt) and one of 1100 ms or two crits (accepted at the beyond attempt) alert: the 10% either side of the 1000 ms claim are excluded. Healing critical strikes are not run (see the ledger row). Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs (a passive and its proc); Hammer of Kings 804751 377 aura applications in 6 logs and Solar Prayer 806479 41 casts in 17 logs carry no cooldown link; bindmysoul talents snapshot (fetched 2026-07-22) reads 'Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by -1.' (tooltip figure, 1 second); nothing else found."
-    },
-    {
-      "spell": 561327,
-      "name": "Blessing of Kings (Hammer of Kings cooldown after a critical Daybreak heal)",
-      "kind": "cost_gate",
-      "variant": "cd_hammer_heal",
-      "label_suffix": "cd_hammer_heal",
-      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-      "gated_spell": 804751,
-      "resource": "cooldown",
-      "reduction": 1000,
-      "target": "caster",
-      "margin_ms": 60,
-      "after_casts": [
-        [
-          503624,
-          "caster"
-        ]
-      ],
-      "after_wait_ms": 1600,
-      "cast_power": 1360,
-      "caster_health_pct": 30,
-      "cast_auras": [
-        {
-          "spell": 503624,
-          "auras": [
-            10043
-          ],
-          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture, the claim measured is the cooldown reduction a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
-        }
-      ],
-      "observe_source": "Healing half of 561327 (AscensionSunClericEvents.cpp:117 gates on an own, non-derived critical damage or healing event; 561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671, EffectBasePoints -1001 = 1 s, Spell.dbc). Hammer of Kings (RecoveryTime 20000) is cast on the caster as the priming cast, then Daybreak 503624 heals the caster (health 30%) 1600 ms later as a critical heal; the gate attempts Hammer of Kings again 19060 ms after the priming cast (arm with: accepted; arm without, 561327 not learned: refused, the control) and 18940 ms after it (arm beyond: refused). margin_ms 60 excludes reductions of 900 and 1100 ms. Same cast route as Hope 300349 cd_gate (design 3 of the healing half; the forced spell rating on Solar Prayer and the Illumination cooldown read, whose 87985 then 0 read had no known cause, are not used). A zero delta is the 165 effect's reset sentinel (SpellEffects.cpp:408-412): a full reset would show as acceptance in the beyond arm. cost_gate has no void_on_cast_failure option: the run's cast_failures hold only the judged refusals, reason 67 (not ready) at casts 3 (without) and 9 (beyond), in pair 20261122-221200 / 20261122-221504. Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) reads 'by -1'; nothing else found. Fix (class ADR 0037, mentor D-220): a self-heal fires two proc events on the caster, the actor side (DONE flags) and the action-target side (TAKEN flags, Unit.cpp:14429-14438), and spell_proc 561327 ProcFlags 1048575 accepts both, so the script reduced twice (2000 ms, diag 20261122-215740); 561327 now counts the actor side only (AscensionSunClericEvents.cpp:118). The PROC_TRIGGER_SPELL 680671 path does not run: the script's OnProc calls PreventDefaultAction (AscensionSunClericEvents.cpp:150, SpellAuras.cpp:2398-2412)."
-    },
-    {
-      "spell": 561327,
-      "name": "Blessing of Kings (Solar Prayer cooldown after a critical Daybreak heal)",
-      "kind": "cost_gate",
-      "variant": "cd_prayer_heal",
-      "label_suffix": "cd_prayer_heal",
-      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-      "gated_spell": 806479,
-      "resource": "cooldown",
-      "reduction": 1000,
-      "target": "caster",
-      "margin_ms": 60,
-      "after_casts": [
-        [
-          503624,
-          "caster"
-        ]
-      ],
-      "after_wait_ms": 1600,
-      "cast_power": 1360,
-      "caster_health_pct": 30,
-      "cast_auras": [
-        {
-          "spell": 503624,
-          "auras": [
-            10043
-          ],
-          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture, the claim measured is the cooldown reduction a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
-        }
-      ],
-      "observe_source": "Healing half of 561327 (AscensionSunClericEvents.cpp:117 gates on an own, non-derived critical damage or healing event; 561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671, EffectBasePoints -1001 = 1 s, Spell.dbc). Solar Prayer (RecoveryTime 90000) is cast on the caster as the priming cast, then Daybreak 503624 heals the caster (health 30%) 1600 ms later as a critical heal; the gate attempts Solar Prayer again 89060 ms after the priming cast (arm with: accepted; arm without, 561327 not learned: refused, the control) and 88940 ms after it (arm beyond: refused). margin_ms 60 excludes reductions of 900 and 1100 ms. Same cast route as Hope 300349 cd_gate (design 3 of the healing half; the forced spell rating on Solar Prayer and the Illumination cooldown read, whose 87985 then 0 read had no known cause, are not used). A zero delta is the 165 effect's reset sentinel (SpellEffects.cpp:408-412): a full reset would show as acceptance in the beyond arm. cost_gate has no void_on_cast_failure option: the run's cast_failures hold only the judged refusals, reason 67 (not ready) at casts 3 (without) and 9 (beyond), in pair 20261122-221200 / 20261122-221504. Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) reads 'by -1'; nothing else found. Fix (class ADR 0037, mentor D-220): a self-heal fires two proc events on the caster, the actor side (DONE flags) and the action-target side (TAKEN flags, Unit.cpp:14429-14438), and spell_proc 561327 ProcFlags 1048575 accepts both, so the script reduced twice (2000 ms, diag 20261122-215740); 561327 now counts the actor side only (AscensionSunClericEvents.cpp:118). The PROC_TRIGGER_SPELL 680671 path does not run: the script's OnProc calls PreventDefaultAction (AscensionSunClericEvents.cpp:150, SpellAuras.cpp:2398-2412)."
-    },
-    {
-      "spell": 561327,
-      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-      "kind": "metric_delta",
-      "gate_spell": 561327,
-      "trigger_spell": 503624,
-      "target": "caster",
-      "cast_in_before": false,
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1360,
-      "caster_health_pct": 30,
-      "metric": "cooldown_ms",
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "tolerance": 50,
-      "void_on_cast_failure": true,
-      "setup_casts": [
-        804751
-      ],
-      "fields": {
-        "spell": 804751
-      },
-      "variant": "heal_crit_hammer",
-      "label_suffix": "heal_crit_hammer",
-      "expected": 16900,
-      "force_crit": "spell",
-      "name": "Blessing of Kings (Hammer of Kings cooldown read after one critical Daybreak self-heal)",
-      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Hammer of Kings 804751 (RecoveryTime 20000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 804751 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Hammer of Kings cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). force_crit spell makes the Daybreak heal critical: one critical heal event on the caster (spell_heal_count 1, diag 20261122-215740), so one 1000 ms cut: 20000 - 2100 - 1000 = 16900 (tooltip: 1 s per critical strike, Spell.dbc 680671 EffectBasePoints -1001; RecoveryTime 20000). No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
-    },
-    {
-      "spell": 561327,
-      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-      "kind": "metric_delta",
-      "gate_spell": 561327,
-      "trigger_spell": 503624,
-      "target": "caster",
-      "cast_in_before": false,
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1360,
-      "caster_health_pct": 30,
-      "metric": "cooldown_ms",
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "tolerance": 50,
-      "void_on_cast_failure": true,
-      "setup_casts": [
-        806479
-      ],
-      "fields": {
-        "spell": 806479
-      },
-      "variant": "heal_crit_prayer",
-      "label_suffix": "heal_crit_prayer",
-      "expected": 86900,
-      "force_crit": "spell",
-      "name": "Blessing of Kings (Solar Prayer cooldown read after one critical Daybreak self-heal)",
-      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Solar Prayer 806479 (RecoveryTime 90000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 806479 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Solar Prayer cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). force_crit spell makes the Daybreak heal critical: one critical heal event on the caster (spell_heal_count 1, diag 20261122-215740), so one 1000 ms cut: 90000 - 2100 - 1000 = 86900 (tooltip: 1 s per critical strike, Spell.dbc 680671 EffectBasePoints -1001; RecoveryTime 90000). No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
-    },
-    {
-      "spell": 561327,
-      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-      "kind": "metric_delta",
-      "gate_spell": 561327,
-      "trigger_spell": 503624,
-      "target": "caster",
-      "cast_in_before": false,
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1360,
-      "caster_health_pct": 30,
-      "metric": "cooldown_ms",
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "tolerance": 50,
-      "void_on_cast_failure": true,
-      "setup_casts": [
-        804751
-      ],
-      "fields": {
-        "spell": 804751
-      },
-      "variant": "heal_plain_hammer",
-      "label_suffix": "heal_plain_hammer",
-      "expected": 17900,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "name": "Blessing of Kings (Hammer of Kings cooldown read after one non-critical Daybreak self-heal)",
-      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Hammer of Kings 804751 (RecoveryTime 20000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 804751 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Hammer of Kings cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). Control arm: 984954 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000) on the caster, so the Daybreak heal cannot crit and the cut is 0: 20000 - 2100 = 17900 (RecoveryTime 20000). It is the control arm of the critical-heal claim: a non-critical heal leaves the 2100 ms timeline as the only elapsed time. No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
-    },
-    {
-      "spell": 561327,
-      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-      "kind": "metric_delta",
-      "gate_spell": 561327,
-      "trigger_spell": 503624,
-      "target": "caster",
-      "cast_in_before": false,
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "cast_power": 1360,
-      "caster_health_pct": 30,
-      "metric": "cooldown_ms",
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "tolerance": 50,
-      "void_on_cast_failure": true,
-      "setup_casts": [
-        806479
-      ],
-      "fields": {
-        "spell": 806479
-      },
-      "variant": "heal_plain_prayer",
-      "label_suffix": "heal_plain_prayer",
-      "expected": 87900,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "name": "Blessing of Kings (Solar Prayer cooldown read after one non-critical Daybreak self-heal)",
-      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Solar Prayer 806479 (RecoveryTime 90000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 806479 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Solar Prayer cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). Control arm: 984954 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000) on the caster, so the Daybreak heal cannot crit and the cut is 0: 90000 - 2100 = 87900 (RecoveryTime 90000). It is the control arm of the critical-heal claim: a non-critical heal leaves the 2100 ms timeline as the only elapsed time. No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
     },
     {
       "spell": 301011,
@@ -28369,43 +28041,6 @@
       "observe_source": "681254 StackAmount 10, DurationIndex 18 (20000 ms) (server DBC). Angelic Presence 800722 is instant with no global cooldown (CastingTimeIndex 1, StartRecoveryTime 0), so it does not use the Illumination cast time: with it up Illumination 500143 is instant (800722 Effect[0] aura 108 MiscValue 10 SPELLMOD_CASTING_TIME -100% on the Illumination mask, the 2000 ms cast time of 500143 otherwise, as the entry of the 92137 grant reads it) and costs one 1500 ms global cooldown, so one cycle (800722, then 500143) takes 2 x 800 ms = 1600 ms and 11 consumptions fit in 16.8 s, inside the 20 s of the first stack, with no haste fixture and no ignore_gcd. Eleven consumptions, the last the trigger cast: an uncapped counter would read 11, the cap reads 10; the same sequence without 680648 is the control (0 stacks). Reference search 2026-11-22: coa-history spell 681254: 0 events in 186 logs (an aura of a passive; positive control: Paragon 680639 has 60 casts in 15 logs); nothing else found."
     },
     {
-      "spell": 503690,
-      "name": "Dawn's Arrival (free Gavel earned from Dawnbreak)",
-      "kind": "aura_fed_effect",
-      "variant": "cooldown",
-      "label_suffix": "fed_cooldown",
-      "quote": "causes the next one to not incur a cooldown.",
-      "feed_spell": 800654,
-      "aura": 503691,
-      "effect_spell": 800611,
-      "every_ms": 1700,
-      "residual_target": 0.001,
-      "feed_power": 1363,
-      "effect_power": 1363,
-      "expected": 0,
-      "trials": 8,
-      "evidence_metric": "cast_failure",
-      "observe_source": "Route: real Dawnbreak 800654 casts every 1700 ms (cast_until_aura, owner ruling O-17) until the free-Gavel aura 503691 is on the caster; the harness never sets it (D-145). Code: the grant and the reset sit in one block, one roll: AscensionSunClericAbilities.cpp:282-287 (if Chance(player, 503690): Reduce INT32_MAX on Gavel roots 800611, 800614, 800617, then Cast 503691); Chance() rolls the raw ProcChance 40 of 503690 (AscensionSunCleric.cpp:196-205), so the trials that read the aura also read the reset. The free cast: :291-292 (a Gavel carrying script value 503691 is reduced to no cooldown). Reads: cooldown_ms is readback data (the server cooldown map), so the behaviour is the recast: a second real Gavel 1600 ms after the first goes off (spell_go_count, cast_failure 0) in the treatment and is refused with SPELL_FAILED_NOT_READY 67 in the control (no aura), and a third in the treatment is refused (only the next cast is free). Reset: a Gavel of Light 800611 is cast first (CategoryRecoveryTime 5000 in Spell.dbc), 1600 ms later the feed starts; a feed that reaches the aura at its first or second cast finds the Gavel still cooling naturally (3400 or 1700 ms left), so a read of 0 right after the aura appeared is the reset; later casts find it over and are not judged (spell_go_count of 800654 gives the casts per trial). Control: the same Gavel without the feed reads 3400 and 1700 ms left (natural cooldown, within 10%). The free read starts from a Gavel reset as a precondition fixture so it does not depend on the reset claim. Sizing: ProcChance 40, so a trial is judged for the reset with probability 1 - 0.6^2 = 0.64; 8 trials leave a run with no judged trial at 0.36^8 = 2.8e-4 (5.7e-4 per pair, unmeasured, never a false verdict); max_casts 19 keeps an unfed trial at most 0.001 per pair. A correct server has no random outcome in a judged trial. Reference search 2026-11-22: coa-history spell 503690: 0 events in 186 logs (a passive); 503691: 280 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED in 5 logs, no cooldown or cast event, so a free Gavel is not told apart there; Dawnbreak 800654: 284 SPELL_CAST_SUCCESS in 4 logs; nothing found beyond the tooltip and the DBC. Tool: aura_fed_effect cooldown variant (Sun Cleric tool ADR 1037)."
-    },
-    {
-      "spell": 503690,
-      "name": "Dawn's Arrival (Gavel reset by Dawnbreak, recast read)",
-      "kind": "aura_fed_effect",
-      "variant": "cooldown_reset_recast",
-      "label_suffix": "fed_reset",
-      "quote": "Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels",
-      "feed_spell": 800654,
-      "aura": 503691,
-      "effect_spell": 800611,
-      "every_ms": 1700,
-      "residual_target": 0.001,
-      "feed_power": 1363,
-      "effect_power": 1363,
-      "expected": 0,
-      "trials": 15,
-      "observe_source": "Route: a real Gavel of Light 800611 primer (cooldown reset first as a precondition fixture; CategoryRecoveryTime 5000, StartRecoveryTime 1500 in category 133 shared with Dawnbreak 800654, Spell.dbc /srv/coa/server-data/dbc) is read 1600 ms later (3400 ms natural left, a primer not natural within 10% voids the run); treatment trials then cast real Dawnbreak 800654 every 1700 ms (cast_until_aura, owner ruling O-17) until 503691 is on the caster, the harness never sets it (D-145); 1600 ms later, past the global cooldown and 3200 ms after the primer, the Gavel is cast again (R). Code: the grant and the reset sit in one block, one roll: AscensionSunClericAbilities.cpp:282-287 (if Chance(player, 503690): Reduce INT32_MAX on Gavel roots 800611, 800614, 800617, then Cast 503691), so a trial that holds the aura also had its Gavel cooldown reset. Behaviour read: R goes off (spell_go_count +1 over the primer, cast_failure 0) in the treatment and is refused with SPELL_FAILED_NOT_READY 67 in the control (no feed, no aura, 1800 ms of natural cooldown left). Selection (mentor D-210): only treatment trials whose aura came at the first Dawnbreak are judged (spell_go_count of 800654), on the aura timing, never on the outcome of R; a grant at the second cast puts R at 4900 ms, inside the band of the natural end. Void (in-kind): a refused Dawnbreak voids the run; the control's 67 on R is the judged read, not a void. Sizing: ProcChance 40 of 503690, a trial is selected with probability 0.4, 15 trials leave a run with none selected at 0.6^15 = 4.7e-4 (unmeasured, never a false verdict). The 40% figure itself stays an owner question (no claim). Reference search: see the fed_cooldown entry (coa-history 503691 280 aura applies, no cooldown event). Tool: aura_fed_effect cooldown_reset_recast variant (Sun Cleric tool ADR 1037 addendum)."
-    },
-    {
       "spell": 300323,
       "name": "Holy Fervor (Sunrise effectiveness)",
       "kind": "hit_ratio",
@@ -31584,136 +31219,6 @@
       "phase_power_in_uncast_before": true
     },
     {
-      "spell": 300353,
-      "kind": "metric_delta",
-      "gate_spell": 300353,
-      "trigger_spell": 800617,
-      "target": "dummy",
-      "dummy_distance": 3,
-      "cast_power": 1363,
-      "before_expected": 0,
-      "wait_ms": 1000,
-      "expire_ms": 600,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 800617,
-        "target": "dummy"
-      },
-      "expected": 1,
-      "tolerance": 0,
-      "void_on_cast_failure": true,
-      "quote": "Your Gavels can no longer be missed, dodged, or parried",
-      "name": "Heaven's Appraisal (a Gavel of Wrath is not dodged by a 100% dodge dummy)",
-      "variant": "gavel_undodged",
-      "player_ratings": {
-        "expertise_rating": 0
-      },
-      "label_suffix": "gavel_undodged",
-      "phase_auras": [
-        [
-          805301,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          10020,
-          1,
-          "dummy",
-          "dummy"
-        ]
-      ],
-      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Dodge 10020 (Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture (the subject is the Gavel's table, not the fixture). One Gavel of Wrath per phase at the dummy, the damage events (spell_damage_count, a dodged spell logs none) of 800617 on the dummy are counted: control without 300353 dodged, 0; with 300353 learned, 1. A control reading above 0 shows the fixture did not dodge (the entry then proves nothing and is unmeasured by review). Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500). Design 3 (2026-11-22): the class file ratings give the caster expertise_rating 10000, which removes the dummy's dodge and parry chance before any aura is read (a lead from the first pair, where the control Gavel landed with the fixture on the dummy), so this entry sets expertise_rating 0 on the caster (player_ratings); the control phase, the same Gavel without 300353, must then be dodged (0 damage events) and the learned phase lands."
-    },
-    {
-      "spell": 300353,
-      "kind": "metric_delta",
-      "gate_spell": 300353,
-      "trigger_spell": 800611,
-      "target": "dummy",
-      "dummy_distance": 3,
-      "cast_power": 1363,
-      "caster_health_pct": 50,
-      "player_attack_power": 20000,
-      "metric": "aura",
-      "fields": {
-        "spell": 805489,
-        "target": "caster"
-      },
-      "before_expected": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "tolerance": 0,
-      "void_on_cast_failure": true,
-      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
-      "name": "Heaven's Appraisal (Gavel of Light places Holy Shield under Holy Form)",
-      "variant": "light_shield",
-      "label_suffix": "light_shield",
-      "expected": 1,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          805301,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture). Control without 300353: no shield, 0; with 300353: 1. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found."
-    },
-    {
-      "spell": 300353,
-      "kind": "metric_delta",
-      "gate_spell": 300353,
-      "trigger_spell": 800611,
-      "target": "dummy",
-      "dummy_distance": 3,
-      "cast_power": 1363,
-      "caster_health_pct": 50,
-      "player_attack_power": 20000,
-      "metric": "aura",
-      "fields": {
-        "spell": 805489,
-        "target": "caster"
-      },
-      "before_expected": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "tolerance": 0,
-      "void_on_cast_failure": true,
-      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
-      "name": "Heaven's Appraisal (control: Gavel of Light without Holy Form places no shield)",
-      "variant": "light_shield_control",
-      "label_suffix": "light_shield_control",
-      "expected": 0,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Without Holy Form on the caster the condition is false: no shield in either phase, 0 before and 0 after 300353 is learned. Reference search 2026-11-22: as light_shield; nothing else found."
-    },
-    {
       "spell": 704579,
       "name": "Twilight (Fulfillment of Vow of the Eclipse copies twice the damage)",
       "kind": "metric_delta",
@@ -32242,6 +31747,1571 @@
         ]
       },
       "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 14450 ms after the trigger, at least 10550 ms and at most 10950 ms after the application: gone excludes a duration of 11000 ms (10% long) or more, since the read is at most 10950 ms after the application, and a 10000 ms aura is gone from 10000 ms on. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (healing done after Illumination consumes Angelic Presence)",
+      "kind": "hit_ratio",
+      "variant": "healing_gain",
+      "label_suffix": "healing_gain",
+      "quote": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d,",
+      "expected": 1.01,
+      "observe_spell": 503624,
+      "metric": "spell_heal_total",
+      "target": "ally",
+      "control": {
+        "auras": [
+          [
+            681254,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800722,
+            "target": "caster",
+            "power": 1363
+          },
+          {
+            "spell": 500143,
+            "target": "caster",
+            "power": 1363
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            681254,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800722,
+            "target": "caster",
+            "power": 1363
+          },
+          {
+            "spell": 500143,
+            "target": "caster",
+            "power": 1363
+          }
+        ],
+        "learn": [
+          680648
+        ]
+      },
+      "critical": false,
+      "trials": 16,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 4000,
+      "control_excluded": {
+        "residual": 0.0001
+      },
+      "expected_source": "681254 Sacred Vessel Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT MiscValue 126, EffectBasePoints 0 + 1 = 1 ($681254s1): healing done x 1.01 for one stack. AscensionSunClericAbilities.cpp:91-92: an Illumination 500143 cast that consumes Angelic Presence 800722 while the caster holds 680648 adds one stack of 681254 (StackWithoutRefresh). Both arms, before every trial: 681254 removed (set to 0 stacks, so each trial carries one stack, never a growing count), Angelic Presence 800722 cast at the caster, then Illumination 500143 cast at the caster (Spell.dbc EffectImplicitTargetA 21, an ally-target heal: the first design cast it at the dummy and read 0.99988), each with the caster's mana set to 1363 first (Illumination ManaCostPercentage 30); the treatment arm learns 680648, the control arm does not. The observed heal is Daybreak 503624 at the ally (${$m1+0+$BH*0.595}, bonus healing fixture 5000, cast power 1000), non-critical heals only (681254 Effect[0] also adds 1% critical strike chance). Daybreak holds 2 charges with a 10 s recharge (tooltip), so each trial spans 1600 + 3600 + 1600 + 4000 = 10800 ms, above 10 s. control_excluded residual 1e-4: the 2-point G-19 band of +1% holds 0, so the one-sided bound must exclude 0. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally damage done)",
+      "kind": "hit_ratio",
+      "variant": "ally_damage",
+      "label_suffix": "ally_damage",
+      "quote": "and $680911s3% increased damage.",
+      "expected": 1.1,
+      "observe_spell": 802561,
+      "caster": "ally",
+      "ally_distance": 0,
+      "control": {
+        "casts": [
+          {
+            "spell": 804247,
+            "target": "ally",
+            "power": 1363
+          }
+        ]
+      },
+      "treatment": {
+        "casts": [
+          {
+            "spell": 804247,
+            "target": "ally",
+            "power": 1363
+          },
+          {
+            "spell": 804250,
+            "target": "ally",
+            "power": 1363
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_power": 1360,
+      "expected_source": "680911 Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 (all schools), EffectBasePoints 9 + 1 = 10 ($680911s3): damage done x 1.10 on the redeemed ally. 804250 Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680911 only on an ally holding the caster's Bless (AscensionSunClericAbilities.cpp:541-555). Before every trial the caster casts Bless 804247 at the ally (both arms) and, in the treatment arm, 804250 at the ally, each with the caster's mana set to 1363 first (ManaCostPercentage 20 and 13 of the base mana 1363). The grouped ally (ally_distance 0, on the caster's spot, as March of the Valkyr 560534 reads it) casts Gavel of Wrath 802561 at the dummy (Physical, normalized weapon damage, instant, attack power 20000 so the weapon roll spreads little); only its non-critical hits are read. 680911's haste parts do not change a normalized weapon hit. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally healed for 10% of its direct damage below 35%)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_heal",
+      "label_suffix": "ally_damage_heal",
+      "quote": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+      "trigger_spell": 804250,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "select_dummy": true,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681386,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_attacks": [
+          {
+            "spell": 802561,
+            "power": 1360,
+            "source": "Gavel of Wrath 802561, an instant Physical direct hit the ally casts at the dummy after the trigger, its damage event read as the ally's own"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 681386,
+              "target": "ally"
+            },
+            "source": "the heal 681386 the caster casts at the ally from the ally's damage (AscensionSunClericEvents.cpp:390-392, Copy(player, ally, 681386, CalculatePct(damage, 10)))"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802561,
+              "target": "dummy"
+            },
+            "source": "the ally's own Gavel of Wrath damage at the dummy"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.1,
+            "tolerance": 0.0005,
+            "floor_count": 0,
+            "source": "$680911s3 = 10 (680911 Effect[2] BasePoints 9 + 1): healed for 10% of the direct damage dealt; 681386 carries SPELL_ATTR2_CANT_CRIT and SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), and CalculatePct truncates each heal to an integer"
+          }
+        ]
+      },
+      "observe_source": "680911 is applied by 804250 on an ally holding the caster's Bless (AscensionSunClericAbilities.cpp:541-555); its proc (AscensionSunClericEvents.cpp:80-82) accepts a direct damaging hit the ally deals while the ally is below 35% health or once the aura's script value is set, and :390-392 sets the value and heals the ally for 10% of the damage. In both phases Bless 804247 is cast at the ally (ally_casts) and the ally is set to 3000 of 10000 health (30%, below 35%); 804250 is cast at the ally in the after phase only (cast_in_before false), the before phase is the control (no 680911, no heal). The ally then casts Gavel of Wrath 802561 at the dummy in both phases (ally_attacks, spell_go proof). Read on the caster: the heal events of 681386 given to the ally, 0 then 1; the ratio of the heal total to the ally's damage total is 0.10. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally above 35% is not healed)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_heal_above",
+      "label_suffix": "ally_damage_heal_above",
+      "quote": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+      "trigger_spell": 804250,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "select_dummy": true,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681386,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          4200,
+          10000
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_attacks": [
+          {
+            "spell": 802561,
+            "power": 1360,
+            "source": "Gavel of Wrath 802561, an instant Physical direct hit the ally casts at the dummy after the trigger, its damage event read as the ally's own"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681386,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "no 681386 heal event is given to the ally that stays above 35% health: the 680911 proc accepts a hit only while the ally is below 35% health or once the aura script value is set (AscensionSunClericEvents.cpp:80-82)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802561,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the ally casts Gavel of Wrath 802561 once at the dummy in each phase (ally_attacks), an instant Physical direct hit, and the harness counts events over both phases: 1 after the first phase and 2 after the second prove the ally struck in each"
+          }
+        ]
+      },
+      "observe_source": "Control arm of the below-35% entry ally_damage_heal, same cast sequence: the ally stays above 35% (4200 of 10000, 42%; its Gavel of Wrath 802561 hit read in the damage arm leaves it above 35%) and 804250 is cast at it in the after phase: no 681386 heal event is expected (0 then 0) while the damage arm proves the ally struck. 680911 proc (AscensionSunClericEvents.cpp:80-82) accepts a hit while the ally is below 35% health or once the aura script value is set. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (additional mana spent with the extra heal: below-30% arm 850 pays nothing, above-30% arm 872 pays)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_mana",
+      "label_suffix": "ally_bless_mana",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 850,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the extra heal 807994 on the Bless ally: none in the below-30% arm (850), one in the above-30% arm (872)"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. Mana: the caster's mana read after the heal, regeneration off, Holy Form removed at the start of each phase before its setup cast (so the after phase casts it again rather than over the form). Below-30% arm (the before phase, 850 at the hook, 29.6% of the maximum mana; the control of this entry, counted on direction, D-214): nothing is paid, 850 exactly, and no extra heal. Above-30% arm (the after phase, 872 at the hook, 30.4%) the extra heal lands (arm 2) and the mana read must be at most 871, below what the heal's own cost leaves: additional mana is spent (direction only, D-165, mentor D-214). Observation, not an expectation: the code pays (extra + 3) / 4 (AscensionSunClericAbilities.cpp:399, set by e36bc50aad, a bulk restore); neither the tooltip nor the DBC states an amount, so the exact value stays open for the mentor.",
+      "tolerance": 0,
+      "after_at_least": 0,
+      "after_at_most": 871,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 871
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (control without the form: no additional mana, no extra heal)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_mana_no_form",
+      "label_suffix": "ally_bless_mana_no_form",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2043,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1417,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "without Holy Form no extra heal 807994 reaches the Bless ally in either phase"
+          }
+        ]
+      },
+      "observe_source": "Control of the Holy Form mana clause (mentor D-214 (c)): the same Bless ally, Daybreak 503624 and phases as ally_bless_mana, without the Holy Form setup cast. Mana at the hook: 2043 - Bless 272 - Daybreak 354 = 1417 (Spell.dbc ManaCostPercentage 20 and 26 of base mana 1363, truncated), above the 860.4 gate in both phases; without the form AscensionSunClericAbilities.cpp:390 pays nothing and casts no 807994, so the mana read after the heal is 1417 in both phases and the extra heal count stays 0, while the Daybreak arm shows the heal landed. Regeneration off. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0,
+      "after_at_least": 1417,
+      "after_at_most": 1417,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "expected": 1417
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (the extra heal can critically strike)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_crit",
+      "label_suffix": "extra_heal_crit",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807994,
+        "target": "ally",
+        "critical": true
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "every extra heal 807994: the critical count equals it, so the one extra heal is critical"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the forced crit fixture works: each Daybreak heal reads critical"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. Crit: force_crit spell sets spell_crit_rating 100000 on the caster's player fixture; the trial reads the heals as critical (fields.critical true), never assumes it. 807994 has no SPELL_ATTR2_CANT_CRIT in Spell.dbc and AscensionSunClericContracts.cpp:85-86 clears it; AscensionSunClericAbilities.cpp:220 lets the crit hook see 807994. Below the gate no extra heal (0), above it one, read critical; the Daybreak arm reads both Daybreak heals critical. Holy Form removed at each phase start before its setup cast.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 1,
+      "force_crit": "spell"
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (critical extra heal on the Bless ally procs The Redeemer: 30% healed when struck)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer",
+      "label_suffix": "extra_heal_redeemer",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1749,
+        1771
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative: one Daybreak heal on ally2 per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Daybreak at ally2 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Holy Form extra heal on the Bless ally (ally 1): none below the gate, one above it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the extra heal on ally 1 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker hit this ally once in the phase, so a 301005 it held was consumed (proof that a missing Redeemer heal is not a missing strike)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally 1 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 301004,
+              "target": "ally"
+            },
+            "source": "the Redeemer heal 301004 lands on the Bless ally when struck (AscensionSunClericEvents.cpp:380-387)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "source": "the Holy Form extra heal 807994 on ally 1, critical (the amount the Redeemer part is read against)"
+          }
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_strikes": true,
+        "ratios": [
+          {
+            "numerator": 7,
+            "denominator": 8,
+            "expected": 0.3,
+            "tolerance": 0.003,
+            "floor_count": 7,
+            "source": "tooltip: healed for 30% of the amount originally healed the next time they take damage (The Redeemer 300339 Effect[0] BasePoints 29 + 1, Spell.dbc); CalculatePct truncates the heal to an integer"
+          }
+        ]
+      },
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Main reading: heal events 301004 on ally 1, 0 below the gate and 1 above it; ratio of the 301004 total to the critical 807994 total expected 0.30.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 1,
+      "force_crit": "spell",
+      "strike": {
+        "spell": 47632,
+        "health": 5000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      }
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (control: non-critical extra heal, no Redeemer, no heal when struck)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer_noncrit",
+      "label_suffix": "extra_heal_redeemer_noncrit",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1749,
+        1771
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative: one Daybreak heal on ally2 per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Daybreak at ally2 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Holy Form extra heal on the Bless ally (ally 1): none below the gate, one above it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the extra heal on ally 1 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker hit this ally once in the phase, so a 301005 it held was consumed (proof that a missing Redeemer heal is not a missing strike)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally 1 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          }
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_strikes": true
+      },
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without the forced crit: 807994 reads non-critical (its critical arm 0), no 301004 on strike. A baseline crit would turn an arm off, never pass the control.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "strike": {
+        "spell": 47632,
+        "health": 5000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      }
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (control without the form: no extra heal 807994, no Redeemer)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer_no_form",
+      "label_suffix": "extra_heal_redeemer_no_form",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1749,
+        1771
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative: one Daybreak heal on ally2 per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Daybreak at ally2 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Holy Form extra heal on the Bless ally (ally 1): none without Holy Form"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the extra heal on ally 1 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker hit this ally once in the phase, so a 301005 it held was consumed (proof that a missing Redeemer heal is not a missing strike)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally 1 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          }
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_strikes": true
+      },
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without Holy Form (setup cast dropped): no 807994, Daybreak critical at ally2 only, no 301004 on ally 1.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "force_crit": "spell",
+      "strike": {
+        "spell": 47632,
+        "health": 5000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      }
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (radius edge around the struck target: 5 yd plus both object sizes, 10% bracket)",
+      "kind": "radius_edge",
+      "label_suffix": "flare_edge_target",
+      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
+      "gate_spell": 804632,
+      "cast_spell": 500154,
+      "hit_spell": 807175,
+      "power": 1363,
+      "radius": 5,
+      "dummy_reach": 1.275,
+      "center_reach": 1.275,
+      "margin_yd": 0.755,
+      "repeats": 3,
+      "settle_ms": 3000,
+      "reach_source": "the dummy entry 36 combat reach 1.275 yd (read 1.275 on every dummy in diagnostic run 20261122-081052; the judge reads each reach again and refuses a layout that does not bracket the edge). The centre is the struck target, as the tooltip says (\"of your target\"): the handler of case 804632 lists Nearby(target, Radius(573449)) (AscensionSunClericEvents.cpp:314, AscensionSunCleric.cpp:138-146), whose AnyUnitInObjectRangeCheck uses IsWithinDistInMap with both object sizes (GridNotifiers.h:1061-1070, Object.cpp:1257-1264, GetObjectSize = combat reach, Object.cpp:2898-2901), so the edge is 5 + 1.275 + 1.275 = 7.55 yd centre to centre; the rule is the accepted effective radius (class-conformance.md section 5, both object sizes for script checks, G-29). Margin 0.755 = 10% of 7.55: inside 6.795 yd, outside 8.305 yd from the primary, which stands 3 yd from the caster. The wait after each cast is 3000 ms: the flares travel (diagnostic runs 20261122-215449 to -215850: a flare reads 0 at 1000 ms when the caster-to-dummy path is long and 1 at 4000 ms). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found.",
+      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5, radius index 8 = 5 yd = $573449a1); the handler fires on damage by Horusath Blast 500154. Centre named by the tooltip: the target. Centre used by the code: the struck target. Bracket 10% either side of 5 + both sizes. Control: the first arm, without the passive, strikes neither dummy. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (cone: a dummy 4.5 degrees inside the 90 degree edge is struck, one 4.5 degrees outside and one behind are not)",
+      "kind": "metric_delta",
+      "variant": "cone_edge",
+      "label_suffix": "cone_edge",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "cone": {
+          "angle": 90,
+          "radius": 12,
+          "source": "Spell::SelectImplicitConeTargets, Spell.cpp:1277-1279: 60 degrees unless spell_cone has a row; spell_cone 800654 ConeDegrees 90 covers every rank of Dawnbreak 504580 through GetFirstSpellInChain (data/sql/updates/pending_db_world/rev_20261027_02_dawnbreak_cone.sql); the arc test is Position::HasInArc, Position.cpp:148-179, half the angle either side of the facing; radius index 32 = 12 yd"
+        }
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504580 Dawnbreak Effect[0] SCHOOL_DAMAGE, EffectImplicitTargetA 24 (TARGET_UNIT_CONE_ENEMY_24), radius index 32 = 12 yd, RangeIndex 2. The cone is 90 degrees (spell_cone 800654, Spell.cpp:1277-1279), so the edge lies 45 degrees either side of the caster's facing; HasInArc tests the centre bearing of the target (Position.cpp:148-179, no target radius is passed by isInFront, Object.cpp:1553-1556). The caster is moved off the dummy line by a relocate step (orientation unchanged and read) so three dummies on the line stand at 40.5 degrees (primary, struck), 49.5 degrees (area1, not struck: 10% of the half angle outside the edge) and 135 degrees (area2, behind the caster, not struck); every bearing is recomputed from the read positions and orientation and a dummy more than 1 degree off its plan, or a height more than 1 yd off the caster's, voids the trial. All three stand 4 to 11 yd from the caster, inside the 12 yd radius. Control: the first phase, without the spell learned, reads 0. Crit and resist fixtures 984954 and 823764 in both phases. Reference search 2026-11-22: coa-history spell 504580 Dawnbreak (angles cannot be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Radiate holy light from your shield on enemies in front of you\" (same text); nothing else found."
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (no shield equipped: the cast is refused with the equipped item class failure)",
+      "kind": "metric_delta",
+      "variant": "no_shield",
+      "label_suffix": "no_shield",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "learn": [
+        504580
+      ],
+      "cast_in_before": true,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504580
+      },
+      "before_expected": 0,
+      "expected": 29,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "without_item": {
+        "item": 2129,
+        "source": "504580 EquippedItemClass 4 with EquippedItemSubClassMask 64 (shield, server DBC set), refused through Spell::CheckItems HasItemFitToSpellRequirements, Spell.cpp:7539-7541, as SPELL_FAILED_EQUIPPED_ITEM_CLASS 29 (SharedDefines.h:1079)"
+      },
+      "observe_source": "504580 Dawnbreak requires an equipped shield: EquippedItemClass 4 (armor) with EquippedItemSubClassMask 64 (shield) and EquippedItemInventoryTypeMask 0 (server DBC set). The reference character carries shield 2129 in the off-hand (equip step, slot 16). Both phases cast 504580 at the dummy with the spell learned: the first with the shield, the control, reads cast_failure 0 (accepted); the first cast is read 2000 ms after it, past the 1500 ms global cooldown, then the cooldown of 504580 is reset (harness reset_cooldown step, so the first cast's own cooldown cannot answer first; either would refuse with 67), the shield is destroyed (harness destroy_item step on the equipped item) and the second cast reads 29, SPELL_FAILED_EQUIPPED_ITEM_CLASS (Spell.cpp:7539-7541). Reference search 2026-11-22: coa-history spell 504580 Dawnbreak (angles cannot be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Radiate holy light from your shield on enemies in front of you\" (same text); nothing else found."
+    },
+    {
+      "spell": 704941,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "name": "Light of the Sun (the +30% parry is consumed by the next attack)",
+      "variant": "parry_next",
+      "label_suffix": "parry_next",
+      "quote": "and increases your chance to parry the next attack by $707843s1%.",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 707843,
+        "effect": 0
+      },
+      "expected": 0,
+      "second_strike": {
+        "spell": 23583,
+        "present": 30
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0 (Spell.dbc, /srv/coa/server-data/dbc); the class code only casts it on a parry (AscensionSunClericEvents.cpp). The scenario is the one of the parry entry (a Speed Slash 2118233 parried at a caster parry chance forced to 100%, harness set_combat_avoidance, a named precondition fixture; Holy Form 805301 the trigger cast; 704941 learned between the phases), then metric_delta second_strike: right after the Holy Form cast the aura amount is read and must be 30 in the treatment phase (the aura the next attack meets), the caster's dodge and parry are set to 0% and the striker casts Night Slaughter 23583 at the caster (SPELL_ATTR0_NO_ACTIVE_DEFENSE: never dodged or parried, so it cannot re-apply the aura through a parry), 300 ms, then the entry's 500 ms wait and the read of the amount of effect 0 of 707843 on the caster. Expected from the tooltip ('the next attack'): 0, the bonus consumed by the attack that followed; control: the phase without 704941 has no aura, 0. The read comes about 1.1 s after the parry, inside the 5000 ms duration, so a 0 cannot be the aura's expiry. The damage logs of 23583 are counted after the after reading: no landed second strike, or a present read other than 30, makes the trial unmeasured. A reading of 30 is a finding against the tooltip (no server change in this entry). Reference search 2026-11-22: as the parry entry (bindmysoul snapshot 2026-07-22 carries the same tooltip; coa-history 707843: 2 SPELL_AURA_APPLIED and 2 SPELL_AURA_REMOVED in 2 logs, no consumption timing); nothing found on consumption."
+    },
+    {
+      "spell": 561327,
+      "name": "Blessing of Kings (Hammer of Kings cooldown after a critical Daybreak heal)",
+      "kind": "cost_gate",
+      "variant": "cd_hammer_heal",
+      "label_suffix": "cd_hammer_heal",
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "gated_spell": 804751,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          503624,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "cast_auras": [
+        {
+          "spell": 503624,
+          "auras": [
+            10043
+          ],
+          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture, the claim measured is the cooldown reduction a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
+        }
+      ],
+      "observe_source": "Healing half of 561327 (AscensionSunClericEvents.cpp:117 gates on an own, non-derived critical damage or healing event; 561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671, EffectBasePoints -1001 = 1 s, Spell.dbc). Hammer of Kings (RecoveryTime 20000) is cast on the caster as the priming cast, then Daybreak 503624 heals the caster (health 30%) 1600 ms later as a critical heal; the gate attempts Hammer of Kings again 19060 ms after the priming cast (arm with: accepted; arm without, 561327 not learned: refused, the control) and 18940 ms after it (arm beyond: refused). margin_ms 60 excludes reductions of 900 and 1100 ms. Same cast route as Hope 300349 cd_gate (design 3 of the healing half; the forced spell rating on Solar Prayer and the Illumination cooldown read, whose 87985 then 0 read had no known cause, are not used). A zero delta is the 165 effect's reset sentinel (SpellEffects.cpp:408-412): a full reset would show as acceptance in the beyond arm. cost_gate has no void_on_cast_failure option: the run's cast_failures hold only the judged refusals, reason 67 (not ready) at casts 3 (without) and 9 (beyond), in pair 20261122-221200 / 20261122-221504. Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) reads 'by -1'; nothing else found. Fix (class ADR 0037, mentor D-220): a self-heal fires two proc events on the caster, the actor side (DONE flags) and the action-target side (TAKEN flags, Unit.cpp:14429-14438), and spell_proc 561327 ProcFlags 1048575 accepts both, so the script reduced twice (2000 ms, diag 20261122-215740); 561327 now counts the actor side only (AscensionSunClericEvents.cpp:118). The PROC_TRIGGER_SPELL 680671 path does not run: the script's OnProc calls PreventDefaultAction (AscensionSunClericEvents.cpp:150, SpellAuras.cpp:2398-2412)."
+    },
+    {
+      "spell": 561327,
+      "name": "Blessing of Kings (Solar Prayer cooldown after a critical Daybreak heal)",
+      "kind": "cost_gate",
+      "variant": "cd_prayer_heal",
+      "label_suffix": "cd_prayer_heal",
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "gated_spell": 806479,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          503624,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "cast_auras": [
+        {
+          "spell": 503624,
+          "auras": [
+            10043
+          ],
+          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture, the claim measured is the cooldown reduction a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
+        }
+      ],
+      "observe_source": "Healing half of 561327 (AscensionSunClericEvents.cpp:117 gates on an own, non-derived critical damage or healing event; 561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671, EffectBasePoints -1001 = 1 s, Spell.dbc). Solar Prayer (RecoveryTime 90000) is cast on the caster as the priming cast, then Daybreak 503624 heals the caster (health 30%) 1600 ms later as a critical heal; the gate attempts Solar Prayer again 89060 ms after the priming cast (arm with: accepted; arm without, 561327 not learned: refused, the control) and 88940 ms after it (arm beyond: refused). margin_ms 60 excludes reductions of 900 and 1100 ms. Same cast route as Hope 300349 cd_gate (design 3 of the healing half; the forced spell rating on Solar Prayer and the Illumination cooldown read, whose 87985 then 0 read had no known cause, are not used). A zero delta is the 165 effect's reset sentinel (SpellEffects.cpp:408-412): a full reset would show as acceptance in the beyond arm. cost_gate has no void_on_cast_failure option: the run's cast_failures hold only the judged refusals, reason 67 (not ready) at casts 3 (without) and 9 (beyond), in pair 20261122-221200 / 20261122-221504. Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) reads 'by -1'; nothing else found. Fix (class ADR 0037, mentor D-220): a self-heal fires two proc events on the caster, the actor side (DONE flags) and the action-target side (TAKEN flags, Unit.cpp:14429-14438), and spell_proc 561327 ProcFlags 1048575 accepts both, so the script reduced twice (2000 ms, diag 20261122-215740); 561327 now counts the actor side only (AscensionSunClericEvents.cpp:118). The PROC_TRIGGER_SPELL 680671 path does not run: the script's OnProc calls PreventDefaultAction (AscensionSunClericEvents.cpp:150, SpellAuras.cpp:2398-2412)."
+    },
+    {
+      "spell": 561327,
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "kind": "metric_delta",
+      "gate_spell": 561327,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "cooldown_ms",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "tolerance": 50,
+      "void_on_cast_failure": true,
+      "setup_casts": [
+        804751
+      ],
+      "fields": {
+        "spell": 804751
+      },
+      "variant": "heal_crit_hammer",
+      "label_suffix": "heal_crit_hammer",
+      "expected": 16900,
+      "force_crit": "spell",
+      "name": "Blessing of Kings (Hammer of Kings cooldown read after one critical Daybreak self-heal)",
+      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Hammer of Kings 804751 (RecoveryTime 20000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 804751 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Hammer of Kings cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). force_crit spell makes the Daybreak heal critical: one critical heal event on the caster (spell_heal_count 1, diag 20261122-215740), so one 1000 ms cut: 20000 - 2100 - 1000 = 16900 (tooltip: 1 s per critical strike, Spell.dbc 680671 EffectBasePoints -1001; RecoveryTime 20000). No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
+    },
+    {
+      "spell": 561327,
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "kind": "metric_delta",
+      "gate_spell": 561327,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "cooldown_ms",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "tolerance": 50,
+      "void_on_cast_failure": true,
+      "setup_casts": [
+        806479
+      ],
+      "fields": {
+        "spell": 806479
+      },
+      "variant": "heal_crit_prayer",
+      "label_suffix": "heal_crit_prayer",
+      "expected": 86900,
+      "force_crit": "spell",
+      "name": "Blessing of Kings (Solar Prayer cooldown read after one critical Daybreak self-heal)",
+      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Solar Prayer 806479 (RecoveryTime 90000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 806479 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Solar Prayer cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). force_crit spell makes the Daybreak heal critical: one critical heal event on the caster (spell_heal_count 1, diag 20261122-215740), so one 1000 ms cut: 90000 - 2100 - 1000 = 86900 (tooltip: 1 s per critical strike, Spell.dbc 680671 EffectBasePoints -1001; RecoveryTime 90000). No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
+    },
+    {
+      "spell": 561327,
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "kind": "metric_delta",
+      "gate_spell": 561327,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "cooldown_ms",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "tolerance": 50,
+      "void_on_cast_failure": true,
+      "setup_casts": [
+        804751
+      ],
+      "fields": {
+        "spell": 804751
+      },
+      "variant": "heal_plain_hammer",
+      "label_suffix": "heal_plain_hammer",
+      "expected": 17900,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Blessing of Kings (Hammer of Kings cooldown read after one non-critical Daybreak self-heal)",
+      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Hammer of Kings 804751 (RecoveryTime 20000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 804751 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Hammer of Kings cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). Control arm: 984954 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000) on the caster, so the Daybreak heal cannot crit and the cut is 0: 20000 - 2100 = 17900 (RecoveryTime 20000). It is the control arm of the critical-heal claim: a non-critical heal leaves the 2100 ms timeline as the only elapsed time. No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
+    },
+    {
+      "spell": 561327,
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "kind": "metric_delta",
+      "gate_spell": 561327,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "cooldown_ms",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "tolerance": 50,
+      "void_on_cast_failure": true,
+      "setup_casts": [
+        806479
+      ],
+      "fields": {
+        "spell": 806479
+      },
+      "variant": "heal_plain_prayer",
+      "label_suffix": "heal_plain_prayer",
+      "expected": 87900,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Blessing of Kings (Solar Prayer cooldown read after one non-critical Daybreak self-heal)",
+      "observe_source": "561327 Effect[1] aura 42, AscensionSunClericEvents.cpp:118 (own critical damage or heal, actor-side event only) and :332-334 (Reduce by |680671 s1| = 1000 ms, EffectBasePoints -1001). Solar Prayer 806479 (RecoveryTime 90000) is cast on the caster, Daybreak 503624 heals the caster (health 30%) 1600 ms later, and the cooldown of 806479 is read 500 ms after Daybreak; 2100 ms of timeline elapse from the Solar Prayer cast to the read (1600 ms before Daybreak + 500 ms wait; the harness steps add about 15 ms, inside the tolerance 50, and no read sets the expectation). Control arm: 984954 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000) on the caster, so the Daybreak heal cannot crit and the cut is 0: 90000 - 2100 = 87900 (RecoveryTime 90000). It is the control arm of the critical-heal claim: a non-critical heal leaves the 2100 ms timeline as the only elapsed time. No cast in the before phase (0 expected). void_on_cast_failure: a refused cast makes the entry unmeasured. Class ADR 0037 (mentor D-220)."
+    },
+    {
+      "spell": 503690,
+      "name": "Dawn's Arrival (free Gavel earned from Dawnbreak)",
+      "kind": "aura_fed_effect",
+      "variant": "cooldown",
+      "label_suffix": "fed_cooldown",
+      "quote": "causes the next one to not incur a cooldown.",
+      "feed_spell": 800654,
+      "aura": 503691,
+      "effect_spell": 800611,
+      "every_ms": 1700,
+      "residual_target": 0.001,
+      "feed_power": 1363,
+      "effect_power": 1363,
+      "expected": 0,
+      "trials": 8,
+      "evidence_metric": "cast_failure",
+      "observe_source": "Route: real Dawnbreak 800654 casts every 1700 ms (cast_until_aura, owner ruling O-17) until the free-Gavel aura 503691 is on the caster; the harness never sets it (D-145). Code: the grant and the reset sit in one block, one roll: AscensionSunClericAbilities.cpp:282-287 (if Chance(player, 503690): Reduce INT32_MAX on Gavel roots 800611, 800614, 800617, then Cast 503691); Chance() rolls the raw ProcChance 40 of 503690 (AscensionSunCleric.cpp:196-205), so the trials that read the aura also read the reset. The free cast: :291-292 (a Gavel carrying script value 503691 is reduced to no cooldown). Reads: cooldown_ms is readback data (the server cooldown map), so the behaviour is the recast: a second real Gavel 1600 ms after the first goes off (spell_go_count, cast_failure 0) in the treatment and is refused with SPELL_FAILED_NOT_READY 67 in the control (no aura), and a third in the treatment is refused (only the next cast is free). Reset: a Gavel of Light 800611 is cast first (CategoryRecoveryTime 5000 in Spell.dbc), 1600 ms later the feed starts; a feed that reaches the aura at its first or second cast finds the Gavel still cooling naturally (3400 or 1700 ms left), so a read of 0 right after the aura appeared is the reset; later casts find it over and are not judged (spell_go_count of 800654 gives the casts per trial). Control: the same Gavel without the feed reads 3400 and 1700 ms left (natural cooldown, within 10%). The free read starts from a Gavel reset as a precondition fixture so it does not depend on the reset claim. Sizing: ProcChance 40, so a trial is judged for the reset with probability 1 - 0.6^2 = 0.64; 8 trials leave a run with no judged trial at 0.36^8 = 2.8e-4 (5.7e-4 per pair, unmeasured, never a false verdict); max_casts 19 keeps an unfed trial at most 0.001 per pair. A correct server has no random outcome in a judged trial. Reference search 2026-11-22: coa-history spell 503690: 0 events in 186 logs (a passive); 503691: 280 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED in 5 logs, no cooldown or cast event, so a free Gavel is not told apart there; Dawnbreak 800654: 284 SPELL_CAST_SUCCESS in 4 logs; nothing found beyond the tooltip and the DBC. Tool: aura_fed_effect cooldown variant (Sun Cleric tool ADR 1037)."
+    },
+    {
+      "spell": 503690,
+      "name": "Dawn's Arrival (Gavel reset by Dawnbreak, recast read)",
+      "kind": "aura_fed_effect",
+      "variant": "cooldown_reset_recast",
+      "label_suffix": "fed_reset",
+      "quote": "Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels",
+      "feed_spell": 800654,
+      "aura": 503691,
+      "effect_spell": 800611,
+      "every_ms": 1700,
+      "residual_target": 0.001,
+      "feed_power": 1363,
+      "effect_power": 1363,
+      "expected": 0,
+      "trials": 15,
+      "observe_source": "Route: a real Gavel of Light 800611 primer (cooldown reset first as a precondition fixture; CategoryRecoveryTime 5000, StartRecoveryTime 1500 in category 133 shared with Dawnbreak 800654, Spell.dbc /srv/coa/server-data/dbc) is read 1600 ms later (3400 ms natural left, a primer not natural within 10% voids the run); treatment trials then cast real Dawnbreak 800654 every 1700 ms (cast_until_aura, owner ruling O-17) until 503691 is on the caster, the harness never sets it (D-145); 1600 ms later, past the global cooldown and 3200 ms after the primer, the Gavel is cast again (R). Code: the grant and the reset sit in one block, one roll: AscensionSunClericAbilities.cpp:282-287 (if Chance(player, 503690): Reduce INT32_MAX on Gavel roots 800611, 800614, 800617, then Cast 503691), so a trial that holds the aura also had its Gavel cooldown reset. Behaviour read: R goes off (spell_go_count +1 over the primer, cast_failure 0) in the treatment and is refused with SPELL_FAILED_NOT_READY 67 in the control (no feed, no aura, 1800 ms of natural cooldown left). Selection (mentor D-210): only treatment trials whose aura came at the first Dawnbreak are judged (spell_go_count of 800654), on the aura timing, never on the outcome of R; a grant at the second cast puts R at 4900 ms, inside the band of the natural end. Void (in-kind): a refused Dawnbreak voids the run; the control's 67 on R is the judged read, not a void. Sizing: ProcChance 40 of 503690, a trial is selected with probability 0.4, 15 trials leave a run with none selected at 0.6^15 = 4.7e-4 (unmeasured, never a false verdict). The 40% figure itself stays an owner question (no claim). Reference search: see the fed_cooldown entry (coa-history 503691 280 aura applies, no cooldown event). Tool: aura_fed_effect cooldown_reset_recast variant (Sun Cleric tool ADR 1037 addendum)."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 600,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "expected": 1,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Your Gavels can no longer be missed, dodged, or parried",
+      "name": "Heaven's Appraisal (a Gavel of Wrath is not dodged by a 100% dodge dummy)",
+      "variant": "gavel_undodged",
+      "player_ratings": {
+        "expertise_rating": 0
+      },
+      "label_suffix": "gavel_undodged",
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10020,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Dodge 10020 (Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture (the subject is the Gavel's table, not the fixture). One Gavel of Wrath per phase at the dummy, the damage events (spell_damage_count, a dodged spell logs none) of 800617 on the dummy are counted: control without 300353 dodged, 0; with 300353 learned, 1. A control reading above 0 shows the fixture did not dodge (the entry then proves nothing and is unmeasured by review). Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500). Design 3 (2026-11-22): the class file ratings give the caster expertise_rating 10000, which removes the dummy's dodge and parry chance before any aura is read (a lead from the first pair, where the control Gavel landed with the fixture on the dummy), so this entry sets expertise_rating 0 on the caster (player_ratings); the control phase, the same Gavel without 300353, must then be dodged (0 damage events) and the learned phase lands."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "metric": "aura",
+      "fields": {
+        "spell": 805489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
+      "name": "Heaven's Appraisal (Gavel of Light places Holy Shield under Holy Form)",
+      "variant": "light_shield",
+      "label_suffix": "light_shield",
+      "expected": 1,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture). Control without 300353: no shield, 0; with 300353: 1. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "metric": "aura",
+      "fields": {
+        "spell": 805489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
+      "name": "Heaven's Appraisal (control: Gavel of Light without Holy Form places no shield)",
+      "variant": "light_shield_control",
+      "label_suffix": "light_shield_control",
+      "expected": 0,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Without Holy Form on the caster the condition is false: no shield in either phase, 0 before and 0 after 300353 is learned. Reference search 2026-11-22: as light_shield; nothing else found."
     },
     {
       "spell": 560492,

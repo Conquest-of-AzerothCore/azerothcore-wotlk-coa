@@ -16,7 +16,10 @@ CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effectiv
 CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total'}
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
-KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source', 'ally_class'}
+KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source', 'ally_attacks',
+        'ally_strikes', 'ally_class'}
+ALLY_ATTACK_KEYS = {'spell', 'power', 'source'}
+ALLY_ATTACK_SETTLE_MS = 2000
 COA_CLASSES = range(12, 33)
 ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source', 'reach_source',
             'precondition'}
@@ -67,6 +70,9 @@ class AllyArm:
     go_per_cast: tuple[tuple[int, int, str], ...] = ()
     ratios: tuple[Ratio, ...] = ()
     reach_source: str = ''
+    ally_attacks: tuple[tuple[int, int, str], ...] = ()
+    ally_strikes: bool = False
+    ally_strike_health: int | None = None
     ally_class: int | None = None
 
     @property
@@ -134,6 +140,14 @@ def parse_ally_cast(raw) -> tuple[int, int, str]:
     return raw['spell'], raw['spell_go_per_cast'], raw['source']
 
 
+def parse_ally_attack(raw) -> tuple[int, int, str]:
+    if not isinstance(raw, dict) or set(raw) != ALLY_ATTACK_KEYS or type(raw['spell']) is not int \
+            or raw['spell'] <= 0 or type(raw['power']) is not int or raw['power'] < 0 or not stated_text(raw['source']):
+        raise ValueError(f'an ally_arm ally attack is {{spell, power: the ally\'s power set before the cast, an '
+                         f'integer >= 0, source: text}}, not {raw!r}')
+    return raw['spell'], raw['power'], raw['source']
+
+
 def parse_ratio(raw, arms: int) -> Ratio:
     floor_count = raw.get(FLOOR_COUNT_KEY) if isinstance(raw, dict) else None
     if isinstance(raw, dict) and FLOOR_COUNT_KEY in raw and (
@@ -179,6 +193,22 @@ def parse(raw) -> AllyArm:
     casts = raw.get('ally_casts', [])
     if type(allies) is not int or not 0 <= allies <= len(ALLY_IDS):
         raise ValueError(f'ally_arm allies is an integer from 0 to {len(ALLY_IDS)}, not {allies!r}')
+    attacks = raw.get('ally_attacks', [])
+    if not isinstance(attacks, list) or ('ally_attacks' in raw and not attacks):
+        raise ValueError(f'ally_arm ally_attacks is a non-empty list, not {attacks!r}')
+    strikes = raw.get('ally_strikes', True)
+    strike_health = None
+    if isinstance(strikes, dict):
+        strike_health = strikes.get('health')
+        if set(strikes) != {'health'} or type(strike_health) is not int or strike_health <= 0:
+            raise ValueError(f'ally_arm ally_strikes is true or {{health: a positive integer}}, not {strikes!r}')
+    elif strikes is not True:
+        raise ValueError(f'ally_arm ally_strikes is true or {{health: N}}, not {strikes!r}')
+    if allies == 0 and (attacks or 'ally_strikes' in raw):
+        raise ValueError('ally_arm allies 0 has no ally to attack or to strike')
+    if (attacks or 'ally_strikes' in raw) and 'control_wait' in raw:
+        raise ValueError('ally_arm ally_attacks and ally_strikes add waits after the trigger, which control_wait '
+                         'does not time')
     if allies == 0 and (health is not None or casts or not raw.get('arms')):
         raise ValueError('ally_arm allies 0 reads caster-only arms: arms, no ally_health and no ally_casts')
     if health is not None and (not isinstance(health, list) or len(health) != 2
@@ -230,7 +260,9 @@ def parse(raw) -> AllyArm:
     return AllyArm(allies, tuple(health) if health is not None else None, tuple(spell for spell, _, _ in stated),
                    'control_wait' in raw, parsed_arms,
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
-                   parsed_ratios, raw.get('reach_source', ''), ally_class)
+                   parsed_ratios, raw.get('reach_source', ''),
+                   tuple(parse_ally_attack(attack) for attack in attacks), 'ally_strikes' in raw, strike_health,
+                   ally_class)
 
 
 def check(spec, ally):
@@ -264,12 +296,29 @@ def check(spec, ally):
                                  f'METRIC_EVIDENCE row that is not a readback, found {counted!r}')
             reads += [(actor, arm.count_metric, arm.fields, f'arm {index} count') for actor in arm.actors]
     reach_check(spec, ally)
+    attacked = {spell for spell, _, _ in ally.ally_attacks}
     for actor, metric, fields, read in reads:
+        if actor == ALLY_IDS[0] and metric in CASTER_SCOPED_METRICS and fields.get('spell') in attacked:
+            continue
         if actor != CASTER and metric in CASTER_SCOPED_METRICS \
                 and not (metric in CASTER_ENTRY_METRICS and 'caster_entry' in fields):
             raise ValueError(f'{spec.spell} ally_arm {read} reads {metric} on {actor}: the harness counts only the '
                              f'events {actor} itself (or its pet, or a caster_entry creature for a heal) cast, never '
                              f'the caster\'s; read it on the caster with fields.target {actor!r}')
+    if (ally.ally_attacks or ally.ally_strikes) and (spec.gate_timing != 'between' or spec.setup_only_after):
+        raise ValueError(f'{spec.spell} ally_arm ally_attacks and ally_strikes run in the default gate timing only, '
+                         f'with no setup_only_after')
+    if ally.ally_attacks and not dummy:
+        raise ValueError(f'{spec.spell} ally_arm ally_attacks cast at the dummy, which its scenario does not have: '
+                         f'set select_dummy or read the dummy')
+    if ally.ally_strikes and (spec.strike is None or spec.strike.after_trigger_ms is None
+                              or spec.strike.owned_entry is not None or spec.strike.dx):
+        raise ValueError(f'{spec.spell} ally_arm ally_strikes repeats the entry\'s strike at each ally after the '
+                         f'trigger: a strike with after_trigger_ms, no owned_entry and no dx')
+    if ally.ally_strike_health is not None and spec.strike is not None \
+            and ally.ally_strike_health > spec.strike.max_health:
+        raise ValueError(f'{spec.spell} ally_arm ally_strikes health {ally.ally_strike_health} exceeds the strike\'s '
+                         f'max_health {spec.strike.max_health}')
     if ally.ally_casts and spec.attack_swings:
         raise ValueError(f'{spec.spell} ally_arm casts at the ally in cast phases only, not between attack swings')
     for spell in ally.ally_casts:
@@ -317,6 +366,59 @@ def ally_cast_step(spell: int) -> dict:
     return {'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': ALLY_IDS[0]}
 
 
+def uncast_before(spec) -> bool:
+    return not spec.cast_in_before or spec.trigger_only_after
+
+
+def ally_attack_label(spell: int, moment: str, index: int) -> str:
+    return f'{spell} {moment} SETUP: ally attack {index} went off'
+
+
+def ally_attack_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
+    from values import TARGET
+    moment = 'after' if after else 'before'
+    spells = [spell for spell, _, _ in ally.ally_attacks]
+    steps = []
+    for index, (spell, power, _) in enumerate(ally.ally_attacks):
+        landed = spells[:index + 1].count(spell) + (spells.count(spell) if after else 0)
+        steps += [{'action': 'set_power', 'actor': ALLY_IDS[0], 'power': 0, 'value': power},
+                  {'action': 'reset_cooldown', 'actor': ALLY_IDS[0], 'spell': spell},
+                  {'action': 'cast', 'actor': ALLY_IDS[0], 'spell': spell, 'target': TARGET},
+                  {'action': 'wait', 'label': f'{spell} by the ally at the dummy, past the global cooldown',
+                   'ms': ALLY_ATTACK_SETTLE_MS},
+                  {'action': 'assert', 'label': ally_attack_label(spell, moment, index), 'actor': ALLY_IDS[0],
+                   'metric': ALLY_CAST_PROOF_METRIC, 'spell': spell, 'equals': landed}]
+    return steps
+
+
+def strike_label(spec, moment: str, unit: str, edge: str) -> str:
+    return f'{arm_label(spec, moment, "strike", unit)} {edge}'
+
+
+def ally_strike_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
+    from behaviours import STRIKER
+    from profile import CASTER, measurement
+    moment = 'after' if after else 'before'
+    strike = spec.strike
+    steps = []
+    for unit in ally.ally_ids:
+        steps.append(measurement(strike_label(spec, moment, unit, 'start'), CASTER, ALLY_CAST_PROOF_METRIC,
+                                 spell=strike.spell, caster=STRIKER))
+        steps.append({'action': 'set_health', 'actor': unit, 'maximum': strike.max_health,
+                      'value': strike.health if ally.ally_strike_health is None else ally.ally_strike_health})
+        for _ in range(strike.count):
+            steps += [{'action': 'cast', 'actor': STRIKER, 'spell': strike.spell, 'target': unit},
+                      {'action': 'wait', 'label': 'strike', 'ms': strike.wait_ms}]
+        steps.append(measurement(strike_label(spec, moment, unit, 'end'), CASTER, ALLY_CAST_PROOF_METRIC,
+                                 spell=strike.spell, caster=STRIKER))
+    return steps
+
+
+def after_trigger_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
+    return (ally_strike_steps(spec, ally, after) if ally.ally_strikes else []) + \
+        (ally_attack_steps(spec, ally, after) if ally.ally_attacks else [])
+
+
 def phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
     from profile import CASTER
     moment = 'after' if after else 'before'
@@ -335,6 +437,8 @@ def phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
                   for unit in ally.ally_ids]
     if ally.control_wait and not after:
         steps.append({'action': 'wait', 'label': CONTROL_LABEL, 'ms': spec.wait_ms})
+    if not after and uncast_before(spec):
+        steps += after_trigger_steps(spec, ally, after)
     return steps
 
 
@@ -405,7 +509,9 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
                         **({'allow_regeneration': False} if spec.disable_regeneration else {})})
     steps = scenario['steps']
     settled = len(base_steps(class_file))
-    steps[settled:settled] = [{'action': 'group', 'actor': CASTER, 'target': unit} for unit in ally.ally_ids]
+    steps[settled:settled] = [{'action': 'group', 'actor': CASTER, 'target': unit} for unit in ally.ally_ids] + \
+        [{'action': 'learn', 'actor': ALLY_IDS[0], 'spell': spell}
+         for spell in dict.fromkeys(spell for spell, _, _ in ally.ally_attacks)]
     for moment in ('after', 'before'):
         read = next(index for index, step in enumerate(steps) if step.get('label') == metric_delta_label(spec, moment))
         steps[read + 1:read + 1] = arm_reads(spec, ally, moment)
@@ -424,6 +530,19 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
             contract += f' Each {spell} cast at {ALLY_IDS[0]} counts {count} SPELL_GO ({source}).'
     if ally.ally_health is not None:
         contract += f' Each phase sets the allies\' health to {ally.ally_health[0]} of {ally.ally_health[1]}.'
+    if ally.ally_strikes:
+        contract += (f' After the trigger and the caster\'s strikes (at the start of an uncast before phase), each '
+                     f'ally is set to {spec.strike.health if ally.ally_strike_health is None else ally.ally_strike_health}'
+                     f' of {spec.strike.max_health} health and struck '
+                     f'{spec.strike.count} time(s) by the striker\'s '
+                     f'{spec.strike.spell}; the caster\'s count of the striker\'s {ALLY_CAST_PROOF_METRIC} of it is '
+                     f'read around each ally\'s strikes, and a count that did not grow by {spec.strike.count} voids '
+                     f'the trial (unmeasured).')
+    for spell, power, source in ally.ally_attacks:
+        contract += (f' {ALLY_IDS[0]} learns {spell} and, after the trigger (at the same point in an uncast before '
+                     f'phase), casts it at the dummy with its power set to {power}, waiting {ALLY_ATTACK_SETTLE_MS} '
+                     f'ms, and its own {ALLY_CAST_PROOF_METRIC} of it is asserted, so the scenario fails when the '
+                     f'attack did not go off ({source}).')
     if ally.control_wait:
         contract += (f' The uncast before phase waits {spec.wait_ms} ms, the after phase\'s wait, before its '
                      f'reading (timed no-cast control).')
@@ -461,10 +580,13 @@ def model(spec, ally: AllyArm) -> dict:
                           'tolerance': ratio.tolerance, 'source': ratio.source,
                           **({FLOOR_COUNT_KEY: ratio.floor_count} if ratio.floor_count is not None else {})}
                          for ratio in ally.ratios]}
+    strikes = {'strike_reads': [[strike_label(spec, moment, unit, 'start'), strike_label(spec, moment, unit, 'end'),
+                                 spec.strike.count] for moment in ('before', 'after') for unit in ally.ally_ids]
+               } if ally.ally_strikes else {}
     arms = [arm_model(spec, index, arm) for index, arm in enumerate(ally.arms)]
     return {NAME: {'allies': list(ally.ally_ids),
                    **({'ally_class': ally.ally_class} if ally.ally_class is not None else {}), 'arms': arms,
-                   **(ratios if ally.ratios else {})}}
+                   **(ratios if ally.ratios else {}), **strikes}}
 
 
 def arm_model(spec, index: int, arm: Arm) -> dict:
@@ -512,7 +634,23 @@ def void_trial(verdict, run, arms: list[dict]):
                                           'a precondition failed: the trial is void, not judged'])), texts
 
 
+def unlanded_strikes(run, ally: dict) -> list[str]:
+    texts = []
+    for start, end, count in ally.get('strike_reads', []):
+        first, last = run.values.get(start), run.values.get(end)
+        if first is None or last is None:
+            texts.append(f'{start if first is None else end} was not read')
+        elif last - first != count:
+            texts.append(f'{end}: the striker\'s count grew by {last - first:g}, not {count}')
+    return texts
+
+
 def verdict(verdict, run, ally: dict):
+    unlanded = unlanded_strikes(run, ally)
+    if unlanded:
+        return replace(verdict, status='unmeasured',
+                       explanation='; '.join([verdict.explanation, *unlanded,
+                                              'an ally strike did not land: the trial is void, not judged']))
     if not ally['arms'] or verdict.status == 'unmeasured':
         return verdict
     voided, texts = void_trial(verdict, run, ally['arms'])
