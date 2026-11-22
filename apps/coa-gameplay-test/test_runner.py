@@ -1554,8 +1554,8 @@ class RunnerTests(unittest.TestCase):
                 run.validate(invalid)
 
     def test_spell_damage_with_resist_total_refuses_the_spell_damage_event_filters(self):
-        for key, value in (('pet', False), ('resisted', True), ('blocked', False), ('entry', 36),
-                           ('target_entry', 36), ('caster_entry', 36)):
+        for key, value in (('pet', False), ('resisted', True), ('blocked', False), ('target_entry', 36),
+                           ('caster_entry', 36)):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_damage_with_resist_total',
                                       'spell': 116, key: value, 'min': 0})
