@@ -1886,5 +1886,94 @@ class CriticalBlockChancePartnerTest(unittest.TestCase):
             self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10), self.arm(self.OFF, 0)), [DATA])
 
 
+class UseTimeContrastPartnerTest(unittest.TestCase):
+    METRIC = 'spell_cast_time_ms'
+    PLAIN = 'Reduces the cast time of Radiant Cascade by $s1%.'
+    NEXT = 'Your next Illumination is instant cast'
+    COST = 'and free of cost'
+    ARM = '92137 behaviour_metric_delta instant'
+    OFF = '92137 behaviour_metric_delta consumed'
+    PLAIN_ARM = '807874 behaviour_metric_delta cast_time'
+
+    def arm(self, label, gain, arms, contrast=LEARNED_CONTRAST, metric=METRIC, status='ok'):
+        return judged(label, BEHAVIOUR_METRIC_DELTA, metric, status=status, contrast=contrast,
+                      use_time_contrast={'arms': list(arms), 'gain': gain})
+
+    def plain(self, label, contrast=LEARNED_CONTRAST, metric=METRIC):
+        return judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=contrast)
+
+    def evidence(self, text, *verdicts):
+        return evidence_of([claim(text, *(verdict.label for verdict in verdicts))], list(verdicts))[0]
+
+    def pair(self, metric=METRIC):
+        arms = (self.ARM, self.OFF)
+        return self.arm(self.ARM, -1500, arms, metric=metric), self.arm(self.OFF, 0, arms, metric=metric)
+
+    def test_the_rows_stay_readbacks_without_a_base_contrast_proof(self):
+        for metric in ('spell_cast_time_ms', 'spell_power_cost'):
+            with self.subTest(metric=metric):
+                self.assertEqual(METRIC_EVIDENCE[metric], READBACK)
+                self.assertNotIn(metric, CONTRAST_PROOF)
+                self.assertNotIn(metric, PARTNERED_CONTRASTS)
+                self.assertNotIn(metric, STATE_PROMISES)
+        self.assertTrue(conditional_text(self.PLAIN))
+
+    def test_a_conditional_clause_is_behaviour_with_both_named_arms(self):
+        self.assertEqual(self.evidence(self.NEXT, *self.pair()), [BEHAVIOUR])
+
+    def test_a_cost_clause_is_behaviour_with_both_named_arms(self):
+        self.assertEqual(self.evidence(self.COST, *self.pair('spell_power_cost')), [BEHAVIOUR])
+
+    def test_a_plain_cast_time_sentence_needs_no_zero_arm(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.PLAIN_ARM, -375, (self.PLAIN_ARM,))), [BEHAVIOUR])
+
+    def test_the_non_zero_arm_alone_of_a_conditional_clause_stays_data(self):
+        self.assertEqual(self.evidence(self.NEXT, self.arm(self.ARM, -1500, (self.ARM,))), [DATA])
+
+    def test_the_zero_arm_alone_stays_data(self):
+        self.assertEqual(self.evidence(self.NEXT, self.arm(self.OFF, 0, (self.OFF,))), [DATA])
+
+    def test_a_named_arm_absent_among_the_partners_stays_data(self):
+        effect, _ = self.pair()
+        self.assertEqual(self.evidence(self.NEXT, effect), [DATA])
+
+    def test_a_named_arm_that_did_not_opt_in_does_not_count(self):
+        effect, _ = self.pair()
+        self.assertEqual(self.evidence(self.NEXT, effect, self.plain(self.OFF)), [DATA])
+
+    def test_a_condition_contrast_stays_data(self):
+        arms = (self.ARM, self.OFF)
+        self.assertEqual(self.evidence(self.NEXT, self.arm(self.ARM, -1500, arms, CONDITION_CONTRAST),
+                                       self.arm(self.OFF, 0, arms, CONDITION_CONTRAST)), [DATA])
+
+    def test_a_clause_that_does_not_promise_the_cast_time_stays_data(self):
+        self.assertEqual(self.evidence('Your next Illumination heals more', *self.pair()), [DATA])
+
+    def test_a_zero_gain_arm_under_an_unpromised_sentence_stays_data(self):
+        self.assertEqual(self.evidence('Increases the healing of Radiant Cascade by $s1%.',
+                                       self.arm(self.PLAIN_ARM, 0, (self.PLAIN_ARM,))), [DATA])
+
+    def test_a_partner_of_another_metric_does_not_count(self):
+        arms = (self.ARM, self.OFF)
+        other = self.arm(self.OFF, 0, arms, metric='spell_power_cost')
+        self.assertEqual(self.evidence(self.NEXT, self.arm(self.ARM, -1500, arms), other), [DATA])
+
+    def test_an_entry_without_the_field_keeps_its_readback_data(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.plain(self.PLAIN_ARM)), [DATA])
+        self.assertEqual(self.evidence(self.NEXT, self.plain(self.ARM), self.plain(self.OFF)), [DATA])
+
+    def test_the_field_on_another_metric_changes_nothing(self):
+        stamped = self.arm('1 behaviour_metric_delta cd', -1000, ('1 behaviour_metric_delta cd',), metric='cooldown_ms')
+        self.assertEqual(self.evidence('Reduces the cooldown of Radiant Cascade by 1 sec.', stamped), [DATA])
+
+    def test_mutant_without_the_partner_gate_passes_the_one_arm_claim(self):
+        with mock.patch('coverage.use_time_partners_hold', lambda verdict, text, partners: True):
+            self.assertEqual(self.evidence(self.NEXT, self.arm(self.ARM, -1500, (self.ARM,))), [BEHAVIOUR])
+
+    def test_mutant_without_the_opt_in_row_keeps_the_paired_arms_at_data(self):
+        with mock.patch('coverage.USE_TIME_METRICS', frozenset()):
+            self.assertEqual(self.evidence(self.NEXT, *self.pair()), [DATA])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -8547,6 +8547,9 @@
       "variant": "cast_time",
       "label_suffix": "cast_time",
       "quote": "Reduces the cast time of Radiant Cascade by $s1%.",
+      "use_time_contrast": [
+        "cast_time"
+      ],
       "trigger_spell": 805301,
       "gate_spell": 807874,
       "target": "caster",
