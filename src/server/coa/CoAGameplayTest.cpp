@@ -3607,6 +3607,12 @@ private:
             return unit->GetCreatureType();
         if (metric == "display_id")
             return unit->GetDisplayId();
+        if (metric == "display_of_creature")
+        {
+            CreatureTemplate const* info = sObjectMgr->GetCreatureTemplate(step.get<uint32>("entry"));
+            Require(info != nullptr, "Unknown creature entry in metric");
+            return info->GetModelWithDisplayId(unit->GetDisplayId()) != nullptr;
+        }
         if (metric == "target_entry")
         {
             Unit* target = ObjectAccessor::GetUnit(*unit, unit->GetTarget());
@@ -8795,7 +8801,10 @@ private:
         }
         else if (action == "use_gameobject")
         {
-            std::list<GameObject*> objects = OwnedGameObjects(player, step.get<uint32>("entry"));
+            Player* owner = player;
+            if (auto id = step.get_optional<std::string>("owner"))
+                owner = GetPlayer(*id);
+            std::list<GameObject*> objects = OwnedGameObjects(owner, step.get<uint32>("entry"));
             Require(objects.size() == 1, "Gameobject use needs exactly one owned object");
             WorldPacket packet(CMSG_GAMEOBJ_USE, 8);
             packet << objects.front()->GetGUID();
@@ -9005,6 +9014,8 @@ private:
                 target = player->GetPet();
                 Require(target != nullptr, "Power fixture needs a current pet");
             }
+            if (auto id = step.get_optional<std::string>("target"))
+                target = GetUnit(*id);
             uint32 power = step.get<uint32>("power", POWER_MANA);
             Require(power < MAX_POWERS, "Invalid power index");
             uint32 value = step.get<uint32>("value");
