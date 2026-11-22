@@ -141,7 +141,8 @@
           "92136 behaviour_metric_delta cap_caster_low"
         ]
       }
-    ]
+    ],
+    "reason": "Radius part: allies at 42.5 yd healed and at 43.5 yd not, the engine edge 40 + 1.5 + 1.5 (combat reach terms cited from Player.h:1110, not read; first run with 39/41 yd healed the 41 yd ally, the lead that showed the reach term). Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip."
   },
   {
     "spell": 92137,
@@ -3505,7 +3506,8 @@
       "681252 cost_gate 800612 cooldown_cut with",
       "681252 cost_gate 800612 cooldown_cut beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cost-gate arms: without 681252 the cooldown of Champion of the Sun runs on (attempt at 119080 ms refused), with it the attempt goes through, the 118920 ms attempt is refused: cut 1000 ms, excludes 900 and 1100. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip."
   },
   {
     "spell": 681252,
@@ -5079,7 +5081,7 @@
         ]
       }
     ],
-    "reason": "Second design for Judgement Day: a cost_gate resets arm (primer cast of 806121 with a dummy in its area, New Day cast after it, 806121 attempted again inside its 60000 ms cooldown: refused 67 without, accepted with), replacing the withdrawn cooldown read (b10c4: the primer found no enemy and left no cooldown). Paragon and Chosen of the Light get the same cast-attempt arms beside their cooldown readbacks."
+    "reason": "Second design for Judgement Day: a cost_gate resets arm (primer cast of 806121 with a dummy in its area, New Day cast after it, 806121 attempted again inside its 60000 ms cooldown: refused 67 without, accepted with), replacing the withdrawn cooldown read (b10c4: the primer found no enemy and left no cooldown). Paragon and Chosen of the Light get the same cast-attempt arms beside their cooldown readbacks. Judgement Day: refused without, accepted with, on the cost_gate resets arm. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip."
   },
   {
     "spell": 800602,
@@ -6616,7 +6618,7 @@
     "spell": 807343,
     "clause": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
     "kind": "claim",
-    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip.",
+    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip. light_held: present at 9500..9800 ms, gone at 10700..11000 ms after the cast. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip.",
     "claims": [
       {
         "claim": "grants you Light of Absolution on Horusath Blast damage",
