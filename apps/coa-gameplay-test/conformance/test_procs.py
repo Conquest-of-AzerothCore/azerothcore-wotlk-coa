@@ -1787,6 +1787,7 @@ class EffectiveHealTrialTest(unittest.TestCase):
         for index in casts:
             self.assertIn({'action': 'set_health', 'actor': 'ally', 'value': 1, 'maximum': 2000000000},
                           steps[index - 4:index])
+            self.assertNotIn('relocate', [step['action'] for step in steps[index - 4:index]])
         measured = {step['label']: step for step in steps if step['action'] == 'assert'}
         trials = measured['804571 proc trials']
         self.assertEqual((trials['metric'], trials['spell'], trials['target']),

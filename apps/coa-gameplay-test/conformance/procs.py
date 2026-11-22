@@ -736,10 +736,10 @@ def attempt_fixtures(entry: dict) -> list[dict]:
     spell = trigger_spell(entry)
     fixtures = [{'action': 'restore_charges', 'actor': CASTER, 'spell': spell}] if counts_charges(entry) else []
     fixtures += attempt_auras(entry)
-    if trigger_target(entry) == ALLY:
-        fixtures.append({'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD})
     if counts_effective_heals(entry):
         fixtures.append({'action': 'set_health', 'actor': ALLY, 'value': 1, 'maximum': HEAL_POOL})
+    elif trigger_target(entry) == ALLY:
+        fixtures.append({'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD})
     return fixtures
 
 
