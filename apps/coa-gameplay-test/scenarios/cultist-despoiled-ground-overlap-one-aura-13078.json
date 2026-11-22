@@ -34,13 +34,22 @@
       "destination": {"x": -8914.41, "y": -115.853, "z": 82.3711}
     },
     {
+      "action": "assert", "label": "SETUP: the first patch is accepted", "actor": "cultist", "metric": "cast_failure",
+      "spell": 805180, "equals": 0
+    },
+    {
       "action": "assert", "label": "SETUP: the enemy carries the first patch's aura", "actor": "mob", "metric": "aura",
       "spell": 805180, "equals": 1, "within_ms": 2000
     },
     {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "reset_cooldown", "actor": "cultist", "spell": 805180},
     {
       "action": "cast", "label": "Second, overlapping patch", "actor": "cultist", "spell": 805180,
       "destination": {"x": -8914.41, "y": -115.853, "z": 82.3711}
+    },
+    {
+      "action": "assert", "label": "SETUP: the second patch is accepted", "actor": "cultist", "metric": "cast_failure",
+      "spell": 805180, "equals": 0
     },
     {
       "action": "assert", "label": "SETUP: two overlapping patches", "actor": "cultist", "metric": "dynamic_object",
