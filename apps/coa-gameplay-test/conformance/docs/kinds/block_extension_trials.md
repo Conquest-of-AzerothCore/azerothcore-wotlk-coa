@@ -11,7 +11,8 @@ After the strike the blocked and unblocked hit counts are read, then the aura's 
 and on both sides of the extended band (base + `extension_spell` Effect[`extension_effect`], +-10%). The stamps
 bracket the expiry.
 
-Judge, per trial: a strike that is not exactly one blocked hit, or a cast that left no aura, voids the trial. A
+Judge, per trial: a strike that does not raise the cumulative counts by exactly one blocked hit and no unblocked
+hit, or a cast that left no aura, voids the trial. A
 bracket inside the base band is a plain trial, inside the extended band an extended trial; a bracket outside both
 bands, or an aura back after it was gone, alerts; a bracket straddling a band edge is unmeasured. The verdict alerts
 on any alerting trial, is unmeasured on any unmeasured trial or when no trial was extended, and is ok otherwise. The

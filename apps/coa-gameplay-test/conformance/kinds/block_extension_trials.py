@@ -168,9 +168,12 @@ def classify(bracket: tuple[float, float | None], limits: dict) -> str:
     return 'alert' if outside else 'unmeasured'
 
 
-def trial_outcome(run: Run, trial: dict, limits: dict) -> tuple[str, str]:
-    if run.values[trial['blocked']] != 1 or run.values[trial['unblocked']] != 0 or run.values[trial['cast_aura']] != 1:
-        return 'void', 'strike not one blocked hit or no aura after the cast'
+def trial_outcome(run: Run, trial: dict, previous: dict | None, limits: dict) -> tuple[str, str]:
+    blocked, unblocked = (run.values[trial[key]] - (run.values[previous[key]] if previous else 0.0)
+                          for key in ('blocked', 'unblocked'))
+    if blocked != 1 or unblocked != 0 or run.values[trial['cast_aura']] != 1:
+        return 'void', f'{blocked:g} blocked and {unblocked:g} unblocked hits, aura after the cast ' \
+                       f'{run.values[trial["cast_aura"]]:g}'
     start = run.values[trial['cast_time']]
     reads = [(run.values[read['time']] - start, run.values[read['aura']]) for read in trial['reads']]
     bracket = expiry_bracket(reads)
@@ -188,7 +191,9 @@ def block_extension_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
     refused = [reason for reasons in run.cast_failures.values() for reason in reasons if reason != NO_CAST_FAILURE]
     limits = {name: tuple(limit) for name, limit in model['bands'].items()}
-    outcomes = [trial_outcome(run, trial, limits) for trial in model['trials']]
+    trials = model['trials']
+    outcomes = [trial_outcome(run, trial, trials[index - 1] if index else None, limits)
+                for index, trial in enumerate(trials)]
     counts = {name: sum(outcome == name for outcome, _ in outcomes)
               for name in ('base', 'extended', 'alert', 'unmeasured', 'void')}
     judged = counts['base'] + counts['extended']

@@ -24,13 +24,14 @@ class BlockExtensionTrialsTests(unittest.TestCase):
         scenario, expectation = self.generated()
         offsets = [step['ms'] for step in scenario['steps']
                    if step['action'] == 'wait' and ' read ' in step.get('label', '') and 'trial 0 ' in step['label']]
-        values = {}
+        values, totals = {}, (0.0, 0.0)
         for index, (trial, expiry) in enumerate(zip(expectation.model['trials'], expiries)):
             start = 100000.0 * (index + 1)
             values[trial['cast_time']] = start
             values[trial['cast_aura']] = 1.0
-            values[trial['blocked']] = 1.0 if blocked is None or blocked[index] else 0.0
-            values[trial['unblocked']] = 1.0 - values[trial['blocked']]
+            hit = 1.0 if blocked is None or blocked[index] else 0.0
+            totals = (totals[0] + hit, totals[1] + 1.0 - hit)
+            values[trial['blocked']], values[trial['unblocked']] = totals
             elapsed = 600.0
             for read, wait in zip(trial['reads'], offsets):
                 elapsed += wait + STEP_DRIFT_MS

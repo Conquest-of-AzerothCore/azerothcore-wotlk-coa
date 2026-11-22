@@ -5145,7 +5145,7 @@
         ]
       }
     ],
-    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; 24 unblocked hits grant it never (block 0%), every strike checked blocked or landed (caster_avoidance block, D-176). Residual 0.7^24 = 1.9e-4 per run. The 30% chance stays data: G-20 step 1 not run (the band 28..32% needs about 5,450 to 13,900 blocks per arm; the cost goes to the mentor first); the extended share of the block_extension trials gives an interval, never judged. The 4 sec duration stays data."
+    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; 24 unblocked hits grant it never (block 0%, no shield: with the shield on, 0% still blocked about 4%), every strike checked blocked or landed (caster_avoidance block, D-176). Residual 0.7^24 = 1.9e-4 per run. The 30% chance stays data: G-20 step 1 not run (the band 28..32% needs about 5,450 to 13,900 blocks per arm; the cost goes to the mentor first); the extended share of the block_extension trials gives an interval, never judged. The 4 sec duration stays data."
   },
   {
     "spell": 707629,
@@ -5163,7 +5163,7 @@
         ]
       }
     ],
-    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm: 24 unblocked hits on one application, gone 13.8 s after the cast. The data labels of the base ledger are kept beside it."
+    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (no shield): 24 unblocked hits on one application, gone 13.8 s after the cast. The data labels of the base ledger are kept beside it."
   },
   {
     "spell": 707767,
