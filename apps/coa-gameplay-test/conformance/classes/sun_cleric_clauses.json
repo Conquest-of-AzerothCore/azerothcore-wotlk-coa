@@ -5736,7 +5736,7 @@
         ]
       }
     ],
-    "reason": "Open: no label covers the ranged weapon part; the melee weapon disarm and the duration have their own labels."
+    "reason": "Open, finding for the owner: Calm sets DISARMED 0x00200000 and DISARM_OFFHAND 0x80 (both read 1) but not DISARM_RANGED 0x400 (read 0), and its DBC has aura 67 and 254 with no aura 278, which the core handles (SpellAuraEffects.cpp:3302). An enemy Witch Hunter fires 3 Auto Shots in the control and +2 under Calm (expected 0), so ranged attacks continue; the positive control Justice 572848 is refused under Calm. Pair 20261122-213945 / -214041, build d0e42dc9, no flip. The flag_ranged and shooter_ranged entries alerted in both runs and are archived in removed-entries.json (rev1fix) until the owner chooses: add aura 278 to Calm or correct the text. The melee disarm and the duration keep their own labels."
   },
   {
     "spell": 804057,
