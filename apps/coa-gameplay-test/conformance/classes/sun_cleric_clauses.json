@@ -4533,7 +4533,6 @@
       {
         "claim": "by $s2%",
         "labels": [
-          "707433 effect_value e1 #1",
           "707433 behaviour_metric_delta mercy_spent"
         ]
       }
