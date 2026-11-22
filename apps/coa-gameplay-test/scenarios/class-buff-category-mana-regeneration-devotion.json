@@ -5,7 +5,7 @@
     "Devotion of Grace rank 2 300858 (Sun Cleric, class 27; SPELL_AURA_MOD_POWER_REGEN mana, base points 9: 10",
     "mana per 5 seconds, plus -7% spell cost) and Grove Instinct 572810 (Primalist, class 31,",
     "SPELL_AURA_MOD_POWER_REGEN mana, base points 4: 5) are two classes' MP5 buffs. Maintainer decision",
-    "2026-11-22: Devotion of Grace belongs to the MP5 category. Its chain head 800852 joins spell_group 2113014",
+    "2026-11-22: Devotion of Grace belongs to the MP5 category. Its chain head 800852 joins spell_group 2113013",
     "(rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) next to Grove Instinct. Expected: on a grouped ally each cast",
     "replaces the other."
   ],

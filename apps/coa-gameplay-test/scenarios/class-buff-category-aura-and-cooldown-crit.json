@@ -2,17 +2,17 @@
   "schema": 1,
   "name": "Class buffs: a crit cooldown stacks with another class's crit aura",
   "contract": [
-    "Maintainer decision 2026-11-22: area cooldowns must not skip a player who carries another class's",
-    "aura; a permanent aura and a cooldown stack. Slayer 300968 (Witch Hunter, family 21, passive raid area",
-    "aura, SPELL_AURA_MOD_CRIT_PCT base points 2: +3%) is in the crit aura category, spell_group 2113024.",
-    "Horn of War 800086 (Ranger, family 27, raid area aura for 30 seconds on a 60 second cooldown,",
-    "SPELL_AURA_MOD_CRIT_PCT base points 4: +5%) is in the timed crit category, spell_group 2113005. Slayer's",
-    "rule-3 group 2000181 does not hold Horn of War, so no shared group decides the pair. Expected: both",
-    "auras stay applied on a grouped ally and on the Ranger, and the Ranger's melee crit rises by 8. Crit is",
-    "measured on the Ranger because Horn of War's crit effect currently reaches only its caster: the direct",
-    "effect 1 application gives party members their own Horn of War aura, and the Ranger's area effect then",
-    "skips them in Aura::UpdateTargetMap. A fresh character's crit field reads 0 until a crit aura first",
-    "recomputes it, so Night Stalker 300792 primes the field first."
+    "Maintainer decision 2026-11-22: area cooldowns must not skip a player who carries another class's aura; a",
+    "permanent aura and a cooldown stack. Slayer 300968 (Witch Hunter, family 21, passive raid area aura,",
+    "SPELL_AURA_MOD_CRIT_PCT base points 2: +3%) is in the crit aura category, spell_group 2113015. Horn of War",
+    "800086 (Ranger, family 27, raid area aura for 30 seconds on a 60 second cooldown, SPELL_AURA_MOD_CRIT_PCT",
+    "base points 4: +5%) says it does not stack with similar effects, so it is in the support crit category,",
+    "spell_group 2113005. Slayer's rule-3 group 2000181 does not hold Horn of War, so no shared group decides",
+    "the pair. Expected: both auras stay applied on a grouped ally and on the Ranger, and the Ranger's melee",
+    "crit rises by 8. Crit is measured on the Ranger because Horn of War's crit effect currently reaches only",
+    "its caster: the direct effect 1 application gives party members their own Horn of War aura, and the",
+    "Ranger's area effect then skips them in Aura::UpdateTargetMap. A fresh character's crit field reads 0",
+    "until a crit aura first recomputes it, so Night Stalker 300792 primes the field first."
   ],
   "timeout_ms": 60000,
   "players": [

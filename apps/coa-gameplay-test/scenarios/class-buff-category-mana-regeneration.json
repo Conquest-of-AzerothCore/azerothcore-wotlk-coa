@@ -2,9 +2,9 @@
   "schema": 1,
   "name": "Class buffs: Grove Instinct and Seal of Al'ar share the mana regeneration category",
   "contract": [
-    "Grove Instinct 572810 (Primalist, class 31, SPELL_AURA_MOD_POWER_REGEN mana, base points 4: 5 mana per",
-    "5 seconds) and Seal of Al'ar 803649 (Pyromancer, class 24, SPELL_AURA_MOD_POWER_REGEN mana, base points 9:",
-    "10 mana per 5 seconds) are two classes' MP5 buffs on one ally. spell_group 2113014 (rule 1,",
+    "Grove Instinct 572810 (Primalist, class 31, SPELL_AURA_MOD_POWER_REGEN mana, base points 4: 5 mana per 5",
+    "seconds) and Seal of Al'ar 803649 (Pyromancer, class 24, SPELL_AURA_MOD_POWER_REGEN mana, base points 9:",
+    "10 mana per 5 seconds) are two classes' MP5 buffs on one ally. spell_group 2113013 (rule 1,",
     "SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both chains; their other groups (103955, 2104883, 2110008) are not",
     "shared. Expected: on a grouped ally each cast replaces the other, the weaker one included. The aura",
     "amounts stand in for the regeneration total, which a warrior ally does not show."

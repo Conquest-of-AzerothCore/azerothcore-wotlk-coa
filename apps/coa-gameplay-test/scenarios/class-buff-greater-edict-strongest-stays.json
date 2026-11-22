@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Class buffs: a single Inquisitor's Edict cannot replace Greater Inquisitor's Edict",
+  "contract": [
+    "Inquisitor's Edict 707679-707683 (single target, base points 1 -> +2 Agility) and Greater Inquisitor's",
+    "Edict 680303 (raid, base points 76 -> +77 Agility) are Witch Hunter (class 15) buffs in the Agility",
+    "category 2110001 (rule 1, newest wins). spell_group 2106097 holds the pair with rule 4",
+    "(SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST); its id is lower than 2110001, so it decides the pair first,",
+    "as 2106090-2106096 do for the resistance pairs (#6086). Expected on a grouped warrior ally: a single",
+    "Inquisitor's Edict from another Witch Hunter is refused, Greater Inquisitor's Edict stays and Agility",
+    "does not drop."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter_a",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "hunter_b",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "hunter_a",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "hunter_a",
+      "target": "hunter_b"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter_b",
+      "spell": 680303
+    },
+    {
+      "action": "learn",
+      "actor": "hunter_a",
+      "spell": 707679
+    },
+    {
+      "action": "cast",
+      "label": "Greater Inquisitor's Edict on the party",
+      "actor": "hunter_b",
+      "spell": 680303
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Greater Inquisitor's Edict",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680303,
+      "caster": "hunter_b",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "save_as": "greater",
+      "stat": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "A single Inquisitor's Edict from another Witch Hunter",
+      "actor": "hunter_a",
+      "spell": 707679,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the single Inquisitor's Edict is refused",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 707679,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Inquisitor's Edict stays",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680303,
+      "caster": "hunter_b",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Agility does not drop after the single cast",
+      "actor": "ally",
+      "metric": "stat",
+      "relative_to": "greater",
+      "min": 0,
+      "max": 0,
+      "stat": 1
+    }
+  ]
+}

@@ -16,7 +16,15 @@ def buff(spell_id, family, *effects):
 
 
 def persistent_buff(spell_id, family, *effects):
-    return Buff(spell_id, f'Spell {spell_id}', family, tuple(effects), True)
+    return Buff(spell_id, f'Spell {spell_id}', family, tuple(effects), model.AURA)
+
+
+def support_buff(spell_id, family, *effects):
+    return Buff(spell_id, f'Spell {spell_id}', family, tuple(effects), model.SUPPORT)
+
+
+def cooldown(spell_id, family, *effects):
+    return Buff(spell_id, f'Spell {spell_id}', family, tuple(effects), model.COOLDOWN)
 
 
 def groups(members, rules=None):
@@ -61,10 +69,13 @@ class SignatureTests(unittest.TestCase):
         beetle = buff(803657, 29, aura('SPELL_AURA_MOD_RESISTANCE', 1), aura('SPELL_AURA_MOD_STAT', -1))
         self.assertEqual(frozenset({'armor', 'stat:all'}), model.signature(beetle))
         self.assertEqual(frozenset({'stat:1'}), model.signature(buff(1, 20, aura('SPELL_AURA_MOD_STAT', 1))))
-        exclusive_armor = buff(2, 20, aura('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 1))
-        self.assertEqual(frozenset({'armor'}), model.signature(exclusive_armor))
-        all_schools = buff(3, 20, aura('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 126))
+        all_schools = buff(3, 20, aura('SPELL_AURA_MOD_RESISTANCE', 126))
         self.assertEqual(frozenset({'resistance:126'}), model.signature(all_schools))
+
+    def test_exclusive_resistance_is_left_to_the_engine(self):
+        self.assertEqual(frozenset(), model.signature(buff(1, 20, aura('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32))))
+        korthazz = buff(706589, 23, aura('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 4), aura('SPELL_AURA_MOD_STAT', 0))
+        self.assertEqual(frozenset({'stat:0'}), model.signature(korthazz))
 
     def test_ignored_effects_do_not_change_signature(self):
         plain = buff(1, 20, aura('SPELL_AURA_MOD_STAT', 1))
@@ -201,6 +212,9 @@ class PlanTests(unittest.TestCase):
                          {key: value for key, value in model.MANUAL.items() if value is not None})
         for timed in (300679, 504157, 704476, 804859, 804990, 806197, 502442, 800234, 805417, 806123):
             self.assertIsNone(model.MANUAL[timed])
+        wild_blessing = 681527
+        self.assertIsNone(model.MANUAL[wild_blessing])
+        self.assertEqual(frozenset({'spell_power:127'}), model.EXISTING_CATEGORIES[2110012])
         for passive in (300929, 300944, 560545, 300515, 504348, 804705):
             self.assertNotIn(passive, model.MANUAL)
         self.assertEqual(frozenset({model.INTELLECT_GROUP}), model.LEFT_ALONE_GROUPS)
@@ -288,6 +302,59 @@ class PlanTests(unittest.TestCase):
         self.assertEqual({20, 21}, plan.members[2113001])
         self.assertEqual({2113001}, plan.auras)
 
+    def test_cooldowns_get_no_category(self):
+        health = aura('SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT')
+        plan = self.plan([cooldown(10, 19, health), cooldown(11, 32, health), cooldown(12, 37, health),
+                          buff(13, 25, health)])
+        self.assertEqual({}, {key: value for key, value in plan.members.items() if value & {10, 11, 12, 13}})
+        self.assertEqual([10, 11, 12], plan.cooldowns[frozenset({'health_pct'})])
+        self.assertEqual([13], plan.single_class[frozenset({'health_pct'})])
+
+    def test_signature_with_only_cooldowns_is_not_single_class(self):
+        health = aura('SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT')
+        plan = self.plan([cooldown(10, 19, health), cooldown(11, 19, health)])
+        self.assertEqual({}, plan.single_class)
+        self.assertEqual([10, 11], plan.cooldowns[frozenset({'health_pct'})])
+
+    def test_support_buffs_get_their_own_category(self):
+        crit = aura('SPELL_AURA_MOD_CRIT_PCT')
+        plan = self.plan([buff(10, 19, crit), buff(11, 22, crit), support_buff(12, 27, crit),
+                          support_buff(13, 18, crit), persistent_buff(14, 20, crit), persistent_buff(15, 21, crit),
+                          cooldown(16, 30, crit)])
+        self.assertEqual({10, 11}, plan.members[2113001])
+        self.assertEqual({12, 13}, plan.members[2113002])
+        self.assertEqual({14, 15}, plan.members[2113003])
+        self.assertEqual({2113002}, plan.support)
+        self.assertEqual({2113003}, plan.auras)
+        self.assertNotIn(16, set().union(*plan.members.values()))
+
+    def test_support_buffs_alone_form_a_support_category(self):
+        haste = aura('SPELL_AURA_MOD_MELEE_HASTE')
+        plan = self.plan([support_buff(12, 27, haste), support_buff(13, 18, haste), cooldown(14, 31, haste)])
+        self.assertEqual({12, 13}, plan.members[2113001])
+        self.assertEqual({2113001}, plan.support)
+
+    def test_one_family_support_buffs_are_listed(self):
+        crit = aura('SPELL_AURA_MOD_CRIT_PCT')
+        plan = self.plan([buff(10, 19, crit), buff(11, 22, crit), support_buff(12, 27, crit)])
+        self.assertEqual(set(), plan.support)
+        self.assertEqual([12], plan.single_class[frozenset({'crit:SPELL_AURA_MOD_CRIT_PCT', 'support'})])
+
+    def test_support_buffs_stay_out_of_an_existing_category(self):
+        state = groups({2110001: {300857}}, {2110001: 1})
+        agility = aura('SPELL_AURA_MOD_STAT', 1)
+        plan = self.plan([buff(300857, 23, agility), support_buff(20, 30, agility), support_buff(21, 31, agility),
+                          cooldown(22, 32, agility)], state=state)
+        self.assertEqual({300857}, plan.members[2110001])
+        self.assertEqual({20, 21}, plan.members[2113001])
+        self.assertEqual({2113001}, plan.support)
+
+    def test_apply_plan_names_support_categories(self):
+        crit = aura('SPELL_AURA_MOD_CRIT_PCT')
+        after = model.apply_plan(self.existing(), self.plan([support_buff(12, 27, crit), support_buff(13, 18, crit)]))
+        self.assertEqual('CoA class support buffs: crit:SPELL_AURA_MOD_CRIT_PCT', after.descriptions[2113001])
+        self.assertEqual(1, after.rules[2113001])
+
     def test_apply_plan_names_aura_categories(self):
         crit = aura('SPELL_AURA_MOD_CRIT_PCT')
         buffs = [buff(10, 19, crit), buff(11, 22, crit), persistent_buff(12, 20, crit), persistent_buff(13, 21, crit)]
@@ -322,8 +389,19 @@ def trigger(spell_id):
                   spell_id)
 
 
-def record(family, *effects, passive=False, name='Spell', duration_index=0):
-    return model.Record(name, family, model.PASSIVE_ATTRIBUTE if passive else 0, tuple(effects), duration_index)
+def proc(spell_id):
+    return Effect('SPELL_EFFECT_APPLY_AURA', 'SPELL_AURA_PROC_TRIGGER_SPELL', 0, 0, 'TARGET_UNIT_CASTER',
+                  'TARGET_NONE', spell_id)
+
+
+def periodic(spell_id):
+    return Effect('SPELL_EFFECT_APPLY_AURA', 'SPELL_AURA_PERIODIC_TRIGGER_SPELL', 0, 0, 'TARGET_UNIT_CASTER',
+                  'TARGET_NONE', spell_id)
+
+
+def record(family, *effects, passive=False, name='Spell', duration_index=0, description=''):
+    return model.Record(name, family, model.PASSIVE_ATTRIBUTE if passive else 0, tuple(effects), duration_index,
+                        description)
 
 
 class SelectionTests(unittest.TestCase):
@@ -347,19 +425,90 @@ class SelectionTests(unittest.TestCase):
         self.assertEqual([1, 6, 7, 8], [buff.spell_id for buff in selected])
 
     def test_signature_uses_only_effects_that_reach_others(self):
-        dark_aura = record(21, area('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32),
+        dark_aura = record(21, area('SPELL_AURA_MOD_RESISTANCE', 32),
                            self_aura('SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE', 2), passive=True)
-        void = record(31, area('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32), passive=True)
+        void = record(31, area('SPELL_AURA_MOD_RESISTANCE', 32), passive=True)
         selected = model.select_buffs({1: dark_aura, 2: void}, {1, 2})
         self.assertEqual([frozenset({'resistance:32'})] * 2, [model.signature(buff) for buff in selected])
 
-    def test_passive_and_endless_buffs_are_persistent(self):
+    def test_passive_and_endless_buffs_are_auras(self):
         records = {1: record(20, area('SPELL_AURA_MOD_CRIT_PCT'), passive=True),
                    2: record(20, area('SPELL_AURA_MOD_CRIT_PCT'), duration_index=21),
                    3: record(20, area('SPELL_AURA_MOD_CRIT_PCT'), duration_index=30),
                    4: record(20, aura('SPELL_AURA_MOD_CRIT_PCT'))}
-        selected = model.select_buffs(records, {1, 2, 3, 4}, frozenset({21}))
+        selected = model.select_buffs(records, {1, 2, 3, 4}, {21: -1, 30: 1800000})
         self.assertEqual([True, True, False, False], [buff.persistent for buff in selected])
+
+    def test_buff_kinds_follow_duration_and_tooltip(self):
+        crit = area('SPELL_AURA_MOD_CRIT_PCT')
+        no_stack = 'Increases critical strike chance by $s1%.  Does not stack with similar effects.'
+        records = {1: record(20, crit, duration_index=30),
+                   2: record(20, crit, duration_index=29),
+                   3: record(20, crit, duration_index=31, description=no_stack),
+                   4: record(20, crit, duration_index=31),
+                   5: record(20, aura('SPELL_AURA_MOD_CRIT_PCT'), description=no_stack),
+                   6: record(20, aura('SPELL_AURA_MOD_CRIT_PCT')),
+                   7: record(20, crit, duration_index=31,
+                             description='Allies cannot benefit from similar effects for $57724d.'),
+                   8: record(20, crit, duration_index=31, description='Shares a cooldown with similar effects.')}
+        durations = {29: 300000, 30: 1800000, 31: 20000}
+        selected = model.select_buffs(records, set(records), durations)
+        self.assertEqual([model.BUFF, model.BUFF, model.SUPPORT, model.COOLDOWN, model.SUPPORT, model.COOLDOWN,
+                          model.SUPPORT, model.COOLDOWN], [buff.kind for buff in selected])
+
+    def test_area_aura_without_a_duration_is_an_aura(self):
+        no_stack = 'Increases critical strike chance of all party and raid members by 3%.  ' \
+                   'Does not stack with similar effects.'
+        records = {1: record(31, area('SPELL_AURA_MOD_CRIT_PCT'), description=no_stack),
+                   2: record(31, area('SPELL_AURA_MOD_CRIT_PCT'), duration_index=31, description=no_stack)}
+        selected = model.select_buffs(records, set(records), {31: 20000})
+        self.assertEqual({1: model.AURA, 2: model.SUPPORT}, {buff.spell_id: buff.kind for buff in selected})
+
+    def test_higher_rank_takes_the_tooltip_of_its_first_rank(self):
+        crit = area('SPELL_AURA_MOD_CRIT_PCT')
+        records = {1: record(20, crit, duration_index=31, description='Does not stack with similar effects.'),
+                   2: record(20, crit, duration_index=31)}
+        selected = model.select_buffs(records, {1, 2}, {31: 20000}, {2: 1})
+        self.assertEqual([model.SUPPORT, model.SUPPORT], [buff.kind for buff in selected])
+
+    def test_proc_takes_the_tooltip_of_its_trigger(self):
+        haste = area('SPELL_AURA_MOD_MELEE_HASTE')
+        records = {1: record(37, proc(2), passive=True, duration_index=21,
+                             description='Your heals grant haste.  Does not stack with similar effects.'),
+                   2: record(37, haste, duration_index=31),
+                   3: record(37, proc(4), passive=True, duration_index=21, description='Gain haste.'),
+                   4: record(37, haste, duration_index=31)}
+        selected = model.select_buffs(records, {1, 2, 3, 4}, {21: -1, 31: 20000})
+        self.assertEqual({2: model.SUPPORT, 4: model.COOLDOWN}, {buff.spell_id: buff.kind for buff in selected})
+
+    def test_buff_kept_up_by_an_endless_periodic_trigger_is_an_aura(self):
+        haste = area('SPELL_AURA_MOD_MELEE_HASTE')
+        no_stack = 'Does not stack with similar effects.'
+        records = {1: record(24, periodic(2), duration_index=21, description=no_stack),
+                   2: record(24, haste, duration_index=31),
+                   3: record(24, periodic(4), duration_index=31, description=no_stack),
+                   4: record(24, haste, duration_index=31),
+                   5: record(24, proc(6), duration_index=21, description=no_stack),
+                   6: record(24, haste, duration_index=31)}
+        selected = model.select_buffs(records, set(records), {21: -1, 31: 20000})
+        self.assertEqual({2: model.AURA, 4: model.SUPPORT, 6: model.SUPPORT},
+                         {buff.spell_id: buff.kind for buff in selected})
+
+    def test_banner_of_conquest_is_a_support_buff(self):
+        no_stack = 'Does not stack with similar effects.'
+        records = {500261: record(24, periodic(500264), duration_index=21, description=no_stack),
+                   500264: record(24, area('SPELL_AURA_MOD_CRIT_PCT'), duration_index=18)}
+        selected = model.select_buffs(records, set(records), {21: -1, 18: 20000})
+        self.assertEqual({500264: model.SUPPORT}, {buff.spell_id: buff.kind for buff in selected})
+
+    def test_drunken_brawler_is_excluded(self):
+        self.assertIn(805908, model.EXCEPTIONS)
+
+    def test_spell_dbc_row_keeps_its_description(self):
+        row = {'ID': 10, 'Name_Lang_enUS': 'Override', 'SpellClassSet': 25, 'Attributes': 0, 'DurationIndex': 21,
+               'Description_Lang_enUS': 'Does not stack with similar effects.',
+               'Effect_1': 6, 'EffectAura_1': 29, 'EffectMiscValue_1': 2, 'EffectBasePoints_1': 9}
+        self.assertEqual('Does not stack with similar effects.', model.apply_overrides({}, [row])[10].description)
 
     def test_spell_dbc_row_keeps_its_duration(self):
         row = {'ID': 10, 'Name_Lang_enUS': 'Override', 'SpellClassSet': 25, 'Attributes': 0, 'DurationIndex': 21,

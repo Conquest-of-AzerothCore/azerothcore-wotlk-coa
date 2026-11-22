@@ -3,11 +3,11 @@
   "name": "Class buffs: Honor and Rite of Power share the Strength category",
   "contract": [
     "Honor 300856 (Guardian, class 18, SPELL_AURA_MOD_STAT Strength, base points 3: +4) and Rite of Power",
-    "578126 (Reaper, class 30, SPELL_AURA_MOD_STAT Strength, base points 19: +20) are two classes' Strength buffs",
-    "on one ally. Maintainer decision 2026-11-22: they form one Strength category. spell_group 2113022 (rule 1,",
-    "SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both, and no lower shared group decides the pair. Expected: on a",
-    "grouped warrior ally Rite of Power replaces Honor, Strength rises by 20, not 24, and Honor cast again",
-    "replaces the stronger Rite of Power, because the rule is EXCLUSIVE, not EXCLUSIVE_HIGHEST."
+    "578126 (Reaper, class 30, SPELL_AURA_MOD_STAT Strength, base points 19: +20) are two classes' Strength",
+    "buffs on one ally. Maintainer decision 2026-11-22: they form one Strength category. spell_group 2113014",
+    "(rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both, and no lower shared group decides the pair.",
+    "Expected: on a grouped warrior ally Rite of Power replaces Honor, Strength rises by 20, not 24, and Honor",
+    "cast again replaces the stronger Rite of Power, because the rule is EXCLUSIVE, not EXCLUSIVE_HIGHEST."
   ],
   "timeout_ms": 90000,
   "players": [

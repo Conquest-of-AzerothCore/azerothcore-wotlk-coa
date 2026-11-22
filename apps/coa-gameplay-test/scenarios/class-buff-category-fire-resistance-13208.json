@@ -1,14 +1,13 @@
 {
   "schema": 1,
-  "name": "Class buffs: Fire Protection and Inscription: Fire share the Fire resistance category (#13208)",
+  "name": "Class buffs: Fire Protection and Inscription: Fire count once for Fire resistance (#13208)",
   "contract": [
     "#13208: resistance buffs of different classes stack. Fire Protection rank 3 582535 (Guardian, class 18,",
     "SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE Fire, base points 59: +60) and Inscription: Fire 561250 (Runemaster,",
     "class 32, the same aura and amount) are two classes' Fire resistance buffs on one ally; the aura keeps",
-    "only the highest amount but both buffs stayed on the ally.",
-    "spell_group 2113018 (rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both chains, and no lower shared",
-    "group decides the pair. Expected: on a grouped warrior ally each cast replaces the other and Fire",
-    "resistance rises by 60, with one of the two buffs on the ally."
+    "only the highest amount per school, so the resistance does not add up. Neither chain is in a CoA class",
+    "category, so a resistance buff keeps its other effects. Expected: on a grouped warrior ally both buffs",
+    "stay and Fire resistance rises by 60, not 120."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -131,17 +130,16 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Inscription: Fire replaced Fire Protection",
+      "label": "CONTROL: Fire Protection stays next to Inscription: Fire",
       "actor": "ally",
       "metric": "aura",
       "spell": 582535,
       "caster": "guardian",
-      "equals": 0,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Fire resistance rose once, by 60",
+      "label": "DISCRIMINATING: the two buffs count once, Fire resistance rose by 60",
       "actor": "ally",
       "metric": "resistance",
       "relative_to": "alone",
@@ -173,13 +171,22 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the newest buff wins, so Fire Protection replaced Inscription: Fire",
+      "label": "CONTROL: a refreshed Fire Protection leaves Inscription: Fire in place",
       "actor": "ally",
       "metric": "aura",
       "spell": 561250,
       "caster": "runemaster",
-      "equals": 0,
-      "within_ms": 1000
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Fire resistance still rose by 60 only",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 60,
+      "max": 60,
+      "school": 2
     }
   ]
 }

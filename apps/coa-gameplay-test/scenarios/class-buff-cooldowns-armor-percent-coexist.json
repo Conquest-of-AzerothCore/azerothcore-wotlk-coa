@@ -1,11 +1,14 @@
 {
   "schema": 1,
-  "name": "Class buffs: Elune's Grace and Faith share the armor percentage category",
+  "name": "Class buffs: the Elune's Grace and Faith armor cooldowns stack on one ally",
   "contract": [
-    "Elune's Grace 504027 (Starcaller, class 26) and Faith 804405 (Sun Cleric, class 27) both give",
-    "SPELL_AURA_MOD_RESISTANCE_PCT physical, base points 9: +10% armor, to one ally. spell_group 2113021 (rule",
-    "1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both, and no lower shared group decides the pair. Expected: on",
-    "a grouped ally Faith replaces Elune's Grace and Elune's Grace cast again replaces Faith."
+    "Maintainer decision 2026-11-22 (PR #13237 review): a buff of five minutes or longer keeps one per stat",
+    "across classes; a shorter buff whose tooltip says it does not stack with similar effects is a support buff",
+    "and keeps one per stat among support buffs; every other shorter buff is a cooldown, has no CoA class",
+    "category and stacks with everything. Elune's Grace 504027 (Starcaller, class 26, 15 seconds) and Faith",
+    "804405 (Sun Cleric, class 27, 20 seconds) both give SPELL_AURA_MOD_RESISTANCE_PCT physical, base points 9:",
+    "+10% armor, to one ally. Both are cooldowns, so no spell_group decides the pair. Expected: on a grouped",
+    "ally Faith leaves Elune's Grace in place."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -88,11 +91,6 @@
       "equals": 10
     },
     {
-      "action": "wait",
-      "label": "Let the global cooldown end",
-      "ms": 1600
-    },
-    {
       "action": "cast",
       "label": "Faith on the ally",
       "actor": "sun_cleric",
@@ -110,46 +108,27 @@
       "within_ms": 2000
     },
     {
-      "action": "assert",
-      "label": "DISCRIMINATING: Faith replaced Elune's Grace",
-      "actor": "ally",
-      "metric": "aura",
-      "spell": 504027,
-      "caster": "starcaller",
-      "equals": 0,
-      "within_ms": 1000
-    },
-    {
       "action": "wait",
-      "label": "Let the global cooldown end",
-      "ms": 1600
-    },
-    {
-      "action": "cast",
-      "label": "Elune's Grace again on the ally",
-      "actor": "starcaller",
-      "spell": 504027,
-      "target": "ally"
+      "label": "Give a replacement time to remove Elune's Grace",
+      "ms": 1000
     },
     {
       "action": "assert",
-      "label": "SETUP: the ally carries Elune's Grace again",
+      "label": "DISCRIMINATING: Faith leaves Elune's Grace in place",
       "actor": "ally",
       "metric": "aura",
       "spell": 504027,
       "caster": "starcaller",
-      "equals": 1,
-      "within_ms": 2000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the newest buff wins, so Elune's Grace replaced Faith",
+      "label": "DISCRIMINATING: Elune's Grace leaves Faith in place",
       "actor": "ally",
       "metric": "aura",
       "spell": 804405,
       "caster": "sun_cleric",
-      "equals": 0,
-      "within_ms": 1000
+      "equals": 1
     }
   ]
 }

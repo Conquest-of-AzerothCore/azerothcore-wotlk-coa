@@ -2,15 +2,15 @@
   "schema": 1,
   "name": "Class buffs: a weaker rank cannot replace a Greater resistance buff of the same family",
   "contract": [
-    "Resistance buffs use SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE (aura 143) and share rule-1 categories across",
-    "classes (Fire: 2113018). Within one family, Greater and ordinary forms keep the strongest buff, as the",
-    "Necromancer Mandates do (#6086): spell_group 2106092 holds Inscription: Fire 561248/561249/561250 and",
-    "Greater 561251 (Runemaster, class 32), 2106093 holds Fire Protection 582533 ranks and Greater 582536",
-    "(Guardian, class 18), both rule 4 (SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST) and lower than 2113018.",
-    "Amounts: rank 1 561248 base points 29 (+30), 561250 and both Greater forms base points 59 (+60).",
-    "Expected on a grouped warrior ally: a weaker cast from another caster of the same class is refused and",
-    "the Greater buff stays; an equal cast replaces it; a cast from another class replaces the older buff.",
-    "Fire resistance stays at +60."
+    "Resistance buffs use SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE (aura 143), which the engine already counts once",
+    "per school (the highest amount), so they are in no cross-class category. Within one family, Greater and",
+    "ordinary forms keep the strongest buff, as the Necromancer Mandates do (#6086): spell_group 2106092 holds",
+    "Inscription: Fire 561248/561249/561250 and Greater 561251 (Runemaster, class 32), 2106093 holds Fire",
+    "Protection 582533 ranks and Greater 582536 (Guardian, class 18), both rule 4",
+    "(SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST). Amounts: rank 1 561248 base points 29 (+30), 561250 and both",
+    "Greater forms base points 59 (+60). Expected on a grouped warrior ally: a weaker cast from another caster",
+    "of the same class is refused and the Greater buff stays; an equal cast replaces it; a buff from another",
+    "class applies next to it. Fire resistance stays at +60."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -240,16 +240,16 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: another class replaces Inscription: Fire, newest first",
+      "label": "CONTROL: Inscription: Fire from another class stays next to it",
       "actor": "ally",
       "metric": "aura",
       "spell": 561250,
-      "equals": 0,
-      "within_ms": 1000
+      "caster": "rune_a",
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "Greater Fire Protection keeps Fire resistance at 60",
+      "label": "The engine counts only the highest Fire resistance: still 60",
       "actor": "ally",
       "metric": "resistance",
       "relative_to": "alone",

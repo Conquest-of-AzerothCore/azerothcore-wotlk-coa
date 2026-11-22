@@ -42,7 +42,8 @@ SUITES = {
                      ['tools/test_comments.py'], ['tools/test_verify_all.py']],
     },
     'class-buffs': {
-        'paths': ['tools/coa_class_buffs.py', 'tools/test_coa_class_buffs.py'],
+        'paths': ['tools/coa_class_buffs.py', 'tools/test_coa_class_buffs.py',
+                  'data/sql/updates/pending_db_world/*.sql'],
         'commands': [['tools/test_coa_class_buffs.py']],
     },
     'molten-core-sql': {

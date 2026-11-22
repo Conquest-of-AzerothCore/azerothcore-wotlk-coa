@@ -115,7 +115,8 @@ class SourceSelectionTests(unittest.TestCase):
         self.assertEqual(result['checks'], ['mechanics'])
 
     def test_class_buff_audit_changes_run_its_tests(self):
-        for path in ['tools/coa_class_buffs.py', 'tools/test_coa_class_buffs.py']:
+        for path in ['tools/coa_class_buffs.py', 'tools/test_coa_class_buffs.py',
+                     'data/sql/updates/pending_db_world/rev_20261201_00_later.sql']:
             with self.subTest(path=path):
                 self.assertIn('class-buffs', check_source.select([path])['checks'])
         self.assertEqual(check_source.SUITES['class-buffs']['commands'], [['tools/test_coa_class_buffs.py']])

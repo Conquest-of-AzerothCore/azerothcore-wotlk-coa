@@ -1,13 +1,15 @@
 {
   "schema": 1,
-  "name": "Class buffs: Hasten and Combat Symbiosis share the spell and melee haste category",
+  "name": "Class buffs: the Hasten and Combat Symbiosis cooldowns stack on one ally",
   "contract": [
-    "Hasten 801304 (Chronomancer, class 22: SPELL_AURA_HASTE_SPELLS and SPELL_AURA_MOD_MELEE_RANGED_HASTE, base",
-    "points 19: 20% each, plus run speed) and Combat Symbiosis 805305 (Tinker, class 28: SPELL_AURA_HASTE_SPELLS",
-    "and SPELL_AURA_MOD_MELEE_RANGED_HASTE, base points 19: 20% each) are two classes' combined haste buffs on",
-    "one ally. spell_group 2113008 (rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both, and no lower shared",
-    "group decides the pair. Expected: on a grouped ally Combat Symbiosis replaces Hasten. Both have a 90",
-    "second cooldown, so neither is cast a second time."
+    "Maintainer decision 2026-11-22 (PR #13237 review): a buff of five minutes or longer keeps one per stat",
+    "across classes; a shorter buff whose tooltip says it does not stack with similar effects is a support buff",
+    "and keeps one per stat among support buffs; every other shorter buff is a cooldown, has no CoA class",
+    "category and stacks with everything. Hasten 801304 (Chronomancer, class 22, 12 seconds:",
+    "SPELL_AURA_HASTE_SPELLS and SPELL_AURA_MOD_MELEE_RANGED_HASTE, base points 19: 20% each, plus run speed)",
+    "and Combat Symbiosis 805305 (Tinker, class 28, 15 seconds: the same two haste auras, base points 19: 20%",
+    "each) are cooldowns, so no spell_group decides the pair. Expected: on a grouped ally Combat Symbiosis",
+    "leaves Hasten in place. Both have a 90 second cooldown, so neither is cast a second time."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -90,11 +92,6 @@
       "equals": 20
     },
     {
-      "action": "wait",
-      "label": "Let the global cooldown end",
-      "ms": 1600
-    },
-    {
       "action": "cast",
       "label": "Combat Symbiosis on the ally",
       "actor": "tinker",
@@ -112,14 +109,27 @@
       "within_ms": 2000
     },
     {
+      "action": "wait",
+      "label": "Give a replacement time to remove Hasten",
+      "ms": 1000
+    },
+    {
       "action": "assert",
-      "label": "DISCRIMINATING: Combat Symbiosis replaced Hasten",
+      "label": "DISCRIMINATING: Combat Symbiosis leaves Hasten in place",
       "actor": "ally",
       "metric": "aura",
       "spell": 801304,
       "caster": "chronomancer",
-      "equals": 0,
-      "within_ms": 1000
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hasten leaves Combat Symbiosis in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 805305,
+      "caster": "tinker",
+      "equals": 1
     }
   ]
 }

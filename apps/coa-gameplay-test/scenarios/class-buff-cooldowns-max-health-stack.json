@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Class buffs: the Elune's Presence and Protective Roar health cooldowns stack",
+  "contract": [
+    "Maintainer decision 2026-11-22 (PR #13237 review): a buff of five minutes or longer keeps one per stat",
+    "across classes; a shorter buff whose tooltip says it does not stack with similar effects is a support buff",
+    "and keeps one per stat among support buffs; every other shorter buff is a cooldown, has no CoA class",
+    "category and stacks with everything. Elune's Presence 680774 (Starcaller, class 26, 10 seconds, raid",
+    "members within 40 yards: SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT base points 19: +20%) and Protective Roar",
+    "802782 (Primalist, class 31, 12 seconds, party and raid members: SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT",
+    "base points 9: +10%) are cooldowns, so no spell_group decides the pair. Expected: on a grouped ally",
+    "Protective Roar leaves Elune's Presence in place and raises the maximum health again."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "starcaller",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    },
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "starcaller",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "starcaller",
+      "target": "primalist"
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 680774
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_health",
+      "save_as": "alone"
+    },
+    {
+      "action": "cast",
+      "label": "Elune's Presence around the Starcaller",
+      "actor": "starcaller",
+      "spell": 680774
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Elune's Presence reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680774,
+      "caster": "starcaller",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Elune's Presence raises the ally's maximum health",
+      "actor": "ally",
+      "metric": "max_health",
+      "relative_to": "alone",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_health",
+      "save_as": "presence"
+    },
+    {
+      "action": "cast",
+      "label": "Protective Roar from the Primalist",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Protective Roar reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802782,
+      "caster": "primalist",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Give a replacement time to remove Elune's Presence",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Protective Roar leaves Elune's Presence in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680774,
+      "caster": "starcaller",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Protective Roar adds to Elune's Presence",
+      "actor": "ally",
+      "metric": "max_health",
+      "relative_to": "presence",
+      "min": 1
+    }
+  ]
+}

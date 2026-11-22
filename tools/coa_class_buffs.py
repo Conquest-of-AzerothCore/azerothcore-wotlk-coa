@@ -24,6 +24,11 @@ INTELLECT_ONLY = frozenset({'stat:3'})
 CLASS_FAMILIES = range(18, 39)
 PASSIVE_ATTRIBUTE = 0x40
 APPLY_AURA = 'SPELL_EFFECT_APPLY_AURA'
+PERIODIC_TRIGGER = 'SPELL_AURA_PERIODIC_TRIGGER_SPELL'
+AURA, BUFF, SUPPORT, COOLDOWN = 'aura', 'buff', 'support', 'cooldown'
+ENDLESS = -1
+LONG_BUFF_MS = 300000
+DOES_NOT_STACK = re.compile(r'stack with (other )?similar effects|benefit(ing)? from similar effects', re.IGNORECASE)
 AREA_AURA_EFFECTS = frozenset({
     'SPELL_EFFECT_APPLY_AREA_AURA_PARTY',
     'SPELL_EFFECT_APPLY_AREA_AURA_RAID',
@@ -51,7 +56,10 @@ ALLIED_TARGETS = frozenset({
 
 EXCEPTIONS = {
     523495: "Ascension live logs 2026-08-11 keep it next to Greater Beetle Pheromones and Greater Footpad's Adaptation",
+    805908: 'no CharacterAdvancement entry, trainer, item, trigger or script teaches it; class players report it '
+            'does not exist (2026-11-22)',
 }
+SUPPORT_BANNERS = frozenset({500264})
 SCRIPTED_EFFECTS = frozenset({
     300459, 460502, 500151, 500336, 500349, 500715, 500721, 500751, 501789, 501790, 501791, 501792, 501793, 501794,
     501795, 501841, 501842, 502244, 502245, 502246, 502247, 502434, 502435, 502436, 502437, 502438, 502439, 502533,
@@ -66,8 +74,9 @@ TIMED_DAMAGE_AND_HEALING_COOLDOWNS = frozenset({
     805417, 806123,
 })
 MANA_REGEN_ONLY = frozenset({'regen:0'})
+EXCLUSIVE_RESISTANCE_WITH_UNUSED_DUMMIES = frozenset({681527})
 MANUAL: dict = {
-    **dict.fromkeys(SCRIPTED_EFFECTS | TIMED_DAMAGE_AND_HEALING_COOLDOWNS),
+    **dict.fromkeys(SCRIPTED_EFFECTS | TIMED_DAMAGE_AND_HEALING_COOLDOWNS | EXCLUSIVE_RESISTANCE_WITH_UNUSED_DUMMIES),
     **dict.fromkeys((800852, 300858, 681160), MANA_REGEN_ONLY),
 }
 
@@ -78,7 +87,7 @@ EXISTING_CATEGORIES = {
     2110004: frozenset({'armor', 'stat:all'}),
     2110005: frozenset({'stat:4'}),
     2110006: frozenset({'stat_pct:-1'}),
-    2110012: frozenset({'spell_power:126'}),
+    2110012: frozenset({'spell_power:127'}),
 }
 
 
@@ -97,7 +106,11 @@ class Buff(NamedTuple):
     name: str
     family: int
     effects: tuple
-    persistent: bool = False
+    kind: str = BUFF
+
+    @property
+    def persistent(self):
+        return self.kind == AURA
 
 
 class Record(NamedTuple):
@@ -106,6 +119,7 @@ class Record(NamedTuple):
     attributes: int
     effects: tuple
     duration_index: int = 0
+    description: str = ''
 
 
 class Groups(NamedTuple):
@@ -122,6 +136,8 @@ class Plan(NamedTuple):
     single_class: dict
     unclassified: list
     auras: frozenset = frozenset()
+    support: frozenset = frozenset()
+    cooldowns: dict = {}
 
 
 def _stat(misc):
@@ -158,7 +174,6 @@ STAT_KEYS = {
     'SPELL_AURA_MOD_EXPERTISE': _fixed('expertise'),
     'SPELL_AURA_MOD_STAT': _stat,
     'SPELL_AURA_MOD_RESISTANCE': _resistance,
-    'SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE': _resistance,
     'SPELL_AURA_MOD_BASE_RESISTANCE': _resistance,
     'SPELL_AURA_MOD_ATTACK_POWER': _fixed('ap:melee'),
     'SPELL_AURA_MOD_RANGED_ATTACK_POWER': _fixed('ap:ranged'),
@@ -205,7 +220,7 @@ NON_STAT_AURAS = frozenset(f'SPELL_AURA_{name}' for name in [
     'WATER_WALK', 'FEATHER_FALL', 'SAFE_FALL', 'HOVER',
     'MOD_STEALTH', 'MOD_STEALTH_DETECT', 'MOD_DETECTED_RANGE', 'MOD_TOTAL_THREAT', 'MOD_THREAT',
     'MOD_STUN', 'TRANSFORM', 'MOD_SCALE', 'PHASE', 'BIND_SIGHT', 'EMPATHY', 'CONTROL_VEHICLE',
-    'MOD_IGNORE_SHAPESHIFT', 'MOD_REPUTATION_GAIN', 'MOD_XP_PCT',
+    'MOD_IGNORE_SHAPESHIFT', 'MOD_REPUTATION_GAIN', 'MOD_XP_PCT', 'MOD_RESISTANCE_EXCLUSIVE',
 ])
 
 
@@ -349,7 +364,7 @@ def plan_categories(buffs, groups, first_rank, exceptions, manual):
             by_signature.setdefault(keys, []).append(buff)
 
     existing_by_signature = {keys: group_id for group_id, keys in categories.items()}
-    single_class, split_auras, auras = {}, {}, set()
+    single_class, split, kinds, cooldowns = {}, {}, {AURA: set(), SUPPORT: set()}, {}
     next_id = FIRST_NEW_CATEGORY
 
     def new_category(keys, ids):
@@ -364,44 +379,50 @@ def plan_categories(buffs, groups, first_rank, exceptions, manual):
     def ids_of(half):
         return {rank(buff.spell_id) for buff in half}
 
-    def label(keys, half):
-        return keys | {'aura'} if half[0].persistent else keys
+    def label(keys, kind):
+        return keys if kind == BUFF else keys | {kind}
+
+    def cross_class(half):
+        return len({buff.family for buff in half}) >= 2
+
+    def add_category(keys, kind, half):
+        group_id = new_category(keys, ids_of(half))
+        if kind in kinds:
+            kinds[kind].add(group_id)
 
     for keys in sorted(by_signature, key=lambda item: sorted(item)):
         group = by_signature[keys]
-        timed = [buff for buff in group if not buff.persistent]
-        persistent = [buff for buff in group if buff.persistent]
+        halves = {kind: [buff for buff in group if buff.kind == kind] for kind in (BUFF, SUPPORT, AURA, COOLDOWN)}
+        if halves[COOLDOWN]:
+            cooldowns[keys] = sorted(ids_of(halves.pop(COOLDOWN)))
+        halves = {kind: half for kind, half in halves.items() if half}
         if keys in existing_by_signature:
-            members[existing_by_signature[keys]] |= ids_of(timed)
-            if persistent:
-                split_auras[keys] = persistent
+            members[existing_by_signature[keys]] |= ids_of(halves.pop(BUFF, []))
+            split.update({(kind, keys): half for kind, half in halves.items()})
             continue
-        halves = [half for half in (timed, persistent) if half]
-        eligible = [half for half in halves if len({buff.family for buff in half}) >= 2]
+        eligible = [kind for kind, half in halves.items() if cross_class(half)]
         if not eligible:
-            single_class[keys] = sorted(ids_of(group))
+            if halves:
+                single_class[keys] = sorted(set().union(*(ids_of(half) for half in halves.values())))
             continue
-        first = eligible[0]
-        group_id = new_category(keys, ids_of(first))
-        if first is persistent:
-            auras.add(group_id)
-        for half in halves:
-            if half is first:
+        add_category(keys, eligible[0], halves[eligible[0]])
+        for kind, half in halves.items():
+            if kind == eligible[0]:
                 continue
-            if half in eligible:
-                split_auras[keys] = half
+            if kind in eligible:
+                split[(kind, keys)] = half
             else:
-                single_class[label(keys, half)] = sorted(ids_of(half))
+                single_class[label(keys, kind)] = sorted(ids_of(half))
 
-    for keys in sorted(split_auras, key=lambda item: sorted(item)):
-        half = split_auras[keys]
-        if len({buff.family for buff in half}) >= 2:
-            auras.add(new_category(keys, ids_of(half)))
+    for kind, keys in sorted(split, key=lambda item: (item[0] == AURA, sorted(item[1]))):
+        half = split[(kind, keys)]
+        if cross_class(half):
+            add_category(keys, kind, half)
         else:
-            single_class[label(keys, half)] = sorted(ids_of(half))
+            single_class[label(keys, kind)] = sorted(ids_of(half))
 
     return Plan(categories, members, _intellect_subgroups(intellect, groups, first_rank), mismatches,
-                single_class, unclassified, frozenset(auras))
+                single_class, unclassified, frozenset(kinds[AURA]), frozenset(kinds[SUPPORT]), cooldowns)
 
 
 def apply_plan(groups, plan):
@@ -411,7 +432,7 @@ def apply_plan(groups, plan):
     for group_id, spells in plan.members.items():
         members[group_id] = members.get(group_id, set()) | spells
         rules.setdefault(group_id, EXCLUSIVE)
-        kind = 'auras' if group_id in plan.auras else 'buffs'
+        kind = 'auras' if group_id in plan.auras else 'support buffs' if group_id in plan.support else 'buffs'
         descriptions.setdefault(group_id, f'CoA class {kind}: {_signature_label(plan.categories[group_id])}')
     for group_id, spells in plan.intellect_subgroups.items():
         members[group_id] = members.get(group_id, set()) | spells
@@ -419,10 +440,10 @@ def apply_plan(groups, plan):
     return Groups(members, rules, descriptions)
 
 
-DBC_HEADER = ('SpellName[enUS]', 'SpellFamilyName', 'Attributes', 'DurationIndex')
+DBC_HEADER = ('SpellName[enUS]', 'SpellFamilyName', 'Attributes', 'DurationIndex', 'Description[enUS]')
 DBC_EFFECT = ('Effect[{}]', 'EffectApplyAuraName[{}]', 'EffectMiscValue[{}]', 'EffectBasePoints[{}]',
               'EffectImplicitTargetA[{}]', 'EffectImplicitTargetB[{}]', 'EffectTriggerSpell[{}]')
-SPELL_DBC_HEADER = ('Name_Lang_enUS', 'SpellClassSet', 'Attributes', 'DurationIndex')
+SPELL_DBC_HEADER = ('Name_Lang_enUS', 'SpellClassSet', 'Attributes', 'DurationIndex', 'Description_Lang_enUS')
 SPELL_DBC_EFFECT = ('Effect_{}', 'EffectAura_{}', 'EffectMiscValue_{}', 'EffectBasePoints_{}',
                     'ImplicitTargetA_{}', 'ImplicitTargetB_{}', 'EffectTriggerSpell_{}')
 
@@ -439,7 +460,7 @@ def _number(value):
 def _record(get, header, templates, indices):
     names = _enums()
     effects_by_id, auras_by_id, targets_by_id = names['SpellEffects'], names['AuraType'], names['Targets']
-    name, family, attributes, duration_index = (get(column) for column in header)
+    name, family, attributes, duration_index, description = (get(column) for column in header)
     effects = []
     for index in indices:
         effect, aura_type, misc, base_points, target_a, target_b, trigger_spell = (
@@ -449,8 +470,12 @@ def _record(get, header, templates, indices):
         effects.append(Effect(effects_by_id.get(effect, str(effect)), auras_by_id.get(aura_type, str(aura_type)),
                               misc, base_points + 1, targets_by_id.get(target_a, 'TARGET_NONE'),
                               targets_by_id.get(target_b, 'TARGET_NONE'), trigger_spell))
-    return Record(name if name not in (None, 'NULL') else '', _number(family), _number(attributes), tuple(effects),
-                  _number(duration_index))
+    return Record(_text(name), _number(family), _number(attributes), tuple(effects), _number(duration_index),
+                  _text(description))
+
+
+def _text(value):
+    return value if value not in (None, 'NULL') else ''
 
 
 def apply_overrides(records, spell_dbc_rows):
@@ -470,7 +495,42 @@ def _is_area(buff):
     return any(effect.effect in AREA_AURA_EFFECTS for effect in buff.effects)
 
 
-def select_buffs(records, learnable, endless_durations=frozenset()):
+def _parents(records):
+    parents = {}
+    for spell_id, spell in records.items():
+        for effect in spell.effects:
+            if effect.trigger_spell:
+                parents.setdefault(effect.trigger_spell, []).append((spell_id, effect))
+    return parents
+
+
+def buff_kind(spell_id, records, durations, parents, first_rank):
+    spell = records[spell_id]
+    triggers = parents.get(spell_id, ())
+
+    def endless(record):
+        return durations.get(record.duration_index) == ENDLESS
+
+    if spell_id in SUPPORT_BANNERS:
+        return SUPPORT
+    if spell.attributes & PASSIVE_ATTRIBUTE or endless(spell):
+        return AURA
+    if spell.duration_index not in durations and any(effect.effect in AREA_AURA_EFFECTS for effect in spell.effects):
+        return AURA
+    if any(effect.aura == PERIODIC_TRIGGER and not records[parent].attributes & PASSIVE_ATTRIBUTE
+           and endless(records[parent]) for parent, effect in triggers):
+        return AURA
+    if durations.get(spell.duration_index, 0) >= LONG_BUFF_MS:
+        return BUFF
+    sources = [spell, records.get(first_rank.get(spell_id, spell_id))] + [records[parent] for parent, _ in triggers]
+    if any(source is not None and DOES_NOT_STACK.search(source.description) for source in sources):
+        return SUPPORT
+    return COOLDOWN
+
+
+def select_buffs(records, learnable, durations=None, first_rank=None):
+    durations, first_rank = durations or {}, first_rank or {}
+    parents = _parents(records)
     buffs = []
     for spell_id in sorted(records):
         spell = records[spell_id]
@@ -481,8 +541,8 @@ def select_buffs(records, learnable, endless_durations=frozenset()):
             continue
         if spell.attributes & PASSIVE_ATTRIBUTE and not any(effect.effect in AREA_AURA_EFFECTS for effect in reaching):
             continue
-        persistent = bool(spell.attributes & PASSIVE_ATTRIBUTE) or spell.duration_index in endless_durations
-        buffs.append(Buff(spell_id, spell.name, spell.family, reaching, persistent))
+        kind = buff_kind(spell_id, records, durations, parents, first_rank)
+        buffs.append(Buff(spell_id, spell.name, spell.family, reaching, kind))
     return buffs
 
 
@@ -619,6 +679,12 @@ def review_markdown(buffs, plan, before, after, first_rank, unclassified):
                              f'{RULE_OUTCOMES[decided[1]]} {decided[0]} |')
     lines.append('')
 
+    lines += ['## Cooldowns without a category', '']
+    for keys in sorted(plan.cooldowns, key=sorted):
+        names = ', '.join(_buff_label(by_rank[member]) for member in plan.cooldowns[keys] if member in by_rank)
+        lines.append(f'- {_signature_label(keys)}: {names}')
+    lines.append('')
+
     lines += ['## Single-class signatures', '']
     for keys in sorted(plan.single_class, key=sorted):
         names = ', '.join(_buff_label(by_rank[member]) for member in plan.single_class[keys] if member in by_rank)
@@ -733,11 +799,12 @@ def load_dbc(dbc_dir):
     advancement = {advancement_value(row, f'RankSpell[{index}]') for row in entries.values() for index in range(5)}
     abilities, ability_value = table('SkillLineAbility')
     skill_line = {ability_value(row, 'Spell') for row in abilities.values()}
-    durations, duration_value = table('SpellDuration')
-    endless = frozenset(duration_id for duration_id, row in durations.items()
-                        if duration_value(row, 'MaxDuration') == -1)
+    rows, duration_value = table('SpellDuration')
+    durations = {duration_id: ENDLESS if duration_value(row, 'MaxDuration') == ENDLESS
+                 else max(duration_value(row, 'Duration'), duration_value(row, 'MaxDuration'))
+                 for duration_id, row in rows.items()}
     return (records, advancement - {0}, skill_line - {0}, spell_rank_rows(Path(dbc_dir) / 'SpellRank.dbc'),
-            endless)
+            durations)
 
 
 def _mysql(args, query):
@@ -775,18 +842,19 @@ def main(argv=None):
     parser.add_argument('--sql')
     args = parser.parse_args(argv)
 
-    records, advancement, skill_line, client_ranks, endless = load_dbc(args.dbc)
+    records, advancement, skill_line, client_ranks, durations = load_dbc(args.dbc)
     spell_dbc, groups, table_ranks, updates = load_database(args)
     records = apply_overrides(records, spell_dbc)
     first_rank = rank_chains(client_ranks, table_ranks, set(records))
     learnable = learnable_spells(advancement, skill_line, records, first_rank)
-    buffs = select_buffs(records, learnable, endless)
+    buffs = select_buffs(records, learnable, durations, first_rank)
     plan = plan_categories(buffs, groups, first_rank, EXCEPTIONS, MANUAL)
     after = apply_plan(groups, plan)
     missing = pending_world_files_applied(updates, ROOT / 'data' / 'sql' / 'updates' / 'pending_db_world')
 
     selected = {buff.spell_id for buff in buffs}
-    unlearned = [buff for buff in select_buffs(records, set(records)) if buff.spell_id not in selected]
+    unlearned = [buff for buff in select_buffs(records, set(records), durations, first_rank)
+                 if buff.spell_id not in selected]
     text = review_markdown(buffs, plan, groups, after, first_rank, plan.unclassified)
     text += '\n## Qualifying but not learnable\n\n'
     text += ''.join(f'- {_buff_label(buff)}: {_cell(_effect_summary(buff))}\n' for buff in unlearned)

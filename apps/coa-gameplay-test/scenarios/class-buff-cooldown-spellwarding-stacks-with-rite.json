@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Class buffs: the Spellwarding cooldown stacks with the all-resistance buffs",
+  "contract": [
+    "Maintainer decision 2026-11-22 (PR #13237 review): a buff of five minutes or longer keeps one per stat",
+    "across classes; a shorter buff whose tooltip says it does not stack with similar effects is a support buff",
+    "and keeps one per stat among support buffs; every other shorter buff is a cooldown, has no CoA class",
+    "category and stacks with everything. Rite of Perseverance 575839 (Reaper, class 30) and Call of the",
+    "Lightning 575843 (Stormbringer, class 16) are 30 minute buffs, SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE on all",
+    "magic schools (misc 126), base points 9: +10. The engine counts that aura once per school (the highest",
+    "amount), so these buffs are in no CoA class category. Spellwarding 562371 (Guardian, class 18) is a 10",
+    "second raid area aura,",
+    "SPELL_AURA_MOD_RESISTANCE misc 126, base points 19: +20, and a cooldown outside every category. Expected:",
+    "on a grouped ally Call of the Lightning stays next to Rite of Perseverance and Fire resistance stays at",
+    "+10, Spellwarding then reaches the ally beside both, and the Fire resistance rises to 30 in total."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "stormbringer",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    },
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "reaper"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "stormbringer"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 575839
+    },
+    {
+      "action": "learn",
+      "actor": "stormbringer",
+      "spell": 575843
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 562371
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "resistance",
+      "save_as": "alone",
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "Rite of Perseverance on the ally",
+      "actor": "reaper",
+      "spell": 575839,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Rite of Perseverance",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575839,
+      "caster": "reaper",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rite of Perseverance raises Fire resistance by 10",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 10,
+      "max": 10,
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "Call of the Lightning on the ally",
+      "actor": "stormbringer",
+      "spell": 575843,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Call of the Lightning",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575843,
+      "caster": "stormbringer",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no category removes Rite of Perseverance",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575839,
+      "caster": "reaper",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the engine counts the highest only, so Fire resistance stays at 10",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 10,
+      "max": 10,
+      "school": 2
+    },
+    {
+      "action": "cast",
+      "label": "Spellwarding around the Guardian",
+      "actor": "guardian",
+      "spell": 562371
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Spellwarding area aura reaches the ally who carries Call of the Lightning",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 562371,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Give a replacement time to remove either aura",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Spellwarding leaves Call of the Lightning in place",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575843,
+      "caster": "stormbringer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Fire resistance adds both, 10 and 20",
+      "actor": "ally",
+      "metric": "resistance",
+      "relative_to": "alone",
+      "min": 30,
+      "max": 30,
+      "school": 2
+    }
+  ]
+}
