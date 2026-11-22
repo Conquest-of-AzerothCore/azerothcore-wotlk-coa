@@ -75,7 +75,7 @@ class VehicleLandedTests(unittest.TestCase):
                 values.update(dict(zip((reads['start'], reads['before'], reads['after']), counts)))
             return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
 
-        held = float(expectation.expected)
+        held = float(stun_entry()['expected'])
         self.assertEqual(judged(held, (0, 1, 2)), 'ok')
         self.assertEqual(judged(1 - held, (0, 1, 2)), 'alert')
         self.assertEqual(judged(1 - held, (0, 1, 1)), 'unmeasured')
@@ -88,7 +88,7 @@ class VehicleLandedTests(unittest.TestCase):
         _, expectation = generated(stun_entry())
         model = expectation.model
         reads = model['vehicle_landed']['labels']
-        values = {model['before_label']: 1, model['after_label']: 1 - float(expectation.expected),
+        values = {model['before_label']: 1, model['after_label']: 1 - float(stun_entry()['expected']),
                   reads['start']: 0, reads['before']: 1, reads['after']: 1}
         original = module.verdict
         try:
