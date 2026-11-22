@@ -8919,6 +8919,84 @@
         ]
       },
       "observe_source": "707079 Chosen King Effect[0]/[1] flat and percent modifiers (data), and AscensionSunClericAbilities.cpp:18-20 casts Anointed 524998 on the caster when Hammer of Kings 804751 is cast with 707079 known. 524998 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1 = 10 ($524998s1), DurationIndex 1 = 10000 ms ($524998d). Hammer of Kings 804751 (RecoveryTime 20000, self cast) is cast before the learn (control) and after it. The aura is read present at 9100..9800 ms of game time after the cast and gone at 10200..10800 ms: the duration lies in 9100..10800, which excludes 9000 and 11000 ms (10% off). The control is the cast without the passive (no aura). Reference search 2026-11-22: coa-history spell 707079: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707079 and no value; git log --grep and gh pr list --search 707079: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 806458,
+      "name": "Flames of the Father (Dawnsear against a Burning target)",
+      "kind": "hit_ratio",
+      "variant": "burning",
+      "label_suffix": "burning",
+      "quote": "Your Fire damage dealt is increased by $s1% against Burning targets.",
+      "expected": 1.1,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          806458
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1000,
+      "critical": false,
+      "expected_source": "$s1 = 10 (806458 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, EffectBasePoints 9 + 1); AscensionSunClericContracts.cpp:328-336 multiplies a family 33 Fire-school hit by 1 + 10% when the target carries an applied Fire-school periodic damage aura. Dawnsear 554406 (Fire school 4, family 33) is cast at the dummy; the non-critical hit with 806458 learned (treatment) against without it (control). Burning fixture (precondition, both arms): Immolate 348 (Fire school, Effect[0] aura 3 periodic damage, DurationIndex 8) set on the dummy before every cast; the cause under test is the passive, the control arm is the same target without 806458: expected 1.10. 823764 removes the dummy's magic resistance. Reference search 2026-11-22: coa-history spell 806458: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806458 and no value; git log --grep and gh pr list --search 806458: see the report; nothing found beyond the tooltip and the DBC for the value.",
+      "target_auras": [
+        [
+          348,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 806458,
+      "name": "Flames of the Father (Dawnsear against a target that is not Burning)",
+      "kind": "hit_ratio",
+      "variant": "unburnt",
+      "label_suffix": "unburnt",
+      "quote": "Your Fire damage dealt is increased by $s1% against Burning targets.",
+      "expected": 1.0,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          806458
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1000,
+      "critical": false,
+      "expected_source": "$s1 = 10 (806458 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, EffectBasePoints 9 + 1); AscensionSunClericContracts.cpp:328-336 multiplies a family 33 Fire-school hit by 1 + 10% when the target carries an applied Fire-school periodic damage aura. Dawnsear 554406 (Fire school 4, family 33) is cast at the dummy; the non-critical hit with 806458 learned (treatment) against without it (control). Control of the condition: no Burning aura on the dummy in either arm, so the passive must add nothing: expected 1.00. 823764 removes the dummy's magic resistance. Reference search 2026-11-22: coa-history spell 806458: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806458 and no value; git log --grep and gh pr list --search 806458: see the report; nothing found beyond the tooltip and the DBC for the value."
     }
   ],
   "player_observations": [],

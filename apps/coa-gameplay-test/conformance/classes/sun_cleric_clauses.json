@@ -4350,10 +4350,21 @@
   {
     "spell": 806458,
     "clause": "Your Fire damage dealt is increased by $s1% against Burning targets.",
-    "labels": [
-      "806458 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Fire damage dealt is increased by $s1%",
+        "labels": [
+          "806458 behaviour_hit_ratio burning"
+        ]
+      },
+      {
+        "claim": "against Burning targets",
+        "labels": [
+          "806458 behaviour_hit_ratio unburnt"
+        ]
+      }
+    ]
   },
   {
     "spell": 807372,
