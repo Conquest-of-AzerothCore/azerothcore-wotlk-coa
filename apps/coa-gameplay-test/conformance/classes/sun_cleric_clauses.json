@@ -376,7 +376,9 @@
   {
     "spell": 300339,
     "clause": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
-    "labels": [],
+    "labels": [
+      "300339 behaviour_metric_delta crit_heal_return"
+    ],
     "kind": "claim"
   },
   {
@@ -1282,15 +1284,13 @@
       {
         "claim": "and reducing their attack power by ${-($572050m1+$572050ppl1)}",
         "labels": [
-          "572801 behaviour_metric_delta ap_reduction",
-          "572801 effect_value 572050e0 #1"
+          "572801 behaviour_metric_delta ap_reduction"
         ]
       },
       {
         "claim": "for $572050d",
         "labels": [
-          "572801 behaviour_metric_delta ap_duration",
-          "572801 spell_duration 572050 #2"
+          "572801 behaviour_metric_delta ap_duration"
         ]
       }
     ]
