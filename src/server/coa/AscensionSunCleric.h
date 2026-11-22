@@ -27,7 +27,6 @@ struct SunClericState
     EventMap timers;
     TaskScheduler scheduler;
     ObjectGuid blessed, gate;
-    std::set<ObjectGuid> firstAttacks;
     uint64 sequence = 0;
     uint32 sunchargeStacks = 0;
     bool event = false, refreshing = false, dawnEvent = false;

@@ -817,10 +817,32 @@
   {
     "spell": 301011,
     "clause": "Your Gavel of Light now additionally heals up to 5 nearby allies for $s1% of the amount it heals you.",
-    "labels": [
-      "301011 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your Gavel of Light now additionally heals up to 5 nearby allies (5 of 6 grouped allies healed, all 3 of 3 healed)",
+        "labels": [
+          "301011 behaviour_metric_delta allies_cap",
+          "301011 behaviour_metric_delta allies_few"
+        ]
+      },
+      {
+        "claim": "for 100% of the amount it heals you ($s1 value 100)",
+        "labels": [
+          "301011 effect_value e0 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Count half: Gavel of Light 800611 at the dummy with the caster at 50% health: 0 heal events of 301012 cast by the caster before the learn (control) and 5 after with 6 grouped allies, 3 with 3 grouped allies, in both runs. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip (both runs the same statuses), 12 of 12 scenarios passed natively in each run. Amount half (100% of the Gavel of Light self heal): no kind reads two amounts of one cast when the claim's own passive must be learned: amount_match learns only its cast spell and sets auras with set_aura (the claim's own aura, never), and metric_delta judges one reading against floors or its own before reading (tool need, returned: amount_match with a learned gate, or a metric_delta ratio of two heal totals of one phase); the data label reads the value 100 only. Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours.",
+    "tool_gap": {
+      "reason": "the 100% amount needs amount_match with a learned gate or a two-total ratio read in one phase",
+      "attempts": [
+        {
+          "agent": "sc-b8d1",
+          "report": ".agents/plans/sun-cleric-b8d1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301239,
@@ -2123,10 +2145,51 @@
   {
     "spell": 561327,
     "clause": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
-    "labels": [
-      "561327 effect_value 680671e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the cooldown reduction is 1 s per critical strike ($/1000;680671s1)",
+        "labels": [
+          "561327 effect_value 680671e0 #0",
+          "561327 cost_gate 804751 cd_hammer without",
+          "561327 cost_gate 804751 cd_hammer with",
+          "561327 cost_gate 804751 cd_hammer beyond",
+          "561327 cost_gate 806479 cd_prayer without",
+          "561327 cost_gate 806479 cd_prayer with",
+          "561327 cost_gate 806479 cd_prayer beyond"
+        ]
+      },
+      {
+        "claim": "a critical damage hit reduces the cooldown of Hammer of Kings by 1 s",
+        "labels": [
+          "561327 cost_gate 804751 cd_hammer without",
+          "561327 cost_gate 804751 cd_hammer with",
+          "561327 cost_gate 804751 cd_hammer beyond"
+        ]
+      },
+      {
+        "claim": "a critical damage hit reduces the cooldown of Solar Prayer by 1 s",
+        "labels": [
+          "561327 cost_gate 806479 cd_prayer without",
+          "561327 cost_gate 806479 cd_prayer with",
+          "561327 cost_gate 806479 cd_prayer beyond"
+        ]
+      },
+      {
+        "claim": "a critical healing hit reduces the cooldowns of Hammer of Kings and Solar Prayer",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Damage half, cooldown cost_gate route (guide section 2, Lorescribe), a cast the server accepts or refuses: Hammer of Kings 804751 (RecoveryTime 20000) or Solar Prayer 806479 (90000) is cast as the priming cast, Gavel of Wrath 802561 is cast 1600 ms later as a critical hit (984954 and 823764 set on the caster before that cast only, a precondition fixture; class file ratings leave no miss, residual failure probability 0 per pair), and the same spell is attempted again 19060 / 89060 ms after the priming cast (with: accepted; without, 561327 not learned: refused, the control) and 18940 / 88940 ms after it (beyond: refused). margin_ms 60 excludes reductions of 900 and 1100 ms (10% either side of 1 s) and two critical strikes. 12 of 12 labels ok in both runs. Pair 20261122-081945 / 20261122-082015 (verify-all stamps), build 81028c380373, server commit c0716cc8aa6a+, no flip. These entries replace the earlier cooldown_ms entries cd_hammer and cd_prayer, whose reads are a readback and count as data under coverage.py. Lead, not measured: in the beyond arms the Hammer of Kings periodic tick (804751 Effect[0] aura 23 every 3000 ms triggering 804752) ran under the critical-hit fixture 984954 (weapon crit +101) and no extra reduction was seen; whether the ticks hit and crit was not read, so this does not show that a tick critical strike counts or not for the tooltip's 'Critical strikes'. Healing half, not closed, two designs tried and both inconclusive: design 1 forced the spell crit rating (force_crit spell) and cast Solar Prayer as the critical heal after Hammer of Kings; the cooldown did not move (17988 of 17988) and a diagnostic read of critical heals of 806479 gave 0 before and 0 after, so the forced rating does not make that heal critical; design 2 cast Illumination 500143 (2000 ms cast) after Solar Prayer: its critical heal count read 0 before and 1 after the learn, but the cooldown read of the 2000 ms cast came while the heal was still pending and read 87985 before and 0 after, a read with no known cause, kept as an open lead (cause first, no status 3 or 4 on it). Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs; Hammer of Kings 804751 377 aura applications and Solar Prayer 806479 41 casts carry no cooldown link; bindmysoul talents snapshot (fetched 2026-07-22) reads 'by -1' (1 second); nothing else found.",
+    "tool_gap": {
+      "reason": "no kind makes a Solar Prayer heal critical, nor reads a cooldown after a pending cast with a known cause: the healing half of the clause has no route yet",
+      "attempts": [
+        {
+          "agent": "sc-b8d1",
+          "report": ".agents/plans/sun-cleric-b8d1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561328,
@@ -2689,10 +2752,41 @@
   {
     "spell": 680643,
     "clause": "Increases your melee attack speed by $s1% and your first auto attack on a target hits twice.",
-    "labels": [
-      "680643 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your melee attack speed by 15%",
+        "labels": [
+          "680643 effect_value e0 #0",
+          "680643 behaviour_metric_delta melee_haste"
+        ]
+      },
+      {
+        "claim": "your first auto attack gets the extra attack once, in the first swing interval, and no Vow of the Valkyr strike",
+        "labels": [
+          "680643 behaviour_metric_delta first_extra",
+          "680643 behaviour_metric_delta first_marker",
+          "680643 behaviour_metric_delta first_interval",
+          "680643 behaviour_metric_delta no_vow_strike"
+        ]
+      },
+      {
+        "claim": "on a target: a second target gets its own extra attack, and the extra attack lands as a second white swing",
+        "labels": [
+          "680643 behaviour_metric_delta second_target"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Haste: the main-hand attack time (Seraphim 2027, 2300 ms) reads 2300 before the learn (control) and 2000 after, ratio 0.869565 within 0.001, which excludes 14% and 16% and 13.5% and 16.5%. Extra attack (ADR 0024): the DBC proc runs again. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531, ExcludeTargetAuraSpell 681531); 681531 is the per-target marker (Effect[0] aura 4 DUMMY on the enemy, duration index 6 = 600000 ms), and a cast of 681472 at a target holding it is refused (SpellInfo::CheckTarget), which replaces the earlier per-GUID set. Over 3 swing intervals at the dummy the caster's casts of 681472 read 0 before the learn (control) and exactly 1 after (not one per swing), the dummy holds 681531 after the learn and not before, the cast is already there after 1 swing interval, and casts of 506824 read 0 in both phases (the strike the code cast before ADR 0024). Pair 20261122-083906 / 20261122-083941, build 138707765c08, server commit 8045c0550b87+, no flip (both runs the same statuses), 5 of 5 scenarios ok in each run; the class file ratings leave no miss, dodge or parry, residual failure probability 0 per pair. Not measured, tool_gap: a second target gets its own extra attack (autos are driven at the dummy only), and the extra attack lands as a second white swing (melee_attack_count and melee_damage_count change with the swing at the interval boundary, tried and dropped in the b8d1 pass); the first_interval read does not separate the first from the second hasted swing of the interval, only the marker gates. The damage of the first exchange (white swing against the 506824 strike) is not measured: no entry reads it deterministically and the pre-fix tree is not rebuilt. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later, 35 events on 35 distinct target GUIDs (none twice); that player has 0 events of 506824 in all 186 logs, the 1388 SPELL_DAMAGE events of 506824 come from four other players; 680643 0 events (a passive); bindmysoul reads the tooltip figure 15%; nothing else found.",
+    "tool_gap": {
+      "reason": "autos are driven at the dummy only (attack_swings requires target dummy), so no second target can be attacked and the landing white swing has no deterministic count (melee_attack_count and melee_damage_count change with the swing at the interval boundary)",
+      "attempts": [
+        {
+          "agent": "fix-valiance",
+          "report": ".agents/plans/fix-valiance/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680645,
@@ -4556,17 +4650,39 @@
     "spell": 803913,
     "clause": "Strike with both weapons dealing Weapon Damage plus $s1 Physical damage",
     "labels": [
-      "803913 effect_value e0 #0"
+      "803913 effect_value e0 #0",
+      "803913 script_hit 800691 main_hand",
+      "803913 script_hit 802566 off_hand"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Main-hand strike 800691 and off-hand strike 802566 of 40 non-critical hits each against the dummy: weapon roll of the Valkyr set (two 2529) plus attack power / 14 x 3.3 plus 76 (halved and truncated on the off hand, times 0.5), armor mitigated; measured 165.825 and 165.6 against a model mean 165.233 and 82.3 and 81.9 against 82.6; control arm without the cast counts 0 hits. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip (both runs the same statuses), 12 of 12 scenarios passed natively in each run. 800691 and 802566 were added to spell_weapon_sets (Valkyr), the set of their cast spell 803913, so that the judged weapon is the one the scenario wears. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731), 802566 3362 events (mean 503). Lead on the off-hand share, not an agreement and not a proven difference: the off-hand to main-hand mean ratio of six players (23 to 1406 hits each) is 0.64, 0.65, 0.71, 0.79, 0.80 and 0.85, above the 0.50 measured here (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike); live gear, off-hand talents and crits are unknown, and the question stays open for the owner (mentor D-121). No value is taken from the live figures. Nothing found for the flat 76 beyond the tooltip and DBC. Residual failure probability of the two script_hit checks: each judges the 99% interval of the mean of 40 non-critical hits, so a correct server fails about 1% per check and run, about 2% per check and pair (a false alert, never a false pass); the attack power term of the model has no contrast arm of its own."
   },
   {
     "spell": 803913,
     "clause": "and regenerate mana equal to $807451s1% of the damage dealt.",
-    "labels": [
-      "803913 effect_value 807451e0 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "regenerate mana equal to $807451s1% (5) of the damage dealt: the value 5",
+        "labels": [
+          "803913 effect_value 807451e0 #1"
+        ]
+      },
+      {
+        "claim": "the mana restored by the strikes is 5% of the damage they dealt",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "The value 5 is a data label. The behaviour half compares the 807552 energize with the damage of the same two strikes: the existing kinds do not read that ratio on one phase (amount_match reads damage and heal totals only, not energize; rage_per_damage is a Rage-only option; the Arbiter of Grace entry ge_mana_vow judges a cumulative ratio of 5.0 between two phases that both carry the base 5%, so it does not read the base share). Tool need, returned: an energize-per-damage ratio read for mana, or amount_match with an energize side. Reference search 2026-11-22: coa-history 807552 Glorious Execution: SPELL_ENERGIZE 6772 events in 14 logs (mean 30), 800691 and 802566 damage in the same logs; the Arbiter of Grace entry records mana at 4.77% to 4.97% of damage across 16 player/log pairs in the logs, which agrees with 5% but is not a measurement of ours.",
+    "tool_gap": {
+      "reason": "no kind reads an energize amount against the damage of the same strikes",
+      "attempts": [
+        {
+          "agent": "sc-b8d1",
+          "report": ".agents/plans/sun-cleric-b8d1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 504580,
@@ -5135,7 +5251,8 @@
       "804630 behaviour_metric_delta flare_hit",
       "804630 behaviour_metric_delta flare_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data only, not behaviour: the Solar Flare hit chance (aura amount of effect 0) and duration (remaining aura duration) are readbacks of the applied aura on the dummy (aura_amount and aura_duration_ms are classed READBACK in coverage.py, no behaviour consumption row). They read 0 before the learn (control) and -3 after, and 9958 ms after against 10000 expected (tolerance 400, which excludes 9000 and 11000 ms). That the aura then lowers the target's chance to hit by 3%, and expires after 10 s, is not measured: the tooling has routes for both (attacker_miss_share for the hit chance, the aura expiry kinds for the duration) and none was attempted here; both stay open. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip. Reference search 2026-11-22: coa-history 807175 Solar Flare: 15499 damage events in 29 logs; 804630: 0 events; bindmysoul (fetched 2026-07-22) reads 'reduces the target's chance to hit by -3% for 10 seconds' on Adjudication 804630; nothing else found."
   },
   {
     "spell": 804632,

@@ -23030,6 +23030,300 @@
         }
       ],
       "observe_source": "Mentor D-106: direction only. The tooltip states no figure; the server adds 0.25 x attack power to Horusath Blast effect 0 while 680656 is known (AscensionSunClericContracts.cpp:309-310), a value with no source, which is not judged. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries the same sentence with no coefficient; nothing else found."
+    },
+    {
+      "spell": 561327,
+      "name": "Blessing of Kings (Hammer of Kings cooldown after a critical Gavel of Wrath)",
+      "kind": "cost_gate",
+      "variant": "cd_hammer",
+      "label_suffix": "cd_hammer",
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "gated_spell": 804751,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          802561,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "cast_auras": [
+        {
+          "spell": 802561,
+          "auras": [
+            984954,
+            823764
+          ],
+          "reason": "984954 makes every Gavel of Wrath hit a critical strike (weapon crit +101) and no spell crit, 823764 removes the dummy's resists; both are set on the caster before each Gavel cast, a precondition fixture, the claim is the cooldown reduction a critical hit applies."
+        }
+      ],
+      "observe_source": "561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671; 680671 Effect[0] and Effect[1] are SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) with EffectBasePoints -1001 and EffectMiscValue 804751 (Hammer of Kings) and 806479 (Solar Prayer): $/1000;680671s1 = 1 second. AscensionSunClericEvents.cpp:117 gates 561327 on an own, non-derived critical damage or healing event and :324-326 calls Reduce(player, 804751, |Amount(680671)|) and Reduce(player, 806479, ...). Route: the cooldown cost_gate (guide section 2, Lorescribe), a cast attempt the server accepts or refuses, not a cooldown readback. Hammer of Kings 804751 (Spell.dbc RecoveryTime 20000) is cast on the caster as the priming cast, then Gavel of Wrath 802561 is cast at the dummy at 5 yd 1600 ms later; the critical-hit fixture 984954 (Effect[0] aura 52 weapon crit +101, Effect[1] aura 57 spell crit -1000) and 823764 (the dummy's resists removed) are set on the caster before that Gavel cast only (cast_auras), a precondition fixture: the claim is the cooldown reduction a real critical hit applies. Class file ratings (melee hit and expertise 10000) leave no miss, dodge or parry: the crit probability is 1 by construction, residual failure probability 0 per pair. The gate attempts the Hammer again 19060 ms after the priming cast (arm with, expected accepted; arm without, 561327 unknown, refused: the control) and 18940 ms after it (arm beyond, refused: the reduction is no larger than 1 s). margin_ms 60 puts the attempts 60 ms either side of the reduced cooldown, so a reduction of 900 ms (refused at the with attempt) and one of 1100 ms or two crits (accepted at the beyond attempt) alert: the 10% either side of the 1000 ms claim are excluded. Healing critical strikes are not run (see the ledger row). Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs (a passive and its proc); Hammer of Kings 804751 377 aura applications in 6 logs and Solar Prayer 806479 41 casts in 17 logs carry no cooldown link; bindmysoul talents snapshot (fetched 2026-07-22) reads 'Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by -1.' (tooltip figure, 1 second); nothing else found."
+    },
+    {
+      "spell": 561327,
+      "name": "Blessing of Kings (Solar Prayer cooldown after a critical Gavel of Wrath)",
+      "kind": "cost_gate",
+      "variant": "cd_prayer",
+      "label_suffix": "cd_prayer",
+      "quote": "Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by $/1000;680671s1.",
+      "gated_spell": 806479,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          802561,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "cast_auras": [
+        {
+          "spell": 802561,
+          "auras": [
+            984954,
+            823764
+          ],
+          "reason": "984954 makes every Gavel of Wrath hit a critical strike (weapon crit +101) and no spell crit, 823764 removes the dummy's resists; both are set on the caster before each Gavel cast, a precondition fixture, the claim is the cooldown reduction a critical hit applies."
+        }
+      ],
+      "observe_source": "561327 Effect[1] aura 42 PROC_TRIGGER_SPELL 680671; 680671 Effect[0] and Effect[1] are SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) with EffectBasePoints -1001 and EffectMiscValue 804751 (Hammer of Kings) and 806479 (Solar Prayer): $/1000;680671s1 = 1 second. AscensionSunClericEvents.cpp:117 gates 561327 on an own, non-derived critical damage or healing event and :324-326 calls Reduce(player, 804751, |Amount(680671)|) and Reduce(player, 806479, ...). Route: the cooldown cost_gate (guide section 2, Lorescribe), a cast attempt the server accepts or refuses, not a cooldown readback. Solar Prayer 806479 (Spell.dbc RecoveryTime 90000) is cast on the caster as the priming cast, then Gavel of Wrath 802561 is cast at the dummy at 5 yd 1600 ms later; the critical-hit fixture 984954 (Effect[0] aura 52 weapon crit +101, Effect[1] aura 57 spell crit -1000) and 823764 (the dummy's resists removed) are set on the caster before that Gavel cast only (cast_auras), a precondition fixture: the claim is the cooldown reduction a real critical hit applies. Class file ratings (melee hit and expertise 10000) leave no miss, dodge or parry: the crit probability is 1 by construction, residual failure probability 0 per pair. The gate attempts the Prayer again 89060 ms after the priming cast (arm with, expected accepted; arm without, 561327 unknown, refused: the control) and 88940 ms after it (arm beyond, refused: the reduction is no larger than 1 s). margin_ms 60 puts the attempts 60 ms either side of the reduced cooldown, so a reduction of 900 ms (refused at the with attempt) and one of 1100 ms or two crits (accepted at the beyond attempt) alert: the 10% either side of the 1000 ms claim are excluded. Healing critical strikes are not run (see the ledger row). Reference search 2026-11-22: coa-history spells 561327 and 680671: 0 events in 186 logs (a passive and its proc); Hammer of Kings 804751 377 aura applications in 6 logs and Solar Prayer 806479 41 casts in 17 logs carry no cooldown link; bindmysoul talents snapshot (fetched 2026-07-22) reads 'Critical strikes now reduce the cooldown of Hammer of Kings and Solar Prayer by -1.' (tooltip figure, 1 second); nothing else found."
+    },
+    {
+      "spell": 301011,
+      "name": "Holy Knight (Gavel of Light additionally heals 5 of 6 nearby allies)",
+      "kind": "metric_delta",
+      "variant": "allies_cap",
+      "label_suffix": "allies_cap",
+      "quote": "Your Gavel of Light now additionally heals up to 5 nearby allies",
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301012
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 6,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "observe_source": "301011 Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT (BasePoints 99 +1 = 100, $s1), trigger 301012 (Effect[0] SPELL_EFFECT_HEAL, TargetA 31 TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 9). AscensionSunClericAbilities.cpp:289-300: when the caster's own Gavel of Light heal 707522 (State.gavelHealing, set by the Gavel of Light 800611 branch at :326-335) lands on the caster with 301011 known, Allies(player, player, Radius(301012)) minus the caster is cut to 5 (allies.resize(5)) and each receives Copy(player, ally, 301012, CalculatePct(healing, Amount(301011))). Allies() keeps units in the caster's raid and friendly (AscensionSunCleric.cpp:149-157), so 6 grouped allies stand within range and the count read is the number of 301012 heal events the caster cast: 5. The count is read as the caster's spell_heal_count of 301012 (events the caster itself cast, any target), 0 in the before phase (control: 301011 not learned, Gavel of Light cast the same way) and 5 after the learn; the counter is cumulative and the before reading is 0, so the after reading is the gain. Gavel of Light 800611 at the dummy at 5 yd with the caster held at 50% health (so the self heal is not zero); 984954 makes the Gavel hit a critical strike in both phases, 823764 removes resists; class file ratings leave no miss: residual failure probability 0 per pair. Weapon set Blessings (spell_weapon_sets 301011). The amount (100% of the self heal) is not read here (see the ledger row). Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours."
+    },
+    {
+      "spell": 301011,
+      "name": "Holy Knight (Gavel of Light additionally heals all 3 nearby allies)",
+      "kind": "metric_delta",
+      "variant": "allies_few",
+      "label_suffix": "allies_few",
+      "quote": "Your Gavel of Light now additionally heals up to 5 nearby allies",
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301012
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 3,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "observe_source": "301011 Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT (BasePoints 99 +1 = 100, $s1), trigger 301012 (Effect[0] SPELL_EFFECT_HEAL, TargetA 31 TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 9). AscensionSunClericAbilities.cpp:289-300: when the caster's own Gavel of Light heal 707522 (State.gavelHealing, set by the Gavel of Light 800611 branch at :326-335) lands on the caster with 301011 known, Allies(player, player, Radius(301012)) minus the caster is cut to 5 (allies.resize(5)) and each receives Copy(player, ally, 301012, CalculatePct(healing, Amount(301011))). Allies() keeps units in the caster's raid and friendly (AscensionSunCleric.cpp:149-157), so 3 grouped allies stand within range and the count read is the number of 301012 heal events the caster cast: 3. The count is read as the caster's spell_heal_count of 301012 (events the caster itself cast, any target), 0 in the before phase (control: 301011 not learned, Gavel of Light cast the same way) and 3 after the learn; the counter is cumulative and the before reading is 0, so the after reading is the gain. Gavel of Light 800611 at the dummy at 5 yd with the caster held at 50% health (so the self heal is not zero); 984954 makes the Gavel hit a critical strike in both phases, 823764 removes resists; class file ratings leave no miss: residual failure probability 0 per pair. Weapon set Blessings (spell_weapon_sets 301011). The amount (100% of the self heal) is not read here (see the ledger row). Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (melee attack speed)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "Increases your melee attack speed by $s1%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "expected": 2000,
+      "expected_ratio": 0.869565,
+      "tolerance": 0.001,
+      "observe_source": "680643 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, EffectBasePoints 14 + 1 = 15 ($s1). attack_time_ms reads UNIT_FIELD_BASEATTACKTIME (hand 0), the hasted swing time: the Seraphim main hand 2027 swings in 2300 ms (class file weapon set Seraphim, spell_weapon_sets 680643), 2300 / 1.15 = 2000 ms with the passive and 2300 before it is learned (control; the harness trigger Holy Form 805301 is cast in both phases and the before reading shows it adds no haste). The ratio 0.869565 within 0.001 excludes 14% (0.87719) and 16% (0.86207), and 13.5% and 16.5%, the 10% either side of the 15% claim, (0.88106 and 0.85837). Deterministic stat read, judged to the rounding. Reference search 2026-11-22: coa-history spell 680643: 0 events in 186 logs (a passive); bindmysoul talents snapshot (fetched 2026-07-22) reads 'Increases your melee attack speed by 15% and your first auto attack on a target hits twice.'; the same Swift Justice 300322 entry reads the melee haste of another passive with the same metric; nothing else found."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (first auto attack gets the DBC extra attack)",
+      "kind": "metric_delta",
+      "variant": "first_extra",
+      "label_suffix": "first_extra",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 681472
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 681472 read 0 without the passive and exactly 1 with it over 3 swing intervals (3 or 4 swings of the hasted main hand): one extra attack, not one per swing. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (first auto attack marks the target)",
+      "kind": "metric_delta",
+      "variant": "first_marker",
+      "label_suffix": "first_marker",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "trigger_spell": 681472,
+      "metric": "aura",
+      "fields": {
+        "spell": 681531
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The dummy holds 681531 read 0 without the passive and 1 with it after 3 swing intervals: the marker lands on the target and its 600000 ms duration outlives the phase, so the later swings are refused. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (the extra attack comes in the first swing interval)",
+      "kind": "metric_delta",
+      "variant": "first_interval",
+      "label_suffix": "first_interval",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 1,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 681472
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. Same read after 1 swing interval (2300 ms): 0 without the passive and 1 with it, so the single extra attack of the 3-interval entry has already come in the first interval and none comes after. One interval holds one or two hasted swings (2000 ms), so this entry does not separate the first from the second swing; the DBC marker is the only gate and no code counts swings. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (no Vow of the Valkyr strike)",
+      "kind": "metric_delta",
+      "variant": "no_vow_strike",
+      "label_suffix": "no_vow_strike",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 506824
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 506824 (Vow of the Valkyr (Mainhand), the strike the code cast before ADR 0024) read 0 without the passive (control) and 0 with it over 3 swing intervals. Positive control: coa-history 506824 SPELL_DAMAGE 1388 events in 11 logs, none from the Valiance player. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 803913,
+      "name": "Glorious Execution (main-hand strike)",
+      "kind": "script_hit",
+      "variant": "main_hand",
+      "label_suffix": "main_hand",
+      "quote": "Strike with both weapons dealing Weapon Damage plus $s1 Physical damage",
+      "hit_spell": 800691,
+      "casts": [
+        [
+          803913,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "value_spell": 803913,
+      "value_effect": 0,
+      "normalized_value": true,
+      "trials": 40,
+      "minimum_hits": 15,
+      "cast_power": 1363,
+      "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 800691. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 803913,
+      "name": "Glorious Execution (off-hand strike)",
+      "kind": "script_hit",
+      "variant": "off_hand",
+      "label_suffix": "off_hand",
+      "quote": "Strike with both weapons dealing Weapon Damage plus $s1 Physical damage",
+      "hit_spell": 802566,
+      "casts": [
+        [
+          803913,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "value_spell": 803913,
+      "value_effect": 0,
+      "normalized_value": true,
+      "trials": 40,
+      "minimum_hits": 15,
+      "cast_power": 1363,
+      "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
@@ -23378,7 +23672,9 @@
     "807971": "Valkyr",
     "807972": "Valkyr",
     "807973": "Valkyr",
-    "807974": "Valkyr"
+    "807974": "Valkyr",
+    "800691": "Valkyr",
+    "802566": "Valkyr"
   },
   "weapon_set_spells": {
     "Valkyr": [

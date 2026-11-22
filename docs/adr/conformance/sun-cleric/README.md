@@ -26,3 +26,5 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0020](0020-five-mana-restores-log-under-their-own-spell.md) | Five Sun Cleric mana restores log under their own spell, not Vow of Grace |
 | [0021](0021-lead-me-not-astray-doubles-the-bless-heal.md) | Lead Me Not Astray doubles the Bless heal as well as the mana |
 | [0022](0022-glaring-rays-haste-stacks-as-two-multipliers.md) | Glaring Rays haste stacks as two multipliers |
+| [0023](0023-a-triggered-strike-takes-its-cast-spells-weapon-set.md) | A triggered strike takes its cast spell's weapon set |
+| [0024](0024-valiance-first-auto-attack-is-the-dbc-extra-swing.md) | Valiance's first auto attack on a target is the DBC extra attack, gated by its debuff |
