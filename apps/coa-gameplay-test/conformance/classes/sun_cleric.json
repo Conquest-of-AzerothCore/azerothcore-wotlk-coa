@@ -16296,6 +16296,298 @@
       "observe_source": "805581 Trial of Valor Effect[0] aura 4 SPELL_AURA_DUMMY; the class code (AscensionSunCleric.cpp:292-293, Fulfill) cuts Horusath Blast 500154 by |Amount(807445)| when a Vow is fulfilled under Dawn with 805581 known; 807445 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -2001 (-2000 ms, $/1000;807445s1 = 2 s), MiscValue 500154. Fulfilment as the Final Vows entry sets it up: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast, then Horusath Blast 500154 (RecoveryTime 25000) is cast at the dummy; setup runs in the after phase only, so the before phase is a plain cast (a third control, 24000 = 25000 - 1000). The remaining cooldown is read 1000 ms after the cast (game time 980..1020 ms): 25000 - 2000 - 1000 = 22000 with the passive. A cut of 1800 ms (10% off) reads 22200 and 2200 ms reads 21800, 200 ms away, so tolerance 150 excludes both. Control: 805581 is never learned (the learned gate is Angelic 704582): 24000, so the fulfilment alone cuts nothing."
     },
     {
+      "spell": 805581,
+      "name": "Trial of Valor (Horusath Blast cooldown entry 23.2 s after a fulfilment)",
+      "kind": "metric_delta",
+      "variant": "cd_late",
+      "label_suffix": "cd_late",
+      "quote": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500154
+      },
+      "before_expected": 1800,
+      "wait_ms": 23200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          23180,
+          23220
+        ]
+      },
+      "expected": 0,
+      "tolerance": 150,
+      "observe_source": "805581 cooldown cut as the cd entry (807445 BasePoints -2001, 2000 ms; Fulfill AscensionSunCleric.cpp:289-293 through Reduce, ModifySpellCooldown Player.cpp:11969). Horusath Blast 500154: Category 559, RecoveryTime 25000, CategoryRecoveryTime 25000 (Spell.dbc). The entry a recast is checked against is the spell's own entry: Spell::CheckCast reads HasSpellCooldown(500154) only (Spell.cpp:5828) and AddSpellAndCategoryCooldowns writes the category cooldown as the entries of the other spells of Category 559 (Player.cpp:11867-11909), so a category cooldown cannot hold the recast. This entry reads that own entry 23200 ms after the cast: 25000 - 2000 - 23200 < 0 so the cooldown is over (0); the control without 805581 reads 25000 - 23200 = 1800. A zero read says only that the entry has ended, the amount of the cut stays proven by the cd entry. Cause check for the refused recast of the withdrawn cd_gate arms (d8 third design).",
+      "gate_spell": 805581
+    },
+    {
+      "spell": 805581,
+      "name": "Trial of Valor (control: the same read without 805581)",
+      "kind": "metric_delta",
+      "variant": "cd_late_control",
+      "label_suffix": "cd_late_control",
+      "quote": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500154
+      },
+      "before_expected": 1800,
+      "wait_ms": 23200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          23180,
+          23220
+        ]
+      },
+      "expected": 1800,
+      "tolerance": 150,
+      "gate_spell": 704582,
+      "observe_source": "Control of cd_late: 805581 is never learned (the learned gate is Angelic 704582), so the fulfilment cuts nothing and the cooldown entry of Horusath Blast 500154 still has 25000 - 23200 = 1800 ms left."
+    },
+    {
+      "spell": 680630,
+      "name": "Pendant of the Sun (charges after the refresh: nine heals leave one)",
+      "kind": "metric_delta",
+      "variant": "pendant_consumption",
+      "label_suffix": "pendant_consumption",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "trigger_spell": 680630,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 8,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Pendant 680630 then refreshes all charges to ProcCharges 10 (AscensionSunClericAbilities.cpp:525-531) and nine more heals spend 9: 10 - 9 = 1 charge. Dawn 807440 is a harness phase_auras fixture (the condition Pendant needs, not the subject).",
+      "setup_in_before": true,
+      "post_trigger_casts": {
+        "spell": 500143,
+        "count": 9,
+        "health_pct": 50
+      }
+    },
+    {
+      "spell": 680630,
+      "name": "Pendant of the Sun (control: the same eleven heals without the refresh)",
+      "kind": "metric_delta",
+      "variant": "pendant_consumption_control",
+      "label_suffix": "pendant_consumption_control",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 8,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Control: an Illumination in place of Pendant, so no refresh: 2 + 1 + 8 = 11 heals against 10 charges, the aura is gone at the 10th (0 read).",
+      "setup_in_before": true,
+      "post_trigger_casts": {
+        "spell": 500143,
+        "count": 8,
+        "health_pct": 50
+      }
+    },
+    {
+      "spell": 680630,
+      "name": "Pendant of the Sun (control: eight heals without the refresh leave two charges)",
+      "kind": "metric_delta",
+      "variant": "pendant_consumption_mid",
+      "label_suffix": "pendant_consumption_mid",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 8,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Dawn 807440 tooltip (Spell.dbc, enUS): 'Your next 10 damaging or healing spells or abilities will trigger the Fulfillment effect of your Vow. ... Each damaging or healing spell will expend a charge regardless of whether or not your current Vow is fulfilled by it.' ProcCharges 10. Illumination 500143 is a SPELL_EFFECT_HEAL (Useful, AscensionSunClericAbilities.cpp:57-67), each non-triggered cast of it runs SpendDawn from OnSpellBeforeEffects (:214) which does SetCharges(charges - 1), or Remove() at the last charge (:131-134); a Vow fulfilment is not needed. Two heals run in both phases (10 - 2 = 8 before). Sizing arm: 2 + 1 + 5 = 8 heals without the refresh: 10 - 8 = 2 charges.",
+      "setup_in_before": true,
+      "post_trigger_casts": {
+        "spell": 500143,
+        "count": 5,
+        "health_pct": 50
+      }
+    },
+    {
       "spell": 681252,
       "name": "Radiant Halberd (Champion of the Sun duration)",
       "kind": "metric_delta",
