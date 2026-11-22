@@ -7559,14 +7559,14 @@
       "quote": "Dealing direct damage to an enemy affected by",
       "seed_spell": 801524,
       "aura_spell": 806697,
-      "target_rank": 807870,
+      "target_rank": 800231,
       "hit_spells": [
-        807870
+        800231
       ],
       "spares": 6,
       "radius": 10.0,
       "force_crit": "spell",
-      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Glare 807870 (Effect[1] SCHOOL_DAMAGE, a direct hit, with a 5 s aura) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Sunflare 800231 (Effect[0] SCHOOL_DAMAGE, SchoolMask 2, a direct hit, 2000 ms cast, speed 70, 10% mana, no SPELL_ATTR2_CANT_CRIT) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted as a critical strike; the earlier hit spell Glare 807870 carries AttributesEx2 0x20000000 (SPELL_ATTR2_CANT_CRIT), so no run could count a critical hit with it; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
     },
     {
       "spell": 704562,
@@ -7900,8 +7900,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "parts": 50,
+      "trials": 36,
+      "parts": 66,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Horusath Blast 500154 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
@@ -7928,8 +7928,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "parts": 72,
+      "trials": 24,
+      "parts": 90,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Rapture 806477 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
