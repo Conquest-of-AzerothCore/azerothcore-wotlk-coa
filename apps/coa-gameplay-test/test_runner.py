@@ -1542,7 +1542,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(invalid)
 
     def test_spell_log_metrics_need_a_spell_and_take_the_caster_filters(self):
-        for metric in ('spell_log_count', 'spell_absorb_total', 'spell_resist_total'):
+        for metric in ('spell_log_count', 'spell_absorb_total', 'spell_resist_total', 'spell_damage_with_resist_total'):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
                                       'caster': 'target', 'target': 'caster', 'critical': False, 'min': 0})
@@ -1552,6 +1552,15 @@ class RunnerTests(unittest.TestCase):
             del invalid['steps'][-1]['spell']
             with self.subTest(metric=metric, spell=None), self.assertRaises(ValueError):
                 run.validate(invalid)
+
+    def test_spell_damage_with_resist_total_refuses_the_spell_damage_event_filters(self):
+        for key, value in (('pet', False), ('resisted', True), ('blocked', False), ('entry', 36),
+                           ('target_entry', 36), ('caster_entry', 36)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_damage_with_resist_total',
+                                      'spell': 116, key: value, 'min': 0})
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                run.validate(scenario)
 
     def test_spell_resist_chance_needs_a_magic_school_and_a_target(self):
         scenario = copy.deepcopy(self.scenario)

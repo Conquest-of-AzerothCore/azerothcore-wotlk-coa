@@ -5280,7 +5280,8 @@ private:
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
         }
-        if (metric == "spell_log_count" || metric == "spell_absorb_total" || metric == "spell_resist_total")
+        if (metric == "spell_log_count" || metric == "spell_absorb_total" || metric == "spell_resist_total" ||
+            metric == "spell_damage_with_resist_total")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
             ObjectGuid caster = player->GetGUID();
@@ -5294,8 +5295,16 @@ private:
             for (SpellLogEvent const& event : _actors.at(step.get<std::string>("actor")).spellLogs)
                 if (event.caster == caster && event.spell == spell && (!target || event.target == target) &&
                     (!critical || event.critical == *critical))
-                    value += metric == "spell_log_count" ? 1 :
-                        (metric == "spell_absorb_total" ? event.absorb : event.resist);
+                {
+                    if (metric == "spell_log_count")
+                        value += 1;
+                    else if (metric == "spell_absorb_total")
+                        value += event.absorb;
+                    else if (metric == "spell_resist_total")
+                        value += event.resist;
+                    else
+                        value += uint64(event.damage) + event.resist;
+                }
             return double(value);
         }
         if (metric == "owned_creature_avoided_count")
