@@ -1082,7 +1082,7 @@
     "spell": 504848,
     "clause": "Grant mercy to an ally and up to 5 nearby allies,",
     "kind": "claim",
-    "reason": "Open: the ally half is read by targets_ally (the target and the four other grouped allies hold the aura, none in the uncast control). The cap of 5 needs a sixth candidate (allies above 5 in the ally option, tool need returned). Not given a final status.",
+    "reason": "The ally half is read by targets_ally (the target and the four other grouped allies hold the aura, none in the uncast control); the reach is the stock chain targeting of a target-21 spell with EffectChainTarget 6 (Spell::SelectImplicitChainTargets, Spell.cpp:1919-1939, SearchChainTargets :2200-2300; the arm cites it as its reach_source, ally5 stands in raid subgroup 2 and TARGET_CHECK_ALLY has no group test). The cap of 5 needs a sixth candidate (allies above 5 in the ally option, tool need returned). The \"up to 5 nearby allies (the cap)\" claim has no label and keeps the clause open. Not given a final status.",
     "claims": [
       {
         "claim": "Grant mercy to an ally",
@@ -3364,10 +3364,16 @@
         "labels": [
           "707081 behaviour_metric_delta strike_0",
           "707081 behaviour_metric_delta strike_1",
-          "707081 behaviour_metric_delta strike_5"
+          "707081 behaviour_metric_delta strike_4"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "basis": "live_source",
+      "spell": 707081,
+      "ruling": "Mentor D-63 (a): 5 strikes in all conform to live; coa-history logs 75, 76, 77 and 82 (2026-08-01 and 2026-08-02), 657125 hits grouped by cast: at most 5 distinct targets in 1,916 casts, never 6."
+    },
+    "reason": "Mentor D-63 (a): the chain strikes 5 enemies in all (the primary and 4 additional), conformant to live, from the logs above and not from the Templar \"N in all\" precedent. The DBC word \"up to $657125i additional enemies\" is 5; the stock engine counts the primary in the chain (Spell.cpp:1921, :1934). The last strike is read as strike_4 (98 x 0.8^4)."
   },
   {
     "spell": 707414,
@@ -4367,19 +4373,31 @@
     "claims": [
       {
         "claim": "Increases the effectiveness of Gavels (Gavel of Light)",
-        "labels": []
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel_light",
+          "805628 behaviour_hit_ratio effect_gavel_light_oos"
+        ]
       },
       {
         "claim": "Increases the effectiveness of Gavels (Gavel of Grace)",
-        "labels": []
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel_grace",
+          "805628 behaviour_hit_ratio effect_gavel_grace_oos"
+        ]
       },
       {
         "claim": "Increases the effectiveness of Gavels (Gavel of Wrath)",
-        "labels": []
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel",
+          "805628 behaviour_hit_ratio effect_gavel_oos"
+        ]
       },
       {
         "claim": "Increases the effectiveness of Horusath Blast",
-        "labels": []
+        "labels": [
+          "805628 behaviour_hit_ratio effect_horusath",
+          "805628 behaviour_hit_ratio effect_horusath_oos"
+        ]
       },
       {
         "claim": "reduces the mana cost of Gavels by $s2% (Gavel of Light and Gavel of Wrath; Gavel of Grace has no mana cost)",
@@ -4395,7 +4413,7 @@
         ]
       }
     ],
-    "reason": "Mentor D-60: the four effectiveness claims are not counted (labels withheld) until the mentor settles the model; the cost claims are counted. The D-54 expectation stays in the entries; the reproduced model (Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%) with file:line is in the fix report and ADR sun-cleric 0008 (proposed). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (the full text is in each entry's expected_source)."
+    "reason": "ADR sun-cleric 0008, accepted (mentor D-61 and D-68): the four effectiveness claims carry the engine arithmetic of the model, ratios 1.27137 (Gavel of Wrath), 1.23845 (Gavel of Grace), 1.21667 (Gavel of Light) and 1.19336 (Horusath Blast), each proven by two setups: the original entry (attack power 70, target armor 528) and its out-of-sample entry (_oos: attack power 280, target creature 603 armor 3750, prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635). Not tested: another weapon, another level, spell power. The Horusath arm is a replication, not an out-of-sample test (no attack power term, no armor). The cost claims are counted as before. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (the full text is in each entry's expected_source)."
   },
   {
     "spell": 807973,
