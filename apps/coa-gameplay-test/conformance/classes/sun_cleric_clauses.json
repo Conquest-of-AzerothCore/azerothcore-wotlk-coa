@@ -1704,15 +1704,38 @@
   {
     "spell": 520024,
     "clause": "At the end of the duration, you charge back down, dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage to all enemies within $570034a1 yds.",
-    "labels": [
-      "520024 effect_value 570034e0 #1",
-      "520024 effect_radius 570034e0 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "At the end of the duration, you charge back down",
+        "labels": [
+          "520024 behaviour_metric_delta charge_hit",
+          "520024 behaviour_metric_delta charge_hit_ap"
+        ]
+      },
+      {
+        "claim": "dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage",
+        "labels": [
+          "520024 effect_value 570034e0 #1",
+          "520024 behaviour_metric_delta charge_hit",
+          "520024 behaviour_metric_delta charge_hit_ap",
+          "520024 behaviour_metric_delta charge_cast",
+          "520024 behaviour_metric_delta charge_cast_sp"
+        ]
+      },
+      {
+        "claim": "to all enemies within $570034a1 yds",
+        "labels": [
+          "520024 effect_radius 570034e0 #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261122-165714 / -165754 (b11d9 fix round, build 9c082b20c072, server commit 4d75f6bdf8fa, no flip, 26 ok, 0 alerts in both runs; control = no cast before, 0 damage): charge_hit 497 and charge_hit_ap 10497 on a real 520024 cast with the dummy selected (select_dummy; without a selection the landing cast 570034 fails with cast_failure 27, a test fault, not a server verdict), against 497.6 and 10497.6; charge_cast 497 and charge_cast_sp 4997 on a direct cast of 570034 (the hit arm reads the school of the cast spell, and 520024 has none), against 497.6 and 4997.6. Observation M1 (no fix): the landing cast in Valkyr (AscensionSunClericSummons.cpp:85-86) depends on the player selection at landing, not on the stored victim (:48); with no or a friendly selection the landing deals no damage, and with an enemy selected the area is centred on that unit, not on the landing point."
   },
   {
     "spell": 572848,
     "clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
+    "reason": "Open, not written: the value labels need a per-hand weapon hit with an absolute expected from the weapon and the off-hand rule. Observation: the tooltip token $524857m2 reads 6 while 572850 and 572045 effect 1 BasePoints are 156 and 104 (+1).",
     "labels": [
       "572848 effect_value 524857e0 #0",
       "572848 effect_value 524857e1 #1",
@@ -1724,6 +1747,7 @@
   {
     "spell": 572848,
     "clause": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+    "reason": "Open, tool need: no per-event school read exists (SpellDamageEvent in CoAGameplayTest.cpp carries no school field). The data side is DBC: 572850 SchoolMask 1 (Physical) and 572045 SchoolMask 4 (Fire).",
     "labels": [],
     "kind": "claim"
   },
@@ -4883,7 +4907,10 @@
     "kind": "claim",
     "labels": [
       "707528 behaviour_metric_delta cd",
-      "707528 behaviour_metric_delta cd_control"
+      "707528 behaviour_metric_delta cd_control",
+      "707528 cost_gate 500154 cd_gate without",
+      "707528 cost_gate 500154 cd_gate with",
+      "707528 cost_gate 500154 cd_gate beyond"
     ]
   },
   {
@@ -5708,6 +5735,7 @@
   {
     "spell": 804250,
     "clause": "and $680911s3% increased damage.",
+    "reason": "Open, tool need: the ally must deal damage under a real 804250 cast. hit_ratio arm casts are spell ids cast at the dummy (behaviours.py), ally_arm has no ally attack, and set_aura of 680911 is forbidden as a fixture of the claim.",
     "labels": [
       "804250 effect_value 680911e2 #2"
     ],
@@ -5716,6 +5744,7 @@
   {
     "spell": 804250,
     "clause": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+    "reason": "Open, tool need: same as the increased damage clause (the ally must deal damage under a real 804250 cast); no existing kind reads the ally's damage or its healing.",
     "labels": [
       "804250 effect_value 680911e2 #3"
     ],
