@@ -1860,10 +1860,11 @@
   {
     "spell": 680620,
     "clause": "Increases the critical strike chance of Valkyr's Calling by $s1%.",
+    "kind": "claim",
     "labels": [
-      "680620 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "680620 behaviour_metric_delta crit",
+      "680620 behaviour_metric_delta crit_control"
+    ]
   },
   {
     "spell": 681433,
@@ -2275,20 +2276,18 @@
     "spell": 681066,
     "clause": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
     "kind": "claim",
-    "reason": "Solar Invocation spells: 4 in family 33 (Revelation, Resplendence share mask word 0), all four are tested (G-23).",
+    "reason": "Solar Invocation spells: 4 in family 33 (Revelation, Resplendence share mask word 0), all four are tested (G-23). Ascension (2500 ms cast, cooldown starts at completion) is read as the remaining cooldown after its cast, the other three as cost gates.",
     "labels": [
       "681066 cost_gate 503651 cd_revelation without",
       "681066 cost_gate 503651 cd_revelation with",
       "681066 cost_gate 503651 cd_revelation beyond",
-      "681066 cost_gate 500152 cd_ascension without",
-      "681066 cost_gate 500152 cd_ascension with",
-      "681066 cost_gate 500152 cd_ascension beyond",
       "681066 cost_gate 800764 cd_conquest without",
       "681066 cost_gate 800764 cd_conquest with",
       "681066 cost_gate 800764 cd_conquest beyond",
       "681066 cost_gate 806159 cd_resplendence without",
       "681066 cost_gate 806159 cd_resplendence with",
-      "681066 cost_gate 806159 cd_resplendence beyond"
+      "681066 cost_gate 806159 cd_resplendence beyond",
+      "681066 behaviour_metric_delta cd_ascension"
     ]
   },
   {
@@ -2539,8 +2538,11 @@
   {
     "spell": 704582,
     "clause": "Reduces the cast time of Illumination by 0.25 sec.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704582 behaviour_metric_delta illum_held",
+      "704582 behaviour_metric_delta illum_done"
+    ]
   },
   {
     "spell": 704585,
@@ -3058,11 +3060,27 @@
   {
     "spell": 707079,
     "clause": "Casting Hammer of Kings now also increases your critical strike chance by $524998s1% for $524998d.",
-    "labels": [
-      "707079 effect_value 524998e0 #0",
-      "707079 spell_duration 524998 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Hammer of Kings now also increases your critical strike chance",
+        "labels": [
+          "707079 behaviour_metric_delta aura"
+        ]
+      },
+      {
+        "claim": "by $524998s1%",
+        "labels": [
+          "707079 behaviour_metric_delta crit_gain"
+        ]
+      },
+      {
+        "claim": "for $524998d",
+        "labels": [
+          "707079 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 707081,

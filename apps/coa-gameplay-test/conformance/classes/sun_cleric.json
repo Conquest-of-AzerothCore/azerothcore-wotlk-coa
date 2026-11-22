@@ -8628,20 +8628,6 @@
     },
     {
       "spell": 681066,
-      "name": "Devoted to the Sun (Ascension cooldown)",
-      "kind": "cost_gate",
-      "variant": "cd_ascension",
-      "label_suffix": "cd_ascension",
-      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
-      "gated_spell": 500152,
-      "resource": "cooldown",
-      "reduction": 5000,
-      "target": "caster",
-      "margin_ms": 400,
-      "observe_source": "681066 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 (-5000 ms, $/1000;s1 = 5 s), class mask 294912 / 128 / 524290. Ascension 500152 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 25000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 25000 ms, so the cut lies within 400 ms of 5000 ms, excluding 4500 and 5500 ms. Reference search 2026-11-22: coa-history spell 681066: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 681066 and no value; git log --grep and gh pr list --search 681066: see the report; nothing found beyond the tooltip and the DBC for the value."
-    },
-    {
-      "spell": 681066,
       "name": "Devoted to the Sun (Conquest cooldown)",
       "kind": "cost_gate",
       "variant": "cd_conquest",
@@ -8730,6 +8716,209 @@
       "expected": 29500,
       "tolerance": 1500,
       "observe_source": "503651 Revelation and Resplendence 806159 carry the same Category 767 with CategoryRecoveryTime 30000 (Spell.dbc; the Category field is read for 503651, 800764 and 500152 in the existing 800764 entry). One cast of 503651 at the caster is followed 500 ms later by a read of the remaining cooldown of 806159, which was never cast: 0 before the cast (control) and 30000 less the elapsed time after it, expected 29500 with a tolerance of 1500 ms (5%), which excludes a category cooldown 10% (3000 ms) off on both sides. Reference search 2026-11-22: coa-history spell 503651: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 503651 and no value; git log --grep and gh pr list --search 503651: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681066,
+      "name": "Devoted to the Sun (Ascension cooldown left after its cast)",
+      "kind": "metric_delta",
+      "variant": "cd_ascension",
+      "label_suffix": "cd_ascension",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+      "trigger_spell": 500152,
+      "gate_spell": 681066,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 29500,
+      "expected": 24500,
+      "tolerance": 400,
+      "wait_ms": 3000,
+      "expire_ms": 30500,
+      "game_time": {
+        "after": [
+          2950,
+          3050
+        ]
+      },
+      "observe_source": "681066 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 (-5000 ms, $/1000;s1 = 5 s), class mask word 1 = 128 = Solar Invocation: Ascension 500152's SpellFamilyFlags[1] (CategoryRecoveryTime 30000, RecoveryTime 0). Ascension has CastingTimeIndex 19 = 2500 ms (SpellCastTimes) and Spell::cast, which calls SendSpellCooldown (Spell.cpp:4036), runs when the cast completes, so the cooldown starts 2500 ms after the cast starts: the cost_gate attempt of the first run (25400 ms after the cast started, 22900 ms into the cooldown) was refused for that reason (an incorrect test, not a defect; the instant Solar Invocation spells passed). This entry reads the remaining cooldown of 500152 3000 ms after the cast started (game time 2950..3050 ms), 500 ms into the cooldown: 29500 before the learn (control) and 24500 after it, within 400 ms, which excludes a cut of 4500 or 5500 ms (reads of 25000 and 24000 ms). Reference search 2026-11-22: coa-history spell 681066: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 681066 and no value; git log --grep and gh pr list --search 681066: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 704582,
+      "name": "Angelic (Illumination cast still running)",
+      "kind": "metric_delta",
+      "variant": "illum_held",
+      "label_suffix": "illum_held",
+      "quote": "Reduces the cast time of Illumination by 0.25 sec.",
+      "trigger_spell": 500143,
+      "gate_spell": 704582,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1735,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1730,
+          1745
+        ]
+      },
+      "observe_source": "704582 Angelic Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -251 (-250 ms), class mask word 1 = 512 = Illumination 500143's SpellFamilyFlags[1]. Illumination 500143 has CastingTimeIndex 5 = 2000 ms (SpellCastTimes), so the tooltip's 0.25 s makes it 1750 ms. The caster's cast is read still running at 1735 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 2000 ms): the cast lasts more than 1735 ms, so the cut is under 265 ms (excludes 275 ms). The two reads exclude a cut 10% (25 ms) off on both sides. Mana is set to the class base mana 1363 before each cast, regeneration off. Reference search 2026-11-22: coa-history spell 704582: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704582 and no value; git log --grep and gh pr list --search 704582: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 704582,
+      "name": "Angelic (Illumination cast finished)",
+      "kind": "metric_delta",
+      "variant": "illum_done",
+      "label_suffix": "illum_done",
+      "quote": "Reduces the cast time of Illumination by 0.25 sec.",
+      "trigger_spell": 500143,
+      "gate_spell": 704582,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1765,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1760,
+          1775
+        ]
+      },
+      "observe_source": "704582 Angelic Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -251 (-250 ms), class mask word 1 = 512 = Illumination 500143's SpellFamilyFlags[1]. Illumination 500143 has CastingTimeIndex 5 = 2000 ms (SpellCastTimes), so the tooltip's 0.25 s makes it 1750 ms. The caster's cast is read finished by 1765 ms of game time after it starts, with and without the passive learned between the phases (the control phase reads the cast still running, 2000 ms): the cast lasts at most 1765 ms, so the cut is at least 235 ms (excludes 225 ms). The two reads exclude a cut 10% (25 ms) off on both sides. Mana is set to the class base mana 1363 before each cast, regeneration off. Reference search 2026-11-22: coa-history spell 704582: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704582 and no value; git log --grep and gh pr list --search 704582: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 680620,
+      "name": "By The Light (Valkyr's Calling critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit",
+      "label_suffix": "crit",
+      "quote": "Increases the critical strike chance of Valkyr's Calling by $s1%.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 570034,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "expected_gain": 50,
+      "tolerance": 0.0001,
+      "observe_source": "680620 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 49 + 1 = 50 ($s1), EffectSpellClassMask word 1 = 16 = the SpellFamilyFlags[1] of 570034, the Holy damage spell of Valkyr's Calling 520024 (its charge back down, tooltip $570034m1). The caster's crit chance for a 570034 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) is read before the passive is learned (control) and after: gain 50 points. Bless 804247 is the fixture cast between the reads. Reference search 2026-11-22: coa-history spell 680620: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 680620 and no value; git log --grep and gh pr list --search 680620: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 680620,
+      "name": "By The Light (control: Horusath Blast critical strike chance outside the mask)",
+      "kind": "metric_delta",
+      "variant": "crit_control",
+      "label_suffix": "crit_control",
+      "quote": "Increases the critical strike chance of Valkyr's Calling by $s1%.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.0001,
+      "observe_source": "680620 EffectSpellClassMask word 1 = 16 does not include Horusath Blast 500154 (SpellFamilyFlags[1] 64): its crit chance read around the same learn must not move (gain 0). Reference search 2026-11-22: coa-history spell 680620: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 680620 and no value; git log --grep and gh pr list --search 680620: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 707079,
+      "quote": "Casting Hammer of Kings now also increases your critical strike chance by $524998s1% for $524998d.",
+      "kind": "metric_delta",
+      "trigger_spell": 804751,
+      "gate_spell": 707079,
+      "target": "caster",
+      "expire_ms": 20500,
+      "name": "Chosen King (Anointed aura after Hammer of Kings)",
+      "variant": "aura",
+      "label_suffix": "aura",
+      "metric": "aura",
+      "fields": {
+        "spell": 524998
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "observe_source": "707079 Chosen King Effect[0]/[1] flat and percent modifiers (data), and AscensionSunClericAbilities.cpp:18-20 casts Anointed 524998 on the caster when Hammer of Kings 804751 is cast with 707079 known. 524998 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1 = 10 ($524998s1), DurationIndex 1 = 10000 ms ($524998d). Hammer of Kings 804751 (RecoveryTime 20000, self cast) is cast before the learn (control) and after it. Reference search 2026-11-22: coa-history spell 707079: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707079 and no value; git log --grep and gh pr list --search 707079: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 707079,
+      "quote": "Casting Hammer of Kings now also increases your critical strike chance by $524998s1% for $524998d.",
+      "kind": "metric_delta",
+      "trigger_spell": 804751,
+      "gate_spell": 707079,
+      "target": "caster",
+      "expire_ms": 20500,
+      "name": "Chosen King (Anointed critical strike chance)",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "observe_source": "707079 Chosen King Effect[0]/[1] flat and percent modifiers (data), and AscensionSunClericAbilities.cpp:18-20 casts Anointed 524998 on the caster when Hammer of Kings 804751 is cast with 707079 known. 524998 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1 = 10 ($524998s1), DurationIndex 1 = 10000 ms ($524998d). Hammer of Kings 804751 (RecoveryTime 20000, self cast) is cast before the learn (control) and after it. The caster's Holy spell crit percentage is read 500 ms after each cast: gain 10 points. Reference search 2026-11-22: coa-history spell 707079: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707079 and no value; git log --grep and gh pr list --search 707079: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 707079,
+      "quote": "Casting Hammer of Kings now also increases your critical strike chance by $524998s1% for $524998d.",
+      "kind": "metric_delta",
+      "trigger_spell": 804751,
+      "gate_spell": 707079,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Chosen King (Anointed lasts 10 s)",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "metric": "aura",
+      "fields": {
+        "spell": 524998
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9500,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          9100,
+          9800
+        ],
+        "expired": [
+          10200,
+          10800
+        ]
+      },
+      "observe_source": "707079 Chosen King Effect[0]/[1] flat and percent modifiers (data), and AscensionSunClericAbilities.cpp:18-20 casts Anointed 524998 on the caster when Hammer of Kings 804751 is cast with 707079 known. 524998 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1 = 10 ($524998s1), DurationIndex 1 = 10000 ms ($524998d). Hammer of Kings 804751 (RecoveryTime 20000, self cast) is cast before the learn (control) and after it. The aura is read present at 9100..9800 ms of game time after the cast and gone at 10200..10800 ms: the duration lies in 9100..10800, which excludes 9000 and 11000 ms (10% off). The control is the cast without the passive (no aura). Reference search 2026-11-22: coa-history spell 707079: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707079 and no value; git log --grep and gh pr list --search 707079: see the report; nothing found beyond the tooltip and the DBC for the value."
     }
   ],
   "player_observations": [],
