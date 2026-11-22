@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Ranger Horn of War party crit",
+  "contract": [
+    "Horn of War 800086 (Ranger, family 27) tooltip: emanate an aura for 30 seconds that grants 5% increased",
+    "critical strike chance to party and raid members; while active, you generate 3 Focus every second.",
+    "Effect 0 is the raid area aura (SPELL_AURA_MOD_CRIT_PCT, base points 4) on the caster, effect 1 the",
+    "targets effect 1 at TARGET_UNIT_CASTER_AREA_RAID, so each member got its own Horn of War aura and the",
+    "crit area aura skipped them. The area-52 client archive patch-D.MPQ and the CoA Tavern snapshot list effect 1",
+    "at TARGET_UNIT_CASTER, and live combat logs from 2026-08-23 show every Horn of War energize on the casting",
+    "Ranger only. Expected: a grouped ally gains 5% melee crit and the Ranger keeps both effects. A",
+    "fresh character's crit field reads 0 until a crit aura first recomputes it, so Night Stalker 300792 primes",
+    "the field first."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 800086
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit field with a learn",
+      "actor": "ally",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit field with an unlearn",
+      "actor": "ally",
+      "spell": 300792
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit field with a learn",
+      "actor": "ranger",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit field with an unlearn",
+      "actor": "ranger",
+      "spell": 300792
+    },
+    {
+      "action": "wait",
+      "label": "Let the recomputed fields settle",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ally melee critical chance before the horn",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "save_as": "ally_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranger melee critical chance before the horn",
+      "actor": "ranger",
+      "metric": "melee_crit_chance",
+      "save_as": "ranger_before"
+    },
+    {
+      "action": "cast",
+      "label": "The Ranger sounds Horn of War",
+      "actor": "ranger",
+      "spell": 800086
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Horn of War reaches the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800086,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Give the area aura updates time to settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally's Horn of War carries the 5% crit effect",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 800086,
+      "caster": "ranger",
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally melee crit rises by 5",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "ally_before",
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "The Ranger's Horn of War carries the 5% crit effect",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 800086,
+      "caster": "ranger",
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "The Ranger's Horn of War generates 3 focus each tick",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 800086,
+      "caster": "ranger",
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Ranger melee crit rises by 5",
+      "actor": "ranger",
+      "metric": "melee_crit_chance",
+      "relative_to": "ranger_before",
+      "min": 4.99,
+      "max": 5.01
+    }
+  ]
+}
