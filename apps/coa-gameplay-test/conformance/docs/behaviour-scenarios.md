@@ -1895,6 +1895,18 @@ players are flagged for PvP after the base steps. The entry's `target` and `meas
 only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an orc in the circle (read 9800 ms and
 10200 ms after the cast, its first tick at about 2000 ms) and 40000 ms on the dummy.
 
+### Two read-only harness reads (ADR 1040, provisional)
+
+- `school_mask` (1 to 127) in the `fields` of a `spell_damage_count` or `spell_damage_total` read keeps the damage events
+  whose packet school mask equals it (`SMSG_SPELLNONMELEEDAMAGELOG` carries `log->schoolMask`; Physical 1, Holy 2, Fire 4,
+  Nature 8, Frost 16, Shadow 32, Arcane 64). Absent, the read is unchanged. Periodic damage events carry no mask and
+  never match. Justice 572848: the main-hand strike 572850 reads 1 event at mask 1 and 0 at mask 4, the off-hand strike
+  572045 the reverse, each beside an unfiltered count of 1 so that the 0 is not a missed hit.
+- the state metric `unit_flag_set` (`fields.target` a unit, `field` 1 for `UNIT_FIELD_FLAGS` or 2 for
+  `UNIT_FIELD_FLAGS_2`, `mask`) reads 1 when every bit of the mask is set on the unit, else 0. Calm 804057: on an Imp
+  `UNIT_FLAG_DISARMED` 0x00200000 and `UNIT_FLAG2_DISARM_OFFHAND` 0x80 read 1 after the cast and 0 before, the ranged
+  flag `UNIT_FLAG2_DISARM_RANGED` 0x400 is read beside them.
+
 ### A fixed-count dummy behind the caster (ADR 0223)
 
 A `fixed_count` entry may set `behind_yd` (inside `radius`) for a cone: every dummy spawns `2 x behind_yd` further
@@ -2259,5 +2271,7 @@ Options with a module:
 - [`ally_arm`](metric_delta_options/ally_arm.md): grouped ally players to read or target, their health and casts at
   the ally in both phases, a timed no-cast control, and stated extra reads judged beside the main one (ADR 1016),
   or held as preconditions that void the trial when off (ADR 1029)
+- [`enemy_shooter`](metric_delta_options/enemy_shooter.md): the enemy player casts a shot or an ability at the caster in
+  an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1040)
 - [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
   power cost read, judged with the partner arms the entry names (ADR 1024)

@@ -430,7 +430,7 @@ METRIC_EVIDENCE = {
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',
-                     'power', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
+                     'power', 'active_power', 'unit_flag_set', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
                      'melee_crit_chance', 'melee_crit_chance_refreshed', 'ranged_taken_crit_chance', 'spell_crit_chance',
                      'weapon_damage_min', 'resistance', 'mana_regen', 'moving', 'threat', 'owned_creature_max_health',
                      'owned_creature_attack_time_ms', 'owned_creature_crit_chance', 'owned_creature_armor',

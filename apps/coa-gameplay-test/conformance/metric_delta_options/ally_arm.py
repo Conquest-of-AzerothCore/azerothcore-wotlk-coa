@@ -16,7 +16,8 @@ CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effectiv
 CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total'}
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
-KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source'}
+KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source', 'ally_class'}
+COA_CLASSES = range(12, 33)
 ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source', 'reach_source',
             'precondition'}
 OPTIONAL_ARM_KEYS = {'fields', 'reach_source', 'precondition'}
@@ -66,6 +67,7 @@ class AllyArm:
     go_per_cast: tuple[tuple[int, int, str], ...] = ()
     ratios: tuple[Ratio, ...] = ()
     reach_source: str = ''
+    ally_class: int | None = None
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
@@ -193,6 +195,10 @@ def parse(raw) -> AllyArm:
     if 'reach_source' in raw and not stated_text(raw['reach_source']):
         raise ValueError(f'ally_arm reach_source is text citing the code or data line that reaches raid subgroup 2, '
                          f'not {raw["reach_source"]!r}')
+    ally_class = raw.get('ally_class')
+    if 'ally_class' in raw and (type(ally_class) is not int or ally_class not in COA_CLASSES or allies == 0):
+        raise ValueError(f'ally_arm ally_class is a CoA class id {COA_CLASSES.start} to {COA_CLASSES.stop - 1} and '
+                         f'needs at least one ally, not {ally_class!r}')
     if raw.get('control_wait', True) is not True:
         raise ValueError(f'ally_arm control_wait is true, not {raw["control_wait"]!r}')
     arms = raw.get('arms', [])
@@ -224,7 +230,7 @@ def parse(raw) -> AllyArm:
     return AllyArm(allies, tuple(health) if health is not None else None, tuple(spell for spell, _, _ in stated),
                    'control_wait' in raw, parsed_arms,
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
-                   parsed_ratios, raw.get('reach_source', ''))
+                   parsed_ratios, raw.get('reach_source', ''), ally_class)
 
 
 def check(spec, ally):
@@ -395,6 +401,7 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
     players = scenario['players']
     for unit in ally.ally_ids:
         players.append({**player_fixture(class_file), 'id': unit,
+                        **({'class': ally.ally_class} if ally.ally_class is not None else {}),
                         **({'allow_regeneration': False} if spec.disable_regeneration else {})})
     steps = scenario['steps']
     settled = len(base_steps(class_file))
@@ -406,7 +413,8 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
     if ally.control_wait:
         control_interval_check(spec, steps)
     contract = (f' {ally.allies} grouped ally player(s) {list(ally.ally_ids)} stand with the caster'
-                + (', regeneration off' if spec.disable_regeneration else '') + '.')
+                + (', regeneration off' if spec.disable_regeneration else '')
+                + (f', of CoA class {ally.ally_class}' if ally.ally_class is not None else '') + '.')
     if ally.ally_casts:
         contract += (f' Each phase first casts {list(ally.ally_casts)} at {ALLY_IDS[0]} (learned, its flat power '
                      f'cost, required caster aura and reagents set first), waiting {ALLY_CAST_SETTLE_MS} ms after '
@@ -453,8 +461,9 @@ def model(spec, ally: AllyArm) -> dict:
                           'tolerance': ratio.tolerance, 'source': ratio.source,
                           **({FLOOR_COUNT_KEY: ratio.floor_count} if ratio.floor_count is not None else {})}
                          for ratio in ally.ratios]}
-    return {NAME: {'allies': list(ally.ally_ids), 'arms': [arm_model(spec, index, arm)
-                                                            for index, arm in enumerate(ally.arms)],
+    arms = [arm_model(spec, index, arm) for index, arm in enumerate(ally.arms)]
+    return {NAME: {'allies': list(ally.ally_ids),
+                   **({'ally_class': ally.ally_class} if ally.ally_class is not None else {}), 'arms': arms,
                    **(ratios if ally.ratios else {})}}
 
 

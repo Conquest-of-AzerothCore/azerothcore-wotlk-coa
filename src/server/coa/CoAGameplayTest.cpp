@@ -1051,6 +1051,7 @@ struct SpellDamageEvent
     bool blocked = false;
     bool resisted = false;
     bool periodic = false;
+    int32 schoolMask = -1;
     uint32 casterEntry = 0;
     uint64 atMs = 0;
 };
@@ -1323,7 +1324,9 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
     {
         response >> event.damage;
         response.read_skip<uint32>();
-        response.read_skip<uint8>();
+        uint8 schoolMask;
+        response >> schoolMask;
+        event.schoolMask = schoolMask;
         uint32 absorb;
         uint32 resist;
         response >> absorb >> resist;
@@ -5294,6 +5297,7 @@ private:
             auto blocked = step.get_optional<bool>("blocked");
             auto resisted = step.get_optional<bool>("resisted");
             auto periodic = step.get_optional<bool>("periodic");
+            auto schoolMask = step.get_optional<int32>("school_mask");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
                 if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
@@ -5301,7 +5305,7 @@ private:
                     (!targetEntry || (event.target.IsCreature() && event.target.GetEntry() == *targetEntry)) &&
                     (!critical || event.critical == *critical) &&
                     (!blocked || event.blocked == *blocked) && (!resisted || event.resisted == *resisted) &&
-                    (!periodic || event.periodic == *periodic))
+                    (!periodic || event.periodic == *periodic) && (!schoolMask || event.schoolMask == *schoolMask))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
         }
@@ -5455,6 +5459,16 @@ private:
             uint32 const power = step.get<uint32>("power");
             Require(power < MAX_POWERS, "Invalid power type");
             return player->HasActivePowerType(Powers(power));
+        }
+        if (metric == "unit_flag_set")
+        {
+            uint32 const field = step.get<uint32>("field");
+            Require(field == 1 || field == 2, "Unit flag field must be 1 (flags) or 2 (flags 2)");
+            uint32 const mask = step.get<uint32>("mask");
+            Require(mask != 0, "Unit flag mask must not be empty");
+            Unit* unit = GetUnit(step.get<std::string>("target"));
+            uint32 const flags = unit->GetUInt32Value(field == 1 ? UNIT_FIELD_FLAGS : UNIT_FIELD_FLAGS_2);
+            return (flags & mask) == mask ? 1.0 : 0.0;
         }
         if (metric == "expertise")
             return player->GetUInt32Value(PLAYER_EXPERTISE);

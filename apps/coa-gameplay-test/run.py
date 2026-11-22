@@ -120,7 +120,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
     'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms',
     'owned_creature_applied_aura_count', 'owned_creature_max_health',
-    'owned_creature_health', 'owned_creature_health_modifier', 'power_type', 'active_power',
+    'owned_creature_health', 'owned_creature_health_modifier', 'power_type', 'active_power', 'unit_flag_set',
     'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
@@ -264,7 +264,7 @@ PLAYER_STAT_METRICS = {
     'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
 }
-METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
+METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster', 'effect', 'item', 'entry', 'button',
                  'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'aura_state', 'school', 'hand',
                  'rating', 'op', 'subclass', 'part',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
@@ -1406,6 +1406,9 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step['owned_entry'], f'{where}.owned_entry', 1, 2**32 - 1, True)
             if metric == 'school_prohibited':
                 number(step.get('school_mask'), f'{where}.school_mask', 1, 127, True)
+            elif 'school_mask' in step:
+                require(metric in SPELL_DAMAGE_METRICS, f'{where}: school_mask only filters spell damage events')
+                number(step['school_mask'], f'{where}.school_mask', 1, 127, True)
             if metric == 'aura_proc_rate':
                 require('target' in step, f'{where}: {metric} metric needs target')
                 number(step.get('type_mask'), f'{where}.type_mask', 1, 2**32 - 1, True)
@@ -1548,6 +1551,12 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'active_power':
                 require('power' in step, f'{where}: metric needs the power type')
                 number(step['power'], f'{where}.power', 0, 6, True)
+            if metric == 'unit_flag_set':
+                require('target' in step, f'{where}: metric needs the unit as target')
+                number(step.get('field'), f'{where}.field', 1, 2, True)
+                number(step.get('mask'), f'{where}.mask', 1, 2**32 - 1, True)
+            elif 'field' in step or 'mask' in step:
+                require(False, f'{where}: field and mask only apply to unit_flag_set')
             if metric == 'owned_creature_health_modifier':
                 require('part' in step, f'{where}: metric needs the health modifier part')
                 number(step['part'], f'{where}.part', 0, 3, True)

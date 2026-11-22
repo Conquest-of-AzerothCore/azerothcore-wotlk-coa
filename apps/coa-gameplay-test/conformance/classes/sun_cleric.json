@@ -4571,6 +4571,201 @@
       "wait_ms": 1000
     },
     {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "metric": "unit_flag_set",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target_entry": 416,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "name": "Calm (main-hand disarm flag, positive control)",
+      "variant": "flag_main",
+      "label_suffix": "flag_main",
+      "fields": {
+        "target": "dummy",
+        "field": 1,
+        "mask": 2097152
+      },
+      "expected": 1,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305), and no CoA code references it (src/server/coa has no DISARM_RANGED). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). Positive control (aura 67): UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS reads 1 on the target 1000 ms after the cast, 0 before it. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "metric": "unit_flag_set",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target_entry": 416,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "name": "Calm (off-hand disarm flag, positive control)",
+      "variant": "flag_offhand",
+      "label_suffix": "flag_offhand",
+      "fields": {
+        "target": "dummy",
+        "field": 2,
+        "mask": 128
+      },
+      "expected": 1,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305), and no CoA code references it (src/server/coa has no DISARM_RANGED). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). Positive control (aura 254): UNIT_FLAG2_DISARM_OFFHAND 0x80 in UNIT_FIELD_FLAGS_2 reads 1 on the target 1000 ms after the cast, 0 before it. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "metric": "unit_flag_set",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target_entry": 416,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "name": "Calm (ranged disarm flag)",
+      "variant": "flag_ranged",
+      "label_suffix": "flag_ranged",
+      "fields": {
+        "target": "dummy",
+        "field": 2,
+        "mask": 1024
+      },
+      "expected": 1,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305), and no CoA code references it (src/server/coa has no DISARM_RANGED). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). The tooltip says ranged weapons are disarmed; the expectation 1 is the tooltip's, the flag UNIT_FLAG2_DISARM_RANGED 0x400 is what the core's ranged-disarm consumer reads. Control: 0 before the cast; the two positive controls flag_main and flag_offhand read 1 after the same cast. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "enemy",
+      "enemy_player_race": 2,
+      "measure_actor": "enemy",
+      "cast_in_before": false,
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "name": "Calm (an enemy player's Auto Shots stop)",
+      "variant": "shooter_ranged",
+      "label_suffix": "shooter_ranged",
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 75
+      },
+      "enemy_shooter": {
+        "mode": "ranged",
+        "class": 15,
+        "weapons": [
+          {
+            "item": 15809,
+            "slot": 17
+          }
+        ],
+        "skills": [
+          226
+        ],
+        "learn": [],
+        "spell": 75,
+        "relocate": [
+          -12,
+          0
+        ],
+        "window_ms": 5000,
+        "distance_yd": [
+          8,
+          30
+        ],
+        "native_refusals": [
+          [
+            807778,
+            27
+          ]
+        ],
+        "source": "Witch Hunter (class 15) with the crossbow of the 'Boltslinger' set of witch_hunter.json (item 15809, slot 17, skill line 226). Control: the same enemy shoots 5000 ms with no Calm on it; the trial is void unless it fired at least one Auto Shot (SPELL_GO of 75) there."
+      },
+      "observe_source": "Calm 804057 Effect[1] aura 67 MOD_DISARM and Effect[2] aura 254 MOD_DISARM_OFFHAND, no aura 278 (DBC read 2026-11-22). Enemy player race 2. Calm on a player (not Undead or Demon) refuses its own Effect[0] trigger 807778 with reason 27 (SPELL_FAILED_DONT_REPORT): that refusal is native to the cast and is stated in native_refusals; any other refusal voids the ranged trial. Auto Shot 75 SPELL_GO count of the enemy: the control window (no Calm) must read at least 1 (crossbow speed 2800 ms, so at least 1 in 5000 ms), and the window with Calm on the enemy (1000 ms + 4500 ms, the aura read first) must add 0 shots (the tooltip says ranged weapons are disarmed). The only consumer of UNIT_FLAG2_DISARM_RANGED is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "enemy",
+      "enemy_player_race": 2,
+      "measure_actor": "enemy",
+      "cast_in_before": false,
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "name": "Calm (an enemy player's weapon ability is refused, positive control)",
+      "variant": "shooter_ability",
+      "label_suffix": "shooter_ability",
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 572848
+      },
+      "enemy_shooter": {
+        "mode": "ability",
+        "class": 27,
+        "weapons": [
+          {
+            "item": 2529,
+            "slot": 15
+          },
+          {
+            "item": 2529,
+            "slot": 16
+          }
+        ],
+        "skills": [
+          43,
+          94,
+          96,
+          97,
+          498
+        ],
+        "learn": [
+          707072
+        ],
+        "spell": 572848,
+        "power": [
+          0,
+          1363
+        ],
+        "window_ms": 5000,
+        "distance_yd": [
+          0,
+          5
+        ],
+        "native_refusals": [
+          [
+            807778,
+            27
+          ]
+        ],
+        "source": "Sun Cleric (class 27) with the Valkyr set (2529 in both hands) casts Justice 572848, which requires a main-hand weapon (SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON, EquippedItemClass 2); the cooldown is reset before each cast and mana set to 1363. Control: the first cast, with no Calm on the enemy, must go (SPELL_GO of 572848 at least 1)."
+      },
+      "observe_source": "Calm 804057 Effect[1] aura 67 MOD_DISARM and Effect[2] aura 254 MOD_DISARM_OFFHAND, no aura 278 (DBC read 2026-11-22). Enemy player race 2. Calm on a player (not Undead or Demon) refuses its own Effect[0] trigger 807778 with reason 27 (SPELL_FAILED_DONT_REPORT): that refusal is native to the cast and is stated in native_refusals; any other refusal voids the ranged trial. Positive control of shooter_ranged on the same enemy: Justice 572848 requires a main-hand weapon, so with the main hand disarmed (aura 67, UNIT_FLAG_DISARMED) the cast is refused and no SPELL_GO is added; the cast in the control window must go. Refusals are expected here (the effect under test). Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
       "spell": 301266,
       "name": "Solar Concord (lasts 15 s)",
       "kind": "metric_delta",
@@ -29559,6 +29754,410 @@
       "observe_source": "807523 Light of Absolution DurationIndex 1 = 10000 ms ($807523d), granted to the caster when a damaging Horusath Blast 572801 hit lands (AscensionSunClericEvents.cpp:125 and :298); the aura starts at the hit, 100 to 450 ms after the cast (dummy 5 yd away, missile speed 20 yd/s). One real Horusath Blast with 807343 learned: the aura is present when read 9500..9800 ms after the cast (game time) and gone when read 10700..11000 ms after it. The aura started at the hit, at most 450 ms after the cast, so a present read at 9500 or later excludes a duration of 9000 (10% under 10000) and a gone read at 11000 or earlier, with a hit at least 100 ms after the cast, excludes 11000 (10% over). A true duration of 10000 ends between 10100 and 10450 ms after the cast, inside neither window. Control: the without-passive phase of light_granted reads 0 for the same cast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'grants you Light of Absolution for 10 seconds'; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
     },
     {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Rage restore on a rage ally)",
+      "variant": "restore_rage",
+      "label_suffix": "restore_rage",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807525,
+        "power": 1,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "after_at_least": 19,
+      "after_at_most": 21,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 17,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 17 (Fleshwarden) is active in power type 1 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 1000 for power type 1 (Unit.cpp:13984-14000), so the percent restore is of 1000"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[0] HEAL_PCT, Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] ENERGIZE_PCT MiscValue 1 (rage); 807526 Effect[0] ENERGIZE_PCT MiscValue 2 (focus), Effect[1] MiscValue 3 (energy), Effect[2] MiscValue 6 (runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1, as the 2% of the heal), Spell::EffectEnergizePct (SpellEffects.cpp:3016-3046) gives CalculatePct(GetMaxPower(power), 2): a percent of the MAXIMUM power, skipped for a player that is not active in the power type (Unit::CanReceivePowerFromSpell, Unit.cpp:13964), so the ally is a CoA class that is: Fleshwarden (class 17) for power type 1. Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Runic Power restore on a runic ally)",
+      "variant": "restore_runic",
+      "label_suffix": "restore_runic",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807526,
+        "power": 6,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "after_at_least": 19,
+      "after_at_most": 21,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 30,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 6
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 30 (Reaper) is active in power type 6 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 6
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 1000 for power type 6 (Unit.cpp:13984-14000), so the percent restore is of 1000"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[0] HEAL_PCT, Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] ENERGIZE_PCT MiscValue 1 (rage); 807526 Effect[0] ENERGIZE_PCT MiscValue 2 (focus), Effect[1] MiscValue 3 (energy), Effect[2] MiscValue 6 (runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1, as the 2% of the heal), Spell::EffectEnergizePct (SpellEffects.cpp:3016-3046) gives CalculatePct(GetMaxPower(power), 2): a percent of the MAXIMUM power, skipped for a player that is not active in the power type (Unit::CanReceivePowerFromSpell, Unit.cpp:13964), so the ally is a CoA class that is: Reaper (class 30) for power type 6. Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Energy restore on an energy ally)",
+      "variant": "restore_energy",
+      "label_suffix": "restore_energy",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807526,
+        "power": 3,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 1.9,
+      "after_at_most": 2.1,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 19,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 3
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 19 (Templar) is active in power type 3 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 3
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 100 for power type 3 (Unit.cpp:13984-14000), so the percent restore is of 100"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[0] HEAL_PCT, Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] ENERGIZE_PCT MiscValue 1 (rage); 807526 Effect[0] ENERGIZE_PCT MiscValue 2 (focus), Effect[1] MiscValue 3 (energy), Effect[2] MiscValue 6 (runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1, as the 2% of the heal), Spell::EffectEnergizePct (SpellEffects.cpp:3016-3046) gives CalculatePct(GetMaxPower(power), 2): a percent of the MAXIMUM power, skipped for a player that is not active in the power type (Unit::CanReceivePowerFromSpell, Unit.cpp:13964), so the ally is a CoA class that is: Templar (class 19) for power type 3. Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Focus restore on a focus ally)",
+      "variant": "restore_focus",
+      "label_suffix": "restore_focus",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807526,
+        "power": 2,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 1.9,
+      "after_at_most": 2.1,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 21,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 2
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 21 (Ranger) is active in power type 2 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 2
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 100 for power type 2 (Unit.cpp:13984-14000), so the percent restore is of 100"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[0] HEAL_PCT, Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] ENERGIZE_PCT MiscValue 1 (rage); 807526 Effect[0] ENERGIZE_PCT MiscValue 2 (focus), Effect[1] MiscValue 3 (energy), Effect[2] MiscValue 6 (runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1, as the 2% of the heal), Spell::EffectEnergizePct (SpellEffects.cpp:3016-3046) gives CalculatePct(GetMaxPower(power), 2): a percent of the MAXIMUM power, skipped for a player that is not active in the power type (Unit::CanReceivePowerFromSpell, Unit.cpp:13964), so the ally is a CoA class that is: Ranger (class 21) for power type 2. Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Mana restore on a mana ally)",
+      "variant": "restore_mana",
+      "label_suffix": "restore_mana",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807525,
+        "power": 0,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 57,
+      "after_at_least": 56.5,
+      "after_at_most": 57.5,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally is a Sun Cleric (the class under test), active in power type 0 (HasActivePowerType), read at the start of the trial"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 2868,
+            "expected": 2868,
+            "tolerance": 1,
+            "source": "player_class_stats BaseMana 1363 at level 60 (class file base_mana) + Player intellect bonus 20 + (119 - 20) x 15 = 1505 (GetManaBonusFromIntellect, the reference intellect of the class file, 119) = 2868, so 2% is 57.36 and CalculatePct truncates to 57"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[0] HEAL_PCT, Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] ENERGIZE_PCT MiscValue 1 (rage); 807526 Effect[0] ENERGIZE_PCT MiscValue 2 (focus), Effect[1] MiscValue 3 (energy), Effect[2] MiscValue 6 (runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1, as the 2% of the heal), Spell::EffectEnergizePct (SpellEffects.cpp:3016-3046) gives CalculatePct(GetMaxPower(power), 2): a percent of the MAXIMUM power, skipped for a player that is not active in the power type (Unit::CanReceivePowerFromSpell, Unit.cpp:13964), so the ally is a Sun Cleric, which is active in mana: the Sun Cleric ally (the class under test) for power type 0. Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
       "spell": 300315,
       "name": "Judgement of the Valkyrie (Judgement Day cooldown gate)",
       "kind": "cost_gate",
@@ -37472,6 +38071,182 @@
         ]
       },
       "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 14450 ms after the trigger, at least 10550 ms and at most 10950 ms after the application: gone excludes a duration of 11000 ms (10% long) or more, since the read is at most 10950 ms after the application, and a 10000 ms aura is gone from 10000 ms on. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
+    },
+    {
+      "spell": 572848,
+      "kind": "metric_delta",
+      "quote": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+      "trigger_spell": 572848,
+      "target": "dummy",
+      "cast_in_before": false,
+      "dummy_distance": 3,
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "spell_damage_count",
+      "void_on_cast_failure": true,
+      "name": "Justice (main-hand strike deals Physical)",
+      "variant": "school_main",
+      "label_suffix": "school_main",
+      "fields": {
+        "spell": 572850,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572850,
+              "target": "dummy",
+              "school_mask": 4
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control: the same hit read with the Fire school mask 4, which the DBC does not give 572850 (572850 SchoolMask 1 (SPELL_SCHOOL_MASK_NORMAL))"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572850,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "The strike 572850 landed once on the dummy whatever its school (Justice 572848 Effect[0] triggers 572850 once at one target)"
+          }
+        ]
+      },
+      "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand) and Effect[1] TRIGGER_SPELL 572045 (off hand); 572850 SchoolMask 1 (SPELL_SCHOOL_MASK_NORMAL). The damage event of 572850 on the dummy is read with its packet school mask (SMSG_SPELLNONMELEEDAMAGELOG, Unit.cpp:7623 writes log->schoolMask) filtered by school_mask 1 (Physical): 1 event, 0 before the cast. Valkyr weapon set (spell_weapon_sets 572848), melee and expertise rating 10000 so the strike lands. Control arms: the other school mask reads 0 and the unfiltered count reads 1, so the 0 is not a missed hit. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (coa-history 572850/572045 not queried for school)."
+    },
+    {
+      "spell": 572848,
+      "kind": "metric_delta",
+      "quote": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+      "trigger_spell": 572848,
+      "target": "dummy",
+      "cast_in_before": false,
+      "dummy_distance": 3,
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "spell_damage_count",
+      "void_on_cast_failure": true,
+      "name": "Justice (off-hand strike deals Fire)",
+      "variant": "school_off",
+      "label_suffix": "school_off",
+      "fields": {
+        "spell": 572045,
+        "target": "dummy",
+        "school_mask": 4
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572045,
+              "target": "dummy",
+              "school_mask": 1
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control: the same hit read with the Physical school mask 1, which the DBC does not give 572045 (572045 SchoolMask 4 (SPELL_SCHOOL_MASK_FIRE))"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572045,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "The strike 572045 landed once on the dummy whatever its school (Justice 572848 Effect[1] triggers 572045 once at one target)"
+          }
+        ]
+      },
+      "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand) and Effect[1] TRIGGER_SPELL 572045 (off hand); 572045 SchoolMask 4 (SPELL_SCHOOL_MASK_FIRE). The damage event of 572045 on the dummy is read with its packet school mask (SMSG_SPELLNONMELEEDAMAGELOG, Unit.cpp:7623 writes log->schoolMask) filtered by school_mask 4 (Fire): 1 event, 0 before the cast. Valkyr weapon set (spell_weapon_sets 572848), melee and expertise rating 10000 so the strike lands. Control arms: the other school mask reads 0 and the unfiltered count reads 1, so the 0 is not a missed hit. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (coa-history 572850/572045 not queried for school)."
+    },
+    {
+      "spell": 572848,
+      "kind": "metric_delta",
+      "quote": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
+      "trigger_spell": 572848,
+      "target": "dummy",
+      "cast_in_before": false,
+      "dummy_distance": 3,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "spell_damage_total",
+      "void_on_cast_failure": true,
+      "name": "Justice (main-hand strike hit)",
+      "variant": "hand_main",
+      "label_suffix": "hand_main",
+      "fields": {
+        "spell": 572850,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 190,
+      "after_at_least": 183,
+      "after_at_most": 198,
+      "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand, Physical, SchoolMask 1) and Effect[1] TRIGGER_SPELL 572045 (off hand, Fire, SchoolMask 4); each strike has Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 49 (50%, the $524857s1 of the tooltip) and Effect[1] SCHOOL_DAMAGE flat: 572850 BasePoints 156 (157), 572045 BasePoints 104 (105), EffectDieSides 1 (value = BasePoints + 1). The tooltip token $524857m2 reads 6 (524857 Effect[1] BasePoints 5, a tooltip-only spell), the served flats are 157 and 105: this entry reads the hit the server really deals per hand, and its bounds come from the served DBC values, not from the token. Valkyr weapon set (spell_weapon_sets 572848): 2529 in both hands, 73.62-103.34, 2800 ms; reference attack power 70, so the attack-power part of one hit is 70/14 x 2.8 = 14; spell power 0 so the $spfi*0.2 part is 0; melee and expertise rating 10000, non-critical hits only, Fire resistance of the dummy removed by 823764. Main hand, Physical: 50% of (die roll 73.62..103.34 + 14) + 157 = 200.8..215.7 before armor; the harness dummy's armor leaves 913 of 1000 (armor_reduced_damage read of the Vindicator armor_ignore entry, tolerance 1), so 183.1..197.1: interval [183, 198]. Control: no cast before, 0 damage. The 6-flat reading (tooltip token) would give 50% x (87.6..117.3) + 6 = 49.8..64.7 before armor, outside the interval. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572848,
+      "kind": "metric_delta",
+      "quote": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
+      "trigger_spell": 572848,
+      "target": "dummy",
+      "cast_in_before": false,
+      "dummy_distance": 3,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "spell_damage_total",
+      "void_on_cast_failure": true,
+      "name": "Justice (off-hand strike hit)",
+      "variant": "hand_off",
+      "label_suffix": "hand_off",
+      "fields": {
+        "spell": 572045,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 145,
+      "after_at_least": 126,
+      "after_at_most": 164,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand, Physical, SchoolMask 1) and Effect[1] TRIGGER_SPELL 572045 (off hand, Fire, SchoolMask 4); each strike has Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 49 (50%, the $524857s1 of the tooltip) and Effect[1] SCHOOL_DAMAGE flat: 572850 BasePoints 156 (157), 572045 BasePoints 104 (105), EffectDieSides 1 (value = BasePoints + 1). The tooltip token $524857m2 reads 6 (524857 Effect[1] BasePoints 5, a tooltip-only spell), the served flats are 157 and 105: this entry reads the hit the server really deals per hand, and its bounds come from the served DBC values, not from the token. Valkyr weapon set (spell_weapon_sets 572848): 2529 in both hands, 73.62-103.34, 2800 ms; reference attack power 70, so the attack-power part of one hit is 70/14 x 2.8 = 14; spell power 0 so the $spfi*0.2 part is 0; melee and expertise rating 10000, non-critical hits only, Fire resistance of the dummy removed by 823764. Off hand, Fire: 50% of (die roll 73.62..103.34 + 14) + 105 = 148.8..163.7 without an off-hand penalty, 126.9..134.3 if the off-hand weapon part is halved: interval [126, 164]; Fire is not reduced by armor and 823764 removes the dummy's resistance. Control: no cast before, 0 damage. The 6-flat reading (tooltip token) would give 6 + 22..59 = 28..65, outside the interval. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
