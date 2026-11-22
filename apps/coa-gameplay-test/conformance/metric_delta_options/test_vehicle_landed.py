@@ -6,7 +6,7 @@ from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
 
-NECROMANCER = 19
+NECROMANCER = 23
 STUN = 853
 
 
