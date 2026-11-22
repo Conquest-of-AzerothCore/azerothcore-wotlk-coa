@@ -17,7 +17,10 @@ HEAL = {'spell': 704920, 'name': 'Cultivate Divinity (Illumination)', 'kind': 'a
         'label_suffix': 'fed_heal', 'quote': 'to increase the healing of your next Illumination',
         'feed_spell': 500141, 'aura': 301293, 'effect_spell': 500143, 'every_ms': 3500, 'residual_target': 0.001,
         'feed_power': 1363, 'effect_power': 1363, 'expected': 1.2, 'trials': 4}
-SIZED_HEAL = {**HEAL, 'trials': 12, 'fixture': {'spell_power': 20000}}
+SIZED_HEAL = {**HEAL, 'name': 'Cultivate Divinity (Radiant Cascade)', 'variant': 'heal_cascade',
+              'label_suffix': 'fed_heal_cascade', 'quote': 'to increase the healing of your next Radiant Cascade',
+              'feed_spell': 500143, 'aura': 300354, 'effect_spell': 500141, 'chance_spell': 707520, 'trials': 12,
+              'fixture': {'spell_power': 20000}}
 CONTROL_HIT = 8800.0
 SEED = 704920
 
