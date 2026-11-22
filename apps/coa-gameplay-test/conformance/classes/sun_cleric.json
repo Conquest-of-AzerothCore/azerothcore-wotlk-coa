@@ -30181,7 +30181,7 @@
       "kind": "attacker_miss_share",
       "variant": "herald_miss",
       "label_suffix": "herald_miss",
-      "quote": "and reduces the target's chance to hit by $s1% for $d.",
+      "quote": "reduces the target's chance to hit by",
       "cast_spell": 500146,
       "pre_cast": [
         806477
@@ -30198,7 +30198,8 @@
       "cycle_ms": 8000,
       "settle_ms": 8000,
       "parts": 20,
-      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), launched at the Dawnsear target by the Herald of Dawn route (AscensionSunClericAbilities.cpp:213-214 casts 804631 when a Rapture 806477 cast completes with 804630 known, :353-356 casts Solar Flare 807175 when a Dawnsear 500146 hit finds the marker): each treatment cycle casts Rapture then Dawnsear at the one attacker (pre_cast, tool ADR 1029), and the aura from the caster is read on the attacker at every cycle end (a cycle without it makes the verdict unmeasured, never a miss sample). The attacker is one aggressive stationary Harvest Golem 36 at the class level melee-ing the caster; the control arm counts its swings and misses with no cast. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run), judged with the 99% interval of the difference and the band of 2 points. reset_cooldown and set_power are named precondition fixtures (G-21 point 6). The same aura is proven by the Sun Down entry attacker_miss of 572752; this entry proves the Herald route. Reference search 2026-11-22: coa-history has 0 events for 804630, 804631 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs; bindmysoul has no Herald of Dawn entry; nothing found for the miss share."
+      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), launched at the Dawnsear target by the Herald of Dawn route (AscensionSunClericAbilities.cpp:213-214 casts 804631 when a Rapture 806477 cast completes with 804630 known, :353-356 casts Solar Flare 807175 when a Dawnsear 500146 hit finds the marker): each treatment cycle casts Rapture then Dawnsear at the one attacker (pre_cast, tool ADR 1029), and the aura from the caster is read on the attacker at every cycle end (a cycle without it makes the verdict unmeasured, never a miss sample). The attacker is one aggressive stationary Harvest Golem 36 at the class level melee-ing the caster; the control arm counts its swings and misses with no cast. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run), judged with the 99% interval of the difference and the band of 2 points. reset_cooldown and set_power are named precondition fixtures (G-21 point 6). The same aura is proven by the Sun Down entry attacker_miss of 572752; this entry proves the Herald route. Reference search 2026-11-22: coa-history has 0 events for 804630, 804631 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs; bindmysoul has no Herald of Dawn entry; nothing found for the miss share.",
+      "quote_spell": 807175
     }
   ],
   "player_observations": [],
