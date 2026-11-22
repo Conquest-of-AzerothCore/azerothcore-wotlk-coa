@@ -34,3 +34,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0028](0028-lights-of-absolution-restores-on-solar-flare-damage.md) | Lights of Absolution restores on Solar Flare damage, from missing health, once every 0.5 sec (owner ruling O-13) |
 | [0029](0029-gavel-effectiveness-talents-apply-to-the-whole-hit.md) | Gavel effectiveness talents apply their figure to the whole hit (supersedes 0007 and the Gavel figures of 0008) |
 | [0030](0030-twilight-does-not-blind-raid-or-world-bosses.md) | Twilight does not blind raid encounter or world-boss-rank creatures (mentor decision D-154) |
+| [0031](0031-blightbreaker-gives-mercy-a-two-second-period.md) | Blightbreaker gives Mercy a 2 sec period, duration unchanged (owner ruling O-24) |

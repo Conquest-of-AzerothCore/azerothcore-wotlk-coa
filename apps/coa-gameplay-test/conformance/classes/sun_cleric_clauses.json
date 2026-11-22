@@ -4808,17 +4808,27 @@
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
     "kind": "claim",
-    "reason": "Mentor D-74 (2026-11-22), owner information I-3: conformant as is. The basis is the DBC modifier value, Effect[0] SPELLMOD_ACTIVATION_TIME -50% on Mercy 504848's period, applied by the stock engine; the tooltip's 50 is read as that period figure (3000 to 1500 ms), not as a +50% tick rate.",
+    "reason": "Owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031: +50% tick rate = period x 2/3 with the duration unchanged, so Mercy 504848's 3000 ms period becomes 2000 ms (the stock -50% period modifier gave 1500 ms; the D-74 note is withdrawn). The server sets Mercy's amplitude before the engine applies Blightbreaker's unchanged Effect[0] modifier (aura_ascension_sun_cleric_mercy). Counted pair after the fix: 20261122-160902 / 20261122-160936, build eb64db249abd, server commit 859c4970d6, no flip, 3 of 3 verdicts ok in both runs: mercy_period 2000 (expected 2000, control 3000), mercy_cost 572 and mercy_spent 791 unchanged. Before (base pair 11, 20261122-143800): mercy_period 1500. Ticks over the whole 12000 ms aura, sun-cleric-blightbreaker-mercy: 5 without the passive, 7 with it. Behaviour proof beside the period read: the caster's Mercy Proc 503650 cast count (one per tick) at 4300 ms and 5500 ms after a real cast, cumulative over a control cast without Blightbreaker (ticks 2, then 5 + 3 = 8 expected from the 2000 ms period; tolerance 0, the pair bounds the period to 1834 to 2150 ms and excludes 1800, 2200, 1500 and 3000 ms). The figure claim 'by $s1%' cites the applied period and the tick counts, not only the DBC -50% readback, which the fix leaves unchanged. Reference search 2026-11-22: coa-history spell 503650 and 504848: 0 events in 186 logs; bindmysoul lists Blightbreaker without a period; nothing found.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 707433,
+      "ruling": "O-24 (2026-11-22): Blightbreaker raises Mercy's tick rate by 50% with its duration unchanged, a 2 sec period instead of 1.5 sec"
+    },
     "claims": [
       {
         "claim": "Increases the tick rate of Mercy",
         "labels": [
-          "707433 behaviour_metric_delta mercy_period"
+          "707433 behaviour_metric_delta mercy_period",
+          "707433 behaviour_metric_delta mercy_ticks_early",
+          "707433 behaviour_metric_delta mercy_ticks_late"
         ]
       },
       {
         "claim": "by $s1%",
         "labels": [
+          "707433 behaviour_metric_delta mercy_period",
+          "707433 behaviour_metric_delta mercy_ticks_early",
+          "707433 behaviour_metric_delta mercy_ticks_late",
           "707433 effect_value e0 #0"
         ]
       }
