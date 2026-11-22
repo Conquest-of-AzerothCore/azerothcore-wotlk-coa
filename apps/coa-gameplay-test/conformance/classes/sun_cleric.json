@@ -39448,7 +39448,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -39456,6 +39456,7 @@
       "setup_casts": [
         803489
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39484,7 +39485,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -39498,6 +39499,7 @@
       "setup_casts": [
         803489
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39526,7 +39528,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -39534,6 +39536,7 @@
       "setup_casts": [
         803491
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "ally_arm": {
         "allies": 1,
@@ -39569,7 +39572,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -39583,6 +39586,7 @@
       "setup_casts": [
         803491
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39611,7 +39615,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -39619,6 +39623,7 @@
       "setup_casts": [
         803719
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39647,7 +39652,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -39661,6 +39666,7 @@
       "setup_casts": [
         803719
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40110,7 +40116,7 @@
       },
       "before_expected": 0,
       "expected": 2,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -40118,6 +40124,7 @@
       "setup_casts": [
         803489
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40146,7 +40153,7 @@
       },
       "before_expected": 0,
       "expected": 2,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -40160,6 +40167,7 @@
       "setup_casts": [
         803489
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40188,7 +40196,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -40196,6 +40204,7 @@
       "setup_casts": [
         803491
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40231,7 +40240,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -40245,6 +40254,7 @@
       "setup_casts": [
         803491
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40273,7 +40283,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -40281,6 +40291,7 @@
       "setup_casts": [
         807435
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40309,7 +40320,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
@@ -40323,6 +40334,7 @@
       "setup_casts": [
         807435
       ],
+      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
