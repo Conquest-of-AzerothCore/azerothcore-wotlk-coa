@@ -104,6 +104,7 @@ void AddAscensionStockCoefficientScripts();
 void AddAscensionScalingBaseScripts();
 void AddCoABugReportScripts();
 void AddAscensionArenaQueueScripts();
+void AddSC_AscensionArenaReadyCrystal();
 void AddCoAPlayerTicketScripts();
 void AddCoARotationAssistScripts();
 void AddAscensionWildcardScripts();
@@ -774,6 +775,7 @@ void AddCoAScripts()
     AddSC_XPHotspots();
     AddCoABugReportScripts();
     AddAscensionArenaQueueScripts();
+    AddSC_AscensionArenaReadyCrystal();
     AddCoAPlayerTicketScripts();
     AddCoARotationAssistScripts();
     AddAscensionWildcardScripts();

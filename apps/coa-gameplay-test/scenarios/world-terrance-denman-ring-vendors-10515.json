@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Terrance Denman sells the base-tier level-60 rings in Stormwind and Orgrimmar",
+  "contract": [
+    "Terrance Denman <Ring Vendor> 1532172 (Stormwind) and 1532173 (Orgrimmar) had no template, so nobody sold the",
+    "Ascension rings. Each shop opens with the six base rings (Exiles DB vendor page) at their 600 gold item price.",
+    "The Inscribed, Etched and Runed upgrades unlock with later raid releases, so they are not on the shelves yet;",
+    "a vendor_price of -1 means the item is not sold."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8855.885,
+    "y": 853.7891,
+    "z": 99.60983,
+    "o": 1.1356559
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "stormwind",
+      "owner": "p",
+      "entry": 1532172,
+      "faction": 35,
+      "level": 35,
+      "distance": 2
+    },
+    {
+      "id": "orgrimmar",
+      "owner": "p",
+      "entry": 1532173,
+      "faction": 35,
+      "level": 30,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the Stormwind Terrance Denman for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "stormwind"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Stormwind shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Stormwind shelves hold the six base rings",
+      "actor": "p",
+      "metric": "vendor_items",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Cleric's Circle 1540585 for 600 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1540585,
+      "equals": 6000000
+    },
+    {
+      "action": "assert",
+      "label": "Warrior's Band 1544935 for 600 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1544935,
+      "equals": 6000000
+    },
+    {
+      "action": "assert",
+      "label": "Inscribed Cleric's Circle 1545691 is not sold yet",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1545691,
+      "equals": -1
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the Orgrimmar Terrance Denman for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "orgrimmar"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Orgrimmar shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Orgrimmar shelves hold the six base rings",
+      "actor": "p",
+      "metric": "vendor_items",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Protector's Ring 1540588 for 600 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1540588,
+      "equals": 6000000
+    },
+    {
+      "action": "assert",
+      "label": "Runed Protector's Ring 1551588 is not sold yet",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1551588,
+      "equals": -1
+    }
+  ]
+}

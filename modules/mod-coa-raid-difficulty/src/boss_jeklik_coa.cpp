@@ -64,6 +64,7 @@
 #include "Vehicle.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+#include "zg_coa_leash.h"
 
 using namespace coa_zg;
 
@@ -182,7 +183,10 @@ namespace
 
     struct boss_jeklik_coa : public BossAI
     {
-        boss_jeklik_coa(Creature* creature) : BossAI(creature, DATA_JEKLIK) { }
+        boss_jeklik_coa(Creature* creature) : BossAI(creature, DATA_JEKLIK)
+        {
+            SetBoundary(coa_zg::LeashFor(DATA_JEKLIK));
+        }
 
         void Reset() override
         {

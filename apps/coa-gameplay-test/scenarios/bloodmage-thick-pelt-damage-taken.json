@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Thick Pelt always reduces physical damage taken by 15 plus 20% of melee AP and ignores the Bloodmage's own swings (#2325, #4709, #12568)",
-  "contract": "Thick Pelt 704626 arms Thick Pelt 556233 on physical damage taken; its talent text gives the reduction as Thick Pelt 556233's 15 base plus 20% of melee AP. #12568: the server applied 15 - 20% of AP clamped at zero, so below 75 AP the talent did nothing, and the client text added the base's -15 sign, showing a negative reduction. The amount is now -(15 + 20% of the applying Bloodmage's BASE_ATTACK power), a reduction at every level; the server streams both texts with ${15+$AP*0.2}. Spell.dbc gives 704626 ProcFlags 0x4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK), so the spell_proc override sets it to 680 (taken physical melee/ranged events). Each Bloodmage takes a real incoming hit from a hostile player actor (the harness fixture creature is passive and cannot attack back); the 1000-damage white hit is the server's incoming melee calculation with and without the armed helper. The amount is snapshotted when 556233 applies.",
+  "contract": "Thick Pelt 704626 arms Thick Pelt 556233 on physical damage taken; its talent text gives the reduction as Thick Pelt 556233's 15 base plus 20% of melee AP. #12568: the server applied 15 - 20% of AP clamped at zero, so below 75 AP the talent did nothing, and the client text added the base's -15 sign, showing a negative reduction. The amount is now -(15 + 20% of the applying Bloodmage's BASE_ATTACK power), a reduction at every level; the client rows carry both texts with ${15+$AP*0.2}. Spell.dbc gives 704626 ProcFlags 0x4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK), so the spell_proc override sets it to 680 (taken physical melee/ranged events). Each Bloodmage takes a real incoming hit from a hostile player actor (the harness fixture creature is passive and cannot attack back); the 1000-damage white hit is the server's incoming melee calculation with and without the armed helper. The amount is snapshotted when 556233 applies.",
   "timeout_ms": 90000,
   "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
   "players": [
@@ -15,8 +15,8 @@
   ],
   "steps": [
     {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
-    {"action": "assert", "label": "The talent text is streamed with the positive reduction", "actor": "bloodmage", "metric": "server_packet_contains", "opcode": 2346, "row": 704626, "text": "by ${15+$AP*0.2}.", "equals": 1, "within_ms": 5000},
-    {"action": "assert", "label": "The helper's text is streamed with the same reduction", "actor": "bloodmage", "metric": "server_packet_contains", "opcode": 2346, "row": 556233, "text": "by ${15+$AP*0.2}.", "equals": 1},
+    {"action": "assert", "label": "The client's talent text bills the positive reduction", "actor": "bloodmage", "metric": "client_spell_row_contains", "spell": 704626, "text": "by ${15+$AP*0.2}.", "equals": 1},
+    {"action": "assert", "label": "The client's helper text bills the same reduction", "actor": "bloodmage", "metric": "client_spell_row_contains", "spell": 556233, "text": "by ${15+$AP*0.2}.", "equals": 1},
     {"action": "assert", "label": "SETUP: the level-13 Bloodmage has less than 75 melee AP", "actor": "low_bloodmage", "metric": "attack_power", "equals": 57},
     {"action": "assert", "label": "SETUP: the level-60 Bloodmage's melee AP", "actor": "bloodmage", "metric": "attack_power", "equals": 223},
     {"action": "assert", "label": "CONTROL: a 1000-damage white hit lands in full without Thick Pelt", "actor": "low_bloodmage", "metric": "melee_damage_taken", "target": "low_attacker", "equals": 1000},

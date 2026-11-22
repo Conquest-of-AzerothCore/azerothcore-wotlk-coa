@@ -159,8 +159,7 @@ Map* MapMgr::CreateScriptedPrivateWorldMap(
             !existing->IsScriptedPrivateInstance() ||
             existing->GetScriptedPrivateOwner() !=
                 player->GetScriptedPrivateOwner() ||
-            !existing->IsScriptedPrivateMember(
-                player->GetGUID()))
+            !existing->CanEnterScriptedPrivate(player))
         {
             return nullptr;
         }

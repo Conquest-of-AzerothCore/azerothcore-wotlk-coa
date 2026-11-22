@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode collection quests award experience (#10524, #12942, #12944, #12950, #12953)",
+  "contract": [
+    "Adventure Mode (challenge 211, tier 1 aura 302053) reads: no experience from quests with no objectives. Its NO_FETCH_QUEST_EXPERIENCE rule (#9812) also zeroed item-collection quests, so The Totem of Infliction (101, collect Ghoul Fangs 1129, Vials of Spider Venom 1130 and items 2378) awarded nothing (#10524), as did the Northshire collection quests Wolves Across the Border (33), Brotherhood of Thieves (18), Milly's Harvest (3904), Bounty on Garrick Padfoot (6) and Knowledge Corrupts (1660001) (#12942, #12944, #12950, #12953). The rule now follows the aura tooltip.",
+    "A level-25 adventurer at tier 1 and a level-25 character outside the mode, both at x1 dynamic experience, turn in The Totem of Infliction and then Raven Hill (163, from creature 633 to creature 288, no objectives).",
+    "Tier 1 grants quests +100% experience (SPELL_AURA_MOD_XP_PCT, quest mask), as challenges-adventure-mode records. Expected: the adventurer earns twice the outsider's experience for the collection quest (ratio 2, within integer rounding; before the repair 0) and nothing for the quest without objectives, which the outsider is still rewarded for. Quest 101 at level 25 is worth 2550 base experience, far below the 34000 of a level, so no gain crosses a level."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "adventurer",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "adventurer",
+      "challenge": 211,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Adventure Mode tier 1 starts",
+      "actor": "adventurer",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the tier 1 main aura is applied",
+      "actor": "adventurer",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "adventurer",
+      "value": 25
+    },
+    {
+      "action": "set_level",
+      "actor": "outsider",
+      "value": 25
+    },
+    {
+      "action": "command",
+      "actor": "adventurer",
+      "command": ".xp 1"
+    },
+    {
+      "action": "command",
+      "actor": "outsider",
+      "command": ".xp 1"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "outsider",
+      "quest": 101
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "adventurer",
+      "quest": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "xp",
+      "save_as": "outsider_collect"
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "xp",
+      "save_as": "adventurer_collect"
+    },
+    {
+      "action": "reward_quest",
+      "actor": "outsider",
+      "quest": 101
+    },
+    {
+      "action": "reward_quest",
+      "actor": "adventurer",
+      "quest": 101
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: outside the mode The Totem of Infliction awards experience",
+      "actor": "outsider",
+      "metric": "xp",
+      "relative_to": "outsider_collect",
+      "min": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "CONTROL: the outsider's collection quest gain",
+      "actor": "outsider",
+      "metric": "xp",
+      "relative_to": "outsider_collect",
+      "save_as": "outsider_collect_gain"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: in Adventure Mode the collection quest awards twice the outsider's experience",
+      "actor": "adventurer",
+      "metric": "xp",
+      "relative_to": "adventurer_collect",
+      "ratio_to": "outsider_collect_gain",
+      "min": 1.95,
+      "max": 2.05,
+      "within_ms": 5000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "outsider",
+      "quest": 163
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "adventurer",
+      "quest": 163
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "xp",
+      "save_as": "outsider_talk"
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "xp",
+      "save_as": "adventurer_talk"
+    },
+    {
+      "action": "reward_quest",
+      "actor": "outsider",
+      "quest": 163
+    },
+    {
+      "action": "reward_quest",
+      "actor": "adventurer",
+      "quest": 163
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: outside the mode Raven Hill awards experience",
+      "actor": "outsider",
+      "metric": "xp",
+      "relative_to": "outsider_talk",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "RULE KEPT: in Adventure Mode a quest without objectives awards no experience",
+      "actor": "adventurer",
+      "metric": "xp",
+      "relative_to": "adventurer_talk",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

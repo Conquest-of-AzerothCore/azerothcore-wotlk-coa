@@ -37,7 +37,7 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
         if (GetId() == 807424 && effect->GetEffIndex() == EFFECT_1)
             amount = 0;
     }
-    void Apply(AuraEffect const* effect, AuraEffectHandleModes)
+    void Apply(AuraEffect const* effect, AuraEffectHandleModes mode)
     {
         if (!First(effect))
             return;
@@ -56,7 +56,7 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
             for (Aura* aura : remove)
                 aura->Remove();
         }
-        if (id == 712483)
+        if (id == 712483 && (mode & AURA_EFFECT_HANDLE_REAL))
             GetAura()->SetScriptValue(id, 0);
         if (id == 707902)
             GetAura()->SetScriptValue(id, 3);
@@ -239,7 +239,7 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
             State(player).carveSteps = 0;
             State(player).spenderCrit = oldCrit;
             if (full && player->HasAura(520831))
-                Gain(player, 2);
+                Gain(player, 1);
             if (player->HasAura(707444))
             {
                 Cast(player, player, 807424);

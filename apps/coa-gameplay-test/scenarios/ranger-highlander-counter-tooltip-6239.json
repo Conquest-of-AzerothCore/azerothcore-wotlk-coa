@@ -58,9 +58,8 @@
       "action": "assert",
       "label": "Counter tooltip sends a fixed 100 percent future reward",
       "actor": "ranger",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 707539,
+      "metric": "client_spell_row_contains",
+      "spell": 707539,
       "text": "100% reduced cost",
       "equals": 1
     }

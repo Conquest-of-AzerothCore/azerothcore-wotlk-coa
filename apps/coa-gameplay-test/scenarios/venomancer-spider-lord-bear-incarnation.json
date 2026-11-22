@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "A selected Bear Form incarnation replaces the Spider Lord model and keeps its buff",
+  "contract": [
+    "Spider Lord 704264 augments Beetle Form 803183 into a Spider Lord: AscensionVenomancer::UpdateSpiderLordDisplay sets display 142811 and Refresh keeps the helper 805139 'Spider Form Lord' (damage taken reduced) on the player.",
+    "A Bear Form incarnation the player selected (appearance 822 = display 1083) wins over the Spider Lord model; the helper buff 805139 stays. Clearing the selection brings the Spider Lord model back at once."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "name": "Chitinlord",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": -211.237,
+    "y": 4278.54,
+    "z": 86.5678,
+    "o": 4.59776
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 704264
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Beetle Form with Spider Lord",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "assert",
+      "label": "Spider Lord shows its own model",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 142811,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form Lord is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805139,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select the Bear Form incarnation inside Beetle Form",
+      "actor": "v",
+      "selection": {
+        "17": 822
+      }
+    },
+    {
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000,
+      "action": "assert",
+      "label": "The Bear Form incarnation is offered to a Venomancer",
+      "actor": "v"
+    },
+    {
+      "action": "assert",
+      "label": "The selected incarnation replaces the Spider Lord model",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 1083,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form Lord stays with the incarnation",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805139,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Past the next Venomancer and cosmetic refresh ticks",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation is still shown after the refresh ticks",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 1083
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form Lord is still applied after the refresh ticks",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805139,
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Clear the selection inside Beetle Form",
+      "actor": "v",
+      "selection": {}
+    },
+    {
+      "action": "assert",
+      "label": "Spider Lord takes its model back at once",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 142811,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form Lord is still applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805139,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

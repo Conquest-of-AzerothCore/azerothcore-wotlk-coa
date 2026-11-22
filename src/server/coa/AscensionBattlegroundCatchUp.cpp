@@ -356,6 +356,11 @@ uint32 ScaledOutput(Unit const* source, Unit const* target, uint32 amount, Spell
     if (healing && spell && (spell->HasEffect(SPELL_EFFECT_HEALTH_LEECH) || spell->HasAura(SPELL_AURA_PERIODIC_LEECH)))
         return amount;
 
+    if (healing && spell &&
+        (spell->HasEffect(SPELL_EFFECT_HEAL_PCT) || spell->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
+            spell->HasAura(SPELL_AURA_OBS_MOD_HEALTH)))
+        return amount;
+
     if (source->IsHostileTo(target) == healing)
         return amount;
 

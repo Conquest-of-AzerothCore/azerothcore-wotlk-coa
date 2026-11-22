@@ -31,19 +31,19 @@
     {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
     {
       "action": "assert",
-      "label": "CONTROL: nothing overrides the Hurricane's own client visual (645435 keeps its Spell.dbc row)",
-      "actor": "rm", "metric": "server_packets", "opcode": 2346, "row": 645435, "equals": 0
+      "label": "CONTROL: nothing overrides the Hurricane's own client visual (645435 has no server spell row)",
+      "actor": "rm", "metric": "client_spell_row_u32", "spell": 645435, "index": 0, "equals": -1
     },
     {
       "action": "assert",
-      "label": "CONTROL: the stream keeps another published spell's own visual (Palm Sigil: Water 500639 = 2692)",
-      "actor": "rm", "metric": "server_packet_u32", "opcode": 2346, "row": 500639, "offset": 524,
+      "label": "CONTROL: another published spell's client row keeps its own visual (Palm Sigil: Water 500639 = 2692)",
+      "actor": "rm", "metric": "client_spell_row_u32", "spell": 500639, "index": 131,
       "equals": 2692, "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "CONTROL: the Wildcard sibling 280930 is out of scope and carries no streamed row",
-      "actor": "rm", "metric": "server_packets", "opcode": 2346, "row": 280930, "equals": 0
+      "label": "CONTROL: the Wildcard sibling 280930 is out of scope and has no server spell row",
+      "actor": "rm", "metric": "client_spell_row_u32", "spell": 280930, "index": 0, "equals": -1
     },
     {"action": "learn", "actor": "rm", "spell": 197},
     {"action": "add_item", "actor": "rm", "item": 12784},

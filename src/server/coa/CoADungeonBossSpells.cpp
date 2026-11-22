@@ -520,6 +520,11 @@ public:
             return;
         if (!_loaded)
             Load();
+        if (auto const radius = _radius.find(info->Id); radius != _radius.end())
+            if (SpellRadiusEntry const* entry = sSpellRadiusStore.LookupEntry(radius->second))
+                for (SpellEffectInfo& effect : info->Effects)
+                    if (effect.RadiusEntry)
+                        effect.RadiusEntry = entry;
         auto const itr = _reach.find(info->Id);
         if (itr == _reach.end())
             return;
@@ -549,10 +554,20 @@ private:
             } while (result->NextRow());
         }
         LOG_INFO("server.loading", ">> Loaded {} CoA dungeon spell reach corrections", _reach.size());
+        if (QueryResult result = WorldDatabase.Query("SELECT spell_id, radius_index FROM coa_dungeon_spell_radius"))
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                _radius[fields[0].Get<uint32>()] = fields[1].Get<uint32>();
+            } while (result->NextRow());
+        }
+        LOG_INFO("server.loading", ">> Loaded {} CoA dungeon spell radius corrections", _radius.size());
     }
 
     bool _loaded = false;
     std::unordered_map<uint32, Reach> _reach;
+    std::unordered_map<uint32, uint32> _radius;
 };
 
 class spell_coa_summon_hearty_heart : public SpellScript

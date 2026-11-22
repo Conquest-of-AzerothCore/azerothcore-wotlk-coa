@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Outrage is extended by critical hits on training dummies (#12836)",
+  "contract": [
+    "Outrage 803499 lasts 10 seconds; each critical physical hit extends it by \"Outrage - Increase Duration\" 560016",
+    "(1000 ms) up to 20 seconds in total with Bloodthirsty 300497, which doubles the step to 2000 ms (#7605).",
+    "The dummy AI zeroes health damage too late to affect the proc event, so each dummy has a Power Word: Shield",
+    "with enough capacity to absorb its entire Whirling Advance hit before proc evaluation. Five physical crits",
+    "with zero proc damage must grant five 2000 ms extensions through the training dummy exception (#12836)."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    {
+      "id": "b", "race": 1, "class": 12, "level": 60,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    { "id": "d1", "owner": "b", "entry": 32666, "level": 60, "health": 500000, "distance": 3 },
+    { "id": "d2", "owner": "b", "entry": 32666, "level": 60, "health": 500000, "distance": 5 },
+    { "id": "d3", "owner": "b", "entry": 32666, "level": 60, "health": 500000, "distance": 7 },
+    { "id": "d4", "owner": "b", "entry": 32666, "level": 60, "health": 500000, "distance": 9 },
+    { "id": "d5", "owner": "b", "entry": 32666, "level": 60, "health": 500000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 300497 },
+    { "action": "learn", "actor": "b", "spell": 504915 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "b", "target": "d1", "spell": 17, "stacks": 1, "amount": 100000 },
+    { "action": "set_aura", "actor": "b", "target": "d2", "spell": 17, "stacks": 1, "amount": 100000 },
+    { "action": "set_aura", "actor": "b", "target": "d3", "spell": 17, "stacks": 1, "amount": 100000 },
+    { "action": "set_aura", "actor": "b", "target": "d4", "spell": 17, "stacks": 1, "amount": 100000 },
+    { "action": "set_aura", "actor": "b", "target": "d5", "spell": 17, "stacks": 1, "amount": 100000 },
+    { "action": "set_aura", "actor": "b", "spell": 803499, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Outrage is on the Barbarian", "actor": "b", "metric": "aura", "spell": 803499, "equals": 1, "within_ms": 2000 },
+    { "action": "snapshot", "actor": "b", "metric": "aura_duration_ms", "spell": 803499, "save_as": "outrage_before" },
+    { "action": "cast", "actor": "b", "spell": 504915 },
+    { "action": "assert", "label": "Whirling Advance is accepted", "actor": "b", "metric": "cast_failure", "spell": 504915, "equals": 0 },
+    {
+      "action": "assert", "label": "SETUP: Whirling Advance critically hits all five training dummies",
+      "actor": "b", "metric": "spell_log_count", "spell": 504915, "critical": true, "equals": 5, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Whirling Advance deals zero damage after absorbs",
+      "actor": "b", "metric": "spell_damage_total", "spell": 504915, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: five zero-damage dummy crits extend Outrage by the full budget",
+      "actor": "b", "metric": "aura_duration_ms", "spell": 803499, "relative_to": "outrage_before",
+      "min": 7000, "max": 10000
+    }
+  ]
+}

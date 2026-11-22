@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Mulgore: both Worldforged Kodo Eggs are back (#12882)",
+  "contract": "#12882: the Worldforged pickup Kodo Egg (gameobject 1345150, ScriptName worldforged_pickup, loot item 450886) had no spawn. modules/mod-worldforged-pickups/data/sql/db-world/2026_09_23_05_worldforged_map.sql (#4960) deleted every worldforged_pickup spawn in its guid ranges and re-inserted only the realm-map objects, which removed 6910338 and never restored it. The fix restores 6910338's last repository position and rotation (2026_09_22_01_worldforged_missing_pickups.sql) as guid 6960216, at the archive pin -2783.6, -700.8 (7 records) and 7.6 yd from the reporter. Its repository height 6.6933 (2026_09_22_03_worldforged_appearance_and_ground.sql) lies inside a camp model: measured there, the server ground is 1.521 yd above it, the nearest vmap model 0.26 yd away and the headroom 1.22 yd, while the stock Battered Chests 9862/9863 nearby stand on the ground (gap 0.000) with 10 yd headroom. The fix sets the height to that measured surface, 8.2143, so the egg stands on top and is visible. The second archive pin (-2691.1, -784.0) gets its former spawn 6910339 back as guid 6960217, with that spawn's repository position, rotation (2026_09_22_01) and terrain height -5.7037 (2026_09_22_03), and must stand on open ground the same way.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "auditor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Kodo Egg stands at the fixed spot",
+      "actor": "auditor",
+      "metric": "spawn_distance",
+      "guid": 6960216,
+      "spawn_type": "gameobject",
+      "x": -2782.0,
+      "y": -702.3,
+      "z": 8.2143,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Kodo Egg stands on the ground",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 6960216,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nothing solid covers the Kodo Egg",
+      "actor": "auditor",
+      "metric": "spawn_headroom",
+      "guid": 6960216,
+      "spawn_type": "gameobject",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "the Kodo Egg is not under water",
+      "actor": "auditor",
+      "metric": "spawn_submerged",
+      "guid": 6960216,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Kodo Egg display is in the client DBC",
+      "actor": "auditor",
+      "metric": "spawn_display_state",
+      "guid": 6960216,
+      "spawn_type": "gameobject",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second Kodo Egg stands at its former spot",
+      "actor": "auditor",
+      "metric": "spawn_distance",
+      "guid": 6960217,
+      "spawn_type": "gameobject",
+      "x": -2691.1,
+      "y": -784.0,
+      "z": -5.7037,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "the second Kodo Egg stands on the ground",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 6960217,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "nothing solid covers the second Kodo Egg",
+      "actor": "auditor",
+      "metric": "spawn_headroom",
+      "guid": 6960217,
+      "spawn_type": "gameobject",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "the second Kodo Egg is not under water",
+      "actor": "auditor",
+      "metric": "spawn_submerged",
+      "guid": 6960217,
+      "spawn_type": "gameobject",
+      "equals": 0
+    }
+  ]
+}

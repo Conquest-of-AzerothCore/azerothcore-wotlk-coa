@@ -32,6 +32,7 @@ enum RangerTalentSpells : uint32
     SPELL_EXTEND_DIRTY_BLADES = 524653,
     SPELL_SNATCH = 803115,
     SPELL_SNATCH_DISARM = 803123,
+    SPELL_HORN_OF_WAR = 800086,
     SPELL_PHOENIX_PLUMES = 705074,
     SPELL_PHOENIX_PLUMES_WAR_FALCON = 520558,
     SPELL_SWIFTSHOT = 705028,
@@ -565,6 +566,8 @@ void ApplyAscensionRangerTalentContracts(SpellInfo* info)
     if (info->Id == SPELL_SNATCH_DISARM && info->SpellFamilyName == 27)
         if (SpellInfo const* parent = sSpellMgr->GetSpellInfo(SPELL_SNATCH))
             info->DurationEntry = parent->DurationEntry;
+    if (info->Id == SPELL_HORN_OF_WAR && info->SpellFamilyName == 27)
+        info->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
 }
 
 void AddSC_AscensionRangerTalents()

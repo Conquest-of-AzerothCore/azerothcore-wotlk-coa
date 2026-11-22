@@ -98,6 +98,7 @@ enum BloodmageTalentSpells : uint32
     SPELL_SANGUINE_ESSENCE_DAMAGE = 681399,
     SPELL_NIGHTMARE_TALENT = 300226,
     SPELL_NIGHTMARE_BUFF = 301273,
+    SPELL_NIGHTMARE_SELF_DAMAGE = 704257,
     SPELL_BLOOD_VEIL = 504263,
     SPELL_HUNTER_AND_HUNTED = 807487,
     SPELL_DARK_EMBRACE = 804854,
@@ -403,6 +404,12 @@ struct npc_ascension_animated_blood : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (Player* owner = ObjectAccessor::GetPlayer(*me, me->GetOwnerGUID()))
+            if (bool travelling = owner->IsMounted() || owner->IsInFlight(); travelling != Travelling)
+            {
+                Travelling = travelling;
+                me->SetImmuneToNPC(travelling);
+            }
         if (!UpdateVictim())
             return;
         if (BloodStrikeTimer <= diff)
@@ -424,6 +431,7 @@ struct npc_ascension_animated_blood : public ScriptedAI
     }
 
     uint32 BloodStrikeTimer = 2000;
+    bool Travelling = false;
 };
 
 void HunterAndHuntedCharge(Player* player)
@@ -944,18 +952,29 @@ class aura_ascension_bloodmage_coagulation : public AuraScript
     }
 };
 
-constexpr uint32 TaldaramsTormentEnergizeRage = 30;
+constexpr uint32 SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE = 582765;
+constexpr uint32 SPELL_THE_COUNCIL_ASSEMBLED = 504103;
+constexpr uint32 SPELL_ATHERANNS_ACUITY = 504105;
 
 class aura_ascension_bloodmage_taldarams_torment : public AuraScript
 {
     PrepareAuraScript(aura_ascension_bloodmage_taldarams_torment);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE, SPELL_ATHERANNS_ACUITY});
+    }
 
     void Tick(AuraEffect const*)
     {
         Unit* caster = GetCaster();
         if (!caster)
             return;
-        caster->EnergizeBySpell(caster, GetId(), TaldaramsTormentEnergizeRage, POWER_RAGE);
+        SpellInfo const* energize = sSpellMgr->GetSpellInfo(SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE);
+        int32 rage = caster->CalculateSpellDamage(caster, energize, EFFECT_0);
+        caster->EnergizeBySpell(caster, GetId(), uint32(std::max(rage, 0)), POWER_RAGE);
+        if (caster->HasAura(SPELL_THE_COUNCIL_ASSEMBLED))
+            caster->CastSpell(caster, SPELL_ATHERANNS_ACUITY, true);
     }
 
     void Register() override
@@ -1547,7 +1566,7 @@ class spell_ascension_bloodmage_blood_orb_pickup : public SpellScript
     {
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
             spell_ascension_bloodmage_blood_orb_pickup::SelectOwner, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
-        OnEffectHitTarget += SpellEffectFn(spell_ascension_bloodmage_blood_orb_pickup::Collect,
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_bloodmage_blood_orb_pickup::Collect,
             EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
     }
 };
@@ -1602,6 +1621,31 @@ public:
             player->GetTemporarySpellReplacement(SPELL_ACCURSED_FORM) != SPELL_BLOODGALE)
             return;
         ClearHunterAndHuntedReactivation(player);
+    }
+};
+
+class bloodmage_nightmare_casts : public AllSpellScript
+{
+public:
+    bloodmage_nightmare_casts() : AllSpellScript("bloodmage_nightmare_casts", {ALLSPELLHOOK_ON_BEFORE_EFFECTS}) { }
+
+    void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        Player* player = caster ? caster->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_SON_OF_ARUGAL || !info || spell->IsTriggered() ||
+            info->PowerType != POWER_RAGE || spell->GetPowerCost() <= 0 ||
+            !player->HasAura(SPELL_NIGHTMARE_TALENT) || player->GetHealthPct() <= 50.0f)
+            return;
+        SpellInfo const* selfDamage = sSpellMgr->GetSpellInfo(SPELL_NIGHTMARE_SELF_DAMAGE);
+        SpellInfo const* bonus = sSpellMgr->GetSpellInfo(SPELL_NIGHTMARE_BUFF);
+        if (!selfDamage || !bonus)
+            return;
+        int32 const cost = int32(player->CountPctFromMaxHealth(selfDamage->Effects[EFFECT_1].CalcValue()));
+        int32 const increase = bonus->Effects[EFFECT_0].CalcValue();
+        if (cost <= 0 || increase <= 0)
+            return;
+        player->ModifyHealth(-cost);
+        spell->SetScriptValue(AscensionBloodmage::NightmareTalent, uint64(increase));
     }
 };
 
@@ -1740,6 +1784,7 @@ void AddSC_AscensionBloodmageTalents()
     new bloodmage_cursed_form_death();
     new bloodmage_cursed_form_weapons();
     new bloodmage_hunter_and_hunted_casts();
+    new bloodmage_nightmare_casts();
     new bloodmage_infuse_accumulation();
     new bloodmage_blood_constructor();
     new bloodmage_talent_contracts();

@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionBarbarianCompletion.h"
+#include "Creature.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -20,6 +21,12 @@ using namespace AscensionBarbarian;
 bool Damage(ProcEventInfo const& event)
 {
     return event.GetDamageInfo() && event.GetDamageInfo()->GetDamage();
+}
+
+bool TrainingDummyHit(ProcEventInfo const& event)
+{
+    Creature const* target = event.GetActionTarget() ? event.GetActionTarget()->ToCreature() : nullptr;
+    return event.GetDamageInfo() && target && target->GetScriptName() == "npc_training_dummy";
 }
 
 bool Direct(ProcEventInfo const& event)
@@ -200,7 +207,7 @@ class aura_ascension_barbarian_event : public AuraScript
             case 500061: return event.GetHealInfo() && event.GetHealInfo()->GetTarget() == owner &&
                 event.GetHealInfo()->GetEffectiveHeal() && Ancestor(player);
             case 801759:
-            case 803499: return outgoing && Damage(event) && critical &&
+            case 803499: return outgoing && (Damage(event) || TrainingDummyHit(event)) && critical &&
                 (event.GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL);
             case 804141: return outgoing && info && Ranged(event) && sid != 520518 &&
                 !(event.GetTypeMask() & PROC_FLAG_DONE_RANGED_AUTO_ATTACK) && event.GetProcSpell() &&

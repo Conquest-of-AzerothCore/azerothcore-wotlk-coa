@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Stratholme: Grand Crusader Dathrohan casts Hour of Judgement from the middle of his room (#11940)",
+  "contract": "#11940: When Grand Crusader Dathrohan (10812) drops below 66% health his Ascension kit casts Hour of Judgement (92564) once. On Ascension he is teleported to the middle of his room for it (tester position 3415.84, -3044.54; his spawn point, z 136.81). Kit row 9010 starts the cast and links to a teleport there (new row 9011); teleporting first and then casting failed the line-of-sight check of the cast in this room. His spawn point is the same spot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 329,
+      "x": 3405.0,
+      "y": -3037.0,
+      "z": 136.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Stratholme on Mythic",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 10812,
+      "as": "dathrohan",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "dathrohan"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dathrohan fights away from the middle of the room",
+      "actor": "dathrohan",
+      "metric": "position_x",
+      "max": 3410,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "p",
+      "target": "dathrohan",
+      "pct": 60
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: below 66% he stands in the middle of the room",
+      "actor": "dathrohan",
+      "metric": "position_x",
+      "min": 3414.8,
+      "max": 3416.8,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "his y in the middle of the room",
+      "actor": "dathrohan",
+      "metric": "position_y",
+      "min": -3045.6,
+      "max": -3043.5
+    },
+    {
+      "action": "assert",
+      "label": "and casts Hour of Judgement there",
+      "actor": "dathrohan",
+      "metric": "cast_remaining_ms",
+      "spell": 92564,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

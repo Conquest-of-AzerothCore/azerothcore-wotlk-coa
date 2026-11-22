@@ -4,7 +4,6 @@
 
 #include "GrootCoin.h"
 
-#include "AscensionClientSpellPatches.h"
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "Creature.h"
@@ -298,7 +297,6 @@ namespace
 
 void AddGrootCoinScripts()
 {
-    Ascension::ClientItemPatches::Instance().Register(COIN_ITEM);
     new groot_coin_commands();
     new groot_coin_world();
 }

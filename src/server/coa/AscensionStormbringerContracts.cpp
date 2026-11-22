@@ -21,7 +21,9 @@ enum StormbringerContractSpells : uint32
     SPELL_CRUSHING_PRESSURE_RANK_2 = 803567,
     SPELL_CRUSHING_PRESSURE_RANK_3 = 803569,
     SPELL_WINDRIDE = 804724,
-    SPELL_THUNDERALE = 804762
+    SPELL_THUNDERALE = 804762,
+    SPELL_AEROBLAST = 801839,
+    SPELL_ADD_5_STATIC = 804044
 };
 
 constexpr uint32 THUNDERALE_DURATION_INDEX = 63;
@@ -85,6 +87,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
     if (info->Id == SPELL_ELECTRIFIED_WATERS_TRIGGER && info->TargetAuraSpell == SPELL_DROWN_TARGET_AURA_STUB)
         info->TargetAuraSpell = 0;
+    if (info->Id == SPELL_AEROBLAST)
+        info->IgnoreSpellLevelPenalty = true;
+    if (info->Id == SPELL_ADD_5_STATIC && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_DUMMY &&
+        info->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ANY)
+    {
+        info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        info->_InitializeExplicitTargetMask();
+    }
     if (info->Id == SPELL_WINDRIDE)
         info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
     if (info->Id == SPELL_ATMOSPHERIC_PRESSURE && info->HasAttribute(SPELL_ATTR5_NO_CASTER_AURA_ICON))

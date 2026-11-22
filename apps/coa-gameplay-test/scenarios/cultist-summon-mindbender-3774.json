@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Summon Mindbender uses the recovered creature template (#3774)",
+  "contract": [
+    "Spell 803062 uses the native summon-pet effect with creature entry 50328.",
+    "The CoA creature cache records display 464978 for that entry.",
+    "The summon tooltip references Entropic Union 800022, which heals nearby allies.",
+    "The fixture grants the summon and commands the heal through the native pet action."
+  ],
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 },
+    { "id": "ally", "race": 1, "class": 1, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "cultist", "target": "ally" },
+    { "action": "learn", "actor": "cultist", "spell": 803062 },
+    { "action": "assert", "actor": "cultist", "metric": "knows_spell", "spell": 803062, "equals": 1 },
+    { "action": "assert", "actor": "cultist", "metric": "pet_entry", "equals": 0 },
+    { "action": "assert", "actor": "cultist", "metric": "spell_power_cost", "spell": 803062, "min": 1 },
+    { "action": "cast", "actor": "cultist", "spell": 803062 },
+    { "action": "assert", "actor": "cultist", "metric": "cast_failure", "spell": 803062, "equals": 0 },
+    {
+      "action": "assert", "label": "The summoned Mindbender occupies the pet slot",
+      "actor": "cultist", "metric": "pet_entry", "equals": 50328, "within_ms": 4000
+    },
+    { "action": "assert", "actor": "cultist", "metric": "cooldown_ms", "spell": 803062, "equals": 0 },
+    { "action": "assert", "actor": "cultist", "metric": "pet_display", "equals": 464978 },
+    { "action": "assert", "actor": "cultist", "metric": "pet_knows_spell", "spell": 800022, "equals": 1 },
+    { "action": "set_health", "actor": "ally", "value": 1000, "maximum": 2000 },
+    {
+      "action": "client_packet", "label": "CMSG_PET_ACTION casts Entropic Union (ACT_ENABLED << 24 | 800022)",
+      "actor": "cultist", "opcode": 373, "consumed": false,
+      "fields": [{ "pet_guid": "cultist" }, { "u32": 3238802710 }, { "actor_guid": "ally" }]
+    },
+    {
+      "action": "assert", "label": "Mindbender's Entropic Union restores the party member's health",
+      "actor": "ally", "metric": "spell_effective_heal_total", "spell": 800022,
+      "caster_entry": 50328, "target": "ally", "min": 1, "within_ms": 4000
+    }
+  ]
+}

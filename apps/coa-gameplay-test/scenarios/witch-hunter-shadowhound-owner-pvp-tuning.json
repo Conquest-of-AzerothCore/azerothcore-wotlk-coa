@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "The Shadowhound deals its Witch Hunter's PvP damage tuning against players",
+  "contract": [
+    "Players carry CoA PvP tuning auras (887100-887190, aura 322) that scale their damage against players; the Witch Hunter class aura 887103 lowers it by 10 percent.",
+    "Pets and guardians use their player owner's PvP tuning against players, as the owner does. The owner's 887103 effect is fixed at 0 for a control fight and at -50 for a test fight;",
+    "the Shadowhound (50124) keeps the same stats and the same player victim, so its average plain melee hit must halve: the control average divided by the test average is 2 (1 when the owner's tuning is ignored)."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 60 },
+    { "id": "victim", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and class synchronisation settle", "ms": 4000 },
+    { "action": "teleport", "actor": "hunter", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "victim", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "pvp", "actor": "hunter", "enabled": true },
+    { "action": "pvp", "actor": "victim", "enabled": true },
+    { "action": "set_health", "actor": "victim", "maximum": 1000000, "value": 1000000 },
+    { "action": "learn", "actor": "hunter", "spell": 801343 },
+    { "action": "cast", "actor": "hunter", "spell": 801343 },
+    { "action": "assert", "label": "SETUP: the Shadowhound is out", "actor": "hunter", "metric": "pet_entry", "equals": 50124, "within_ms": 15000 },
+    { "action": "set_aura", "label": "CONTROL: the owner's PvP damage tuning is neutral", "actor": "hunter", "spell": 887103, "stacks": 1, "amount": 0 },
+    { "action": "snapshot", "actor": "hunter", "metric": "pet_melee_plain_count", "save_as": "control_count_before" },
+    { "action": "snapshot", "actor": "hunter", "metric": "pet_melee_plain_damage", "save_as": "control_damage_before" },
+    { "action": "attack", "label": "Send the Shadowhound at the player", "actor": "hunter", "target": "victim", "pet": true },
+    { "action": "wait", "label": "CONTROL: let the Shadowhound swing", "ms": 25000 },
+    { "action": "snapshot", "actor": "hunter", "metric": "pet_melee_plain_count", "relative_to": "control_count_before", "save_as": "control_hits" },
+    { "action": "assert", "label": "SETUP: the control fight has plain hits", "actor": "hunter", "metric": "pet_melee_plain_count", "relative_to": "control_count_before", "min": 5 },
+    { "action": "snapshot", "label": "CONTROL: average plain hit", "actor": "hunter", "metric": "pet_melee_plain_damage", "relative_to": "control_damage_before", "ratio_to": "control_hits", "save_as": "control_average" },
+    { "action": "set_aura", "label": "TEST: the owner's PvP damage tuning is -50 percent", "actor": "hunter", "spell": 887103, "stacks": 1, "amount": -50 },
+    { "action": "snapshot", "actor": "hunter", "metric": "pet_melee_plain_count", "save_as": "test_count_before" },
+    { "action": "snapshot", "actor": "hunter", "metric": "pet_melee_plain_damage", "save_as": "test_damage_before" },
+    { "action": "wait", "label": "TEST: let the Shadowhound swing", "ms": 25000 },
+    { "action": "assert", "label": "SETUP: the test fight has plain hits", "actor": "hunter", "metric": "pet_melee_plain_count", "relative_to": "test_count_before", "min": 5 },
+    { "action": "snapshot", "label": "TEST: damage in control-average hits", "actor": "hunter", "metric": "pet_melee_plain_damage", "relative_to": "test_damage_before", "ratio_to": "control_average", "save_as": "test_in_control_hits" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the control average is twice the test average",
+      "actor": "hunter", "metric": "pet_melee_plain_count", "relative_to": "test_count_before",
+      "ratio_to": "test_in_control_hits", "min": 1.7, "max": 2.3
+    },
+    { "action": "assert", "label": "The player survived the measurement", "actor": "victim", "metric": "alive", "equals": 1 }
+  ]
+}

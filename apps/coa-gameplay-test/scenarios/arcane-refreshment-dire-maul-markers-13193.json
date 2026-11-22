@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Arcane Refreshment (7463): both map markers are drawn on Dire Maul",
+  "contract": "rev_20261122_70_quest_7463_arcane_refreshment_poi.sql moves quest 7463's two POIs from Silverpine's map (map 0, world map area 21) to Dire Maul (map 429, area 699): the Hydrospawn Essence objective at Hydrospawn's spawn (3, -419) and the turn-in pin at Lorekeeper Lydros (164, 522), which client QuestSuperTrack 4018 also places on map 429. A level 60 mage carries the quest and sends the CMSG_QUEST_POI_QUERY a real client sends; SMSG_QUEST_POI_QUERY_RESPONSE must list exactly two POIs, each on map 429 and area 699 with its original point. Before the fix both POIs answered map 0 and area 21, so the map and area assertions discriminate.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the mage carries 7463 'Arcane Refreshment' unfinished",
+      "actor": "mage",
+      "quest": 7463,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 7463 'Arcane Refreshment'",
+      "actor": "mage",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 7463
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 7463's own POI list",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 7463,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463 answers with 2 POIs: the objective area and the turn-in pin",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 0 is the Hydrospawn Essence objective (index 4)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7463 POI 0 is on map 429 Dire Maul, not map 0",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7463 POI 0 is drawn on WorldMapAreaId 699 Dire Maul, not 21 Silverpine",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 0 has 1 point",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 0 point x 3 (Hydrospawn's spawn)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 0 point y -419 (Hydrospawn's spawn)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966877,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 1 is the turn-in pin (index -1)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7463 POI 1 is on map 429 Dire Maul, not map 0",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7463 POI 1 is drawn on WorldMapAreaId 699 Dire Maul, not 21 Silverpine",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 1 point x 164 (Lorekeeper Lydros)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 164,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7463: POI 1 point y 522 (Lorekeeper Lydros)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 522,
+      "within_ms": 4000
+    }
+  ]
+}
