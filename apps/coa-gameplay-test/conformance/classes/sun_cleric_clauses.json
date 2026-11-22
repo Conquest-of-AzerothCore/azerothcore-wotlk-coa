@@ -2393,7 +2393,8 @@
     "clause": "Shine the light of the sun on an enemy, dealing ${$m1+0+$sph*1} Holy Damage and granting you Scorch Marks.",
     "labels": [
       "704908 behaviour_metric_delta sun_ray_damage",
-      "704908 behaviour_metric_delta scorch_granted"
+      "704908 behaviour_metric_delta scorch_granted",
+      "704908 behaviour_metric_delta scorch_granted_early"
     ],
     "kind": "claim"
   },

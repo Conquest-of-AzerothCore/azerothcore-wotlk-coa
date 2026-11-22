@@ -394,7 +394,7 @@ void Refresh(Player* player)
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231))
             player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
-    if (!replacement)
+    if (!replacement && !player->HasAura(807059))
         player->removeSpell(504764, SPEC_MASK_ALL, true);
     bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
     bool const converted = player->HasSpell(RadiantConversion);
