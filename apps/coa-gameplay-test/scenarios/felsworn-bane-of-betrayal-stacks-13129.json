@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Bane of Betrayal keeps its stacks through casts and a recast (#13129)",
+  "contract": [
+    "Bane of Betrayal 712483: 'each spell or ability they cast to add 1 stack to this effect for $d. At the end of the duration, deal damage to them based on how many stacks were accrued.' StackAmount is 30.",
+    "The target is an opposite-faction PvP-flagged mage that casts Arcane Intellect 1459 on itself, one cast per global cooldown.",
+    "Three casts must show 3 stacks. A recast of the Bane must not drop them, and the next cast must reach 4."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "felsworn", "race": 1, "class": 14, "level": 80, "spell_hit_rating": 10000,
+      "allow_regeneration": false },
+    { "id": "victim", "race": 5, "class": 8, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "teleport", "actor": "felsworn", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "victim", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "pvp", "actor": "felsworn", "enabled": true },
+    { "action": "pvp", "actor": "victim", "enabled": true },
+    { "action": "learn", "actor": "felsworn", "spell": 712483 },
+    { "action": "learn", "actor": "victim", "spell": 1459 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Apply Bane of Betrayal", "actor": "felsworn", "spell": 712483, "target": "victim" },
+    { "action": "assert", "actor": "felsworn", "metric": "cast_failure", "spell": 712483, "equals": 0 },
+    { "action": "assert", "label": "The Bane lands on the target", "actor": "victim", "metric": "aura_stacks",
+      "spell": 712483, "min": 1, "within_ms": 2000 },
+    { "action": "cast", "label": "First cast by the target", "actor": "victim", "spell": 1459 },
+    { "action": "assert", "actor": "victim", "metric": "cast_failure", "spell": 1459, "equals": 0 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "label": "Second cast by the target", "actor": "victim", "spell": 1459 },
+    { "action": "assert", "actor": "victim", "metric": "cast_failure", "spell": 1459, "equals": 0 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "label": "Third cast by the target", "actor": "victim", "spell": 1459 },
+    { "action": "assert", "actor": "victim", "metric": "cast_failure", "spell": 1459, "equals": 0 },
+    { "action": "assert", "label": "Three casts accrue three stacks", "actor": "victim", "metric": "aura_stacks",
+      "spell": 712483, "equals": 3, "within_ms": 1000 },
+    { "action": "reset_cooldown", "actor": "felsworn", "spell": 712483 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "label": "Recast Bane of Betrayal", "actor": "felsworn", "spell": 712483, "target": "victim" },
+    { "action": "assert", "actor": "felsworn", "metric": "cast_failure", "spell": 712483, "equals": 0 },
+    { "action": "assert", "label": "The recast keeps the accrued stacks", "actor": "victim", "metric": "aura_stacks",
+      "spell": 712483, "min": 3, "within_ms": 1000 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "label": "Fourth cast by the target", "actor": "victim", "spell": 1459 },
+    { "action": "assert", "actor": "victim", "metric": "cast_failure", "spell": 1459, "equals": 0 },
+    { "action": "assert", "label": "The next cast keeps counting from the accrued stacks", "actor": "victim",
+      "metric": "aura_stacks", "spell": 712483, "equals": 4, "within_ms": 1000 }
+  ]
+}
