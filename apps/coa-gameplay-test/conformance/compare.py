@@ -40,6 +40,7 @@ from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_
                    per_event_sample, sized_trials)
 import control_excluded
 import hit_ratio_versus
+import hit_ratio_void
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings, fixture_note
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
@@ -4661,6 +4662,11 @@ def engine_amount_band_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
+    if model.get(hit_ratio_void.NAME):
+        refused = hit_ratio_void.refused(runs, NO_CAST_FAILURE)
+        if refused:
+            return replace(base, status='unmeasured',
+                           explanation=hit_ratio_void.explanation(refused, describe_failures))
     scale = 100.0 if model.get('rate') else 1.0
     between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))
     series = {}
