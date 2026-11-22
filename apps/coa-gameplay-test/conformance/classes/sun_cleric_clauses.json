@@ -743,7 +743,7 @@
         ]
       },
       {
-        "claim": "the day read (1/(1.09 x 1.03), not 1/1.03): data only, the clause does not state that the $s1% stays on during the day",
+        "claim": "the spell haste of the day read keeps the 9% beneath the day bonus (1/(1.09 x 1.03), not 1/1.03)",
         "labels": [
           "300626 behaviour_metric_delta day_haste"
         ]
@@ -757,13 +757,13 @@
     "reason": "Control arm = the night arm (0.917431) and the read before the learn (1). Day (hour 12) 0.890710 after against 1/(1.09 x 1.03) within 0.002, which excludes 2% and 4% (0.899442, 0.882145). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
     "claims": [
       {
-        "claim": "plus an additional $s2% (3%)",
+        "claim": "plus an additional $s2% spell haste (3%)",
         "labels": [
           "300626 behaviour_metric_delta day_haste"
         ]
       },
       {
-        "claim": "during the day only (the night read has no 3%)",
+        "claim": "spell haste during the day only (the night read has no 3%)",
         "labels": [
           "300626 behaviour_metric_delta night_haste"
         ]
@@ -2674,14 +2674,20 @@
     "claims": [
       {
         "claim": "guaranteed to critically strike against Undead",
-        "labels": []
+        "labels": [
+          "681433 behaviour_metric_delta crit_undead",
+          "681433 behaviour_metric_delta crit_control"
+        ]
       },
       {
         "claim": "guaranteed to critically strike against Demons",
-        "labels": []
+        "labels": [
+          "681433 behaviour_metric_delta crit_demon",
+          "681433 behaviour_metric_delta crit_control"
+        ]
       }
     ],
-    "reason": "Withdrawn. The scripted crit metric is judged on the gain between the two phases only (behaviours.py require_scripted_crit_probe, expected_gain), and Solar Nova has no learnable that changes its crit chance, so an Undead or Demon arm reads 100 in both phases (gain 0) and a Humanoid control would also read a gain of 0: no arm tells a script that sets 100 for every creature type from the real one. Tool need: an absolute read of the scripted crit chance, or a target swap between the phases, with a non-Undead non-Demon control (entry 6 Humanoid). Reference search 2026-11-22: coa-history spell 681433: 271 SPELL_DAMAGE events (67 crits) in 3 logs, no target creature type in the index; nothing else found."
+    "reason": "Control arm = crit_control: the same cast at a Humanoid with the natural crit chance removed (fixture 984954) lands a non-critical hit and no crit. Undead 1 critical hit of 1 and Demon 1 of 1 with the same fixture, cast_in_before false (0 before). Reference search 2026-11-22: coa-history spell 681433: 271 SPELL_DAMAGE events (67 crits) in 3 logs, no target creature type in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip sentence only: nothing found beyond the DBC, the tooltip and the script."
   },
   {
     "spell": 680622,
@@ -4149,7 +4155,9 @@
       {
         "claim": "for $d",
         "labels": [
-          "704934 spell_duration 800601 #1"
+          "704934 spell_duration 800601 #1",
+          "704934 behaviour_metric_delta duration_held",
+          "704934 behaviour_metric_delta duration_gone"
         ]
       }
     ]

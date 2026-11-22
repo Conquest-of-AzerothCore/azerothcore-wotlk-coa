@@ -11291,6 +11291,60 @@
       "observe_source": "The after phase gives the stack through the Gavel setup (setup_only_after; one stack proven by melee_stack in the same pair), then casts Shine and reads the stacks of 800601 after the cast completes: 0 (the stack is spent, 'your next Shine'). AscensionSunClericAbilities.cpp:40 selects Shine 800357 for aura 800601. Control: the stack read before any Shine is melee_stack's 1. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
     },
     {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800601
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sunwalker (stack still present at 27.1 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "expected": 1,
+      "wait_ms": 27100,
+      "game_time": {
+        "after": [
+          27080,
+          27180
+        ]
+      },
+      "observe_source": "Sunwalker 800601 ($d = 30000 ms, Spell.dbc duration of the stack aura named by clause 258). One Gavel of Wrath 802561 hit gives one stack (melee_stack, same pair); the caster casts Gavel once and never attacks, so nothing refreshes or adds a stack. The stack of 800601 on the caster is still present at 27.1 s of game time after the cast (window 27080..27180 ms): the duration is above 27.0 s, excluding 10% short. Control (before phase): the same Gavel cast without 704934, 0 stacks. Reference search 2026-11-22: coa-history spell 800601: 1601 SPELL_AURA_REFRESH and 101 SPELL_AURA_APPLIED_DOSE events in 5 logs, no duration figure in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip with its numbers blanked ('for , stacking times'): nothing found beyond the DBC and the tooltip, which are the expectation."
+    },
+    {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800601
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sunwalker (stack gone by 32.9 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "expected": 0,
+      "wait_ms": 32900,
+      "game_time": {
+        "after": [
+          32880,
+          32970
+        ]
+      },
+      "observe_source": "Sunwalker 800601 ($d = 30000 ms). Same scenario as duration_held, read later: the stack is gone at 32.9 s of game time after the cast (window 32880..32970 ms): the duration is below 33.0 s, excluding 10% long. With duration_held it brackets 30 s; the stack itself is proven by melee_stack and duration_held in the same pair, control (before phase) 0. Reference search 2026-11-22: coa-history spell 800601: 1601 SPELL_AURA_REFRESH and 101 SPELL_AURA_APPLIED_DOSE events in 5 logs, no duration figure in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip with its numbers blanked ('for , stacking times'): nothing found beyond the DBC and the tooltip, which are the expectation."
+    },
+    {
       "spell": 300347,
       "kind": "metric_delta",
       "gate_spell": 300347,
@@ -14729,6 +14783,131 @@
       "expected": 27900,
       "tolerance": 300,
       "observe_source": "Control of cd_refund_three: the only dummy stands 20 yd away, outside the 8 yd radius, so no target is struck and the cooldown of Solar Invocation: Conquest 800764 reads 30000 - 2100 ms elapsed = 27900, tolerance 300. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "target_entry": 1501,
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "dummy_distance": 3,
+      "name": "Solar Nova (guaranteed critical strike on an Undead, entry 1501 Mindless Zombie)",
+      "variant": "crit_undead",
+      "label_suffix": "crit_undead",
+      "quote": "This ability is guaranteed to critically strike against Undead or Demons.",
+      "observe_source": "AscensionSunClericAbilities.cpp:210-212 (OnSpellCritChance): a Solar Nova (named 680621, every rank) cast at a target of creature type Undead or Demon sets the crit chance to 100. The check counts the critical Solar Nova 681433 hits on the dummy (spell_damage_count, critical filter): 0 before (no cast), 1 after one cast. Fixture 984954 on the caster (DBC: effect 1 aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, -1001, a precondition fixture, never the subject) removes the natural crit chance, so any crit comes from the guarantee, and the Humanoid control crit_control reads 0 crits with its hit landed. A spell hit against a target 3 or more levels below the caster cannot miss in the core, and a miss would read 0 here (an alert, never a pass). Residual false pass: none, the natural crit chance is removed and the control shows it. Reference search 2026-11-22: coa-history spell 681433: 271 SPELL_DAMAGE events (67 crits) in 3 logs, no target creature type in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip sentence only: nothing found beyond the DBC, the tooltip and the script. creature_template.type of entry 1501 is 6 Undead (data/sql/base/db_world/creature_template.sql)."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "target_entry": 416,
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "dummy_distance": 3,
+      "name": "Solar Nova (guaranteed critical strike on a Demon, entry 416 Imp)",
+      "variant": "crit_demon",
+      "label_suffix": "crit_demon",
+      "quote": "This ability is guaranteed to critically strike against Undead or Demons.",
+      "observe_source": "AscensionSunClericAbilities.cpp:210-212 (OnSpellCritChance): a Solar Nova (named 680621, every rank) cast at a target of creature type Undead or Demon sets the crit chance to 100. The check counts the critical Solar Nova 681433 hits on the dummy (spell_damage_count, critical filter): 0 before (no cast), 1 after one cast. Fixture 984954 on the caster (DBC: effect 1 aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, -1001, a precondition fixture, never the subject) removes the natural crit chance, so any crit comes from the guarantee, and the Humanoid control crit_control reads 0 crits with its hit landed. A spell hit against a target 3 or more levels below the caster cannot miss in the core, and a miss would read 0 here (an alert, never a pass). Residual false pass: none, the natural crit chance is removed and the control shows it. Reference search 2026-11-22: coa-history spell 681433: 271 SPELL_DAMAGE events (67 crits) in 3 logs, no target creature type in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip sentence only: nothing found beyond the DBC, the tooltip and the script. creature_template.type of entry 416 is 3 Demon (data/sql/base/db_world/creature_template.sql)."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "target_entry": 6,
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "dummy_distance": 3,
+      "name": "Solar Nova (control: Humanoid, entry 6 Kobold Vermin, no guarantee)",
+      "variant": "crit_control",
+      "label_suffix": "crit_control",
+      "quote": "This ability is guaranteed to critically strike against Undead or Demons.",
+      "observe_source": "Control of crit_undead and crit_demon: the same scenario against a Humanoid. AscensionSunClericAbilities.cpp:210-212 (OnSpellCritChance): a Solar Nova (named 680621, every rank) cast at a target of creature type Undead or Demon sets the crit chance to 100. The check counts the critical Solar Nova 681433 hits on the dummy (spell_damage_count, critical filter): 0 before (no cast), 1 after one cast. Fixture 984954 on the caster (DBC: effect 1 aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, -1001, a precondition fixture, never the subject) removes the natural crit chance, so any crit comes from the guarantee, and the Humanoid control crit_control reads 0 crits with its hit landed. A spell hit against a target 3 or more levels below the caster cannot miss in the core, and a miss would read 0 here (an alert, never a pass). Residual false pass: none, the natural crit chance is removed and the control shows it. Reference search 2026-11-22: coa-history spell 681433: 271 SPELL_DAMAGE events (67 crits) in 3 logs, no target creature type in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip sentence only: nothing found beyond the DBC, the tooltip and the script. creature_template.type of entry 6 is 7 Humanoid (data/sql/base/db_world/creature_template.sql).",
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 681433,
+              "target": "dummy",
+              "critical": false
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the non-critical Solar Nova hits on the Humanoid dummy: none before, one after the cast, so the hit landed and did not crit"
+          }
+        ]
+      }
     },
     {
       "spell": 704910,
