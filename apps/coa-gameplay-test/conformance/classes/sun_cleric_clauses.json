@@ -2858,7 +2858,7 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "reduces the cooldown of your Solar Invocation spells by 1 sec",
+        "claim": "reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck",
         "labels": [
           "681433 cost_gate 800764 cd_conquest without",
           "681433 cost_gate 800764 cd_conquest with",
@@ -3603,21 +3603,31 @@
   {
     "spell": 681253,
     "clause": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
-    "labels": [
-      "681253 cost_gate 800764 cd_gate_800764 without",
-      "681253 cost_gate 800764 cd_gate_800764 with",
-      "681253 cost_gate 800764 cd_gate_800764 beyond",
-      "681253 cost_gate 503651 cd_gate_503651 without",
-      "681253 cost_gate 503651 cd_gate_503651 with",
-      "681253 cost_gate 503651 cd_gate_503651 beyond",
-      "681253 cost_gate 806159 cd_gate_806159 without",
-      "681253 cost_gate 806159 cd_gate_806159 with",
-      "681253 cost_gate 806159 cd_gate_806159 beyond",
-      "681253 behaviour_metric_delta cd_cut_500152",
-      "681253 behaviour_metric_delta cd_cut_control_500152"
+    "claims": [
+      {
+        "claim": "reduces the cooldown of Conquest, Revelation and Resplendence by $/1000;681789s1 sec",
+        "labels": [
+          "681253 cost_gate 800764 cd_gate_800764 without",
+          "681253 cost_gate 800764 cd_gate_800764 with",
+          "681253 cost_gate 800764 cd_gate_800764 beyond",
+          "681253 cost_gate 503651 cd_gate_503651 without",
+          "681253 cost_gate 503651 cd_gate_503651 with",
+          "681253 cost_gate 503651 cd_gate_503651 beyond",
+          "681253 cost_gate 806159 cd_gate_806159 without",
+          "681253 cost_gate 806159 cd_gate_806159 with",
+          "681253 cost_gate 806159 cd_gate_806159 beyond"
+        ]
+      },
+      {
+        "claim": "reduces the cooldown of Ascension by $/1000;681789s1 sec",
+        "labels": [
+          "681253 behaviour_metric_delta cd_cut_500152",
+          "681253 behaviour_metric_delta cd_cut_control_500152"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "The cooldown_ms readbacks cd_cut_* (data) are replaced by the cost_gate arms: each Solar Invocation spell is attempted 60 ms before and 60 ms after the reduced cooldown, without the talent (refused), with it (accepted). Ascension 500152 stays on its cooldown_ms readbacks (data): it casts for 2500 ms and its cooldown starts at the cast end, so the cut from the cast start is -1500 ms, and cost_gate refuses a negative cooldown reduction with after_casts (tool need)."
+    "reason": "Split by spell (G-23 subset argued per claim). Conquest 800764, Revelation 503651 and Resplendence 806159: the cooldown_ms readbacks are replaced by the cost_gate arms, each spell attempted 60 ms before and 60 ms after the reduced cooldown, without the talent (refused), with it (accepted); the 60 ms margin excludes a 0.9 s or 1.1 s cut because the simulated clock runs the waits at nominal (run1 681253 cd_gate_800764 result.json: waits 1600 / 27460 / 27340 ms, max_step_ms 25, game_elapsed 98836 against 98936), and it is not safe for a real-clock rerun (blockers.tsv row 64: 344 ms drift measured earlier). Ascension 500152 is its own claim and stays data: it casts for 2500 ms and its cooldown starts at the cast end, so the cut from the cast start is -1500 ms, and cost_gate refuses a negative cooldown reduction with after_casts (tool need); only its cooldown_ms readbacks cd_cut_500152 and cd_cut_control_500152 carry it. The roots are {800764, 500152, 503651, 806159} (AscensionSunCleric.cpp:215)."
   },
   {
     "spell": 681337,
@@ -5234,9 +5244,17 @@
           "504580 behaviour_metric_delta damage_block",
           "504580 behaviour_metric_delta damage_block_only"
         ]
+      },
+      {
+        "claim": "on enemies in front of you",
+        "labels": []
+      },
+      {
+        "claim": "from your shield",
+        "labels": []
       }
     ],
-    "reason": "D-95: the zero read of base pair 7 run 1 (crit or miss) was never witnessed; the Strength entry damage_block and the new arms damage_sp, damage_ap and damage_block_only count every damage event with no critical filter (design 2), so a crit cannot read 0. The block value coefficient 1.0 is measured by damage_block_only against the DBC-derived window, not taken from the code (AscensionSunClericContracts.cpp:311-312)."
+    "reason": "Held, not counted (D-95, mentor condition: cause of the run-1 zero first). The cause of the zero read of base pair 7 run 1 (a crit, a miss or another cause) is unproven and no measured arm settles it. The Strength entry damage_block and the damage entry keep the critical false filter (unchanged since 221e0ff4a2, 2026-11-20): a critical hit would read 0 there; the arms damage_sp, damage_ap and damage_block_only count every damage event with no critical filter, so a crit would exceed their window and alert. Fixture 984954 (Effect[1] aura 57, -1000% spell crit) on a DmgClass 1 spell already makes a crit impossible in every arm, so dropping the filter does not test the crit hypothesis. The block value coefficient 1.0 is the implementation's (AscensionSunClericContracts.cpp:311-312), the tooltip states none and the reference search found none; the contrast of damage_block_only against the base arms shows the stated scaling with block value, not the coefficient. Two claims stay open: the front cone (Spell.dbc 504580 Effect[0] EffectImplicitTargetA 24, EffectRadiusIndex 32) and the shield requirement (EquippedItemClass 4, SubClassMask 64): every arm strikes one dummy in front of the caster, none shows a cone edge, a second enemy or a cast without a shield."
   },
   {
     "spell": 800764,
