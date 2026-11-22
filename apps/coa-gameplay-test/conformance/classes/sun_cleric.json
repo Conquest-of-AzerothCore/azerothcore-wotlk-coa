@@ -3809,7 +3809,15 @@
           "caster"
         ]
       ],
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12, BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64: the figure is 20% of 3500 = 700 ms, a cast time of 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Read in game time (game_time window) 2740 ms after the cast starts under Dawn, talent learned: still casting (1), so the cast time exceeds 2735 ms (cut under 21.9%, which excludes 22%, 10% above the stated 20). Control (before): the same read without the talent, still casting."
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Read in game time 2740 ms after the cast starts under Dawn, talent learned: still casting (1), so the cast time is above 2740 ms (the cut is at most 21.7%). Control (before): Dawn up, no talent, still casting.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 300321,
@@ -3849,7 +3857,15 @@
           "caster"
         ]
       ],
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12, BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64: the figure is 20% of 3500 = 700 ms, a cast time of 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Read in game time 2855 ms after the cast starts under Dawn, talent learned: finished (0), so the cast time is at most 2865 ms (cut at least 18.1%, which excludes 18%, 10% below the stated 20). Control (before): still casting at the same moment without the talent (3500 ms)."
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Read in game time 2855 ms after the cast starts under Dawn, talent learned: finished (0), so the cast time is at most 2865 ms (cut at least 18.1%, which excludes 18%, 10% below the stated 20). Control (before): Dawn up, no talent, still casting at the same moment (3500 ms).",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 300321,
@@ -3876,7 +3892,7 @@
           2910
         ]
       },
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12, BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64: the figure is 20% of 3500 = 700 ms, a cast time of 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. The condition arm: no Dawn is cast, the talent is learned, and the cast still runs at 2865 ms (1), so the cut does not apply without Dawn. Control (before): same read without the talent."
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. The condition arm: no Dawn is cast, the talent is learned, and the cast still runs at 2865 ms (1), so the cut does not apply without Dawn. Control (before): same read without the talent."
     },
     {
       "spell": 300321,
@@ -3896,7 +3912,7 @@
       "expected": 2800,
       "tolerance": 1,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 2000,
       "phase_auras": [
         [
           500149,
@@ -3905,7 +3921,15 @@
           "caster"
         ]
       ],
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12, BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64: the figure is 20% of 3500 = 700 ms, a cast time of 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Diagnostic read: the engine cast time of Dawnsear 554406 for the caster (Spell cast-time function with the spell modifiers) right after a real Dawn 804584 cast: 3500 ms before the learn (control), 2800 ms expected after."
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases and the gap between them (2000 ms) outlasts the 1500 ms global cooldown of the first Dawn cast, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Diagnostic read: the engine cast time of Dawnsear 554406 for the caster (Spell cast-time function with the spell modifiers) right after a real Dawn 804584 cast: 3500 ms before the learn (control), 2800 ms expected after.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 503624,
@@ -4077,7 +4101,7 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 1500,
-      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (no critical strike) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. Solar Power 500149 stacks on the caster read 1500 ms after the Horusath Blast: the gain over the control phase is 1 (expected_gain 1; the control reads at least 0). Solar Power value from 804098 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS MiscValue 1.",
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (aura 57 MOD_SPELL_CRIT_CHANCE -1000 and aura 52 MOD_WEAPON_CRIT_PERCENT +101: no spell critical strike; weapon attacks are not suppressed, and no weapon attack is read here) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. Solar Power 500149 stacks on the caster read 1500 ms after the Horusath Blast: the gain over the control phase is 1 (expected_gain 1; the control reads at least 0). Solar Power value from 804098 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS MiscValue 1.",
       "measure_actor": "caster",
       "expected_gain": 1,
       "tolerance": 0.0001
@@ -4125,7 +4149,7 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 1500,
-      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (no critical strike) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. Casts of Gain 1 Solar Power 804098 by the caster after one Flare: 1, against 0 in the control phase.",
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (aura 57 MOD_SPELL_CRIT_CHANCE -1000 and aura 52 MOD_WEAPON_CRIT_PERCENT +101: no spell critical strike; weapon attacks are not suppressed, and no weapon attack is read here) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. Casts of Gain 1 Solar Power 804098 by the caster after one Flare: 1, against 0 in the control phase.",
       "measure_actor": "caster"
     },
     {
@@ -4172,7 +4196,7 @@
       "before_expected": -1000,
       "expected": -997,
       "wait_ms": 1500,
-      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (no critical strike) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. 706733 Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126 (magic schools), BasePoints 2 + 1 = 3 ($706733s1). The chance for the caster's Solar Flare 807175 to critically strike the dummy (SpellDoneCritChance then SpellTakenCritChance, the engine functions used at hit time) 1500 ms after the Horusath Blast: the gain over the control phase is 3 points. The raw read is negative against the dummy (crit suppression of its level), so the least before reading is set to -1000: only the gain is the claim.",
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (aura 57 MOD_SPELL_CRIT_CHANCE -1000 and aura 52 MOD_WEAPON_CRIT_PERCENT +101: no spell critical strike; weapon attacks are not suppressed, and no weapon attack is read here) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. 706733 Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126 (magic schools), BasePoints 2 + 1 = 3 ($706733s1). The chance for the caster's Solar Flare 807175 to critically strike the dummy (SpellDoneCritChance then SpellTakenCritChance, the engine functions used at hit time) 1500 ms after the Horusath Blast: the gain over the control phase is 3 points. The raw read is negative against the dummy (crit suppression of its level), so the least before reading is set to -1000: only the gain is the claim.",
       "measure_actor": "caster",
       "expected_gain": 3,
       "tolerance": 0.0001
@@ -4373,6 +4397,80 @@
       "caster_health_pct": 50,
       "after_at_least": 79,
       "after_at_most": 81
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawn is active under the cast time read)",
+      "kind": "metric_delta",
+      "variant": "dawn_present",
+      "label_suffix": "dawn_present",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 804584,
+      "gate_spell": 300321,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases and the gap between them (2000 ms) outlasts the 1500 ms global cooldown of the first Dawn cast, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Presence read: the aura Dawn 807440 on the caster 500 ms after the real Dawn cast, in both phases (1 and 1), so the cast time reads of the other entries are taken with Dawn active. Control (before): Dawn up without the talent.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawn modifier amount)",
+      "kind": "metric_delta",
+      "variant": "dawn_amount",
+      "label_suffix": "dawn_amount",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 804584,
+      "gate_spell": 300321,
+      "target": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 807440,
+        "effect": 1
+      },
+      "before_expected": 0,
+      "expected": -20,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases and the gap between them (2000 ms) outlasts the 1500 ms global cooldown of the first Dawn cast, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Readback: the live amount of effect 1 of Dawn 807440 on the caster, 0 without the talent (control) and -20 with it. A readback of a computed value, not a proof of the cast time.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],
