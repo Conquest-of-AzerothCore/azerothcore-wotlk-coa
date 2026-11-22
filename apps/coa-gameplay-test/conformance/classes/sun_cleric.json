@@ -19745,6 +19745,7 @@
         ],
         "casts": [
           806060,
+          806060,
           806060
         ],
         "learn": [
@@ -19760,6 +19761,7 @@
         ],
         "casts": [
           806060,
+          806060,
           806060
         ],
         "learn": [
@@ -19772,7 +19774,7 @@
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after two Radiant Flame casts 1600 ms apart, the 3500 ms Dawnsear cast landing after them (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real twice before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same two casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, added by e94d29e22b) and then by SpellFamilyName 33 and the class mask (:1223, IsAffectedOnSpell called from Unit.cpp:10113); Fire Blast is Fire but family 3, so the family check excludes it. The claim is read on a class Fire spell (Dawnsear, family 33); Fire damage of the caster outside family 33 is an open expectation, not measured. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Two casts now fit (2 x 25% = 50% of the pool; the observed cast of the previous trial costs 33% (Horusath Blast) or 15% (Dawnsear)) and the pool is set to 1363 before every observed cast; a first design with three casts still refused the third in the Horusath Blast entry."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after three Radiant Flame casts 1600 ms apart, the 3500 ms Dawnsear cast landing after them (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real three times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same three casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, added by e94d29e22b) and then by SpellFamilyName 33 and the class mask (:1223, IsAffectedOnSpell called from Unit.cpp:10113); Fire Blast is Fire but family 3, so the family check excludes it. The claim is read on a class Fire spell (Dawnsear, family 33); Fire damage of the caster outside family 33 is an open expectation, not measured. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Three casts now fit (3 x 25% = 75% of the pool; the observed Dawnsear of the previous trial costs 15%) and the pool is set to 1363 before every observed cast; a design with two casts read insufficient_trials (99% half-width 1.46 points above the limit of 1), so three casts it is."
     },
     {
       "spell": 806024,
@@ -27574,7 +27576,7 @@
         805301
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 1600,
+      "setup_wait_ms": 10100,
       "caster_health": [
         7000,
         10000
@@ -27588,7 +27590,7 @@
       "expected": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 79% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% stops at 79%, which is not above 80%: the helper stays absent (the arm at 81% is the contrast, same pre-step). Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
+      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 79% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% stops at 79%, which is not above 80%: the helper stays absent (the arm at 81% is the contrast, same pre-step). Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the setup cast and the trigger cast are both Holy Form 805301 (RecoveryTime 10000 ms, Spell.dbc) with no cooldown reset between them, so the trigger was refused with NOT_READY (reason 67, pair 12); the trigger is now submitted 10100 ms after the setup cast.",
       "void_on_cast_failure": true
     },
     {
@@ -27605,7 +27607,7 @@
         805301
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 1600,
+      "setup_wait_ms": 10100,
       "caster_health": [
         7000,
         10000
@@ -27619,7 +27621,7 @@
       "expected": 1,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 81% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% reaches 81%, above 80%: the helper appears, where the same sequence at 79% leaves it absent. Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
+      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 81% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% reaches 81%, above 80%: the helper appears, where the same sequence at 79% leaves it absent. Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the setup cast and the trigger cast are both Holy Form 805301 (RecoveryTime 10000 ms, Spell.dbc) with no cooldown reset between them, so the trigger was refused with NOT_READY (reason 67, pair 12); the trigger is now submitted 10100 ms after the setup cast.",
       "void_on_cast_failure": true
     },
     {
