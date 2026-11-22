@@ -18541,97 +18541,6 @@
       "observe_source": "Circle of Valor 520647: the circle breaks when a damage hit leaves the caster below 10% of its maximum health. The caster stands inside its circle (cast at its own position) and holds its area aura 520647. Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast, the health being set to 12100 of 100000 right before it: the strike leaves 11.0%, above the 10% line: the circle stays and the caster's area aura 520647 is still present. The read is the presence of aura 520647 on the caster 5000 ms after the strike (the circle lasts 15000 ms), so the break itself is observed, not a suppressed heal. The two arms bracket the 10% line at 9.0% and 11.0% (10% either side of the line); each is the control of the other. The before phase has no cast: 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds\" (the 10% line itself is not in any reference); nothing else found."
     },
     {
-      "spell": 92137,
-      "kind": "metric_delta",
-      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
-      "trigger_spell": 805301,
-      "target": "caster",
-      "before_expected": 2000,
-      "wait_ms": 500,
-      "expire_ms": 2000,
-      "strike": {
-        "spell": 2118233,
-        "health": 50000,
-        "max_health": 100000,
-        "count": 40,
-        "wait_ms": 200
-      },
-      "caster_avoidance": {
-        "parry": 100
-      },
-      "fields": {
-        "spell": 500143
-      },
-      "name": "Angelic Presence (next Illumination is instant cast)",
-      "variant": "instant",
-      "label_suffix": "instant",
-      "metric": "spell_cast_time_ms",
-      "expected": 0,
-      "tolerance": 1,
-      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. The cast time of Illumination for the caster is read 500 ms after the strikes: 2000 ms before (control, no passive) and 0 ms after the learn. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values."
-    },
-    {
-      "spell": 92137,
-      "kind": "metric_delta",
-      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
-      "trigger_spell": 805301,
-      "target": "caster",
-      "before_expected": 408.9,
-      "wait_ms": 500,
-      "expire_ms": 2000,
-      "strike": {
-        "spell": 2118233,
-        "health": 50000,
-        "max_health": 100000,
-        "count": 40,
-        "wait_ms": 200
-      },
-      "caster_avoidance": {
-        "parry": 100
-      },
-      "fields": {
-        "spell": 500143
-      },
-      "name": "Angelic Presence (next Illumination is free of cost)",
-      "variant": "free",
-      "label_suffix": "free",
-      "metric": "spell_power_cost",
-      "expected": 0,
-      "tolerance": 2,
-      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. The mana cost of Illumination for the caster is read 500 ms after the strikes: 408.9 before (control, no passive) and 0 after the learn. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values."
-    },
-    {
-      "spell": 92137,
-      "kind": "metric_delta",
-      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
-      "trigger_spell": 500143,
-      "target": "caster",
-      "before_expected": 2000,
-      "wait_ms": 500,
-      "expire_ms": 2000,
-      "strike": {
-        "spell": 2118233,
-        "health": 50000,
-        "max_health": 100000,
-        "count": 40,
-        "wait_ms": 200
-      },
-      "caster_avoidance": {
-        "parry": 100
-      },
-      "fields": {
-        "spell": 500143
-      },
-      "name": "Angelic Presence (the Illumination consumes the buff)",
-      "variant": "consumed",
-      "label_suffix": "consumed",
-      "cast_power": 1360,
-      "metric": "spell_cast_time_ms",
-      "expected": 2000,
-      "tolerance": 1,
-      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. Here the trigger cast is Illumination 500143 itself, cast on the caster after the strikes (free and instant when 800722 was granted, a normal 2000 ms cast otherwise); the cast time of Illumination is read 500 ms after it: 2000 ms in both phases, the buff gone after one Illumination (\"next\"), against the 0 ms the instant entry reads while the buff is up. A phase without a proc would also read 2000, so the entry proves the consumption only together with the instant entry of the same pair (which alerts when no proc happened, residual 2.6e-4 per pair). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values."
-    },
-    {
       "spell": 807870,
       "name": "Glare (stun at 7 yd)",
       "kind": "metric_delta",
@@ -31166,6 +31075,660 @@
       },
       "tolerance": 0,
       "select_dummy": true
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 2000,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (next Illumination is instant cast)",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "metric": "spell_cast_time_ms",
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. The cast time of Illumination for the caster is read 500 ms after the strikes: 2000 ms before (control, no passive) and 0 ms after the learn. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values.",
+      "use_time_contrast": [
+        "instant",
+        "consumed"
+      ],
+      "expected_gain": -2000
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 408.9,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (next Illumination is free of cost)",
+      "variant": "free",
+      "label_suffix": "free",
+      "metric": "spell_power_cost",
+      "expected": 0,
+      "tolerance": 2,
+      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. The mana cost of Illumination for the caster is read 500 ms after the strikes: 408.9 before (control, no passive) and 0 after the learn. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values.",
+      "use_time_contrast": [
+        "free",
+        "consumed_cost"
+      ],
+      "expected_gain": -408.9
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "before_expected": 2000,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (the Illumination consumes the buff)",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "cast_power": 1360,
+      "metric": "spell_cast_time_ms",
+      "expected": 2000,
+      "tolerance": 1,
+      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. Here the trigger cast is Illumination 500143 itself, cast on the caster after the strikes (free and instant when 800722 was granted, a normal 2000 ms cast otherwise); the cast time of Illumination is read 500 ms after it: 2000 ms in both phases, the buff gone after one Illumination (\"next\"), against the 0 ms the instant entry reads while the buff is up. A phase without a proc would also read 2000, so the entry proves the consumption only together with the instant entry of the same pair (which alerts when no proc happened, residual 2.6e-4 per pair). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values.",
+      "use_time_contrast": [
+        "instant",
+        "consumed"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 560113,
+      "name": "Zealous (Radiance cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Radiance by $/1000;s1 sec.",
+      "gated_spell": 800054,
+      "resource": "cooldown",
+      "reduction": 30000,
+      "target": "caster",
+      "cast_power": 1363,
+      "observe_source": "560113 Zealous Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -30001 (-30000 ms, $/1000;s1 = 30 sec), EffectSpellClassMask word 1 = 65536 = SpellFamilyFlags[1] of Radiance 800054 (RecoveryTime 120000 ms, Spell.dbc). Behaviour route: Radiance is cast, then attempted again 90500 ms after the cast (500 ms after the reduced cooldown 90000 ms): refused without Zealous (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 89500 ms after the cast (500 ms before), so the cut lies within 500 ms (1.7%) of 30000 ms, inside 10% (3000 ms) on both sides. Radiance has no cast time (the cooldown_ms readback of the metric_delta entry radiance_cooldown reads 119500 ms 500 ms after the cast). Mana is set before every cast. Reference search 2026-11-22: coa-history spell 560113: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "quote": "dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies.",
+      "name": "Solar Nova (one hit at the reference spell power and attack power)",
+      "variant": "nova_base",
+      "label_suffix": "nova_base",
+      "after_at_least": 303,
+      "after_at_most": 416,
+      "expected": 359.5,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE BasePoints 279, DieSides 113, EffectRealPointsPerLevel 2.58 from BaseLevel 52 (MaxLevel 62): at level 60 int(8 x 2.58) = 20 is added, so one hit rolls 279 + 20 + irand(1, 113) = 300 to 412 (SpellInfo CalcValue; pair 2 runs read 400 and 408 above the 392 of the first window, which left the level term out), plus 0.5 x spell power and 0.050575 x attack power (the tooltip token). The reference character has spell power 0 and attack power 70 (class file reference_stats), so the base arm reads 300 + int(0.050575 x 70 = 3.54) to 412 + 3.54: 303 to 415. 984954 on the caster removes the natural crit chance (Effect[1] aura 57; Effect[0] aura 52 is inert for this magic-class spell) and 823764 removes the dummy's resistance: precondition fixtures, never the subject; the Humanoid dummy has no crit guarantee. One cast, one hit on the dummy at 3 yd, read as spell_damage_total of 681433 on the dummy (a landed hit). Base arm and contrast of the two power arms in the same pair: window 303 to 416 at spell power 0 and attack power 70. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "quote": "dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies.",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "name": "Solar Nova (one hit at +20000 spell power)",
+      "variant": "nova_sp",
+      "label_suffix": "nova_sp",
+      "after_at_least": 10303,
+      "after_at_most": 10416,
+      "expected": 10359.5,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE BasePoints 279, DieSides 113, EffectRealPointsPerLevel 2.58 from BaseLevel 52 (MaxLevel 62): at level 60 int(8 x 2.58) = 20 is added, so one hit rolls 279 + 20 + irand(1, 113) = 300 to 412 (SpellInfo CalcValue; pair 2 runs read 400 and 408 above the 392 of the first window, which left the level term out), plus 0.5 x spell power and 0.050575 x attack power (the tooltip token). The reference character has spell power 0 and attack power 70 (class file reference_stats), so the base arm reads 300 + int(0.050575 x 70 = 3.54) to 412 + 3.54: 303 to 415. 984954 on the caster removes the natural crit chance (Effect[1] aura 57; Effect[0] aura 52 is inert for this magic-class spell) and 823764 removes the dummy's resistance: precondition fixtures, never the subject; the Humanoid dummy has no crit guarantee. One cast, one hit on the dummy at 3 yd, read as spell_damage_total of 681433 on the dummy (a landed hit). Spell power arm: the spell power fixture 20000 adds 0.5 x 20000 = 10000, window 10303 to 10416 (300 + 10000 + 3.54 to 412 + 10000 + 3.54, rounded outwards by 1); it excludes a coefficient 5% off (10000 +-500) on both sides because the roll spans only 112. The attack power term (3.54) is the reference one, so the arm shows the spell power term apart from the attack power term; its contrast is nova_base and nova_ap. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "quote": "dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies.",
+      "player_attack_power": 100000,
+      "name": "Solar Nova (one hit at +100000 attack power)",
+      "variant": "nova_ap",
+      "label_suffix": "nova_ap",
+      "after_at_least": 5361,
+      "after_at_most": 5474,
+      "expected": 5417.5,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE BasePoints 279, DieSides 113, EffectRealPointsPerLevel 2.58 from BaseLevel 52 (MaxLevel 62): at level 60 int(8 x 2.58) = 20 is added, so one hit rolls 279 + 20 + irand(1, 113) = 300 to 412 (SpellInfo CalcValue; pair 2 runs read 400 and 408 above the 392 of the first window, which left the level term out), plus 0.5 x spell power and 0.050575 x attack power (the tooltip token). The reference character has spell power 0 and attack power 70 (class file reference_stats), so the base arm reads 300 + int(0.050575 x 70 = 3.54) to 412 + 3.54: 303 to 415. 984954 on the caster removes the natural crit chance (Effect[1] aura 57; Effect[0] aura 52 is inert for this magic-class spell) and 823764 removes the dummy's resistance: precondition fixtures, never the subject; the Humanoid dummy has no crit guarantee. One cast, one hit on the dummy at 3 yd, read as spell_damage_total of 681433 on the dummy (a landed hit). Attack power arm: the attack power fixture adds 100000 to the reference 70, 0.050575 x 100070 = 5061.04, window 5361 to 5474 (300 + 5061 to 412 + 5061, rounded outwards by 1); 100000 so that the term, not the roll span of 112, decides: a coefficient 5% off moves the hit by 253 and falls outside on both sides. The spell power is the reference 0, so the arm shows the attack power term apart from the spell power term; its contrast is nova_base and nova_sp. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "name": "Solar Nova (radius 8 yd)",
+      "kind": "radius_edge",
+      "label_suffix": "radius_edge",
+      "quote": "Emit a powerful holy light in an $a1 yd radius,",
+      "gate_spell": 681433,
+      "cast_spell": 681433,
+      "cast_at": "caster",
+      "hit_spell": 681433,
+      "power": 1363,
+      "radius": 8,
+      "dummy_reach": 1.275,
+      "primary_yd": 0.1,
+      "repeats": 1,
+      "settle_ms": 2500,
+      "leeway": true,
+      "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
+      "observe_source": "681433 Effect[0] SCHOOL_DAMAGE, TargetA 22 SRC_CASTER, TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd ($a1, the same radius index as Glare 807870's radius_edge entry, SpellEffectInfo::CalcRadius, no SPELLMOD_RADIUS here). Effective radius (guide section 5, G-29): the area search measures from the caster centre to centre against 8 yd plus the player caster's leeway and the dummy's combat reach, as the Glare radius_edge entry derives it. The kind brackets that edge with a dummy just inside and one just outside and reads damage hits of 681433. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "name": "Solar Nova (Solar Invocation: Conquest cooldown cut by 1 s for the target struck)",
+      "kind": "cost_gate",
+      "variant": "cd_conquest",
+      "label_suffix": "cd_conquest",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          681433,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "observe_source": "524858 Seraphim's Light CD reduc Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 (1000 ms, $/1000;524858s1 = 1 sec) on 800764 Conquest, 503651 Revelation and 806159 Resplendence; the class code casts 524858 per target struck. Conquest 800764 is cast, Solar Nova strikes one dummy 1600 ms later, and the gated spell is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the cut, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% on both sides. One target is struck, so this arm proves the 1 sec cut; the per-target multiplication stays with the cd_refund readbacks. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "name": "Solar Nova (Solar Invocation: Revelation cooldown cut by 1 s for the target struck)",
+      "kind": "cost_gate",
+      "variant": "cd_revelation",
+      "label_suffix": "cd_revelation",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gated_spell": 503651,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          681433,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "observe_source": "524858 Seraphim's Light CD reduc Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 (1000 ms, $/1000;524858s1 = 1 sec) on 800764 Conquest, 503651 Revelation and 806159 Resplendence; the class code casts 524858 per target struck. Revelation 503651 is cast, Solar Nova strikes one dummy 1600 ms later, and the gated spell is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the cut, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% on both sides. One target is struck, so this arm proves the 1 sec cut; the per-target multiplication stays with the cd_refund readbacks. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "name": "Solar Nova (Solar Invocation: Resplendence cooldown cut by 1 s for the target struck)",
+      "kind": "cost_gate",
+      "variant": "cd_resplendence",
+      "label_suffix": "cd_resplendence",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gated_spell": 806159,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          681433,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "observe_source": "524858 Seraphim's Light CD reduc Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 (1000 ms, $/1000;524858s1 = 1 sec) on 800764 Conquest, 503651 Revelation and 806159 Resplendence; the class code casts 524858 per target struck. Resplendence 806159 is cast, Solar Nova strikes one dummy 1600 ms later, and the gated spell is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the cut, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% on both sides. One target is struck, so this arm proves the 1 sec cut; the per-target multiplication stays with the cd_refund readbacks. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Conquest by 1 s, cast refused then accepted)",
+      "kind": "cost_gate",
+      "variant": "cd_gate_800764",
+      "label_suffix": "cd_gate_800764",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          500143,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 2868,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known reduces the Solar Invocation roots by 1000 ms; AscensionSunCleric.cpp:213-217). Conquest 800764 is cast, Illumination 500143 is cast at the caster 1600 ms later in every arm (the talent is learned in the with arms only), and Conquest is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the talent, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% (100 ms) on both sides. This replaces the cooldown_ms readbacks cd_cut_* of the same claim by a cast refused then accepted. Reference search 2026-11-22: coa-history spell 681253: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Revelation by 1 s, cast refused then accepted)",
+      "kind": "cost_gate",
+      "variant": "cd_gate_503651",
+      "label_suffix": "cd_gate_503651",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gated_spell": 503651,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          500143,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 2868,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known reduces the Solar Invocation roots by 1000 ms; AscensionSunCleric.cpp:213-217). Revelation 503651 is cast, Illumination 500143 is cast at the caster 1600 ms later in every arm (the talent is learned in the with arms only), and Revelation is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the talent, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% (100 ms) on both sides. This replaces the cooldown_ms readbacks cd_cut_* of the same claim by a cast refused then accepted. Reference search 2026-11-22: coa-history spell 681253: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Resplendence by 1 s, cast refused then accepted)",
+      "kind": "cost_gate",
+      "variant": "cd_gate_806159",
+      "label_suffix": "cd_gate_806159",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gated_spell": 806159,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          500143,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 2868,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known reduces the Solar Invocation roots by 1000 ms; AscensionSunCleric.cpp:213-217). Resplendence 806159 is cast, Illumination 500143 is cast at the caster 1600 ms later in every arm (the talent is learned in the with arms only), and Resplendence is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the talent, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% (100 ms) on both sides. This replaces the cooldown_ms readbacks cd_cut_* of the same claim by a cast refused then accepted. Reference search 2026-11-22: coa-history spell 681253: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "before_expected": 408.9,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (the Illumination consumes the buff: its cost is back)",
+      "variant": "consumed_cost",
+      "label_suffix": "consumed_cost",
+      "cast_power": 1360,
+      "metric": "spell_power_cost",
+      "expected": 408.9,
+      "tolerance": 2,
+      "observe_source": "Same strike, parry fixture and consumption as the consumed entry, read on the cost: Illumination 500143 costs 30% of the base mana 1363 = 408.9 (spell_power_cost) before the passive, and after a proc and one Illumination cast the cost is 408.9 again, so the buff is consumed on the cost as well as on the cast time (the zero-gain partner of the free arm, ADR 1024). Reference search 2026-11-22: coa-history spell 92137: no event beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ; nothing found beyond the tooltip and the DBC.",
+      "use_time_contrast": [
+        "free",
+        "consumed_cost"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 800722,
+      "gate_spell": 92137,
+      "target": "caster",
+      "cast_in_before": false,
+      "before_expected": 2000,
+      "wait_ms": 13600,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 500143
+      },
+      "metric": "spell_cast_time_ms",
+      "name": "Angelic Presence (Illumination is still instant 13.6 s after the buff)",
+      "variant": "window_held",
+      "label_suffix": "window_held",
+      "expected": 0,
+      "expected_gain": -2000,
+      "tolerance": 1,
+      "use_time_contrast": [
+        "window_held",
+        "window_gone"
+      ],
+      "game_time": {
+        "after": [
+          13500,
+          14900
+        ]
+      },
+      "observe_source": "Quote: the clause 'Your next Illumination within $d is instant cast and free of cost.' belongs to this spell's ledger row (clause 7) and its words come from the tooltip of 800722, as for the entries instant, free and consumed. 800722 Angelic Presence has DurationIndex 8 = 15000 ms ($d, Spell.dbc; 802598 aura 354 Effect[2] is the consuming handler) and its Effect[0] SPELLMOD_CASTING_TIME -101 on the Illumination family makes Illumination 500143 (2000 ms) instant. The buff is applied by a real cast of 800722 at the caster (the grant by an avoided attack is proven by the proc_rate avoided entry, and the strike entries instant, free and consumed prove the effect and its consumption); no set_aura is used. The cast time of Illumination (spell_cast_time_ms, the engine's use-time function) is read 13600 ms after the cast (game_time stamped, window [13500, 14900] ms): the buff is still held 1400 ms before its end, so the stated 15000 ms is not 10% shorter (13500 ms). The partner arm is the other window read. Reference search 2026-11-22: coa-history spell 92137: no event beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 800722,
+      "gate_spell": 92137,
+      "target": "caster",
+      "cast_in_before": false,
+      "before_expected": 2000,
+      "wait_ms": 16400,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 500143
+      },
+      "metric": "spell_cast_time_ms",
+      "name": "Angelic Presence (Illumination is no longer instant 16.4 s after the buff)",
+      "variant": "window_gone",
+      "label_suffix": "window_gone",
+      "expected": 2000,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "use_time_contrast": [
+        "window_held",
+        "window_gone"
+      ],
+      "game_time": {
+        "after": [
+          15100,
+          16500
+        ]
+      },
+      "observe_source": "Quote: the clause 'Your next Illumination within $d is instant cast and free of cost.' belongs to this spell's ledger row (clause 7) and its words come from the tooltip of 800722, as for the entries instant, free and consumed. 800722 Angelic Presence has DurationIndex 8 = 15000 ms ($d, Spell.dbc; 802598 aura 354 Effect[2] is the consuming handler) and its Effect[0] SPELLMOD_CASTING_TIME -101 on the Illumination family makes Illumination 500143 (2000 ms) instant. The buff is applied by a real cast of 800722 at the caster (the grant by an avoided attack is proven by the proc_rate avoided entry, and the strike entries instant, free and consumed prove the effect and its consumption); no set_aura is used. The cast time of Illumination (spell_cast_time_ms, the engine's use-time function) is read 16400 ms after the cast (game_time stamped, window [15100, 16500] ms): the buff is gone 1400 ms after its end, so the stated 15000 ms is not 10% longer (16500 ms). The partner arm is the other window read. Reference search 2026-11-22: coa-history spell 92137: no event beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5241.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 207..240 at level 60 (the damage entry's derivation), plus 0.1 x attack power, 0.25 x spell power and the shield block value x 1.0 (the server's coefficient; the tooltip states none). Reference character: attack power 70 (term 7), spell power 0, block value 11 (1 + 40 x 0.5 - 10, read with the harness metric block_value in pair 20261120-220241 / -220458). Precondition fixtures: 823764 removes the dummy's resistance, 984954 removes spell crit (its Effect[1] aura 57 -1000%; 504580 is DmgClass MAGIC). Design 2 of the D-95 lead (a zero read of the Strength entry in base pair 7 run 1, crit or miss, not witnessed): this arm counts every damage event of 504580 on the dummy, critical or not (no critical filter), so a crit can no longer read as 0; a zero read is a miss or a missing hit and alerts, never passes, and a crit would exceed the window and alert. Spell power arm: 0.25 x 20000 = 5000 added to the base [207 + 7 + 11, 240 + 7 + 11] = [225, 258]: window [5225, 5258]; 5% of the term is 250, far above the window span of 33, so a coefficient 5% or 10% off falls outside on both sides. Its contrast is the damage entry (spell power 0) and the other arms of the same pair. Reference search 2026-11-22: bindmysoul and coabuildhub carry the same sentence ('23 + 25% SP + 10% AP' at rank 1, 'scaling with your block value') and no coefficient; coa-history spell 504580: 638 Dawnbreak damage events, gear unknown; nothing found that fixes the block value coefficient beyond the tooltip, the DBC and the contract code (AscensionSunClericContracts.cpp:311-312 adds GetShieldBlockValue() x 1.0 to effect 0).",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "after_at_least": 5225,
+      "after_at_most": 5258
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage at +100000 attack power)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10241.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 207..240 at level 60 (the damage entry's derivation), plus 0.1 x attack power, 0.25 x spell power and the shield block value x 1.0 (the server's coefficient; the tooltip states none). Reference character: attack power 70 (term 7), spell power 0, block value 11 (1 + 40 x 0.5 - 10, read with the harness metric block_value in pair 20261120-220241 / -220458). Precondition fixtures: 823764 removes the dummy's resistance, 984954 removes spell crit (its Effect[1] aura 57 -1000%; 504580 is DmgClass MAGIC). Design 2 of the D-95 lead (a zero read of the Strength entry in base pair 7 run 1, crit or miss, not witnessed): this arm counts every damage event of 504580 on the dummy, critical or not (no critical filter), so a crit can no longer read as 0; a zero read is a miss or a missing hit and alerts, never passes, and a crit would exceed the window and alert. Attack power arm: the fixture adds 100000 to the reference 70, 0.1 x 100070 = 10007 (the block value does not move: it is read from Strength, not attack power), window [207 + 10007 + 11, 240 + 10007 + 11] = [10225, 10258]; 5% of the term is 500, far above the span 33. Its contrast is the damage entry (attack power 70) and the other arms. Reference search 2026-11-22: bindmysoul and coabuildhub carry the same sentence ('23 + 25% SP + 10% AP' at rank 1, 'scaling with your block value') and no coefficient; coa-history spell 504580: 638 Dawnbreak damage events, gear unknown; nothing found that fixes the block value coefficient beyond the tooltip, the DBC and the contract code (AscensionSunClericContracts.cpp:311-312 adds GetShieldBlockValue() x 1.0 to effect 0).",
+      "player_attack_power": 100000,
+      "after_at_least": 10225,
+      "after_at_most": 10258
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (damage at +2000 block value)",
+      "kind": "metric_delta",
+      "variant": "damage_block_only",
+      "label_suffix": "damage_block_only",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2241.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10037,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 207..240 at level 60 (the damage entry's derivation), plus 0.1 x attack power, 0.25 x spell power and the shield block value x 1.0 (the server's coefficient; the tooltip states none). Reference character: attack power 70 (term 7), spell power 0, block value 11 (1 + 40 x 0.5 - 10, read with the harness metric block_value in pair 20261120-220241 / -220458). Precondition fixtures: 823764 removes the dummy's resistance, 984954 removes spell crit (its Effect[1] aura 57 -1000%; 504580 is DmgClass MAGIC). Design 2 of the D-95 lead (a zero read of the Strength entry in base pair 7 run 1, crit or miss, not witnessed): this arm counts every damage event of 504580 on the dummy, critical or not (no critical filter), so a crit can no longer read as 0; a zero read is a miss or a missing hit and alerts, never passes, and a crit would exceed the window and alert. Block value arm: the QA Test +100 Block Value fixture 10037 (Effect[0] aura 158 SPELL_AURA_MOD_SHIELD_BLOCKVALUE, BasePoints 99) set to +2000 raises the block value by 2000 without moving attack power or spell power (the Strength entry damage_block moves AP and block together), expected [207 + 7 + 2011, 240 + 7 + 2011] = [2225, 2258]; coefficient 0 would read [214, 247] and 0.5 about [1219, 1252]. If the fixture does not reach GetShieldBlockValue the arm reads [214, 247] and alerts: a lead for the fixture, not for the server. Reference search 2026-11-22: bindmysoul and coabuildhub carry the same sentence ('23 + 25% SP + 10% AP' at rank 1, 'scaling with your block value') and no coefficient; coa-history spell 504580: 638 Dawnbreak damage events, gear unknown; nothing found that fixes the block value coefficient beyond the tooltip, the DBC and the contract code (AscensionSunClericContracts.cpp:311-312 adds GetShieldBlockValue() x 1.0 to effect 0).",
+      "phase_aura_amounts": [
+        [
+          10037,
+          0,
+          2000
+        ]
+      ],
+      "after_at_least": 2225,
+      "after_at_most": 2258
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (auto attack damage with the Vow cast)",
+      "variant": "damage_swings",
+      "label_suffix": "damage_swings",
+      "quote": "and deal $s2% increased damage.",
+      "attack_swings": 5,
+      "gate_spell": 807749,
+      "gate_cast": true,
+      "trigger_spell": 807749,
+      "metric": "melee_damage_total",
+      "fields": {},
+      "before_expected": 100000,
+      "expected_ratio": 2.1,
+      "tolerance": 0.02,
+      "player_attack_power": 100000,
+      "observe_source": "807749 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS BasePoints 9 (+1 = 10, $s2): the Vow adds 10% to the auto attack damage the caster deals (AscensionSunClericContracts.cpp:354-355, AddPct(damage, Amount(807749, 1))). Behaviour: each phase auto attacks the dummy for 5 reference swing intervals with both Valkyr weapons (10 landed hits, as the swings entry reads), the first phase without the Vow (control), the second after a real cast of the Vow (gate_cast, no set_aura of the Vow), and melee_damage_total is cumulative over the scenario, so the after reading over the before reading is 1 + 1.10 = 2.10 for a bonus of 10%; the band is 2 points on the +10% (the larger of 5% of 10 and 2 points, G-19): 2.08 to 2.12. The attack power fixture 100000 makes the attack power part of a hit (about 20000 per main-hand swing) dominate the weapon roll of 73 to 103, so the per-hit spread is below 0.1% and the 2% band is excluded with a residual failure probability far below 0.1% per pair; force_crit melee (ADR 0692) sets the forced melee crit rating on the caster, so every hit of both phases is a critical strike alike, a precondition fixture that cancels in the ratio. The confound it removes: the contract remaps 807749 Effect[2] to SPELL_AURA_MOD_CRIT_PCT (+5%, AscensionSunClericContracts.cpp:119-124), which would raise the crit rate of the after phase alone; with every hit forced to crit in both phases that term cannot move the ratio, and the +10% (AddPct on all caster melee damage, :362-364) is isolated. Misses would change the hit count between phases: a miss only alerts, never passes, because a different count moves the ratio outside the band (this entry does not read the hit count; the swings entry reads it in its own scenario). Reference search 2026-11-22: coa-history spell 807749 (138 casts in 11 logs), 506823 and 506824 (1391 and 1388 Vow auto attack events); bindmysoul text identical to the streamed one; nothing found beyond the tooltip and the DBC for the +10% value.",
+      "expected": 210000,
+      "force_crit": "melee"
     }
   ],
   "player_observations": [],
