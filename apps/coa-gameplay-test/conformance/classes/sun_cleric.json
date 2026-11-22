@@ -35900,6 +35900,170 @@
       "trigger_only_after": true,
       "after_expiry_expected": 0,
       "expiry_wait_ms": 10000
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "quote": "Gavel of Grace: Restores $504722s1% of your maximum mana.",
+      "trigger_spell": 800614,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Heaven's Appraisal (Gavel of Grace restores 10% of maximum mana under Holy Form)",
+      "variant": "grace_mana",
+      "label_suffix": "grace_mana",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 311,
+      "observe_source": "300353 Heaven's Appraisal under Holy Form 805301 (harness set_aura, a precondition fixture: the claim's subject is the Gavel of Grace effect of 300353, not Holy Form; the control arms are the same cast without it). Gavel of Grace 800614 is cast once at the dummy in the after phase only (cast_in_before false) with the caster's mana set to 0 and regeneration off; its own Effect[2] (142, EffectBasePoints 24, 800614 $m3 = 25) triggers Energize 681317 for 25 mana, so the control reads 25 and the claim adds 10% of the maximum mana, 504722 Effect[0] aura 137 (energize percent) BasePoints 9 + 1 = 10%, of the fixture's maximum mana: BaseMana 1363 (class file base_mana, player_class_stats class 27 level 60) plus the engine's Intellect bonus 20 + 15 x (Intellect - 20) with the class file's Intellect (reference_stats stat 3) = 2868, so 10% = 286.8, truncated to 286 by CalculatePct; expected 25 + 286 = 311 within 1. Controls: grace_mana_control, the same cast without Holy Form, expects 25; grace_mana_nolearn, Holy Form applied but 300353 never learned, expects 25, so the extra mana needs 300353 and not Holy Form alone. Reference search 2026-11-22: coa-history spells 300353 and 800614: see the Gavel of Wrath entries of 300353, passives and Gavels leave no logged energize event; nothing found beyond the tooltip and the server DBC.",
+      "cast_in_before": false,
+      "tolerance": 1,
+      "disable_regeneration": true,
+      "phase_power": [
+        0,
+        0,
+        0
+      ],
+      "dummy_distance": 3,
+      "phase_power_in_uncast_before": true
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "quote": "Gavel of Grace: Restores $504722s1% of your maximum mana.",
+      "trigger_spell": 800614,
+      "target": "dummy",
+      "phase_auras": [],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Heaven's Appraisal (control: Gavel of Grace without Holy Form restores its own mana only)",
+      "variant": "grace_mana_control",
+      "label_suffix": "grace_mana_control",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 25,
+      "observe_source": "300353 Heaven's Appraisal under Holy Form 805301 (harness set_aura, a precondition fixture: the claim's subject is the Gavel of Grace effect of 300353, not Holy Form; the control arms are the same cast without it). Gavel of Grace 800614 is cast once at the dummy in the after phase only (cast_in_before false) with the caster's mana set to 0 and regeneration off; its own Effect[2] (142, EffectBasePoints 24, 800614 $m3 = 25) triggers Energize 681317 for 25 mana, so the control reads 25 and the claim adds 10% of the maximum mana, 504722 Effect[0] aura 137 (energize percent) BasePoints 9 + 1 = 10%, of the fixture's 1363 maximum mana (class file base_mana, player_class_stats class 27 level 60) = 136.3, read as 136 by the whole-point rounding of the power; expected 25 + 136 = 161 within 1. Controls: grace_mana_control, the same cast without Holy Form, expects 25; grace_mana_nolearn, Holy Form applied but 300353 never learned, expects 25, so the extra mana needs 300353 and not Holy Form alone. Reference search 2026-11-22: coa-history spells 300353 and 800614: see the Gavel of Wrath entries of 300353, passives and Gavels leave no logged energize event; nothing found beyond the tooltip and the server DBC.",
+      "cast_in_before": false,
+      "tolerance": 1,
+      "disable_regeneration": true,
+      "phase_power": [
+        0,
+        0,
+        0
+      ],
+      "dummy_distance": 3,
+      "phase_power_in_uncast_before": true
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 800614,
+      "quote": "Gavel of Grace: Restores $504722s1% of your maximum mana.",
+      "trigger_spell": 800614,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Heaven's Appraisal (control: Holy Form without 300353 learned restores its own mana only)",
+      "variant": "grace_mana_nolearn",
+      "label_suffix": "grace_mana_nolearn",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 25,
+      "observe_source": "300353 Heaven's Appraisal under Holy Form 805301 (harness set_aura, a precondition fixture: the claim's subject is the Gavel of Grace effect of 300353, not Holy Form; the control arms are the same cast without it). Gavel of Grace 800614 is cast once at the dummy in the after phase only (cast_in_before false) with the caster's mana set to 0 and regeneration off; its own Effect[2] (142, EffectBasePoints 24, 800614 $m3 = 25) triggers Energize 681317 for 25 mana, so the control reads 25 and the claim adds 10% of the maximum mana, 504722 Effect[0] aura 137 (energize percent) BasePoints 9 + 1 = 10%, of the fixture's 1363 maximum mana (class file base_mana, player_class_stats class 27 level 60) = 136.3, read as 136 by the whole-point rounding of the power; expected 25 + 136 = 161 within 1. Controls: grace_mana_control, the same cast without Holy Form, expects 25; grace_mana_nolearn, Holy Form applied but 300353 never learned, expects 25, so the extra mana needs 300353 and not Holy Form alone. Reference search 2026-11-22: coa-history spells 300353 and 800614: see the Gavel of Wrath entries of 300353, passives and Gavels leave no logged energize event; nothing found beyond the tooltip and the server DBC.",
+      "cast_in_before": false,
+      "tolerance": 1,
+      "disable_regeneration": true,
+      "phase_power": [
+        0,
+        0,
+        0
+      ],
+      "dummy_distance": 3,
+      "phase_power_in_uncast_before": true
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Fulfillment of Vow of the Eclipse copies twice the damage)",
+      "kind": "metric_delta",
+      "variant": "fulfillment_ratio",
+      "label_suffix": "fulfillment_ratio",
+      "quote": "In addition, increases the effectiveness of the Fulfillment effect of Vow of the Eclipse by $s2%.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          505340,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "player_spell_power": 20000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807215,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_ratio": 3.0,
+      "tolerance": 0.1,
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "704579 Twilight Effect[1] aura 108, BasePoints 99 + 1 = +100% ($s2). The server code reads it as pct = Amount(807444, 1) (Dawn 807444 Effect[1], BasePoints 9 + 1 = 10) times (100 + 100)% when 704579 is known (AscensionSunClericEvents.cpp:231-236), the Fulfillment copy of Vow of the Eclipse 807435 on a marked enemy; the expectation is the tooltip's +100%, so the copy a Dawn-fulfilled Sunflare 800231 causes (Sun Power 807215 damage events on the dummy) doubles once 704579 is learned. Setup: Vow of the Eclipse 807435, Dawn 807440 with one charge and the Eclipse mark 505340 on the dummy (the caster's own, Eclipse(), AscensionSunCleric.cpp:312-322) are applied by harness set_aura as precondition fixtures in both phases (the subject is the Fulfillment copy, not the mark or the Vow; a first cast as the mark was measured and left the arms unequal: the mark outlives the before phase, so the after phase's first cast copied as well while the before phase's did not), then the judged Sunflare 800231 lands on the marked dummy with Dawn up in both phases; the control phase without 704579 learned reads the 10% copy of the hit. Crit and resist removed (984954 removes the caster's natural spell crit; 823764 removes the dummy's resistances) and spell power 20000 narrows the damage dice so the copy tracks the hit it is a share of. spell_damage_total is cumulative on the dummy, so the after reading is the control copy plus the learned one: the control copy c (10%) and the after-phase copy 2c (+100%) read c then 3c, and the judged ratio is 3.0; +100% passes from 1.95 to 2.05 of the copy (G-19, the larger of 5% of 100% and 2 points is 5 points), that is a ratio from 2.95 to 3.05, tolerance 0.1 on the ratio (2.9 to 3.1). The reads wait 4000 ms because the copy lands late (a 1500 ms wait read the before-phase copy after the learn). Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip words; nothing found that states another figure."
     }
   ],
   "player_observations": [],
