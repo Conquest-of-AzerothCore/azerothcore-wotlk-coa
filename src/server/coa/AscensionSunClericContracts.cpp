@@ -352,7 +352,7 @@ public:
     {
         Player* player = Owner(caster);
         if (player == caster && player && player->HasAura(807749))
-            AddPct(damage, Amount(807749, 1));
+            AddPct(damage, Amount(807749, 1, player));
     }
     void OnDamage(Unit*, Unit* victim, uint32& damage) override
     {
