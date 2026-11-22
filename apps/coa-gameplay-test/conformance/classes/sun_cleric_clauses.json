@@ -5874,10 +5874,11 @@
       {
         "claim": "for $d",
         "labels": [
-          "804632 behaviour_metric_delta flare_duration_window"
+          "804632 spell_duration 807175 #4"
         ]
       }
-    ]
+    ],
+    "reason": "Hit chance part measured as the attackers' miss share (+3 points, pair). The duration part stays a data label: a first window design (aura on the dummy read 9300-9800 ms and 10300-10900 ms after the cast) read the aura still held at 10518 ms, which cannot be judged because the hit lands after the cast and its delay is not read, so the window bounds do not bound the duration; a delay-aware read of the aura's apply time would be a tool need."
   },
   {
     "spell": 804751,

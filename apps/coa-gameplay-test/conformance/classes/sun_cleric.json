@@ -30104,10 +30104,11 @@
       "setup_casts": [
         804584,
         500143,
+        804584,
         500143
       ],
       "wait_ms": 500,
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). Casts after the entering one: the setup cast and the trigger cast, two spells started under the aura, so one of the 3 charges is left and the engine cast speed multiplier is 100 / (100 + 20) = 0.833333 (Unit.cpp:14967-14970). Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip."
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). Casts after the entering one: the setup cast and the trigger cast, two spells started under the aura, so one of the 3 charges is left and the engine cast speed multiplier is 100 / (100 + 20) = 0.833333 (Unit.cpp:14967-14970). Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip. Design 2: Dawn has 10 charges and every Holy or Fire cast under it enters the other state and grants 301265 again, so the first design (Dawn left active) kept re-granting the aura; here a second Dawn cast cancels the active Dawn right after the entering cast (the cancel is the replaced Dawn button, AscensionSunCleric.cpp:399-410) so that the later casts only spend charges."
     },
     {
       "spell": 300360,
@@ -30153,11 +30154,12 @@
       "setup_casts": [
         804584,
         500143,
+        804584,
         500143,
         500143
       ],
       "wait_ms": 500,
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). Casts after the entering one: two setup casts and the trigger cast, three spells started under the aura, so the third charge is spent and the aura is gone: multiplier 1, read about 6 s after the aura was granted, well inside its 10 s, so the 3 casts and not the duration ended it. Its partner haste_two_casts reads 0.833333 with one cast fewer, so a zero here is a consumed aura, not an aura that never came. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip."
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). Casts after the entering one: two setup casts and the trigger cast, three spells started under the aura, so the third charge is spent and the aura is gone: multiplier 1, read about 6 s after the aura was granted, well inside its 10 s, so the 3 casts and not the duration ended it. Its partner haste_two_casts reads 0.833333 with one cast fewer, so a zero here is a consumed aura, not an aura that never came. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip. Design 2: Dawn has 10 charges and every Holy or Fire cast under it enters the other state and grants 301265 again, so the first design (Dawn left active) kept re-granting the aura; here a second Dawn cast cancels the active Dawn right after the entering cast (the cancel is the replaced Dawn button, AscensionSunCleric.cpp:399-410) so that the later casts only spend charges."
     },
     {
       "spell": 300360,
@@ -30271,8 +30273,11 @@
         ]
       },
       "control_residual": 0.001,
-      "expected_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 20% x 1.2 = 24%, so the ratio of a Holy (Horusath Blast 500154) hit with against without the passive is 1.24 / 1.20 = 1.0333 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunrise 500477 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry.",
-      "observe_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 20% x 1.2 = 24%, so the ratio of a Holy (Horusath Blast 500154) hit with against without the passive is 1.24 / 1.20 = 1.0333 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunrise 500477 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry."
+      "expected_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 20% x 1.2 = 24%, so the ratio of a Holy (Horusath Blast 500154) hit with against without the passive is 1.24 / 1.20 = 1.0333 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunrise 500477 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "observe_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 20% x 1.2 = 24%, so the ratio of a Holy (Horusath Blast 500154) hit with against without the passive is 1.24 / 1.20 = 1.0333 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunrise 500477 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "fixture": {
+        "spell_power": 20000
+      }
     },
     {
       "spell": 300323,
@@ -30323,8 +30328,11 @@
         ]
       },
       "control_residual": 0.001,
-      "expected_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 10% x 1.2 = 12%, so the ratio of a Fire (Dawnsear 500146) hit with against without the passive is 1.12 / 1.10 = 1.0182 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunset 500511 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry.",
-      "observe_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 10% x 1.2 = 12%, so the ratio of a Fire (Dawnsear 500146) hit with against without the passive is 1.12 / 1.10 = 1.0182 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunset 500511 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry."
+      "expected_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 10% x 1.2 = 12%, so the ratio of a Fire (Dawnsear 500146) hit with against without the passive is 1.12 / 1.10 = 1.0182 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunset 500511 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "observe_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 10% x 1.2 = 12%, so the ratio of a Fire (Dawnsear 500146) hit with against without the passive is 1.12 / 1.10 = 1.0182 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunset 500511 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "fixture": {
+        "spell_power": 20000
+      }
     },
     {
       "spell": 704565,
@@ -30344,8 +30352,8 @@
         "spell": 500141
       },
       "measure_actor": "caster",
-      "before_expected": 4,
-      "expected": 10,
+      "before_expected": 5,
+      "expected": 12,
       "tolerance": 0,
       "ally_arm": {
         "allies": 7,
@@ -30354,7 +30362,7 @@
           10000
         ]
       },
-      "observe_source": "704565 Everglow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 17 (SPELLMOD_JUMP_TARGETS) BasePoints 1 + DieSides 1 = 2 jump targets (the tooltip $s1). Radiant Cascade 500141 Effect[0] SPELL_EFFECT_HEAL TargetA 45 (chain heal), EffectChainTarget 4: 4 heal events per cast without the passive. The tooltip $s1 = 2 additional allies (DBC EffectBasePoints 1 + EffectDieSides 1), so 6 heals per cast with it. Seven grouped allies at 50% health stand at the caster's spawn, so the pool (7 injured allies plus the caster) is larger than the cap and the cap decides. The cast is made at the ally once before and once after the passive is learned (control: the first cast, 4 heals); the heal events of 500141 on every target are counted by the caster and the counter is cumulative: 4 after the first cast, 4 + 6 = 10 after the second. Reference search 2026-11-22: coa-history spell 704565: 0 events in 186 logs (a passive); Radiant Cascade 500141: 143 SPELL_HEAL events and 41 SPELL_CAST_START in 2 logs (no chain size readable from aggregates); nothing else found."
+      "observe_source": "704565 Everglow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 17 (SPELLMOD_JUMP_TARGETS) BasePoints 1 + DieSides 1 = 2 jump targets (the tooltip $s1). Radiant Cascade 500141 Effect[0] SPELL_EFFECT_HEAL TargetA 45 (chain heal), EffectChainTarget 4 in the DBC, but AscensionSunClericContracts.cpp:226 sets Effects[0].ChainTarget = 5 for Radiant Cascade (the effective value; the tooltip is silent on the base count), so the control cast heals 5 units (primary plus 4: Spell::SelectImplicitChainTargets, Spell.cpp:1921-1935). The tooltip $s1 = 2 additional allies (DBC EffectBasePoints 1 + EffectDieSides 1), so 7 heals per cast with it. Seven grouped allies at 50% health stand at the caster's spawn, so the pool (7 injured allies plus the caster) is larger than the cap and the cap decides. The cast is made at the ally once before and once after the passive is learned (control: the first cast, 4 heals); the heal events of 500141 on every target are counted by the caster and the counter is cumulative: 5 after the first cast, 5 + 7 = 12 after the second. Reference search 2026-11-22: coa-history spell 704565: 0 events in 186 logs (a passive); Radiant Cascade 500141: 143 SPELL_HEAL events and 41 SPELL_CAST_START in 2 logs (no chain size readable from aggregates); nothing else found. The claim is the +2; the base 5 is the control reading, not part of the claim."
     },
     {
       "spell": 804254,
@@ -30376,14 +30384,14 @@
         "target": "caster"
       },
       "measure_actor": "caster",
-      "before_expected": 0,
+      "before_expected": 2,
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
       "name": "Blessing of Retribution (deflects the next harmful spell only)",
       "variant": "deflect_next",
       "label_suffix": "deflect_next",
-      "expected": 1,
+      "expected": 3,
       "strike": {
         "spell": 47632,
         "health": 50000,
@@ -30392,7 +30400,7 @@
         "wait_ms": 300,
         "after_trigger_ms": 1600
       },
-      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100, ProcCharges 1, DurationIndex 3 = 60000 ms. The caster is its own Blessed ally: Bless 804247 is cast at the caster in both phases (precondition, not the subject), then Blessing of Retribution 804254 at the caster in the after phase only. A striker (creature, spell 47632 Grave Coil, an enemy harmful spell cast at the caster) strikes twice, 300 ms apart. With the Blessing cast first, the first strike is deflected and the second lands: 1 damage event of 47632 on the caster (the deflect is not a damage event; the aura has 1 charge). Reference search 2026-11-22: coa-history spell 804254 and 680888: 0 events in 186 logs; nothing else found."
+      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100, ProcCharges 1, DurationIndex 3 = 60000 ms. The caster is its own Blessed ally: Bless 804247 is cast at the caster in both phases (precondition, not the subject), then Blessing of Retribution 804254 at the caster in the after phase only. The striker (creature, spell 47632 Grave Coil, an enemy harmful spell cast at the caster) strikes twice, 300 ms apart. With the Blessing cast first, the first strike is deflected and the second lands: 1 damage event of 47632 on the caster (the deflect is not a damage event; the aura has 1 charge). Reference search 2026-11-22: coa-history spell 804254 and 680888: 0 events in 186 logs; nothing else found. The damage counter is cumulative over the scenario: the first phase strikes twice with no Blessing cast (control, 2 damage events), the after phase adds its own strikes (cumulative 3 with the Blessing: one deflected, one landed; cumulative 4 in the control cast without Bless: both landed)."
     },
     {
       "spell": 804254,
@@ -30409,14 +30417,14 @@
         "target": "caster"
       },
       "measure_actor": "caster",
-      "before_expected": 0,
+      "before_expected": 2,
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
       "name": "Blessing of Retribution (control: cast without Bless, the same two strikes land)",
       "variant": "deflect_control",
       "label_suffix": "deflect_control",
-      "expected": 2,
+      "expected": 4,
       "strike": {
         "spell": 47632,
         "health": 50000,
@@ -30425,7 +30433,7 @@
         "wait_ms": 300,
         "after_trigger_ms": 1600
       },
-      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100, ProcCharges 1, DurationIndex 3 = 60000 ms. The caster is its own Blessed ally: Bless 804247 is cast at the caster in both phases (precondition, not the subject), then Blessing of Retribution 804254 at the caster in the after phase only. A striker (creature, spell 47632 Grave Coil, an enemy harmful spell cast at the caster) strikes twice, 300 ms apart. Control: no Bless is cast, so the Blessing, usable only on an ally with Bless active (the tooltip condition, entry no_bless), takes no hold and both strikes land: 2 damage events. It shows the strikes land when nothing deflects them. Reference search 2026-11-22: coa-history spell 804254 and 680888: 0 events in 186 logs; nothing else found."
+      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100, ProcCharges 1, DurationIndex 3 = 60000 ms. The caster is its own Blessed ally: Bless 804247 is cast at the caster in both phases (precondition, not the subject), then Blessing of Retribution 804254 at the caster in the after phase only. The striker (creature, spell 47632 Grave Coil, an enemy harmful spell cast at the caster) strikes twice, 300 ms apart. Control: no Bless is cast, so the Blessing, usable only on an ally with Bless active (the tooltip condition, entry no_bless), takes no hold and both strikes land: 2 damage events. It shows the strikes land when nothing deflects them. Reference search 2026-11-22: coa-history spell 804254 and 680888: 0 events in 186 logs; nothing else found. The damage counter is cumulative over the scenario: the first phase strikes twice with no Blessing cast (control, 2 damage events), the after phase adds its own strikes (cumulative 3 with the Blessing: one deflected, one landed; cumulative 4 in the control cast without Bless: both landed)."
     },
     {
       "spell": 804632,
@@ -30506,58 +30514,6 @@
       "expected": 136.5,
       "tolerance": 7,
       "observe_source": "804632 Flames of Absolution launches Solar Flare 807175 (Effect[1] SCHOOL_DAMAGE, Holy) at the target of Horusath Blast 500154 damage (AscensionSunClericEvents.cpp:126, :303-312, and the core proc row 804632 -> 573449 Effect 64). The tooltip text resolves to 136.5 at no spell power (the packet token) and adds 0.26 per spell power. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, no Solar Flare damage). 984954 (no spell crit) and 823764 (no magic resistance) are precondition fixtures in both phases. Contrast arm of flare_sp on the same build: the same cast with no spell power added reads 136.5 (5% band 7), so the hit landed and the 0.26 spell power term is the difference between the two arms. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits), 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs (no hit chance readable); nothing else found."
-    },
-    {
-      "spell": 804632,
-      "name": "Flames of Absolution (Solar Flare lasts 10 s on the target)",
-      "kind": "metric_delta",
-      "variant": "flare_duration_window",
-      "label_suffix": "flare_duration_window",
-      "quote": "launches a Solar Flare",
-      "trigger_spell": 500154,
-      "gate_spell": 804632,
-      "target": "dummy",
-      "dummy_distance": 10,
-      "cast_power": 1363,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "aura",
-      "fields": {
-        "spell": 807175,
-        "caster": "caster"
-      },
-      "measure_actor": "dummy",
-      "before_expected": 0,
-      "expected": 1,
-      "after_expiry_expected": 0,
-      "trigger_only_after": true,
-      "gate_timing": "start",
-      "wait_ms": 9500,
-      "expiry_wait_ms": 1000,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          9300,
-          9800
-        ],
-        "expired": [
-          10300,
-          10900
-        ]
-      },
-      "observe_source": "Solar Flare 807175 DurationIndex 1 = 10000 ms ($d). One real Horusath Blast 500154 (instant) at the dummy with 804632 learned: the aura from the caster is present on the dummy when read 9300..9800 ms after the cast (game time), at least 9000 ms after it was applied if the hit lands within 300 ms, and gone when read 10300..10900 ms after it, at most 10900 ms, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. 984954 and 823764 are precondition fixtures. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits), 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs (no hit chance readable); nothing else found."
     },
     {
       "spell": 804632,
