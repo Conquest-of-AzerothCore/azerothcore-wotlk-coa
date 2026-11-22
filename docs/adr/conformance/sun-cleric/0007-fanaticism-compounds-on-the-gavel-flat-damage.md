@@ -1,6 +1,6 @@
 # 0007. Fanaticism compounds its effectiveness on the Gavel flat damage
 
-- Status: accepted
+- Status: superseded by [0029](0029-gavel-effectiveness-talents-apply-to-the-whole-hit.md) (owner ruling O-18): the Gavels no longer keep the stock engine order
 - Date: 2026-11-22
 
 ## Context

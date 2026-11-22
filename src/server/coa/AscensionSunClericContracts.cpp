@@ -221,6 +221,8 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesEx4 |= SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS;
         info->AscensionInheritsResolvedAmount = true;
     }
+    if (Gavel(info))
+        info->AscensionFlatAfterWeaponPercent = true;
     if (Named(info, 500141))
         info->Effects[0].ChainTarget = 5;
     if (Named(info, 800231))
