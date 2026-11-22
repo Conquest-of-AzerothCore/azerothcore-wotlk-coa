@@ -4068,7 +4068,8 @@
           "805628 behaviour_metric_delta cost_horusath"
         ]
       }
-    ]
+    ],
+    "reason": "Mentor D-54, ruling (a): the stock engine order is accepted. Expectation as engine arithmetic 1.2 x (W + 1.2 x B) against W + B (Spell::EffectWeaponDmg, SpellEffects.cpp:4676, :4681 and the loop at :4729-4741), expected values from W, B and the armor read, never from the measured bonus: Horusath Blast +20% (no flat term, band 18..22), Gavel of Wrath +27.77%, Gavel of Grace +24.54%, Gavel of Light +22.46% (ADR sun-cleric 0007)."
   },
   {
     "spell": 807973,
