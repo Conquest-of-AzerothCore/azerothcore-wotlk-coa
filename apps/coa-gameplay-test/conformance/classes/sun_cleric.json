@@ -15221,6 +15221,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "aura_charges",
@@ -15231,7 +15237,7 @@
       "expected": 10,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680630 Pendant of the Sun (RecoveryTime 60000, CasterAuraSpell 807440 so it needs Dawn) runs the class code AscensionSunClericAbilities.cpp:466-470: aura->SetCharges(aura->CalcMaxCharges()) and SetDuration(GetMaxDuration()) on the Dawn state aura 807440 (ProcCharges 10, DurationIndex 3 = 60000 ms). The Dawn state aura 807440 is set on the caster by the harness before each phase (a precondition fixture, the condition Pendant needs, not the subject); the setup casts of Illumination 500143 (a direct heal on the caster at 50% health) run in both phases, before the first reading, and the trigger cast is made in the after phase only. Each of the two heals expends one charge by the Dawn tooltip ('Each damaging or healing spell will expend a charge'): 10 - 2 = 8 charges, read before Pendant (the control reading of the same scenario: no Pendant cast, charges stay spent). Pendant is then cast and the charges are read 500 ms later: 10 with the refresh. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC for this value.",
+      "observe_source": "680630 Pendant of the Sun (RecoveryTime 60000, CasterAuraSpell 807440 so it needs Dawn) runs the class code AscensionSunClericAbilities.cpp:466-470: aura->SetCharges(aura->CalcMaxCharges()) and SetDuration(GetMaxDuration()) on the Dawn state aura 807440 (ProcCharges 10, DurationIndex 3 = 60000 ms). The Dawn state aura 807440 is set on the caster by the harness at the start of each phase (phase_auras) (a precondition fixture, the condition Pendant needs, not the subject); the setup casts of Illumination 500143 (a direct heal on the caster at 50% health) run in both phases, before the first reading, and the trigger cast is made in the after phase only. Each of the two heals expends one charge by the Dawn tooltip ('Each damaging or healing spell will expend a charge'): 10 - 2 = 8 charges, read before Pendant (the control reading of the same scenario: no Pendant cast, charges stay spent). Pendant is then cast and the charges are read 500 ms later: 10 with the refresh. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC for this value.",
       "setup_in_before": true
     },
     {
@@ -15270,6 +15276,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "aura_duration_ms",
@@ -15280,7 +15292,7 @@
       "expected": 59500,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680630 Pendant of the Sun (RecoveryTime 60000, CasterAuraSpell 807440 so it needs Dawn) runs the class code AscensionSunClericAbilities.cpp:466-470: aura->SetCharges(aura->CalcMaxCharges()) and SetDuration(GetMaxDuration()) on the Dawn state aura 807440 (ProcCharges 10, DurationIndex 3 = 60000 ms). The Dawn state aura 807440 is set on the caster by the harness before each phase (a precondition fixture, the condition Pendant needs, not the subject); the setup casts of Illumination 500143 (a direct heal on the caster at 50% health) run in both phases, before the first reading, and the trigger cast is made in the after phase only. The two heals are 10000 ms apart, so the remaining duration of 807440 is read about 20000 ms after the fixture: 60000 - 20000 = 40000 (the control reading of the same scenario: no Pendant cast, the duration keeps running, tolerance 2000). Pendant is then cast and the duration read 500 ms later: 60000 - 500 = 59500 with the refresh; 54000 and 66000 (10% off the full 60000 ms) are 5500 and 6500 away, and the 40000 of no refresh is 19500 away. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC for this value.",
+      "observe_source": "680630 Pendant of the Sun (RecoveryTime 60000, CasterAuraSpell 807440 so it needs Dawn) runs the class code AscensionSunClericAbilities.cpp:466-470: aura->SetCharges(aura->CalcMaxCharges()) and SetDuration(GetMaxDuration()) on the Dawn state aura 807440 (ProcCharges 10, DurationIndex 3 = 60000 ms). The Dawn state aura 807440 is set on the caster by the harness at the start of each phase (phase_auras) (a precondition fixture, the condition Pendant needs, not the subject); the setup casts of Illumination 500143 (a direct heal on the caster at 50% health) run in both phases, before the first reading, and the trigger cast is made in the after phase only. The two heals are 10000 ms apart, so the remaining duration of 807440 is read about 20000 ms after the fixture: 60000 - 20000 = 40000 (the control reading of the same scenario: no Pendant cast, the duration keeps running, tolerance 2000). Pendant is then cast and the duration read 500 ms later: 60000 - 500 = 59500 with the refresh; 54000 and 66000 (10% off the full 60000 ms) are 5500 and 6500 away, and the 40000 of no refresh is 19500 away. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC for this value.",
       "tolerance": 2000,
       "setup_in_before": true
     },
@@ -15364,6 +15376,62 @@
       "observe_source": "301313 Arbiter of Grace Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), Spell.dbc BasePoints -1, set to 14 (+1 = 15) by AscensionSunClericValkyrie.cpp:25-26, class mask word 1 = 1024 = Glorious Execution Mana Passive 807451 SpellFamilyFlags[1]; 807451 Effect[0] BasePoints 4 (+1 = 5, the base 5% of the damage dealt) is the percent AscensionSunClericAbilities.cpp:346-348 turns into mana (Mana(player, CalculatePct(dealt, Amount(807451)), 807552)) for Glorious Execution 800691 and 802566. Vow of Grace 807446 Effect[2] aura 107 ADD_FLAT_MODIFIER MiscValue 3 BasePoints 14 (+1 = 15, $807446s3), class mask word 2 = 16777216 = Arbiter's own SpellFamilyFlags[2]. Glorious Execution 803913 is cast at the dummy in both phases with +20000 attack power and every hit forced critical (984954) so the damage is the same to well under 1%; the energize events of 807552 are totalled. The totals are cumulative over the scenario: the first reading is X (the first phase, 5% of the damage, no 301313), the second adds the second phase's events, so the stated ratio is (X + 20%/5% X) / X = 5.0 when the passive adds 15 points to 5, and 2.0 when it adds nothing. The 15-point claim has a band of 2 points (the larger of 5% of 15 and 2), 0.4 on that ratio (2/5), so 5.0 +- 0.4 excludes 4.4 and 5.6 and the 2.0 of no additional mana. Control: the first phase without 301313. Control arm: no Vow of Grace is cast, so the tooltip's 'while Vow of Grace is active' condition is false and Glorious Execution regenerates its base 5% only: the second reading is X + X, ratio 2.0 within 0.4 (excludes 5.0). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'While Vow of Grace is active, your Glorious Execution now regenerates an additional 15% mana equal to the damage dealt.' (same figure); coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value.",
       "player_attack_power": 20000,
       "cast_power": 1363
+    },
+    {
+      "spell": 804628,
+      "kind": "metric_delta",
+      "gate_spell": 804628,
+      "trigger_spell": 806121,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 807080
+      },
+      "before_expected": 0,
+      "expire_ms": 31000,
+      "name": "Suncharged (one stack every 0.5 sec)",
+      "variant": "suncharge_period",
+      "label_suffix": "suncharge_period",
+      "quote": "Your Judgement Day now applies Suncharged to the target every $807080t2 sec,",
+      "expected": 9,
+      "wait_ms": 4700,
+      "game_time": {
+        "after": [
+          4500,
+          4900
+        ]
+      },
+      "observe_source": "804628 Suncharged Effect[0] aura 42 PROC_TRIGGER_SPELL 807080; Judgement Day 570125 (DurationIndex 9 = 30000 ms) gets a periodic dummy effect in slot 2 with Amplitude 500 (AscensionSunClericContracts.cpp:266-275) whose tick casts Suncharge 807080 on the target when 804628 is known (AscensionSunClericAuras.cpp:236-239); 807080 StackAmount 10 (DurationIndex 31), Effect[1] EffectAmplitude 500 ($807080t2 = 0.5 s). Judgement Day 806121 is cast at the dummy in both phases, 804628 learned between them (control: the first phase without the passive, 0 stacks), and the stacks of 807080 on the dummy are read. The read is taken 4500..4900 ms of game time after the cast: a tick at 0.5 s steps gives 9 stacks (ticks at 0.5 ... 4.5 s, the tenth at 5.0 s); a period 10% shorter (0.45 s) gives 10 and 10% longer (0.55 s) gives 8, so the exact count excludes both. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'Your Judgement Day now applies Suncharged to the target every 1 sec, stacking 10 times.' (an older state: 1 sec; Spell.dbc 807080 Effect[1] EffectAmplitude 500 and the contract AscensionSunClericContracts.cpp:274-275 give 0.5 s, and the tooltip token $807080t2 reads the DBC); coa-history and merged PRs give nothing else."
+    },
+    {
+      "spell": 804628,
+      "kind": "metric_delta",
+      "gate_spell": 804628,
+      "trigger_spell": 806121,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 807080
+      },
+      "before_expected": 0,
+      "expire_ms": 31000,
+      "name": "Suncharged (stacks up to 10 times)",
+      "variant": "suncharge_cap",
+      "label_suffix": "suncharge_cap",
+      "quote": "stacking $807080u times.",
+      "expected": 10,
+      "wait_ms": 6000,
+      "game_time": {
+        "after": [
+          5500,
+          6500
+        ]
+      },
+      "observe_source": "804628 Suncharged Effect[0] aura 42 PROC_TRIGGER_SPELL 807080; Judgement Day 570125 (DurationIndex 9 = 30000 ms) gets a periodic dummy effect in slot 2 with Amplitude 500 (AscensionSunClericContracts.cpp:266-275) whose tick casts Suncharge 807080 on the target when 804628 is known (AscensionSunClericAuras.cpp:236-239); 807080 StackAmount 10 (DurationIndex 31), Effect[1] EffectAmplitude 500 ($807080t2 = 0.5 s). Judgement Day 806121 is cast at the dummy in both phases, 804628 learned between them (control: the first phase without the passive, 0 stacks), and the stacks of 807080 on the dummy are read. The read is taken 5500..6500 ms after the cast, when 11 to 13 ticks have elapsed: the stacks read 10, the stated cap, not 11 or more. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'Your Judgement Day now applies Suncharged to the target every 1 sec, stacking 10 times.' (an older state: 1 sec; Spell.dbc 807080 Effect[1] EffectAmplitude 500 and the contract AscensionSunClericContracts.cpp:274-275 give 0.5 s, and the tooltip token $807080t2 reads the DBC); coa-history and merged PRs give nothing else."
     }
   ],
   "player_observations": [],

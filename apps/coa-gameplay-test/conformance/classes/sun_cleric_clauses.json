@@ -4360,7 +4360,8 @@
     "spell": 804628,
     "clause": "Your Judgement Day now applies Suncharged to the target every $807080t2 sec,",
     "labels": [
-      "804628 aura_amplitude_ms #0"
+      "804628 aura_amplitude_ms #0",
+      "804628 behaviour_metric_delta suncharge_period"
     ],
     "kind": "claim"
   },
@@ -4368,7 +4369,8 @@
     "spell": 804628,
     "clause": "stacking $807080u times.",
     "labels": [
-      "804628 max_stacks 807080 #1"
+      "804628 max_stacks 807080 #1",
+      "804628 behaviour_metric_delta suncharge_cap"
     ],
     "kind": "claim"
   },
