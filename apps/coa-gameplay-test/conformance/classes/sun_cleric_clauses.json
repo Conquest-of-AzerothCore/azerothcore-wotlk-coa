@@ -4717,7 +4717,12 @@
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
     "kind": "claim",
-    "reason": "Mentor D-74 (2026-11-22), owner information I-3: conformant as is. The basis is the DBC modifier value, Effect[0] SPELLMOD_ACTIVATION_TIME -50% on Mercy 504848's period, applied by the stock engine; the tooltip's 50 is read as that period figure (3000 to 1500 ms), not as a +50% tick rate.",
+    "reason": "Owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031: +50% tick rate = period x 2/3 with the duration unchanged, so Mercy 504848's 3000 ms period becomes 2000 ms (the stock -50% period modifier gave 1500 ms; the D-74 note is withdrawn). The server sets Mercy's amplitude before the engine applies Blightbreaker's unchanged Effect[0] modifier (aura_ascension_sun_cleric_mercy).",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 707433,
+      "ruling": "O-24 (2026-11-22): Blightbreaker raises Mercy's tick rate by 50% with its duration unchanged, a 2 sec period instead of 1.5 sec"
+    },
     "claims": [
       {
         "claim": "Increases the tick rate of Mercy",

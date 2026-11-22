@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "name": "Issue 733: Blightbreaker halves Mercy's tick interval and doubles its cost",
-  "contract": "#733: Blightbreaker 707433 reads 'Increases the tick rate of Mercy by $s1%, but increases its mana cost by $s2%.' Effect 0 is aura 108 SPELLMOD_ACTIVATION_TIME (19) at -50 and effect 1 is aura 108 SPELLMOD_COST (14) at +100, both on EffectSpellClassMask [32, 0, 0] in family 33, which is Mercy 504848's SpellFamilyFlags word 0. Mercy's effect 0 is aura 23 with a 3000 ms amplitude, so a fresh Mercy should tick every 1500 ms (the repo's tick-rate convention, as for Fearmonger and Explosive) and cost twice as much. A previous live run found the applied Mercy still at 3000 ms. Each link is asserted separately so the first failing step names the broken one: the passive's aura, the modifier query without a cast, the cost, then the amplitude of a real self-cast. Only the Blightbreaker caster casts Mercy, and every aura read names its caster: Mercy chains to nearby allies (sun-cleric-mercy), so a second caster's Mercy on the same player would otherwise be read instead.",
-  "timeout_ms": 60000,
+  "name": "Blightbreaker raises Mercy's tick rate by 50% (period 3000 to 2000 ms) and doubles its cost",
+  "contract": "Owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031: Blightbreaker 707433 reads 'Increases the tick rate of Mercy by $s1%, but increases its mana cost by $s2%.' Effect 0 is aura 108 SPELLMOD_ACTIVATION_TIME (19) at -50 and effect 1 aura 108 SPELLMOD_COST (14) at +100, both on EffectSpellClassMask [32, 0, 0] in family 33 (Mercy 504848's SpellFamilyFlags word 0). Mercy's effect 0 is aura 23 PERIODIC_TRIGGER_SPELL of Mercy Proc 503650 with a 3000 ms amplitude, DurationIndex 29 (12000 ms) and SPELL_ATTR5_EXTRA_INITIAL_PERIOD. The ruling keeps the duration and adds 50% to the tick rate: the period becomes 3000 x 100 / 150 = 2000 ms (the stock -50% period modifier gave 1500). aura_ascension_sun_cleric_mercy sets the amplitude before the engine applies the modifier (SpellAuraEffects.cpp:709 then :725), so the modifier query still reads the DBC -50% while the applied aura reads 2000. Each tick casts 503650 from the aura's holder (TARGET_UNIT_CASTER, no explicit target), so the holder's 503650 cast count over the whole aura counts the ticks. Control arm: the caster without Blightbreaker, period 3000 and its tick count; Blightbreaker arm: period 2000 and its tick count over the same 12000 ms duration; the cost stays doubled. The arms run one after the other and each count is taken relative to a snapshot after the other caster's Mercy expired, because Mercy chains to nearby allies (sun-cleric-mercy) and a chained copy would tick on the other player too.",
+  "timeout_ms": 90000,
   "players": [
     {
       "id": "control",
@@ -60,7 +60,7 @@
     },
     {
       "action": "assert",
-      "label": "Blightbreaker halves Mercy's tick interval in the modifier query",
+      "label": "Blightbreaker's DBC period modifier stays installed (-50% in the modifier query)",
       "actor": "breaker",
       "metric": "spell_modifier",
       "spell": 504848,
@@ -87,13 +87,91 @@
       "max": 2.01
     },
     {
+      "action": "assert",
+      "label": "No Mercy is on control before its own cast",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 504848,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "snapshot",
+      "label": "control's Mercy Proc casts before its own Mercy",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 503650,
+      "save_as": "control_ticks_before"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 504848
+    },
+    {
+      "action": "assert",
+      "label": "control's Mercy is applied",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control's Mercy ticks every 3000 ms",
+      "actor": "control",
+      "metric": "aura_amplitude_ms",
+      "spell": 504848,
+      "caster": "control",
+      "effect": 0,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control's Mercy expires after its 12000 ms duration",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "control",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Control's Mercy ticks over its whole duration",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 503650,
+      "relative_to": "control_ticks_before",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "No Mercy is on breaker before its own cast",
+      "actor": "breaker",
+      "metric": "aura",
+      "spell": 504848,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "snapshot",
+      "label": "breaker's Mercy Proc casts before its own Mercy",
+      "actor": "breaker",
+      "metric": "spell_cast_count",
+      "spell": 503650,
+      "save_as": "breaker_ticks_before"
+    },
+    {
       "action": "cast",
       "actor": "breaker",
       "spell": 504848
     },
     {
       "action": "assert",
-      "label": "Blightbreaker caster's Mercy is applied",
+      "label": "breaker's Mercy is applied",
       "actor": "breaker",
       "metric": "aura",
       "spell": 504848,
@@ -103,13 +181,32 @@
     },
     {
       "action": "assert",
-      "label": "Blightbreaker caster's Mercy ticks every 1500 ms",
+      "label": "breaker's Mercy ticks every 2000 ms",
       "actor": "breaker",
       "metric": "aura_amplitude_ms",
       "spell": 504848,
       "caster": "breaker",
       "effect": 0,
-      "equals": 1500
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "breaker's Mercy expires after its 12000 ms duration",
+      "actor": "breaker",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "breaker",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Blightbreaker caster's Mercy ticks over the same duration",
+      "actor": "breaker",
+      "metric": "spell_cast_count",
+      "spell": 503650,
+      "relative_to": "breaker_ticks_before",
+      "equals": 7
     }
   ]
 }

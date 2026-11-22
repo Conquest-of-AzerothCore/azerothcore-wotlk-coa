@@ -15271,11 +15271,11 @@
         "spell": 504848
       },
       "before_expected": 3000,
-      "expected": 1500,
+      "expected": 2000,
       "tolerance": 10,
       "wait_ms": 300,
       "expire_ms": 20000,
-      "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The period of the Mercy aura on the caster is read after a real cast before the learn (3000, the control) and after a real cast with Blightbreaker learned: the SPELLMOD period of -50% gives 1500 ms. Expectation note: the tooltip says the tick rate rises by $s1 = 50%, which is a period of 2000 ms read literally and 1500 ms (a rate of +100%) read as the stated modifier on the period; the DBC value is the period modifier, so 1500 is judged: mentor D-74 (2026-11-22) rules the clause conformant as is, the tooltip's 50 being the -50% period modifier the stock engine applies (owner information I-3)."
+      "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The period of the Mercy aura on the caster is read after a real cast before the learn (3000, the control) and after a real cast with Blightbreaker learned: owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031, reads the tooltip literally, a tick rate +$s1% = 50% with the duration unchanged, so the period is 3000 x 100 / 150 = 2000 ms (the stock -50% period modifier gave 1500 ms, a +100% rate; mentor D-74 is withdrawn). The server's aura_ascension_sun_cleric_mercy sets Mercy's amplitude before the engine applies the unchanged -50% modifier, so the aura reads 2000 while the passive's spell_modifier check keeps the DBC -500."
     },
     {
       "spell": 707433,
