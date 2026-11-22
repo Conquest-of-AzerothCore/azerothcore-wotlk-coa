@@ -545,7 +545,8 @@ namespace
         static bool HandleAssign(ChatHandler* handler, std::string target, Optional<QuotedString> name)
         {
             std::string assignee = name ? std::string(*name) : std::string();
-            if (!assignee.empty() && !normalizePlayerName(assignee))
+            if (!assignee.empty() &&
+                (!normalizePlayerName(assignee) || ObjectMgr::CheckPlayerName(assignee, true) != CHAR_NAME_SUCCESS))
             {
                 handler->SendErrorMessage("{} is not a valid character name.", assignee);
                 return false;
