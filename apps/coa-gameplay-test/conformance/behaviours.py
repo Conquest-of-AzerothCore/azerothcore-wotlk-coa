@@ -4215,6 +4215,8 @@ class CostGateSpec:
     caster_health_pct: int | None = None
     refused_with: bool = False
     extra_reads: tuple[tuple[str, int | None, str | None, int | None], ...] = ()
+    only_arm: str | None = None
+    priming_reads: tuple[tuple[int, int], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -4228,6 +4230,7 @@ class CostGateArm:
     skip_setup: bool = False
 
 
+COST_GATE_ONLY_ARMS = ('without', 'with', 'beyond', 'unfulfilled')
 COST_GATE_EXTRA_READ_METRICS = frozenset({'cooldown_ms', 'global_cooldown_ms', 'knows_spell', 'aura', 'power'})
 EXTRA_READ_ARMS = ('without', 'with')
 
@@ -4320,6 +4323,22 @@ def lengthens(spec: CostGateSpec) -> bool:
 
 def removes_cooldown(spec: CostGateSpec, base: float) -> bool:
     return spec.resource == 'cooldown' and spec.reduction == base and not spec.resets
+
+
+def cost_gate_selected_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
+    arms = cost_gate_arms(spec, base)
+    if spec.only_arm is None:
+        return arms
+    if (spec.only_arm not in COST_GATE_ONLY_ARMS or spec.resource != 'cooldown' or spec.resets or lengthens(spec)
+            or spec.next_arm or spec.unset_arm or spec.aura_duration_ms is not None or spec.talent_aura
+            or spec.charges is not None or spec.removal_wait_ms is not None):
+        raise ValueError(f'{spec.spell} cost_gate only_arm is one of {list(COST_GATE_ONLY_ARMS)} on a plain cooldown '
+                         f'gate (no resets, longer cooldown, next, unset or duration arm, talent aura, charges or '
+                         f'removal wait)')
+    if spec.only_arm == 'unfulfilled':
+        with_arm = next(arm for arm in arms if arm.name == 'with')
+        return [CostGateArm('unfulfilled', True, with_arm.level, COST_GATE_RESOURCES[spec.resource])]
+    return [arm for arm in arms if arm.name == spec.only_arm]
 
 
 def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
@@ -4494,7 +4513,7 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     if spec.talent_aura and spec.talent_aura_each_arm:
         talent_steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 0}] + talent_steps
     learned = False
-    for arm in cost_gate_arms(spec, base):
+    for arm in cost_gate_selected_arms(spec, base):
         if arm.with_talent and (not learned or (spec.talent_aura_each_arm and arm.setup)):
             steps += talent_steps
             learned = True
@@ -4517,6 +4536,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                                                 'value': int(arm.level)}])
         else:
             steps += (opening + full_power + required_aura_steps(facts) + cost_gate_aura_steps(spec, spec.gated_spell)
+                      + [measurement(f'{label} priming {aura}', CASTER, 'aura', spell=aura)
+                         for aura, _ in spec.priming_reads]
                       + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target}]
                       + ([measurement(f'{label} cooldown', CASTER, 'cooldown_ms', spell=spec.gated_spell)]
                          if spec.removal_wait_ms is not None else [])
@@ -4529,6 +4550,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                 expectations.append(Expectation(f'{label} after_cast', BEHAVIOUR_CAST_CONDITION, spec.spell,
                                                 spec.spell, None, str(NO_CAST_FAILURE), rule,
                                                 {**model, 'arm': arm.name, 'reading': 'after_cast'}))
+        expectations += [Expectation(f'{label} priming {aura}', BEHAVIOUR_CAST_CONDITION, spec.spell, aura, None,
+                                     str(state), rule, {**model, 'arm': arm.name, 'reading': 'aura'})
+                         for aura, state in spec.priming_reads]
         expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell, None,
                                         str(arm.result), rule,
                                         {**model, 'arm': arm.name, 'level': arm.level, 'held_ms': arm.held_ms}))
@@ -4558,7 +4582,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cost gate'
-                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
+                + (f' {spec.label_suffix}' if spec.label_suffix else '')
+                + (f' {spec.only_arm}' if spec.only_arm else ''),
         'contract': f'{spec.gated_spell} is attempted at {base:g} less {spec.reduction:g} {unit}: without '
                     f'{spec.spell} it must be refused, with it it must go through, and one step beyond the stated '
                     f'reduction it must be refused again, proving the "{spec.quote}" clause.'
@@ -4596,6 +4621,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                     + (f' {[spell for spell, _ in spec.after_casts]} are cast {spec.after_wait_ms} ms after the '
                        f'priming cast, in every arm except {spec.spell} itself, which only the arms with it cast and '
                        f'learn.' if spec.after_casts else '')
+                    + (f' This scenario runs the {spec.only_arm} arm alone, so no other arm leaves an aura or a cooldown '
+                       f'behind.' if spec.only_arm else '')
+                    + (f' Before the priming cast of {spec.gated_spell}, the auras {[aura for aura, _ in spec.priming_reads]} '
+                       f'are read on the caster and judged against {[state for _, state in spec.priming_reads]}: a '
+                       f'precondition check, so a mismatch voids the arm.' if spec.priming_reads else '')
                     + (f' In the without and with arms, {len(spec.extra_reads)} diagnostic reads (after the attempt or around an '
                        f'after cast) are recorded in the result and never judged.' if spec.extra_reads else '')
                     + (f' A forcing fixture raises the roll of {spec.forced_roll} by {FORCED_CHANCE_PERCENT}% (a '
@@ -4641,7 +4671,15 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         metric_delta_strike(entry.get('strike')),
                         tuple((int(aura), int(stacks)) for aura, stacks in entry.get('strike_victim_auras', ())),
                         entry.get('caster_health_pct'), bool(entry.get('refused_with', False)),
-                        cost_gate_extra_reads(entry))
+                        cost_gate_extra_reads(entry), entry.get('only_arm'), cost_gate_priming_reads(entry))
+
+
+def cost_gate_priming_reads(entry: dict) -> tuple[tuple[int, int], ...]:
+    reads = tuple((int(read['spell']), int(read['expected'])) for read in entry.get('priming_reads', ()))
+    if reads and (entry.get('resource') != 'cooldown' or any(state not in (0, 1) for _, state in reads)):
+        raise ValueError(f'{entry["spell"]} cost_gate priming_reads are {{spell, expected 0 or 1}} aura presence reads '
+                         f'of a cooldown gate')
+    return reads
 
 
 def cost_gate_extra_reads(entry: dict) -> tuple[tuple[str, int | None, str | None, int | None], ...]:

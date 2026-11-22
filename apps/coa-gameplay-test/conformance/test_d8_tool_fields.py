@@ -137,6 +137,66 @@ class ExtraReadsTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class OnlyArmTests(unittest.TestCase):
+    def scenario(self, **changes):
+        return behaviour_scenario(CLASS_FILE, {**entry_of(707528, 'cd_gate'), **changes})
+
+    def test_off_by_default_every_arm_shares_one_scenario(self):
+        _, expectations = self.scenario()
+        self.assertEqual([e.label.rsplit(' ', 1)[1] for e in expectations], ['without', 'with', 'beyond'])
+
+    def test_one_arm_alone_has_its_own_scenario_name_and_label(self):
+        plain, _ = self.scenario()
+        for arm, result in (('without', 67), ('with', 0), ('beyond', 67), ('unfulfilled', 67)):
+            scenario, expectations = self.scenario(only_arm=arm)
+            self.assertEqual([e.label.rsplit(' ', 1)[1] for e in expectations], [arm])
+            self.assertEqual([e.displayed for e in expectations], [str(result)])
+            self.assertTrue(scenario['name'].endswith(f' {arm}'))
+            self.assertNotEqual(scenario['name'], plain['name'])
+            self.assertEqual(len([s for s in scenario['steps'] if s.get('metric') == 'cast_failure']), 1)
+
+    def test_the_talent_is_learned_only_in_the_arms_that_have_it(self):
+        learned = lambda arm: [s['spell'] for s in self.scenario(only_arm=arm)[0]['steps']
+                               if s['action'] == 'learn' and s['spell'] == 707528]
+        self.assertEqual(learned('without'), [])
+        for arm in ('with', 'beyond', 'unfulfilled'):
+            self.assertEqual(learned(arm), [707528])
+
+    def test_the_beyond_attempt_is_earlier_than_the_with_attempt(self):
+        waits = lambda arm: [s['ms'] for s in self.scenario(only_arm=arm)[0]['steps']
+                             if s['action'] == 'wait' and s.get('label', '').endswith('cooldown wait')]
+        self.assertGreater(waits('with')[0], waits('beyond')[0])
+
+    def test_priming_reads_precede_the_priming_cast_and_are_judged_per_scenario(self):
+        reads = [{'spell': 807440, 'expected': 1}, {'spell': 803719, 'expected': 1}]
+        scenario, expectations = self.scenario(only_arm='with', priming_reads=reads)
+        steps = scenario['steps']
+        priming = [i for i, s in enumerate(steps) if ' priming ' in s.get('label', '')]
+        self.assertEqual([steps[i]['spell'] for i in priming], [807440, 803719])
+        cast = next(i for i in range(priming[-1], len(steps)) if steps[i]['action'] == 'cast')
+        self.assertEqual(steps[cast]['spell'], 500154)
+        self.assertEqual([e.displayed for e in expectations if ' priming ' in e.label], ['1', '1'])
+        void = next(e for e in expectations if e.label.endswith('priming 807440'))
+        self.assertEqual(judged(void, {void.label: 0.0}), 'alert')
+        self.assertEqual(judged(void, {void.label: 1.0}), 'ok')
+
+    def test_priming_reads_are_off_by_default(self):
+        scenario, expectations = self.scenario(only_arm='with')
+        self.assertFalse([s for s in scenario['steps'] if ' priming ' in s.get('label', '')])
+        self.assertFalse([e for e in expectations if ' priming ' in e.label])
+
+    def test_only_arm_refuses_an_unknown_arm_and_an_incompatible_gate(self):
+        for changes in ({'only_arm': 'next'}, {'only_arm': 'with', 'next_arm': True},
+                        {'only_arm': 'with', 'unset_arm': True}, {'only_arm': 'with', 'talent_aura': 123456}):
+            with self.assertRaisesRegex(ValueError, 'only_arm'):
+                self.scenario(**changes)
+
+    def test_priming_reads_refuse_a_state_other_than_0_or_1(self):
+        with self.assertRaisesRegex(ValueError, 'priming_reads'):
+            self.scenario(only_arm='with', priming_reads=[{'spell': 807440, 'expected': 2}])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class ThreatSlopeFieldTests(unittest.TestCase):
     def sunflare(self, **changes) -> dict:
         entry = {**entry_of(504734, 'threat_slope_sunflare'), **changes}

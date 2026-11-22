@@ -15679,6 +15679,218 @@
       "gate_spell": 805581
     },
     {
+      "spell": 805581,
+      "name": "Trial of Valor recast (talent absent: Horusath Blast refused at 23.2 s)",
+      "kind": "cost_gate",
+      "variant": "recast_without",
+      "label_suffix": "recast",
+      "quote": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "margin_ms": 200,
+      "setup_casts": [
+        [
+          803719,
+          "caster"
+        ],
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 carries CasterAuraSpell 704396 (helper aura set at 20 Solar Power by AscensionSunCleric.cpp:260 and :357) and its fulfilment is SpendDawn (AscensionSunClericAbilities.cpp:105-115); 500149 is set at 20 stacks on the caster before the Dawn cast, a named precondition fixture; the claim measured is the cooldown cut."
+        },
+        {
+          "spell": 500154,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "823764 (Effect[0] aura 123 MOD_TARGET_RESISTANCE -9999 removes the dummy's resists; Effect[1] aura 108 +100% SPELLMOD_EFFECT1 matches neither 500154 nor 570034) and 984954 (Effect[1] aura 57 -1000 removes the caster's natural spell crit chance; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101% does not reach the magic 500154), set before every Horusath Blast cast as in the cd entry: precondition fixtures, the claim measured is the cooldown cut. The generated scenario also sets 704396 (20 Solar Power, the CasterAuraSpell of 804584) with set_aura before each Dawn cast: a precondition fixture, not the claim."
+        }
+      ],
+      "only_arm": "without",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        },
+        {
+          "spell": 803719,
+          "expected": 1
+        }
+      ],
+      "observe_source": "without 805581 the recast at 23.2 s is refused (67). Horusath Blast 500154 (RecoveryTime 25000) is the cast that fulfils the Vow: Spell::_cast starts its cooldown entry (Spell.cpp:4036) before the hit; SpendDawn (AscensionSunClericAbilities.cpp:105-117, :214) sets the Dawn script value, the Vow of Grace proc (AscensionSunClericEvents.cpp:164-172) calls Fulfill (AscensionSunCleric.cpp:287-293) and Reduce cuts 807445 (2000 ms) from the existing entry (Player.cpp:11969). Vow of Grace 803719 and Dawn 804584 are real casts (20 Solar Power 500149 and 704396 are the named precondition fixtures of the Dawn cast); each scenario holds one arm, so no other arm leaves Dawn or the Vow behind. Dawn 807440 and the Vow aura 803719 are read on the caster right before the priming cast. The recast of 500154 is attempted 23200 ms after the priming cast (25000 - 2000 + 200) or 22800 ms for the beyond arm; the expectations come from the DBC RecoveryTime 25000 and 807445 BasePoints -2001, never from a run."
+    },
+    {
+      "spell": 805581,
+      "name": "Trial of Valor recast (fulfilled Vow: Horusath Blast accepted at 23.2 s)",
+      "kind": "cost_gate",
+      "variant": "recast_with",
+      "label_suffix": "recast",
+      "quote": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "margin_ms": 200,
+      "setup_casts": [
+        [
+          803719,
+          "caster"
+        ],
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 carries CasterAuraSpell 704396 (helper aura set at 20 Solar Power by AscensionSunCleric.cpp:260 and :357) and its fulfilment is SpendDawn (AscensionSunClericAbilities.cpp:105-115); 500149 is set at 20 stacks on the caster before the Dawn cast, a named precondition fixture; the claim measured is the cooldown cut."
+        },
+        {
+          "spell": 500154,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "823764 (Effect[0] aura 123 MOD_TARGET_RESISTANCE -9999 removes the dummy's resists; Effect[1] aura 108 +100% SPELLMOD_EFFECT1 matches neither 500154 nor 570034) and 984954 (Effect[1] aura 57 -1000 removes the caster's natural spell crit chance; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101% does not reach the magic 500154), set before every Horusath Blast cast as in the cd entry: precondition fixtures, the claim measured is the cooldown cut. The generated scenario also sets 704396 (20 Solar Power, the CasterAuraSpell of 804584) with set_aura before each Dawn cast: a precondition fixture, not the claim."
+        }
+      ],
+      "only_arm": "with",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        },
+        {
+          "spell": 803719,
+          "expected": 1
+        }
+      ],
+      "observe_source": "with 805581 and a fulfilled Vow the recast at 23.2 s is accepted (0). Horusath Blast 500154 (RecoveryTime 25000) is the cast that fulfils the Vow: Spell::_cast starts its cooldown entry (Spell.cpp:4036) before the hit; SpendDawn (AscensionSunClericAbilities.cpp:105-117, :214) sets the Dawn script value, the Vow of Grace proc (AscensionSunClericEvents.cpp:164-172) calls Fulfill (AscensionSunCleric.cpp:287-293) and Reduce cuts 807445 (2000 ms) from the existing entry (Player.cpp:11969). Vow of Grace 803719 and Dawn 804584 are real casts (20 Solar Power 500149 and 704396 are the named precondition fixtures of the Dawn cast); each scenario holds one arm, so no other arm leaves Dawn or the Vow behind. Dawn 807440 and the Vow aura 803719 are read on the caster right before the priming cast. The recast of 500154 is attempted 23200 ms after the priming cast (25000 - 2000 + 200) or 22800 ms for the beyond arm; the expectations come from the DBC RecoveryTime 25000 and 807445 BasePoints -2001, never from a run."
+    },
+    {
+      "spell": 805581,
+      "name": "Trial of Valor recast (Vow cast, no Dawn, nothing fulfilled: Horusath Blast refused at 23.2 s)",
+      "kind": "cost_gate",
+      "variant": "recast_unfulfilled",
+      "label_suffix": "recast",
+      "quote": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "margin_ms": 200,
+      "setup_casts": [
+        [
+          803719,
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 carries CasterAuraSpell 704396 (helper aura set at 20 Solar Power by AscensionSunCleric.cpp:260 and :357) and its fulfilment is SpendDawn (AscensionSunClericAbilities.cpp:105-115); 500149 is set at 20 stacks on the caster before the Dawn cast, a named precondition fixture; the claim measured is the cooldown cut."
+        },
+        {
+          "spell": 500154,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "823764 (Effect[0] aura 123 MOD_TARGET_RESISTANCE -9999 removes the dummy's resists; Effect[1] aura 108 +100% SPELLMOD_EFFECT1 matches neither 500154 nor 570034) and 984954 (Effect[1] aura 57 -1000 removes the caster's natural spell crit chance; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101% does not reach the magic 500154), set before every Horusath Blast cast as in the cd entry: precondition fixtures, the claim measured is the cooldown cut. The generated scenario also sets 704396 (20 Solar Power, the CasterAuraSpell of 804584) with set_aura before each Dawn cast: a precondition fixture, not the claim."
+        }
+      ],
+      "only_arm": "unfulfilled",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        },
+        {
+          "spell": 803719,
+          "expected": 1
+        }
+      ],
+      "observe_source": "with 805581 but no fulfilling cast the recast at 23.2 s is refused (67). Horusath Blast 500154 (RecoveryTime 25000) is the cast that fulfils the Vow: Spell::_cast starts its cooldown entry (Spell.cpp:4036) before the hit; SpendDawn (AscensionSunClericAbilities.cpp:105-117, :214) sets the Dawn script value, the Vow of Grace proc (AscensionSunClericEvents.cpp:164-172) calls Fulfill (AscensionSunCleric.cpp:287-293) and Reduce cuts 807445 (2000 ms) from the existing entry (Player.cpp:11969). Vow of Grace 803719 and Dawn 804584 are real casts (20 Solar Power 500149 and 704396 are the named precondition fixtures of the Dawn cast); each scenario holds one arm, so no other arm leaves Dawn or the Vow behind. Dawn 807440 and the Vow aura 803719 are read on the caster right before the priming cast. The recast of 500154 is attempted 23200 ms after the priming cast (25000 - 2000 + 200) or 22800 ms for the beyond arm; the expectations come from the DBC RecoveryTime 25000 and 807445 BasePoints -2001, never from a run."
+    },
+    {
+      "spell": 805581,
+      "name": "Trial of Valor recast (fulfilled Vow: Horusath Blast refused at 22.8 s)",
+      "kind": "cost_gate",
+      "variant": "recast_beyond",
+      "label_suffix": "recast",
+      "quote": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "margin_ms": 200,
+      "setup_casts": [
+        [
+          803719,
+          "caster"
+        ],
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 carries CasterAuraSpell 704396 (helper aura set at 20 Solar Power by AscensionSunCleric.cpp:260 and :357) and its fulfilment is SpendDawn (AscensionSunClericAbilities.cpp:105-115); 500149 is set at 20 stacks on the caster before the Dawn cast, a named precondition fixture; the claim measured is the cooldown cut."
+        },
+        {
+          "spell": 500154,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "823764 (Effect[0] aura 123 MOD_TARGET_RESISTANCE -9999 removes the dummy's resists; Effect[1] aura 108 +100% SPELLMOD_EFFECT1 matches neither 500154 nor 570034) and 984954 (Effect[1] aura 57 -1000 removes the caster's natural spell crit chance; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101% does not reach the magic 500154), set before every Horusath Blast cast as in the cd entry: precondition fixtures, the claim measured is the cooldown cut. The generated scenario also sets 704396 (20 Solar Power, the CasterAuraSpell of 804584) with set_aura before each Dawn cast: a precondition fixture, not the claim."
+        }
+      ],
+      "only_arm": "beyond",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        },
+        {
+          "spell": 803719,
+          "expected": 1
+        }
+      ],
+      "observe_source": "with 805581 and a fulfilled Vow the recast at 22.8 s, 2200 ms after the cut ends, is refused (67). Horusath Blast 500154 (RecoveryTime 25000) is the cast that fulfils the Vow: Spell::_cast starts its cooldown entry (Spell.cpp:4036) before the hit; SpendDawn (AscensionSunClericAbilities.cpp:105-117, :214) sets the Dawn script value, the Vow of Grace proc (AscensionSunClericEvents.cpp:164-172) calls Fulfill (AscensionSunCleric.cpp:287-293) and Reduce cuts 807445 (2000 ms) from the existing entry (Player.cpp:11969). Vow of Grace 803719 and Dawn 804584 are real casts (20 Solar Power 500149 and 704396 are the named precondition fixtures of the Dawn cast); each scenario holds one arm, so no other arm leaves Dawn or the Vow behind. Dawn 807440 and the Vow aura 803719 are read on the caster right before the priming cast. The recast of 500154 is attempted 23200 ms after the priming cast (25000 - 2000 + 200) or 22800 ms for the beyond arm; the expectations come from the DBC RecoveryTime 25000 and 807445 BasePoints -2001, never from a run."
+    },
+    {
       "spell": 680630,
       "name": "Pendant of the Sun (charges after the refresh: nine heals leave one)",
       "kind": "metric_delta",
