@@ -3338,8 +3338,9 @@ bool Player::addSpell(uint32 spellId, uint8 addSpecMask, bool updateActive, bool
                     }
                     else if (IsInWorld())
                     {
+                        // The client holds a rank shown as its temporary replacement only under that replacement.
                         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-                        data << uint32(nextSpellInfo->Id);
+                        data << uint32(GetClientShownSupersededSpell(nextSpellInfo->Id));
                         data << uint32(spellInfo->Id);
                         SendDirectMessage(&data);
                     }
@@ -14272,6 +14273,21 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, b
         }
         sScriptMgr->OnPlayerTemporarySpellReplacementNotice(this, previous, replacement, true);
     }
+}
+
+uint32 Player::GetClientShownSupersededSpell(uint32 superseded) const
+{
+    auto itr = m_temporarySpellReplacements.find(superseded);
+    if (itr == m_temporarySpellReplacements.end() || !HasActiveSpell(itr->second))
+        return superseded;
+
+    uint32 const replacement = itr->second;
+    bool const shownByAnother = std::any_of(m_temporarySpellReplacements.begin(), m_temporarySpellReplacements.end(),
+        [this, superseded, replacement](auto const& entry)
+        {
+            return entry.first != superseded && entry.second == replacement && HasActiveSpell(entry.first);
+        });
+    return shownByAnother ? superseded : replacement;
 }
 
 uint32 Player::GetTemporarySpellReplacement(uint32 original) const

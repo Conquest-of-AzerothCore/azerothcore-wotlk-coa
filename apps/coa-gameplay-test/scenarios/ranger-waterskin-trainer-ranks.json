@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Ranger trainer and the Book of Ascension teach Waterskin ranks 2-8 at their spell levels",
-  "contract": "Crude Waterskin 802808 (rank 1) comes with the Bushcraft skill at creation (SkillLineAbility 86420, SkillLine 505, AcquireMethod 2). Ranks 2-8 (802810, 802812-802817; Spell.dbc BaseLevel 14, 22, 30, 38, 44, 50, 56, the levels Exiles DB lists as 'Level required') are SkillLine 505 recipes with AcquireMethod 0 that no trainer, book or item taught. The Ranger class trainer (trainer 900021, Gustaf Blightflight 50281) and the Book of Ascension (SpellbookRankData) now sell each rank at its BaseLevel, requiring the rank below. A level-22 Ranger is offered rank 2 as available, rank 3 as unavailable until rank 2 is held, and rank 4 as unavailable below level 30; it buys ranks 2 and 3 from the trainer, is refused rank 4 at level 22, and buys rank 4 from the book at level 30. It does not test the client's window rendering.",
+  "contract": "Crude Waterskin 802808 (rank 1) comes with the Bushcraft skill at creation (SkillLineAbility 86420, SkillLine 505, AcquireMethod 2). Ranks 2-8 (802810, 802812-802817; Spell.dbc BaseLevel 14, 22, 30, 38, 44, 50, 56, the levels Exiles DB lists as 'Level required') are SkillLine 505 recipes with AcquireMethod 0 that no trainer, book or item taught. The Ranger class trainer (trainer 900021, Gustaf Blightflight 50281) and the Book of Ascension (SpellbookRankData) now sell each rank at its BaseLevel, requiring the rank below. A level-22 Ranger is offered rank 2 as available, rank 3 as unavailable until rank 2 is held, and rank 4 as unavailable below level 30; it buys ranks 2 and 3 from the trainer, is refused rank 4 at level 22, and buys rank 4 from the book at level 30. Each trainer purchase supersedes a held rank, so the trainer re-sends its window (#10825). It does not test the client's window rendering.",
   "timeout_ms": 60000,
   "players": [
     { "id": "ranger", "race": 1, "class": 21, "level": 22 }
@@ -63,10 +63,14 @@
       "action": "assert", "label": "Below level 30 Hardened Waterskin is refused", "actor": "ranger",
       "metric": "knows_spell", "spell": 802813, "equals": 0
     },
+    {
+      "action": "assert", "label": "Each rank that superseded a held rank re-sent the trainer window (#10825)",
+      "actor": "ranger", "metric": "trainer_list_packets", "equals": 3
+    },
     { "action": "gossip_hello", "label": "Open the Book of Ascension", "actor": "ranger", "target": "book" },
     {
       "action": "assert", "label": "The book opens its trainer window", "actor": "ranger",
-      "metric": "trainer_list_packets", "equals": 2
+      "metric": "trainer_list_packets", "equals": 4
     },
     {
       "action": "assert", "label": "The book holds Hardened Waterskin, unavailable at 22", "actor": "ranger",
