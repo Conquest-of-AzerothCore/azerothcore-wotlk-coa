@@ -3468,12 +3468,8 @@
   {
     "spell": 704579,
     "clause": "Does not work on bosses.",
-    "labels": [
-      "704579 behaviour_metric_delta boss_blind_stacks",
-      "704579 behaviour_metric_delta boss_hit",
-      "704579 behaviour_metric_delta blind_stacks"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": []
   },
   {
     "spell": 704579,

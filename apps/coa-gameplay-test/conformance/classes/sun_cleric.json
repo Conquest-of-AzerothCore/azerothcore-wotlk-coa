@@ -23399,7 +23399,6 @@
       "expected": 268,
       "after_at_least": 264,
       "after_at_most": 272,
-      "dummy_distance": 6,
       "area_dummies": [
         4.0
       ],
@@ -23441,7 +23440,6 @@
       "expected": 268,
       "after_at_least": 264,
       "after_at_most": 272,
-      "dummy_distance": 6,
       "area_dummies": [
         4.0
       ],
@@ -23477,99 +23475,13 @@
       "before_expected": 0,
       "metric": "spell_heal_total",
       "fields": {
-        "spell": 707774,
-        "target": "caster"
+        "spell": 707774
       },
       "caster_health_pct": 50,
       "expected": 40,
       "after_at_least": 39,
       "after_at_most": 41,
       "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). The caster is held at 50% of the health fixture before each cast so the heal is not capped. One dummy: the leech deals 399..405 and heals the caster for its EffectValueMultiplier 0.1 = 39.9..40.5, read within 39..41. Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
-    },
-    {
-      "spell": 704579,
-      "name": "Twilight (a boss gains no Blinded stacks)",
-      "kind": "metric_delta",
-      "variant": "boss_blind_stacks",
-      "label_suffix": "boss_blind_stacks",
-      "quote": "Does not work on bosses.",
-      "gate_spell": 704579,
-      "trigger_spell": 800231,
-      "target": "dummy",
-      "setup_casts": [
-        800231,
-        800231,
-        800231,
-        800231,
-        800231
-      ],
-      "setup_target": "dummy",
-      "setup_wait_ms": 2400,
-      "phase_auras": [
-        [
-          807435,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "metric": "aura_stacks",
-      "measure_actor": "dummy",
-      "fields": {
-        "spell": 505342,
-        "caster": "caster"
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "wait_ms": 2600,
-      "expire_ms": 500,
-      "observe_source": "AscensionSunCleric.cpp:312: Blinded 505342 is cast only when Twilight 704579 is known and the target is not a dungeon boss (Creature::IsDungeonBoss). The target is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, the Templar Sacred Defense dungeon_boss arm's striker), against the non-boss dummy of the blind_stacks entry (5 stacks, same casts). Vow of the Eclipse 807435 is set on the caster as a named precondition fixture, never the subject. Six Sunflare 800231 hits (five setup casts and the trigger, 2400 ms apart) at the boss: the stacks of 505342 read 0 before and after the learn; the boss_hit entry shows the Sunflare hits land on that creature. Control: blind_stacks reads 5 on the non-boss dummy in the same pair. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip words; nothing else found. ",
-      "target_entry": 31146
-    },
-    {
-      "spell": 704579,
-      "name": "Twilight (the Sunflare hits land on the boss)",
-      "kind": "metric_delta",
-      "variant": "boss_hit",
-      "label_suffix": "boss_hit",
-      "quote": "Does not work on bosses.",
-      "gate_spell": 704579,
-      "trigger_spell": 800231,
-      "target": "dummy",
-      "setup_casts": [
-        800231,
-        800231,
-        800231,
-        800231,
-        800231
-      ],
-      "setup_target": "dummy",
-      "setup_wait_ms": 2400,
-      "phase_auras": [
-        [
-          807435,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 800231,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 6,
-      "wait_ms": 2600,
-      "expire_ms": 500,
-      "observe_source": "AscensionSunCleric.cpp:312: Blinded 505342 is cast only when Twilight 704579 is known and the target is not a dungeon boss (Creature::IsDungeonBoss). The target is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, the Templar Sacred Defense dungeon_boss arm's striker), against the non-boss dummy of the blind_stacks entry (5 stacks, same casts). Vow of the Eclipse 807435 is set on the caster as a named precondition fixture, never the subject. Reads the damage count of Sunflare 800231 on the boss after the six casts: at least one landed (the chance that all six miss is under 1e-4 at any miss chance below 0.2), so the 0 stacks of boss_blind_stacks is not a missed cast. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip words; nothing else found. ",
-      "target_entry": 31146,
-      "after_at_least": 1,
-      "after_at_most": 6,
-      "setup_only_after": true,
-      "cast_in_before": false
     },
     {
       "spell": 804257,
@@ -23598,6 +23510,45 @@
       "learn": [
         560628
       ]
+    },
+    {
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "spell": 704903,
+      "name": "Adjudicator (diagnostic: the Wrath hit itself with the passive learned)",
+      "kind": "metric_delta",
+      "variant": "wrath_hit",
+      "label_suffix": "wrath_hit",
+      "quote": "If you only hit one target, the damage dealt is increased to that target by 50%.",
+      "gate_spell": 704903,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 536,
+      "after_at_least": 531,
+      "after_at_most": 541,
+      "observe_source": "Diagnostic of lone_damage: Justicar's Wrath 806980 read on the dummy with 704903 learned: 515..523 + int(0.25 x 70) = 532..540 at the reference stats (the 806980 damage entry), read within 531..541."
     }
   ],
   "player_observations": [],
