@@ -65,7 +65,9 @@ class EnemyShooterTests(unittest.TestCase):
 
     def test_the_ability_mode_does_not_void_on_the_refusal_it_tests(self):
         entry = shooter_entry('shooter_ability')
-        self.assertEqual(self.judged({}, {807778: [27], 572848: [30]}, entry).status, 'ok')
+        _, [expectation] = behaviour_scenario(class_file(), entry)
+        near = {expectation.model['enemy_shooter']['distance_label']: 2.0}
+        self.assertEqual(self.judged(near, {807778: [27], 572848: [29]}, entry).status, 'ok')
 
     def test_a_malformed_option_is_refused(self):
         good = shooter_entry()['enemy_shooter']

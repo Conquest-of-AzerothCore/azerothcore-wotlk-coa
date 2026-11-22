@@ -3,7 +3,7 @@ import math
 
 NAME = 'ally_arm'
 ORDER = 24
-METRIC_EVIDENCE = {'combat_reach': 'state'}
+METRIC_EVIDENCE = {'combat_reach': 'state', 'active_power': 'state'}
 PRECONDITION_ONLY_METRICS = frozenset(METRIC_EVIDENCE)
 ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7')
 RAID_SUBGROUP_TWO = ALLY_IDS[4:]
