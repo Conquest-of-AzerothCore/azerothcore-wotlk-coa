@@ -37686,7 +37686,7 @@
       "expected": 1500,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so this reads the caster only: it does not show that an ally's aura procs, which stays open as the \"any ally\" claim. The read uses one maximum health (10000): a flat 1500 heal would also pass, so the 15% scaling is not separated from a flat amount here. Threshold: the heal at 33.8% after the hit excludes a threshold at or below 33.8% (33% and 31.5%); heal_close_above is the read from above. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Each ally (ally_arm ally_strikes, ADR 1046): after the caster's strike, ally then ally2 are set to 3800 of 10000 health and struck once by the same Grave Coil; the caster's count of the striker's SPELL_GO of 47632 is read around each ally's strike (a strike that did not land voids the trial). The tooltip says any ally is healed once, so each of the caster, ally and ally2 expects one heal 681383 (read on the caster with fields.target per ally). Code reading: the once flag is the script value of the area Aura (AscensionSunClericEvents.cpp:79, :297), which the caster's application and the allies' applications may share; an ally heal of 0 would then be a finding against the tooltip, not a test fault.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so this reads the caster only: it does not show that an ally's aura procs, which stays open as the \"any ally\" claim. The read uses one maximum health (10000): a flat 1500 heal would also pass, so the 15% scaling is not separated from a flat amount here. Threshold: the heal at 33.8% after the hit excludes a threshold at or below 33.8% (33% and 31.5%); heal_close_above is the read from above. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Each ally (ally_arm ally_strikes, ADR 1046): after the caster's strike, ally then ally2 are set to 3800 of 10000 health and struck once by the same Grave Coil; the caster's count of the striker's SPELL_GO of 47632 is read around each ally's strike (a strike that did not land voids the trial). The tooltip says any ally is healed once, so each of the caster, ally and ally2 expects one heal 681383 (read on the caster with fields.target per ally). Code reading: the once flag is the script value of the area Aura (AscensionSunClericEvents.cpp:79, :297), which the caster's application and the allies' applications may share; an ally heal of 0 would then be a finding against the tooltip, not a test fault. Proof arms: the striker's hit on each ally is counted on the caster (spell_damage_count with caster striker and target the ally, as The Redeemer noncrit_strike_landed reads it), each ally holds 680646 in the after phase, and each ally's health is read: 3200 before, 4880 after when healed once (3380 if not).",
       "phase_auras": [
         [
           823764,
@@ -37736,6 +37736,82 @@
             "expected": 1,
             "tolerance": 0,
             "source": "tooltip: once for each ally; ally2 struck from 3800 to below 35% after ally"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally once per phase (cumulative), so a 0 heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally2 once per phase (cumulative), so a 0 heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally holds the Scroll's area aura in the after phase only (the reach_raid entry reads the same)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally2 holds the Scroll's area aura in the after phase only (the reach_raid entry reads the same)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally: 3800 less the full 600 Grave Coil (no Scroll) = 3200 before; 3800 less 420 (30% less magic damage taken, 680646 $s1) = 3380, plus the 15% heal of 10000 = 4880 after (3380 when not healed)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally2: 3800 less the full 600 Grave Coil (no Scroll) = 3200 before; 3800 less 420 (30% less magic damage taken, 680646 $s1) = 3380, plus the 15% heal of 10000 = 4880 after (3380 when not healed)"
           }
         ]
       }
@@ -37994,104 +38070,6 @@
         ]
       ],
       "expected": 1,
-      "force_crit": "spell"
-    },
-    {
-      "spell": 805301,
-      "name": "Holy Form (the extra heal procs The Redeemer)",
-      "kind": "metric_delta",
-      "variant": "extra_heal_redeemer",
-      "label_suffix": "extra_heal_redeemer",
-      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
-      "trigger_spell": 503624,
-      "target": "ally",
-      "measure_actor": "caster",
-      "learn": [
-        804247,
-        300339
-      ],
-      "setup_casts": [
-        804247,
-        805301
-      ],
-      "setup_wait_ms": 2000,
-      "phase_power": [
-        0,
-        2021,
-        2043
-      ],
-      "expire_ms": 500,
-      "metric": "spell_go_count",
-      "fields": {
-        "spell": 301005
-      },
-      "before_expected": 1,
-      "wait_ms": 1500,
-      "ally_arm": {
-        "allies": 1,
-        "ally_health": [
-          5000,
-          10000
-        ],
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 503624,
-              "target": "ally"
-            },
-            "before_expected": 1,
-            "expected": 2,
-            "tolerance": 0,
-            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 807994,
-              "target": "ally"
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "every extra heal 807994: the critical count equals it, so the one extra heal is critical"
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 503624,
-              "target": "ally",
-              "critical": true
-            },
-            "before_expected": 1,
-            "expected": 2,
-            "tolerance": 0,
-            "source": "the forced crit fixture works: each Daybreak heal reads critical"
-          }
-        ]
-      },
-      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. The Redeemer 300339 (learned in both phases): a critical heal casts 301005 on its target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379; Spell.dbc Description 'When you critically heal your target, they will be healed for 30%...'); the Holy Form heal 807994 is admitted at :109. force_crit spell (spell_crit_rating 100000 on the caster), reads critical. The caster's SPELL_GO count of 301005, cumulative: 1 after the before phase (the Daybreak crit, no extra heal below the gate), 3 after the after phase (Daybreak crit and 807994 crit); a 807994 that did not proc reads 2. Arms read 807994 critical and both Daybreaks critical. Holy Form removed at each phase start before its setup cast. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
-      "tolerance": 0,
-      "disable_regeneration": true,
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          805301,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "expected": 3,
       "force_crit": "spell"
     }
   ],

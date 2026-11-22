@@ -6445,8 +6445,7 @@
     "clause": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
     "labels": [
       "805301 effect_value #2",
-      "805301 behaviour_metric_delta extra_heal_crit",
-      "805301 behaviour_metric_delta extra_heal_redeemer"
+      "805301 behaviour_metric_delta extra_heal_crit"
     ],
     "kind": "claim",
     "reason": "Open, data label only: the additional healing, its critical strike and The Redeemer proc depend on the Bless ally path of the clause above. Not given a final status."
