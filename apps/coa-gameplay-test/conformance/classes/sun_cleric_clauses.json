@@ -197,7 +197,8 @@
     "spell": 300324,
     "clause": "Allows Dawn to affect $s1 additional casts.",
     "labels": [
-      "300324 effect_value e0 #0"
+      "300324 effect_value e0 #0",
+      "300324 behaviour_metric_delta dawn_casts"
     ],
     "kind": "claim"
   },
@@ -238,7 +239,8 @@
     "spell": 300329,
     "clause": "Allows Dawn to affect $s1 additional casts.",
     "labels": [
-      "300329 effect_value e0 #0"
+      "300329 effect_value e0 #0",
+      "300329 behaviour_metric_delta dawn_casts"
     ],
     "kind": "claim"
   },
@@ -246,7 +248,8 @@
     "spell": 300331,
     "clause": "Your Vow of Light now heals for an additional $s1% of damage taken or direct healing done by you.",
     "labels": [
-      "300331 effect_value e0 #0"
+      "300331 effect_value e0 #0",
+      "300331 behaviour_metric_delta vow_heal"
     ],
     "kind": "claim"
   },
@@ -603,7 +606,8 @@
     "spell": 300626,
     "clause": "Increases your spell haste by $s1%,",
     "labels": [
-      "300626 effect_value e0 #0"
+      "300626 effect_value e0 #0",
+      "300626 behaviour_metric_delta night_haste"
     ],
     "kind": "claim"
   },
@@ -611,7 +615,9 @@
     "spell": 300626,
     "clause": "plus an additional $s2% during the day.",
     "labels": [
-      "300626 effect_value e1 #1"
+      "300626 effect_value e1 #1",
+      "300626 behaviour_metric_delta day_haste",
+      "300626 behaviour_metric_delta night_haste"
     ],
     "kind": "claim"
   },
@@ -829,10 +835,22 @@
   {
     "spell": 301313,
     "clause": "While Vow of Grace is active, your Glorious Execution now regenerates an additional $807446s3% mana equal to the damage dealt.",
-    "labels": [
-      "301313 effect_value 807446e2 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While Vow of Grace is active, your Glorious Execution now regenerates an additional mana equal to the damage dealt",
+        "labels": [
+          "301313 behaviour_metric_delta ge_mana_vow",
+          "301313 behaviour_metric_delta ge_mana_no_vow"
+        ]
+      },
+      {
+        "claim": "$807446s3% (the additional percent)",
+        "labels": [
+          "301313 effect_value 807446e2 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 301343,
@@ -2164,8 +2182,21 @@
   {
     "spell": 680630,
     "clause": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Activate your pendant of the sun, refreshing the duration of Dawn",
+        "labels": [
+          "680630 behaviour_metric_delta pendant_duration"
+        ]
+      },
+      {
+        "claim": "and all charges of Dawn",
+        "labels": [
+          "680630 behaviour_metric_delta pendant_charges"
+        ]
+      }
+    ]
   },
   {
     "spell": 680631,
@@ -2441,7 +2472,8 @@
     "spell": 680670,
     "clause": "Increases your chance to block by $s2%",
     "labels": [
-      "680670 effect_value e1 #0"
+      "680670 effect_value e1 #0",
+      "680670 behaviour_metric_delta block"
     ],
     "kind": "claim"
   },
@@ -2449,7 +2481,8 @@
     "spell": 680670,
     "clause": "and reduces the duration of movement slowing effects by $s1%.",
     "labels": [
-      "680670 effect_value e0 #1"
+      "680670 effect_value e0 #1",
+      "680670 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },
@@ -2544,10 +2577,23 @@
   {
     "spell": 681252,
     "clause": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
-    "labels": [
-      "681252 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration of Champion of the Sun by $/1000;s2 sec",
+        "labels": [
+          "681252 effect_value e1 #1",
+          "681252 behaviour_metric_delta champion_duration",
+          "681252 behaviour_metric_delta champion_duration_control"
+        ]
+      },
+      {
+        "claim": "and Chains of Light by $/1000;s2 sec",
+        "labels": [
+          "681252 behaviour_metric_delta chains_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 681253,
@@ -2802,7 +2848,8 @@
     "spell": 704581,
     "clause": "Reduces the duration of stun effects on you by $s2%.",
     "labels": [
-      "704581 effect_value e1 #0"
+      "704581 effect_value e1 #0",
+      "704581 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },
@@ -4532,7 +4579,9 @@
     "spell": 805581,
     "clause": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
     "labels": [
-      "805581 effect_value 807445e0 #0"
+      "805581 effect_value 807445e0 #0",
+      "805581 behaviour_metric_delta cd",
+      "805581 behaviour_metric_delta cd_control"
     ],
     "kind": "claim"
   },
