@@ -15432,6 +15432,202 @@
         ]
       },
       "observe_source": "804628 Suncharged Effect[0] aura 42 PROC_TRIGGER_SPELL 807080; Judgement Day 570125 (DurationIndex 9 = 30000 ms) gets a periodic dummy effect in slot 2 with Amplitude 500 (AscensionSunClericContracts.cpp:266-275) whose tick casts Suncharge 807080 on the target when 804628 is known (AscensionSunClericAuras.cpp:236-239); 807080 StackAmount 10 (DurationIndex 31), Effect[1] EffectAmplitude 500 ($807080t2 = 0.5 s). Judgement Day 806121 is cast at the dummy in both phases, 804628 learned between them (control: the first phase without the passive, 0 stacks), and the stacks of 807080 on the dummy are read. The read is taken 5500..6500 ms after the cast, when 11 to 13 ticks have elapsed: the stacks read 10, the stated cap, not 11 or more. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'Your Judgement Day now applies Suncharged to the target every 1 sec, stacking 10 times.' (an older state: 1 sec; Spell.dbc 807080 Effect[1] EffectAmplitude 500 and the contract AscensionSunClericContracts.cpp:274-275 give 0.5 s, and the tooltip token $807080t2 reads the DBC); coa-history and merged PRs give nothing else."
+    },
+    {
+      "spell": 300315,
+      "name": "Judgement of the Valkyrie (Judgement Day cooldown)",
+      "kind": "metric_delta",
+      "variant": "judgement_day_cooldown",
+      "label_suffix": "judgement_day_cooldown",
+      "quote": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
+      "trigger_spell": 806121,
+      "gate_spell": 300315,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806121
+      },
+      "before_expected": 59500,
+      "expected": 44500,
+      "tolerance": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Judgement of the Valkyrie 300315 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -15001 (-15000 ms as read, $/1000;s1 = 15 sec), EffectSpellClassMask word 0 = 8 = SpellFamilyFlags[0] of Judgement Day 806121 (RecoveryTime 60000 ms, Spell.dbc). Judgement Day is cast for real on the dummy with and without 300315 learned between the phases, and the remaining cooldown of 806121 on the caster is read 500 ms after each cast: 59500 without the passive (control, band 1500 ms: 58000..61000) and 44500 with it, band 43000..46000, which excludes a 10% error (4500 ms) either side of the 45000 ms cooldown. Mana is set to the class base mana before the cast, regeneration off. Reference search 2026-11-22: coa-history spell 300315: 0 events (a passive); nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "spell": 807973,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Sunslam (3 ticks by 3.25 s)",
+      "variant": "period_lo",
+      "label_suffix": "period_lo",
+      "quote": "Slam an enemy every $t1 sec with the might of the sun,",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805639,
+        "target": "dummy"
+      },
+      "expected": 3,
+      "wait_ms": 3150,
+      "game_time": {
+        "after": [
+          3050,
+          3250
+        ]
+      },
+      "observe_source": "Sunslam 807973 Effect[0] aura 227 every 1000 ms ($t1) triggers 805639. The hits of 805639 on the dummy are counted 3050..3250 ms of game time after the cast: 3 (ticks at 1, 2 and 3 s). A period of 1100 ms (10% above) would have landed 2 by 3250 ms, so the period is at most 1083 ms. The reference character carries 10000 spell, melee hit and expertise rating (class file ratings), so no tick misses, dodges or parries. Dawn 807440 is a precondition fixture (set_aura, the cast is the claim); 823764 removes magic resistance. Control: no cast, 0. Reference search 2026-11-22: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs); bindmysoul 805629 text reads the same sentence; nothing found beyond the tooltip and the DBC for the timing."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "spell": 807973,
+      "target": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Sunslam (3 ticks by 3.9 s)",
+      "variant": "period_hi",
+      "label_suffix": "period_hi",
+      "quote": "Slam an enemy every $t1 sec with the might of the sun,",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805639,
+        "target": "dummy"
+      },
+      "expected": 3,
+      "wait_ms": 3775,
+      "game_time": {
+        "after": [
+          3650,
+          3900
+        ]
+      },
+      "observe_source": "Same cast as period_lo, counted 3650..3900 ms of game time after it: still 3 (the 4th tick is due at 4000 ms). A period of 900 ms (10% below) would have landed 4 by 3650 ms, so the period is above 912 ms; with period_lo it lies in (912, 1083] ms. Dawn 807440 and 823764 are precondition fixtures; ratings as period_lo. Control: no cast, 0. Reference search 2026-11-22: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs); bindmysoul 805629 text reads the same sentence; nothing found beyond the tooltip and the DBC for the timing."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "spell": 807973,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Sunslam (stun lasts 1 s)",
+      "variant": "stun_duration",
+      "label_suffix": "stun_duration",
+      "quote": "and stunning them for $807872d.",
+      "target_entry": 6,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 807872
+      },
+      "expected": 940,
+      "tolerance": 60,
+      "wait_ms": 1060,
+      "game_time": {
+        "after": [
+          1030,
+          1090
+        ]
+      },
+      "observe_source": "Sunslam 807973 Effect[2] aura 23 every 1000 ms triggers 807872 (Effect[0] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 36 = 1000 ms, $807872d). Target Kobold Vermin 6 (no immunities, entry 132 of this class), health set by the fixture. The first tick lands at 1000 ms (period_lo/period_hi bound the period to (912, 1083] ms), so the remaining duration of 807872 read 1030..1090 ms after the cast is 1000 minus the 30..90 ms since the tick, 910..970, band 880..1000: a duration of 900 ms would read 840 and one of 1100 ms 1040, both outside. Dawn and 823764 are precondition fixtures. Control: no cast, no aura (0). Reference search 2026-11-22: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs); bindmysoul 805629 text reads the same sentence; nothing found beyond the tooltip and the DBC for the timing."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 807973,
+      "spell": 807973,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Sunslam (aura lasts 4 s)",
+      "variant": "aura_duration",
+      "label_suffix": "aura_duration",
+      "quote": "Lasts $d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 807973
+      },
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "expiry_wait_ms": 450,
+      "wait_ms": 3800,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4100,
+          4350
+        ]
+      },
+      "observe_source": "Sunslam 807973 DurationIndex 35 (4000 ms, $d). The aura on the dummy is present when read 3650..3950 ms of game time after the cast and gone when read 4100..4350 ms after it, so the duration lies in (3650, 4350), inside 10% of 4000 (3600..4400) on both sides. Dawn and 823764 are precondition fixtures. Control: no cast, absent. Reference search 2026-11-22: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs); bindmysoul 805629 text reads the same sentence; nothing found beyond the tooltip and the DBC for the timing.",
+      "gate_timing": "start",
+      "trigger_only_after": true
     }
   ],
   "player_observations": [],

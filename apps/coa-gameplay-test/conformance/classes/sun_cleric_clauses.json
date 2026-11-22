@@ -129,7 +129,8 @@
     "spell": 300315,
     "clause": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
     "labels": [
-      "300315 effect_value e0 #0"
+      "300315 effect_value e0 #0",
+      "300315 behaviour_metric_delta judgement_day_cooldown"
     ],
     "kind": "claim"
   },
@@ -4672,7 +4673,9 @@
     "spell": 807973,
     "clause": "Slam an enemy every $t1 sec with the might of the sun,",
     "labels": [
-      "807973 aura_amplitude_ms #0"
+      "807973 aura_amplitude_ms #0",
+      "807973 behaviour_metric_delta period_lo",
+      "807973 behaviour_metric_delta period_hi"
     ],
     "kind": "claim"
   },
@@ -4689,7 +4692,8 @@
     "spell": 807973,
     "clause": "and stunning them for $807872d.",
     "labels": [
-      "807973 spell_duration 807872 #2"
+      "807973 spell_duration 807872 #2",
+      "807973 behaviour_metric_delta stun_duration"
     ],
     "kind": "claim"
   },
@@ -4697,7 +4701,8 @@
     "spell": 807973,
     "clause": "Lasts $d.",
     "labels": [
-      "807973 aura_duration_ms #3"
+      "807973 aura_duration_ms #3",
+      "807973 behaviour_metric_delta aura_duration"
     ],
     "kind": "claim"
   },
