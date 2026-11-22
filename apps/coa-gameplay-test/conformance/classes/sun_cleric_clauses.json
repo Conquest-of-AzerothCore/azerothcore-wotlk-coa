@@ -9,14 +9,50 @@
   {
     "spell": 92135,
     "clause": "After activating Dawn, casting a Holy spell grants Sunrise or casting a Fire spell grants Sunset.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "After activating Dawn, casting a Holy spell grants Sunrise",
+        "labels": [
+          "92135 behaviour_metric_delta sunrise_duration",
+          "92135 behaviour_metric_delta nodawn_sunrise",
+          "92135 behaviour_metric_delta nodawn_sunrise_landed"
+        ]
+      },
+      {
+        "claim": "or casting a Fire spell grants Sunset",
+        "labels": [
+          "92135 behaviour_metric_delta sunset_duration",
+          "92135 behaviour_metric_delta nodawn_sunset",
+          "92135 behaviour_metric_delta nodawn_sunset_landed"
+        ]
+      }
+    ],
+    "reason": "Sunrise and Sunset are read on the caster after a real Holy or Fire cast under Dawn (present) and without Dawn (absent, with the landing of the hit counted). Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc."
   },
   {
     "spell": 92135,
     "clause": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Entering Sunrise or Sunset prevents you from entering the other",
+        "labels": [
+          "92135 behaviour_metric_delta excl_sunset_blocked",
+          "92135 behaviour_metric_delta excl_sunrise_kept",
+          "92135 behaviour_metric_delta excl_fire_landed"
+        ]
+      },
+      {
+        "claim": "until you enter the next",
+        "labels": [
+          "92135 behaviour_metric_delta excl_next_dawn_sunset",
+          "92135 behaviour_metric_delta excl_next_dawn_sunrise_gone",
+          "92135 behaviour_metric_delta excl_next_fire_landed"
+        ]
+      }
+    ],
+    "reason": "After Sunrise a Fire cast under the same Dawn leaves Sunset absent and Sunrise present; after the next Dawn the Fire cast enters Sunset and removes Sunrise. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc."
   },
   {
     "spell": 92135,
@@ -2070,13 +2106,15 @@
     "labels": [
       "560492 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open (tool need): the token ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} is unreadable (missing '+' before $spfi, '$<scalingbp>' undefined), so no expected amount comes from data; the avoided-swing proc kind counts casts, not the damage amount and its SP and AP terms."
   },
   {
     "spell": 560492,
     "clause": "Can only occur once per sec.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open (tool need): the avoided-swing proc kind refuses swings spaced inside the 1000 ms cooldown (procs.py:567) and the internal_cooldown_gate kind casts its own trigger, which an avoided attack is not."
   },
   {
     "spell": 560534,
@@ -2408,7 +2446,7 @@
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
     "kind": "claim",
-    "reason": "The 80% literal is not measured: the arms read 90% (cast time 0) and 50% (control, 1500 ms), which any threshold between 50% and 90% passes, and the code keeps Fortuitous on above 80% and off only at or below 75% (AscensionSunCleric.cpp:366-371, hysteresis set on purpose by b2ad6f76d6, #5963, Fixes #5763/#5783). Tool need: a pre-step that clears the state below 75% before the reads at 79% (1500 ms expected) and 81% (0 ms expected), and a drop from full health to 76-79% that records the hysteresis. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
+    "reason": "Open for 'while above 80% health': the helper turns off only at or below 75% (AscensionSunCleric.cpp:366-371, hysteresis b2ad6f76d6, #5963, Fixes #5763), so after a drop from above 80% to 76-80% Glare stays instant while the tooltip says above 80%. Measured on the rising edge only (entries glare_81, glare_80, glare_79: 81% reads 0 ms, 80% and 79% 1500 ms after a pre-step to 70%), which does not exercise the falling edge, so the claim is not counted as behaviour. Needs a ruling: 'above 80%' against the hysteresis of #5963 (falling-edge arm 100% to 78%, tooltip expects 1500 ms). Cast time of Glare 807870 is SpellCastTimes 16 = 1500 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L found #5963; nothing else found.",
     "claims": [
       {
         "claim": "Removes the cast time of Glare",
@@ -3754,9 +3792,18 @@
   {
     "spell": 704579,
     "clause": "Does not work on bosses.",
-    "labels": [],
     "kind": "claim",
-    "reason": "Open. A harness fixture is not an owned boss: Creature::IsDungeonBoss() is false only for a player-owned creature (Creature.cpp:3627-3628, owner = UNIT_FIELD_SUMMONEDBY), and player->SummonCreature(entry, position) stores no owner (TemporarySummon.cpp:27-37, 229-230), so the flag read is the template's. Training dummy 31146 reads as a non-boss because CREATURE_FLAG_EXTRA_DUNGEON_BOSS is set only for kill-credit creatures of non-raid instance_encounters (ObjectMgr.cpp:6846-6862). Next design: a 5-man encounter kill-credit creature as the target (entry not checked, nor whether its AI tolerates the harness). Lead (observation, no change): AscensionSunCleric.cpp:312 tests only IsDungeonBoss(), and raid encounter creatures never get the flag (ObjectMgr.cpp:6856-6862), so a raid or world boss is not excluded although the tooltip says 'Does not work on bosses.'"
+    "reason": "Open, no label. Dungeon-boss part: AscensionSunCleric.cpp:312 skips Blinded 505342 only when IsDungeonBoss() (flag set at load from a non-raid instance_encounters credit creature, ObjectMgr.cpp:6846-6862). The Ramstein the Gorger 10439 arms (boss_blind, boss_hit_landed) are withdrawn: in all 4 runs of pairs 2 and 4 each boss scenario logged one cast failure, SpellCastResult 12 SPELL_FAILED_BAD_TARGETS (SharedDefines.h:1062) on Sunflare 800231, which the blind_duration scenario on the training dummy never logs, and boss_hit_landed read 0 hits in pair 4 run 1 (20261122-125701) so boss_blind passed on no hit. The cause of the failed cast is not established (a hit-rating fixture cannot fix a target check: the class file sets spell_hit_rating 10000, which clamps the hit chance to 100% so the miss roll of Unit.cpp MagicSpellHitResult never fires, not measured here), so no landing proof exists; the arms are archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json. Next design: read the cast result per cast before the learn and after it. Raid and world boss part: open, server fix approved by mentor decision D-154 (bosses include raid encounter creatures and world-boss rank; 00b1aaf7b2 / #8881 removed the dungeon-boss flag from raid credit creatures for rewards, not for this spell): the code excludes only dungeon bosses, so a raid or world boss is blinded today while the tooltip says bosses; the fix and its regression on the tool group 5 boss fixture follow. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); nothing found beyond the tooltip and Spell.dbc.",
+    "claims": [
+      {
+        "claim": "Does not work on dungeon bosses",
+        "labels": []
+      },
+      {
+        "claim": "Does not work on raid and world bosses",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 704579,
@@ -4962,7 +5009,7 @@
         "labels": []
       }
     ],
-    "reason": "Open: no label covers the Judgement Day cooldown; Paragon and Chosen of the Light have their own labels."
+    "reason": "Open for Judgement Day: the reset_806121 arms and their control are withdrawn (archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json): the control read cooldown 0 against 58400 in all 4 runs of pairs 2 and 4, so the setup cast of 806121 leaves no cooldown (RecoveryTime 60000, Spell.dbc) and the reset arm's 0 proves nothing. One design so far (cast at the caster, then at the dummy are two targets of the same design), so no status 3. Lead: establish that 806121 is cast and on cooldown right after the setup cast (cast-count or cooldown read) before New Day. Paragon and Chosen of the Light are proven by their own labels."
   },
   {
     "spell": 800602,
@@ -5985,10 +6032,9 @@
   {
     "spell": 805647,
     "clause": "Your Glorious Execution now has a $h% chance to strike 1 additional time.",
-    "labels": [
-      "805647 effect_value #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "reason": "Open, no label (tool need, design note sent to the controller). The proc_rate entry is withdrawn (archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json): it alerted in all 4 runs of pairs 2 and 4 (0.163-0.169 against 0.2). Cause by code reading, not measured: the proc cast of 800626 is cast triggered (Cast is CastSpell(target, id, true), AscensionSunCleric.cpp:83-86; TRIGGERED_DISALLOW_PROC_EVENTS in SpellDefines.h:152-154; Spell.cpp:2373), so its own 800691 hit never rolls, yet the entry counted it as a trial: 0.2 / 1.2 = 0.1667 matches all four reads. A rerun with trial_readings minus_events read 'no usable trial' in 66 of 66 parts in both runs (20261122-131508 / -131632): that reading only works where the trigger spell deals damage itself, and 800626 deals none (trigger_lands_no_hit mode sums the added labels and cannot take minus_events). Proc rate of Knight of Dawn 805647 is ProcChance 20 (Spell.dbc). Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc."
   },
   {
     "spell": 805816,

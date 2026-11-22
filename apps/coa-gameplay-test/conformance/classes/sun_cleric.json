@@ -27916,6 +27916,497 @@
       "cast_wait_ms": 1700,
       "parts": 8,
       "observe_source": "AscensionSunClericEvents.cpp:130 (damage && Justice spell && Chance(player, 806058), ProcChance 8) and :320 (ResetJusticeAfterCast: Reduce(player, 520359, INT32_MAX) one tick later, one SMSG_CLEAR_COOLDOWN per known spell named Justice). Justice 572848 triggers the strikes 572850 and 572045 (idIsJustice); the trial is a completed cast of the strike 572850 cast directly at the dummy, the packet is the clear-cooldown of 572848, learned by the kind as the reset spell, so the fixture reset of 572850 before each cast is not counted in it (the control must read zero packets). Valkyr weapon set (2529 pair, ADR 1017). Reference search 2026-11-22: coa-history spell 806058: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Damage dealt by Justice now has an 8% chance to reset its own cooldown.\" (agrees)."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "After activating Dawn, casting a Holy spell grants Sunrise or casting a Fire spell grants Sunset.",
+      "trigger_spell": 500154,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500477
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "cast_power": 1363,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (control: a Holy cast without Dawn grants no Sunrise)",
+      "variant": "nodawn_sunrise",
+      "label_suffix": "nodawn_sunrise",
+      "observe_source": "Control of sunrise_duration: Sunrise 500477 (Spell.dbc) on the caster after one real Horusath Blast 500154 (Holy) with 92135 learned but without the Dawn fixture 807440: the grant is 'after activating Dawn' (tooltip), so the aura reads absent (0) here against present (1) in sunrise_duration, where Dawn is set. Spell penetration fixture 823764 in both phases keeps the hit landing; its landing is the label nodawn_sunrise_landed. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "After activating Dawn, casting a Holy spell grants Sunrise or casting a Fire spell grants Sunset.",
+      "trigger_spell": 500154,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "cast_power": 1363,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (the Horusath Blast of the no-Dawn control lands)",
+      "variant": "nodawn_sunrise_landed",
+      "label_suffix": "nodawn_sunrise_landed",
+      "expected_gain": 1,
+      "observe_source": "Landing proof of nodawn_sunrise: the same Horusath Blast 500154 at the dummy, its damage events counted, 1 before the learn and one more after it, so the absent Sunrise is a landed hit without Dawn, not a miss. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "After activating Dawn, casting a Holy spell grants Sunrise or casting a Fire spell grants Sunset.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500511
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (control: a Fire cast without Dawn grants no Sunset)",
+      "variant": "nodawn_sunset",
+      "label_suffix": "nodawn_sunset",
+      "observe_source": "Control of sunset_duration: Sunset 500511 (Spell.dbc) on the caster after one real Dawnsear 554406 (Fire, 3500 ms cast) with 92135 learned but without Dawn 807440: absent (0) here against present (1) in sunset_duration, where Dawn is set. Fixture 823764 in both phases; landing is the label nodawn_sunset_landed. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "After activating Dawn, casting a Holy spell grants Sunrise or casting a Fire spell grants Sunset.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (the Dawnsear of the no-Dawn control lands)",
+      "variant": "nodawn_sunset_landed",
+      "label_suffix": "nodawn_sunset_landed",
+      "expected_gain": 1,
+      "observe_source": "Landing proof of nodawn_sunset: the same Dawnsear 554406 at the dummy, its damage events counted, 1 before the learn and one more after it. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500511
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (in Sunrise a Fire cast under the same Dawn does not enter Sunset)",
+      "variant": "excl_sunset_blocked",
+      "label_suffix": "excl_sunset_blocked",
+      "setup_casts": [
+        500154
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Sunset 500511 on the caster reads absent (0) after the Fire cast. Dawn 807440 (10 charges, Spell.dbc ProcCharges) set as the precondition fixture, effect 0 amount 1 (AscensionSunClericAuras.cpp:118-121); a real Horusath Blast 500154 (Holy) first grants Sunrise 500477 and clears the choice (AscensionSunClericAbilities.cpp:106-117), then a real Dawnsear 554406 (Fire) is cast under the same Dawn. Contrast: sunset_duration, where the Fire cast is the first under Dawn and Sunset is present (1); the same Fire cast is landed by fixture 823764. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500477
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (Sunrise stays after the blocked Fire cast)",
+      "variant": "excl_sunrise_kept",
+      "label_suffix": "excl_sunrise_kept",
+      "setup_casts": [
+        500154
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Sunrise 500477 on the caster still reads present (1) after the Fire cast, so the Fire cast did not enter Sunset in its place (a Sunset entry would remove it, AscensionSunClericAbilities.cpp:112-113). Dawn 807440 (10 charges, Spell.dbc ProcCharges) set as the precondition fixture, effect 0 amount 1 (AscensionSunClericAuras.cpp:118-121); a real Horusath Blast 500154 (Holy) first grants Sunrise 500477 and clears the choice (AscensionSunClericAbilities.cpp:106-117), then a real Dawnsear 554406 (Fire) is cast under the same Dawn. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500511
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (after the next Dawn a Fire cast enters Sunset)",
+      "variant": "excl_next_dawn_sunset",
+      "label_suffix": "excl_next_dawn_sunset",
+      "setup_casts": [
+        500154,
+        804584,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Sunset 500511 on the caster reads present (1): once the next Dawn is entered the other state can be entered. Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500477
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (entering Sunset replaces Sunrise)",
+      "variant": "excl_next_dawn_sunrise_gone",
+      "label_suffix": "excl_next_dawn_sunrise_gone",
+      "setup_casts": [
+        500154,
+        804584,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Sunrise 500477 on the caster reads absent (0) once Sunset is entered after the next Dawn (Sunrise is removed when Sunset is granted, AscensionSunClericAbilities.cpp:112-113). Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (the blocked Fire cast lands)",
+      "variant": "excl_fire_landed",
+      "label_suffix": "excl_fire_landed",
+      "setup_casts": [
+        500154
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Landing proof of the exclusivity arms: the same setup and Dawnsear 554406 cast, its damage events on the dummy counted, 1 before the learn and one more after it, so the Fire cast was not blocked by a failed cast. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc.",
+      "expected_gain": 1
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (the Fire cast after the next Dawn lands)",
+      "variant": "excl_next_fire_landed",
+      "label_suffix": "excl_next_fire_landed",
+      "setup_casts": [
+        500154,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Landing proof of the exclusivity arms: the same setup and Dawnsear 554406 cast, its damage events on the dummy counted, 1 before the learn and one more after it, so the Fire cast was not blocked by a failed cast. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc.",
+      "expected_gain": 1
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (Glare cast time, above 80%: 81% health, after a drop to 70%)",
+      "variant": "glare_81",
+      "label_suffix": "glare_81",
+      "caster_health_pct": 81,
+      "before_expected": 1500,
+      "expected": 0,
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 81% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 0 ms, the helper 561396 Effect[0] ADD_PCT_MODIFIER MiscValue 10 BasePoints -101 on the Glare family flag is kept above 80% health. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found.",
+      "caster_health": [
+        7000,
+        10000
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (Glare cast time, control: exactly 80% health, after a drop to 70%)",
+      "variant": "glare_80",
+      "label_suffix": "glare_80",
+      "caster_health_pct": 80,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 80% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found.",
+      "caster_health": [
+        7000,
+        10000
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (Glare cast time, control: 79% health, after a drop to 70%)",
+      "variant": "glare_79",
+      "label_suffix": "glare_79",
+      "caster_health_pct": 79,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 79% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found.",
+      "caster_health": [
+        7000,
+        10000
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true
     }
   ],
   "player_observations": [],
