@@ -1265,7 +1265,9 @@
     "labels": [
       "504734 effect_value e0 #0",
       "504734 behaviour_metric_delta range_in",
-      "504734 behaviour_metric_delta range_out"
+      "504734 behaviour_metric_delta range_out",
+      "504734 behaviour_metric_delta range_channel_in",
+      "504734 behaviour_metric_delta range_channel_out"
     ],
     "kind": "claim",
     "reason": "Redesigned arms (b6a review I-1). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy: refused (97) before the learn and cast (0) after at 38.5 yd (range_in), refused (97) in both phases at 39.0 yd (range_out). With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 38.5 - 2.775 = 35.725 and 39.0 - 2.775 = 36.225 yd, a bonus of +19.1% to +20.75%, which excludes -10% and +10% of the +20% claim (+18% = 35.4 yd, +22% = 36.6 yd). Control arm: the same cast before the learn is refused at 38.5 yd (32.775 yd boundary without the talent). Subset: range tested on Horusath Blast 500154 only, no N-of-M split of the Piety spells yet (G-23). Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
