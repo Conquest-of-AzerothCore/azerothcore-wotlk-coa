@@ -20016,6 +20016,24 @@
       "before_expected": 1,
       "expected": 2,
       "observe_source": "503690 Dawn's Arrival Effect[0] aura 42 (ProcChance 40) -> 503691; AscensionSunClericAbilities.cpp:261-268 resets Gavel of Light/Wrath (800611, 800614, 800617) and casts 503691 when a Dawnbreak 800654 cast rolls Chance(player, 503690); :272-273 removes the cooldown of the next Gavel cast under 503691. Gavel of Light 800611 has a 5000 ms category cooldown (Spell.dbc CategoryRecoveryTime). The harness resets the cooldown of a setup cast before it, so only the trigger cast meets a live cooldown; casts are spaced 1600 ms, past the global cooldown, the roll is forced (forced_roll, SPELLMOD_CHANCE_OF_SUCCESS) after 503690 is learned and the counter is read as a gain (cumulative). Control = the same casts before 503690 is learned. Gavel (cooldown starts), Dawnbreak, then the trigger Gavel 3200 ms after the first: refused by the cooldown without 503690 (1 completed Gavel), completed after the reset (2). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 572752,
+      "name": "Sun Down (attackers swing inside the scorched earth)",
+      "kind": "attacker_miss_share",
+      "variant": "attacker_miss",
+      "label_suffix": "attacker_miss",
+      "quote": "reduces the target's chance to hit by",
+      "quote_spell": 807175,
+      "cast_spell": 572752,
+      "aura": 807175,
+      "aura_effect": 0,
+      "expected": 3,
+      "arm_ms": 640000,
+      "cycle_ms": 8000,
+      "settle_ms": 13000,
+      "parts": 5,
+      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), applied every 3000 ms by the ground aura 572754 of Sun Down 572752 (CastingTimeIndex 5 = 2000 ms, ground 9000 ms starting 4000 ms after the cast starts). Eight aggressive stationary attackers (Harvest Golem 36, class level) melee the caster; the control arm counts their swings and misses with no cast, the treatment arm recasts Sun Down every 8000 ms (reset_cooldown and set_power are named precondition fixtures, G-21 point 6) and counts after 13000 ms, once the aura from the caster is read on every attacker; the aura is read on every attacker at each cycle end. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run); the judge takes the 99% interval of the difference of the two shares against the band of 2 points (the larger of 5% of 3 and 2), a verdict needing a half-width of at most half the band, so a correct server fails by chance with probability under 1e-6 and one 3 points off is excluded. Reference search 2026-11-22: coa-history spell 572752/572753/572754/807175: Sun Down in one log (2026-08-01, 7 casts, no combat-table data on the attackers' swings); the bindmysoul snapshot carries the same sentence; nothing else found."
     }
   ],
   "player_observations": [],

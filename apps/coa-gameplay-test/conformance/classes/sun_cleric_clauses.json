@@ -2260,7 +2260,9 @@
     "claims": [
       {
         "claim": "reduces the target's chance to hit by $s1%",
-        "labels": []
+        "labels": [
+          "572752 behaviour_metric_delta attacker_miss"
+        ]
       },
       {
         "claim": "for $d: lasts more than 9.15 s after the last tick",
@@ -2695,7 +2697,8 @@
     "spell": 680650,
     "clause": "Increases your chance to dodge by $s1%.",
     "labels": [
-      "680650 effect_value e0 #0"
+      "680650 effect_value e0 #0",
+      "680650 e0 dodge_chance"
     ],
     "kind": "claim"
   },
@@ -4715,7 +4718,8 @@
     "spell": 804339,
     "clause": "Increases your attack power by $s1%",
     "labels": [
-      "804339 effect_value e0 #0"
+      "804339 effect_value e0 #0",
+      "804339 e0 attack_power"
     ],
     "kind": "claim"
   },
@@ -4723,7 +4727,8 @@
     "spell": 804339,
     "clause": "and your spell hit rating by $s2% of your Strength.",
     "labels": [
-      "804339 effect_value e1 #1"
+      "804339 effect_value e1 #1",
+      "804339 e1 combat_rating 7"
     ],
     "kind": "claim"
   },
