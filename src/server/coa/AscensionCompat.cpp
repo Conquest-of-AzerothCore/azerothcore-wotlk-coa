@@ -5127,6 +5127,11 @@ public:
     return vanity == _vanityItems.end() || IsVanityItemForPlayer(player, vanity->second);
   }
 
+  [[nodiscard]] uint32 VanityLearnedSpell(uint32 itemId) const {
+    auto const vanity = _vanityItems.find(itemId);
+    return vanity == _vanityItems.end() ? 0 : vanity->second.LearnedSpell;
+  }
+
   bool LoadClientData() {
     _appearances.clear();
     _itemAppearances.clear();
@@ -9735,6 +9740,30 @@ enum StoreTitleContract : uint32
     TITLE_FOUNDER = 210
 };
 
+class item_ascension_vanity_mount_cache : public ItemScript
+{
+public:
+    item_ascension_vanity_mount_cache() : ItemScript("item_ascension_vanity_mount_cache") { }
+
+    bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
+    {
+        uint32 const mountSpell = AscensionCollectionService::Instance().VanityLearnedSpell(item->GetEntry());
+        if (!mountSpell || !sSpellMgr->GetSpellInfo(mountSpell))
+            return false;
+
+        player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+        if (player->HasSpell(mountSpell))
+        {
+            ChatHandler(player->GetSession()).SendNotification("You already know this mount.");
+            return true;
+        }
+
+        player->learnSpell(mountSpell);
+        player->DestroyItemCount(item->GetEntry(), 1, true);
+        return true;
+    }
+};
+
 class item_coa_title_contract : public AllItemScript
 {
 public:
@@ -10862,6 +10891,7 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_wildcard_mount);
   RegisterSpellScript(spell_ascension_legacy_quest_reward);
   new AscensionTradesmanScroll();
+  new item_ascension_vanity_mount_cache();
   new item_coa_title_contract();
   new AscensionCompatServerScript();
   new AscensionCompatCommandScript();
