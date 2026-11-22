@@ -657,7 +657,9 @@
     "claims": [
       {
         "claim": "can no longer be missed",
-        "labels": []
+        "labels": [
+          "300353 behaviour_metric_delta gavel_unmissed"
+        ]
       },
       {
         "claim": "can no longer be dodged",
@@ -667,7 +669,10 @@
       },
       {
         "claim": "can no longer be parried",
-        "labels": []
+        "labels": [
+          "300353 behaviour_metric_delta gavel_unparried_facing",
+          "300353 behaviour_metric_delta gavel_unparried_facing_control"
+        ]
       },
       {
         "claim": "they gain an empowered effect when under Holy Form (the Gavel of Light, Grace and Wrath clauses)",
@@ -690,7 +695,9 @@
       },
       {
         "claim": "the shield equals the amount healed",
-        "labels": []
+        "labels": [
+          "300353 behaviour_metric_delta light_shield_amount"
+        ]
       }
     ],
     "reason": "Shield: proven, entries light_shield (0 to 1) and light_shield_control (0 to 0) ok in both runs of the counted pair 20261122-215137 / 20261122-215215 (build 8d020c35a858, server commit 8576ef7bd7ce, no flip): Gavel of Light 800611 with Holy Form 805301 set by set_aura (precondition fixture), aura 805489 on the caster. \"Equal to the amount healed\": returned, not built. The ally_arm ratios refuse a readback metric arm (aura_amount is READBACK in coverage.METRIC_EVIDENCE, ally_arm.py:244-246) and the heal is a weapon-damage range the data does not state; the route needs a same-trial ratio of the absorbed damage to the heal (design note sent to the controller)."
@@ -1020,7 +1027,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -6517,7 +6524,7 @@
     "spell": 805301,
     "clause": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
     "kind": "claim",
-    "reason": "The gate and the ally heal are read by ally_bless_heal: the ally is below full health, the caster's mana is 850 then 872 at the Daybreak hook against a gate at 860.4, and the Daybreak arm proves the same heal landed in both phases. Open, tool need returned: \"sacrifice additional mana\" is the paid (extra + 3) / 4 of AscensionSunClericAbilities.cpp:365, which depends on the random heal amount and needs an arm-to-arm ratio. Not given a final status. Round B b1 (mentor D-214): the mana sacrifice is judged by direction only (D-165), partial proof counted on direction: ally_bless_mana (its before phase, 850 at the hook, is the below-30% arm: no extra heal and no extra mana; its after phase, 872, is the above-30% arm) reads the extra heal and mana below what the heal\u2019s own cost leaves above the gate, and no extra mana or heal below it; ally_bless_mana_no_form is the control without the form. Observation, not an expectation: the code pays (extra + 3) / 4 (AscensionSunClericAbilities.cpp:399, set by e36bc50aad); that formula is code-only and not the tooltip\u2019s, so the exact value stays open for the mentor.",
+    "reason": "The gate and the ally heal are read by ally_bless_heal: the ally is below full health, the caster's mana is 850 then 872 at the Daybreak hook against a gate at 860.4, and the Daybreak arm proves the same heal landed in both phases. Open, tool need returned: \"sacrifice additional mana\" is the paid (extra + 3) / 4 of AscensionSunClericAbilities.cpp:365, which depends on the random heal amount and needs an arm-to-arm ratio. Not given a final status. Round B b1 (mentor D-214): the mana sacrifice is judged by direction only (D-165), partial proof counted on direction: ally_bless_mana (its before phase, 850 at the hook, is the below-30% arm: no extra heal and no extra mana; its after phase, 872, is the above-30% arm) reads the extra heal and mana below what the heal’s own cost leaves above the gate, and no extra mana or heal below it; ally_bless_mana_no_form is the control without the form. Observation, not an expectation: the code pays (extra + 3) / 4 (AscensionSunClericAbilities.cpp:399, set by e36bc50aad); that formula is code-only and not the tooltip’s, so the exact value stays open for the mentor.",
     "claims": [
       {
         "claim": "you sacrifice additional mana with each heal",
