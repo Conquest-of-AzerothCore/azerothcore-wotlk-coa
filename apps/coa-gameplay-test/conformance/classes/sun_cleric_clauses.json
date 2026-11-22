@@ -316,7 +316,8 @@
     "clause": "Paragon now has a 1 min cooldown",
     "kind": "claim",
     "labels": [
-      "300347 behaviour_metric_delta paragon_cd"
+      "300347 behaviour_metric_delta paragon_cd",
+      "300347 behaviour_metric_delta paragon_cd_newday"
     ]
   },
   {

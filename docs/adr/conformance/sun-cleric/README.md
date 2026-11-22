@@ -13,3 +13,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0007](0007-fanaticism-compounds-on-the-gavel-flat-damage.md) | Fanaticism compounds its effectiveness on the Gavel flat damage |
 | [0008](0008-fanaticism-expectation-is-the-reproduced-engine-arithmetic.md) | Fanaticism expectation is the reproduced engine arithmetic (supersedes the figures of 0007) |
 | [0009](0009-sunwalker-doubles-vow-of-light-once.md) | Sunwalker doubles the value of Vow of Light once |
+| [0010](0010-battle-cleric-cuts-paragon-cooldown-on-the-cast.md) | Battle Cleric cuts the Paragon cooldown on the cast |
