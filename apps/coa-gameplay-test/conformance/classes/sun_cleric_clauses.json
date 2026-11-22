@@ -2484,10 +2484,28 @@
   {
     "spell": 680634,
     "clause": "Increases the effectiveness of Gavels by $s1%.",
-    "labels": [
-      "680634 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of Gavel of Wrath by $s1%",
+        "labels": [
+          "680634 effect_value e0 #0",
+          "680634 behaviour_hit_ratio effect_gavel"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Gavel of Light by $s1%",
+        "labels": [
+          "680634 behaviour_hit_ratio effect_gavel_light"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Gavel of Grace by $s1%",
+        "labels": [
+          "680634 behaviour_hit_ratio effect_gavel_grace"
+        ]
+      }
+    ]
   },
   {
     "spell": 680637,
@@ -2508,11 +2526,31 @@
   {
     "spell": 680641,
     "clause": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
-    "labels": [
-      "680641 spell_duration 680642 #0",
-      "680641 effect_value 680642e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Critical strikes with Gavels or Dawnbreak",
+        "labels": [
+          "680641 behaviour_metric_delta stack_one",
+          "680641 behaviour_metric_delta stack_dawnbreak"
+        ]
+      },
+      {
+        "claim": "increases the healing of your next Illumination by $680642s1%",
+        "labels": [
+          "680641 effect_value 680642e0 #1",
+          "680641 behaviour_hit_ratio illumination_heal"
+        ]
+      },
+      {
+        "claim": "within $680642d",
+        "labels": [
+          "680641 spell_duration 680642 #0",
+          "680641 behaviour_metric_delta duration_held",
+          "680641 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 680641,
@@ -2531,7 +2569,8 @@
       {
         "claim": "Consuming the stacks increases your movement speed by $524859s1%",
         "labels": [
-          "680641 effect_value 524859e0 #3"
+          "680641 effect_value 524859e0 #3",
+          "680641 behaviour_metric_delta consume_speed"
         ]
       },
       {
@@ -2541,7 +2580,9 @@
       {
         "claim": "for $524859d",
         "labels": [
-          "680641 spell_duration 524859 #4"
+          "680641 spell_duration 524859 #4",
+          "680641 behaviour_metric_delta consume_held",
+          "680641 behaviour_metric_delta consume_gone"
         ]
       }
     ]
@@ -4113,7 +4154,9 @@
     "claims": [
       {
         "claim": "While under the effects of Sunstorm, you can move",
-        "labels": []
+        "labels": [
+          "760379 behaviour_metric_delta move"
+        ]
       },
       {
         "claim": "but cannot perform any other abilities",
@@ -4140,7 +4183,10 @@
           "760379 immunity slow 12323 with",
           "760379 immunity slow 12323 control",
           "760379 immunity stun 56 with",
-          "760379 immunity stun 56 control"
+          "760379 immunity stun 56 control",
+          "760379 immunity disarm 676 with",
+          "760379 immunity disarm 12323 with",
+          "760379 immunity disarm 12323 control"
         ]
       }
     ]

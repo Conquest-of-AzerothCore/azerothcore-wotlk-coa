@@ -20369,6 +20369,370 @@
       "expected": 25800,
       "tolerance": 50,
       "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Resplendence 806159 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 806159 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Wrath effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel",
+      "label_suffix": "effect_gavel",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.34412,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677); the weapon roll is urand(90, 119) (item 2529, attack power 70, multiplier 3.3), the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The same enumeration with the factor 1.2f reproduces the ADR 0008 table exactly (141.4576 / 179.8455, 118.1583 / 146.3333, 106.7667 / 129.9000), which is the check of the script (.agents/plans/sun-cleric-b8a2/scratch/gavel_expect.py). Gavel of Wrath 800617: mean non-critical hit 141.4576 without the passive and 190.1364 with it, ratio 1.34412, a bonus of +34.41%: the compounding of the factor on the flat value and on the percent makes the bonus larger than the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The Fanaticism pair sized 1182 trials per arm at the +20% factor; the larger bonus scales the half-width by 1.344/1.271 for Wrath (the same ratio of ratios for the others), so the size grows by at most 1.12 and the entry runs 16 parts of 100 trials, at least 1.1 times that; prove's pilot re-sizes it. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials), and the limit lies more than 15 standard deviations above it, below 1e-9.",
+      "observe_source": "Gavel of Wrath 800617 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Light effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light",
+      "label_suffix": "effect_gavel_light",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.27786,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 22,
+      "cast_power": 1363,
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677); the weapon roll is urand(90, 119) (item 2529, attack power 70, multiplier 3.3), the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The same enumeration with the factor 1.2f reproduces the ADR 0008 table exactly (141.4576 / 179.8455, 118.1583 / 146.3333, 106.7667 / 129.9000), which is the check of the script (.agents/plans/sun-cleric-b8a2/scratch/gavel_expect.py). Gavel of Light 800611: mean non-critical hit 106.7667 without the passive and 136.4333 with it, ratio 1.27786, a bonus of +27.79%: the compounding of the factor on the flat value and on the percent makes the bonus larger than the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The Fanaticism pair sized 1654 trials per arm at the +20% factor; the larger bonus scales the half-width by 1.344/1.271 for Wrath (the same ratio of ratios for the others), so the size grows by at most 1.12 and the entry runs 22 parts of 100 trials, at least 1.1 times that; prove's pilot re-sizes it. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials), and the limit lies more than 15 standard deviations above it, below 1e-9.",
+      "observe_source": "Gavel of Light 800611 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Grace effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace",
+      "label_suffix": "effect_gavel_grace",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.30178,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 18,
+      "cast_power": 1363,
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677); the weapon roll is urand(90, 119) (item 2529, attack power 70, multiplier 3.3), the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The same enumeration with the factor 1.2f reproduces the ADR 0008 table exactly (141.4576 / 179.8455, 118.1583 / 146.3333, 106.7667 / 129.9000), which is the check of the script (.agents/plans/sun-cleric-b8a2/scratch/gavel_expect.py). Gavel of Grace 800614: mean non-critical hit 118.1583 without the passive and 153.8167 with it, ratio 1.30178, a bonus of +30.18%: the compounding of the factor on the flat value and on the percent makes the bonus larger than the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The Fanaticism pair sized 1361 trials per arm at the +20% factor; the larger bonus scales the half-width by 1.344/1.271 for Wrath (the same ratio of ratios for the others), so the size grows by at most 1.12 and the entry runs 18 parts of 100 trials, at least 1.1 times that; prove's pilot re-sizes it. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials), and the limit lies more than 15 standard deviations above it, below 1e-9.",
+      "observe_source": "Gavel of Grace 800614 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "name": "Sun Strider (Illumination heals 15% more with one stack)",
+      "kind": "hit_ratio",
+      "variant": "illumination_heal",
+      "label_suffix": "illumination_heal",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "expected": 1.15,
+      "observe_spell": 500143,
+      "metric": "spell_heal_total",
+      "critical": false,
+      "force_crit": "melee",
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "ally_distance": 5,
+      "dummy_distance": 5,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "trials": 20,
+      "control": {
+        "casts": [
+          802561
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680641
+        ],
+        "casts": [
+          802561
+        ]
+      },
+      "expected_source": "$680642s1 = 15 (680642 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 14 + 1 = +15%, SPELLMOD_DAMAGE on the class mask word 1 = 512 = Illumination 500143, set by AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster)). One stack: the heal of the next Illumination is 1.15 times the heal of an Illumination without it, both from the same procedure (a forced-crit Gavel of Wrath 802561 (rank 58) at the dummy before every Illumination at the grouped ally at 50% health, spell power 20000 so that the integer truncation of the heal is negligible); the non-critical Illumination heals are compared. Control arm: the same Gavel casts without 680641 learned (the crit gives no stack). The band is the G-19 band, the larger of 5% of 15 and 2 points; it is not widened. The Illumination heal is read as the sum of the heals of the observed spell on the ally, without the caster's modifiers dropped (the caster is the reader).",
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (StackAmount 3); AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). Forced melee crits (harness crit rating fixture) make Gavel of Wrath 802561 (rank 58) crit, so the treatment arm holds one 680642 stack before each Illumination; the stack is consumed by that Illumination. Reference search 2026-11-22: server DBC 680641, 680642 and 500143 effects; coa-history spell 680641 and 680642: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider by name only; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (stack still on at 18.3 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "wait_ms": 18300,
+      "game_time": {
+        "after": [
+          18280,
+          18370
+        ]
+      },
+      "expected": 1,
+      "observe_source": "680642 DurationIndex 18 = 20000 ms ($680642d). AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). One forced-crit Gavel of Wrath 802561 (rank 58) at the dummy with 680641 learned between the phases gives a stack; the aura on the caster is read present about 18.3 s after the Gavel: a duration 10% short (18000 ms) would be gone. Control: the same crit in the phase before 680641 is learned reads 0. No Illumination is cast, so nothing consumes the stack. Reference search 2026-11-22: server DBC 680642; coa-history spell 680642: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (stack gone by 21.9 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "wait_ms": 21850,
+      "game_time": {
+        "after": [
+          21830,
+          21920
+        ]
+      },
+      "expected": 0,
+      "observe_source": "680642 DurationIndex 18 = 20000 ms ($680642d). AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). One forced-crit Gavel of Wrath 802561 (rank 58) at the dummy with 680641 learned between the phases gives a stack; the aura on the caster is read absent about 21.9 s after the Gavel: a duration 10% long (22000 ms) would still be on. Control: the same crit in the phase before 680641 is learned reads 0. No Illumination is cast, so nothing consumes the stack. Reference search 2026-11-22: server DBC 680642; coa-history spell 680642: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800654,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "spell",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Dawnbreak)",
+      "variant": "stack_dawnbreak",
+      "label_suffix": "stack_dawnbreak",
+      "wait_ms": 1500,
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642; AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). Dawnbreak 800654 (Holy and Fire SCHOOL_DAMAGE, cone, cooldown 6000 ms, SpellFamilyName 33) is cast at the dummy in front of the caster with forced spell crits and the spell-penetration fixture 823764, 680641 learned between the phases; the control phase (the same crit without the passive) reads 0 stacks, the after phase 1. Reference search 2026-11-22: server DBC 680641; coa-history spell 680641: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {},
+      "name": "Sun Strider (consuming the stack raises movement speed by 10%)",
+      "variant": "consume_speed",
+      "label_suffix": "consume_speed",
+      "metric": "run_speed_rate",
+      "before_expected": 1.0,
+      "expected": 1.1,
+      "tolerance": 0.001,
+      "wait_ms": 2100,
+      "observe_source": "Run speed rate of the caster 100 ms after the Illumination finishes: 1.0 in the control phase and 1.0 x 1.10 after, within 0.001 (as the Light The Way 300336 speed entry). AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster); 524859 (DurationIndex 31 = 8000 ms, $524859d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($524859s1), Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10. A forced-crit Gavel of Wrath 802561 (rank 58) at the dummy gives the stack; the Illumination 500143 cast on the caster 1600 ms later (2000 ms cast) consumes it. Control: the same two casts in the phase before 680641 is learned (no stack, no 524859). Reference search 2026-11-22: server DBC 524859; coa-history spell 524859: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 524859
+      },
+      "name": "Sun Strider (consumed buff still on at 9.3 s)",
+      "variant": "consume_held",
+      "label_suffix": "consume_held",
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9300,
+      "game_time": {
+        "after": [
+          9280,
+          9370
+        ]
+      },
+      "observe_source": "The aura 524859 on the caster is read present about 9.3 s after the Illumination cast started, 7.3 s after it finished at about 2.0 s: a duration 10% short (7200 ms) would be gone. AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster); 524859 (DurationIndex 31 = 8000 ms, $524859d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($524859s1), Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10. A forced-crit Gavel of Wrath 802561 (rank 58) at the dummy gives the stack; the Illumination 500143 cast on the caster 1600 ms later (2000 ms cast) consumes it. Control: the same two casts in the phase before 680641 is learned (no stack, no 524859). Reference search 2026-11-22: server DBC 524859; coa-history spell 524859: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 524859
+      },
+      "name": "Sun Strider (consumed buff gone by 10.7 s)",
+      "variant": "consume_gone",
+      "label_suffix": "consume_gone",
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10700,
+      "game_time": {
+        "after": [
+          10680,
+          10770
+        ]
+      },
+      "observe_source": "The aura 524859 on the caster is read absent about 10.7 s after the Illumination cast started, 8.7 s after it finished: a duration 10% long (8800 ms) would still be on. AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster); 524859 (DurationIndex 31 = 8000 ms, $524859d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($524859s1), Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10. A forced-crit Gavel of Wrath 802561 (rank 58) at the dummy gives the stack; the Illumination 500143 cast on the caster 1600 ms later (2000 ms cast) consumes it. Control: the same two casts in the phase before 680641 is learned (no stack, no 524859). Reference search 2026-11-22: server DBC 524859; coa-history spell 524859: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 760379,
+      "name": "Sunstorm (disarm is not refused)",
+      "kind": "immunity",
+      "variant": "disarm",
+      "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities but you do not feel pity or remorse or fear and you cannot be stopped unless disarmed or killed.",
+      "effects": [
+        {
+          "spell": 12323,
+          "words": "stopped"
+        },
+        {
+          "spell": 676,
+          "words": "disarmed",
+          "lands": true
+        }
+      ],
+      "dummy_distance": 3,
+      "observe_source": "760379 Sunstorm Effect[1] aura 147 MECHANIC_IMMUNITY_MASK MiscValue 1733, Effect[2] aura 263 ALLOW_ONLY_ABILITY, DurationIndex 32 = 6000 ms. Piercing Howl 12323 (aura 33, Mechanic 11) is the refused control and Disarm 676 (Mechanic 3, aura 67 MOD_DISARM, range index 2, DurationIndex 32 = 6000 ms) the effect the clause leaves out: each is cast by the dummy at the caster three times, 500 ms apart, inside the 6000 ms; the slow is absent and the disarm present after them, and the slow lands again after the expiry (control that the cast route lands). Reference search 2026-11-22: server DBC 760379; coa-history spell 760379: 0 events in 186 logs; ascension-data advancement.tsv lists Sunstorm as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 760379,
+      "name": "Sunstorm (the caster can move)",
+      "kind": "metric_delta",
+      "variant": "move",
+      "label_suffix": "move",
+      "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities but you do not feel pity or remorse or fear and you cannot be stopped unless disarmed or killed.",
+      "trigger_spell": 760379,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "position_x",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 14,
+      "tolerance": 4,
+      "wait_ms": 2000,
+      "options": {
+        "displacement": {},
+        "moving_before_trigger": {
+          "flag": "forward"
+        }
+      },
+      "observe_source": "The caster runs forward from the Sunstorm cast: the 2D displacement over the 2000 ms wait is read in the phase with Sunstorm (the base run speed is 7 yd/s: 14 yd within 4) and is 0 in the phase before the cast, where the movement is not started (the flag is set at the trigger cast). Reference search 2026-11-22: server DBC 760379; coa-history spell 760379: 0 events in 186 logs; ascension-data advancement.tsv lists Sunstorm as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
