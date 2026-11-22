@@ -7,7 +7,8 @@ import run
 
 def share_entry(**changes) -> dict:
     return {'spell': 92084, 'name': "Puppeteer's Threads (the released share)", 'kind': 'metric_delta',
-            'label_suffix': 'stored_share', 'quote': 'Damage taken from the Witch Doctor stores 15% of its value.',
+            'label_suffix': 'stored_share',
+            'quote': "Damaging abilities now leave behind Puppeteer's Threads on enemies for $572836d.",
             'trigger_spell': 807037, 'target': 'dummy', 'measure_actor': 'caster', 'metric': 'spell_damage_total',
             'fields': {'spell': 572837, 'target': 'dummy'}, 'cast_power': 1400, 'before_expected': 0,
             'expected': 0.15, 'tolerance': 0.0002, 'wait_ms': 12600, 'expire_ms': 500,
