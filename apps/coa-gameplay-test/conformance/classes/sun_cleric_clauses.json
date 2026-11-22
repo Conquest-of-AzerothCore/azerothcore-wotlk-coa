@@ -908,10 +908,22 @@
   {
     "spell": 554406,
     "clause": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
-    "labels": [
-      "554406 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $m1 Fire damage (the base roll)",
+        "labels": [
+          "554406 behaviour_metric_delta damage_base"
+        ]
+      },
+      {
+        "claim": "plus the spell power coefficient 0.765222",
+        "labels": [
+          "554406 behaviour_metric_delta damage_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Base roll 669..748 measured 676 and 691 at 0 spell power (ok). The spell power term is an alert: 1.0 x 20000 measured against 0.765222 x 20000, so the coefficient part is not conformant; fix note fix-note-554406.md (row { 554406, 0, 1.0 } in AscensionSunClericData.h:81). Control = the 0 spell power arm of the same pair. Reference search 2026-11-22: coa-history spell 554406: 74 SPELL_DAMAGE events in 1 log (Dawnsear 1385..7550, mean 3551 on crits, a different spell power); git log origin/main --grep 554406: #13027 (Dawn charge), #5345, #4516, none about the coefficient; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-012804 / 20261122-012843, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 503624,
@@ -1919,19 +1931,33 @@
   {
     "spell": 680622,
     "clause": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
-    "labels": [
-      "680622 effect_value 680623e0 #0",
-      "680622 spell_duration 680623 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fulfilling a Vow now increases the damage of your Sunslam by 10%",
+        "labels": []
+      },
+      {
+        "claim": "for 60 s",
+        "labels": [
+          "680622 behaviour_metric_delta duration_held",
+          "680622 behaviour_metric_delta duration_gone",
+          "680622 behaviour_metric_delta control_stacks"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration part: control = the Vow fulfilled without the talent (Sunlight 92136 learned instead): 0 stacks. Fervor 680623 is present 54.6 s after the fulfilling heal and gone 66.4 s after it (60000 ms, DurationIndex 3, 10% on both sides excluded). The 10% damage of Sunslam part has no check: the effect is a flat modifier EFFECT1 (+9 + 1) on mask word 1 = 2097152 (Sunslam strike 807447, weapon-percent effect 31) and no entry measures Sunslam's hit under Fervor stacks; it stays unproven in this pass (needs a Vow fulfilment, Dawn, then a Sunslam hit ratio across stacks). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-013201 / 20261122-013234, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 680622,
     "clause": "stacking $680623u times.",
     "labels": [
-      "680622 max_stacks 680623 #2"
+      "680622 behaviour_metric_delta stack_one",
+      "680622 behaviour_metric_delta stack_cap",
+      "680622 behaviour_metric_delta control_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the Vow fulfilled without the talent: 0 stacks. One fulfilment gives 1 stack and six fulfilments give 5, the stated cap (StackAmount 5). Same Fulfill call as Dawnguard 680672. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-013201 / 20261122-013234, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 680624,
@@ -3142,10 +3168,22 @@
   {
     "spell": 707613,
     "clause": "Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.",
-    "labels": [
-      "707613 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "one stack of Sunwalker increases the critical strike chance of Shine by 15%",
+        "labels": [
+          "707613 behaviour_metric_delta stacks_1"
+        ]
+      },
+      {
+        "claim": "each further stack adds 15% (three stacks 45%)",
+        "labels": [
+          "707613 behaviour_metric_delta stacks_3"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry = the reading before the learn with the same Sunwalker stacks (Sunwalker set by harness set_aura as a precondition fixture, the generation of stacks is 704934's). Gain 15 with 1 stack and 45 with 3 (Spell.dbc 707613 effect 0 flat modifier EFFECT2 on mask 128, BasePoints 14 + 1). Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-013201 / 20261122-013234, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707629,
