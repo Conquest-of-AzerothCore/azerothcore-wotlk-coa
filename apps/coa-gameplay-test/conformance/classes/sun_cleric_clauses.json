@@ -4676,7 +4676,7 @@
       "804257 behaviour_metric_delta caster_haste"
     ],
     "kind": "claim",
-    "reason": "Mentor ruling D-119 (2026-11-22), status 1: the additional $s2% is a second aura 216 and the engine multiplies the two (Unit.cpp:14967-14970, ApplyPercentModFloatVar): 1/1.03^2 = 0.942596 for the caster, 1/1.03 = 0.970874 for the ally (ally_haste, same pair). The additive 1/1.06 = 0.943396 is outside the band. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive); nothing else found. ADR 0022."
+    "reason": "Mentor ruling D-119 (2026-11-22), status 1: the additional $s2% is a second aura 216 and the engine multiplies the two (Unit.cpp:14967-14970, ApplyPercentModFloatVar): 1/1.03^2 = 0.942596 for the caster, 1/1.03 = 0.970874 for the ally (ally_haste, same pair). The second effect applies only through the CoA raid group exception (SpellMgr.cpp:826-828, 4ced460235): Glaring Rays is in spell_group 2000182, which the stock rule (SpellAuraEffects.cpp:5049-5051) would let block Effect[1]. The additive 1/1.06 = 0.943396 is outside the band. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive); nothing else found. ADR 0022."
   },
   {
     "spell": 804257,
