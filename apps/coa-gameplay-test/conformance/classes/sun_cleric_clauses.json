@@ -129,9 +129,11 @@
     "spell": 300315,
     "clause": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
     "labels": [
-      "300315 effect_value e0 #0"
+      "300315 effect_value e0 #0",
+      "300315 behaviour_metric_delta judgement_day_cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 300315 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
   },
   {
     "spell": 300318,
@@ -1470,17 +1472,30 @@
     "spell": 560113,
     "clause": "Reduces the cooldown of Radiance by $/1000;s1 sec.",
     "labels": [
-      "560113 effect_value e0 #0"
+      "560113 effect_value e0 #0",
+      "560113 behaviour_metric_delta radiance_cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 560113 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
   },
   {
     "spell": 560113,
     "clause": "Increases the healing and damage of Radiance by $s2%.",
-    "labels": [
-      "560113 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the damage of Radiance by 125%",
+        "labels": [
+          "560113 behaviour_metric_delta radiance_damage"
+        ]
+      },
+      {
+        "claim": "increases the healing of Radiance by 125%",
+        "labels": [
+          "560113 behaviour_metric_delta radiance_heal"
+        ]
+      }
+    ]
   },
   {
     "spell": 560123,
@@ -2251,16 +2266,27 @@
   {
     "spell": 680631,
     "clause": "Increases your chance to critically strike and to parry attacks by $s1%",
-    "labels": [
-      "680631 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your chance to critically strike by 2%",
+        "labels": [
+          "680631 behaviour_metric_delta melee_crit"
+        ]
+      },
+      {
+        "claim": "and to parry attacks by 2%",
+        "labels": [
+          "680631 behaviour_metric_delta parry"
+        ]
+      }
+    ]
   },
   {
     "spell": 680631,
     "clause": "and your spell hit chance by $s3%.",
     "labels": [
-      "680631 effect_value e2 #1"
+      "680631 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
@@ -4765,9 +4791,12 @@
     "spell": 807973,
     "clause": "Slam an enemy every $t1 sec with the might of the sun,",
     "labels": [
-      "807973 aura_amplitude_ms #0"
+      "807973 aura_amplitude_ms #0",
+      "807973 behaviour_metric_delta period_lo",
+      "807973 behaviour_metric_delta period_hi"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Unproven on the b7b counted pairs: the data label 807973 aura_amplitude_ms #0 was not emitted by them (build d61531085dc5), so the behaviour entry does not count alone. It resolves at the next base pair, where the data scenarios run on the same build; it is not claimed here."
   },
   {
     "spell": 807973,
@@ -4782,17 +4811,21 @@
     "spell": 807973,
     "clause": "and stunning them for $807872d.",
     "labels": [
-      "807973 spell_duration 807872 #2"
+      "807973 spell_duration 807872 #2",
+      "807973 behaviour_metric_delta stun_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining stun (aura_duration_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 807973 spell_duration 807872 #2 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs the aura presence and expiry shape of 807973 aura_duration, applied to the stun aura 807872. The stun length is bounded by the period reads only to (946, 1053] ms."
   },
   {
     "spell": 807973,
     "clause": "Lasts $d.",
     "labels": [
-      "807973 aura_duration_ms #3"
+      "807973 aura_duration_ms #3",
+      "807973 behaviour_metric_delta aura_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Unproven on the b7b counted pairs: the data label 807973 aura_duration_ms #3 was not emitted by them (build d61531085dc5), so the behaviour entry does not count alone. It resolves at the next base pair, where the data scenarios run on the same build; it is not claimed here."
   },
   {
     "spell": 807973,
@@ -4928,20 +4961,41 @@
   {
     "spell": 560867,
     "clause": "Launch radiant spheres at an enemy each dealing ${$m1+0+$SP*0.206923} Holyflame Damage,",
-    "labels": [
-      "560867 effect_value e0 #0",
-      "560867 aura_amount e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "each dealing the flat amount of Holyflame damage",
+        "labels": [
+          "560867 behaviour_metric_delta tick_damage"
+        ]
+      },
+      {
+        "claim": "plus 0.206923 of spell power",
+        "labels": [
+          "560867 behaviour_metric_delta tick_damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 560867,
     "clause": "repeating every $t1 sec for $d.",
-    "labels": [
-      "560867 aura_duration_ms #1",
-      "560867 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "repeating every $t1 sec",
+        "labels": [
+          "560867 behaviour_metric_delta period_lo",
+          "560867 behaviour_metric_delta period_hi"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "560867 behaviour_metric_delta aura_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 806116,
