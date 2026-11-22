@@ -29864,7 +29864,7 @@
       "kind": "metric_delta",
       "variant": "blind_stacks_dungeon_boss",
       "label_suffix": "blind_stacks_dungeon_boss",
-      "quote": "stacking $505342u times.",
+      "quote": "Does not work on bosses.",
       "gate_spell": 704579,
       "trigger_spell": 800231,
       "target": "dummy",
@@ -29896,8 +29896,90 @@
       "expected": 0,
       "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Sneed 643, the Deadmines encounter 162 kill credit (rank 3; the Templar 705306 precedent). Expected 0 stacks after the learn.",
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Sneed 643, the Deadmines encounter 162 kill credit (rank 3; the Templar 705306 precedent). Expected 0 stacks after the learn.",
       "target_entry": 643
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Blinded stacks on Sulfuron Harbinger 12098)",
+      "kind": "metric_delta",
+      "variant": "blind_stacks_raid_encounter",
+      "label_suffix": "blind_stacks_raid_encounter",
+      "quote": "Does not work on bosses.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Sulfuron Harbinger 12098, the Molten Core encounter 4037 kill credit (DungeonEncounter.dbc map 409, a raid in Map.dbc; rank 3, coa_boss_ai with no coa_boss_summon row and every coa_boss_schedule row aimed at its victim). Lucifron 12118 was rejected: its coa_boss_summon row brings Shadow of Lucifron 12268 at 5000 ms, and the caster died before the fourth Sunflare (SpellCastResult 23 SPELL_FAILED_CASTER_DEAD from cast 4 in both runs of 20261122-153152 / -153355), so 505340 read 0. Expected 0 stacks after the learn.",
+      "target_entry": 12098
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Blinded stacks on Baron Rivendare 29109)",
+      "kind": "metric_delta",
+      "variant": "blind_stacks_world_boss",
+      "label_suffix": "blind_stacks_world_boss",
+      "quote": "Does not work on bosses.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Baron Rivendare 29109, rank 3, no instance_encounters credit, no script and no SmartAI, unit_flags 0. Expected 0 stacks after the learn.",
+      "target_entry": 29109
     },
     {
       "spell": 704579,
@@ -29905,7 +29987,7 @@
       "kind": "metric_delta",
       "variant": "eclipse_lands_dungeon_boss",
       "label_suffix": "eclipse_lands_dungeon_boss",
-      "quote": "stacking $505342u times.",
+      "quote": "Does not work on bosses.",
       "gate_spell": 704579,
       "trigger_spell": 800231,
       "target": "dummy",
@@ -29937,8 +30019,90 @@
       "expected": 1,
       "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Sneed 643, the Deadmines encounter 162 kill credit (rank 3; the Templar 705306 precedent). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Sneed 643, the Deadmines encounter 162 kill credit (rank 3; the Templar 705306 precedent). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 643
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (landing control: Vow of the Eclipse on Sulfuron Harbinger 12098)",
+      "kind": "metric_delta",
+      "variant": "eclipse_lands_raid_encounter",
+      "label_suffix": "eclipse_lands_raid_encounter",
+      "quote": "Does not work on bosses.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505340,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Sulfuron Harbinger 12098, the Molten Core encounter 4037 kill credit (DungeonEncounter.dbc map 409, a raid in Map.dbc; rank 3, coa_boss_ai with no coa_boss_summon row and every coa_boss_schedule row aimed at its victim). Lucifron 12118 was rejected: its coa_boss_summon row brings Shadow of Lucifron 12268 at 5000 ms, and the caster died before the fourth Sunflare (SpellCastResult 23 SPELL_FAILED_CASTER_DEAD from cast 4 in both runs of 20261122-153152 / -153355), so 505340 read 0. 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
+      "target_entry": 12098
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (landing control: Vow of the Eclipse on Baron Rivendare 29109)",
+      "kind": "metric_delta",
+      "variant": "eclipse_lands_world_boss",
+      "label_suffix": "eclipse_lands_world_boss",
+      "quote": "Does not work on bosses.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505340,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Baron Rivendare 29109, rank 3, no instance_encounters credit, no script and no SmartAI, unit_flags 0. 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
+      "target_entry": 29109
     },
     {
       "spell": 704579,
@@ -29978,7 +30142,7 @@
       "expected": 5,
       "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). Expected 5 stacks after the learn.",
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). Expected 5 stacks after the learn.",
       "target_entry": 36
     },
     {
@@ -30019,7 +30183,7 @@
       "expected": 1,
       "wait_ms": 2600,
       "expire_ms": 500,
-      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
+      "observe_source": "AscensionSunCleric.cpp:305-311, :320: Eclipse casts Blinded 505342 only when the target is not a boss (Twilight ADR 0030, mentor decision D-154): a creature without a player owner that is a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862), a raid encounter kill-credit creature (ObjectMgr::IsRaidEncounterKillCredit, the set ObjectMgr.cpp:6856-6857 fills since 00b1aaf7b2 / #8881) or a creature of world-boss rank (creature_template rank 3, CREATURE_ELITE_WORLDBOSS). Eclipse first copies Vow of the Eclipse 505340 to the target (:316-319), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 36
     }
   ],
