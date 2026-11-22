@@ -17,6 +17,7 @@ ACCEPTED_LABEL = 'ally interact accepted'
 BLINK_LABEL = 'ally interact'
 LOCKOUT_WAIT_LABEL = 'ally lockout wait'
 RELOCATE_STEP_YD = 20.0
+RECORD_LABEL = 'record'
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,7 @@ class AllyInteract:
     return_yd: float | None = None
     bearing: float | None = None
     bearing_tolerance: float = DEFAULT_BEARING_TOLERANCE
+    judged_spell: int | None = None
 
 
 def number(raw, key: str) -> float:
@@ -35,19 +37,24 @@ def number(raw, key: str) -> float:
 
 
 def parse(raw) -> AllyInteract:
-    keys = {'entry', 'lockout_aura', 'return_yd', 'bearing', 'bearing_tolerance'}
+    keys = {'entry', 'lockout_aura', 'return_yd', 'bearing', 'bearing_tolerance', 'judged_spell'}
     if not isinstance(raw, dict) or not set(raw) <= keys or isinstance(raw.get('entry'), bool) \
             or not isinstance(raw.get('entry'), int) or raw['entry'] <= 0:
         raise ValueError(f'ally_interact is {{"entry": creature, "lockout_aura"?, "return_yd"?, "bearing"?, '
-                         f'"bearing_tolerance"?}}, not {raw!r}')
+                         f'"bearing_tolerance"?, "judged_spell"?}}, not {raw!r}')
     lockout = raw.get('lockout_aura')
     if lockout is not None and (isinstance(lockout, bool) or not isinstance(lockout, int) or lockout <= 0):
         raise ValueError(f'ally_interact lockout_aura is a spell id, not {lockout!r}')
     if (lockout is None) != ('return_yd' not in raw) or (lockout is not None and 'bearing' in raw):
         raise ValueError('ally_interact lockout_aura and return_yd go together, and bearing only without them')
+    judged = raw.get('judged_spell')
+    if 'judged_spell' in raw and (lockout is None or isinstance(judged, bool) or not isinstance(judged, int)
+                                  or judged <= 0 or judged == lockout):
+        raise ValueError(f'ally_interact judged_spell is a spell id other than the lockout aura, with it, not '
+                         f'{judged!r}')
     if 'bearing_tolerance' in raw and 'bearing' not in raw:
         raise ValueError('ally_interact bearing_tolerance needs a bearing')
-    value = AllyInteract(raw['entry'], lockout)
+    value = AllyInteract(raw['entry'], lockout, judged_spell=judged)
     if lockout is not None:
         distance = number(raw['return_yd'], 'return_yd')
         if not 0 < distance <= 2 * RELOCATE_STEP_YD:
@@ -67,6 +74,15 @@ def lockout(value: AllyInteract) -> bool:
     return value.lockout_aura is not None
 
 
+def judged_spell(value: AllyInteract) -> int | None:
+    return value.lockout_aura if value.judged_spell is None else value.judged_spell
+
+
+def record_label(spec, value: AllyInteract, moment: str) -> str:
+    from behaviours import metric_delta_label
+    return f'{metric_delta_label(spec, moment)} {ACTOR} {RECORD_LABEL} {value.lockout_aura}'
+
+
 def check(spec, value):
     if value is None:
         return
@@ -78,9 +94,9 @@ def check(spec, value):
         raise ValueError(f'{spec.spell} ally_interact needs a grouped {ACTOR} as the measured actor, a self-cast '
                          f'trigger, no setup casts and no swings')
     if lockout(value) and (not spec.cast_in_before or spec.cast_power is None or spec.metric != 'aura_apply_count'
-                           or spec.fields != {'spell': value.lockout_aura}):
+                           or spec.fields != {'spell': judged_spell(value)}):
         raise ValueError(f'{spec.spell} ally_interact lockout casts in both phases with cast_power and reads the '
-                         f'{ACTOR}\'s aura_apply_count of the lockout aura {value.lockout_aura}')
+                         f'{ACTOR}\'s aura_apply_count of {judged_spell(value)}')
     if not lockout(value) and (spec.cast_in_before or spec.metric != 'position_x' or spec.fields):
         raise ValueError(f'{spec.spell} ally_interact blink casts in the after phase only and reads the {ACTOR}\'s '
                          f'position_x without fields')
@@ -160,6 +176,8 @@ def lockout_fixtures(class_file: dict, spec, value: AllyInteract, scenario: dict
     if gap != accepted_ms - refused_ms:
         raise ValueError(f'{spec.spell} ally_interact waits {gap} ms between the refused and the accepted try, not '
                          f'{accepted_ms - refused_ms}: set expire_ms {spec.expire_ms + accepted_ms - refused_ms - gap}')
+    if value.judged_spell is not None:
+        record_lockout(spec, value, scenario)
     scenario['contract'] += (
         f' The grouped {ACTOR} stands at the gate the caster leaves ({value.entry}) and interacts with it (native '
         f'gossip_hello within the interaction distance, no walk): first after a Sun Gate cast at the start of the '
@@ -167,6 +185,19 @@ def lockout_fixtures(class_file: dict, spec, value: AllyInteract, scenario: dict
         f'aura {value.lockout_aura}, DBC duration: refused), then {accepted_ms} ms after the first ({ACCEPTED_SHARE:g} '
         f'of it: accepted). After each blink the caster and the {ACTOR} are moved back {value.return_yd:g} yd along '
         f'x, so each new gate stands where the {ACTOR} is.')
+
+
+def record_lockout(spec, value: AllyInteract, scenario: dict):
+    from behaviours import metric_delta_label
+    from profile import measurement
+    steps = scenario['steps']
+    for moment in MOMENTS:
+        read = next(i for i, step in enumerate(steps) if step.get('label') == metric_delta_label(spec, moment))
+        steps.insert(read, measurement(record_label(spec, value, moment), ACTOR, 'aura_apply_count',
+                                       spell=value.lockout_aura))
+    scenario['contract'] += (
+        f' The judged count is the {ACTOR}\'s {value.judged_spell} applications; its lockout aura '
+        f'{value.lockout_aura} application count is read beside each reading and recorded, never judged.')
 
 
 def blink_fixtures(spec, value: AllyInteract, scenario: dict):
@@ -209,7 +240,10 @@ def fixtures(class_file: dict, spec, value: AllyInteract, scenario: dict):
 
 def model(spec, value: AllyInteract) -> dict:
     if lockout(value):
-        return {NAME: {'lockout_aura': value.lockout_aura}}
+        if value.judged_spell is None:
+            return {NAME: {'lockout_aura': value.lockout_aura}}
+        return {NAME: {'lockout_aura': value.lockout_aura, 'judged_spell': value.judged_spell,
+                       'recorded': {moment: record_label(spec, value, moment) for moment in MOMENTS}}}
     shift = {moment: labels(spec, moment) for moment in MOMENTS}
     shift['judged'] = {moment: f'{spec.spell} {spec.metric} {moment}' for moment in MOMENTS}
     if value.bearing is not None:

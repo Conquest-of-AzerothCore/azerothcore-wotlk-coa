@@ -133,5 +133,50 @@ class LockoutTests(unittest.TestCase):
                 self.assertEqual(verdict.status, status, verdict.explanation)
 
 
+JUDGED = changed(LOCKOUT, fields={'spell': 802145},
+                 ally_interact={'entry': 50331, 'lockout_aura': 802148, 'return_yd': 25, 'judged_spell': 802145})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class JudgedSpellTests(unittest.TestCase):
+    def test_judged_spell_needs_a_lockout_and_another_spell(self):
+        for raw in ({'entry': 1, 'judged_spell': 2}, {'entry': 1, 'lockout_aura': 2, 'return_yd': 5, 'judged_spell': 2},
+                    {'entry': 1, 'lockout_aura': 2, 'return_yd': 5, 'judged_spell': True}):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                ally_interact.parse(raw)
+
+    def test_the_judged_spell_keeps_the_lockout_timing_and_records_the_lockout_aura(self):
+        scenario, [expectation] = behaviour_scenario(load_class_file(27), JUDGED)
+        run.validate(scenario)
+        times = game_times(scenario)
+        first = times[ally_interact.FIRST_LABEL]
+        self.assertEqual((times[ally_interact.REFUSED_LABEL] - first, times[ally_interact.ACCEPTED_LABEL] - first),
+                         (81000, 99000))
+        recorded = expectation.model['ally_interact']['recorded']
+        reads = [step for step in scenario['steps'] if step.get('label') in recorded.values()]
+        self.assertEqual([(step['metric'], step['spell']) for step in reads], [('aura_apply_count', 802148)] * 2)
+        self.assertEqual(expectation.model['ally_interact']['judged_spell'], 802145)
+
+    def test_the_judged_spell_reading_must_match_its_fields(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(27), changed(JUDGED, fields={'spell': 802148}))
+
+    def test_a_doubled_lockout_record_does_not_alert_but_a_wrong_judged_count_does(self):
+        _, [expectation] = behaviour_scenario(load_class_file(27), JUDGED)
+        before, after = expectation.model['before_label'], expectation.model['after_label']
+        recorded = expectation.model['ally_interact']['recorded']
+        arms = {'802161 aura_apply_count before ally_arm 0 ally': 1.0,
+                '802161 aura_apply_count after ally_arm 0 ally': 2.0}
+        for counts, status in (((1.0, 2.0), 'ok'), ((1.0, 1.0), 'alert'), ((2.0, 3.0), 'alert')):
+            values = {**arms, before: counts[0], after: counts[1], recorded['before']: 2.0, recorded['after']: 4.0}
+            verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+            with self.subTest(counts=counts):
+                self.assertEqual(verdict.status, status, verdict.explanation)
+
+    def test_without_judged_spell_the_lockout_model_is_unchanged(self):
+        _, [expectation] = behaviour_scenario(load_class_file(27), LOCKOUT)
+        self.assertEqual(expectation.model['ally_interact'], {'lockout_aura': 802148})
+
+
 if __name__ == '__main__':
     unittest.main()

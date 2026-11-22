@@ -36,3 +36,14 @@ every gate stands 3 yd from the ally. A calibration read (throwaway probe, never
   mutants alerting, and shorter and longer lockout mutants alerting.
 - The ally's `aura_apply_count` of 802145 is a judged arm (the interaction landed); `spell_go_count` on an ally is
   refused by `ally_arm`.
+
+## Addendum (2026-11-22, D-239): judged spell separate from the timing aura
+
+The lockout form takes an optional `judged_spell` (a spell id other than `lockout_aura`, lockout form only). The
+tries still fall at 0.9 and 1.1 times the DBC duration of `lockout_aura`, but the entry's `fields` must name
+`judged_spell`, and the ally's `aura_apply_count` of `lockout_aura` is read beside each phase reading under
+`<spell> <metric> <moment> ally record <lockout_aura>` and never judged (`model.ally_interact.recorded`). Sun Gate's
+ally lockout judges 802145 (one cast per accepted interaction) and records 802148, whose count doubles per accepted
+interaction for one cast in the script, an owner observation rather than a verdict. Without the key the model and
+every generated scenario stay unchanged; seeded tests cover the parse refusals, the timing, the recorded reads and a
+doubled record that does not alert while a wrong judged count does.
