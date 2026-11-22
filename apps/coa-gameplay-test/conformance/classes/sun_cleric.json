@@ -17011,7 +17011,7 @@
       "kind": "metric_delta",
       "variant": "instant_once",
       "label_suffix": "instant_once",
-      "quote": "Your next Dawnsear within $d is instant cast",
+      "quote": "chance to grant you Spears of Glory.",
       "expected": 1,
       "before_expected": 1,
       "trigger_spell": 554406,
