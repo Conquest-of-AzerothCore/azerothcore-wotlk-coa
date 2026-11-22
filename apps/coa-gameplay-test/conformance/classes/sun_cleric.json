@@ -12320,6 +12320,585 @@
         ]
       },
       "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 300363,
+      "name": "Photosynthetic (spell haste at night)",
+      "kind": "metric_delta",
+      "variant": "night_haste",
+      "label_suffix": "night_haste",
+      "quote": "Increases your spell haste by $s1%,",
+      "trigger_spell": 805301,
+      "gate_spell": 300363,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.970874,
+      "tolerance": 0.002,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "hour": 0,
+      "observe_source": "300363 Photosynthetic Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1); Effect[1] aura 227 periodic trigger with value of 300364 (aura 216, amount set to $s2 = 1 by the script during the day, AscensionSunCleric.cpp:378-382 reads Amount(300363, 1)). Realm-local hour 0. The caster's cast speed multiplier is 1 before the learn (control) and 1/1.03 = 0.970874 after it, within 0.002 (excludes 2%% and 4%%). Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases your spell haste by 3%, plus an additional 1% during the day.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 300363,
+      "name": "Photosynthetic (additional spell haste during the day)",
+      "kind": "metric_delta",
+      "variant": "day_haste",
+      "label_suffix": "day_haste",
+      "quote": "plus an additional $s2% during the day.",
+      "trigger_spell": 805301,
+      "gate_spell": 300363,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.961261,
+      "tolerance": 0.002,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "hour": 12,
+      "observe_source": "300363 Photosynthetic Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1); Effect[1] aura 227 periodic trigger with value of 300364 (aura 216, amount set to $s2 = 1 by the script during the day, AscensionSunCleric.cpp:378-382 reads Amount(300363, 1)). Realm-local hour 12. The caster's cast speed multiplier is 1 before the learn (control) and 1/(1.03 x 1.01) = 0.961261 after it (the night arm night_haste reads 1/1.03 = 0.970874, the control of the 1% part), within 0.002 (excludes the night value and +2% day).Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases your spell haste by 3%, plus an additional 1% during the day.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 707770,
+      "name": "Divine Vision (Holy damage)",
+      "kind": "hit_ratio",
+      "variant": "holy_damage",
+      "label_suffix": "holy_damage",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.08,
+      "critical": false,
+      "observe_spell": 500154,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707770
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "707770 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 7 + 1 = 8 ($s1). Horusath Blast 500154 (Holy, SchoolMask 2) is read in a control arm and an arm with 707770 learned: the mean hit ratio is 1.08 (band 2 points, G-19: the larger of 5% of 8 and 2 points). Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 text \"Increases your Holy damage and healing done by 4%\" (spell 706735 figure, no Physical, an older state); the installed DBC governs; nothing else found."
+    },
+    {
+      "spell": 707770,
+      "name": "Divine Vision (Physical damage)",
+      "kind": "hit_ratio",
+      "variant": "physical_damage",
+      "label_suffix": "physical_damage",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.08,
+      "critical": false,
+      "observe_spell": 800691,
+      "cast_spell": 803913,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          707770
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "707770 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 7 + 1 = 8 ($s1). Glorious Execution 803913 is cast and its main-hand strike 800691 (Physical, SchoolMask 1) is read in a control arm and an arm with 707770 learned: the mean hit ratio is 1.08 (band 2 points). Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 text \"Increases your Holy damage and healing done by 4%\" (spell 706735 figure, no Physical, an older state); the installed DBC governs; nothing else found."
+    },
+    {
+      "spell": 707770,
+      "name": "Divine Vision (healing)",
+      "kind": "hit_ratio",
+      "variant": "healing",
+      "label_suffix": "healing",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.08,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          707770
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "707770 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 7 + 1 = 8 ($s1). The grouped ally's Sunlight 704911 heals (Holy) are read without and with 707770 learned on the caster, the ally held at 50% health: the mean ratio is 1.08 (band 2 points). Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 text \"Increases your Holy damage and healing done by 4%\" (spell 706735 figure, no Physical, an older state); the installed DBC governs; nothing else found."
+    },
+    {
+      "spell": 680647,
+      "name": "Paying The Tithe (Dawnbreak critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "dawnbreak_crit",
+      "label_suffix": "dawnbreak_crit",
+      "quote": "Increases the critical strike chance of Dawnbreak by $s2%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800654,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.0001,
+      "observe_source": "680647 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s2), EffectSpellClassMask word 1 (flattened index 4) = 1073741824 = Dawnbreak 800654 SpellFamilyFlags[1]. The caster's crit chance for a Dawnbreak 800654 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 10 points. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the critical strike chance of Dawnbreak by 10% and your Seraphic Bulwark now lasts for 2 additional blocks.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 680647,
+      "name": "Paying The Tithe (Seraphic Bulwark blocks)",
+      "kind": "metric_delta",
+      "variant": "bulwark_charges",
+      "label_suffix": "bulwark_charges",
+      "quote": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
+      "trigger_spell": 560095,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 5,
+      "expected": 7,
+      "wait_ms": 500,
+      "expire_ms": 11000,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "680647 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), EffectSpellClassMask word 0 = 256 = Seraphic Bulwark 560095 SpellFamilyFlags[0] (ProcCharges 5, '$n blocks'). A real Seraphic Bulwark 560095 cast on the caster with shield 231296 equipped in both phases: the aura holds 5 charges before the passive is learned (control, the base figure) and 7 after (5 + 2), read 500 ms after the cast. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"now lasts for 2 additional blocks\" (same figure); nothing else found."
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Scorch Marks granted by Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_granted",
+      "label_suffix": "scorch_granted",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807059
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). The aura 807059 on the caster is read 500 ms after a real Dawn cast, before the passive is learned (control, 0) and after (1). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, Dawn activates only with 20 Solar Power, not the subject), and the Dawn aura 807440 left by the first phase is set to 0 stacks before the second cast (Dawn excludes itself while up, ExcludeCasterAuraSpell 807440). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame costs no mana after Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_cost",
+      "label_suffix": "scorch_cost",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 340,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 costs ManaCostPercentage 25 of BaseMana 1363 (player_class_stats class 27 level 60) = 340 (control: read after a Dawn cast without the passive); with the passive the engine CalcPowerCost reads 0 while Scorch Marks is on the caster (Effect[2] -101, -100 as read). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, Dawn activates only with 20 Solar Power, not the subject), and the Dawn aura 807440 left by the first phase is set to 0 stacks before the second cast (Dawn excludes itself while up, ExcludeCasterAuraSpell 807440). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame ticks faster after Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_period",
+      "label_suffix": "scorch_period",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 5000,
+      "metric": "aura_amplitude_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 1000,
+      "expected": 500,
+      "tolerance": 10,
+      "wait_ms": 300,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 is cast at the dummy and the amplitude of its periodic aura on the dummy is read (Effect[0] every 1000 ms; with Scorch Marks -50% as read: 500; 450 or 550 would be 10% off). The before phase casts Radiant Flame alone (control), the after phase casts Dawn first. 804625 is known throughout. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (only the next Radiant Flame)",
+      "kind": "metric_delta",
+      "variant": "scorch_next",
+      "label_suffix": "scorch_next",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 5000,
+      "metric": "aura_amplitude_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 1000,
+      "expected": 1000,
+      "tolerance": 10,
+      "wait_ms": 300,
+      "setup_casts": [
+        804584,
+        806060
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 4500,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Dawn grants Scorch Marks, a first Radiant Flame consumes it (setup), and the second Radiant Flame (trigger) is read 4500 ms later: amplitude 1000, the unchanged base. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame shorter after Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_duration",
+      "label_suffix": "scorch_duration",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 5000,
+      "metric": "aura_duration_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 3700,
+      "expected": 1700,
+      "tolerance": 80,
+      "wait_ms": 300,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 (DurationIndex 35, 4000 ms) is cast at the dummy and the remaining duration 300 ms after the cast is read: 3700 without (control), 1700 with Scorch Marks (-50% of 4000, 2000, less 300); a 10% error on the total reads 1500 or 1900, outside the tolerance of 80. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+    },
+    {
+      "spell": 300365,
+      "name": "Sunburn (Rapture cast time read)",
+      "kind": "metric_delta",
+      "variant": "cast_time",
+      "label_suffix": "cast_time",
+      "quote": "Reduces the cast time of Rapture by $/1000;S1 sec.",
+      "trigger_spell": 805301,
+      "gate_spell": 300365,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 806477
+      },
+      "before_expected": 3000,
+      "expected": 2500,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300365 Sunburn Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -501 (-500 ms, $/1000;S1 = 0.5 s); Rapture 806477 has CastingTimeIndex 14 = 3000 ms (SpellCastTimes.dbc), so 2500 ms with the passive. The engine cast time of Rapture on the caster is read before the passive is learned (control, 3000) and after (2500), within 1 ms. Reference search 2026-11-22: coa-history spell 300365: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Rapture by -0.5 sec.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 300365,
+      "name": "Sunburn (Rapture still casting at 2460 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_held",
+      "label_suffix": "cast_held",
+      "quote": "Reduces the cast time of Rapture by $/1000;S1 sec.",
+      "trigger_spell": 806477,
+      "gate_spell": 300365,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2460,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          2455,
+          2495
+        ]
+      },
+      "observe_source": "300365 Sunburn Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -501 (-500 ms, $/1000;S1 = 0.5 s); Rapture 806477 has CastingTimeIndex 14 = 3000 ms (SpellCastTimes.dbc), so 2500 ms with the passive. A real Rapture cast at the dummy, the casting state of the caster read in game time (window 2455..2495 ms after the cast starts): still casting 10 ms after the cast time 10% higher on the 500 ms cut would end (2450). The before phase (no passive, control) is still casting at both times (3000 ms). Reference search 2026-11-22: coa-history spell 300365: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Rapture by -0.5 sec.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 300365,
+      "name": "Sunburn (Rapture finished by 2555 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_done",
+      "label_suffix": "cast_done",
+      "quote": "Reduces the cast time of Rapture by $/1000;S1 sec.",
+      "trigger_spell": 806477,
+      "gate_spell": 300365,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 2555,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          2548,
+          2570
+        ]
+      },
+      "observe_source": "300365 Sunburn Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -501 (-500 ms, $/1000;S1 = 0.5 s); Rapture 806477 has CastingTimeIndex 14 = 3000 ms (SpellCastTimes.dbc), so 2500 ms with the passive. A real Rapture cast at the dummy, the casting state of the caster read in game time (window 2548..2570 ms after the cast starts): finished 5 ms after the cast time 10% lower on the cut would end (2550). The before phase (no passive, control) is still casting at both times (3000 ms). Reference search 2026-11-22: coa-history spell 300365: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Rapture by -0.5 sec.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 504248,
+      "name": "Holy Conquest (Chosen of the Light mana spent)",
+      "kind": "metric_delta",
+      "variant": "chosen",
+      "label_suffix": "chosen",
+      "quote": "Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by $s1%.",
+      "trigger_spell": 800622,
+      "gate_spell": 504248,
+      "target": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 973,
+      "expected": 1168,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504248 Holy Conquest Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -51 (-50%, $s1), EffectSpellClassMask word 0 = 4104 = Chosen of the Light 800622 (SpellFamilyFlags[0] 4096) and Judgement Day 806121 (SpellFamilyFlags[0] 8), word 2 = 8388608 = Paragon 680639 (SpellFamilyFlags[2]). Cost = ManaCost + ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60), SpellInfo::CalcPowerCost (SpellInfo.cpp:3160-3225), then the SPELLMOD_COST percent mod. Chosen of the Light 800622: ManaCost 50 + 25% of 1363 (340) = 390, 195 with -50%. Mana is set to 1363 before each real cast with regeneration off and read 500 ms after: 973 before the learn (control, 390 spent) and 1168 after (195 spent). Reference search 2026-11-22: coa-history spell 504248: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by -50%.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 504248,
+      "name": "Holy Conquest (Judgement Day mana spent)",
+      "kind": "metric_delta",
+      "variant": "judgement_day",
+      "label_suffix": "judgement_day",
+      "quote": "Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by $s1%.",
+      "trigger_spell": 806121,
+      "gate_spell": 504248,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1036,
+      "expected": 1200,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504248 Holy Conquest Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -51 (-50%, $s1), EffectSpellClassMask word 0 = 4104 = Chosen of the Light 800622 (SpellFamilyFlags[0] 4096) and Judgement Day 806121 (SpellFamilyFlags[0] 8), word 2 = 8388608 = Paragon 680639 (SpellFamilyFlags[2]). Cost = ManaCost + ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60), SpellInfo::CalcPowerCost (SpellInfo.cpp:3160-3225), then the SPELLMOD_COST percent mod. Judgement Day 806121: 24% of 1363 (327) = 327, 163 or 164 with -50%. Mana is set to 1363 before each real cast with regeneration off and read 500 ms after: 1036 before the learn (control) and 1200 after, within 1. Reference search 2026-11-22: coa-history spell 504248: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by -50%.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 504248,
+      "name": "Holy Conquest (Paragon mana spent)",
+      "kind": "metric_delta",
+      "variant": "paragon",
+      "label_suffix": "paragon",
+      "quote": "Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by $s1%.",
+      "trigger_spell": 680639,
+      "gate_spell": 504248,
+      "target": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1077,
+      "expected": 1220,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "504248 Holy Conquest Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -51 (-50%, $s1), EffectSpellClassMask word 0 = 4104 = Chosen of the Light 800622 (SpellFamilyFlags[0] 4096) and Judgement Day 806121 (SpellFamilyFlags[0] 8), word 2 = 8388608 = Paragon 680639 (SpellFamilyFlags[2]). Cost = ManaCost + ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60), SpellInfo::CalcPowerCost (SpellInfo.cpp:3160-3225), then the SPELLMOD_COST percent mod. Paragon 680639: 21% of 1363 (286) = 286, 143 with -50%. Paragon needs Dawn 807440 on the caster (CasterAuraSpell), set by the harness before each cast (precondition fixture, the claim is the cost). Mana is set to 1363 before each real cast with regeneration off and read 500 ms after: 1077 before the learn (control) and 1220 after. Reference search 2026-11-22: coa-history spell 504248: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by -50%.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 681448,
+      "name": "Last Call (Valkyr's Calling aura duration read)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Increases the duration of Valkyr's Calling by $/1000;s1 sec.",
+      "trigger_spell": 520024,
+      "gate_spell": 681448,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 520025
+      },
+      "before_expected": 1700,
+      "expected": 2700,
+      "tolerance": 80,
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "observe_source": "681448 Last Call Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 999 (+1000 ms, $/1000;s1 = 1 s), EffectSpellClassMask word 2 = 2097152 = SpellFamilyFlags[2] of Valkyr's Calling 520024 and of its flight aura 520025 (DurationIndex 39, 2000 ms), so 3000 ms with the passive. A real Valkyr's Calling 520024 cast at the dummy applies 520025 to the caster (AscensionSunClericSummons.cpp:50); its remaining duration 300 ms after the cast is read: 1700 without the passive (control) and 2700 with it (3000 less 300); a 10% error on the total reads 2400 or 3000, outside the tolerance of 80. Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the duration of Valkyr's Calling by 1 sec.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 681448,
+      "name": "Last Call (Valkyr's Calling aura still up at 2740 ms)",
+      "kind": "metric_delta",
+      "variant": "aura_held",
+      "label_suffix": "aura_held",
+      "quote": "Increases the duration of Valkyr's Calling by $/1000;s1 sec.",
+      "trigger_spell": 520024,
+      "gate_spell": 681448,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 520025
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2740,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          2730,
+          2790
+        ]
+      },
+      "observe_source": "681448 Last Call Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 999 (+1000 ms, $/1000;s1 = 1 s), EffectSpellClassMask word 2 = 2097152 = SpellFamilyFlags[2] of Valkyr's Calling 520024 and of its flight aura 520025 (DurationIndex 39, 2000 ms), so 3000 ms with the passive. A real Valkyr's Calling cast at the dummy, the aura 520025 on the caster read in game time (window 2730..2790 ms after the cast): still on the caster 10 ms after a total 10% below 3000 (2700) would have ended. The before phase (no passive, control) reads 0 at both times (2000 ms). Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the duration of Valkyr's Calling by 1 sec.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 681448,
+      "name": "Last Call (Valkyr's Calling aura gone by 3310 ms)",
+      "kind": "metric_delta",
+      "variant": "aura_done",
+      "label_suffix": "aura_done",
+      "quote": "Increases the duration of Valkyr's Calling by $/1000;s1 sec.",
+      "trigger_spell": 520024,
+      "gate_spell": 681448,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 520025
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 3310,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          3305,
+          3350
+        ]
+      },
+      "observe_source": "681448 Last Call Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 999 (+1000 ms, $/1000;s1 = 1 s), EffectSpellClassMask word 2 = 2097152 = SpellFamilyFlags[2] of Valkyr's Calling 520024 and of its flight aura 520025 (DurationIndex 39, 2000 ms), so 3000 ms with the passive. A real Valkyr's Calling cast at the dummy, the aura 520025 on the caster read in game time (window 3305..3350 ms after the cast): gone 10 ms after a total 10% above 3000 (3300) would have ended. The before phase (no passive, control) reads 0 at both times (2000 ms). Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the duration of Valkyr's Calling by 1 sec.\" (same figure); nothing else found."
     }
   ],
   "player_observations": [],
