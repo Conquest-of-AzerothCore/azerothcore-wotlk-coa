@@ -74,6 +74,50 @@ class RefusedWithTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ExtraReadsTests(unittest.TestCase):
+    READS = [{'metric': 'cooldown_ms', 'spell': 500154}, {'metric': 'global_cooldown_ms', 'spell': 500154},
+             {'metric': 'knows_spell', 'spell': 502380}, {'metric': 'aura', 'spell': 500149}, {'metric': 'power'}]
+
+    def scenario(self, **changes):
+        return behaviour_scenario(CLASS_FILE, {**entry_of(301266, 'reset_horusath'), **changes})
+
+    def extra_steps(self, scenario) -> list[dict]:
+        return [step for step in scenario['steps'] if ' extra ' in step.get('label', '')]
+
+    def test_off_by_default_the_scenario_has_no_extra_read(self):
+        scenario, _ = self.scenario()
+        self.assertEqual(self.extra_steps(scenario), [])
+
+    def test_reads_follow_the_attempt_of_the_without_and_with_arms_only(self):
+        scenario, expectations = self.scenario(extra_reads=self.READS)
+        steps = scenario['steps']
+        extras = self.extra_steps(scenario)
+        self.assertEqual(len(extras), 2 * len(self.READS))
+        self.assertEqual({step['label'].rsplit(' ', 1)[0].split(' ')[-1] for step in extras if step['metric'] == 'power'},
+                         {'extra'})
+        for step in extras:
+            attempt = max(index for index, other in enumerate(steps[:steps.index(step)])
+                          if other['action'] == 'assert' and other['metric'] == 'cast_failure')
+            self.assertFalse([other for other in steps[attempt + 1:steps.index(step)]
+                              if other['action'] in ('cast', 'wait')])
+        self.assertEqual([step['metric'] for step in extras[:len(self.READS)]],
+                         [read['metric'] for read in self.READS])
+        self.assertEqual(next(step for step in extras if step['metric'] == 'power')['power'], 0)
+
+    def test_the_reads_are_never_an_expectation_and_leave_the_judged_labels_unchanged(self):
+        _, plain = self.scenario()
+        _, extended = self.scenario(extra_reads=self.READS)
+        self.assertEqual([(e.label, e.expected) for e in plain], [(e.label, e.expected) for e in extended])
+        self.assertFalse([e for e in extended if ' extra ' in e.label])
+
+    def test_an_unknown_metric_or_a_power_with_a_spell_is_refused(self):
+        for read in ({'metric': 'cast_failure', 'spell': 500154}, {'metric': 'power', 'spell': 1},
+                     {'metric': 'cooldown_ms'}):
+            with self.assertRaisesRegex(ValueError, 'extra_reads'):
+                self.scenario(extra_reads=[read])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class ThreatSlopeFieldTests(unittest.TestCase):
     def sunflare(self, **changes) -> dict:
         entry = {**entry_of(504734, 'threat_slope_sunflare'), **changes}
