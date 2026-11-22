@@ -16,8 +16,12 @@ CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
 KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source'}
 ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source', 'reach_source'}
+JUDGED_ARM_KEYS = ('before_expected', 'expected', 'tolerance')
+RATIO_ONLY_ARM_KEYS = ARM_KEYS - set(JUDGED_ARM_KEYS) | {'count_metric'}
 ALLY_CAST_KEYS = {'spell', 'spell_go_per_cast', 'source'}
 RATIO_KEYS = {'numerator', 'denominator', 'expected', 'tolerance', 'source'}
+FLOOR_COUNT_KEY = 'floor_count'
+DISCRIMINATED_DEVIATION = 0.10
 
 
 @dataclass(frozen=True)
@@ -30,15 +34,21 @@ class Arm:
     tolerance: float
     source: str
     reach_source: str = ''
+    count_metric: str | None = None
+
+    @property
+    def ratio_only(self) -> bool:
+        return self.count_metric is not None
 
 
 @dataclass(frozen=True)
 class Ratio:
     numerator: int
-    denominator: int
+    denominator: int | tuple[int, ...]
     expected: float
     tolerance: float
     source: str
+    floor_count: int | None = None
 
 
 @dataclass(frozen=True)
@@ -68,7 +78,23 @@ def stated_text(value) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+def parse_ratio_only_arm(raw: dict) -> Arm:
+    if not set(raw) <= RATIO_ONLY_ARM_KEYS or not isinstance(raw.get('actors'), list) or not raw['actors'] \
+            or not all(isinstance(actor, str) and actor for actor in raw['actors']) \
+            or len(set(raw['actors'])) != len(raw['actors']) \
+            or not all(isinstance(raw.get(key), str) and raw[key] for key in ('metric', 'count_metric')) \
+            or raw['metric'] == raw['count_metric'] or not isinstance(raw.get('fields', {}), dict) \
+            or not stated_text(raw.get('source')) or ('reach_source' in raw and not stated_text(raw['reach_source'])):
+        raise ValueError(f'a ratio-only ally_arm arm is {{actors: [unit, ...], metric, count_metric: the count of the '
+                         f'same events, fields?, source: text, reach_source?: text}}, judged through a ratio only, not '
+                         f'{raw!r}')
+    return Arm(tuple(raw['actors']), raw['metric'], dict(raw.get('fields', {})), 0.0, 0.0, 0.0, raw['source'],
+               raw.get('reach_source', ''), raw['count_metric'])
+
+
 def parse_arm(raw) -> Arm:
+    if isinstance(raw, dict) and not any(key in raw for key in JUDGED_ARM_KEYS) and 'count_metric' in raw:
+        return parse_ratio_only_arm(raw)
     if not isinstance(raw, dict) or not ARM_KEYS - {'fields', 'reach_source'} <= set(raw) <= ARM_KEYS \
             or not isinstance(raw['actors'], list) or not raw['actors'] \
             or not all(isinstance(actor, str) and actor for actor in raw['actors']) \
@@ -97,6 +123,24 @@ def parse_ally_cast(raw) -> tuple[int, int, str]:
 
 
 def parse_ratio(raw, arms: int) -> Ratio:
+    floor_count = raw.get(FLOOR_COUNT_KEY) if isinstance(raw, dict) else None
+    if isinstance(raw, dict) and FLOOR_COUNT_KEY in raw and (
+            type(floor_count) is not int or not 0 <= floor_count < arms
+            or not number(raw.get('expected')) or not number(raw.get('tolerance'))
+            or raw['tolerance'] >= DISCRIMINATED_DEVIATION * raw['expected']):
+        raise ValueError(f'an ally_arm ratio floor_count is the index of an arm below {arms} that counts the '
+                         f'truncated events, with a tolerance below {DISCRIMINATED_DEVIATION:.0%} of expected, not '
+                         f'{raw!r}')
+    listed = None
+    if isinstance(raw, dict) and isinstance(raw.get('denominator'), list):
+        listed = raw['denominator']
+        if len(listed) < 2 or not all(type(index) is int and 0 <= index < arms for index in listed) \
+                or len(set(listed)) != len(listed) or raw.get('numerator') in listed:
+            raise ValueError(f'an ally_arm ratio denominator list is two or more distinct arm indices below {arms}, '
+                             f'without the numerator, not {listed!r}')
+        raw = {**raw, 'denominator': next(index for index in range(arms) if index != raw.get('numerator'))}
+    if isinstance(raw, dict):
+        raw = {key: value for key, value in raw.items() if key != FLOOR_COUNT_KEY}
     if not isinstance(raw, dict) or set(raw) != RATIO_KEYS \
             or not all(type(raw[key]) is int and 0 <= raw[key] < arms for key in ('numerator', 'denominator')) \
             or raw['numerator'] == raw['denominator'] \
@@ -105,7 +149,14 @@ def parse_ratio(raw, arms: int) -> Ratio:
             or not isinstance(raw['source'], str) or not raw['source'].strip():
         raise ValueError(f'an ally_arm ratio is {{numerator, denominator: two distinct arm indices below {arms}, '
                          f'expected > 0, tolerance >= 0, source: text}}, finite numbers, not {raw!r}')
-    return Ratio(raw['numerator'], raw['denominator'], float(raw['expected']), float(raw['tolerance']), raw['source'])
+    return Ratio(raw['numerator'], raw['denominator'] if listed is None else tuple(listed), float(raw['expected']),
+                 float(raw['tolerance']), raw['source'], floor_count)
+
+
+def denominator_arms(denominator) -> tuple:
+    if isinstance(denominator, (list, tuple)):
+        return tuple(denominator)
+    return (denominator,)
 
 
 def parse(raw) -> AllyArm:
@@ -114,8 +165,10 @@ def parse(raw) -> AllyArm:
     allies = raw.get('allies', 1)
     health = raw.get('ally_health')
     casts = raw.get('ally_casts', [])
-    if type(allies) is not int or not 1 <= allies <= len(ALLY_IDS):
-        raise ValueError(f'ally_arm allies is an integer from 1 to {len(ALLY_IDS)}, not {allies!r}')
+    if type(allies) is not int or not 0 <= allies <= len(ALLY_IDS):
+        raise ValueError(f'ally_arm allies is an integer from 0 to {len(ALLY_IDS)}, not {allies!r}')
+    if allies == 0 and (health is not None or casts or not raw.get('arms')):
+        raise ValueError('ally_arm allies 0 reads caster-only arms: arms, no ally_health and no ally_casts')
     if health is not None and (not isinstance(health, list) or len(health) != 2
                                or not all(type(value) is int for value in health) or not 1 <= health[0] <= health[1]):
         raise ValueError(f'ally_arm ally_health is [value, maximum], integers with 1 <= value <= maximum, '
@@ -138,10 +191,28 @@ def parse(raw) -> AllyArm:
     ratios = raw.get('ratios', [])
     if not isinstance(ratios, list) or ('ratios' in raw and not ratios):
         raise ValueError(f'ally_arm ratios is a non-empty list, not {ratios!r}')
+    parsed_arms = tuple(parse_arm(arm) for arm in arms)
+    parsed_ratios = tuple(parse_ratio(ratio, len(arms)) for ratio in ratios)
+    named = {index for ratio in parsed_ratios
+             for index in (ratio.numerator, *denominator_arms(ratio.denominator), ratio.floor_count)}
+    unnamed = [index for index, arm in enumerate(parsed_arms) if arm.ratio_only and index not in named]
+    if unnamed:
+        raise ValueError(f'ally_arm ratio-only arms {unnamed} are named by no ratio, so nothing would judge them')
+    floors = [ratio.floor_count for ratio in parsed_ratios if ratio.floor_count is not None
+              and ratio.floor_count in (ratio.numerator, *denominator_arms(ratio.denominator))
+              and not parsed_arms[ratio.floor_count].ratio_only]
+    if floors:
+        raise ValueError(f'ally_arm ratio floor_count {floors} names a judged arm of its own ratio: name a third arm '
+                         f'that counts the events, or a ratio-only arm, whose count_metric is then used')
+    uncounted = [index for ratio in parsed_ratios if isinstance(ratio.denominator, tuple)
+                 for index in ratio.denominator if not parsed_arms[index].ratio_only]
+    if uncounted:
+        raise ValueError(f'ally_arm ratio denominator lists name arms {uncounted} that read no count_metric, so they '
+                         f'cannot show their events landed')
     return AllyArm(allies, tuple(health) if health is not None else None, tuple(spell for spell, _, _ in stated),
-                   'control_wait' in raw, tuple(parse_arm(arm) for arm in arms),
+                   'control_wait' in raw, parsed_arms,
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
-                   tuple(parse_ratio(ratio, len(arms)) for ratio in ratios), raw.get('reach_source', ''))
+                   parsed_ratios, raw.get('reach_source', ''))
 
 
 def check(spec, ally):
@@ -162,6 +233,12 @@ def check(spec, ally):
             raise ValueError(f'{spec.spell} ally_arm metric {arm.metric!r} needs a METRIC_EVIDENCE row that is not '
                              f'a readback, found {evidence!r}')
         reads += [(actor, arm.metric, arm.fields, f'arm {index}') for actor in arm.actors]
+        if arm.ratio_only:
+            counted = metric_evidence().get(arm.count_metric)
+            if counted is None or counted == READBACK:
+                raise ValueError(f'{spec.spell} ally_arm arm {index} count_metric {arm.count_metric!r} needs a '
+                                 f'METRIC_EVIDENCE row that is not a readback, found {counted!r}')
+            reads += [(actor, arm.count_metric, arm.fields, f'arm {index} count') for actor in arm.actors]
     reach_check(spec, ally)
     for actor, metric, fields, read in reads:
         if actor != CASTER and metric in CASTER_SCOPED_METRICS \
@@ -282,10 +359,16 @@ def arm_label(spec, moment: str, index: int, actor: str) -> str:
     return f'{metric_delta_label(spec, moment)} ally_arm {index} {actor}'
 
 
+def arm_count_label(spec, moment: str, index: int, actor: str) -> str:
+    return f'{arm_label(spec, moment, index, actor)} count'
+
+
 def arm_reads(spec, ally: AllyArm, moment: str) -> list[dict]:
     from profile import measurement
-    return [measurement(arm_label(spec, moment, index, actor), actor, arm.metric, **arm.fields)
-            for index, arm in enumerate(ally.arms) for actor in arm.actors]
+    return [read for index, arm in enumerate(ally.arms) for actor in arm.actors for read in (
+        [measurement(arm_label(spec, moment, index, actor), actor, arm.metric, **arm.fields)]
+        + ([measurement(arm_count_label(spec, moment, index, actor), actor, arm.count_metric, **arm.fields)]
+           if arm.ratio_only else []))]
 
 
 def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
@@ -321,26 +404,47 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
     if ally.reach_source:
         contract += f' The main reading reaches raid subgroup 2 ({ally.reach_source}).'
     for index, arm in enumerate(ally.arms):
-        contract += (f' Arm {index}: {arm.metric} {arm.fields} summed over {list(arm.actors)}, read right after each '
-                     f'main reading, expected {arm.before_expected:g} then {arm.expected:g} within '
-                     f'{arm.tolerance:g} ({arm.source}).')
+        if arm.ratio_only:
+            contract += (f' Arm {index}: {arm.metric} {arm.fields} summed over {list(arm.actors)}, read right after '
+                         f'each main reading with its {arm.count_metric}, judged only through its ratio, which is '
+                         f'unmeasured unless the count moved ({arm.source}).')
+        else:
+            contract += (f' Arm {index}: {arm.metric} {arm.fields} summed over {list(arm.actors)}, read right after '
+                         f'each main reading, expected {arm.before_expected:g} then {arm.expected:g} within '
+                         f'{arm.tolerance:g} ({arm.source}).')
         if arm.reach_source:
             contract += f' Arm {index} reaches raid subgroup 2 ({arm.reach_source}).'
     for ratio in ally.ratios:
-        contract += (f' Ratio: arm {ratio.numerator} over arm {ratio.denominator}, each read as its after sum less '
+        over = (f'arm {ratio.denominator}' if not isinstance(ratio.denominator, tuple)
+                else f'the sum of arms {list(ratio.denominator)}')
+        contract += (f' Ratio: arm {ratio.numerator} over {over}, each read as its after sum less '
                      f'its before sum, expected {ratio.expected:g} within {ratio.tolerance:g} ({ratio.source}).')
+        if ratio.floor_count is not None:
+            contract += (f' Its low end widens by arm {ratio.floor_count}\'s delta over arm {ratio.denominator}\'s, '
+                         f'one unit per counted event truncated to an integer, and the ratio is unmeasured when the '
+                         f'widened band no longer excludes {DISCRIMINATED_DEVIATION:.0%} below expected.')
     scenario['contract'] += contract
 
 
 def model(spec, ally: AllyArm) -> dict:
-    ratios = {'ratios': [{'numerator': ratio.numerator, 'denominator': ratio.denominator, 'expected': ratio.expected,
-                          'tolerance': ratio.tolerance, 'source': ratio.source} for ratio in ally.ratios]}
-    return {NAME: {'allies': list(ally.ally_ids), 'arms': [
-        {'metric': arm.metric, 'before_expected': arm.before_expected, 'expected': arm.expected,
-         'tolerance': arm.tolerance, 'source': arm.source,
-         'before': [arm_label(spec, 'before', index, actor) for actor in arm.actors],
-         'after': [arm_label(spec, 'after', index, actor) for actor in arm.actors]}
-        for index, arm in enumerate(ally.arms)], **(ratios if ally.ratios else {})}}
+    ratios = {'ratios': [{'numerator': ratio.numerator, 'denominator': ratio.denominator if not isinstance(
+                              ratio.denominator, tuple) else list(ratio.denominator), 'expected': ratio.expected,
+                          'tolerance': ratio.tolerance, 'source': ratio.source,
+                          **({FLOOR_COUNT_KEY: ratio.floor_count} if ratio.floor_count is not None else {})}
+                         for ratio in ally.ratios]}
+    return {NAME: {'allies': list(ally.ally_ids), 'arms': [arm_model(spec, index, arm)
+                                                            for index, arm in enumerate(ally.arms)],
+                   **(ratios if ally.ratios else {})}}
+
+
+def arm_model(spec, index: int, arm: Arm) -> dict:
+    labels = {moment: [arm_label(spec, moment, index, actor) for actor in arm.actors] for moment in ('before', 'after')}
+    if arm.ratio_only:
+        return {'metric': arm.metric, 'count_metric': arm.count_metric, 'source': arm.source, **labels,
+                **{f'count_{moment}': [arm_count_label(spec, moment, index, actor) for actor in arm.actors]
+                   for moment in ('before', 'after')}}
+    return {'metric': arm.metric, 'before_expected': arm.before_expected, 'expected': arm.expected,
+            'tolerance': arm.tolerance, 'source': arm.source, **labels}
 
 
 def verdict(verdict, run, ally: dict):
@@ -349,28 +453,66 @@ def verdict(verdict, run, ally: dict):
     texts = []
     off = False
     deltas = []
+    landed_counts = {}
+    uncounted = set()
     for index, arm in enumerate(ally['arms']):
-        missing = next((label for label in (*arm['before'], *arm['after']) if run.values.get(label) is None), None)
+        counts = (*arm.get('count_before', ()), *arm.get('count_after', ()))
+        missing = next((label for label in (*arm['before'], *arm['after'], *counts)
+                        if run.values.get(label) is None), None)
         if missing is not None:
             return replace(verdict, status='alert' if verdict.status == 'alert' else 'unmeasured',
                            explanation=f'{verdict.explanation}; ally arm {index}: {missing} was not read')
         before = sum(run.values[label] for label in arm['before'])
         after = sum(run.values[label] for label in arm['after'])
         deltas.append(after - before)
+        if 'count_metric' in arm:
+            landed = (sum(run.values[label] for label in arm['count_after'])
+                      - sum(run.values[label] for label in arm['count_before']))
+            landed_counts[index] = landed
+            if landed <= 0:
+                uncounted.add(index)
+            texts.append(f'ally arm {index} {arm["metric"]}: {before:g} before and {after:g} after, {landed:g} '
+                         f'{arm["count_metric"]} events landed, judged through its ratio ({arm["source"]})')
+            continue
         held = (abs(before - arm['before_expected']) <= arm['tolerance']
                 and abs(after - arm['expected']) <= arm['tolerance'])
         off = off or not held
         texts.append(f'ally arm {index} {arm["metric"]}: {before:g} before (expected {arm["before_expected"]:g}) '
                      f'and {after:g} after (expected {arm["expected"]:g}), within {arm["tolerance"]:g}: '
                      f'{"ok" if held else "off"} ({arm["source"]})')
+    undiscriminated = False
     for ratio in ally.get('ratios', []):
-        numerator, denominator = deltas[ratio['numerator']], deltas[ratio['denominator']]
+        numerator = deltas[ratio['numerator']]
+        denominator = sum(deltas[index] for index in denominator_arms(ratio['denominator']))
         measured = numerator / denominator if denominator else None
-        held = measured is not None and abs(measured - ratio['expected']) <= ratio['tolerance']
+        floor = ratio.get(FLOOR_COUNT_KEY)
+        widening = (landed_counts.get(floor, deltas[floor] if floor is not None else 0) / denominator
+                    if floor is not None and denominator else 0.0)
+        arms = {ratio['numerator'], *denominator_arms(ratio['denominator']), ratio.get(FLOOR_COUNT_KEY)}
+        unlanded = sorted(index for index in arms & uncounted)
+        if unlanded or (measured is None and arms & {index for index, arm in enumerate(ally['arms'])
+                                                     if 'count_metric' in arm}):
+            undiscriminated = True
+            texts.append(f'ally ratio arm {ratio["numerator"]} / arm {ratio["denominator"]}: unmeasured, '
+                         + (f'no event of ratio-only arm(s) {unlanded} landed' if unlanded
+                            else 'the denominator arm did not move'))
+            continue
+        low, high = ratio['expected'] - ratio['tolerance'] - widening, ratio['expected'] + ratio['tolerance']
+        if FLOOR_COUNT_KEY in ratio and low <= (1 - DISCRIMINATED_DEVIATION) * ratio['expected']:
+            undiscriminated = True
+            texts.append(f'ally ratio arm {ratio["numerator"]} / arm {ratio["denominator"]}: the band widened by '
+                         f'{widening:g} for arm {ratio[FLOOR_COUNT_KEY]}\'s truncated events reaches {low:g}, no '
+                         f'longer excluding {DISCRIMINATED_DEVIATION:.0%} below {ratio["expected"]:g}: unmeasured')
+            continue
+        held = measured is not None and low <= measured <= high
         off = off or not held
         read = f'{measured:g}' if measured is not None else 'none, the denominator arm did not move'
+        band = (f'within {ratio["tolerance"]:g}' if FLOOR_COUNT_KEY not in ratio
+                else f'{low:g} to {high:g}, the low end widened by {widening:g} for arm '
+                     f'{ratio[FLOOR_COUNT_KEY]}\'s truncated events')
         texts.append(f'ally ratio arm {ratio["numerator"]} / arm {ratio["denominator"]}: {numerator:g} / '
-                     f'{denominator:g} = {read} (expected {ratio["expected"]:g} within {ratio["tolerance"]:g}): '
+                     f'{denominator:g} = {read} (expected {ratio["expected"]:g} {band}): '
                      f'{"ok" if held else "off"} ({ratio["source"]})')
     explanation = '; '.join([verdict.explanation, *texts])
-    return replace(verdict, status='alert' if off else verdict.status, explanation=explanation)
+    status = 'alert' if off else 'unmeasured' if undiscriminated else verdict.status
+    return replace(verdict, status=status, explanation=explanation)

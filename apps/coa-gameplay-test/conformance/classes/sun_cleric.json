@@ -9920,6 +9920,64 @@
       "after_at_least": 1
     },
     {
+      "spell": 800612,
+      "name": "Champion of the Sun (Holy strike amount is 100% of the auto attack damage)",
+      "kind": "metric_delta",
+      "variant": "holy_amount",
+      "label_suffix": "holy_amount",
+      "quote": "causing your melee auto attacks to deal an additional $s1% of the damage dealt as Holy damage.",
+      "target": "dummy",
+      "expire_ms": 500,
+      "attack_swings": 5,
+      "gate_spell": 800612,
+      "gate_cast": true,
+      "trigger_spell": 800612,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807853,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 807853,
+              "target": "dummy"
+            },
+            "source": "Copy(player, target, 807853, CalculatePct(damage, Amount(800612))) on each damaging auto attack (AscensionSunClericEvents.cpp:376)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {},
+            "source": "the caster's damaging auto attacks, both hands, that the Holy strikes take their amount from"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.02,
+            "source": "800612 Effect[0] BasePoints 99 + 1 = 100 ($s1): each Holy strike is 100% of the auto attack damage dealt; CalculatePct of 100% truncates nothing; the band 0.98 to 1.02 excludes 0.9 and 1.1"
+          }
+        ]
+      },
+      "observe_source": "Amount half of the 800612 clause. Same phases as holy_strikes (5 swing intervals with both hands at the dummy, the before phase without the aura is the control and reads 0 Holy strikes), with two ratio-only arms read after each main reading: the 807853 damage total at the dummy (with its count) and the caster's melee damage total (with its damaging-hit count). The main reading expects 1 or more Holy strikes after (expected 1 as a floor through the count arm). The ratio of the after-phase deltas must be 1.0 within 0.02, unmeasured unless both landed. Expected from 800612 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run.",
+      "after_at_least": 1
+    },
+    {
       "spell": 706735,
       "name": "Divine Vision (Holy damage)",
       "kind": "hit_ratio",
@@ -23984,6 +24042,83 @@
       "observe_source": "301011 Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT (BasePoints 99 +1 = 100, $s1), trigger 301012 (Effect[0] SPELL_EFFECT_HEAL, TargetA 31 TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 9). AscensionSunClericAbilities.cpp:289-300: when the caster's own Gavel of Light heal 707522 (State.gavelHealing, set by the Gavel of Light 800611 branch at :326-335) lands on the caster with 301011 known, Allies(player, player, Radius(301012)) minus the caster is cut to 5 (allies.resize(5)) and each receives Copy(player, ally, 301012, CalculatePct(healing, Amount(301011))). Allies() keeps units in the caster's raid and friendly (AscensionSunCleric.cpp:149-157), so 3 grouped allies stand within range and the count read is the number of 301012 heal events the caster cast: 3. The count is read as the caster's spell_heal_count of 301012 (events the caster itself cast, any target), 0 in the before phase (control: 301011 not learned, Gavel of Light cast the same way) and 3 after the learn; the counter is cumulative and the before reading is 0, so the after reading is the gain. Gavel of Light 800611 at the dummy at 5 yd with the caster held at 50% health (so the self heal is not zero); 984954 makes the Gavel hit a critical strike in both phases, 823764 removes resists; class file ratings leave no miss: residual failure probability 0 per pair. Weapon set Blessings (spell_weapon_sets 301011). The amount (100% of the self heal) is not read here (see the ledger row). Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours."
     },
     {
+      "spell": 301011,
+      "name": "Holy Knight (each ally heal is 100% of the Gavel of Light self heal)",
+      "kind": "metric_delta",
+      "variant": "amount_ratio",
+      "label_suffix": "amount_ratio",
+      "quote": "Your Gavel of Light now additionally heals up to 5 nearby allies for $s1% of the amount it heals you.",
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301012
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 6,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 301012
+            },
+            "source": "Copy(player, ally, 301012, CalculatePct(healing, Amount(301011))) for each of the first 5 allies (AscensionSunClericAbilities.cpp:289-300): the 301012 heals the caster cast, any target"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster"
+            },
+            "source": "the Gavel of Light self heal 707522 that the copies take their amount from"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 5.0,
+            "tolerance": 0.05,
+            "source": "301011 Effect[0] BasePoints 99 + 1 = 100 ($s1): each of the 5 healed allies receives 100% of the self heal, so the after-phase 301012 total is 5 x the after-phase 707522 total; CalculatePct of 100% truncates nothing; the band 4.95 to 5.05 excludes 4.5 and 5.5 (-10% and +10%)"
+          }
+        ]
+      },
+      "observe_source": "Amount half of the 301011 clause. Same scenario as allies_cap (Gavel of Light 800611 at the dummy at 5 yd, caster at 50% health, 984954 forced critical and 823764 no resist in both phases, 6 grouped allies at 5000 of 10000 health), with two ratio-only arms read after each main reading: the 301012 heal total the caster cast (with its count) and the 707522 self heal total on the caster (with its count). Control: the before phase (301011 not learned) casts Gavel of Light the same way and reads 0 of 301012. The ratio of the after-phase deltas must be 5 (5 allies x 100%) within 0.05; it is unmeasured unless both heals landed in the after phase. Expected from 301011 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run."
+    },
+    {
       "spell": 680643,
       "name": "Valiance (melee attack speed)",
       "kind": "metric_delta",
@@ -24126,6 +24261,94 @@
       "minimum_hits": 15,
       "cast_power": 1363,
       "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 803913,
+      "name": "Glorious Execution (mana restored is 5% of the damage of both strikes)",
+      "kind": "metric_delta",
+      "variant": "mana_ratio",
+      "label_suffix": "mana_ratio",
+      "quote": "and regenerate mana equal to $807451s1% of the damage dealt.",
+      "trigger_spell": 803913,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 807552
+      },
+      "before_expected": 2,
+      "expected": 4,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "player_attack_power": 20000,
+      "cast_power": 1363,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_energize_total",
+            "count_metric": "spell_energize_count",
+            "fields": {
+              "spell": 807552
+            },
+            "source": "Mana(player, CalculatePct(dealt, Amount(807451)), 807552) for each Glorious Execution strike 800691 and 802566 (AscensionSunClericAbilities.cpp:377-382)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 800691,
+              "target": "dummy"
+            },
+            "source": "the main-hand strike 800691"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802566,
+              "target": "dummy"
+            },
+            "source": "the off-hand strike 802566"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": [
+              1,
+              2
+            ],
+            "expected": 0.05,
+            "tolerance": 0.001,
+            "floor_count": 0,
+            "source": "807451 Effect[0] BasePoints 4 + 1 = 5 ($807451s1): 5% of the damage of each strike, truncated to an integer per strike by CalculatePct, so the low end widens by one mana per energize event; with +20000 attack power each forced-critical strike deals thousands, so the widened band stays far inside 0.045 to 0.055 (-10% and +10%), and the verdict is unmeasured if it does not"
+          }
+        ]
+      },
+      "observe_source": "Behaviour half of the 803913 mana clause. Glorious Execution 803913 is cast at the dummy in both phases (no gate: Amount(807451) is read from the data without a caster, Sun Cleric ADR 0018), +20000 attack power, 984954 forced critical, 823764 no resist; the class ratings (hit, expertise 10000) leave no miss, dodge or parry, so each cast lands two strikes and two 807552 energize events (main reading: 2 then 4 cumulative). Three ratio-only arms read after each main reading: the 807552 mana total (with its count) over the damage totals of 800691 and 802566 (each with its count), summed. The ratio of the second cast alone must be 5% within 0.001, the low end widened by one mana per energize event for the per-strike truncation. Expected from 807451 Effect[0] BasePoints 4 + 1 (installed DBC) and the tooltip; nothing from a run."
     },
     {
       "spell": 92135,
