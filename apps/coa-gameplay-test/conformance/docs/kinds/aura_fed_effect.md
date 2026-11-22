@@ -43,7 +43,19 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   (`cooldown_ms`, readback) and cast again (B): B goes off in the treatment and is refused in the control, and a third
   cast (C) is refused. `trials` must keep a run without a judged reset trial at most `residual_target` per pair;
   `expected` is 0.
+  `evidence_metric: "cast_failure"` (opt-in, cooldown variant only) stamps the verdict with `cast_failure`, the
+  recast reads, instead of the readback `cooldown_ms`; without it the stamp is unchanged.
+- `variant: "cooldown_reset_recast"` (ADR 1037 addendum, opt-in): every trial resets the effect cooldown as a
+  fixture, casts the effect for real (primer) and reads `cooldown_ms` after the global cooldown; treatment trials then
+  feed until `aura`, control trials cast no feed. After the global cooldown the effect is cast again (R): R goes off
+  (`cast_failure` 0, `spell_go_count` +1 over the primer) in the treatment and is refused with
+  `SPELL_FAILED_NOT_READY` in the control. Only treatment trials whose aura came at the first feed cast are judged (a
+  selection on the aura timing, never on R). A refused feed cast or a primer read not natural within 10% voids the
+  run (unmeasured); the control's refusal of R is the judged read. The verdict is stamped `cast_failure`. `trials`
+  must keep a run without a selected trial at most `residual_target` per pair (15 at ProcChance 40 and 0.001).
 
-Sun Cleric: Spears of Glory 804629 (Radiant Flame 806060 feeding 807299, Dawnsear 554406 instant and +25%, the
+Sun Cleric: Dawn's Arrival 503690 (`cooldown` with `evidence_metric`, label `fed_cooldown`;
+`cooldown_reset_recast`, label `fed_reset`); Spears of Glory 804629 (Radiant Flame 806060 feeding 807299,
+Dawnsear 554406 instant and +25%, the
 +25% sized with `figure_effect` 1, `min_hits` 4, 14 trials and `consumed`); Cultivate
 Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%).

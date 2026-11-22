@@ -28,6 +28,9 @@ COOLDOWN = {'spell': 503690, 'name': 'Dawn\'s Arrival (free Gavel)', 'kind': 'au
             'effect_spell': 800611, 'every_ms': 1700, 'residual_target': 0.001, 'feed_power': 1363,
             'effect_power': 1363, 'expected': 0, 'trials': 8,
             'quote': 'causes the next one to not incur a cooldown'}
+RESET = {**COOLDOWN, 'name': 'Dawn\'s Arrival (Gavel reset)', 'variant': 'cooldown_reset_recast',
+         'label_suffix': 'fed_reset', 'trials': 15,
+         'quote': 'Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels'}
 CONTROL_HIT = 8800.0
 SEED = 704920
 
@@ -255,6 +258,78 @@ class AuraFedEffectTests(unittest.TestCase):
             self.generated({**COOLDOWN, 'trials': 2})
         with self.assertRaises(ValueError):
             self.generated({**COOLDOWN, 'expected': 1})
+
+    def test_the_free_cast_verdict_carries_the_evidence_metric_only_when_asked(self):
+        for entry, metric in ((COOLDOWN, 'cooldown_ms'), ({**COOLDOWN, 'evidence_metric': 'cast_failure'},
+                                                          'cast_failure')):
+            _, expectation = self.generated(entry)
+            values = self.cooldown_values()
+            verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+            self.assertEqual((verdict.status, verdict.detail['metric']), ('ok', metric))
+
+    def test_the_evidence_metric_is_a_cooldown_option_of_one_value(self):
+        with self.assertRaises(ValueError):
+            self.generated({**COOLDOWN, 'evidence_metric': 'spell_go_count'})
+        with self.assertRaises(ValueError):
+            self.generated({**DAMAGE, 'evidence_metric': 'cast_failure'})
+
+    def reset_run(self, attempts=None, recast=0.0, control=67.0, primed=3400.0, feed_failures=(), stamp=None):
+        _, expectation = self.generated(RESET)
+        attempts = attempts or [1] * 15
+        values, fed, go = {}, 0.0, 0.0
+        for arm in ('control', 'treatment'):
+            for index, trial in enumerate(expectation.model['reads'][arm]):
+                treated = arm == 'treatment'
+                go += 1
+                failure = recast[index] if treated and isinstance(recast, list) else recast if treated else control
+                values.update({trial['pre']: primed, trial['pre_go']: go, trial['aura']: 1.0 if treated else 0.0,
+                               trial['recast_failure']: failure})
+                go += 1 if failure == 0 else 0
+                values[trial['recast_go']] = go
+                if treated:
+                    fed += attempts[index]
+                    values[trial['fed']] = fed
+        fake = FakeRun(values)
+        fake.cast_failures = {800611: [67] * 15, **({800654: list(feed_failures)} if feed_failures else {})}
+        return judge_behaviour(base_verdict(expectation), fake, expectation)
+
+    def test_the_reset_recast_feeds_for_real_and_never_sets_the_aura(self):
+        scenario, expectation = self.generated(RESET)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        feeds = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
+        self.assertEqual([(step['spell'], step['aura']) for step in feeds], [(800654, 503691)] * 15)
+        self.assertFalse(any(step['action'] == 'set_aura' and step['spell'] == 503691 for step in scenario['steps']))
+        self.assertIn('never on the outcome', scenario['contract'])
+        self.assertEqual(expectation.model['metric'], 'cast_failure')
+
+    def test_the_reset_recast_is_ok_when_the_granting_roll_resets_the_gavel(self):
+        verdict = self.reset_run()
+        self.assertEqual((verdict.status, verdict.detail['metric']), ('ok', 'cast_failure'))
+
+    def test_a_mutant_without_the_reset_alerts(self):
+        self.assertEqual(self.reset_run(recast=67.0).status, 'alert')
+        self.assertEqual(self.reset_run(recast=[0.0] * 14 + [67.0]).status, 'alert')
+
+    def test_a_control_recast_that_goes_off_alerts(self):
+        self.assertEqual(self.reset_run(control=0.0).status, 'alert')
+
+    def test_the_selection_rests_on_the_aura_timing_not_the_outcome(self):
+        attempts = [1, 2] * 7 + [1]
+        recast = [0.0 if count == 1 else 67.0 for count in attempts]
+        self.assertEqual(self.reset_run(attempts=attempts, recast=recast).status, 'ok')
+        recast[0] = 67.0
+        self.assertEqual(self.reset_run(attempts=attempts, recast=recast).status, 'alert')
+        self.assertEqual(self.reset_run(attempts=[2] * 15).status, 'unmeasured')
+
+    def test_a_refused_feed_or_a_non_natural_primer_voids_the_run(self):
+        self.assertEqual(self.reset_run(feed_failures=(67,)).status, 'unmeasured')
+        self.assertEqual(self.reset_run(feed_failures=(0,)).status, 'ok')
+        self.assertEqual(self.reset_run(primed=0.0).status, 'unmeasured')
+        self.assertEqual(self.reset_run(primed=0.0, recast=67.0).status, 'unmeasured')
+
+    def test_the_reset_recast_needs_its_trials(self):
+        with self.assertRaises(ValueError):
+            self.generated({**RESET, 'trials': 14})
 
     def test_a_missing_read_is_unmeasured(self):
         self.assertEqual(self.judged(DAMAGE, {}), 'unmeasured')
