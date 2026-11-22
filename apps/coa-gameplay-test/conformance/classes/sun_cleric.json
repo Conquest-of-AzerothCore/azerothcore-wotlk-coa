@@ -3922,7 +3922,13 @@
           "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
         }
       ],
-      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Radiance (cooldown 120000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Radiance is attempted again 108330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 107830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 11840 ms at the Dawn cast) or of the full cooldown (12000 ms) the tooltip does not say; the stated cut is taken as their midpoint 11920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value."
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Radiance (cooldown 120000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Radiance is attempted again 108330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 107830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 11840 ms at the Dawn cast) or of the full cooldown (12000 ms) the tooltip does not say; the stated cut is taken as their midpoint 11920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ]
     },
     {
       "spell": 707414,
@@ -3953,7 +3959,13 @@
           "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut."
         }
       ],
-      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Valkyr's Calling (cooldown 180000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Valkyr's Calling is attempted again 162330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 161830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 17840 ms at the Dawn cast) or of the full cooldown (18000 ms) the tooltip does not say; the stated cut is taken as their midpoint 17920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value."
+      "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Valkyr's Calling (cooldown 180000 ms) is cast, Dawn 804584 is cast at the caster 1600 ms later with 20 Solar Power (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it), and Valkyr's Calling is attempted again 162330 ms after its cast: refused without the passive (control arm), accepted with it, and refused again 161830 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 17840 ms at the Dawn cast) or of the full cooldown (18000 ms) the tooltip does not say; the stated cut is taken as their midpoint 17920 ms with a margin of 250 ms (about 2% of 11920 ms, 6% of 4420 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Dawn lasts 60000 ms and its second cast cancels it, so the arms are spaced to let it end. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ]
     },
     {
       "spell": 707414,
@@ -3989,7 +4001,13 @@
         }
       ],
       "observe_source": "707414 It's Always Sunny Effect[0] PROC_TRIGGER_SPELL 712380; 712380 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, BasePoints 9 (+1 = 10, $712380s1), MiscValue 800054 Radiance, 520024 Valkyr's Calling, 805629 Sunslam. Sunslam (cooldown 45000 ms) is cast with the Dawn state aura 807440 present (Sunslam is refused without it, AscensionSunClericAbilities.cpp:90, so the harness sets it before each Sunslam cast), then Dawn 804584 is cast twice at the caster, 1600 ms and 3200 ms after it, with 20 Solar Power each time (a precondition fixture by harness set_aura, in every arm; It's Always Sunny is learned only in the arms with it): the first cast finds Dawn present and cancels it, the second activates it (AscensionSunClericAbilities.cpp:417-423) and applies the cut. Sunslam is attempted again 40910 ms after its cast (4340 ms less than its cooldown plus 250 ms): refused without the passive (control arm), accepted with it, and refused again 40410 ms after the cast. Whether the 10% is of the remaining cooldown (a cut of 4180 ms at the second Dawn cast) or of the full cooldown (4500 ms) the tooltip does not say; the stated cut is taken as their midpoint 4340 ms with a margin of 250 ms (6% of 4340 ms), so the cut is bracketed inside 10% on both sides and both readings pass. Reference search 2026-11-20: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and figure; coa-history spell 800054 shows 22 logs with aura events, 520024 41 casts in 6 logs, 804584 1070 casts in 42 logs, none with a cooldown reading; nothing found beyond the tooltip and the DBC for the value.",
-      "after_cast_gap_ms": 1600
+      "after_cast_gap_ms": 1600,
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ]
     },
     {
       "spell": 804269,
@@ -5404,6 +5422,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
       ]
     },
     {
@@ -5452,6 +5476,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
       ]
     },
     {
@@ -5516,7 +5546,8 @@
           "caster",
           "caster"
         ]
-      ]
+      ],
+      "void_on_cast_failure": true
     },
     {
       "spell": 503624,
@@ -6433,7 +6464,8 @@
           "caster",
           "caster"
         ]
-      ]
+      ],
+      "void_on_cast_failure": true
     },
     {
       "spell": 300321,
@@ -6471,7 +6503,8 @@
           "caster",
           "caster"
         ]
-      ]
+      ],
+      "void_on_cast_failure": true
     },
     {
       "spell": 560094,
@@ -8138,7 +8171,13 @@
       "tolerance": 0.05,
       "wait_ms": 2600,
       "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases and the Vow, Dawn and heal run once, after the learn (a second Dawn sequence in the same scenario does not fulfil again with 704562 learned: batch 3c diagnostic d1, block and stacks unchanged at 0 after the learn). The control without the talent is the sibling scenario of the entries control_stacks and control_fulfilled: the same Vow, Dawn and heal with 704562 never learned, where the Vow is fulfilled (Sunlight heals) and no Dawnguard stack appears; the talent gate is therefore measured, not read from the code (AscensionSunCleric.cpp:296-297).  The caster's block chance (PLAYER_BLOCK_PERCENTAGE) is read after the heal lands (wait 2600 ms from the cast start): the gain must be 2 within 0.05, which excludes 1 and 3. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
-      "cast_in_before": false
+      "cast_in_before": false,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 704562,
@@ -8186,7 +8225,13 @@
       "expected": 1,
       "wait_ms": 2600,
       "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases and the Vow, Dawn and heal run once, after the learn (a second Dawn sequence in the same scenario does not fulfil again with 704562 learned: batch 3c diagnostic d1, block and stacks unchanged at 0 after the learn). The control without the talent is the sibling scenario of the entries control_stacks and control_fulfilled: the same Vow, Dawn and heal with 704562 never learned, where the Vow is fulfilled (Sunlight heals) and no Dawnguard stack appears; the talent gate is therefore measured, not read from the code (AscensionSunCleric.cpp:296-297).  One fulfilment: 1 stack of 680672. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
-      "cast_in_before": false
+      "cast_in_before": false,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 704562,
@@ -8245,7 +8290,13 @@
       "cast_power": 1363,
       "refill_power_after_setup_casts": {
         "power": 0
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 704562,
@@ -8304,7 +8355,13 @@
       "cast_power": 1363,
       "refill_power_after_setup_casts": {
         "power": 0
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 704562,
@@ -8353,7 +8410,13 @@
       "wait_ms": 16600,
       "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). 680672 is on the caster 14600 ms after the fulfilling heal landed (2000 ms cast + 14600): its duration is above 14.6 s, which excludes 13.5 s (-10% of 15 s). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 704562,
@@ -8402,7 +8465,13 @@
       "wait_ms": 18400,
       "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). 680672 is gone 16400 ms after the heal landed: its duration is below 16.4 s, which excludes 16.5 s (+10%). With duration_held its end lies in (14.6, 16.4) s. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300371,
@@ -8622,7 +8691,13 @@
       "wait_ms": 2600,
       "observe_source": "Control without 704562 for block_one, stack_one and the stack entries: 704562 is never learned; the gate learned from the start is Sunlight 92136 (a passive that acts on the same Vow fulfilment, observed by control_fulfilled). The same Vow of Radiance 803489, Dawn 804584 (20 Solar Power 500149 set as in the other entries) and Illumination 500143 heal at 50% health, run once. Dawnguard 680672 stacks on the caster: 0 expected, because AscensionSunCleric.cpp:296-297 casts it only with 704562. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 704562,
@@ -8674,7 +8749,13 @@
       "cast_in_before": false,
       "setup_only_after": true,
       "after_at_least": 60,
-      "after_at_most": 64
+      "after_at_most": 64,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 681064,
@@ -9412,7 +9493,13 @@
       "expected": 1,
       "wait_ms": 2600,
       "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). One fulfilment reads 1 stack. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
-      "cast_in_before": false
+      "cast_in_before": false,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 680622,
@@ -9471,7 +9558,13 @@
       "cast_power": 1363,
       "refill_power_after_setup_casts": {
         "power": 0
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 680622,
@@ -9520,7 +9613,13 @@
       "wait_ms": 2600,
       "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). The control without the talent: 0 stacks (the Vow is fulfilled, 680622 never learned; Sunlight 92136 is learned as the fulfilling talent, as in the Dawnguard control). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 680622,
@@ -9569,7 +9668,13 @@
       "wait_ms": 56600,
       "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is on the caster 54600 ms after the fulfilling heal (wait 2000 ms cast + 54600): its duration is above 54.6 s, which excludes 54 s (-10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 680622,
@@ -9618,7 +9723,13 @@
       "wait_ms": 67400,
       "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is gone 65400 ms after the fulfilling heal (wait 2000 ms cast + 65400): its duration is below 65.4 s, which excludes 66 s (+10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707613,
@@ -11771,7 +11882,13 @@
       "expected": 5,
       "observe_source": "657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectChainTarget 5; the tooltip reads \"up to $657125i additional enemies\" with $657125i = 5 in the DBC (EffectChainTarget 5), and the stock engine counts the primary in the chain (Spell.cpp:1921, :1934), so a cast strikes 5 enemies in all, which the live logs show (mentor D-63, ruling (a): Live source (mentor D-63, ruling (a): 5 strikes in all, the primary enemy and 4 additional): coa-history logs 75, 76, 77 and 82 (2026-08-01 and 2026-08-02), 657125 SPELL_DAMAGE and SPELL_MISSED grouped by cast (events within 10 ms of the first of a group): 1,916 casts with 1 to 5 distinct targets each and never 6 (5 targets in 59, 36, 93 and 128 casts, 316 in all). The server engine counts the primary in the chain (Spell::SelectImplicitChainTargets, Spell.cpp:1921 and :1934: ChainTarget 5, SearchChainTargets for 4 more), as the live logs show.). The strikes of 657125 are counted over the eight dummies (area_sum): 0 in the control phase, exactly 5 with 707081 (excludes 4 and 6). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707081,
@@ -11832,7 +11949,13 @@
       "tolerance": 5,
       "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 1 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^0 = 98. The damage total of 657125 on dummy is read 1000 ms after the cast: 0 in the control phase. Tolerance 5 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707081,
@@ -11893,7 +12016,13 @@
       "tolerance": 4,
       "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 2 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^1 = 78.4. The damage total of 657125 on area1 is read 1000 ms after the cast: 0 in the control phase. Tolerance 4 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707081,
@@ -11954,7 +12083,13 @@
       "tolerance": 2.0,
       "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 5, the last of the 5 strikes in all (mentor D-63, ruling (a); see the chain_count entry), deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^4 = 40.14. The damage total of 657125 on area4 is read 1000 ms after the cast: 0 in the control phase. Tolerance 2.0 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 680619,
@@ -13054,7 +13189,8 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). The aura 807059 on the caster is read 500 ms after a real Dawn cast, before the passive is learned (control, 0) and after (1). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, Dawn activates only with 20 Solar Power, not the subject), and the Dawn aura 807440 left by the first phase is set to 0 stacks before the second cast (Dawn excludes itself while up, ExcludeCasterAuraSpell 807440). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). The aura 807059 on the caster is read 500 ms after a real Dawn cast, before the passive is learned (control, 0) and after (1). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, Dawn activates only with 20 Solar Power, not the subject), and the Dawn aura 807440 left by the first phase is set to 0 stacks before the second cast (Dawn excludes itself while up, ExcludeCasterAuraSpell 807440). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 804625,
@@ -13089,7 +13225,13 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 is cast at the dummy and the amplitude of its periodic aura on the dummy is read (Effect[0] every 1000 ms; with Scorch Marks -50% as read: 500; 450 or 550 would be 10% off). The before phase casts Radiant Flame alone (control), the after phase casts Dawn first. 804625 is known throughout. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 is cast at the dummy and the amplitude of its periodic aura on the dummy is read (Effect[0] every 1000 ms; with Scorch Marks -50% as read: 500; 450 or 550 would be 10% off). The before phase casts Radiant Flame alone (control), the after phase casts Dawn first. 804625 is known throughout. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 804625,
@@ -13125,7 +13267,13 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Dawn grants Scorch Marks, a first Radiant Flame consumes it (setup), and the second Radiant Flame (trigger) is read 4500 ms later: amplitude 1000, the unchanged base. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Dawn grants Scorch Marks, a first Radiant Flame consumes it (setup), and the second Radiant Flame (trigger) is read 4500 ms later: amplitude 1000, the unchanged base. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 804625,
@@ -13160,7 +13308,13 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 (DurationIndex 35, 4000 ms) is cast at the dummy and the remaining duration 300 ms after the cast is read: 3700 without (control), 1700 with Scorch Marks (-50% of 4000, 2000, less 300); a 10% error on the total reads 1500 or 1900, outside the tolerance of 80. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 (DurationIndex 35, 4000 ms) is cast at the dummy and the remaining duration 300 ms after the cast is read: 3700 without (control), 1700 with Scorch Marks (-50% of 4000, 2000, less 300); a 10% error on the total reads 1500 or 1900, outside the tolerance of 80. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300365,
@@ -13635,7 +13789,8 @@
           "caster"
         ]
       ],
-      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture) and the Dawn aura left by the first phase is set to 0 stacks before the second cast. The remaining duration of 805265 on the caster 500 ms after the cast is read: 0 before the learn (control) and 59500 after, within 1000 (a total 10% off reads 53500 or 65500). Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found."
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture) and the Dawn aura left by the first phase is set to 0 stacks before the second cast. The remaining duration of 805265 on the caster 500 ms after the cast is read: 0 before the learn (control) and 59500 after, within 1000 (a total 10% off reads 53500 or 65500). Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 704586,
@@ -13670,7 +13825,8 @@
           "caster"
         ]
       ],
-      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). The reference character wields the Seraphim set with the Large Round Shield 2129 (spell_weapon_sets 704586 = Seraphim); its worn armor is the Reborn column, 48 (item_template armor is 41; LocalLevelScaling::WornArmorFor at Player.cpp:7347, the same 48 as the Sun-Touched Armor 561023 entry); StatSystem.cpp:390 adds the shield armor x (multiplier - 1) for a MiscValueB mask, so 48 x 0.5 = 24. The armor is read 500 ms after a real Dawn cast, before the learn (control) and after, judged by its gain, within 1 (a gain 10% off reads 21.6 or 26.4). Ledger clause 235 of 704586 (the streamed Shining Shield text); the quote field names the Spell.dbc sentence the entry hangs under. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found."
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). The reference character wields the Seraphim set with the Large Round Shield 2129 (spell_weapon_sets 704586 = Seraphim); its worn armor is the Reborn column, 48 (item_template armor is 41; LocalLevelScaling::WornArmorFor at Player.cpp:7347, the same 48 as the Sun-Touched Armor 561023 entry); StatSystem.cpp:390 adds the shield armor x (multiplier - 1) for a MiscValueB mask, so 48 x 0.5 = 24. The armor is read 500 ms after a real Dawn cast, before the learn (control) and after, judged by its gain, within 1 (a gain 10% off reads 21.6 or 26.4). Ledger clause 235 of 704586 (the streamed Shining Shield text); the quote field names the Spell.dbc sentence the entry hangs under. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 560547,
@@ -15294,7 +15450,8 @@
       "expected": 13,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), EffectSpellClassMask word 0 = 64 = the Dawn state aura 807440 SpellFamilyFlags[0] (ProcCharges 10, DurationIndex 3 = 60000 ms). A real Dawn cast 804584 (it activates only with 20 Solar Power 500149, set before each cast as a precondition fixture in both phases: AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265; the harness waits 61000 ms between phases so the first Dawn has expired and the second cast activates rather than cancels it, AscensionSunClericAbilities.cpp:417-423): the aura 807440 holds 10 charges before the passive is learned (control, the base figure) and 13 after (10 + 3), read 500 ms after the cast. Reference search 2026-11-22: bindmysoul talents snapshot (reference/snapshots/bindmysoul, fetched 2026-07-22) carries 'Allows Dawn to affect 3 additional casts.' for the rank 1 spell 300324 (the 300329 rank 2 states 5 in our DBC); coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), EffectSpellClassMask word 0 = 64 = the Dawn state aura 807440 SpellFamilyFlags[0] (ProcCharges 10, DurationIndex 3 = 60000 ms). A real Dawn cast 804584 (it activates only with 20 Solar Power 500149, set before each cast as a precondition fixture in both phases: AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265; the harness waits 61000 ms between phases so the first Dawn has expired and the second cast activates rather than cancels it, AscensionSunClericAbilities.cpp:417-423): the aura 807440 holds 10 charges before the passive is learned (control, the base figure) and 13 after (10 + 3), read 500 ms after the cast. Reference search 2026-11-22: bindmysoul talents snapshot (reference/snapshots/bindmysoul, fetched 2026-07-22) carries 'Allows Dawn to affect 3 additional casts.' for the rank 1 spell 300324 (the 300329 rank 2 states 5 in our DBC); coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 300329,
@@ -15323,7 +15480,8 @@
       "expected": 15,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), EffectSpellClassMask word 0 = 64 = the Dawn state aura 807440 SpellFamilyFlags[0] (ProcCharges 10, DurationIndex 3 = 60000 ms). A real Dawn cast 804584 (it activates only with 20 Solar Power 500149, set before each cast as a precondition fixture in both phases: AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265; the harness waits 61000 ms between phases so the first Dawn has expired and the second cast activates rather than cancels it, AscensionSunClericAbilities.cpp:417-423): the aura 807440 holds 10 charges before the passive is learned (control, the base figure) and 15 after (10 + 5), read 500 ms after the cast. Reference search 2026-11-22: bindmysoul talents snapshot (reference/snapshots/bindmysoul, fetched 2026-07-22) carries 'Allows Dawn to affect 3 additional casts.' for the rank 1 spell 300324 (the 300329 rank 2 states 5 in our DBC); coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), EffectSpellClassMask word 0 = 64 = the Dawn state aura 807440 SpellFamilyFlags[0] (ProcCharges 10, DurationIndex 3 = 60000 ms). A real Dawn cast 804584 (it activates only with 20 Solar Power 500149, set before each cast as a precondition fixture in both phases: AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265; the harness waits 61000 ms between phases so the first Dawn has expired and the second cast activates rather than cancels it, AscensionSunClericAbilities.cpp:417-423): the aura 807440 holds 10 charges before the passive is learned (control, the base figure) and 15 after (10 + 5), read 500 ms after the cast. Reference search 2026-11-22: bindmysoul talents snapshot (reference/snapshots/bindmysoul, fetched 2026-07-22) carries 'Allows Dawn to affect 3 additional casts.' for the rank 1 spell 300324 (the 300329 rank 2 states 5 in our DBC); coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680670,
@@ -15411,7 +15569,13 @@
       "expected": 22000,
       "tolerance": 150,
       "observe_source": "805581 Trial of Valor Effect[0] aura 4 SPELL_AURA_DUMMY; the class code (AscensionSunCleric.cpp:292-293, Fulfill) cuts Horusath Blast 500154 by |Amount(807445)| when a Vow is fulfilled under Dawn with 805581 known; 807445 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -2001 (-2000 ms, $/1000;807445s1 = 2 s), MiscValue 500154. Fulfilment as the Final Vows entry sets it up: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast, then Horusath Blast 500154 (RecoveryTime 25000) is cast at the dummy; setup runs in the after phase only, so the before phase is a plain cast (a third control, 24000 = 25000 - 1000). The remaining cooldown is read 1000 ms after the cast (game time 980..1020 ms): 25000 - 2000 - 1000 = 22000 with the passive. A cut of 1800 ms (10% off) reads 22200 and 2200 ms reads 21800, 200 ms away, so tolerance 150 excludes both. With 805581 learned: 22000.",
-      "gate_spell": 805581
+      "gate_spell": 805581,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 805581,
@@ -15467,7 +15631,13 @@
       "expected": 24000,
       "tolerance": 150,
       "gate_spell": 704582,
-      "observe_source": "805581 Trial of Valor Effect[0] aura 4 SPELL_AURA_DUMMY; the class code (AscensionSunCleric.cpp:292-293, Fulfill) cuts Horusath Blast 500154 by |Amount(807445)| when a Vow is fulfilled under Dawn with 805581 known; 807445 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -2001 (-2000 ms, $/1000;807445s1 = 2 s), MiscValue 500154. Fulfilment as the Final Vows entry sets it up: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast, then Horusath Blast 500154 (RecoveryTime 25000) is cast at the dummy; setup runs in the after phase only, so the before phase is a plain cast (a third control, 24000 = 25000 - 1000). The remaining cooldown is read 1000 ms after the cast (game time 980..1020 ms): 25000 - 2000 - 1000 = 22000 with the passive. A cut of 1800 ms (10% off) reads 22200 and 2200 ms reads 21800, 200 ms away, so tolerance 150 excludes both. Control: 805581 is never learned (the learned gate is Angelic 704582): 24000, so the fulfilment alone cuts nothing."
+      "observe_source": "805581 Trial of Valor Effect[0] aura 4 SPELL_AURA_DUMMY; the class code (AscensionSunCleric.cpp:292-293, Fulfill) cuts Horusath Blast 500154 by |Amount(807445)| when a Vow is fulfilled under Dawn with 805581 known; 807445 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -2001 (-2000 ms, $/1000;807445s1 = 2 s), MiscValue 500154. Fulfilment as the Final Vows entry sets it up: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast, then Horusath Blast 500154 (RecoveryTime 25000) is cast at the dummy; setup runs in the after phase only, so the before phase is a plain cast (a third control, 24000 = 25000 - 1000). The remaining cooldown is read 1000 ms after the cast (game time 980..1020 ms): 25000 - 2000 - 1000 = 22000 with the passive. A cut of 1800 ms (10% off) reads 22200 and 2200 ms reads 21800, 200 ms away, so tolerance 150 excludes both. Control: 805581 is never learned (the learned gate is Angelic 704582): 24000, so the fulfilment alone cuts nothing.",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 805581,
@@ -15523,7 +15693,13 @@
       "expected": 0,
       "tolerance": 150,
       "observe_source": "805581 cooldown cut as the cd entry (807445 BasePoints -2001, 2000 ms; Fulfill AscensionSunCleric.cpp:289-293 through Reduce, ModifySpellCooldown Player.cpp:11969). Horusath Blast 500154: Category 559, RecoveryTime 25000, CategoryRecoveryTime 25000 (Spell.dbc). The entry a recast is checked against is the spell's own entry: Spell::CheckCast reads HasSpellCooldown(500154) only (Spell.cpp:5828) and AddSpellAndCategoryCooldowns writes the category cooldown as the entries of the other spells of Category 559 (Player.cpp:11867-11909), so a category cooldown cannot hold the recast. This entry reads that own entry 23200 ms after the cast: 25000 - 2000 - 23200 < 0 so the cooldown is over (0); the control without 805581 reads 25000 - 23200 = 1800. A zero read says only that the entry has ended, the amount of the cut stays proven by the cd entry. Cause check for the refused recast of the withdrawn cd_gate arms (d8 third design).",
-      "gate_spell": 805581
+      "gate_spell": 805581,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 805581,
@@ -15579,7 +15755,13 @@
       "expected": 1800,
       "tolerance": 150,
       "gate_spell": 704582,
-      "observe_source": "Control of cd_late: 805581 is never learned (the learned gate is Angelic 704582), so the fulfilment cuts nothing and the cooldown entry of Horusath Blast 500154 still has 25000 - 23200 = 1800 ms left."
+      "observe_source": "Control of cd_late: 805581 is never learned (the learned gate is Angelic 704582), so the fulfilment cuts nothing and the cooldown entry of Horusath Blast 500154 still has 25000 - 23200 = 1800 ms left.",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 805581,
@@ -15792,7 +15974,7 @@
           "expected": 1
         }
       ],
-      "observe_source": "with 805581 but no fulfilling cast the recast at 23.2 s is refused (67). Horusath Blast 500154 (RecoveryTime 25000) is the cast that fulfils the Vow: Spell::_cast starts its cooldown entry (Spell.cpp:4036) before the hit; SpendDawn (AscensionSunClericAbilities.cpp:105-117, :214) sets the Dawn script value, the Vow of Grace proc (AscensionSunClericEvents.cpp:164-172) calls Fulfill (AscensionSunCleric.cpp:287-293) and Reduce cuts 807445 (2000 ms) from the existing entry (Player.cpp:11969). Vow of Grace 803719 and Dawn 804584 are real casts (20 Solar Power 500149 and 704396 are the named precondition fixtures of the Dawn cast); each scenario holds one arm, so no other arm leaves Dawn or the Vow behind. Dawn 807440 and the Vow aura 803719 are read on the caster right before the priming cast. The recast of 500154 is attempted 23200 ms after the priming cast (25000 - 2000 + 200) or 22800 ms for the beyond arm; the expectations come from the DBC RecoveryTime 25000 and 807445 BasePoints -2001, never from a run."
+      "observe_source": "with 805581 but no fulfilling cast the recast at 23.2 s is refused (67). Horusath Blast 500154 (RecoveryTime 25000) is the cast that fulfils the Vow: Spell::_cast starts its cooldown entry (Spell.cpp:4036) before the hit; SpendDawn (AscensionSunClericAbilities.cpp:105-117, :214) sets the Dawn script value, the Vow of Grace proc (AscensionSunClericEvents.cpp:164-172) calls Fulfill (AscensionSunCleric.cpp:287-293) and Reduce cuts 807445 (2000 ms) from the existing entry (Player.cpp:11969). Vow of Grace 803719 and Dawn 804584 are real casts (20 Solar Power 500149 and 704396 are the named precondition fixtures of the Dawn cast); each scenario holds one arm, so no other arm leaves Dawn or the Vow behind. Dawn 807440 and the Vow aura 803719 are read on the caster right before the priming cast. The recast of 500154 is attempted 23200 ms after the priming cast (25000 - 2000 + 200) or 22800 ms for the beyond arm; the expectations come from the DBC RecoveryTime 25000 and 807445 BasePoints -2001, never from a run. This unfulfilled arm casts no Dawn (its priming read expects 807440 absent); the 804584 cast_auras item is shared with the sibling recast entries and inert here."
     },
     {
       "spell": 805581,
@@ -18572,7 +18754,8 @@
       "expire_ms": 61000,
       "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 92137, helper 520641 Seraphim's Light. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
-      "label_suffix": "helper_92137"
+      "label_suffix": "helper_92137",
+      "void_on_cast_failure": true
     },
     {
       "spell": 520639,
@@ -18607,7 +18790,8 @@
       "expire_ms": 61000,
       "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500207, helper 520644 Pious Flames. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
-      "label_suffix": "helper_500207"
+      "label_suffix": "helper_500207",
+      "void_on_cast_failure": true
     },
     {
       "spell": 520639,
@@ -18642,7 +18826,8 @@
       "expire_ms": 61000,
       "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500209, helper 520645 Holy Blessing. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
-      "label_suffix": "helper_500209"
+      "label_suffix": "helper_500209",
+      "void_on_cast_failure": true
     },
     {
       "spell": 520639,
@@ -18677,7 +18862,8 @@
       "expire_ms": 61000,
       "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 680627, helper 520646 Power of the Val'kyr. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
-      "label_suffix": "helper_680627"
+      "label_suffix": "helper_680627",
+      "void_on_cast_failure": true
     },
     {
       "spell": 561204,
@@ -18729,7 +18915,8 @@
       "expire_ms": 61000,
       "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture): without the passive no Radiance (0, control); with it Radiance 800054 reads 6001 - 50 = 5950 ms within 100 ms (the 10% band is 600 ms). Lead of batch 1b: Radiance was not applied after a Dawn cast. Reference search 2026-11-22: coa-history (800054 cast and refresh events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
-      "label_suffix": "dawn_gain"
+      "label_suffix": "dawn_gain",
+      "void_on_cast_failure": true
     },
     {
       "spell": 561204,
@@ -18764,7 +18951,14 @@
       "expire_ms": 61000,
       "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. Radiance is cast first, 1600 ms later Dawn is cast and the Radiance duration is read 50 ms after. Control (before, no passive): 10000 - 1650 = 8350 within 300 ms, no extension. With the passive: the base is 16000 and the extension adds 6001: 16000 + 6001 - 1650 = 20351, within 300 ms (excludes the 14350 of no extension, 6 s apart). Reference search 2026-11-22: coa-history (800054 refresh events 123) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
-      "label_suffix": "dawn_extend"
+      "label_suffix": "dawn_extend",
+      "void_on_cast_failure": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ]
     },
     {
       "spell": 561204,
@@ -22450,6 +22644,12 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
       ]
     },
     {
@@ -22517,6 +22717,12 @@
         {
           "spell": 807440,
           "expected": 0
+        }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
         }
       ]
     },
@@ -22603,6 +22809,12 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
       ]
     },
     {
@@ -22687,6 +22899,12 @@
         {
           "spell": 807440,
           "expected": 0
+        }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
         }
       ]
     },
@@ -23140,7 +23358,13 @@
       "tolerance": 0.0001,
       "wait_ms": 2500,
       "expire_ms": 500,
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Sunflare 800231 (Holy, SchoolMask 2) is cast at the dummy after Dawn: Sunrise is entered. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found."
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Sunflare 800231 (Holy, SchoolMask 2) is cast at the dummy after Dawn: Sunrise is entered. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found.",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300360,
@@ -23187,7 +23411,13 @@
       "tolerance": 0.0001,
       "wait_ms": 4500,
       "expire_ms": 500,
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Dawnsear 554406 (Fire, SchoolMask 4, cast time 3500 ms) is cast at the dummy after Dawn and read at 4500 ms: Sunset is entered when the cast completes. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found."
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Dawnsear 554406 (Fire, SchoolMask 4, cast time 3500 ms) is cast at the dummy after Dawn and read at 4500 ms: Sunset is entered when the cast completes. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found.",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 804632,
@@ -24325,7 +24555,13 @@
       "player_spell_power": {
         "amount": 10000,
         "hit_arm": true
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707081,
@@ -24387,7 +24623,13 @@
       "observe_source": "Contrast arm of the attack power term $AP*.1: +20000 attack power (player_attack_power, harness rating). 657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Holy, BasePoints 80 + DieSides 1 (the roll adds 1: m1 = 81), RealPointsPerLevel 5.0 x (60 - BaseLevel 58) = 10 ($657125ppl1), so the base is 91 at level 60. The caster's Holy damage read is the base entry strike_0 (spell power 0, attack power 70: 91 + int(0.1 x 70) = 98), the contrast arm in the same pair. Crit and resist fixtures 984954 and 823764 and the fulfilment setup are those of strike_0. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the value (the strike_0 search). Residual failure probability of a correct server per pair: 0 (crit removed by 984954, spell_hit_rating 10000, one strike read, the 5% band against a damage roll of width 1). Expected 91 + int(0.1 x (70 + 20000)) = 91 + 2007 = 2098, tolerance 105 (5%, G-19); a coefficient of 0.05 gives 1094 and a dropped term 98, both outside the band.",
       "cast_in_before": false,
       "setup_only_after": true,
-      "player_attack_power": 20000
+      "player_attack_power": 20000,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 560534,
@@ -25817,7 +26059,8 @@
           6150,
           6550
         ]
-      }
+      },
+      "void_on_cast_failure": true
     },
     {
       "spell": 561204,
@@ -25848,7 +26091,8 @@
       "kind": "metric_delta",
       "label_suffix": "dawn_gain_expiry_control",
       "gate_timing": "start",
-      "trigger_only_after": true
+      "trigger_only_after": true,
+      "void_on_cast_failure": true
     },
     {
       "spell": 561204,
@@ -25896,7 +26140,14 @@
           20450,
           20800
         ]
-      }
+      },
+      "void_on_cast_failure": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ]
     },
     {
       "spell": 561204,
@@ -25932,7 +26183,14 @@
       "kind": "metric_delta",
       "label_suffix": "dawn_extend_expiry_control",
       "gate_timing": "start",
-      "trigger_only_after": true
+      "trigger_only_after": true,
+      "void_on_cast_failure": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ]
     },
     {
       "spell": 704586,
@@ -25981,7 +26239,8 @@
           60200,
           62500
         ]
-      }
+      },
+      "void_on_cast_failure": true
     },
     {
       "spell": 704586,
@@ -26019,7 +26278,8 @@
       "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 has DurationIndex 3 (60000 ms, $805265d). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture). The aura 805265 on the caster is an event read (presence), not the remaining-time field: read present 57300..59900 ms of game time after the trigger cast and gone 60200..62500 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
       "gate_timing": "start",
       "trigger_only_after": true,
-      "gate_spell": 300321
+      "gate_spell": 300321,
+      "void_on_cast_failure": true
     },
     {
       "spell": 804625,
@@ -26066,7 +26326,13 @@
           2050,
           2150
         ]
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 804625,
@@ -26102,7 +26368,13 @@
       "observe_source": "804625 Harsh Lessons: Dawn grants Scorch Marks 807059 (Effect[0] SPELLMOD_DURATION -51 = -50%), so Radiant Flame 806060 (DurationIndex 35, 4000 ms) lasts 2000 ms; the gate 804625 is learned from the start, Dawn 804584 is cast at the dummy-less caster as the setup cast of the treatment phase (Solar Power 500149 at 20 stacks, precondition fixture). The aura 806060 on the dummy is an event read (presence), not the remaining-time field: read present 1850..1950 ms of game time after the trigger cast and gone 2050..2150 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, read at 2000 ms: aura present.",
       "gate_timing": "start",
       "trigger_only_after": true,
-      "gate_spell": 300321
+      "gate_spell": 300321,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 807870,
@@ -27965,7 +28237,13 @@
       ],
       "setup_target": "dummy",
       "setup_wait_ms": 1600,
-      "observe_source": "Sunset 500511 on the caster reads present (1): once the next Dawn is entered the other state can be entered. Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "Sunset 500511 on the caster reads present (1): once the next Dawn is entered the other state can be entered. Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc.",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 92135,
@@ -28014,7 +28292,13 @@
       ],
       "setup_target": "dummy",
       "setup_wait_ms": 1600,
-      "observe_source": "Sunrise 500477 on the caster reads absent (0) once Sunset is entered after the next Dawn (Sunrise is removed when Sunset is granted, AscensionSunClericAbilities.cpp:112-113). Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "Sunrise 500477 on the caster reads absent (0) once Sunset is entered after the next Dawn (Sunrise is removed when Sunset is granted, AscensionSunClericAbilities.cpp:112-113). Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc.",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 92135,
@@ -28104,7 +28388,7 @@
       ],
       "setup_target": "dummy",
       "setup_wait_ms": 1600,
-      "observe_source": "Landing proof of the exclusivity arms: the same setup and Dawnsear 554406 cast, its damage events on the dummy counted, 1 before the learn and one more after it, so the Fire cast was not blocked by a failed cast. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "Landing proof of the exclusivity arms: the same setup and Dawnsear 554406 cast, its damage events on the dummy counted, 1 before the learn and one more after it, so the Fire cast was not blocked by a failed cast. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc. Dawn 804584 stays in the setup to repeat the exclusivity route of the excl_next entries; the counted label counts Dawnsear 554406 damage events on the dummy (a landing proof), which the Dawn state does not gate, so no Dawn read is judged here.",
       "expected_gain": 1
     },
     {
@@ -31112,6 +31396,12 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
       ]
     },
     {
@@ -31500,7 +31790,13 @@
       },
       "expected": 21500,
       "tolerance": 150,
-      "observe_source": "707528 Final Vows Effect[0] aura 107 and Effect[2] aura 107 carry no cooldown percent; the 10% is read by the class code (AscensionSunClericAbilities.cpp:293-294: after a cast carrying the Dawn script value, with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|) with Amount from Effect[0] BasePoints 9 + 1 = 10). Fulfilment is set up as the Dawnguard control does: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast (it 'allows you to fulfill your Vows'), then Horusath Blast 500154 (Holy damage, RecoveryTime 25000, instant, its own cooldown, not a Gavel category) is cast at the dummy. Setup runs in the after phase only, so the before phase is a plain cast without any fulfilment: its read (24000 = 25000 - 1000) is a third control. The remaining cooldown of 500154 is read 1000 ms after the cast (game time 980..1020 ms): 25000 x 0.9 - 1000 = 21500 with the passive, 24000 without (control). A cut of 9% reads 21750 and 11% reads 21250, 250 ms away, so tolerance 150 excludes both. With 707528 learned: 21500. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707528 and no value; merged-PR and git log search --grep 707528: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+      "observe_source": "707528 Final Vows Effect[0] aura 107 and Effect[2] aura 107 carry no cooldown percent; the 10% is read by the class code (AscensionSunClericAbilities.cpp:293-294: after a cast carrying the Dawn script value, with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|) with Amount from Effect[0] BasePoints 9 + 1 = 10). Fulfilment is set up as the Dawnguard control does: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast (it 'allows you to fulfill your Vows'), then Horusath Blast 500154 (Holy damage, RecoveryTime 25000, instant, its own cooldown, not a Gavel category) is cast at the dummy. Setup runs in the after phase only, so the before phase is a plain cast without any fulfilment: its read (24000 = 25000 - 1000) is a third control. The remaining cooldown of 500154 is read 1000 ms after the cast (game time 980..1020 ms): 25000 x 0.9 - 1000 = 21500 with the passive, 24000 without (control). A cut of 9% reads 21750 and 11% reads 21250, 250 ms away, so tolerance 150 excludes both. With 707528 learned: 21500. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707528 and no value; merged-PR and git log search --grep 707528: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report).",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707528,
@@ -31556,7 +31852,13 @@
       "expected": 24000,
       "tolerance": 150,
       "gate_spell": 704582,
-      "observe_source": "707528 Final Vows Effect[0] aura 107 and Effect[2] aura 107 carry no cooldown percent; the 10% is read by the class code (AscensionSunClericAbilities.cpp:293-294: after a cast carrying the Dawn script value, with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|) with Amount from Effect[0] BasePoints 9 + 1 = 10). Fulfilment is set up as the Dawnguard control does: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast (it 'allows you to fulfill your Vows'), then Horusath Blast 500154 (Holy damage, RecoveryTime 25000, instant, its own cooldown, not a Gavel category) is cast at the dummy. Setup runs in the after phase only, so the before phase is a plain cast without any fulfilment: its read (24000 = 25000 - 1000) is a third control. The remaining cooldown of 500154 is read 1000 ms after the cast (game time 980..1020 ms): 25000 x 0.9 - 1000 = 21500 with the passive, 24000 without (control). A cut of 9% reads 21750 and 11% reads 21250, 250 ms away, so tolerance 150 excludes both. Control: 707528 is never learned (the learned gate is Angelic 704582): 24000, so the Vow alone cuts nothing. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707528 and no value; merged-PR and git log search --grep 707528: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+      "observe_source": "707528 Final Vows Effect[0] aura 107 and Effect[2] aura 107 carry no cooldown percent; the 10% is read by the class code (AscensionSunClericAbilities.cpp:293-294: after a cast carrying the Dawn script value, with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|) with Amount from Effect[0] BasePoints 9 + 1 = 10). Fulfilment is set up as the Dawnguard control does: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast (it 'allows you to fulfill your Vows'), then Horusath Blast 500154 (Holy damage, RecoveryTime 25000, instant, its own cooldown, not a Gavel category) is cast at the dummy. Setup runs in the after phase only, so the before phase is a plain cast without any fulfilment: its read (24000 = 25000 - 1000) is a third control. The remaining cooldown of 500154 is read 1000 ms after the cast (game time 980..1020 ms): 25000 x 0.9 - 1000 = 21500 with the passive, 24000 without (control). A cut of 9% reads 21750 and 11% reads 21250, 250 ms away, so tolerance 150 excludes both. Control: 707528 is never learned (the learned gate is Angelic 704582): 24000, so the Vow alone cuts nothing. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707528 and no value; merged-PR and git log search --grep 707528: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report).",
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 707528,
@@ -31911,7 +32213,8 @@
         "scorch_cost",
         "scorch_cost_next"
       ],
-      "expected_gain": -340
+      "expected_gain": -340,
+      "void_on_cast_failure": true
     },
     {
       "spell": 561329,
@@ -32124,7 +32427,13 @@
         804584
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 1600
+      "setup_wait_ms": 1600,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300339,
@@ -32599,7 +32908,13 @@
           1661,
           1711
         ]
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 804625,
@@ -32647,7 +32962,13 @@
           1661,
           1711
         ]
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300347,
@@ -33144,7 +33465,13 @@
         ]
       },
       "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). One real Illumination cast (2000 ms cast time, the aura is granted when it completes) with no later cast: the aura is present when read 11100..11700 ms after the cast started (game time), at least 9100 ms after it was granted, and gone when read 12400..12900 ms after it, at most 10900 ms after, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip.",
-      "void_on_cast_failure": true
+      "void_on_cast_failure": true,
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300360,
@@ -33198,7 +33525,13 @@
       "void_on_cast_failure": true,
       "refill_power_after_setup_casts": {
         "power": 0
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 300360,
@@ -33253,7 +33586,13 @@
       "void_on_cast_failure": true,
       "refill_power_after_setup_casts": {
         "power": 0
-      }
+      },
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ]
     },
     {
       "spell": 503690,
@@ -36962,7 +37301,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms).",
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). The aura 807440 is the metric itself, so no separate Dawn read is added.",
       "dummy_distance": 3,
       "ally_arm": {
         "allies": 0,
@@ -37043,7 +37382,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Gavel of Grace 807987 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms).",
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Gavel of Grace 807987 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). The aura 807440 is the metric itself, so no separate Dawn read is added.",
       "dummy_distance": 3,
       "ally_arm": {
         "allies": 0,
@@ -37125,7 +37464,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). Rank 2 300329: 10 + 5 = 15 casts: 14 Gavel of Grace casts leave Dawn with one charge; wait 3200 ms between the setup casts (14 casts, the last about 47 s into the 60 s Dawn). The control phase (300329 not learned) holds 10 charges: Dawn is gone after the 10th cast.",
+      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). Rank 2 300329: 10 + 5 = 15 casts: 14 Gavel of Grace casts leave Dawn with one charge; wait 3200 ms between the setup casts (14 casts, the last about 47 s into the 60 s Dawn). The control phase (300329 not learned) holds 10 charges: Dawn is gone after the 10th cast. The aura 807440 is the metric itself, so no separate Dawn read is added.",
       "dummy_distance": 3,
       "ally_arm": {
         "allies": 0,
@@ -37208,7 +37547,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 15 Gavel of Grace 807987 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). Rank 2 300329: 10 + 5 = 15 casts: 15 Gavel of Grace casts leave Dawn gone; wait 3200 ms between the setup casts (15 casts, the last about 50 s into the 60 s Dawn). The control phase (300329 not learned) holds 10 charges: Dawn is gone after the 10th cast.",
+      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 15 Gavel of Grace 807987 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). Rank 2 300329: 10 + 5 = 15 casts: 15 Gavel of Grace casts leave Dawn gone; wait 3200 ms between the setup casts (15 casts, the last about 50 s into the 60 s Dawn). The control phase (300329 not learned) holds 10 charges: Dawn is gone after the 10th cast. The aura 807440 is the metric itself, so no separate Dawn read is added.",
       "dummy_distance": 3,
       "ally_arm": {
         "allies": 0,
