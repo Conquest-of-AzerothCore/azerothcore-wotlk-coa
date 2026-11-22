@@ -29334,7 +29334,7 @@
       "trials": 14,
       "sized": true,
       "figure_effect": 1,
-      "min_hits": 4,
+      "min_hits": 14,
       "consumed": true,
       "caster_auras": [
         823764
