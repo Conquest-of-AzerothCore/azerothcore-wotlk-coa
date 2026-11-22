@@ -523,8 +523,21 @@
   {
     "spell": 300357,
     "clause": "Doubles the healing done and mana restored by Bless.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doubles the healing done",
+        "labels": [
+          "300357 behaviour_metric_delta health_tick_lead"
+        ]
+      },
+      {
+        "claim": "mana restored by Bless",
+        "labels": [
+          "804247 behaviour_metric_delta mana_tick_lead"
+        ]
+      }
+    ]
   },
   {
     "spell": 300360,
@@ -1210,10 +1223,20 @@
   {
     "spell": 503690,
     "clause": "Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels and causes the next one to not incur a cooldown.",
-    "labels": [
-      "503690 effect_value #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels",
+        "labels": []
+      },
+      {
+        "claim": "reset the cooldown of Gavels and causes the next one to not incur a cooldown",
+        "labels": [
+          "503690 behaviour_metric_delta gavel_free"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Open: the 40% chance (the first claim) needs 15,926 landed trials for the band alone (G-20) and 43,617 attempts for a residual of 0.1% per pair (procs.py sizing, min_detectable 4); Dawnbreak 800654 has a 6000 ms category cooldown, so one attempt takes 6500 ms and the proof needs about 80 parts, past the 90 minute limit; no cheaper attempt route exists in the tools (a tool need is returned: a cooldown reset between attempts for procs). The reset and the free next Gavel are read by gavel_free with the roll forced."
   },
   {
     "spell": 504070,
@@ -2294,12 +2317,19 @@
       {
         "claim": "Melee critical strikes increase your haste by $582837s1% per stack",
         "labels": [
-          "582832 effect_value 582837e0 #0"
+          "582832 effect_value 582837e0 #0",
+          "582832 behaviour_metric_delta spell_haste_one",
+          "582832 behaviour_metric_delta spell_haste_cap",
+          "582832 behaviour_metric_delta melee_haste_one",
+          "582832 behaviour_metric_delta melee_haste_cap"
         ]
       },
       {
         "claim": "and healing done by $582837s1% per stack",
-        "labels": []
+        "labels": [
+          "582832 behaviour_hit_ratio healing_one",
+          "582832 behaviour_hit_ratio healing_cap"
+        ]
       }
     ]
   },
@@ -2307,7 +2337,9 @@
     "spell": 582832,
     "clause": "stacking up to $582837u times.",
     "labels": [
-      "582832 max_stacks 582837 #1"
+      "582832 max_stacks 582837 #1",
+      "582832 behaviour_metric_delta stack_one",
+      "582832 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -2315,7 +2347,9 @@
     "spell": 582832,
     "clause": "Lasts for $582837d.",
     "labels": [
-      "582832 spell_duration 582837 #2"
+      "582832 spell_duration 582837 #2",
+      "582832 behaviour_metric_delta duration_held",
+      "582832 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -5700,7 +5734,8 @@
     "spell": 807873,
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
     "labels": [
-      "807873 effect_value e0 #0"
+      "807873 effect_value e0 #0",
+      "807873 behaviour_hit_ratio offhand_swing"
     ],
     "kind": "claim"
   },
@@ -5708,7 +5743,8 @@
     "spell": 807873,
     "clause": "and reduces the duration of disarm effects by $s2%.",
     "labels": [
-      "807873 effect_value e1 #1"
+      "807873 effect_value e1 #1",
+      "807873 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },

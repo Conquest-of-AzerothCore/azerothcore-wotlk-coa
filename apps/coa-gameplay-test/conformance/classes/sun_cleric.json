@@ -47,7 +47,19 @@
     "skill 498": 300.0
   },
   "log_queries": {},
-  "off_hand_weapons": [],
+  "off_hand_weapons": [
+    {
+      "item": 2027,
+      "slot": 16,
+      "subclass": 7,
+      "min_damage": 17.25,
+      "max_damage": 28.75,
+      "speed_ms": 2300,
+      "inventory_type": 13,
+      "normalized_speed": 2.4,
+      "skill_line": 43
+    }
+  ],
   "known_auras": [
     887015
   ],
@@ -19655,6 +19667,424 @@
       "leeway": true,
       "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
       "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd ($a1, the tooltip resolves 8; SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639, no SPELLMOD_RADIUS here). Effective radius (guide section 5, G-29): the area search measures from the caster, centre to centre, against 8 yd + the player caster's leeway 2.66 yd (Spell.cpp:1388-1394 for TargetB 15; Object.cpp:1787-1808, LEEWAY_BONUS_RANGE for a run speed above LEEWAY_MIN_MOVE_SPEED 4.97, ObjectDefines.h:50-51, a standing player in run mode at 7.0 yd/s) + the dummy's combat reach 1.275 yd (Spell.cpp:9434-9442) = 11.935 yd, computed by the kind's leeway option from the engine rule and the caster's run speed rate read in the run (ADR 1020), not from a measured edge; earlier diagnostic reads (stunned at about 11.4 yd, not at 12.5 yd, Sun Cleric b7a review I4) agree. The leeway is this core's inherited rule, not evidence about the original server. The primary dummy stands 0.1 yd from the caster and the inside and outside dummies 0.5 yd either side of 11.935 yd. Control arm: the cast is refused before 807870 is learned (gate = cast spell, learned between the arms), no stun on any dummy; treatment: one cast after the learn (120 s cooldown, so one repeat), the stun read per dummy: on the primary and the inside dummy, not on the outside one. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 300357,
+      "name": "Bless (health per tick doubled by Lead Me Not Astray)",
+      "kind": "metric_delta",
+      "variant": "health_tick_lead",
+      "label_suffix": "health_tick_lead",
+      "quote": "Doubles the healing done and mana restored by Bless.",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "cast_in_before": true,
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5500,
+      "expected": 6000,
+      "observe_source": "300357 Lead Me Not Astray: \"Doubles the healing done and mana restored by Bless\"; Effect[0] aura 108 ADD_PCT_MODIFIER misc 8 BasePoints 99 (+99%, so x2). Bless 804247 is cast on the caster in both phases with the caster held at 5000 of 10000 health, regeneration off, and read 10500 ms later (one tick): without 300357 (control) 5000 + 5% of 10000 = 5500 ($s1 = 5 of the 804247 text, owner ruling O-4), with 300357 learned between the phases the tick heals 10% = 1000: 6000. Expected values come from the tooltips and the DBC, not from a run. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "gate_spell": 300357
+    },
+    {
+      "spell": 807873,
+      "name": "Valkyr's Grip (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
+      "expected": 1.61,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          807873
+        ]
+      },
+      "critical": false,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "807873 Valkyr's Grip Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints 60 + 1 = 61 ($s1), read from Spell.dbc: a plain off-hand white swing grows by 1.61. The caster wields the class file's one-hand main hand 2027 and off-hand 2027 (no Dual Wield grant, as Brooding Hatred 301251) and auto attacks the dummy for one off-hand swing interval per trial; plain (not critical, not glancing) off-hand hits are read without the passive (control) and with 807873 learned (treatment). Band 3.05 points (5% of 61, G-19). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "off_hand_item": 2027
+    },
+    {
+      "spell": 807873,
+      "name": "Valkyr's Grip (disarm duration)",
+      "kind": "duration_ratio",
+      "quote": "and reduces the duration of disarm effects by $s2%.",
+      "expected_ratio": 0.7,
+      "vehicle_spell": 301235,
+      "striker_entry": 36
+    },
+    {
+      "spell": 503690,
+      "name": "Dawn's Arrival (Gavel cooldown reset, next Gavel free)",
+      "kind": "metric_delta",
+      "variant": "gavel_free",
+      "label_suffix": "gavel_free",
+      "quote": "to reset the cooldown of Gavels and causes the next one to not incur a cooldown.",
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "cast_power": 1363,
+      "setup_casts": [
+        800611,
+        800654,
+        800611,
+        800611
+      ],
+      "setup_wait_ms": 1600,
+      "setup_target": "dummy",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "forced_roll": {
+        "talent": 503690
+      },
+      "gate_spell": 503690,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 800611
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "observe_source": "503690 Dawn's Arrival Effect[0] aura 42 (ProcChance 40) -> 503691; AscensionSunClericAbilities.cpp:261-268 resets Gavel of Light/Wrath (800611, 800614, 800617) and casts 503691 when a Dawnbreak 800654 cast rolls Chance(player, 503690); :272-273 removes the cooldown of the next Gavel cast under 503691. Gavel of Light 800611 has a 5000 ms category cooldown (Spell.dbc CategoryRecoveryTime). Sequence spaced 1600 ms apart, past the global cooldown: Gavel (cooldown starts), Dawnbreak, Gavel, Gavel, then the trigger Gavel. Without 503690 (control) only the first Gavel completes: 1. With 503690 learned and the roll forced (forced_roll, SPELLMOD_CHANCE_OF_SUCCESS): Dawnbreak resets the cooldown so the second Gavel completes and, being the next one, starts no cooldown so the third completes; that third starts the cooldown and the fourth (trigger) is refused: 3 completed Gavels, not 2 (reset only) and not 4 (every Gavel free). The chance itself is the proc_rate check. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "stacking up to $582837u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 582837
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Pure Heart (stack one)",
+      "variant": "stack_one",
+      "label_suffix": "stack_one",
+      "expected": 1,
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). One forced crit: 1 stack. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "stacking up to $582837u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 5100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 582837
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Pure Heart (stack cap)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "expected": 3,
+      "setup_casts": [
+        802561,
+        802561,
+        802561
+      ],
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). Four forced crits (three setup casts and the trigger cast, 5100 ms apart past the 5000 ms Gavel category cooldown): 3 stacks, not 4 (the stated cap). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Pure Heart (spell_haste at 1 stack)",
+      "variant": "spell_haste_one",
+      "label_suffix": "spell_haste_one",
+      "expected": 0.952381,
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 1 stack(s) of +5% haste read on the caster: cast speed multiplier 1 before, 1 / 1.05 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0.0001
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Pure Heart (melee_haste at 1 stack)",
+      "variant": "melee_haste_one",
+      "label_suffix": "melee_haste_one",
+      "expected": 2190.4762,
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 1 stack(s) of +5% haste read on the caster: main-hand attack time (Blessings set, 2300 ms) 2300 before, 2300 / 1.05 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0.001,
+      "expected_ratio": 0.952381
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 5100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Pure Heart (spell_haste at 3 stacks)",
+      "variant": "spell_haste_cap",
+      "label_suffix": "spell_haste_cap",
+      "expected": 0.869565,
+      "setup_casts": [
+        802561,
+        802561,
+        802561
+      ],
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 3 stack(s) of +5% haste read on the caster: cast speed multiplier 1 before, 1 / 1.15 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0.0001
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 5100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Pure Heart (melee_haste at 3 stacks)",
+      "variant": "melee_haste_cap",
+      "label_suffix": "melee_haste_cap",
+      "expected": 2000.0,
+      "setup_casts": [
+        802561,
+        802561,
+        802561
+      ],
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 3 stack(s) of +5% haste read on the caster: main-hand attack time (Blessings set, 2300 ms) 2300 before, 2300 / 1.15 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0.001,
+      "expected_ratio": 0.869565
+    },
+    {
+      "spell": 582832,
+      "name": "Pure Heart (healing done at 1 stack)",
+      "kind": "hit_ratio",
+      "variant": "healing_one",
+      "label_suffix": "healing_one",
+      "quote": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
+      "expected": 1.05,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          582832
+        ],
+        "casts": [
+          582837
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "582837 Effect[2] aura 136 MOD_HEALING_DONE_PERCENT misc 127, BasePoints 4 + 1 = 5 ($582837s1) per stack: 1 stack(s) give x1.05. The grouped ally's Sunlight 704911 heals are read without (control) and with the aura applied by 1 real cast(s) of 582837 before every heal (the proc path is the stack entries'); ally 5 yd away at 50% health, spell power 20000. Band 2 points (G-19). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 582832,
+      "name": "Pure Heart (healing done at 3 stacks)",
+      "kind": "hit_ratio",
+      "variant": "healing_cap",
+      "label_suffix": "healing_cap",
+      "quote": "Melee critical strikes increase your haste and healing done by $582837s1% per stack,",
+      "expected": 1.15,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          582832
+        ],
+        "casts": [
+          582837,
+          582837,
+          582837
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "582837 Effect[2] aura 136 MOD_HEALING_DONE_PERCENT misc 127, BasePoints 4 + 1 = 5 ($582837s1) per stack: 3 stack(s) give x1.15. The grouped ally's Sunlight 704911 heals are read without (control) and with the aura applied by 3 real cast(s) of 582837 before every heal (the proc path is the stack entries'); ally 5 yd away at 50% health, spell power 20000. Band 2 points (G-19). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "Lasts for $582837d.",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 582837
+      },
+      "before_expected": 0,
+      "wait_ms": 9000,
+      "expire_ms": 500,
+      "name": "Pure Heart (aura present at 9 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "expected": 1,
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 582837 lasts 10000 ms (DurationIndex 1): after one forced crit the aura is present at 9.0 s (excludes 9.0 s = -10% of 10000 ms); control: the same crit without 582832 leaves no aura. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 582832,
+      "kind": "metric_delta",
+      "quote": "Lasts for $582837d.",
+      "trigger_spell": 802561,
+      "gate_spell": 582832,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 582837
+      },
+      "before_expected": 0,
+      "wait_ms": 11000,
+      "expire_ms": 500,
+      "name": "Pure Heart (aura gone at 11 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "expected": 0,
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 582837 lasts 10000 ms (DurationIndex 1): after one forced crit the aura is gone at 11.0 s (excludes +10%); control: the same crit without 582832 leaves no aura. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],
