@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Infernal drops its summon spell at the target point (#13116)",
+  "contract": [
+    "Infernal 560284 effect 2 triggers 572183, the summon of Infernal 51320. 572183 carries the falling missile (Speed 100, SpellVisual 832635); 560284 itself has Speed 0.",
+    "The trigger targets enemies in the area, so it stays disabled and the server casts 572183 at the chosen point instead: the cast must reach the client exactly once, with no enemy in the area.",
+    "The summon must still produce exactly one Infernal."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "felsworn", "race": 1, "class": 14, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "felsworn", "spell": 560284 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Drop the Infernal at a point", "actor": "felsworn", "spell": 560284,
+      "destination": { "x": -8912.41, "y": -115.853, "z": 82.3711 } },
+    { "action": "assert", "actor": "felsworn", "metric": "cast_failure", "spell": 560284, "equals": 0 },
+    { "action": "wait", "label": "Let the falling summon land", "ms": 2000 },
+    { "action": "assert", "label": "The summon spell with the meteor reaches the client once", "actor": "felsworn",
+      "metric": "spell_go_count", "spell": 572183, "equals": 1 },
+    { "action": "assert", "label": "Exactly one Infernal is summoned", "actor": "felsworn",
+      "metric": "owned_creature_count", "entry": 51320, "equals": 1 }
+  ]
+}
