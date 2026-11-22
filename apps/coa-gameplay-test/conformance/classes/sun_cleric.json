@@ -2607,6 +2607,87 @@
       }
     },
     {
+      "spell": 554406,
+      "name": "Dawnsear (damage at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
+      "expected": 708.5,
+      "after_at_least": 669,
+      "after_at_most": 748,
+      "player_spell_power": 0,
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "554406 Dawnsear Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 668 + EffectDieSides 80: $m1 = 669..748, no per-level term at level 60; the school is Fire (SchoolMask 4). The spell damage of one real cast on the dummy (spell penetration 823764 and a -1000% spell crit aura 984954 as harness precondition fixtures: no resist and no critical strike) at 0 spell power lies in [669, 748]."
+    },
+    {
+      "spell": 554406,
+      "name": "Dawnsear (damage at 20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
+      "expected": 16012.9,
+      "after_at_least": 15973,
+      "after_at_most": 16053,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Contrast arm of damage_base in the same pair: the spell power coefficient 0.765222 ($spfi) x 20000 = 15304.44 added to [669, 748] gives [15973.44, 16052.44]; the entry reads one real cast at 20000 spell power on the dummy (same fixtures), which excludes a coefficient 10% off (+-1530). Owner ruling O-15 (2026-11-22, Sun Cleric ADR 0026): the tooltip coefficient 0.765222 applies to all eight ranks (500146, 502366 to 502371, 554406); SunClericCoefficients carried 1.0 (measured 20672 and 20745 at 20000 spell power, pair 20261122-012804 / -012843, build 33138890), which reads [20669, 20748] and is excluded."
+    },
+    {
       "spell": 504070,
       "name": "Grace (Dawnsear)",
       "kind": "hit_ratio",
@@ -2677,6 +2758,51 @@
       "expected_source": "$s2 = 10 (504070 Effect[1] aura 107 SPELLMOD op 24 on Sunflare, EffectBasePoints 9). Sunflare 502396 Effect[0]: EffectBasePoints 553, EffectDieSides 28, BaseLevel 60 (no per-level term at 60): m1 = 554..581, mean 567.5. The coefficient is the recorded local choice 'Sunflare uses the first recovered rank's 0.25 SP coefficient for all ranks' (docs/coa/sun-cleric-completion.md:50; AscensionSunClericData.h row 800231 sp 0.25), so with the spell power fixture 10000 the coefficient part is 2500 and the bonus scales it by 1.1: (567.5 + 2750) / (567.5 + 2500) = 1.0815. Control: Grace not learned. 823764 removes the dummy's magic resistance as in the Templar entries. Reference search: nothing found for Sunflare's coefficient beyond the recorded choice.",
       "cast_power": 1000,
       "critical": false
+    },
+    {
+      "spell": 504070,
+      "name": "Grace (Dawnsear damage at 20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_damage_sp",
+      "label_suffix": "dawnsear_damage_sp",
+      "quote": "Increases the spell damage bonus of Dawnsear by $s1%",
+      "expected": 19073.8,
+      "after_at_least": 19034,
+      "after_at_most": 19114,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "$s1 = 20 (504070 Effect[0] EffectBasePoints 19 + 1). Grace is learned with the trigger spell; Dawnsear 554406 is cast once at the dummy at 20000 spell power (823764 no resist, 984954 no critical strike, both phases). sun_cleric_devotion_scaling (AscensionSunClericDevotion.cpp) adds $s1% of Dawnsear's own SunClericCoefficients sp term, so the spell power part is 20000 x 0.765222 x 1.2 = 18365.33 and the hit reads 669..748 + 18365.33 = [19034.33, 19113.33]. Control: Dawnsear damage_sp at the same 20000 spell power without Grace, [15973, 16053]. The coefficient 1.0 that O-15 replaced would read [24669, 24748]; Grace adding 20% of the spell power instead of 20% of the coefficient term would read [19973, 20053]. Owner ruling O-15, Sun Cleric ADR 0026.",
+      "learn": [
+        504070
+      ]
     },
     {
       "spell": 301345,
@@ -5388,6 +5514,76 @@
       "after_at_least": 1429,
       "after_at_most": 1455,
       "observe_source": "503624 Daybreak: Effect[0] SPELL_EFFECT_HEAL, EffectBasePoints 532, EffectDieSides 32, EffectRealPointsPerLevel 6.5825, BaseLevel 46, SpellLevel 46, MaxLevel 56: at level 60 the level is capped at 56 (SpellInfo.cpp:487-497), so m1 = 532 + int32(10 x 6.5825) = 597 + irand(1, 32) = 598..629 (rounding 3, per-level truncation). Class tuning 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10, MaxLevel 60: -1 + int(50 x -0.4) + 1 = -20% at level 60 (known_aura), so the healing done is x 0.8. Tooltip coefficient: $BH*0.595 (Spell.dbc description; AscensionSunClericData.h row 503624 healing 0.595). The caster is held at 30% health, the heal lands on the caster (TARGET_UNIT_TARGET_ALLY accepts itself), critical strike forced out by fixture 984954 (precondition). With 2000 spell power (harness fixture, recorded on the verdict by the hit arm) the bonus healing term is 0.595 x 2000 = 1190 (1189 if the float product truncates below), so the heal is (598..629 + 1189..1190) x 0.8 = 1429.6..1455.2, truncated to 1429..1455; without the spell power term it reads 478..503 (heal_plain, the contrast on the same build), at 0.4 x BH it would read about 1110. Control (before): no cast, 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Make a prayer, healing an ally for 155 + 59.5% healing.\" for Daybreak 500147 (the rank 1 figure, same 59.5% coefficient); nothing else found. "
+    },
+    {
+      "spell": 503625,
+      "name": "Daybreak (rank 503625, heal amount at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "heal_plain",
+      "label_suffix": "heal_plain",
+      "quote": "Make a prayer, healing an ally for ${$m1+0+$BH*0.7}.",
+      "trigger_spell": 503625,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 503625,
+        "target": "caster"
+      },
+      "expected": 538,
+      "after_at_least": 519,
+      "after_at_most": 557,
+      "observe_source": "503625 Daybreak (the trainer's level 52 rank, Sun Cleric trainer 900027): Effect[0] SPELL_EFFECT_HEAL, EffectBasePoints 570, EffectDieSides 48, EffectRealPointsPerLevel 11.1729, BaseLevel 52, SpellLevel 52, MaxLevel 59: at level 60 the level is capped at 59 (SpellInfo.cpp:489-497), so m1 = 570 + int32(7 x 11.1729) = 648 + irand(1, 48) = 649..696. Class tuning 887015 Effect[2] aura 136 MOD_HEALING_DONE_PERCENT: -20% at level 60, so the healing done is x 0.8. Tooltip: ${$m1+0+$BH*0.7} (server Spell.dbc Description); owner ruling O-15 (2026-11-22, Sun Cleric ADR 0026) replaced the SunClericCoefficients healing 0.595 of this rank with 0.7. The caster is held at 30% health, the heal lands on the caster, critical strike forced out by fixture 984954. Control (before): no cast, 0. At spell power 0 the heal is 649..696 x 0.8 = 519.2..556.8."
+    },
+    {
+      "spell": 503625,
+      "name": "Daybreak (rank 503625, heal amount at +2000 spell power)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Make a prayer, healing an ally for ${$m1+0+$BH*0.7}.",
+      "trigger_spell": 503625,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 503625,
+        "target": "caster"
+      },
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "expected": 1658,
+      "after_at_least": 1639,
+      "after_at_most": 1677,
+      "observe_source": "503625 Daybreak (the trainer's level 52 rank, Sun Cleric trainer 900027): Effect[0] SPELL_EFFECT_HEAL, EffectBasePoints 570, EffectDieSides 48, EffectRealPointsPerLevel 11.1729, BaseLevel 52, SpellLevel 52, MaxLevel 59: at level 60 the level is capped at 59 (SpellInfo.cpp:489-497), so m1 = 570 + int32(7 x 11.1729) = 648 + irand(1, 48) = 649..696. Class tuning 887015 Effect[2] aura 136 MOD_HEALING_DONE_PERCENT: -20% at level 60, so the healing done is x 0.8. Tooltip: ${$m1+0+$BH*0.7} (server Spell.dbc Description); owner ruling O-15 (2026-11-22, Sun Cleric ADR 0026) replaced the SunClericCoefficients healing 0.595 of this rank with 0.7. The caster is held at 30% health, the heal lands on the caster, critical strike forced out by fixture 984954. Control (before): no cast, 0. With 2000 spell power (harness fixture, recorded on the verdict by the hit arm) the bonus healing term is 0.7 x 2000 = 1400, so the heal is (649..696 + 1400) x 0.8 = 1639.2..1676.8; heal_plain is the contrast on the same build. The replaced 0.595 would read (649..696 + 1190) x 0.8 = 1471.2..1508.8, excluded."
     },
     {
       "spell": 681468,
