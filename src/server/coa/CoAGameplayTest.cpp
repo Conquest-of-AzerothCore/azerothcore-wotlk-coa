@@ -2294,8 +2294,11 @@ public:
         if (!_stepStarted || _nextStep == _steps.end())
             return request;
         Tree const& step = _nextStep->second;
-        bool const waiting = step.get<std::string>("action", "") == "wait";
-        uint64 const window = waiting ? step.get<uint32>("ms", 0) : step.get<uint32>("within_ms", 0);
+        std::string const action = step.get<std::string>("action", "");
+        bool const waiting = action == "wait";
+        uint64 const window = waiting ? step.get<uint32>("ms", 0) : action == "cast_until_aura"
+            ? uint64(step.get<uint32>("every_ms", 0)) * step.get<uint32>("max_casts", 0)
+            : step.get<uint32>("within_ms", 0);
         uint64 const elapsed = GameElapsed(_stepTime);
         request.activity = waiting ? LaneActivity::Waiting : LaneActivity::Polling;
         request.remaining = Milliseconds(Milliseconds::rep(window > elapsed ? window - elapsed : 0));
@@ -7358,12 +7361,65 @@ private:
         }
         else if (action == "login_hooks" && !QueuedCharacterWorkDone())
             return;
+        else if (action == "cast_until_aura")
+        {
+            if (!CastUntilAura(step, record))
+                return;
+        }
         else
             Act(step, record);
         record.put("status", "completed");
         record.put("elapsed_ms", GameElapsed(_stepTime));
         _records.push_back({ "", record });
         Advance();
+    }
+
+    bool CastUntilAura(Tree const& step, Tree& record)
+    {
+        std::string const actor = step.get<std::string>("actor");
+        Player* player = GetPlayer(actor);
+        uint32 const aura = step.get<uint32>("aura");
+        Require(sSpellMgr->GetSpellInfo(aura) != nullptr, "Unknown cast_until_aura aura: " + std::to_string(aura));
+        uint32 const maxCasts = step.get<uint32>("max_casts");
+        uint64 const everyMs = step.get<uint32>("every_ms");
+        uint64 const elapsed = GameElapsed(_stepTime);
+        bool const present = player->HasAura(aura);
+        if (!present && (_untilAuraAttempts < maxCasts || elapsed < _untilAuraAttempts * everyMs))
+        {
+            if (_untilAuraAttempts < maxCasts && elapsed >= _untilAuraAttempts * everyMs)
+            {
+                Tree ignored;
+                if (auto power = step.get_optional<uint32>("cast_power"))
+                {
+                    Tree fixture;
+                    fixture.put("action", "set_power");
+                    fixture.put("actor", actor);
+                    fixture.put("power", step.get<uint32>("power", POWER_MANA));
+                    fixture.put("value", *power);
+                    Act(fixture, ignored);
+                }
+                if (step.get<bool>("reset_cooldown", false))
+                {
+                    Tree fixture;
+                    fixture.put("action", "reset_cooldown");
+                    fixture.put("actor", actor);
+                    fixture.put("spell", step.get<uint32>("spell"));
+                    Act(fixture, ignored);
+                }
+                Tree cast;
+                cast.put("action", "cast");
+                cast.put("actor", actor);
+                cast.put("spell", step.get<uint32>("spell"));
+                if (auto target = step.get_optional<std::string>("target"))
+                    cast.put("target", *target);
+                Act(cast, ignored);
+                ++_untilAuraAttempts;
+            }
+            return false;
+        }
+        record.put("attempts", _untilAuraAttempts);
+        record.put("stopped", present ? "aura" : "cap");
+        return true;
     }
 
     bool QueuedCharacterWorkDone()
@@ -8723,6 +8779,11 @@ private:
             {
                 Actor& actor = _actors.at(step.get<std::string>("actor"));
                 actor.clientReadyAtAttempt[spell] = ClientCooldownReady(actor, spell, GameNowMs());
+                if (step.get<bool>("ignore_gcd", false))
+                {
+                    player->GetGlobalCooldownMgr().CancelGlobalCooldown(sSpellMgr->GetSpellInfo(spell));
+                    record.put("gcd_ignored", true);
+                }
                 player->GetSession()->HandleCastSpellOpcode(packet);
             }
             else if (action == "cast_charm")
@@ -9176,6 +9237,7 @@ private:
         ++_nextStep;
         ++_completed;
         _stepStarted = false;
+        _untilAuraAttempts = 0;
         _talentRequestSent = false;
         _characterQueueMarked = false;
         _characterQueueReached = false;
@@ -9187,6 +9249,7 @@ private:
     std::optional<TransactionCallback> _relogSave;
     bool _targetsCreated = false;
     bool _stepStarted = false;
+    uint32 _untilAuraAttempts = 0;
     bool _talentRequestSent = false;
     uint32 _talentResultsBefore = 0;
     bool _characterQueueMarked = false;
