@@ -8681,6 +8681,250 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Radiant Cascade 500141 has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19 CastTime 2500). 807874 Sunbeams Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -16 + 1 = -15 ($s1): 2500 x 0.85 = 2125 ms. The cast time of Radiant Cascade is read (the spell's own cast time function for the caster) before and after a real learn of 807874 (the reading before is the control). Reference search 2026-11-22: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (shared cooldown with Ascension)",
+      "kind": "metric_delta",
+      "variant": "shared_cooldown",
+      "label_suffix": "shared_cooldown",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 29500,
+      "tolerance": 1500,
+      "observe_source": "806159 and Solar Invocation: Ascension 500152 both carry Category 767 with CategoryRecoveryTime 30000 (Spell.dbc). One cast of 806159 is followed 500 ms later by a read of the remaining cooldown of 500152, which was never cast: 0 before the cast (control) and 30000 less the elapsed time after it, expected 29500 within 1500 (the same shape as 800764 in this class file)."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (Illumination instant cast)",
+      "kind": "metric_delta",
+      "variant": "instant_cast",
+      "label_suffix": "instant_cast",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 500143
+      },
+      "before_expected": 2000,
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "806159 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 + 1 = -100, EffectSpellClassMask word 2 = 512; Illumination 500143 has SpellFamilyFlags[2] 512 and a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5). The cast time of Illumination for the caster is read before (control) and 500 ms after a real cast of 806159: 2000 then 0 ms."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (Illumination guaranteed critical strike)",
+      "kind": "metric_delta",
+      "variant": "guaranteed_crit",
+      "label_suffix": "guaranteed_crit",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "after_at_least": 100,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000, EffectSpellClassMask word 2 = 512 (Illumination 500143). The caster's critical strike chance of Illumination is read before (control, 0) and after a real cast of 806159: at least 100 (a guarantee needs 100 or more)."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (Illumination costs 100% more mana)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 500143
+      },
+      "before_expected": 408.9,
+      "expected": 817.8,
+      "tolerance": 2,
+      "observe_source": "806159 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s3), EffectSpellClassMask word 2 = 512. Illumination 500143 costs 30% of base mana (ManaCostPercentage 30) and the reference base mana is 1363 (BaseMana 1363, as recorded in this class file): 408.9 before the cast (control) and 817.8 after it, within 2 (excludes +90% and +110%)."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Invoke the grace of An'she for $d,",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "aura",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7400,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          7200,
+          7760
+        ],
+        "expired": [
+          8240,
+          8800
+        ]
+      },
+      "observe_source": "806159 DurationIndex 31 (8000 ms, $d). One real cast of 806159 on the caster: its aura is present when read 7200..7760 ms of game time after the cast (G-19 band, 10% below 8000 excluded) and gone when read 8240..8800 ms after it (10% above excluded); no cast, no aura (control)."
+    },
+    {
+      "spell": 707767,
+      "name": "Devotee (Devotion of Dawn attack power)",
+      "kind": "metric_delta",
+      "variant": "dawn_ap",
+      "label_suffix": "dawn_ap",
+      "quote": "Increases the effectiveness of your Devotions by $s2%.",
+      "trigger_spell": 300859,
+      "gate_spell": 707767,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 105,
+      "expected": 112,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "after_auras": [
+        [
+          300859,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Dawn 300859 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, BasePoints 34 + 1 = 35. The caster's attack power is 70 (reference_stats) plus 35 after a real cast of 300859 without the talent (105, the control), and plus 35 x 1.20 = 42 after a real learn of 707767 and a new cast (112) (the first aura is removed before the second cast). One of three tested shapes of the 24 Devotions (G-23): attack power here, spell power and cost reduction in their own entries, every one a distinct aura type under the one mask."
+    },
+    {
+      "spell": 707767,
+      "name": "Devotee (Devotion of Radiance spell power)",
+      "kind": "metric_delta",
+      "variant": "radiance_sp",
+      "label_suffix": "radiance_sp",
+      "quote": "Increases the effectiveness of your Devotions by $s2%.",
+      "trigger_spell": 300862,
+      "gate_spell": 707767,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 28,
+      "expected": 33.6,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "after_auras": [
+        [
+          300862,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Radiance 300862 Effect[0] aura 345, BasePoints 27 + 1 = 28 (spell power). The caster's Holy spell power is 0 in the reference and 28 after a real cast of 300862 without the talent (the control), 28 x 1.20 = 33.6 after a real learn of 707767 and a new cast (the first aura removed before it), within 1 (excludes +10% and +30%)."
+    },
+    {
+      "spell": 300621,
+      "name": "Photosynthetic (spell haste at night)",
+      "kind": "metric_delta",
+      "variant": "night_haste",
+      "label_suffix": "night_haste",
+      "quote": "Increases your spell haste by $s1%,",
+      "trigger_spell": 805301,
+      "gate_spell": 300621,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.943396,
+      "tolerance": 0.002,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "hour": 0,
+      "observe_source": "300621 Photosynthetic Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 5 + 1 = 6 ($s1); Effect[1] aura 227 periodic trigger with value of 300364 (aura 216, amount set to $s2 = 2 by the script during the day, AscensionSunCleric.cpp:378-382). Realm-local hour 0. The caster's cast speed multiplier is 1 before the learn (control) and 1/1.06 = 0.943396 after it, within 0.002 (excludes 4% and 8%)."
+    },
+    {
+      "spell": 300621,
+      "name": "Photosynthetic (additional spell haste during the day)",
+      "kind": "metric_delta",
+      "variant": "day_haste",
+      "label_suffix": "day_haste",
+      "quote": "plus an additional $s2% during the day.",
+      "trigger_spell": 805301,
+      "gate_spell": 300621,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.924883,
+      "tolerance": 0.002,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "hour": 12,
+      "observe_source": "300621 Photosynthetic Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 5 + 1 = 6 ($s1); Effect[1] aura 227 periodic trigger with value of 300364 (aura 216, amount set to $s2 = 2 by the script during the day, AscensionSunCleric.cpp:378-382). Realm-local hour 12. The caster's cast speed multiplier is 1 before the learn (control) and 1/(1.06 x 1.02) = 0.924883 after it (the night arm night_haste reads 1/1.06 = 0.943396, the control of the 2% part), within 0.002 (excludes the night value and +4% day)."
+    },
+    {
+      "spell": 560111,
+      "name": "Blessed Magic (Horusath Blast resets Glorious Execution)",
+      "kind": "metric_delta",
+      "variant": "ge_reset",
+      "label_suffix": "ge_reset",
+      "quote": "Casting Horusath Blast now resets the cooldown of Glorious Execution.",
+      "trigger_spell": 500154,
+      "gate_spell": 560111,
+      "setup_casts": [
+        800626
+      ],
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800626
+      },
+      "before_expected": 6000,
+      "expected": 0,
+      "tolerance": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1363,
+      "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 6000 ms without the talent, the control, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500)."
     }
   ],
   "player_observations": [],
