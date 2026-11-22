@@ -56,11 +56,12 @@ def pair_label(spec: EquipGrantSpec, arm: str, index: int, slot: int) -> str:
 
 def pair_steps(spec: EquipGrantSpec, arm: str, index: int, pair: EquipPair) -> list[dict]:
     learned = arm == 'learned'
-    steps = [{'action': 'add_item', 'actor': CASTER, 'item': pair.main_hand},
-             {'action': 'equip', 'actor': CASTER, 'item': pair.main_hand, 'slot': EQUIPMENT_SLOT_MAIN_HAND},
-             {'action': 'add_item', 'actor': CASTER, 'item': pair.off_hand},
-             {'action': 'equip', 'actor': CASTER, 'item': pair.off_hand, 'slot': EQUIPMENT_SLOT_OFF_HAND,
-              **({} if learned else {'rejected': True})}]
+    grants = [] if learned else [{'action': 'add_item', 'actor': CASTER, 'item': item}
+                                 for item in (pair.main_hand, pair.off_hand)]
+    steps = grants[:1] + [
+        {'action': 'equip', 'actor': CASTER, 'item': pair.main_hand, 'slot': EQUIPMENT_SLOT_MAIN_HAND}] + grants[1:] + [
+        {'action': 'equip', 'actor': CASTER, 'item': pair.off_hand, 'slot': EQUIPMENT_SLOT_OFF_HAND,
+         **({} if learned else {'rejected': True})}]
     return steps + [measurement(pair_label(spec, arm, index, slot), CASTER, 'equipped_item', slot=slot)
                     for slot in (EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND)]
 
@@ -81,9 +82,10 @@ def equip_grant_scenario(class_file: dict, spec: EquipGrantSpec) -> tuple[dict, 
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour equip grant',
-        'contract': (f'{spec.spell} is unlearned, then for each pair the main hand is equipped and the off hand '
-                     f'equip must be refused (the harness fails the step when it is accepted); {spec.spell} is then '
-                     f'learned and every off hand equip must be accepted. Pairs: '
+        'contract': (f'{spec.spell} is unlearned, then for each pair both items are added, the main hand is '
+                     f'equipped and the off hand equip must be refused (the harness fails the step when it is '
+                     f'accepted); {spec.spell} is then learned and every pair is equipped again from the bags, the off '
+                     f'hand equip now accepted. Pairs: '
                      + '; '.join(f'{pair.main_hand} with {pair.off_hand} (skill line {pair.skill_line}, '
                                  f'{pair.source})' for pair in spec.pairs)
                      + '. Each arm reads both hands with equipped_item: the off hand does not hold its item without '

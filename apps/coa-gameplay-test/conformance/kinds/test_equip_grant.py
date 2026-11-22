@@ -34,6 +34,9 @@ class EquipGrantTests(unittest.TestCase):
         refused = [action for action in actions[unlearn:learn] if action[3]]
         self.assertEqual(refused, [('equip', 30754, 16, True), ('equip', 2529, 16, True)])
         self.assertFalse(any(action[3] for action in actions[learn:]))
+        learned = steps[next(index for index, step in enumerate(steps)
+                             if step['action'] == 'learn' and step.get('spell') == GRANT):]
+        self.assertNotIn('add_item', [step['action'] for step in learned])
         self.assertEqual(expectation.label, f'{GRANT} behaviour_metric_delta equip')
         self.assertEqual(len(expectation.model['pairs']), 2)
 
