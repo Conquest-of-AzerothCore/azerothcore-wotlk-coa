@@ -2,7 +2,7 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from coverage import READBACK, metric_evidence
+from coverage import EVENT, READBACK, STATE, metric_evidence
 from metric_delta_options.ally_arm import parse
 from profile import DBC_DIR, load_fixture_class_file
 import run
@@ -25,6 +25,8 @@ PRIMARY_ARM = {'actors': ['ally2'], 'metric': 'health', 'before_expected': 5000,
                'source': 'a seeded primary heal'}
 REACH = 'a seeded Allies() filter by IsInRaidWith'
 RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.75, 'tolerance': 0.01, 'source': 'a seeded 75% copy'}
+REACH_ARM = {'actors': ['ally'], 'metric': 'combat_reach', 'before_expected': 1.5, 'expected': 1.5, 'tolerance': 0.01,
+             'source': 'a seeded player combat reach', 'precondition': True}
 
 
 def templar():
@@ -149,6 +151,32 @@ class AllyArmScenarioTests(unittest.TestCase):
             {'source': ' '}, {'tolerance': -1}, {'tolerance': float('inf')}, {'expected': float('nan')},
             {'expected': '5000'}, {'actors': []}, {'actors': ['ally', 'ally']},
             {'actors': ['ally3']}, {'actors': ['dummy']}, {'metric': readback}, {'metric': 'no_such_metric'})]
+        for option in options:
+            with self.subTest(option=option), self.assertRaises(ValueError):
+                self.scenario(steed_entry(ally_arm=option))
+
+    def test_a_precondition_arm_is_read_and_carries_its_key_only_when_set(self):
+        scenario, [expectation] = self.scenario(steed_entry(ally_arm={'allies': 2, 'arms': [HEALTH_ARM, REACH_ARM]}))
+        run.validate(scenario)
+        health, reach = expectation.model['ally_arm']['arms']
+        self.assertNotIn('precondition', health)
+        self.assertIs(reach['precondition'], True)
+        reads = [step for step in scenario['steps'] if step.get('label') in reach['after']]
+        self.assertEqual([(step['actor'], step['metric']) for step in reads], [('ally', 'combat_reach')])
+        self.assertIn('Arm 1 is a precondition: off or unread, it voids the trial', scenario['contract'])
+        self.assertNotIn('Arm 0 is a precondition', scenario['contract'])
+
+    def test_combat_reach_is_a_state_row_of_the_option(self):
+        self.assertEqual(metric_evidence()['combat_reach'], STATE)
+
+    def test_a_precondition_arm_outside_its_contract_is_refused(self):
+        self.assertEqual(metric_evidence()[HEALTH_ARM['metric']], EVENT)
+        reach_judged = {key: value for key, value in REACH_ARM.items() if key != 'precondition'}
+        options = [{'allies': 2, 'arms': [reach_judged]},
+                   {'allies': 2, 'arms': [{**REACH_ARM, 'precondition': False}]},
+                   {'allies': 2, 'arms': [{**REACH_ARM, 'precondition': 'yes'}]},
+                   {'allies': 2, 'arms': [{**HEALTH_ARM, 'precondition': True}]},
+                   {'allies': 2, 'arms': [COPY_ARM, REACH_ARM], 'ratios': [RATIO]}]
         for option in options:
             with self.subTest(option=option), self.assertRaises(ValueError):
                 self.scenario(steed_entry(ally_arm=option))
@@ -393,6 +421,36 @@ class AllyArmVerdictTests(unittest.TestCase):
         verdict = self.judged(ratio_entry(), self.ratio_values(copy_after=5000, primary_after=5000))
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('none, the denominator arm did not move', verdict.explanation)
+
+    def reach_entry(self) -> dict:
+        return steed_entry(ally_arm={'allies': 2, 'arms': [HEALTH_ARM, AURA_ARM, REACH_ARM]})
+
+    def reach_values(self, before=1.5, after=1.5) -> dict:
+        return {**self.held(), (2, 'before'): before, (2, 'after'): after}
+
+    def test_held_preconditions_keep_the_judged_status(self):
+        verdict = self.judged(self.reach_entry(), self.reach_values())
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('precondition ally arm 2 combat_reach: 1.5 before (expected 1.5) and 1.5 after',
+                      verdict.explanation)
+        alert = self.judged(self.reach_entry(), {**self.reach_values(), (1, 'after'): 1})
+        self.assertEqual(alert.status, 'alert')
+
+    def test_mutant_a_precondition_off_voids_the_trial_instead_of_judging_it(self):
+        for values, main in ((self.reach_values(after=1.6), (1.0, 2.0)),
+                             (self.reach_values(before=1.4), (1.0, 2.0)),
+                             ({**self.reach_values(after=2.0), (1, 'after'): 1}, (1.0, 1.0))):
+            with self.subTest(values=values, main=main):
+                verdict = self.judged(self.reach_entry(), values, main=main)
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn('a precondition failed: the trial is void, not judged', verdict.explanation)
+                self.assertNotIn('ally arm 1 aura', verdict.explanation)
+
+    def test_an_unread_precondition_voids_the_trial(self):
+        values = {key: value for key, value in self.reach_values().items() if key != (2, 'after')}
+        verdict = self.judged(self.reach_entry(), values, main=(1.0, 1.0))
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('precondition arm 2:', verdict.explanation)
 
     def test_without_arms_the_verdict_is_the_plain_one(self):
         plain = self.judged(steed_entry(), {})

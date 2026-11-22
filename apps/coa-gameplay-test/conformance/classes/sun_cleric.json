@@ -30395,7 +30395,7 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "ally2 stands 43.5 yd from the caster, 0.5 yd beyond the engine edge of 43.0 yd (40 + 1.5 + 1.5); it is at 50% health, among the lowest, so it would be healed if the edge reached it"
+            "source": "ally2 stands 43.5 yd from the caster, 0.5 yd beyond the computed edge = 704911 EffectRadiusIndex 23 = SpellRadius 23 RadiusMax 40 yd (server DBC set) plus the caster's and the ally's object sizes, both added by IsWithinDistInMap (Object.h:550 defaults, _IsWithinDist Object.cpp:1257-1264; GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901), 1.5 each as the class file player (Player.h:1110), read by the three precondition arms: 43.0 yd; it is at 50% health, among the lowest, so it would be healed if the edge reached it; a radius 10% larger (44 yd, edge 47.0) would heal it"
           },
           {
             "actors": [
@@ -30436,6 +30436,39 @@
             "expected": 1,
             "tolerance": 0,
             "source": "the heal fired: the caster at 50% health is among the lowest and heals once (positive control of the arm of ally2)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the caster's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the ally's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the ally2's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
           }
         ]
       },
@@ -30443,7 +30476,7 @@
         "ally": 42.5,
         "ally2": 43.5
       },
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets): Nearby(center, range) uses AnyUnitInObjectRangeCheck -> IsWithinDistInMap(u, range) (GridNotifiers.h:1065-1067), whose defaults add both object sizes (Object.h:550, _IsWithinDist adds GetObjectSize() of each unit, = combat reach, Object.cpp:2898-2901). 704911 EffectRadiusIndex 23 = 40 yd (SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC). Engine edge between two players: 40 + 1.5 + 1.5 = 43.0 yd (known engine behaviour, guide section 5 effective radius; there is no player leeway here, the radius comes from Radius(), not from a SRC_AREA target). Run 1 (pair-less exploratory run 20261122-154829) with allies at 39 and 41 yd healed the 41 yd ally: the lead that showed the reach term; the arms are now 42.5 and 43.5 yd, 0.5 yd on each side. Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489, Illumination 500143 on the caster at 50% health, 92136 learned between the phases). Expected: 1 Sunlight heal on the ally at 42.5 yd, 0 on the ally at 43.5 yd, 1 on the caster; the cap of five is not reached. The combat reach terms (1.5 each, Player.h:1110 and ObjectDefines.h:45) are cited from the code, not read, and no stock area spell control is run: the ally_arm option rejects the combat_reach metric (it has no METRIC_EVIDENCE row), so the edge rests on an unread term and the radius claim stays open until a read of both reaches exists (design note to the controller). The arms measure distance_2d on flat ground; IsWithinDistInMap is 3D, immaterial for a 10% shift. Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets): Nearby(center, range) uses AnyUnitInObjectRangeCheck -> IsWithinDistInMap(u, range) (GridNotifiers.h:1065-1067), whose defaults add both object sizes (Object.h:550, _IsWithinDist adds GetObjectSize() of each unit, = combat reach, Object.cpp:2898-2901). 704911 EffectRadiusIndex 23 = 40 yd (SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC). Engine edge between two players: 40 + 1.5 + 1.5 = 43.0 yd (known engine behaviour, guide section 5 effective radius; there is no player leeway here, the radius comes from Radius(), not from a SRC_AREA target). Run 1 (pair-less exploratory run 20261122-154829) with allies at 39 and 41 yd healed the 41 yd ally: the lead that showed the reach term; the arms are now 42.5 and 43.5 yd, 0.5 yd on each side of the computed edge, so a radius 10% smaller (36 yd, edge 39.0) or larger (44 yd, edge 47.0) fails one arm. Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489, Illumination 500143 on the caster at 50% health, 92136 learned between the phases). Expected: 1 Sunlight heal on the ally at 42.5 yd, 0 on the ally at 43.5 yd, 1 on the caster; the cap of five is not reached. The combat reach terms (1.5 each, Player.h:1110 and ObjectDefines.h:45) are read on the caster, the ally and ally2 by three ally_arm precondition arms (combat_reach, 1.5 within 0.01, before and after; mentor D-169): a read off 1.5 voids the trial (unmeasured), it never judges the radius; the edge itself is computed from the DBC radius and the cited rule, never from a measured distance. The arms measure distance_2d on flat ground; IsWithinDistInMap is 3D, immaterial for a 10% shift. Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
