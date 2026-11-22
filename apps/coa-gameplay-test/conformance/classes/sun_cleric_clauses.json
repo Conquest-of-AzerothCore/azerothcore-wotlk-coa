@@ -308,22 +308,39 @@
   {
     "spell": 300347,
     "clause": "Paragon now has a 1 min cooldown",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300347 behaviour_metric_delta paragon_cd"
+    ]
   },
   {
     "spell": 300347,
     "clause": "and empowers your Gavels, causing them to have no cooldown and have $562316s1% increased effectiveness.",
-    "labels": [
-      "300347 effect_value 562316e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "empowers your Gavels, causing them to have no cooldown",
+        "labels": [
+          "300347 behaviour_metric_delta gavel_cd"
+        ]
+      },
+      {
+        "claim": "have $562316s1% increased effectiveness",
+        "labels": [
+          "300347 behaviour_hit_ratio effectiveness",
+          "300347 effect_value 562316e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 300347,
     "clause": "In addition, your Gavels now have a 40 yd range.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300347 behaviour_metric_delta range_in",
+      "300347 behaviour_metric_delta range_out"
+    ]
   },
   {
     "spell": 300348,
@@ -1001,10 +1018,12 @@
   {
     "spell": 503651,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+    "kind": "claim",
     "labels": [
-      "503651 effect_value #4"
-    ],
-    "kind": "claim"
+      "503651 behaviour_metric_delta shared_ascension",
+      "503651 behaviour_metric_delta shared_conquest",
+      "503651 behaviour_metric_delta shared_resplendence"
+    ]
   },
   {
     "spell": 503690,
@@ -1667,10 +1686,21 @@
   {
     "spell": 570027,
     "clause": "Increases the damage of Horusath Blast and Rapture by $s1%.",
-    "labels": [
-      "570027 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Horusath Blast by $s1%",
+        "labels": [
+          "570027 behaviour_hit_ratio horusath"
+        ]
+      },
+      {
+        "claim": "and Rapture by $s1%",
+        "labels": [
+          "570027 behaviour_hit_ratio rapture"
+        ]
+      }
+    ]
   },
   {
     "spell": 570120,
@@ -1887,16 +1917,19 @@
   {
     "spell": 680619,
     "clause": "Fervor of the Sun now stacks up to 3 additional times.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "680619 behaviour_metric_delta stack_cap"
+    ]
   },
   {
     "spell": 680620,
     "clause": "Increases the critical strike chance of Valkyr's Calling by $s1%.",
+    "kind": "claim",
     "labels": [
-      "680620 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "680620 behaviour_metric_delta crit",
+      "680620 behaviour_metric_delta crit_control"
+    ]
   },
   {
     "spell": 681433,
@@ -2323,10 +2356,20 @@
   {
     "spell": 681066,
     "clause": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+    "kind": "claim",
+    "reason": "Solar Invocation spells: 4 in family 33 (Revelation, Resplendence share mask word 0), all four are tested (G-23). Ascension (2500 ms cast, cooldown starts at completion) is read as the remaining cooldown after its cast, the other three as cost gates.",
     "labels": [
-      "681066 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "681066 cost_gate 503651 cd_revelation without",
+      "681066 cost_gate 503651 cd_revelation with",
+      "681066 cost_gate 503651 cd_revelation beyond",
+      "681066 cost_gate 800764 cd_conquest without",
+      "681066 cost_gate 800764 cd_conquest with",
+      "681066 cost_gate 800764 cd_conquest beyond",
+      "681066 cost_gate 806159 cd_resplendence without",
+      "681066 cost_gate 806159 cd_resplendence with",
+      "681066 cost_gate 806159 cd_resplendence beyond",
+      "681066 behaviour_metric_delta cd_ascension"
+    ]
   },
   {
     "spell": 681252,
@@ -2525,11 +2568,23 @@
   {
     "spell": 704563,
     "clause": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
-    "labels": [
-      "704563 effect_value 704564e0 #0",
-      "704563 spell_duration 704564 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1}",
+        "labels": [
+          "704563 behaviour_metric_delta max_health",
+          "704563 behaviour_metric_delta control"
+        ]
+      },
+      {
+        "claim": "for $704564d",
+        "labels": [
+          "704563 behaviour_metric_delta held",
+          "704563 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704565,
@@ -2589,8 +2644,11 @@
   {
     "spell": 704582,
     "clause": "Reduces the cast time of Illumination by 0.25 sec.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704582 behaviour_metric_delta illum_held",
+      "704582 behaviour_metric_delta illum_done"
+    ]
   },
   {
     "spell": 704585,
@@ -2899,23 +2957,50 @@
   {
     "spell": 704934,
     "clause": "Dealing melee damage now generates a stack of Sunwalker.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704934 behaviour_metric_delta melee_stack"
+    ]
   },
   {
     "spell": 704934,
     "clause": "In addition, the value of Vow of Light is doubled.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704934 behaviour_metric_delta vow_value"
+    ]
   },
   {
     "spell": 704934,
     "clause": "Reduces the cast time and mana cost of your next Shine by $s1% for $d,",
-    "labels": [
-      "704934 effect_value 800601e0 #0",
-      "704934 spell_duration 800601 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cast time of your next Shine by $s1%",
+        "labels": [
+          "704934 behaviour_metric_delta shine_held",
+          "704934 behaviour_metric_delta shine_done"
+        ]
+      },
+      {
+        "claim": "mana cost of your next Shine by $s1%",
+        "labels": [
+          "704934 behaviour_metric_delta shine_cost"
+        ]
+      },
+      {
+        "claim": "your next Shine",
+        "labels": [
+          "704934 behaviour_metric_delta shine_consumes"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "704934 spell_duration 800601 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 704934,
@@ -2944,10 +3029,11 @@
   {
     "spell": 704936,
     "clause": "Your Illumination now shields you for $s1% of the amount healed.",
+    "kind": "claim",
     "labels": [
-      "704936 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "704936 behaviour_metric_delta shield_base",
+      "704936 behaviour_metric_delta shield_sp"
+    ]
   },
   {
     "spell": 704938,
@@ -3006,10 +3092,31 @@
   {
     "spell": 704945,
     "clause": "Reduces the cooldown of Gavels and Horusath Blast by $s1%.",
-    "labels": [
-      "704945 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Gavels by $s1%",
+        "labels": [
+          "704945 cost_gate 800611 cd_light without",
+          "704945 cost_gate 800611 cd_light with",
+          "704945 cost_gate 800611 cd_light beyond",
+          "704945 cost_gate 800614 cd_grace without",
+          "704945 cost_gate 800614 cd_grace with",
+          "704945 cost_gate 800614 cd_grace beyond",
+          "704945 cost_gate 800617 cd_wrath without",
+          "704945 cost_gate 800617 cd_wrath with",
+          "704945 cost_gate 800617 cd_wrath beyond"
+        ]
+      },
+      {
+        "claim": "and Horusath Blast by $s1%",
+        "labels": [
+          "704945 cost_gate 500154 cd_horusath without",
+          "704945 cost_gate 500154 cd_horusath with",
+          "704945 cost_gate 500154 cd_horusath beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 704947,
@@ -3056,10 +3163,21 @@
   {
     "spell": 707072,
     "clause": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand and your chance to hit is increased by $707072s2%.",
-    "labels": [
-      "707072 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand",
+        "labels": []
+      },
+      {
+        "claim": "your chance to hit is increased by $707072s2%",
+        "labels": [
+          "707072 behaviour_metric_delta melee_hit_chance",
+          "707072 behaviour_metric_delta spell_hit_chance",
+          "707072 effect_value e1 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707077,
@@ -3083,10 +3201,23 @@
   {
     "spell": 707078,
     "clause": "During the day you now deal $707768s2% more Holy damage",
-    "labels": [
-      "707078 effect_value 707768e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "you now deal $707768s2% more Holy damage",
+        "labels": [
+          "707078 behaviour_metric_delta day_damage",
+          "707078 behaviour_metric_delta day_aura"
+        ]
+      },
+      {
+        "claim": "During the day",
+        "labels": [
+          "707078 behaviour_metric_delta night_damage",
+          "707078 behaviour_metric_delta night_aura"
+        ]
+      }
+    ]
   },
   {
     "spell": 707078,
@@ -3099,11 +3230,27 @@
   {
     "spell": 707079,
     "clause": "Casting Hammer of Kings now also increases your critical strike chance by $524998s1% for $524998d.",
-    "labels": [
-      "707079 effect_value 524998e0 #0",
-      "707079 spell_duration 524998 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Hammer of Kings now also increases your critical strike chance",
+        "labels": [
+          "707079 behaviour_metric_delta aura"
+        ]
+      },
+      {
+        "claim": "by $524998s1%",
+        "labels": [
+          "707079 behaviour_metric_delta crit_gain"
+        ]
+      },
+      {
+        "claim": "for $524998d",
+        "labels": [
+          "707079 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 707081,
@@ -3116,10 +3263,23 @@
   {
     "spell": 707081,
     "clause": "and then bouncing to up to $657125i additional enemies, dealing reduced damage with each strike.",
-    "labels": [
-      "707081 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "bouncing to up to $657125i additional enemies",
+        "labels": [
+          "707081 behaviour_metric_delta chain_count"
+        ]
+      },
+      {
+        "claim": "dealing reduced damage with each strike",
+        "labels": [
+          "707081 behaviour_metric_delta strike_0",
+          "707081 behaviour_metric_delta strike_1",
+          "707081 behaviour_metric_delta strike_5"
+        ]
+      }
+    ]
   },
   {
     "spell": 707414,
@@ -3162,8 +3322,11 @@
   {
     "spell": 707528,
     "clause": "Fulfilling your Vow of Grace now also reduces the cooldown of the triggered ability by 10%.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "707528 behaviour_metric_delta cd",
+      "707528 behaviour_metric_delta cd_control"
+    ]
   },
   {
     "spell": 707613,
@@ -4453,10 +4616,21 @@
   {
     "spell": 806458,
     "clause": "Your Fire damage dealt is increased by $s1% against Burning targets.",
-    "labels": [
-      "806458 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Fire damage dealt is increased by $s1%",
+        "labels": [
+          "806458 behaviour_hit_ratio burning"
+        ]
+      },
+      {
+        "claim": "against Burning targets",
+        "labels": [
+          "806458 behaviour_hit_ratio unburnt"
+        ]
+      }
+    ]
   },
   {
     "spell": 807372,
@@ -4501,17 +4675,31 @@
   {
     "spell": 806479,
     "clause": "Recite a solar prayer, instantly healing you for $s1% of your maximum health plus an additional ${$m2+0+$SP*1}, scaling with spell power.",
-    "labels": [
-      "806479 effect_value e0 #0",
-      "806479 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "instantly healing you for $s1% of your maximum health",
+        "labels": [
+          "806479 behaviour_metric_delta heal_base",
+          "806479 behaviour_metric_delta heal_half_health"
+        ]
+      },
+      {
+        "claim": "plus an additional ${$m2+0+$SP*1}, scaling with spell power",
+        "labels": [
+          "806479 behaviour_metric_delta heal_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 806479,
     "clause": "Usable while stunned.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "806479 behaviour_metric_delta stunned",
+      "806479 behaviour_metric_delta stunned_control"
+    ]
   },
   {
     "spell": 806699,
@@ -4533,19 +4721,45 @@
   {
     "spell": 806980,
     "clause": "Bring holy wrath down upon an enemy, dealing ${$m1+0+$SP*.55+$AP*.25} High Threat Holy damage",
-    "labels": [
-      "806980 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*.55+$AP*.25} Holy damage",
+        "labels": [
+          "806980 behaviour_metric_delta damage",
+          "806980 behaviour_metric_delta damage_sp",
+          "806980 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "High Threat",
+        "labels": [
+          "806980 behaviour_threat_slope 806980",
+          "806980 behaviour_metric_delta threat_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 806980,
     "clause": "and increasing the target's spell damage taken by $572067s1% for $572067d.",
-    "labels": [
-      "806980 effect_value 572067e0 #1",
-      "806980 spell_duration 572067 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing the target's spell damage taken by $572067s1%",
+        "labels": [
+          "806980 behaviour_hit_ratio taken_fire",
+          "806980 behaviour_hit_ratio taken_holy"
+        ]
+      },
+      {
+        "claim": "for $572067d",
+        "labels": [
+          "806980 behaviour_metric_delta held",
+          "806980 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 807343,
@@ -4595,18 +4809,19 @@
   {
     "spell": 807507,
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
+    "kind": "claim",
     "labels": [
       "807507 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    ]
   },
   {
     "spell": 807507,
     "clause": "and reduces the duration of disarm effects by $s2%.",
+    "kind": "claim",
     "labels": [
+      "807507 behaviour_duration_ratio",
       "807507 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    ]
   },
   {
     "spell": 807654,
