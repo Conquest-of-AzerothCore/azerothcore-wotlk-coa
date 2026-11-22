@@ -11970,10 +11970,10 @@
     },
     {
       "spell": 807507,
-      "name": "Valkyr's Grip 807507 (window: disarm held just before the reduced end)",
+      "name": "Valkyr's Grip 807507 (window: disarm held at its reduced end less 10%, gone by its reduced end plus 10%)",
       "kind": "metric_delta",
-      "variant": "window_held",
-      "label_suffix": "window_held",
+      "variant": "window_expiry",
+      "label_suffix": "window_expiry",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "trigger_spell": 805301,
       "target": "caster",
@@ -11999,17 +11999,23 @@
         "after": [
           30,
           85
+        ],
+        "expired": [
+          115,
+          170
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "807507 reduces Valkyr's Grip durations on the caster; vehicle 8379 cast once by a striker at the caster in both phases (strike.in_before), aura 8379 read on the caster. The strike wait is the age timer: the read follows the landing by the strike wait plus the game-time gap between the stamps. Window arm: see the ledger reason."
+      "observe_source": "Valkyr's Grip 807507: window arm, see the ledger reason.",
+      "expiry_wait_ms": 100,
+      "after_expiry_expected": 0
     },
     {
       "spell": 807507,
-      "name": "Valkyr's grip 807507 (window: gone just after the reduced end)",
+      "name": "Valkyr's Grip 807507 (window control: disarm still held at the later read without the talent)",
       "kind": "metric_delta",
-      "variant": "window_gone",
-      "label_suffix": "window_gone",
+      "variant": "window_control",
+      "label_suffix": "window_control",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "trigger_spell": 805301,
       "target": "caster",
@@ -12038,14 +12044,14 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "807507 reduces Valkyr's Grip durations on the caster; vehicle 8379 cast once by a striker at the caster in both phases (strike.in_before), aura 8379 read on the caster. The strike wait is the age timer: the read follows the landing by the strike wait plus the game-time gap between the stamps. Window arm: see the ledger reason."
+      "observe_source": "Valkyr's Grip 807507: window arm, see the ledger reason."
     },
     {
       "spell": 807873,
-      "name": "Valkyr's grip rank 2 807873 (window: held just before the reduced end)",
+      "name": "Valkyr's Grip 807873 (window: disarm held at its reduced end less 10%, gone by its reduced end plus 10%)",
       "kind": "metric_delta",
-      "variant": "window_held",
-      "label_suffix": "window_held",
+      "variant": "window_expiry",
+      "label_suffix": "window_expiry",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "trigger_spell": 805301,
       "target": "caster",
@@ -12071,17 +12077,23 @@
         "after": [
           30,
           85
+        ],
+        "expired": [
+          145,
+          285
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "807873 reduces Valkyr's Grip rank 2 durations on the caster; vehicle 8379 cast once by a striker at the caster in both phases (strike.in_before), aura 8379 read on the caster. The strike wait is the age timer: the read follows the landing by the strike wait plus the game-time gap between the stamps. Window arm: see the ledger reason."
+      "observe_source": "Valkyr's Grip 807873: window arm, see the ledger reason.",
+      "expiry_wait_ms": 150,
+      "after_expiry_expected": 0
     },
     {
       "spell": 807873,
-      "name": "Valkyr's grip rank 2 807873 (window: gone just after the reduced end)",
+      "name": "Valkyr's Grip 807873 (window control: disarm still held at the later read without the talent)",
       "kind": "metric_delta",
-      "variant": "window_gone",
-      "label_suffix": "window_gone",
+      "variant": "window_control",
+      "label_suffix": "window_control",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "trigger_spell": 805301,
       "target": "caster",
@@ -12110,7 +12122,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "807873 reduces Valkyr's Grip rank 2 durations on the caster; vehicle 8379 cast once by a striker at the caster in both phases (strike.in_before), aura 8379 read on the caster. The strike wait is the age timer: the read follows the landing by the strike wait plus the game-time gap between the stamps. Window arm: see the ledger reason."
+      "observe_source": "Valkyr's Grip 807873: window arm, see the ledger reason."
     },
     {
       "spell": 807873,
@@ -15464,78 +15476,6 @@
       "before_expected": 0,
       "expected": 5,
       "expected_gain": 5
-    },
-    {
-      "spell": 704581,
-      "name": "Solar guardian 704581 (window: held just before the reduced end)",
-      "kind": "metric_delta",
-      "variant": "window_held",
-      "label_suffix": "window_held",
-      "quote": "Reduces the duration of stun effects on you by $s2%.",
-      "trigger_spell": 805301,
-      "target": "caster",
-      "cast_in_before": false,
-      "strike": {
-        "spell": 2880,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 7895,
-        "in_before": true,
-        "striker_entry": 36
-      },
-      "metric": "aura",
-      "fields": {
-        "spell": 2880
-      },
-      "before_expected": 1,
-      "expected": 1,
-      "wait_ms": 25,
-      "expire_ms": 21000,
-      "game_time": {
-        "after": [
-          30,
-          85
-        ]
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "704581 reduces Solar Guardian durations on the caster; vehicle 2880 cast once by a striker at the caster in both phases (strike.in_before), aura 2880 read on the caster. The strike wait is the age timer: the read follows the landing by the strike wait plus the game-time gap between the stamps. Window arm: see the ledger reason."
-    },
-    {
-      "spell": 704581,
-      "name": "Solar guardian 704581 (window: gone just after the reduced end)",
-      "kind": "metric_delta",
-      "variant": "window_gone",
-      "label_suffix": "window_gone",
-      "quote": "Reduces the duration of stun effects on you by $s2%.",
-      "trigger_spell": 805301,
-      "target": "caster",
-      "cast_in_before": false,
-      "strike": {
-        "spell": 2880,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 1,
-        "wait_ms": 8080,
-        "in_before": true,
-        "striker_entry": 36
-      },
-      "metric": "aura",
-      "fields": {
-        "spell": 2880
-      },
-      "before_expected": 1,
-      "expected": 0,
-      "wait_ms": 25,
-      "expire_ms": 21000,
-      "game_time": {
-        "after": [
-          30,
-          85
-        ]
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "704581 reduces Solar Guardian durations on the caster; vehicle 2880 cast once by a striker at the caster in both phases (strike.in_before), aura 2880 read on the caster. The strike wait is the age timer: the read follows the landing by the strike wait plus the game-time gap between the stamps. Window arm: see the ledger reason."
     },
     {
       "spell": 704581,
