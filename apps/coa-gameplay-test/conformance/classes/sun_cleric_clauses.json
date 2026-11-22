@@ -5135,8 +5135,7 @@
       {
         "claim": "has a $h% chance (30%, ProcChance)",
         "labels": [
-          "707629 behaviour_metric_delta block_grant_rate",
-          "707629 effect_value #0"
+          "707629 behaviour_metric_delta block_grant_rate"
         ]
       },
       {
@@ -5153,13 +5152,10 @@
     "clause": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
     "labels": [
       "707629 behaviour_metric_delta block_extension",
-      "707629 behaviour_metric_delta block_extension_unblocked",
-      "707629 effect_value 804752e0 #2",
-      "707629 aura_amplitude_ms #3",
-      "707629 spell_duration 804751 #4"
+      "707629 behaviour_metric_delta block_extension_unblocked"
     ],
     "kind": "claim",
-    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (D-228): 32 trials at block 0% on the same kind (opt-in block 0); a strike blocked anyway voids its trial, every judged trial must stay in the base band, at least 24 judged. The data labels of the base ledger are kept beside it."
+    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (D-228): 32 trials at block 0% on the same kind (opt-in block 0); a strike blocked anyway voids its trial, every judged trial must stay in the base band, at least 24 judged. The tokens of the @s:804751:0@ pull (804752e0 #2, aura_amplitude_ms #3, 804751 #4) describe Hammer of Kings' own damage, tick and duration, not this clause, and are no longer cited here."
   },
   {
     "spell": 707767,
