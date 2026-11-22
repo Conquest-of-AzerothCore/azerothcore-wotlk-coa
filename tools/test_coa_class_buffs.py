@@ -1,3 +1,4 @@
+import struct
 import tempfile
 import unittest
 from pathlib import Path
@@ -208,6 +209,14 @@ class PlanTests(unittest.TestCase):
         plan = model.plan_categories([first, higher, partner, other], self.existing(), {64: 63}, {}, {63: None})
         self.assertEqual({65, 66}, plan.members[2113001])
 
+    def test_later_rank_with_another_stat_does_not_move_its_chain(self):
+        first = buff(63, 26, aura('SPELL_AURA_MOD_RESISTANCE', 8))
+        higher = buff(64, 26, aura('SPELL_AURA_MOD_RESISTANCE', 16))
+        partners = [buff(65, 24, aura('SPELL_AURA_MOD_RESISTANCE', 16)), buff(66, 22, aura('SPELL_AURA_MOD_RESISTANCE', 16))]
+        plan = model.plan_categories([first, higher, *partners], self.existing(), {64: 63}, {}, {})
+        self.assertEqual([{65, 66}], [members for members in plan.members.values() if 65 in members])
+        self.assertIn('64 (rank of 63) gives resistance:16, first rank gives resistance:8', plan.mismatches)
+
     def test_unclassified_without_decision_is_listed(self):
         plan = self.plan([buff(70, 19, aura('SPELL_AURA_DUMMY'))])
         self.assertEqual([70], plan.unclassified)
@@ -302,12 +311,67 @@ class SelectionTests(unittest.TestCase):
 
 
 class PendingFileTests(unittest.TestCase):
+    def test_later_file_touching_a_migrated_group_is_reported(self):
+        with tempfile.TemporaryDirectory() as folder:
+            pending = Path(folder)
+            (pending / 'rev_1795_buffs.sql').write_text('DELETE FROM `spell_group` WHERE `id` IN (2110001);\n',
+                                                        encoding='utf-8')
+            (pending / 'rev_20261009_50_old.sql').write_text('(2110001, 300857),\n', encoding='utf-8')
+            (pending / 'rev_20261009_51_other.sql').write_text('(1083, -1082),\n', encoding='utf-8')
+            self.assertEqual(['rev_20261009_50_old.sql'],
+                             model.files_after_migration(pending, 'rev_1795_buffs.sql', {2110001}))
+
+    def test_committed_class_buff_migrations_sort_last(self):
+        pending = model.ROOT / 'data' / 'sql' / 'updates' / 'pending_db_world'
+        for name in ('rev_20261122_01_coa_class_buff_cross_class_categories.sql',
+                     'rev_20261122_02_coa_class_buff_greater_pairs.sql'):
+            with self.subTest(name=name):
+                groups = model.migration_groups(pending / name)
+                self.assertTrue({2110001, 2113001} <= groups or {2106090, 2106096} <= groups)
+                self.assertEqual([], model.files_after_migration(pending, name, groups))
+
     def test_unapplied_pending_world_file_reported(self):
         with tempfile.TemporaryDirectory() as folder:
             pending = Path(folder)
             for name in ('rev_1.sql', 'rev_2.sql', 'create_sql.sh', '.dummy'):
                 (pending / name).write_text('', encoding='utf-8')
             self.assertEqual(['rev_2.sql'], model.pending_world_files_applied({'rev_1.sql'}, pending))
+
+
+class RankChainTests(unittest.TestCase):
+    known = {10, 11, 12, 13, 20, 30, 31, 40, 41, 42}
+
+    def test_client_chain_wins_over_a_table_chain_that_reuses_its_rank(self):
+        client = [(10, 10, 1), (10, 11, 2), (10, 12, 3)]
+        result = model.rank_chains(client, [(20, 20, 1), (20, 12, 2)], self.known)
+        self.assertEqual(10, result[12])
+        self.assertNotIn(20, result)
+
+    def test_table_extends_a_client_chain(self):
+        client = [(10, 10, 1), (10, 11, 2)]
+        table = [(10, 10, 1), (10, 11, 2), (10, 12, 3), (10, 13, 4)]
+        self.assertEqual({10: 10, 11: 10, 12: 10, 13: 10}, model.rank_chains(client, table, self.known))
+
+    def test_shorter_table_chain_keeps_the_client_chain(self):
+        client = [(10, 10, 1), (10, 11, 2), (10, 12, 3)]
+        self.assertEqual(10, model.rank_chains(client, [(10, 10, 1), (10, 11, 2)], self.known)[12])
+
+    def test_table_adds_chains_the_client_lacks(self):
+        self.assertEqual({30: 30, 31: 30}, model.rank_chains([], [(30, 30, 1), (30, 31, 2)], self.known))
+
+    def test_broken_chains_are_skipped(self):
+        client = [(40, 40, 1), (40, 42, 3)]
+        table = [(30, 30, 1), (30, 99, 2)]
+        self.assertEqual({}, model.rank_chains(client, table, self.known))
+
+    def test_spell_rank_rows_read_from_client_file(self):
+        rows = [(1, 10, 10, 1), (2, 10, 11, 2)]
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'SpellRank.dbc'
+            payload = b'WDBC' + struct.pack('<4I', len(rows), 4, 16, 1)
+            payload += b''.join(struct.pack('<4I', *row) for row in rows) + b'\0'
+            path.write_bytes(payload)
+            self.assertEqual([(10, 10, 1), (10, 11, 2)], model.spell_rank_rows(path))
 
 
 class OutputTests(unittest.TestCase):
@@ -323,8 +387,26 @@ class OutputTests(unittest.TestCase):
     def plan(self):
         return model.plan_categories(self.buffs(), self.state(), {}, {}, {})
 
+    def test_migration_sql_keeps_first_ranks_only(self):
+        state = self.state()
+        state.members[2110001].add(300886)
+        sql = model.migration_sql(self.plan(), state, {300886: 300857})
+        self.assertIn('(2110001, 300857)', sql)
+        self.assertNotIn('300886', sql)
+
+    def test_review_lists_pairs_a_lower_group_decides(self):
+        state = self.state()
+        state.members[5] = {300857, 20}
+        state.rules[5] = 3
+        plan = model.plan_categories(self.buffs(), state, {}, {}, {})
+        text = model.review_markdown(self.buffs(), plan, state, model.apply_plan(state, plan), {}, [])
+        section = text.split('## Decided by a lower group')[1].split('\n## ')[0]
+        self.assertIn('| 2110001 | Spell 20 (20, family 30) | Spell 300857 (300857, family 23) | same_effect 5 |',
+                      section)
+        self.assertNotIn('Spell 21 (21, family 30) |', section)
+
     def test_migration_sql_shape(self):
-        sql = model.migration_sql(self.plan(), self.state())
+        sql = model.migration_sql(self.plan(), self.state(), {})
         lines = sql.splitlines()
         self.assertTrue(sql.endswith('\n'))
         self.assertTrue(all(len(line) <= 120 for line in lines))

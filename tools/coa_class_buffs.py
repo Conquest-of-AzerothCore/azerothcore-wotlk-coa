@@ -1,5 +1,7 @@
 import argparse
 import functools
+import re
+import struct
 import subprocess
 import sys
 from itertools import combinations
@@ -306,11 +308,18 @@ def plan_categories(buffs, groups, first_rank, exceptions, manual):
         elif keys:
             signatures[buff.spell_id] = keys
 
+    categories, members, mismatches = {}, {}, []
+    for buff in buffs:
+        first = rank(buff.spell_id)
+        if first != buff.spell_id and first in signatures and buff.spell_id in signatures                 and signatures[first] != signatures[buff.spell_id]:
+            mismatches.append(f'{buff.spell_id} (rank of {first}) gives {_signature_label(signatures[buff.spell_id])}, '
+                              f'first rank gives {_signature_label(signatures[first])}')
+            del signatures[buff.spell_id]
+
     placed = {rank(member) for group_id in EXISTING_CATEGORIES for member in groups.members.get(group_id, ())}
     left_alone = {buff.spell_id for buff in buffs
                   if any(_contains(groups, group_id, rank(buff.spell_id)) for group_id in LEFT_ALONE_GROUPS)}
 
-    categories, members, mismatches = {}, {}, []
     for group_id, keys in EXISTING_CATEGORIES.items():
         if group_id not in groups.members:
             continue
@@ -455,6 +464,19 @@ def pending_world_files_applied(updates, pending_dir):
     return sorted(path.name for path in Path(pending_dir).glob('*.sql') if path.name not in updates)
 
 
+def migration_groups(path):
+    text = Path(path).read_text(encoding='utf-8')
+    groups = {int(value) for value in re.findall(r'^\((\d+),', text, re.MULTILINE)}
+    for listed in re.findall(r'IN \(([\d,\s]+)\)', text):
+        groups.update(int(value) for value in listed.split(','))
+    return groups
+
+
+def files_after_migration(pending_dir, name, groups):
+    return sorted(path.name for path in Path(pending_dir).glob('*.sql')
+                  if path.name > name and migration_groups(path) & set(groups))
+
+
 def _cell(text):
     return str(text).replace('|', '\\|')
 
@@ -540,6 +562,17 @@ def review_markdown(buffs, plan, before, after, first_rank, unclassified):
                 lines.append(f'| {_buff_label(a)} | {_buff_label(b)} | {old} | {new} | {note} |')
     lines.append('')
 
+    lines += ['## Decided by a lower group', '', '| Category | A | B | Decided by |', '|---|---|---|---|']
+    for group_id in sorted(plan.categories):
+        inside = sorted({buff.spell_id for buff in buffs if _contains(after, group_id, rank(buff.spell_id))})
+        for a_id, b_id in combinations(inside, 2):
+            a, b = by_id[a_id], by_id[b_id]
+            decided = deciding_group(a_id, b_id, after, first_rank)
+            if a.family != b.family and decided and decided[0] != group_id:
+                lines.append(f'| {group_id} | {_buff_label(a)} | {_buff_label(b)} | '
+                             f'{RULE_OUTCOMES[decided[1]]} {decided[0]} |')
+    lines.append('')
+
     lines += ['## Single-class signatures', '']
     for keys in sorted(plan.single_class, key=sorted):
         names = ', '.join(_buff_label(by_rank[member]) for member in plan.single_class[keys] if member in by_rank)
@@ -578,10 +611,11 @@ def _values(header, rows):
     return [header] + [f'({row}){";" if index == len(rows) - 1 else ","}' for index, row in enumerate(rows)]
 
 
-def migration_sql(plan, groups):
+def migration_sql(plan, groups, first_rank):
     after = apply_plan(groups, plan)
     touched = sorted(_touched_groups(plan))
-    members = [(group_id, member) for group_id in touched for member in sorted(after.members.get(group_id, ()))]
+    members = [(group_id, member) for group_id in touched for member in sorted(after.members.get(group_id, ()))
+               if member < 0 or first_rank.get(member, member) == member]
     ruled = [group_id for group_id in touched if after.rules.get(group_id)]
     lines = _in_list('DELETE FROM `spell_group` WHERE `id` IN', touched)
     lines += _values('INSERT INTO `spell_group` (`id`, `spell_id`) VALUES',
@@ -592,6 +626,50 @@ def migration_sql(plan, groups):
                      [f'{group_id}, {after.rules[group_id]}, {_sql_text(after.descriptions.get(group_id, ""))}'
                       for group_id in ruled])
     return '\n'.join(lines) + '\n'
+
+
+def spell_rank_rows(path):
+    data = Path(path).read_bytes()
+    magic, count, fields, size, _ = struct.unpack_from('<4s4I', data)
+    if magic != b'WDBC' or fields < 4:
+        raise ValueError(f'{path} is not a SpellRank WDBC file')
+    rows = (struct.unpack_from('<4I', data, 20 + index * size) for index in range(count))
+    return [(first, spell, rank) for _, first, spell, rank in rows]
+
+
+def _ladders(rows):
+    ladders = {}
+    for first, spell, rank in rows:
+        ladders.setdefault(first, {})[rank] = spell
+    return ladders
+
+
+def _chain(ladder, known):
+    chain = []
+    for rank, spell in sorted(ladder.items()):
+        if rank != len(chain) + 1 or spell not in known:
+            return []
+        chain.append(spell)
+    return chain if len(chain) >= 2 else []
+
+
+def rank_chains(client_rows, table_rows, known):
+    chains = [chain for chain in (_chain(ladder, known) for _, ladder in sorted(_ladders(client_rows).items()))
+              if chain]
+    client_of = {spell: index for index, chain in enumerate(chains) for spell in chain}
+    for first, ladder in sorted(_ladders(table_rows).items()):
+        chain = _chain(ladder, known)
+        if not chain or first not in known:
+            continue
+        if chain[0] in client_of:
+            current = chains[client_of[chain[0]]]
+            if (len(chain) > len(current) and chain[:len(current)] == current
+                    and not any(spell in client_of for spell in chain[len(current):])):
+                chains[client_of[chain[0]]] = chain
+            continue
+        if not any(spell in client_of for spell in chain):
+            chains.append(chain)
+    return {spell: chain[0] for chain in chains for spell in chain}
 
 
 def load_dbc(dbc_dir):
@@ -609,7 +687,7 @@ def load_dbc(dbc_dir):
     advancement = {advancement_value(row, f'RankSpell[{index}]') for row in entries.values() for index in range(5)}
     abilities, ability_value = table('SkillLineAbility')
     skill_line = {ability_value(row, 'Spell') for row in abilities.values()}
-    return records, advancement - {0}, skill_line - {0}
+    return records, advancement - {0}, skill_line - {0}, spell_rank_rows(Path(dbc_dir) / 'SpellRank.dbc')
 
 
 def _mysql(args, query):
@@ -631,10 +709,10 @@ def load_database(args):
     for row in _mysql(args, 'SELECT group_id, stack_rule, description FROM spell_group_stack_rules'):
         rules[int(row['group_id'])] = int(row['stack_rule'])
         descriptions[int(row['group_id'])] = row['description'] if row['description'] != 'NULL' else ''
-    first_rank = {int(row['spell_id']): int(row['first_spell_id'])
-                  for row in _mysql(args, 'SELECT first_spell_id, spell_id FROM spell_ranks')}
+    table_ranks = [(int(row['first_spell_id']), int(row['spell_id']), int(row['rank']))
+                   for row in _mysql(args, 'SELECT first_spell_id, spell_id, `rank` FROM spell_ranks')]
     updates = {row['name'] for row in _mysql(args, 'SELECT name FROM updates')}
-    return spell_dbc, Groups(members, rules, descriptions), first_rank, updates
+    return spell_dbc, Groups(members, rules, descriptions), table_ranks, updates
 
 
 def main(argv=None):
@@ -647,9 +725,10 @@ def main(argv=None):
     parser.add_argument('--sql')
     args = parser.parse_args(argv)
 
-    records, advancement, skill_line = load_dbc(args.dbc)
-    spell_dbc, groups, first_rank, updates = load_database(args)
+    records, advancement, skill_line, client_ranks = load_dbc(args.dbc)
+    spell_dbc, groups, table_ranks, updates = load_database(args)
     records = apply_overrides(records, spell_dbc)
+    first_rank = rank_chains(client_ranks, table_ranks, set(records))
     learnable = learnable_spells(advancement, skill_line, records, first_rank)
     buffs = select_buffs(records, learnable)
     plan = plan_categories(buffs, groups, first_rank, EXCEPTIONS, MANUAL)
@@ -664,7 +743,7 @@ def main(argv=None):
     text += '\n## Unapplied pending world files\n\n' + ''.join(f'- {name}\n' for name in missing)
     Path(args.review).write_text(text, encoding='utf-8', newline='\n')
     if args.sql:
-        Path(args.sql).write_text(migration_sql(plan, groups), encoding='utf-8', newline='\n')
+        Path(args.sql).write_text(migration_sql(plan, groups, first_rank), encoding='utf-8', newline='\n')
     print(f'buffs={len(buffs)} categories={len(plan.categories)} unclassified={len(plan.unclassified)} '
           f'unapplied={len(missing)} review={args.review}')
     return 1 if plan.unclassified or missing else 0
