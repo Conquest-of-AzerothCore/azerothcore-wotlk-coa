@@ -1,4 +1,4 @@
-# 1017. A scripted crit read proves a crit claim with its partner arms
+# 1018. A scripted crit read proves a crit claim with its partner arms
 
 - Status: proposed
 - Date: 2026-11-22
@@ -26,8 +26,9 @@ The cases where such a read must not count:
    targets, no triggering aura and no script values. The Sun Cleric hook reads caster auras, target health percent,
    creature type and a target aura only (code reading).
 2. The real roll uses `m_attackType` (ranged for `DmgClass` 3 and auto-repeat wands, off hand for melee spells with
-   `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON`) and `m_originalCaster` or the totem owner; the probe passes `BASE_ATTACK`
-   and the player.
+   `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON`, or the attack type a script sets at cast through
+   `Spell::SetScriptMeleeAttackType`) and `m_originalCaster` or the totem owner; the probe passes `BASE_ATTACK` and the
+   player.
 3. A clause that does not promise crit.
 4. A conditional clause proven by one arm: "on enemies above 80% health" with only the above arm would pass a server
    that ignores health; a zero-gain arm alone would pass a server that never applies the talent.
@@ -49,19 +50,39 @@ The third option (mentor D-52, controller approval).
   verdict of it counts as behaviour only when the same ledger row's conformant learned verdicts of the metric
   (`claim_evidence`'s `row_labels`, the labels of every claim of the row) hold:
   - a non-zero expected gain;
-  - when the claim or row text is conditional (`coverage.CONDITIONAL_WORDS`), also a zero expected gain, the arm
-    whose fixture breaks the condition.
+  - unless the spell's text is a plain unconditional stat sentence (`coverage.PLAIN_CRIT_SENTENCE`), also a zero
+    expected gain, the arm meant to break the condition.
 
   The gain is the verdict's `expected`, which `compare.metric_gain_verdict` sets to the entry's `expected_gain`.
-- The conditional words err on the side of requiring the zero-gain arm: a false match only asks for one more arm. A
-  conditional clause the words miss is a review finding, not a pass.
+- The test errs on the side of requiring the zero-gain arm: it is a whitelist, not a list of condition words. A
+  spell's text is plain only when every ledger row of the same spell, joined in ledger order
+  (`coverage.spell_sentence`), is one sentence "Increases your critical strike chance by $s1%." or "Increases the
+  critical strike chance of <Name>[, <Name>| and <Name>] by $s1%." (capitalised spell names), and the claim words are
+  part of it. Anything else needs the zero arm: school or target words ("your Holy critical strike chance", "with Fire
+  spells"), a trigger, a duration, stacks, "next" or "now", and a condition carried by a sibling row of the same spell
+  ("While only 1 Abomination is active," before "the critical strike chance of your Ghouls ..."). A false conditional
+  only asks for one more arm.
+- The tool does not check that the zero arm breaks the stated condition, nor that each condition of the clause has its
+  own arm: one conformant learned zero-gain arm of the metric in the row satisfies the gate. The review checks that the
+  zero arm's fixture breaks the condition, and names any condition left without an arm (for 680618, the health
+  threshold is bracketed at 81% and 79%; the Holy school check of the hook has no arm).
 - Generator refusals (`behaviours.require_scripted_crit_probe`, `NotModelled`) for this metric: a probed spell of
   `DmgClass` 3, an auto-repeat (wand) spell, a melee spell that requires the off hand, a read on another actor than the
-  player, and an entry without `expected_gain`.
+  player, and an entry without `expected_gain`. An `evidence_metric` (ADR 0616) that differs from `metric` is refused
+  when either names `spell_done_crit_chance_scripted`: another read judged as this metric would skip these refusals,
+  and this read judged as another metric would skip the partner gate.
 - Stated review check: a pet, totem or guardian spell read as the player cannot be detected from the DBC (no field
   names the real caster). The entry's `observe_source` states the real caster and that the hook reads no per-cast
   state (case 1); the review checks both.
-- The same one-arm hole exists for the `spell_done_crit_chance` row. That is an observation; it is not changed here.
+- Known limits:
+  - The same one-arm hole exists for the `spell_done_crit_chance` row: a learned verdict of it is behaviour on a
+    conditional clause with one arm. It is pre-existing and not changed here.
+  - A script that moves a melee spell to the off hand at cast (`Spell::SetScriptMeleeAttackType`, set through
+    `SetSpellValue`) is invisible to the DBC refusal; the review checks the probed spell's scripts. No Sun Cleric hook
+    spell is affected at this commit.
+  - `coverage.CRIT_WORDS` ("critical strike chance", "chance to critically") does not match "guaranteed to critically
+    strike", so the "always crits" rows of 680645 and 707517 cannot be promoted by this metric; they need another
+    route.
 
 Sun Cleric ledger rows whose labels use the metric at this commit (the reviewer's list):
 
@@ -70,15 +91,19 @@ Sun Cleric ledger rows whose labels use the metric at this commit (the reviewer'
 | 680618 Gift of the Sun | "... by $s1% on enemies above 80% health." | `above` (gain 50), `below` (gain 0) | yes |
 
 The other hook clauses of the class (300343 "on targets below 20% health", 704909 "against Undead", 707517 "on
-allies affected by Bless") use no entry of this metric yet; the conditional words mark each of them conditional
-(`test_the_conditional_words_mark_every_hook_clause_of_the_sun_cleric`).
+allies affected by Bless") use no entry of this metric yet; the plain-sentence test marks each of them conditional
+(`test_every_hook_clause_of_the_sun_cleric_is_conditional`).
 
 ## Consequences
 
 - Tests: `test_coverage.py` `ScriptedCritPartnerTest` (both arms, one arm, zero arm alone, unconditional clause,
-  condition contrast, non-crit clause, a partner of another metric, a partner in another claim of the row, the word
-  list) with two mutants: the gate removed passes the one-arm row, and the row removed keeps the paired arms at data.
-  `test_behaviours.py` `ScriptedCritProbeRefusalTests` covers each refusal. The ADR 1014 readback test no longer
+  condition contrast, non-crit clause, a partner of another metric, a partner in another claim of the row, the plain
+  sentences, the reviewed trigger, duration, stack, "next" and school rows, a near-plain clause, a condition in a
+  sibling row, and zero arms that are closed, of another check or of the condition contrast) with four mutants: the
+  gate removed passes the one-arm row, every sentence plain passes it, reading the row alone misses the sibling
+  condition, and the row removed keeps the paired arms at data. `test_behaviours.py`
+  `ScriptedCritProbeRefusalTests` covers each refusal, both `evidence_metric` directions, and that the scenario
+  generator runs the refusals on the Sun Cleric 680618 entry. The ADR 1014 readback test no longer
   asserts the missing row.
 - Generation of the finished classes is unchanged: Templar (`--class 19`, with and without `--stack`), Necromancer
   (`--class 23`) and Witch Hunter (`--class 15`) regenerate byte-identical at this commit; no finished class uses the

@@ -1875,10 +1875,11 @@ the one 3 yd behind never.
   the one at 10 yd. Norgannon's Wrath 524739: `settle_ms` 2500 for the delayed strike.
 - `metric_delta` `evidence_metric` (ADR 0616) names the metric the verdict stamps in place of `metric` (a metric of
   `coverage.METRIC_EVIDENCE`, usually gated by `CONTRAST_PROOF`); the read itself is unchanged.
-- `metric_delta` on `spell_done_crit_chance_scripted` (ADR 1017) is `NotModelled` when the probed spell rolls its crit
+- `metric_delta` on `spell_done_crit_chance_scripted` (ADR 1018) is `NotModelled` when the probed spell rolls its crit
   on another attack than the probe's base attack (`DmgClass` 3, an auto-repeat wand spell, or a melee spell that
-  requires the off hand), when the read is on another actor than the player, and without `expected_gain` (each arm
-  names its gain, which the coverage partner gate reads). A pet, totem or guardian spell read as the player is not
+  requires the off hand), when the read is on another actor than the player, without `expected_gain` (each arm
+  names its gain, which the coverage partner gate reads), and with an `evidence_metric` that differs from `metric` when
+  either names `spell_done_crit_chance_scripted`. A pet, totem or guardian spell read as the player is not
   detectable from the DBC: the entry's `observe_source` states the real caster and the review checks it.
 - `metric_delta` `enemy_player_class` (ADR 0561) sets the enemy player's class (with `enemy_player_race`; omitted, the
   enemy keeps the class file's class), for controls against another class.

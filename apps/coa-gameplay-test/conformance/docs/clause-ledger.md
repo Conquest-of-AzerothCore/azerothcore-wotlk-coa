@@ -293,11 +293,12 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
   chance with the attacker's conditional rules, the same way (ADR 0800). `spell_done_crit_chance_scripted`, the done
   chance passed through the CoA crit hook (`ScriptMgr::OnSpellCritChance`), takes the same row and crit words plus a
-  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1017): its learned verdict is behaviour only when the ledger row's
-  conformant learned verdicts of the metric hold a non-zero expected gain and, when the claim or row text is
-  conditional (`coverage.CONDITIONAL_WORDS`), also a zero gain whose fixture breaks the condition. A conditional clause
-  the words miss is a review finding. A `behaviour_group_stack_cap` state read
-  is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
+  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1018): its learned verdict is behaviour only when the ledger row's
+  conformant learned verdicts of the metric hold a non-zero expected gain and, unless every row of the spell joined is
+  a plain unconditional stat sentence (`coverage.PLAIN_CRIT_SENTENCE`), also a zero gain. That the zero arm's fixture
+  breaks the condition, and that each condition has an arm, is a review check; the tool does not see it. A
+  `behaviour_group_stack_cap` state read is behaviour for a no-stack clause ("does not stack",
+  `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
   value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition
   set up, the talent known in both phases) is behaviour for a claim that states that condition: its words start with

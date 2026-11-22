@@ -1678,6 +1678,10 @@ SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON = 0x01000000
 
 
 def require_scripted_crit_probe(records: Records, spec) -> None:
+    evidence_metric = spec.evidence_metric
+    if SCRIPTED_CRIT_METRIC in (spec.metric, evidence_metric) and evidence_metric not in (None, spec.metric):
+        raise NotModelled(f'{spec.spell}: {SCRIPTED_CRIT_METRIC} is read and judged under its own name only, not '
+                          f'{spec.metric} judged as {evidence_metric}')
     if spec.metric != SCRIPTED_CRIT_METRIC:
         return
     spell = int(spec.fields.get('spell', 0))

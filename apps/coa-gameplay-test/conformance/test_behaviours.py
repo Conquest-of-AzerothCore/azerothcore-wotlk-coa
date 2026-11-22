@@ -13479,6 +13479,32 @@ class ScriptedCritProbeRefusalTests(unittest.TestCase):
         require_scripted_crit_probe(self.records(damage_class=3),
                                     metric_delta_spec(self.entry(metric='spell_done_crit_chance')))
 
+    def test_another_read_judged_as_the_scripted_crit_is_refused(self):
+        entry = self.entry(metric='spell_done_crit_chance', evidence_metric='spell_done_crit_chance_scripted')
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(damage_class=3), metric_delta_spec(entry))
+
+    def test_the_scripted_crit_judged_as_another_metric_is_refused(self):
+        entry = self.entry(evidence_metric='spell_done_crit_chance')
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(), metric_delta_spec(entry))
+
+    def test_the_scripted_crit_judged_under_its_own_name_is_generated(self):
+        entry = self.entry(evidence_metric='spell_done_crit_chance_scripted')
+        require_scripted_crit_probe(self.records(), metric_delta_spec(entry))
+
+    def test_another_evidence_metric_of_another_read_is_left_alone(self):
+        entry = self.entry(metric='aura_duration_ms', evidence_metric='enemy_player_aura_duration_ms')
+        require_scripted_crit_probe(self.records(damage_class=3), metric_delta_spec(entry))
+
+    def test_the_scenario_generator_runs_the_refusals(self):
+        entry = next(entry for entry in load_class_file(27)['behaviours']
+                     if entry.get('spell') == 680618 and entry.get('variant') == 'above')
+        behaviour_scenario(load_class_file(27), entry)
+        unarmed = {key: value for key, value in entry.items() if key != 'expected_gain'}
+        with self.assertRaisesRegex(NotModelled, 'judged on its expected_gain only'):
+            behaviour_scenario(load_class_file(27), unarmed)
+
 
 if __name__ == '__main__':
     unittest.main()
