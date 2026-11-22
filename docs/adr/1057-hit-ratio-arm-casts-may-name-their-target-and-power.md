@@ -1,4 +1,4 @@
-# 1044. Hit-ratio arm casts may name their target and power
+# 1057. Hit-ratio arm casts may name their target and power
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-22

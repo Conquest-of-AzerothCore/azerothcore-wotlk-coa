@@ -3467,21 +3467,10 @@
       },
       {
         "claim": "any ally, once for each ally",
-        "labels": [
-          "680646 behaviour_metric_delta heal_each_ally"
-        ]
+        "labels": []
       }
     ],
-    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500 (the five hits are computed from the measured hit, not read). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally\" and \"once for each ally\" stay open as a tool gap, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found.",
-    "tool_gap": {
-      "reason": "The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so no read shows an ally falling below 35% and being healed, nor whether \"once\" is per ally. On this server the once flag is the script value of the shared area Aura (AscensionSunClericEvents.cpp:289, SpellAuras.cpp:664), so one heal per cast for the whole group is possible; a caster-only run reads 1500 either way. Lead only: the tooltip is ambiguous, no server change and no owner question yet.",
-      "attempts": [
-        {
-          "agent": "sc-b8e-fix",
-          "report": ".agents/plans/sun-cleric-b8e-fix/report.md"
-        }
-      ]
-    }
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500 (the five hits are computed from the measured hit, not read). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally, once for each ally\" is a finding for the owner packet, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found. Finding (D-242): with the ally struck below 35% after the caster, the ally arm reads 0 heal events at the ally (expected 1) in every run of the three archived entries heal_each_ally, _a and _b (removed-entries.json in .agents/plans/sun-cleric-rb1/rev1fix); the heal 1500 lands on the Cleric once per cast, and an ally that stays above 35% reads 0. The tooltip claim for allies is therefore not met as written: owner packet, no server change on this check."
   },
   {
     "spell": 680647,
@@ -5926,22 +5915,37 @@
   {
     "spell": 804250,
     "clause": "and $680911s3% increased damage.",
-    "reason": "Open, tool need: the ally must deal damage under a real 804250 cast. hit_ratio arm casts are spell ids cast at the dummy (behaviours.py), ally_arm has no ally attack, and set_aura of 680911 is forbidden as a fixture of the claim.",
-    "labels": [
-      "804250 effect_value 680911e2 #2",
-      "804250 behaviour_hit_ratio ally_damage"
-    ],
-    "kind": "claim"
+    "reason": "Behaviour: the ally Gavel of Wrath mean after Blessing of Triumph over the mean before is read by hit_ratio ally_damage (expected 1.1 = 680911 Effect[2] BasePoints 9 + 1) with a control arm without 804250 in the same pair. The data label 680911e2 is dropped: the behaviour label measures the same stated value in the same run (11.1). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$680911s3% increased damage",
+        "labels": [
+          "804250 behaviour_hit_ratio ally_damage"
+        ]
+      }
+    ]
   },
   {
     "spell": 804250,
     "clause": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
-    "reason": "Open, tool need: same as the increased damage clause (the ally must deal damage under a real 804250 cast); no existing kind reads the ally's damage or its healing.",
-    "labels": [
-      "804250 effect_value 680911e2 #3",
-      "804250 behaviour_metric_delta ally_damage_heal"
-    ],
-    "kind": "claim"
+    "reason": "Behaviour: ally_damage_heal reads the heal 681386 at the ally (0 then 1) and its total over the ally damage total (0.10 = 680911 Effect[2] BasePoints 9 + 1) with the ally at 30% health; ally_damage_heal_above is the arm with the ally at 42%: no heal. The threshold lies between 30% and 42%; the exact 35% is not bracketed (no arm at 34% or 36%), so only the 35% figure is open. The data label 680911e2 #3 is dropped: the behaviour labels measure the same value in the same run. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing nearer found.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "healed for $680911s3% of their direct damage dealt",
+        "labels": [
+          "804250 behaviour_metric_delta ally_damage_heal"
+        ]
+      },
+      {
+        "claim": "If the ally falls below 35% maximum health",
+        "labels": [
+          "804250 behaviour_metric_delta ally_damage_heal",
+          "804250 behaviour_metric_delta ally_damage_heal_above"
+        ]
+      }
+    ]
   },
   {
     "spell": 804250,
@@ -6443,12 +6447,24 @@
   {
     "spell": 805301,
     "clause": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
-    "labels": [
-      "805301 effect_value #2",
-      "805301 behaviour_metric_delta extra_heal_crit"
-    ],
     "kind": "claim",
-    "reason": "Open, data label only: the additional healing, its critical strike and The Redeemer proc depend on the Bless ally path of the clause above. Not given a final status."
+    "reason": "Behaviour: extra_heal_crit reads the critical strike of the additional healing; extra_heal_redeemer, its forced non-crit control and its no-form control read The Redeemer proc on the Bless ally (D-242). The data label (#2, unmodelled) is dropped: the behaviour labels measure the stated claims. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found.",
+    "claims": [
+      {
+        "claim": "This additional healing can critically strike",
+        "labels": [
+          "805301 behaviour_metric_delta extra_heal_crit"
+        ]
+      },
+      {
+        "claim": "and proc effects like The Redeemer",
+        "labels": [
+          "805301 behaviour_metric_delta extra_heal_redeemer",
+          "805301 behaviour_metric_delta extra_heal_redeemer_noncrit",
+          "805301 behaviour_metric_delta extra_heal_redeemer_no_form"
+        ]
+      }
+    ]
   },
   {
     "spell": 805581,
