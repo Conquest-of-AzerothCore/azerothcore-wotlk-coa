@@ -97,7 +97,10 @@ class aura_ascension_cultist_event : public AuraScript
             case 706245: return dealt && Any(info, {800416, 800413}) && Chance(player, id);
             case 706911: return dealt && Named(info, 520332) && Chance(player, id);
             case 707640: return dealt && Named(info, 500720) && Chance(player, id);
-            case 803035: case 803037: case 803082: case 803339: case 805606:
+            case 803035:
+                return dealt && event.GetActor() == player && (!info || (info->Id != Thoughtseize &&
+                    info->Id != DespoiledGround)) && Chance(player, id);
+            case 803037: case 803082: case 803339: case 805606:
                 return dealt && event.GetActor() == player && (!info || info->Id != Thoughtseize) && Chance(player, id);
             case 805110: return dealt && !periodic && Chance(player, id);
             case 807307: return dealt && melee && ability;
