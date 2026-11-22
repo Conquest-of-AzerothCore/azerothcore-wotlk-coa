@@ -47,7 +47,22 @@
     "skill 498": 300.0
   },
   "log_queries": {},
-  "off_hand_weapons": [],
+  "off_hand_weapons": [
+    {
+      "item": 30754,
+      "slot": 16,
+      "subclass": 4,
+      "min_damage": 51.63,
+      "max_damage": 82.65,
+      "speed_ms": 1800,
+      "inventory_type": 13,
+      "normalized_speed": 2.4,
+      "skill_line": 54,
+      "grants": [
+        707072
+      ]
+    }
+  ],
   "known_auras": [
     887015
   ],
@@ -9946,13 +9961,13 @@
             "actors": [
               "caster"
             ],
-            "metric": "spell_damage_total",
+            "metric": "spell_damage_with_resist_total",
             "count_metric": "spell_damage_count",
             "fields": {
               "spell": 807853,
               "target": "dummy"
             },
-            "source": "Copy(player, target, 807853, CalculatePct(damage, Amount(800612))) on each damaging auto attack (AscensionSunClericEvents.cpp:376)"
+            "source": "Copy(player, target, 807853, CalculatePct(damage, Amount(800612))) on each damaging auto attack (AscensionSunClericEvents.cpp:376), read with its resisted part (spell_damage_with_resist_total): the copy sets the amount before the target's mitigation, and 823764 cannot remove resists in an attack_swings phase"
           },
           {
             "actors": [
@@ -9974,7 +9989,7 @@
           }
         ]
       },
-      "observe_source": "Amount half of the 800612 clause. Same phases as holy_strikes (5 swing intervals with both hands at the dummy, the before phase without the aura is the control and reads 0 Holy strikes), with two ratio-only arms read after each main reading: the 807853 damage total at the dummy (with its count) and the caster's melee damage total (with its damaging-hit count). The main reading expects 1 or more Holy strikes after (expected 1 as a floor through the count arm). The ratio of the after-phase deltas must be 1.0 within 0.02, unmeasured unless both landed. Expected from 800612 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run.",
+      "observe_source": "Amount half of the 800612 clause. Same phases as holy_strikes (5 swing intervals with both hands at the dummy, the before phase without the aura is the control and reads 0 Holy strikes), with two ratio-only arms read after each main reading: the 807853 damage total with its resisted part at the dummy (with its count) and the caster's melee damage total (with its damaging-hit count). The main reading expects 1 or more Holy strikes after (expected 1 as a floor through the count arm). The ratio of the after-phase deltas must be 1.0 within 0.02, unmeasured unless both landed. Expected from 800612 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run.",
       "after_at_least": 1
     },
     {
@@ -12879,6 +12894,54 @@
       "expected_ratio": 0.85,
       "vehicle_spell": 301235,
       "striker_entry": 36
+    },
+    {
+      "spell": 807507,
+      "name": "Valkyr's Grip (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
+      "expected": 1.31,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          807507
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "807507 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 30 + EffectDieSides 1 = 31 ($s1, installed DBC): off-hand auto attack damage x1.31. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn."
+    },
+    {
+      "spell": 807873,
+      "name": "Valkyr's Grip (rank 2) (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
+      "expected": 1.61,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          807873
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "807873 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 60 + EffectDieSides 1 = 61 ($s1, installed DBC): off-hand auto attack damage x1.61. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn."
     },
     {
       "spell": 707072,

@@ -1157,7 +1157,8 @@ overcomes.
 
 `off_hand_item` (an item of the class file's `off_hand_weapons`) wields that off hand beside the class file's
 one-handed main hand: the main hand replaces the reference weapon and the off hand is equipped after the base steps,
-with no Dual Wield grant. A spell carrying `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON` then reads the off hand. A class
+with no Dual Wield grant unless the `off_hand_weapons` entry states `grants` (spell ids learned right before the
+equip, ADR 1028; Sun Cleric 30754 with 707072). A spell carrying `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON` then reads the off hand. A class
 with `weapon_sets` (see [Weapon sets](reference-character.md#weapon-sets)) leaves `off_hand_item` out: the set of
 the cast spell equips its own off hand. With
 `swing_hand` (0 main hand, 1 off hand) and `metric: "melee_damage_total"` the arms observe auto attacks instead of a

@@ -1598,6 +1598,12 @@ class MechanicDurationScenarioTests(unittest.TestCase):
         actions = [step.get('action') for step in scenario['steps'] if step.get('action') in ('cast', 'learn')]
         self.assertEqual(actions, ['cast', 'learn', 'cast'])
         self.assertEqual(expectation.model['margin_ms'], 50)
+        self.assertGreater(expectation.model['full_duration_ms'], 0)
+        labels = [step.get('label') for step in scenario['steps']]
+        for moment in ('before', 'after'):
+            cast, read = expectation.model['times'][moment]
+            self.assertLess(labels.index(cast), labels.index(expectation.model[f'{moment}_label']))
+            self.assertLess(labels.index(expectation.model[f'{moment}_label']), labels.index(read))
         self.assertIn('up to 1 times', scenario['contract'])
         self.assertIn('unmeasured unless that margin stays below 10%', scenario['contract'])
         default = mechanic_duration_scenario(CLASS_FILE, mechanic_duration_spec(finesse_rank_1_entry()))
@@ -4529,28 +4535,43 @@ class JudgeDurationRatioTests(unittest.TestCase):
 
     def margined(self, margin_ms: int):
         expectation = self.expectation()
-        return replace(expectation, model={**expectation.model, 'expected': 0.8, 'margin_ms': margin_ms})
+        times = {moment: [f'{moment} cast time', f'{moment} read time'] for moment in ('before', 'after')}
+        return replace(expectation, model={**expectation.model, 'expected': 0.8, 'margin_ms': margin_ms,
+                                           'full_duration_ms': 10000, 'times': times})
 
-    def test_a_stated_margin_replaces_the_settle_margin(self):
+    def timed_run(self, before: float, after: float, elapsed=(506.0, 506.0)):
+        return FakeRun({'before': before, 'after': after, 'before cast time': 1000.0,
+                        'before read time': 1000.0 + elapsed[0], 'after cast time': 30000.0,
+                        'after read time': 30000.0 + elapsed[1]}, max_step_ms=25.0)
+
+    def test_a_stated_margin_judges_the_delta_of_the_full_dbc_duration(self):
         expectation = self.margined(50)
-        for after, status in ((7600.0 + 40.0, 'ok'), (7600.0 - 40.0, 'ok'), (7600.0 + 100.0, 'alert')):
+        for after, status in ((7494.0, 'ok'), (7494.0 + 60.0, 'ok'), (7494.0 + 100.0, 'alert')):
             with self.subTest(after=after):
-                verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 9500.0, 'after': after},
-                                                                              max_step_ms=20.0), expectation)
+                verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, after), expectation)
                 self.assertEqual(verdict.status, status)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0), expectation)
+        self.assertIn('expected delta -2000 ms = the full 10000 ms DBC duration x (0.8 - 1)', verdict.explanation)
 
     def test_mutant_a_stated_margin_still_alerts_ten_percent_off_or_an_absent_reduction(self):
         expectation = self.margined(50)
-        for after in (9500.0 - 1900.0 * 0.9, 9500.0 - 1900.0 * 1.1, 9500.0):
+        for after in (9494.0 - 1800.0, 9494.0 - 2200.0, 9494.0):
             with self.subTest(after=after):
-                verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 9500.0, 'after': after},
-                                                                              max_step_ms=20.0), expectation)
+                verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, after), expectation)
                 self.assertEqual(verdict.status, 'alert')
+
+    def test_a_trial_off_the_full_duration_or_with_uneven_landing_offsets_is_void(self):
+        expectation = self.margined(50)
+        for before, elapsed in ((9000.0, (506.0, 506.0)), (9494.0, (506.0, 606.0))):
+            with self.subTest(before=before, elapsed=elapsed):
+                verdict = judge_behaviour(base_verdict(expectation),
+                                          self.timed_run(before, before - 2000.0, elapsed), expectation)
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn('void trial', verdict.explanation)
 
     def test_a_stated_margin_not_below_ten_percent_of_the_delta_is_unmeasured(self):
         expectation = self.margined(180)
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 9500.0, 'after': 7600.0},
-                                                                      max_step_ms=20.0), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0), expectation)
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertIn('cannot exclude a 10% deviation', verdict.explanation)
 
@@ -7737,6 +7758,18 @@ class OffHandHitRatioTests(unittest.TestCase):
         self.assertLess(off, first_cast)
         self.assertEqual(expectation.label, f'{BLADE_SERMON} behaviour_hit_ratio off_hand')
         self.assertIn(f'off-hand item {ANCIENT_BONE_MACE} equipped', scenario['contract'])
+
+    def test_an_off_hand_grant_is_learned_before_the_off_hand_equip(self):
+        class_file = {**CLASS_FILE, 'off_hand_weapons': [
+            {**weapon, 'grants': [674]} if weapon['item'] == ANCIENT_BONE_MACE else weapon
+            for weapon in CLASS_FILE['off_hand_weapons']]}
+        scenario, _ = behaviour_scenario(class_file, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))
+        steps = run.validate(scenario)['steps']
+        grant = next(index for index, step in enumerate(steps) if step['action'] == 'learn' and step['spell'] == 674)
+        off = next(index for index, step in enumerate(steps) if step['action'] == 'equip' and step['slot'] == 16)
+        self.assertLess(grant, off)
+        plain, _ = behaviour_scenario(CLASS_FILE, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))
+        self.assertNotIn(674, [step.get('spell') for step in plain['steps'] if step['action'] == 'learn'])
 
     def test_a_swing_hit_ratio_reads_plain_off_hand_hits_of_one_stopped_swing_interval_per_trial(self):
         entry = variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing')

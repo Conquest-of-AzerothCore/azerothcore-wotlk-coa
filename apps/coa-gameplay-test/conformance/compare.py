@@ -3844,15 +3844,8 @@ def behaviour_duration_ratio_verdict(base: Verdict, run: Run, model: dict) -> Ve
     status = 'alert' if abs(delta) <= FLOAT_EPSILON < abs(expected_delta) \
         else 'ok' if abs(delta - expected_delta) <= settle_window_jitter_margin + FLOAT_EPSILON else 'alert'
     margin_ratio = settle_window_jitter_margin / before
-    if 'margin_ms' in model and settle_window_jitter_margin >= DURATION_RATIO_DISCRIMINATED * abs(expected_delta):
-        return replace(base, status='unmeasured', measured=ratio, expected=expected_ratio,
-                       low=expected_ratio - margin_ratio, high=expected_ratio + margin_ratio,
-                       explanation=f'{model["vehicle_spell"]} aura_duration_ms measured {before:g} ms before and '
-                                   f'{after:g} ms after {model["target_name"]} was learned; the margin of '
-                                   f'{settle_window_jitter_margin:g} ms ({model["margin_ms"]:g} ms stated plus '
-                                   f'{overshoot:g} ms of tick overshoot) is not below '
-                                   f'{DURATION_RATIO_DISCRIMINATED:.0%} of the expected delta '
-                                   f'{expected_delta:+g} ms, so it cannot exclude a 10% deviation')
+    if 'margin_ms' in model:
+        return margined_duration_ratio_verdict(base, run, model, before, after, settle_window_jitter_margin)
     return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
                    high=expected_ratio + margin_ratio,
                    explanation=f'{model["vehicle_spell"]} aura_duration_ms measured {before:g} ms before and '
@@ -3861,6 +3854,43 @@ def behaviour_duration_ratio_verdict(base: Verdict, run: Run, model: dict) -> Ve
                                f'{model["before_label"]}, within a margin of {settle_window_jitter_margin:g} ms '
                                f'({overshoot:g} ms of it the run\'s own tick overshoot, run.max_step_ms), and a '
                                f'measured 0 against a nonzero expected delta is always an alert')
+
+
+def margined_duration_ratio_verdict(base: Verdict, run: Run, model: dict, before: float, after: float,
+                                    margin: float) -> Verdict:
+    times = {moment: [run.values.get(label) for label in labels] for moment, labels in model['times'].items()}
+    missing = next((label for moment, labels in model['times'].items() for label in labels
+                    if run.values.get(label) is None), None)
+    if missing is not None:
+        return replace(base, explanation=missing_measurement(run, missing))
+    elapsed = {moment: read - cast for moment, (cast, read) in times.items()}
+    full = float(model['full_duration_ms'])
+    expected_ratio = float(model['expected'])
+    expected_delta = full * (expected_ratio - 1.0)
+    delta = after - before
+    ratio = after / before
+    margin_ratio = margin / full
+    text = (f'{model["vehicle_spell"]} aura_duration_ms read {before:g} ms before and {after:g} ms after '
+            f'{model["target_name"]} was learned, {elapsed['before']:g} and {elapsed['after']:g} ms after each landing; '
+            f'expected delta {expected_delta:+g} ms = the full {full:g} ms DBC duration x ({expected_ratio:g} - 1), '
+            f'margin {margin:g} ms ({model["margin_ms"]:g} ms stated plus {run.max_step_ms or 0.0:g} ms of tick '
+            f'overshoot)')
+    common = dict(measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
+                  high=expected_ratio + margin_ratio)
+    if margin >= DURATION_RATIO_DISCRIMINATED * abs(expected_delta):
+        return replace(base, status='unmeasured', **common,
+                       explanation=f'{text}; the margin is not below {DURATION_RATIO_DISCRIMINATED:.0%} of the '
+                                   f'expected delta, so it cannot exclude a 10% deviation')
+    if abs(before + elapsed['before'] - full) > margin or abs(elapsed['before'] - elapsed['after']) > margin:
+        return replace(base, status='unmeasured', **common,
+                       explanation=f'{text}; void trial: the before read plus its elapsed time is '
+                                   f'{before + elapsed['before']:g} ms against the full {full:g} ms, and the landing '
+                                   f'offsets differ by {abs(elapsed['before'] - elapsed['after']):g} ms, one of them '
+                                   f'beyond the margin')
+    status = 'alert' if abs(delta) <= FLOAT_EPSILON < abs(expected_delta) \
+        else 'ok' if abs(delta - expected_delta) <= margin + FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, **common,
+                   explanation=f'{text}; measured delta {delta:+g} ms, ratio of the reads {ratio:g}')
 
 
 def behaviour_duration_refresh_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

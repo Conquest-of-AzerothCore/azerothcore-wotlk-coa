@@ -33,8 +33,13 @@ by any data, and the mana is truncated per strike.
   ratio-only arm's count moved; a ratio's `denominator` may be a list of ratio-only arms, summed; `floor_count`
   widens only the low end by the counted events over the denominator (one unit per truncated event), with a
   tolerance below 10% of `expected` and the ratio unmeasured when the widened band no longer excludes 10% below.
-- `duration_ratio`: `attempts` (1 to 3, default 3) and `margin_ms` (the judge's margin becomes `margin_ms` plus the
-  tick overshoot; unmeasured unless below 10% of the expected delta).
+- `duration_ratio`: `attempts` (1 to 3, default 3) and `margin_ms` (mentor D-170). With `margin_ms` each phase reads
+  the game time after its last landing and after its read; the expected delta is the vehicle's full DBC duration
+  times (tooltip ratio - 1), never a reading; the margin is `margin_ms` plus the tick overshoot; the trial is void
+  (unmeasured) unless the before read plus its elapsed time equals the full duration and both reads share one landing
+  offset, each within the margin, and unmeasured unless the margin stays below 10% of the expected delta.
+- `off_hand_weapons` entries may state `grants`, spell ids the `hit_ratio` off-hand path learns right before the
+  equip (other off-hand callers ignore them).
 - `dispel_count` arms: `learns` (learned before the arm, unlearned after) and `cast: false` (a no-cast control that
   expects no removal).
 - `script_hit`: `caster_avoidance {dodge, parry}` set before each trial with a hostile melee striker in place of
@@ -45,5 +50,10 @@ by any data, and the mana is truncated per strike.
 - Witch Hunter 15, Templar 19 (with `--stack`) and Necromancer 23 regenerate byte-identical and their coverage audits
   are identical before and after.
 - An unmeasured ratio is not behaviour evidence (tested through `clause_coverage`).
+- Known limit of the default path, for the owner (G-39), unchanged here: without `margin_ms` the judge expects
+  `before x (ratio - 1)`, a reduction of the remaining time read after the settle, while both reads are taken the same
+  time after their landing, so the true delta is `full x (ratio - 1)`; the two differ by `elapsed x (1 - ratio)`
+  (about 100 ms for a 20% reduction read 500 ms after landing), which the default 500 ms margin absorbs and hides.
+  Measured on 704581 (Stun 2880, 10000 ms): 9494 then 7494 ms, delta -2000 ms against the default model's -1898.8 ms.
 - 807507 c408 and 807873 c415 stay tool gaps: 10% of their expected 381.6 ms delta is below any tick margin; an exact
   read needs a player aura maximum-duration harness read, not built here.

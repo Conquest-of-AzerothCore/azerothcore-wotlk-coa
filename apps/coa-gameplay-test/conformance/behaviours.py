@@ -6052,6 +6052,10 @@ def mechanic_duration_label(spec: MechanicDurationSpec, moment: str) -> str:
     return f'{spec.spell} {spec.vehicle_spell} duration {moment}'
 
 
+def mechanic_duration_time_label(label: str, moment: str) -> str:
+    return f'{label} {moment} time'
+
+
 def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
@@ -6069,8 +6073,13 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
             if attempt < spec.attempts - 1:
                 steps.append({'action': 'wait', 'label': f'{spec.spell} {label} land attempt {attempt + 1}',
                              'ms': MECHANIC_RETRY_WAIT_MS})
+        timed = spec.margin_ms is not None
+        if timed:
+            steps.append(measurement(mechanic_duration_time_label(label, 'cast'), CASTER, 'game_time_ms'))
         steps.append({'action': 'wait', 'label': f'{spec.spell} {label} settle', 'ms': CAST_MARGIN_MS})
         steps.append(measurement(label, CASTER, 'aura_duration_ms', spell=spec.vehicle_spell))
+        if timed:
+            steps.append(measurement(mechanic_duration_time_label(label, 'read'), CASTER, 'game_time_ms'))
         return steps
 
     scenario = {
@@ -6105,14 +6114,21 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
                   'ms': gap_ms},
                  {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + phase(after_label)}
     if spec.margin_ms is not None:
-        scenario['contract'] += (f' The judge\'s margin is {spec.margin_ms} ms plus the run\'s tick overshoot, and the '
-                                 f'verdict is unmeasured unless that margin stays below '
+        scenario['contract'] += (f' Each phase reads the game time after its last cast and after its read. The '
+                                 f'expected delta is the full {int(unreduced_ms)} ms DBC duration of '
+                                 f'{spec.vehicle_spell} times (ratio - 1); the trial is void unless the before read '
+                                 f'plus its elapsed time equals that full duration and both reads share one landing '
+                                 f'offset, each within the margin of {spec.margin_ms} ms plus the run\'s tick '
+                                 f'overshoot, and unmeasured unless that margin stays below '
                                  f'{DURATION_RATIO_DISCRIMINATED:.0%} of the expected delta.')
     label = f'{spec.spell} behaviour_duration_ratio'
     model = {'kind': 'duration_ratio', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected_ratio, 'quote': entry.quote, 'target_name': spec.name,
              'vehicle_spell': spec.vehicle_spell,
-             **({'margin_ms': spec.margin_ms} if spec.margin_ms is not None else {})}
+             **({'margin_ms': spec.margin_ms, 'full_duration_ms': int(unreduced_ms),
+                 'times': {moment: [mechanic_duration_time_label(mechanic_duration_label(spec, moment), part)
+                                    for part in ('cast', 'read')] for moment in (BEFORE, AFTER)}}
+                if spec.margin_ms is not None else {})}
     expectation = Expectation(label, BEHAVIOUR_DURATION_RATIO, spec.spell, spec.vehicle_spell, None,
                               str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -6719,7 +6735,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
             raise NotModelled(f'{spec.spell} hit_ratio dual wields, which needs a one-handed main-hand weapon in '
                               f'the class file')
         class_file = one_handed
-        equip = off_hand_steps(spec.off_hand_item)
+        equip = off_hand_steps(spec.off_hand_item, tuple(off_hand.get('grants', ())))
     else:
         off_hand, equip = None, []
         if not swinging:
