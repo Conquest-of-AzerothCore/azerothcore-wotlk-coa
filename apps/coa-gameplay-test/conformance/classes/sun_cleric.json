@@ -4829,6 +4829,900 @@
       "expire_ms": 500,
       "observe_source": "300327 Swift Justice Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 5 (+1 = 6, $s1). The ranged attack time (hand 2) is read after a Dawnsear 554406 cast, before and after the passive is learned, and judged as a ratio: 1 / 1.06 = 0.9434 (tolerance 0.001); the before reading must reach 1000. The first run read 2000 ms then 1886.79 ms, the ratio 0.9434: the ranged timer reads 2000 ms in this phase (the class file's wand 477 has delay 1800 ms in item_template; the read does not show it, so no base value is claimed). Control: the phase without the passive. Reference search: nothing found beyond the tooltip and the DBC.",
       "expected_ratio": 0.9434
+    },
+    {
+      "spell": 301817,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 301817 (maximum mana)",
+      "quote": "Increases your mana by $s2% of your Intellect,",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 535.5,
+      "before_expected": 0,
+      "expected_gain": 535.5,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "observe_source": "301817 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 449 + 1 = 450 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119: 450% x 119 = 535.5 added to the maximum mana, judged to one point for the integer rounding of the stat. Maximum mana read before and after the learn; expected_gain judges the difference, control = the reading before the learn. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries Ancient Rites 300351 in an older rank state (\"Increases your Intellect by 2% ... 1% of your maximum mana every 20 sec\"), a different figure that does not override the server DBC (older reference, guide section 4); nothing else found."
+    },
+    {
+      "spell": 301817,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 301817 (regeneration amount)",
+      "quote": "and causes you to regenerate mana equal to 6% of your maximum mana every $t1 sec.",
+      "variant": "regen_amount",
+      "label_suffix": "regen_amount",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 301368
+      },
+      "expected": 204.2,
+      "before_expected": 0,
+      "tolerance": 1,
+      "wait_ms": 16000,
+      "observe_source": "301817 Effect[0] aura 227 periodic trigger with value, EffectBasePoints 5 + 1 = 6 (6%), EffectAmplitude 15000, triggers 301368 whose Effect[0] is ENERGIZE_PCT. One tick after 16000 ms: 6% of the maximum mana with the aura learned = 6% x (2868 + 535.5) = 204.2, judged to one point (CalculatePct truncation). 2868 = 1363 + 20 + (119 - 20) x 15 = 2868 (StatSystem.cpp:421-429; BaseMana 1363 from player_class_stats class 27 level 60, reference Intellect 119 from the class file stat 3). Control: nothing energized before the learn."
+    },
+    {
+      "spell": 301817,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 301817 (first tick by 16.4 s)",
+      "quote": "and causes you to regenerate mana equal to 6% of your maximum mana every $t1 sec.",
+      "variant": "period_upper",
+      "label_suffix": "period_upper",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 16400,
+      "observe_source": "301817 Effect[0] EffectAmplitude 15000 ($t1 = 15 sec). Energize events of 301368 counted 16400 ms after the learn and cast: exactly 1, so the period is at most 16.4 s (excludes 16.5 s, +10%). Control: 0 before the learn."
+    },
+    {
+      "spell": 301817,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 301817 (no second tick by 27.5 s)",
+      "quote": "and causes you to regenerate mana equal to 6% of your maximum mana every $t1 sec.",
+      "variant": "period_lower",
+      "label_suffix": "period_lower",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 27500,
+      "observe_source": "301817 Effect[0] EffectAmplitude 15000 ($t1 = 15 sec). Same events counted 27500 ms after the learn and cast: still exactly 1, so the period is above 13.75 s (excludes 13.5 s, -10%). With period_upper the period lies in (13.75, 16.4] s around the stated 15 s. Control: 0 before the learn."
+    },
+    {
+      "spell": 300351,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 300351 (maximum mana)",
+      "quote": "Increases your mana by $s2% of your Intellect,",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "expected": 178.5,
+      "before_expected": 0,
+      "expected_gain": 178.5,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "observe_source": "300351 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 149 + 1 = 150 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119: 150% x 119 = 178.5 added to the maximum mana, judged to one point for the integer rounding of the stat. Maximum mana read before and after the learn; expected_gain judges the difference, control = the reading before the learn. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries Ancient Rites 300351 in an older rank state (\"Increases your Intellect by 2% ... 1% of your maximum mana every 20 sec\"), a different figure that does not override the server DBC (older reference, guide section 4); nothing else found."
+    },
+    {
+      "spell": 300351,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 300351 (regeneration amount)",
+      "quote": "and causes you to regenerate mana equal to 2% of your maximum mana every $t1 sec.",
+      "variant": "regen_amount",
+      "label_suffix": "regen_amount",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 301368
+      },
+      "expected": 60.93,
+      "before_expected": 0,
+      "tolerance": 1,
+      "wait_ms": 16000,
+      "observe_source": "300351 Effect[0] aura 227 periodic trigger with value, EffectBasePoints 1 + 1 = 2 (2%), EffectAmplitude 15000, triggers 301368 whose Effect[0] is ENERGIZE_PCT. One tick after 16000 ms: 2% of the maximum mana with the aura learned = 2% x (2868 + 178.5) = 60.93, judged to one point (CalculatePct truncation). 2868 = 1363 + 20 + (119 - 20) x 15 = 2868 (StatSystem.cpp:421-429; BaseMana 1363 from player_class_stats class 27 level 60, reference Intellect 119 from the class file stat 3). Control: nothing energized before the learn."
+    },
+    {
+      "spell": 300351,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 300351 (first tick by 16.4 s)",
+      "quote": "and causes you to regenerate mana equal to 2% of your maximum mana every $t1 sec.",
+      "variant": "period_upper",
+      "label_suffix": "period_upper",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 16400,
+      "observe_source": "300351 Effect[0] EffectAmplitude 15000 ($t1 = 15 sec). Energize events of 301368 counted 16400 ms after the learn and cast: exactly 1, so the period is at most 16.4 s (excludes 16.5 s, +10%). Control: 0 before the learn."
+    },
+    {
+      "spell": 300351,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "name": "Ancient Rites 300351 (no second tick by 27.5 s)",
+      "quote": "and causes you to regenerate mana equal to 2% of your maximum mana every $t1 sec.",
+      "variant": "period_lower",
+      "label_suffix": "period_lower",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 27500,
+      "observe_source": "300351 Effect[0] EffectAmplitude 15000 ($t1 = 15 sec). Same events counted 27500 ms after the learn and cast: still exactly 1, so the period is above 13.75 s (excludes 13.5 s, -10%). With period_upper the period lies in (13.75, 16.4] s around the stated 15 s. Control: 0 before the learn."
+    },
+    {
+      "spell": 301295,
+      "name": "Leap of the Valkyrie (Sun Stride cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Sun Stride by $/1000;s1 sec.",
+      "gated_spell": 680700,
+      "resource": "cooldown",
+      "reduction": 4000,
+      "target": "caster",
+      "margin_ms": 300,
+      "observe_source": "301295 Leap of the Valkyrie Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (cooldown), BasePoints -4001 (-4000 ms, $/1000;s1 = 4 s), class mask word 2 = 8388608 = Sun Stride 680700 SpellFamilyFlags[2] (RecoveryTime 24000, target caster, no power cost). Route: Sun Stride is cast and attempted again 20300 ms after the cast (4000 ms less than its cooldown plus 300 ms): refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 19700 ms after the cast (beyond), so the cut lies in [3700, 4300] ms, which excludes 3600 and 4400 ms (10% off on both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cooldown of Sun Stride by -4 sec.\" (same figure); nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681470,
+      "name": "An'she's Guidance (Holy critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "holy_crit",
+      "label_suffix": "holy_crit",
+      "quote": "Increases your Holy critical strike chance by $s1%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.0001,
+      "observe_source": "681470 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 2 (Holy), BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. No CoA code names 681470. The caster live Holy (school index 1) spell crit percentage around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 4 points. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state (2% Holy critical strike chance, 50% less pushback) for An'she's Guidance 681064, an older rank figure that does not override the DBC; nothing else found."
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawnsear still casting at 2740 ms under Dawn)",
+      "kind": "metric_delta",
+      "variant": "dawn_held",
+      "label_suffix": "dawn_held",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 554406,
+      "gate_spell": 300321,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2740,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          2735,
+          2790
+        ]
+      },
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Read in game time 2740 ms after the cast starts under Dawn, talent learned: still casting (1), so the cast time is above 2740 ms (the cut is at most 21.7%). Control (before): Dawn up, no talent, still casting.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawnsear finished by 2855 ms under Dawn)",
+      "kind": "metric_delta",
+      "variant": "dawn_done",
+      "label_suffix": "dawn_done",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 554406,
+      "gate_spell": 300321,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 2855,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          2845,
+          2865
+        ]
+      },
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Read in game time 2855 ms after the cast starts under Dawn, talent learned: finished (0), so the cast time is at most 2865 ms (cut at least 18.1%, which excludes 18%, 10% below the stated 20). Control (before): Dawn up, no talent, still casting at the same moment (3500 ms).",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawnsear still casting at 2865 ms without Dawn)",
+      "kind": "metric_delta",
+      "variant": "nodawn_held",
+      "label_suffix": "nodawn_held",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 554406,
+      "gate_spell": 300321,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2865,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          2855,
+          2910
+        ]
+      },
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. The condition arm: no Dawn is cast, the talent is learned, and the cast still runs at 2865 ms (1), so the cut does not apply without Dawn. Control (before): same read without the talent."
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawnsear cast time read under Dawn)",
+      "kind": "metric_delta",
+      "variant": "dawn_cast_time",
+      "label_suffix": "dawn_cast_time",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 804584,
+      "gate_spell": 300321,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 554406
+      },
+      "before_expected": 3500,
+      "expected": 2800,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases and the gap between them (2000 ms) outlasts the 1500 ms global cooldown of the first Dawn cast, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Diagnostic read: the engine cast time of Dawnsear 554406 for the caster (Spell cast-time function with the spell modifiers) right after a real Dawn 804584 cast: 3500 ms before the learn (control), 2800 ms expected after.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 503624,
+      "name": "Daybreak (charges and recharge)",
+      "kind": "charge_recharge",
+      "quote": "2 Charges, 10 sec recharge",
+      "max_charges": 2,
+      "recharge_ms": 10000,
+      "target": "ally",
+      "observe_source": "503624 carries no native charge data of its own: SpellCharges.dbc row 503624 points at SpellChargesCategory.dbc row 548 (MaxCharges 2, RecoveryTime 10000 ms; coa-dbc-viewer record --table SpellCharges --id 503624, --table SpellChargesCategory --id 548), applied by ApplyClientSpellCharges (AscensionClassMechanics.cpp:1082-1096). The entry casts Daybreak twice, attempts a third (refused with charges 0), and brackets the recharge at 9500 ms (still 0) and 10500 ms (1), which excludes 9000 and 11000 ms (10% off on both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Make a prayer, healing an ally for 155 + 59.5% healing.\" for Daybreak 500147 (the rank 1 figure, same 59.5% coefficient); nothing else found. "
+    },
+    {
+      "spell": 503624,
+      "name": "Daybreak (heal amount at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "heal_plain",
+      "label_suffix": "heal_plain",
+      "quote": "Make a prayer, healing an ally for ${$m1+0+$BH*0.595}.",
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 503624,
+        "target": "caster"
+      },
+      "expected": 490,
+      "after_at_least": 478,
+      "after_at_most": 503,
+      "observe_source": "503624 Daybreak: Effect[0] SPELL_EFFECT_HEAL, EffectBasePoints 532, EffectDieSides 32, EffectRealPointsPerLevel 6.5825, BaseLevel 46, SpellLevel 46, MaxLevel 56: at level 60 the level is capped at 56 (SpellInfo.cpp:487-497), so m1 = 532 + int32(10 x 6.5825) = 597 + irand(1, 32) = 598..629 (rounding 3, per-level truncation). Class tuning 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10, MaxLevel 60: -1 + int(50 x -0.4) + 1 = -20% at level 60 (known_aura), so the healing done is x 0.8. Tooltip coefficient: $BH*0.595 (Spell.dbc description; AscensionSunClericData.h row 503624 healing 0.595). The caster is held at 30% health, the heal lands on the caster (TARGET_UNIT_TARGET_ALLY accepts itself), critical strike forced out by fixture 984954 (precondition). At spell power 0 the heal is 598..629 x 0.8 = 478.4..503.2, truncated to 478..503. Control (before): no cast, 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Make a prayer, healing an ally for 155 + 59.5% healing.\" for Daybreak 500147 (the rank 1 figure, same 59.5% coefficient); nothing else found. "
+    },
+    {
+      "spell": 503624,
+      "name": "Daybreak (heal amount at +2000 spell power)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Make a prayer, healing an ally for ${$m1+0+$BH*0.595}.",
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 503624,
+        "target": "caster"
+      },
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "expected": 1442,
+      "after_at_least": 1429,
+      "after_at_most": 1455,
+      "observe_source": "503624 Daybreak: Effect[0] SPELL_EFFECT_HEAL, EffectBasePoints 532, EffectDieSides 32, EffectRealPointsPerLevel 6.5825, BaseLevel 46, SpellLevel 46, MaxLevel 56: at level 60 the level is capped at 56 (SpellInfo.cpp:487-497), so m1 = 532 + int32(10 x 6.5825) = 597 + irand(1, 32) = 598..629 (rounding 3, per-level truncation). Class tuning 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10, MaxLevel 60: -1 + int(50 x -0.4) + 1 = -20% at level 60 (known_aura), so the healing done is x 0.8. Tooltip coefficient: $BH*0.595 (Spell.dbc description; AscensionSunClericData.h row 503624 healing 0.595). The caster is held at 30% health, the heal lands on the caster (TARGET_UNIT_TARGET_ALLY accepts itself), critical strike forced out by fixture 984954 (precondition). With 2000 spell power (harness fixture, recorded on the verdict by the hit arm) the bonus healing term is 0.595 x 2000 = 1190 (1189 if the float product truncates below), so the heal is (598..629 + 1189..1190) x 0.8 = 1429.6..1455.2, truncated to 1429..1455; without the spell power term it reads 478..503 (heal_plain, the contrast on the same build), at 0.4 x BH it would read about 1110. Control (before): no cast, 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Make a prayer, healing an ally for 155 + 59.5% healing.\" for Daybreak 500147 (the rank 1 figure, same 59.5% coefficient); nothing else found. "
+    },
+    {
+      "spell": 681468,
+      "name": "Paying The Tithe (Dawnbreak critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "dawnbreak_crit",
+      "label_suffix": "dawnbreak_crit",
+      "quote": "Increases the critical strike chance of Dawnbreak by $s2%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800654,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.0001,
+      "observe_source": "681468 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 (flattened index 4) = 1073741824 = Dawnbreak 800654 SpellFamilyFlags[1]. The caster's crit chance for a Dawnbreak 800654 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 20 points. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state of Paying The Tithe 680647 (10% Dawnbreak critical strike chance, 2 additional blocks), an older rank figure that does not override the DBC; nothing else found."
+    },
+    {
+      "spell": 681468,
+      "name": "Paying The Tithe (Seraphic Bulwark blocks)",
+      "kind": "metric_delta",
+      "variant": "bulwark_charges",
+      "label_suffix": "bulwark_charges",
+      "quote": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
+      "trigger_spell": 560095,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 5,
+      "expected": 9,
+      "wait_ms": 500,
+      "expire_ms": 11000,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "681468 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 3 + 1 = 4 ($s1), EffectSpellClassMask word 0 = 256 = Seraphic Bulwark 560095 SpellFamilyFlags[0] (ProcCharges 5, '$n blocks'). A real Seraphic Bulwark 560095 cast on the caster with shield 231296 equipped in both phases: the aura holds 5 charges before the passive is learned (control, the base figure) and 9 after (5 + 4), read 500 ms after the cast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'now lasts for 2 additional blocks' for the rank 1 state; nothing else found."
+    },
+    {
+      "spell": 560276,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "name": "Sun's Hope (Solar Power gained)",
+      "variant": "solar_power",
+      "label_suffix": "solar_power",
+      "quote": "Damage dealt by Solar Flares now grants you 1 Solar Power",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (aura 57 MOD_SPELL_CRIT_CHANCE -1000 and aura 52 MOD_WEAPON_CRIT_PERCENT +101: no spell critical strike; weapon attacks are not suppressed, and no weapon attack is read here) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. Solar Power 500149 stacks on the caster read 1500 ms after the Horusath Blast: the gain over the control phase is 1 (expected_gain 1; the control reads at least 0). Solar Power value from 804098 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS MiscValue 1.",
+      "measure_actor": "caster",
+      "expected_gain": 1,
+      "tolerance": 0.0001
+    },
+    {
+      "spell": 560276,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "name": "Sun's Hope (Gain 1 Solar Power cast)",
+      "variant": "grant_cast",
+      "label_suffix": "grant_cast",
+      "quote": "Damage dealt by Solar Flares now grants you 1 Solar Power",
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804098
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (aura 57 MOD_SPELL_CRIT_CHANCE -1000 and aura 52 MOD_WEAPON_CRIT_PERCENT +101: no spell critical strike; weapon attacks are not suppressed, and no weapon attack is read here) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. Casts of Gain 1 Solar Power 804098 by the caster after one Flare: 1, against 0 in the control phase.",
+      "measure_actor": "caster"
+    },
+    {
+      "spell": 560276,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "name": "Sun's Hope (crit chance taken)",
+      "variant": "crit_taken",
+      "label_suffix": "crit_taken",
+      "quote": "and increase the targets chance to be critically struck by spells by $706733s1%",
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": -1000,
+      "expected": -997,
+      "wait_ms": 1500,
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare is launched for real by Solar Concord 301266 (cast in both phases) on a Horusath Blast 572801 hit while Sunrise 500477 is set (precondition fixture, the state the clause chain needs, not the subject), with 984954 (aura 57 MOD_SPELL_CRIT_CHANCE -1000 and aura 52 MOD_WEAPON_CRIT_PERCENT +101: no spell critical strike; weapon attacks are not suppressed, and no weapon attack is read here) and 823764 (no resist) in both phases. Horusath Blast 572801 and Solar Flare 807175 are instant casts with missile speeds 20 and 25. 560276 is learned between the phases: the before phase is the control (the same Flare without the passive). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('grants you 1 Solar Power and increase the targets chance to be critically struck by spells by 3% for 8 seconds') and Solar Flare 137 + 26% SP; nothing else found. 706733 Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126 (magic schools), BasePoints 2 + 1 = 3 ($706733s1). The chance for the caster's Solar Flare 807175 to critically strike the dummy (SpellDoneCritChance then SpellTakenCritChance, the engine functions used at hit time) 1500 ms after the Horusath Blast: the gain over the control phase is 3 points. The raw read is negative against the dummy (crit suppression of its level), so the least before reading is set to -1000: only the gain is the claim.",
+      "measure_actor": "caster",
+      "expected_gain": 3,
+      "tolerance": 0.0001
+    },
+    {
+      "spell": 560276,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "dummy_distance": 5,
+      "name": "Sun's Hope (debuff remaining duration)",
+      "variant": "debuff_remaining",
+      "label_suffix": "debuff_remaining",
+      "quote": "and increase the targets chance to be critically struck by spells by $706733s1% for $706733d.",
+      "metric": "aura_duration_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 706733
+      },
+      "before_expected": 0,
+      "expected": 7200,
+      "after_at_least": 6850,
+      "after_at_most": 7550,
+      "wait_ms": 1000,
+      "observe_source": "560276 Sun's Hope: Effect[0] PROC_TRIGGER_SPELL 804098 (Gain 1 Solar Power) and Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts both on a damaging Solar Flare 807175 hit of a Sun Cleric that holds 560276 (no proc roll in code). Solar Flare 807175 is cast directly at the dummy 5 yd away (missile Speed 25 yd/s, so it lands about 200 ms in; the Sun Cleric hit hook casts 706733 on that damage). 706733 DurationIndex 31 = 8000 ms ($706733d). The remaining duration read 1000 ms after the cast is 8000 - (1000 - 200) = 7200 for the stated duration; the window 6850..7550 absorbs 350 ms of missile-flight and tick uncertainty and excludes a duration of 7200 ms (-10%, remaining 6400) and of 8800 ms (+10%, remaining 8000). Control: the same cast before the learn leaves no aura, 0. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence; nothing else found."
+    },
+    {
+      "spell": 681470,
+      "name": "An'she's Guidance (pushback reduction, game time)",
+      "kind": "pushback_reduction",
+      "label_suffix": "pushback_game_time",
+      "quote": "and reduces spell pushback suffered from damaging attacks by $s3%.",
+      "cast_spell": 554406,
+      "cast_power": 1363,
+      "reducer_spell": 681470,
+      "reducer_learn": true,
+      "reducer_wait_ms": 500,
+      "strike_spell": 41394,
+      "strike_at_ms": 1000,
+      "windows": [
+        [
+          3440,
+          3480
+        ],
+        [
+          3930,
+          3970
+        ],
+        [
+          3440,
+          3480
+        ],
+        [
+          3440,
+          3480
+        ]
+      ],
+      "expected_pct": 100,
+      "repeats": 10,
+      "observe_source": "681470 Effect[2] aura 149 SPELL_AURA_REDUCE_PUSHBACK, BasePoints 99 + 1 = 100 ($s3). Design of Lich Essence 802988 (ADR 0543, 0546): Dawnsear 554406 (3500 ms cast, CastingTimes 22) is cast at the dummy four kinds of time, 10 repeats each: unhit and hit once by the passive striker Light of the Naaru 41394 1000 ms into the cast without the passive, then the passive learned (a real learn) and again unhit and hit. Every cast end is read in game time from the casting polls; reduction = 1 - (reduced hit end - reduced unhit end) / (hit end - unhit end), judged in the G-19 band 95..105 around 100, no widening; the control is the hit cast without the passive. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state of An'she's Guidance 681064 (2% Holy critical strike chance, 50% less pushback), an older rank figure; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 11500,
+      "name": "Lights of Absolution (Light of Absolution granted)",
+      "variant": "light_granted",
+      "label_suffix": "light_granted",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 807523,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "observe_source": "807343 Lights of Absolution: Effect[0] PROC_TRIGGER_SPELL 807523 (Light of Absolution, DurationIndex 1 = 10000 ms, $807523d); the Sun Cleric event hook casts 807523 on the caster when a damaging Horusath Blast hit lands (AscensionSunClericEvents.cpp:125 and :298). 807523 Effect[0] PROC_TRIGGER_SPELL 807524, whose effects trigger 807526 (energize 2%) and 807525 (HEAL_PCT 2%, $807525s1) on allies within 40 yd (EffectRadiusIndex 23, $807524a1). The code marks only Radiant Flame 806060 casts under 807523 (AscensionSunClericAbilities.cpp:42, :161, :374-375: a Radiant Flame 807058 hit casts 807524), not Solar Flare 807175, which the tooltip names. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same two sentences ('Damage dealt by Horusath Blast now grants you Light of Absolution for 10 seconds' / 'Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.'); nothing else found. Presence of 807523 on the caster 500 ms after a Horusath Blast 572801 hit: 1, against 0 before the passive is learned (control).",
+      "measure_actor": "caster"
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 11500,
+      "name": "Lights of Absolution (Light remaining duration)",
+      "variant": "light_remaining",
+      "label_suffix": "light_remaining",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 807523
+      },
+      "before_expected": 0,
+      "expected": 9250,
+      "wait_ms": 1000,
+      "observe_source": "807343 Lights of Absolution: Effect[0] PROC_TRIGGER_SPELL 807523 (Light of Absolution, DurationIndex 1 = 10000 ms, $807523d); the Sun Cleric event hook casts 807523 on the caster when a damaging Horusath Blast hit lands (AscensionSunClericEvents.cpp:125 and :298). 807523 Effect[0] PROC_TRIGGER_SPELL 807524, whose effects trigger 807526 (energize 2%) and 807525 (HEAL_PCT 2%, $807525s1) on allies within 40 yd (EffectRadiusIndex 23, $807524a1). The code marks only Radiant Flame 806060 casts under 807523 (AscensionSunClericAbilities.cpp:42, :161, :374-375: a Radiant Flame 807058 hit casts 807524), not Solar Flare 807175, which the tooltip names. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same two sentences ('Damage dealt by Horusath Blast now grants you Light of Absolution for 10 seconds' / 'Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.'); nothing else found. Remaining duration read 1000 ms after a direct Horusath Blast 572801 at the dummy 5 yd away (missile Speed 20 yd/s, so it hits about 250 ms in and the aura is applied then): 10000 - (1000 - 250) = 9250 for the stated 10 s; the window 8800..9700 absorbs 450 ms of flight and tick uncertainty and excludes 9000 ms (-10%, remaining 8250) and 11000 ms (+10%, remaining 10250). Control: 0 before the learn.",
+      "measure_actor": "caster",
+      "after_at_least": 8800,
+      "after_at_most": 9700,
+      "dummy_distance": 5
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 11500,
+      "name": "Lights of Absolution (heal on a Solar Flare hit)",
+      "variant": "flare_heal",
+      "label_suffix": "flare_heal",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807525,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 80,
+      "wait_ms": 1500,
+      "observe_source": "807343 Lights of Absolution: Effect[0] PROC_TRIGGER_SPELL 807523 (Light of Absolution, DurationIndex 1 = 10000 ms, $807523d); the Sun Cleric event hook casts 807523 on the caster when a damaging Horusath Blast hit lands (AscensionSunClericEvents.cpp:125 and :298). 807523 Effect[0] PROC_TRIGGER_SPELL 807524, whose effects trigger 807526 (energize 2%) and 807525 (HEAL_PCT 2%, $807525s1) on allies within 40 yd (EffectRadiusIndex 23, $807524a1). The code marks only Radiant Flame 806060 casts under 807523 (AscensionSunClericAbilities.cpp:42, :161, :374-375: a Radiant Flame 807058 hit casts 807524), not Solar Flare 807175, which the tooltip names. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same two sentences ('Damage dealt by Horusath Blast now grants you Light of Absolution for 10 seconds' / 'Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.'); nothing else found. Solar Flare is launched for real by Solar Concord 301266 (set up in both phases, Sunrise 500477 set as a precondition fixture) on the same Horusath Blast hit. The caster is held at 50% of the 10000 health fixture (5000 missing): 2% of the missing health is 100, x 0.8 (class tuning 887015, -20% healing done at level 60, as in the Daybreak entries) = 80, judged 79..81. Control: the phase before the learn. ",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "after_at_least": 79,
+      "after_at_most": 81
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawn is active under the cast time read)",
+      "kind": "metric_delta",
+      "variant": "dawn_present",
+      "label_suffix": "dawn_present",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 804584,
+      "gate_spell": 300321,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases and the gap between them (2000 ms) outlasts the 1500 ms global cooldown of the first Dawn cast, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Presence read: the aura Dawn 807440 on the caster 500 ms after the real Dawn cast, in both phases (1 and 1), so the cast time reads of the other entries are taken with Dawn active. Control (before): Dawn up without the talent.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300321,
+      "name": "Solar Conduit (Dawn modifier amount)",
+      "kind": "metric_delta",
+      "variant": "dawn_amount",
+      "label_suffix": "dawn_amount",
+      "quote": "Reduces the cast time of Dawnsear by $s1% while Dawn is active.",
+      "trigger_spell": 804584,
+      "gate_spell": 300321,
+      "target": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 807440,
+        "effect": 1
+      },
+      "before_expected": 0,
+      "expected": -20,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimes 22, Spell.dbc CastingTimeIndex 22). 300321 Solar Conduit Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2, not the cast time), BasePoints -21 (-20, $s1), EffectSpellClassMask word 0 = 64, which in family 33 matches only Dawn 807440 (SpellFamilyFlags[0] 64). Dawn 807440 Effect[1] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -1 (0% on its own), class mask word 1 = 2 = Dawnsear; Solar Conduit therefore sets Dawn's Dawnsear cast-time modifier to -20%, as merged PR #13027 states (0% on its own, -20% with Solar Conduit): 3500 x 0.8 = 2800 ms while Dawn is active. Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, the state the clause names, not its subject). The talent is learned between the phases and the gap between them (2000 ms) outlasts the 1500 ms global cooldown of the first Dawn cast, so the after phase first removes the Dawn left by the first phase (807440 set to 0 stacks, precondition fixture) and casts Dawn anew with the talent known: a Dawn that is already up when the talent is learned keeps its amount computed without it. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Dawnsear by -20% while Dawn is active.\" (same figure); nothing else found. Readback: the live amount of effect 1 of Dawn 807440 on the caster, 0 without the talent (control) and -20 with it. A readback of a computed value, not a proof of the cast time.",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],

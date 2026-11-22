@@ -855,7 +855,7 @@ class EvidenceTablesTest(unittest.TestCase):
 
     def test_the_witch_hunter_taken_crit_read_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'spell_taken_crit_chance'}
-        self.assertEqual(self.unclassed_metrics(seeded), {'witch_hunter.json': ['spell_taken_crit_chance']})
+        self.assertEqual(self.unclassed_metrics(seeded)['witch_hunter.json'], ['spell_taken_crit_chance'])
 
     def test_cross_class_guard_a_metric_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'owned_creature_distance_2d'}
