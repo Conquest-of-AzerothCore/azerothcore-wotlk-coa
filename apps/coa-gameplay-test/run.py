@@ -319,7 +319,10 @@ ACTIONS = {
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
-                                  'target_gameobject', 'target_owned_entry', 'target_owner'}),
+                                  'target_gameobject', 'target_owned_entry', 'target_owner', 'ignore_gcd'}),
+    'cast_until_aura': ({'actor', 'spell', 'aura', 'every_ms', 'max_casts'},
+                        {'actor', 'spell', 'target', 'aura', 'every_ms', 'max_casts', 'cast_power', 'power',
+                         'reset_cooldown'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
@@ -404,7 +407,7 @@ ACTIONS = {
     'set_reputation': ({'actor', 'id', 'value'}, {'actor', 'id', 'value'}),
     'set_health': ({'actor', 'value'}, {'actor', 'value', 'pet', 'maximum'}),
     'set_health_pct': ({'actor', 'pct'}, {'actor', 'pct', 'entry', 'target'}),
-    'set_combat_avoidance': ({'actor'}, {'actor', 'target', 'dodge', 'parry'}),
+    'set_combat_avoidance': ({'actor'}, {'actor', 'target', 'dodge', 'parry', 'block', 'rejected'}),
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
     'restore_charges': ({'actor', 'spell'}, {'actor', 'spell'}),
     'set_power': ({'actor', 'value'}, {'actor', 'value', 'power', 'pet'}),
@@ -936,6 +939,22 @@ def validate(scenario, clock=REAL_CLOCK):
         for key in ('ms', 'within_ms'):
             if key in step:
                 number(step[key], f'{where}.{key}', 0, scenario.get('timeout_ms', 90000), True)
+        if action == 'cast' and 'ignore_gcd' in step:
+            require(type(step['ignore_gcd']) is bool and step['actor'] in player_ids,
+                    f'{where}: ignore_gcd must be boolean on a player cast')
+        if action == 'cast_until_aura':
+            number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
+            number(step['aura'], f'{where}.aura', 1, 2**32 - 1, True)
+            number(step['max_casts'], f'{where}.max_casts', 1, 200, True)
+            number(step['every_ms'], f'{where}.every_ms', 1, scenario.get('timeout_ms', 90000) // step['max_casts'],
+                   True)
+            if 'cast_power' in step:
+                number(step['cast_power'], f'{where}.cast_power', 0, 2**31 - 1, True)
+            if 'power' in step:
+                number(step['power'], f'{where}.power', 0, 6, True)
+                require('cast_power' in step, f'{where}: power selects the type of cast_power')
+            if 'reset_cooldown' in step:
+                require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
         if action in {'set_skill', 'gather_skill'}:
             number(step['skill'], f'{where}.skill', 1, 65535, True)
         if action == 'set_skill':
@@ -1073,9 +1092,14 @@ def validate(scenario, clock=REAL_CLOCK):
         if action == 'set_combat_avoidance':
             require(step.get('target', step['actor']) in player_ids,
                     f'{where}: combat avoidance fixture needs a player target')
-            for key in ('dodge', 'parry'):
+            for key in ('dodge', 'parry', 'block'):
                 if key in step:
                     number(step[key], f'{where}.{key}', 0, 100)
+            if 'rejected' in step:
+                require(type(step['rejected']) is bool and 'block' in step,
+                        f'{where}: rejected is a boolean that expects the block fixture to be refused')
+                require(step['rejected'] is not True or step['block'] > 0,
+                        f'{where}: a block chance of 0 is always reached, so it cannot be refused')
         if action == 'set_health' and 'maximum' in step:
             require(step['actor'] in player_ids, f'{where}: maximum health fixture needs a player or their pet')
             number(step['maximum'], f'{where}.maximum', 1, 2**31 - 1, True)

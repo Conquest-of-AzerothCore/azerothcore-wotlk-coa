@@ -2088,10 +2088,14 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`attacker_miss_share`](kinds/attacker_miss_share.md): the share of attackers' swings that miss the caster
   without and with a hit-chance aura from a real cast, pooled over parts (ADR 1019, provisional)
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
+- [`aura_fed_effect`](kinds/aura_fed_effect.md): a proc-granted aura's effect with the aura earned by a real
+  `cast_until_aura` feed and read before each judged cast (ADR 1025, provisional)
 - [`aura_keep_rate`](kinds/aura_keep_rate.md): the chance that a consumable aura survives the cast that consumes
   it, pooled over parts (ADR 0672, provisional)
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped
   windows (ADR 0551)
+- [`block_charge_strikes`](kinds/block_charge_strikes.md): how many real blocks a block-charge aura lasts without and
+  with a talent, block forced by `set_combat_avoidance` (ADR 1025, provisional)
 - [`bounce_amounts`](kinds/bounce_amounts.md): the per-hit amount of each enemy a bouncing spell strikes, against
   its jump multiplier (ADR 0587)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
@@ -2143,6 +2147,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   parts (ADR 0544, ADR 0546)
 - [`swing_reset_rate`](kinds/swing_reset_rate.md): a talent's chance to reset a cooldown, from the clear-cooldown
   packets per landed auto-attack hit, pooled over parts (ADR 1017, provisional)
+- [`timer_spacing_arms`](kinds/timer_spacing_arms.md): an internal timer bracketed by two real hits cast
+  `ignore_gcd` on either side of it, judged on the measured spacing (ADR 1025, provisional)
 
 ## Metric-delta option modules
 

@@ -239,6 +239,37 @@ class RunnerTests(unittest.TestCase):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'percent'})
 
+    def test_cast_until_aura_action_fields(self):
+        step = {'action': 'cast_until_aura', 'actor': 'caster', 'spell': 806060, 'target': 'target',
+                'aura': 807299, 'every_ms': 4300, 'max_casts': 10, 'cast_power': 2272, 'reset_cooldown': True}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'power': 0})
+        for change in ({'max_casts': 0}, {'max_casts': 201}, {'every_ms': 0}, {'every_ms': 9001}, {'aura': 0},
+                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'cast_power'} | {'power': 0})
+        for field in ('spell', 'aura', 'every_ms', 'max_casts'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
+        step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'block': 40, 'rejected': True})
+        self.assert_step_validates({**step, 'block': 0, 'rejected': False})
+        self.assert_step_rejected({**step, 'block': 0, 'rejected': True})
+        self.assert_step_validates({'action': 'set_combat_avoidance', 'actor': 'caster', 'parry': 100})
+        for change in ({'block': -1}, {'block': 101}, {'block': '100'}, {'rejected': 1}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({'action': 'set_combat_avoidance', 'actor': 'caster', 'dodge': 10,
+                                   'rejected': True})
+
+    def test_ignore_gcd_is_a_boolean_on_a_player_cast(self):
+        step = {'action': 'cast', 'actor': 'caster', 'spell': 116, 'target': 'target', 'ignore_gcd': True}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'ignore_gcd': False})
+        self.assert_step_rejected({**step, 'ignore_gcd': 1})
+        self.assert_step_rejected({**step, 'actor': 'target', 'target': 'caster'})
+
     def test_spell_mod_mutants_metric_reads_a_player(self):
         self.assert_step_validates({'action': 'assert', 'actor': 'caster', 'metric': 'spell_mod_mutants',
                                     'equals': 1})

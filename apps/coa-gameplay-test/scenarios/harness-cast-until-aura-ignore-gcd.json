@@ -1,0 +1,187 @@
+{
+ "schema": 1,
+ "name": "Harness cast_until_aura and ignore_gcd",
+ "contract": "cast_until_aura re-submits the same cast path every every_ms while the actor lacks the aura and stops at the first poll that reads it or after max_casts, without setting the aura: Holy Form 805301 (instant, its own aura on the caster) is cast once of three allowed, and Daybreak 503624 (instant heal, 2 charges) twice of two while Spears of Glory 807299 never appears. ignore_gcd cancels only the global cooldown before a cast: a second Daybreak right after the first is refused without it (StartRecoveryTime 1500) and goes with it, charges restored before each pair.",
+ "timeout_ms": 60000,
+ "players": [
+  {
+   "id": "caster",
+   "race": 1,
+   "class": 27,
+   "level": 60,
+   "allow_regeneration": false
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "label": "Let spawn AI and level scaling settle",
+   "ms": 5000
+  },
+  {
+   "action": "teleport",
+   "actor": "caster",
+   "map": 0,
+   "x": -9617.06,
+   "y": -288.949,
+   "z": 57.3053,
+   "o": 3.14159
+  },
+  {
+   "action": "learn",
+   "actor": "caster",
+   "spell": 805301
+  },
+  {
+   "action": "learn",
+   "actor": "caster",
+   "spell": 503624
+  },
+  {
+   "action": "cast_until_aura",
+   "label": "Holy Form until its own aura",
+   "actor": "caster",
+   "spell": 805301,
+   "aura": 805301,
+   "every_ms": 1600,
+   "max_casts": 3,
+   "cast_power": 2000,
+   "reset_cooldown": true
+  },
+  {
+   "action": "assert",
+   "label": "The step stops at the first poll that reads the aura",
+   "actor": "caster",
+   "metric": "spell_go_count",
+   "spell": 805301,
+   "equals": 1,
+   "within_ms": 500
+  },
+  {
+   "action": "assert",
+   "label": "Holy Form aura present",
+   "actor": "caster",
+   "metric": "aura",
+   "spell": 805301,
+   "equals": 1
+  },
+  {
+   "action": "wait",
+   "label": "Global cooldown",
+   "ms": 1600
+  },
+  {
+   "action": "cast_until_aura",
+   "label": "Daybreak until an aura it never grants",
+   "actor": "caster",
+   "spell": 503624,
+   "target": "caster",
+   "aura": 807299,
+   "every_ms": 1600,
+   "max_casts": 2,
+   "cast_power": 1360
+  },
+  {
+   "action": "assert",
+   "label": "The step stops at max_casts",
+   "actor": "caster",
+   "metric": "spell_go_count",
+   "spell": 503624,
+   "equals": 2,
+   "within_ms": 500
+  },
+  {
+   "action": "assert",
+   "label": "The step never sets the aura",
+   "actor": "caster",
+   "metric": "aura",
+   "spell": 807299,
+   "equals": 0
+  },
+  {
+   "action": "wait",
+   "label": "Global cooldown before the control pair",
+   "ms": 1600
+  },
+  {
+   "action": "restore_charges",
+   "actor": "caster",
+   "spell": 503624
+  },
+  {
+   "action": "set_power",
+   "actor": "caster",
+   "value": 1360
+  },
+  {
+   "action": "cast",
+   "actor": "caster",
+   "spell": 503624,
+   "target": "caster"
+  },
+  {
+   "action": "cast",
+   "label": "Second Daybreak inside the global cooldown",
+   "actor": "caster",
+   "spell": 503624,
+   "target": "caster"
+  },
+  {
+   "action": "wait",
+   "label": "Control pair",
+   "ms": 300
+  },
+  {
+   "action": "assert",
+   "label": "The global cooldown blocks the second cast",
+   "actor": "caster",
+   "metric": "spell_go_count",
+   "spell": 503624,
+   "equals": 3,
+   "within_ms": 500
+  },
+  {
+   "action": "wait",
+   "label": "Global cooldown before the ignore_gcd pair",
+   "ms": 1600
+  },
+  {
+   "action": "restore_charges",
+   "actor": "caster",
+   "spell": 503624
+  },
+  {
+   "action": "set_power",
+   "actor": "caster",
+   "value": 1360
+  },
+  {
+   "action": "cast",
+   "actor": "caster",
+   "spell": 503624,
+   "target": "caster"
+  },
+  {
+   "action": "cast",
+   "label": "Second Daybreak with ignore_gcd",
+   "actor": "caster",
+   "spell": 503624,
+   "target": "caster",
+   "ignore_gcd": true
+  },
+  {
+   "action": "wait",
+   "label": "ignore_gcd pair",
+   "ms": 300
+  },
+  {
+   "action": "assert",
+   "label": "ignore_gcd lets the second cast through",
+   "actor": "caster",
+   "metric": "spell_go_count",
+   "spell": 503624,
+   "equals": 5,
+   "within_ms": 500
+  }
+ ]
+}

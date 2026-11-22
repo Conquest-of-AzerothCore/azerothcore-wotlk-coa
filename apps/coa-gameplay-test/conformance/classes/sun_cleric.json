@@ -28825,6 +28825,117 @@
       "cast_power": 1000,
       "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 680634 to the weapon set Seraphim, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). Combination rule (mentor D-146): two talents add, the stock engine's rule for percent modifiers on one operation (Player.cpp:10622), and the flag keeps it. The ratio separates the additive whole-hit reading from the old compounding and from a multiplicative reading. Glorious Defender 680634 +25% and Battle Cleric's helper 562316 +50% under Paragon, m = 1.75. Both arms cast Paragon 680639 before every observed cast, attack power 86, weapon rolls 49..70. Gavel of Wrath rank 5 802561, flat 222 + irand(1, 50), dummy armor 528: mean non-critical hit 280.6082 without the passives and 489.9891 with both, ratio 1.74617 (+74.62%); the stock compounding predicts 2.80161 and a multiplicative reading 1.87500, both outside the band (3.73 points). Sizing: the model's per-hit variances give 480 trials per arm at 0.8 of the power limit; the entry pools 8 parts of 80 trials (640 per arm). ",
       "observe_source": "Gavel of Wrath 802561 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 680634 and 300347 first. Control arm: Paragon without the passives. Reference search 2026-11-22: owner ruling O-18 and mentor D-146; server DBC 300347, 562316, 680639 and the Gavel ranks; no Ascension source states the hit beyond the tooltip (live servers closed)."
+    },
+    {
+      "spell": 804629,
+      "name": "Spears of Glory (Dawnsear is instant cast, aura earned from Radiant Flame)",
+      "kind": "aura_fed_effect",
+      "variant": "instant",
+      "label_suffix": "fed_instant",
+      "quote": "chance to grant you Spears of Glory.",
+      "feed_spell": 806060,
+      "aura": 807299,
+      "effect_spell": 554406,
+      "every_ms": 4300,
+      "residual_target": 0.001,
+      "feed_power": 1000,
+      "effect_power": 1363,
+      "expected": 0,
+      "caster_auras": [
+        823764
+      ],
+      "observe_source": "807299 Effect[0] aura 108 SPELLMOD CASTING_TIME (MiscValue 10) -100% (BasePoints -101) on Dawnsear's SpellFamilyFlags[1] = 2, DurationIndex 1 (10000 ms); Dawnsear 554406 has a 3500 ms cast time. Control: 807299 cancelled, Dawnsear cast, casting reads 1 after 300 ms. Treatment: Radiant Flame 806060 (instant channel, DurationIndex 35 = 4000 ms, Effect[0] aura 227 amplitude 1000, AttributesEx5 0x200 SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1 = 5 ticks of 807058) is cast every 4300 ms by the harness step cast_until_aura (owner ruling O-17) until Spears of Glory 807299 is on the caster; AscensionSunClericEvents.cpp:115 rolls Chance(player, 804629) (ProcChance 15) once per landed 807058 tick and :319 casts 807299 on the player. The harness never sets 807299; its presence is read right before every judged Dawnsear and a fed trial without it (cap reached) makes the run unmeasured. The kind sizes max_casts from the DBC ProcChance and tick count for a residual of at most 0.1% per pair. 823764 removes the dummy's resistance so every tick lands. Dawnsear cast 4500 ms after the feed stops (channel over, aura still within its 10 s), casting reads 0 after 300 ms. Each judged Dawnsear must go off: spell_go_count of 554406 is read after the cast and must rise by 1 per trial; a refused fed cast alerts, a refused control cast makes the run unmeasured (review t8 I1). Replaces the held set_aura entries (review b7c C1). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log (52 SPELL_CAST_START, 74 SPELL_DAMAGE) with no event naming Spears of Glory, so a fed cast cannot be told apart; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip (\"within 10 sec is instant cast and deals 25% increased damage\"); nothing else found."
+    },
+    {
+      "spell": 804629,
+      "name": "Spears of Glory (Dawnsear damage, aura earned from Radiant Flame)",
+      "kind": "aura_fed_effect",
+      "variant": "damage",
+      "label_suffix": "fed_damage",
+      "quote": "chance to grant you Spears of Glory.",
+      "feed_spell": 806060,
+      "aura": 807299,
+      "effect_spell": 554406,
+      "every_ms": 4300,
+      "residual_target": 0.001,
+      "feed_power": 1000,
+      "effect_power": 1363,
+      "expected": 1.25,
+      "trials": 6,
+      "caster_auras": [
+        823764
+      ],
+      "fixture": {
+        "spell_power": 10000
+      },
+      "observe_source": "807299 Effect[1] aura 108 SPELLMOD DAMAGE +25% (BasePoints 24 + 1, $s2) on Dawnsear's SpellFamilyFlags[1] = 2. Six control Dawnsear hits (807299 cancelled) and six fed hits, non-critical only, spell power fixture 10000; the mean fed hit is expected at 1.25 times the control mean within the band 1.25 x (1 +- EffectDieSides[0] / control mean). Treatment: Radiant Flame 806060 (instant channel, DurationIndex 35 = 4000 ms, Effect[0] aura 227 amplitude 1000, AttributesEx5 0x200 SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1 = 5 ticks of 807058) is cast every 4300 ms by the harness step cast_until_aura (owner ruling O-17) until Spears of Glory 807299 is on the caster; AscensionSunClericEvents.cpp:115 rolls Chance(player, 804629) (ProcChance 15) once per landed 807058 tick and :319 casts 807299 on the player. The harness never sets 807299; its presence is read right before every judged Dawnsear and a fed trial without it (cap reached) makes the run unmeasured. The kind sizes max_casts from the DBC ProcChance and tick count for a residual of at most 0.1% per pair. 823764 removes the dummy's resistance so every tick lands. Replaces the held set_aura entry (review b7c C1). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log (52 SPELL_CAST_START, 74 SPELL_DAMAGE) with no event naming Spears of Glory, so a fed cast cannot be told apart; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip (\"within 10 sec is instant cast and deals 25% increased damage\"); nothing else found."
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (once per sec: critical heals 940 and 1050 ms apart)",
+      "kind": "timer_spacing_arms",
+      "variant": "cooldown_cut",
+      "label_suffix": "icd_spacing",
+      "quote": "Can occur only once per sec.",
+      "timer_ms": 1000,
+      "gaps": [
+        940,
+        1050
+      ],
+      "hit_spell": 503624,
+      "cooldown_spell": 800764,
+      "cut_spell": 804512,
+      "cut_effect": 0,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "cast_power": 1360,
+      "observe_source": "AscensionSunClericEvents.cpp:129 300349: healing && critical && Chance(player, id, 1000); AscensionSunCleric.cpp:196-205 Chance rolls ProcChance (100) then holds a 1000 ms timer; :302 cuts the Solar Invocation cooldowns by |804512 Effect[0] BasePoints -1001 + 1| = 1000 ms. Each arm casts Conquest 800764 (RecoveryTime 30000), then two forced-crit Daybreak 503624 heals on the caster at 30% health (instant, 2 charges restored), the second with ignore_gcd (owner ruling O-17) 940 ms (blocked arm) or 1050 ms (allowed arm) after the first. Expected: 1 cut in the blocked arm, 2 in the allowed arm, counted as the whole number of 1000 ms cuts in 30000 - read - elapsed, elapsed bounded by the summed step elapsed_ms plus max_step_ms per step. The measured spacing of the two critical heals must lie in [900, 1000) and (1000, 1100] ms (10% band, review b7a I3), and both heals must be critical events, or the run is unmeasured. Reference search 2026-11-22: coa-history spell 300349: 0 events in 186 logs (a passive); Conquest 800764 (645 casts in 35 logs) and Daybreak 503624 (78 heals in 5 logs) are found, but a combat log records no cooldown, so it cannot show the 1000 ms timer; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found."
+    },
+    {
+      "spell": 300371,
+      "name": "Censure (once per sec: direct hits 940 and 1050 ms apart)",
+      "kind": "timer_spacing_arms",
+      "variant": "chain_copy",
+      "label_suffix": "icd_spacing",
+      "quote": "Can only occur once per sec.",
+      "timer_ms": 1000,
+      "gaps": [
+        940,
+        1050
+      ],
+      "hit_spell": 572801,
+      "seed_spell": 801524,
+      "aura_spell": 806697,
+      "spares": 6,
+      "radius": 10.0,
+      "cast_power": 1360,
+      "observe_source": "AscensionSunClericEvents.cpp:134 300371: direct && damage && the target carries the caster's 806697 && Chance(player, id, 1000) (ProcChance 100, a 1000 ms timer); :327-334 copies 806697 to the first other enemy within 10 yd without it. Each arm seeds Chains of Light 801524 (TRIGGER_SPELL 806697) on the primary dummy, then two Horusath Blast 572801 hits on it (instant, single target, missile speed 20, cooldown reset between them), the second cast with ignore_gcd (owner ruling O-17) 940 ms (blocked arm) or 1050 ms (allowed arm) after the first. Dawnbreak 502496 was not used: a cone (EffectImplicitTargetA 24) that would hit the spares, with a 6000 ms category cooldown. Expected new copies on the six spares: 1 in the blocked arm, 2 in the allowed arm. The measured spacing of the two damage events must lie in [900, 1000) and (1000, 1100] ms or the run is unmeasured. Reference search 2026-11-22: coa-history spell 300371: 0 events in 186 logs (a passive); Horusath Blast 572801 (872 damage events in 9 logs) and Chains of Light 806697 (10 applications for 10 casts of 801524 in 3 logs) are found, with no copy to a second enemy to time; the coabuildhub snapshot (fetched 2026-09-18) repeats the tooltip; nothing else found."
+    },
+    {
+      "spell": 680647,
+      "name": "Paying The Tithe (Seraphic Bulwark lasts more blocks, real blocks)",
+      "kind": "block_charge_strikes",
+      "label_suffix": "bulwark_blocks",
+      "quote": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
+      "aura": 560095,
+      "effect": 0,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "cast_power": 1000,
+      "observe_source": "Seraphic Bulwark 560095: ProcCharges 5 ($n, AscensionSunClericContracts.cpp:158 sets the same); AscensionSunClericAuras.cpp:84-92 sets the charges to 5 + the amount of Effect[0] of the learned rank of Paying The Tithe (680647 / 681468) on apply; AscensionSunClericEvents.cpp:96 accepts every block the caster receives and :392-399 removes one charge per block and the aura on the block taken at 1 charge, so the aura lasts exactly its charge count of blocks. Shield 231296 equipped, Block 107 learned, block forced to 100% with dodge and parry 0 (harness set_combat_avoidance block, owner ruling O-20); a passive striker (creature 36) casts Speed Slash 2118233 (melee class, cannot miss, can be blocked) at the caster one strike at a time, the aura and the blocked hit count read after each. Control: before the learn, the aura ends on block 5. Every strike must be a blocked hit or the run is unmeasured. Replaces the readback of aura_charges (bulwark_charges) as the proof of the block count. Expected with 680647: 5 + 2 = 7 blocks (Effect[0] BasePoints 1 + 1)."
+    },
+    {
+      "spell": 681468,
+      "name": "Paying The Tithe (Seraphic Bulwark lasts more blocks, real blocks)",
+      "kind": "block_charge_strikes",
+      "label_suffix": "bulwark_blocks",
+      "quote": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
+      "aura": 560095,
+      "effect": 0,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "cast_power": 1000,
+      "observe_source": "Seraphic Bulwark 560095: ProcCharges 5 ($n, AscensionSunClericContracts.cpp:158 sets the same); AscensionSunClericAuras.cpp:84-92 sets the charges to 5 + the amount of Effect[0] of the learned rank of Paying The Tithe (680647 / 681468) on apply; AscensionSunClericEvents.cpp:96 accepts every block the caster receives and :392-399 removes one charge per block and the aura on the block taken at 1 charge, so the aura lasts exactly its charge count of blocks. Shield 231296 equipped, Block 107 learned, block forced to 100% with dodge and parry 0 (harness set_combat_avoidance block, owner ruling O-20); a passive striker (creature 36) casts Speed Slash 2118233 (melee class, cannot miss, can be blocked) at the caster one strike at a time, the aura and the blocked hit count read after each. Control: before the learn, the aura ends on block 5. Every strike must be a blocked hit or the run is unmeasured. Replaces the readback of aura_charges (bulwark_charges) as the proof of the block count. Expected with 681468: 5 + 4 = 9 blocks (Effect[0] BasePoints 3 + 1)."
     }
   ],
   "player_observations": [],
