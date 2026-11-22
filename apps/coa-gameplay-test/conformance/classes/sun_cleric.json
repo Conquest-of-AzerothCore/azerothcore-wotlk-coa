@@ -3110,6 +3110,50 @@
       "cast_in_before": false
     },
     {
+      "spell": 504848,
+      "name": "Mercy (grouped allies receive it)",
+      "kind": "metric_delta",
+      "variant": "targets_ally",
+      "label_suffix": "targets_ally",
+      "quote": "Grant mercy to an ally and up to 5 nearby allies,",
+      "trigger_spell": 504848,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 5,
+        "arms": [
+          {
+            "actors": [
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504848
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget 6, MaxAffectedTargets 6: the four other grouped allies are nearby allies of the target, each holds Mercy; none holds it in the uncast control",
+            "reach_source": "The unit filter of the chain search is TARGET_CHECK_ALLY: WorldObjectSpellTargetCheck keeps a unit when _IsValidAssistTarget holds, with no IsInPartyWith or IsInRaidWith test (Spell.cpp:9353-9358, reached through WorldObjectSpellAreaTargetCheck with the Chain reason, :9420-9479, which adds only a distance test; only TARGET_CHECK_PARTY :9359 and TARGET_CHECK_RAID :9373 test the group), so ally5 in raid subgroup 2 stands within the 10 yd hop like the party members. Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY with EffectChainTarget[0] 6: Spell::SelectImplicitTargetObjectTargets adds the explicit ally and calls Spell::SelectImplicitChainTargets (Spell.cpp:1895-1917, :1919-1939), which asks SearchChainTargets for ChainTarget - 1 = 5 more units (Spell.cpp:2200-2300); the spell is a magic-class spell, so the search radius is the 10 yd jump radius times 5 and each hop is within 10 yd of the previous unit; no spell_jump_distance row and no script for 504848 or 503650 exists (data/sql searched), and Mercy MaxAffectedTargets 6 is read only for cone and area targets (Spell.cpp:1303, :1405)"
+          }
+        ]
+      },
+      "observe_source": "504848 Mercy Effect[0] aura 23 periodic trigger of 503650, target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6, MaxAffectedTargets 6 (the target and up to 5 nearby allies). Reach: Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY with EffectChainTarget[0] 6: Spell::SelectImplicitTargetObjectTargets adds the explicit ally and calls Spell::SelectImplicitChainTargets (Spell.cpp:1895-1917, :1919-1939), which asks SearchChainTargets for ChainTarget - 1 = 5 more units (Spell.cpp:2200-2300); the spell is a magic-class spell, so the search radius is the 10 yd jump radius times 5 and each hop is within 10 yd of the previous unit; no spell_jump_distance row and no script for 504848 or 503650 exists (data/sql searched), and Mercy MaxAffectedTargets 6 is read only for cone and area targets (Spell.cpp:1303, :1405). Mercy is cast at the grouped ally with four more allies grouped beside it (grouped allies are capped at 5); the Mercy aura is read on the target and, in one arm, summed over the four others: 0 in the uncast control, 1 on the target and 4 across the others after the cast. The cap of 5 nearby allies needs a seventh candidate and is not reachable with 5 grouped allies and the caster (tool need returned). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
       "spell": 805301,
       "name": "Holy Form (healing done)",
       "kind": "hit_ratio",
@@ -10594,6 +10638,124 @@
       "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (15000 ms) 707768; the class code keeps helper 707768 on the player only in daytime (Daytime(): local hour 6 to 17, AscensionSunCleric.cpp:361-377) with 707078; 707768 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 9 + 1 = 10 ($707768s2 as the tooltip reads it). Justicar's Wrath 806980 is cast once at the dummy (deterministic: 515..523 + int(0.25 x 70) = 532..540 at the reference stats, measured in the 806980 damage entry; Holy resistance removed by 823764); the scenario runs at realm-local hour 12 (day) or 0 (night, the control), 707078 learned between the phases. Night (control): the helper is absent. Reference search 2026-11-22: coa-history spell 707078: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707078 and no value; merged-PR and git log search --grep 707078: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
     },
     {
+      "spell": 707078,
+      "kind": "metric_delta",
+      "hour": 12,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "expire_ms": 3000,
+      "gate_spell": 707078,
+      "name": "Stand Against Darkness (periodic damage taken: an enemy DoT, lead L-1)",
+      "variant": "taken_dot",
+      "label_suffix": "taken_dot",
+      "quote": "and take $707768s2% reduced periodic damage.",
+      "strike": {
+        "spell": 22682,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 9500,
+        "in_before": true
+      },
+      "fields": {
+        "spell": 22682,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 4000,
+      "expected": 7600,
+      "tolerance": 40,
+      "wait_ms": 500,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). Unit::SpellDamageBonusTaken applies aura 214 to a DOT only when the effect's MiscValueB is 1 and its caster is the DoT's caster (Unit.cpp:10095-10099), so the lead (b4b report L-1, mentor D-65) is that an enemy's DoT is never reduced; this entry measures it. The scenario runs at realm-local hour 12 (day) in both phases; the passive is learned between them (before phase: no helper, the control; after phase: helper 707768 present). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount with the aura. The enemy DoT is Shadow Flame 22682 (Effect[0] aura 3 PERIODIC_DAMAGE, DmgClass none so it cannot miss, Shadow, BasePoints 499 + 1 die side = 500, amplitude 1000 ms, DurationIndex 31 = 8000 ms): 8 ticks of 500 = 4000 per phase, read 9500 ms after the strike. Tooltip expectation: periodic damage taken -10%, so the after phase deals 0.9 x 4000 = 3600 and the cumulative reading is 4000 + 3600 = 7600; tolerance 40 (1%) excludes a DoT not reduced (8000) and a reduction of 5% or 15%. Control arms: the before phase (no aura) reads the full 4000; the taken_direct entry reads a direct hit of the same school with the same aura, which the periodic claim must leave unchanged. Reference search 2026-11-22: coa-history spell 707078 and 707768: passives and helpers leave no event (a positive control is Paragon 680639 in the same index); nothing found beyond the tooltip and the DBC. A reading of 8000 leaves the clause with the owner (report only, no server change).",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 707768
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Positive control of the aura arm: helper 707768 is kept on the player in daytime with 707078 learned (AscensionSunCleric.cpp:376), so the reading at the end of the phase is 0 in the before phase (707078 not learned) and 1 after the learn at realm hour 12; without it the unchanged damage of this entry would show no reduction because the aura was absent, not because the aura does not reduce"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 707078,
+      "kind": "metric_delta",
+      "hour": 12,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "expire_ms": 3000,
+      "gate_spell": 707078,
+      "name": "Stand Against Darkness (control: direct damage taken from the same school, lead L-1)",
+      "variant": "taken_direct",
+      "label_suffix": "taken_direct",
+      "quote": "and take $707768s2% reduced periodic damage.",
+      "strike": {
+        "spell": 47632,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "in_before": true
+      },
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 600,
+      "expected": 1200,
+      "tolerance": 12,
+      "wait_ms": 500,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). Unit::SpellDamageBonusTaken applies aura 214 to a DOT only when the effect's MiscValueB is 1 and its caster is the DoT's caster (Unit.cpp:10095-10099), so the lead (b4b report L-1, mentor D-65) is that an enemy's DoT is never reduced; this entry measures it. The scenario runs at realm-local hour 12 (day) in both phases; the passive is learned between them (before phase: no helper, the control; after phase: helper 707768 present). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount with the aura. The direct-damage control is Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick): 600 per phase. The tooltip's reduction names periodic damage only, so the same aura leaves the direct hit alone: the after phase deals 600 and the cumulative reading is 1200; tolerance 12 (1%) excludes a direct hit reduced by 10% (1140). Reference search 2026-11-22: as the taken_dot entry; nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 707768
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Positive control of the aura arm: helper 707768 is kept on the player in daytime with 707078 learned (AscensionSunCleric.cpp:376), so the reading at the end of the phase is 0 in the before phase (707078 not learned) and 1 after the learn at realm hour 12; without it the unchanged damage of this entry would show no reduction because the aura was absent, not because the aura does not reduce"
+          }
+        ]
+      }
+    },
+    {
       "spell": 806980,
       "name": "Justicar's Wrath (damage at the reference stats)",
       "kind": "metric_delta",
@@ -11113,7 +11275,7 @@
       "spell": 300347,
       "kind": "metric_delta",
       "gate_spell": 300347,
-      "expire_ms": 500,
+      "expire_ms": 21000,
       "name": "Battle Cleric (Paragon cooldown 1 min)",
       "variant": "paragon_cd",
       "label_suffix": "paragon_cd",
@@ -11128,7 +11290,35 @@
       "expected": 59500,
       "tolerance": 1500,
       "wait_ms": 500,
-      "observe_source": "Paragon 680639 RecoveryTime 300000 and CategoryRecoveryTime 300000 (Spell.dbc); the passive's script (AscensionSunClericBattleCleric.cpp:30-31) takes 240000 ms off it when Paragon applies. One cast of Paragon, the remaining cooldown read 500 ms later: 300000 - 500 = 299500 without the passive (control phase), 60000 - 500 = 59500 with it; tolerance 1500 ms (2.5%) excludes a cooldown 10% (6000 ms) off on both sides. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+      "observe_source": "Paragon 680639 RecoveryTime 300000 and CategoryRecoveryTime 300000 (Spell.dbc); the passive's script (AscensionSunClericBattleCleric.cpp:30-31) takes 240000 ms off it when Paragon applies. One cast of Paragon, the remaining cooldown read 500 ms later: 300000 - 500 = 299500 without the passive (control phase), 60000 - 500 = 59500 with it; tolerance 1500 ms (2.5%) excludes a cooldown 10% (6000 ms) off on both sides. The wait after the learn is 21000 ms, past the 20 s Paragon aura (SpellDuration 18, Duration 20000): the second cast is then a fresh application (AURA_EFFECT_HANDLE_REAL, the only mode the script acts on, AscensionSunClericBattleCleric.cpp:32), not a refresh of the aura still up; cause of the earlier alert and the incorrect test in merged/paragon (mentor D-67). Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "kind": "metric_delta",
+      "gate_spell": 300347,
+      "expire_ms": 21000,
+      "name": "Battle Cleric (Paragon cooldown 1 min, recast inside the aura after New Day)",
+      "variant": "paragon_cd_newday",
+      "label_suffix": "paragon_cd_newday",
+      "quote": "Paragon now has a 1 min cooldown",
+      "trigger_spell": 680639,
+      "target": "caster",
+      "setup_casts": [
+        680639,
+        800600
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680639
+      },
+      "before_expected": 299500,
+      "expected": 59500,
+      "tolerance": 1500,
+      "wait_ms": 500,
+      "observe_source": "Mentor D-67, Paragon O-1: a player route to a recast of Paragon inside its own 20 s aura. New Day 800600 has three SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) effects with EffectMiscValue 680639, 800622 and 806121 and EffectMiscValueB 1, RecoveryTime 480000, TARGET_UNIT_CASTER (Spell.dbc); a scan of every Spell.dbc effect 165, 194, 195, 196 and 197 naming 680639 finds only New Day and the Battle Cleric helper 562316 (effect 165, not an aura, never run by AddAura), and no effect 197 whose class mask matches Paragon's family 33 flags. Each phase casts Paragon (setup cast), New Day (setup cast, its own cooldown cleared by the harness before the cast), and then Paragon again (the trigger) 1600 ms later, inside the 20 s aura (SpellDuration 18), so the trigger cast refreshes the aura in AURA_EFFECT_HANDLE_REAPPLY, which AscensionSunClericBattleCleric.cpp:32 does not act on (REAL only). The Paragon cooldown is read 500 ms after the trigger cast: 300000 - 500 = 299500 without the passive (control phase, 300347 not learned: the route itself), 60000 - 500 = 59500 with it as the tooltip states; tolerance 1500 ms (2.5%) excludes a cooldown 10% (6000 ms) off on both sides and the control. The wait after the first phase is 21000 ms, past the 20 s aura, so the second phase's first Paragon cast is a fresh application. Reference search 2026-11-22: merged/paragon report (fresh cast reads 59.5 s, a recast inside the aura reads 300 s through a harness reset); coa-history spell 800600: 4 SPELL_CAST_SUCCESS events in 2 logs (76, 82), and in log 82 Ceegeevalk cast Paragon 142, 146 and 159 ms after New Day (19:40:54.865, 19:52:33.548 and 20:19:05.568), each time 178 to 213 s after the previous Paragon cast, so outside the 20 s aura: the reset-then-recast pattern is played, the recast inside the aura is not shown by the logs; nothing found beyond the tooltip and the DBC for the cooldown after such a recast."
     },
     {
       "spell": 300347,
@@ -11242,8 +11432,8 @@
         "target": "dummy"
       },
       "area_sum": true,
-      "expected": 6,
-      "observe_source": "657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectChainTarget 5; the tooltip states the primary enemy and up to $657125i = 5 additional enemies: 6 strikes in all. The strikes of 657125 are counted over the eight dummies (area_sum): 0 in the control phase, exactly 6 with 707081 (excludes 5 and 7). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
+      "expected": 5,
+      "observe_source": "657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectChainTarget 5; the tooltip reads \"up to $657125i additional enemies\" with $657125i = 5 in the DBC (EffectChainTarget 5), and the stock engine counts the primary in the chain (Spell.cpp:1921, :1934), so a cast strikes 5 enemies in all, which the live logs show (mentor D-63, ruling (a): Live source (mentor D-63, ruling (a): 5 strikes in all, the primary enemy and 4 additional): coa-history logs 75, 76, 77 and 82 (2026-08-01 and 2026-08-02), 657125 SPELL_DAMAGE and SPELL_MISSED grouped by cast (events within 10 ms of the first of a group): 1,916 casts with 1 to 5 distinct targets each and never 6 (5 targets in 59, 36, 93 and 128 casts, 316 in all). The server engine counts the primary in the chain (Spell::SelectImplicitChainTargets, Spell.cpp:1921 and :1934: ChainTarget 5, SearchChainTargets for 4 more), as the live logs show.). The strikes of 657125 are counted over the eight dummies (area_sum): 0 in the control phase, exactly 5 with 707081 (excludes 4 and 6). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -11416,17 +11606,17 @@
       "before_expected": 0,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "name": "Solar Empowerment (sixth strike reduced)",
-      "variant": "strike_5",
-      "label_suffix": "strike_5",
+      "name": "Solar Empowerment (fifth and last strike reduced)",
+      "variant": "strike_4",
+      "label_suffix": "strike_4",
       "metric": "spell_damage_total",
       "fields": {
         "spell": 657125,
-        "target": "area5"
+        "target": "area4"
       },
-      "expected": 32.11,
-      "tolerance": 1.6,
-      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 6 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^5 = 32.11. The damage total of 657125 on area5 is read 1000 ms after the cast: 0 in the control phase. Tolerance 1.6 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
+      "expected": 40.14,
+      "tolerance": 2.0,
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 5, the last of the 5 strikes in all (mentor D-63, ruling (a); see the chain_count entry), deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^4 = 40.14. The damage total of 657125 on area4 is read 1000 ms after the cast: 0 in the control phase. Tolerance 2.0 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -11722,7 +11912,7 @@
       "variant": "effect_horusath",
       "label_suffix": "effect_horusath",
       "quote": "Increases the effectiveness of",
-      "expected": 1.2,
+      "expected": 1.19336,
       "observe_spell": 500154,
       "control": {
         "auras": []
@@ -11736,7 +11926,7 @@
       "trials": 100,
       "parts": 35,
       "cast_power": 1363,
-      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Horusath Blast 500154 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Band (mentor D-54): Horusath Blast 500154 has one SCHOOL_DAMAGE effect and no flat weapon term, so the engine arithmetic gives exactly +20% and the stated value is judged in the G-19 band of 2 points (18% to 22%); the pair f1 reads +19.33% with a 99% interval of +18.42% to +20.24%, inside the band and holding the stated +20%. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 3500 trials per arm at 0.76 and 0.76 of the limit and sized 3136 and 3136 trials per arm; the entry now runs 35 parts, 3500 trials per arm, at least 1.1 times the larger sized count (3136). At 3500 trials the half-width is at most 0.760 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.20%, and the limit lies 32% above it, 26 standard deviations, below 1e-9."
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Horusath Blast 500154: mean non-critical hit 73.8708 without the passive and 88.1542 with it, ratio 1.19336, a bonus of +19.34%. Horusath arithmetic (Holy SCHOOL_DAMAGE): value 72 + int32(5 x 1.06) + irand(1, 12) from the DBC, scaled by the passive as int32(float(value) x 1.2f); no spell power term (the reference character has none) and no attack power term; the dummy resists Holy through the monster linear resistance (CoA.MonsterResistance.Enable 1, PerLevel 1.0, PerPercent 5.0: 12% average, partial resist i/10 with probabilities 20%, 45%, 30%, 5% for i = 0..3, Unit.cpp:2563-2720). Control: passive not learned. Out-of-sample arm: entry effect_horusath_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +19.34%, read +19.53 / +19.18); the Horusath arm is a replication of the same engine path, not an out-of-sample test (no attack power term, no armor, and the resist is the same). Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 3500 trials per arm at 0.76 and 0.76 of the limit and sized 3136 and 3136 trials per arm; the entry now runs 35 parts, 3500 trials per arm, at least 1.1 times the larger sized count (3136). At 3500 trials the half-width is at most 0.760 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.20%, and the limit lies 32% above it, 26 standard deviations, below 1e-9."
     },
     {
       "spell": 805628,
@@ -11745,7 +11935,7 @@
       "variant": "effect_gavel",
       "label_suffix": "effect_gavel",
       "quote": "Increases the effectiveness of",
-      "expected": 1.2777,
+      "expected": 1.27137,
       "observe_spell": 800617,
       "control": {
         "auras": []
@@ -11759,7 +11949,7 @@
       "trials": 100,
       "parts": 14,
       "cast_power": 1363,
-      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Wrath 800617 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 50 (Gavel of Wrath 800617 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 140.827 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 154.35. Expected ratio 1.2 + 0.24 x 50 / 154.35 = 1.2777, a bonus of 27.77%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 800 trials per arm at 0.972 and 0.943 of the limit and sized 1182 and 1113 trials per arm; the entry now runs 14 parts, 1400 trials per arm, at least 1.1 times the larger sized count (1182). At 1400 trials the half-width is at most 0.735 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.89%, and the limit lies 36% above it, 19 standard deviations, below 1e-9."
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Gavel of Wrath 800617: mean non-critical hit 141.4576 without the passive and 179.8455 with it, ratio 1.27137, a bonus of +27.14%. Gavel arithmetic (Physical, Spell::EffectWeaponDmg, SpellEffects.cpp:4668-4756): weapon roll urand(uint32(min), uint32(max)) with item 2529 (two-handed, multiplier 3.3) and attack power 70, rolls 90..119; flat value BasePoints + irand(1, DieSides) from the DBC, scaled by the passive as int32(float(value) x 1.2f); the weapon percent 100 becomes 120 the same way; the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating; dummy armor 528 (dummy_armor entry), tmp = x / (1 + x) with x = 528 / (85 x 60 + 400) and the hit uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). Control: passive not learned. Out-of-sample arm: entry effect_gavel_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +25.37%, read +25.57 / +25.08); Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 800 trials per arm at 0.972 and 0.943 of the limit and sized 1182 and 1113 trials per arm; the entry now runs 14 parts, 1400 trials per arm, at least 1.1 times the larger sized count (1182). At 1400 trials the half-width is at most 0.735 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.89%, and the limit lies 36% above it, 19 standard deviations, below 1e-9."
     },
     {
       "spell": 805628,
@@ -11768,7 +11958,7 @@
       "variant": "effect_gavel_light",
       "label_suffix": "effect_gavel_light",
       "quote": "Increases the effectiveness of",
-      "expected": 1.2246,
+      "expected": 1.21667,
       "observe_spell": 800611,
       "control": {
         "auras": []
@@ -11782,7 +11972,7 @@
       "trials": 100,
       "parts": 19,
       "cast_power": 1363,
-      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Light 800611 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 12 (Gavel of Light 800611 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 106.63 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 116.87. Expected ratio 1.2 + 0.24 x 12 / 116.87 = 1.2246, a bonus of 22.46%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1200 trials per arm at 0.939 and 0.939 of the limit and sized 1654 and 1655 trials per arm; the entry now runs 19 parts, 1900 trials per arm, at least 1.1 times the larger sized count (1655). At 1900 trials the half-width is at most 0.746 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.62%, and the limit lies 34% above it, 21 standard deviations, below 1e-9."
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Gavel of Light 800611: mean non-critical hit 106.7667 without the passive and 129.9000 with it, ratio 1.21667, a bonus of +21.67%. Gavel arithmetic (Physical, Spell::EffectWeaponDmg, SpellEffects.cpp:4668-4756): weapon roll urand(uint32(min), uint32(max)) with item 2529 (two-handed, multiplier 3.3) and attack power 70, rolls 90..119; flat value BasePoints + irand(1, DieSides) from the DBC, scaled by the passive as int32(float(value) x 1.2f); the weapon percent 100 becomes 120 the same way; the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating; dummy armor 528 (dummy_armor entry), tmp = x / (1 + x) with x = 528 / (85 x 60 + 400) and the hit uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). Control: passive not learned. Out-of-sample arm: entry effect_gavel_light_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +21.11%, read +21.22 / +21.02); Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1200 trials per arm at 0.939 and 0.939 of the limit and sized 1654 and 1655 trials per arm; the entry now runs 19 parts, 1900 trials per arm, at least 1.1 times the larger sized count (1655). At 1900 trials the half-width is at most 0.746 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.62%, and the limit lies 34% above it, 21 standard deviations, below 1e-9."
     },
     {
       "spell": 805628,
@@ -11791,7 +11981,7 @@
       "variant": "effect_gavel_grace",
       "label_suffix": "effect_gavel_grace",
       "quote": "Increases the effectiveness of",
-      "expected": 1.2454,
+      "expected": 1.23845,
       "observe_spell": 800614,
       "control": {
         "auras": []
@@ -11805,7 +11995,7 @@
       "trials": 100,
       "parts": 16,
       "cast_power": 1363,
-      "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Grace 800614 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 24.5 (Gavel of Grace 800614 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 118.173 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 129.52. Expected ratio 1.2 + 0.24 x 24.5 / 129.52 = 1.2454, a bonus of 24.54%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1000 trials per arm at 0.933 and 0.955 of the limit and sized 1361 and 1426 trials per arm; the entry now runs 16 parts, 1600 trials per arm, at least 1.1 times the larger sized count (1426). At 1600 trials the half-width is at most 0.755 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.77%, and the limit lies 32% above it, 18 standard deviations, below 1e-9."
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Gavel of Grace 800614: mean non-critical hit 118.1583 without the passive and 146.3333 with it, ratio 1.23845, a bonus of +23.85%. Gavel arithmetic (Physical, Spell::EffectWeaponDmg, SpellEffects.cpp:4668-4756): weapon roll urand(uint32(min), uint32(max)) with item 2529 (two-handed, multiplier 3.3) and attack power 70, rolls 90..119; flat value BasePoints + irand(1, DieSides) from the DBC, scaled by the passive as int32(float(value) x 1.2f); the weapon percent 100 becomes 120 the same way; the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating; dummy armor 528 (dummy_armor entry), tmp = x / (1 + x) with x = 528 / (85 x 60 + 400) and the hit uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). Control: passive not learned. Out-of-sample arm: entry effect_gavel_grace_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +22.70%, read +22.71 / +22.85); Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1000 trials per arm at 0.933 and 0.955 of the limit and sized 1361 and 1426 trials per arm; the entry now runs 16 parts, 1600 trials per arm, at least 1.1 times the larger sized count (1426). At 1600 trials the half-width is at most 0.755 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.77%, and the limit lies 32% above it, 18 standard deviations, below 1e-9."
     },
     {
       "spell": 805628,

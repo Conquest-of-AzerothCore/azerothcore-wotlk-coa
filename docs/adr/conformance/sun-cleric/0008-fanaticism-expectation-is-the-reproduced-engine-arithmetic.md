@@ -1,6 +1,6 @@
 # 0008. Fanaticism expectation is the reproduced engine arithmetic
 
-- Status: proposed (mentor D-60: awaiting the mentor; the entries keep the D-54 expectation)
+- Status: accepted (mentor D-61, 2026-11-22, on two conditions; both met, accepted for counting by D-68)
 - Date: 2026-11-22
 - Supersedes: the expected figures and the Horusath Blast sentence of [0007](0007-fanaticism-compounds-on-the-gavel-flat-damage.md).
   Its decision (a), accept the stock engine order, stands.
@@ -62,6 +62,31 @@ intervals around the values above. Pair f1 of ADR 0007 (+27.39 / +27.10, +23.76 
 does too.
 
 The claim is judged in the G-19 band (the larger of 5% of the bonus and 2 points). The band is not widened.
+
+## Acceptance
+
+Mentor D-61 accepted the model on two conditions, and D-68 accepted the plan that met the second:
+
+1. Every factor of the model was checked independently in the b4t re-review.
+2. The model had to predict a setup it was not fitted on. The prediction was written and committed first
+   (commit 95f8ff6c99, before any arm ran): attack power 280 instead of 70 and target creature 603 (armor 3750) instead
+   of the creature 36 dummy (armor 528). Pair 20261122-024352 / 20261122-024635 (one build, no flip) read all eight
+   bonuses inside their pre-registered G-19 bands and inside their own 99% intervals (entries `effect_*_oos`; the
+   largest deviation 0.29 point).
+
+The four original entries now carry the table's ratios (1.27137, 1.23845, 1.21667, 1.19336), and the ledger claims count
+both setups' labels.
+
+What was not tested:
+
+- Another weapon. The model uses item 2529; a different weapon set per entry needs a harness change.
+- Another level. Both setups run at level 60 with the level-60 armor constant.
+- Spell power. Horusath Blast has no spell power term for a reference character without spell power, and no entry
+  gives the character any.
+
+The Horusath Blast arm is a replication of the same engine path, not an out-of-sample test: its value has no attack
+power term and the target's armor does not touch a Holy hit, so the new setup leaves its prediction unchanged. Only the
+three Gavels were predicted on inputs the model had not seen.
 
 ## Consequences
 
