@@ -40344,6 +40344,214 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 803489,
+      "kind": "metric_delta",
+      "quote": "Direct ability damage or healing generates 2 Solar Power and damages or heals for an additional $s2% of the amount.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803816
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Vow of Radiance fulfilled under Dawn, heal copy 803816 cast",
+      "variant": "vc_dawn_radiance",
+      "label_suffix": "vc_dawn_radiance",
+      "expected": 1,
+      "observe_source": "D-258 cause of the Vow reads of 0: the Vow is fulfilled only by a cast spent under Dawn 807440 (Abilities.cpp SpendDawn, Events.cpp Vow proc, Fulfill), route of 92136 sunlight_heal; measure only. Vow of Radiance fulfilled under Dawn, heal copy 803816 cast",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 803719,
+      "kind": "metric_delta",
+      "quote": "direct ability damage or healing now regenerates $504775s1% of your missing mana plus ${$504877m1+$504877ppl1}.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Vow of Grace fulfilled under Dawn, energize 504877",
+      "variant": "vc_dawn_grace",
+      "label_suffix": "vc_dawn_grace",
+      "expected": 1,
+      "observe_source": "D-258 cause of the Vow reads of 0: the Vow is fulfilled only by a cast spent under Dawn 807440 (Abilities.cpp SpendDawn, Events.cpp Vow proc, Fulfill), route of 92136 sunlight_heal; measure only. Vow of Grace fulfilled under Dawn, energize 504877",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 803491,
+      "kind": "metric_delta",
+      "quote": "Direct ability damage or healing generates 1 Solar Power and bounces to $803492s1 additional nearby targets with less value per target struck.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "setup_casts": [
+        803491,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803816
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Vow of Dawn fulfilled under Dawn, bounce heal 803816 on grouped ally",
+      "variant": "vc_dawn_dawn",
+      "label_suffix": "vc_dawn_dawn",
+      "expected": 1,
+      "observe_source": "D-258 cause of the Vow reads of 0: the Vow is fulfilled only by a cast spent under Dawn 807440 (Abilities.cpp SpendDawn, Events.cpp Vow proc, Fulfill), route of 92136 sunlight_heal; measure only. Vow of Dawn fulfilled under Dawn, bounce heal 803816 on grouped ally",
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 807440,
+          "expected": 1
+        }
+      ],
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
     }
   ],
   "player_observations": [],
