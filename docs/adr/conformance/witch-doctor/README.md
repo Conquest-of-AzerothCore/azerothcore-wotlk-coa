@@ -35,3 +35,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0026](0026-hireeks-jinx-lasts-eight-seconds-against-players.md) | Hir'eek's Jinx lasts eight seconds against players | proposed (owner question); engine file `SpellMgr.cpp` |
 | [0027](0027-spirit-shock-locks-a-creatures-school.md) | Spirit Shock locks a creature's school | accepted |
 | [0028](0028-voodoo-cauldron-heals-allies-within-fifteen-yards.md) | Voodoo Cauldron heals allies within 15 yd | accepted |
+| [0029](0029-graven-effigy-lengthens-crowd-control.md) | Graven Effigy lengthens crowd control | proposed (owner question); engine file `Unit.cpp` |
