@@ -1546,7 +1546,7 @@
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
     "kind": "claim",
-    "reason": "Data, no status: the interrupt claim is a STATE metric read (casting) and the clause words do not carry the promise word cast, so the audit counts it as data (coverage.py:486, :689). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout, not counted: a metric_delta over school_prohibited fails test_coverage.py's cross-class guard because the metric has no evidence class: tool need returned; the lockout evidence is in the round report. Reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
+    "reason": "Data, no status: the interrupt claim is a STATE metric read (casting) and the clause words do not carry the promise word cast, so the audit counts it as data (coverage.py:486, :689). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout ('for $547217d', ADR 1021): with the dummy channelling Evocation 12051 3 yd away, the Arcane school_prohibited read is held 3000 ms and free 3475 ms after the Horusath Blast cast (missile landing 250 ms after the cast), 0 before the learn; pair 20261122-065615 / 20261122-065914, lockout_held and lockout_free ok in both runs, no flip. Reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
     "claims": [
       {
         "claim": "and causes Horusath Blast to interrupt the target",
@@ -1557,7 +1557,9 @@
       {
         "claim": "for $547217d",
         "labels": [
-          "547214 spell_duration 547217 #1"
+          "547214 spell_duration 547217 #1",
+          "547214 behaviour_metric_delta lockout_held",
+          "547214 behaviour_metric_delta lockout_free"
         ]
       }
     ]

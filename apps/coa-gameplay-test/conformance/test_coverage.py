@@ -619,6 +619,32 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([claim('this spell is instant cast.', label)], [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Only affects Humanoids.', label)], [read])[0], [DATA])
 
+    def test_a_school_lockout_is_a_state_read_where_the_clause_promises_an_interrupt(self):
+        label = '547214 behaviour_metric_delta lockout_held'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'school_prohibited', contrast=LEARNED_CONTRAST)
+        interrupt = 'and causes Horusath Blast to interrupt the target for $547217d.'
+        self.assertEqual(METRIC_EVIDENCE['school_prohibited'], STATE)
+        self.assertEqual(evidence_of([claim(interrupt, label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('locks out that school of magic.', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Increases the mana restored by $s1%', label)], [read])[0], [DATA])
+        unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, 'school_prohibited')
+        self.assertEqual(evidence_of([claim('for $547217d', label)], [unlearned])[0], [DATA])
+        self.assertEqual(evidence_of([claim(interrupt, label)], [unlearned])[0], [DATA])
+        with mock.patch.dict(METRIC_EVIDENCE, {'school_prohibited': READBACK}):
+            self.assertEqual(evidence_of([claim(interrupt, label)], [read])[0], [DATA])
+            self.assertEqual(evidence_of([claim('for $547217d', label)], [read])[0], [DATA])
+
+    def test_a_school_lockout_duration_claim_is_promised_by_its_stated_duration(self):
+        label = '547214 behaviour_metric_delta lockout_held'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'school_prohibited', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim('for $547217d', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('for $d.', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('for $s1 sec.', label)], [read])[0], [DATA])
+        cast = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim('for $547217d', label)], [cast])[0], [DATA])
+        with mock.patch.dict(STATE_PROMISES, {'school_prohibited': r'interrupt\w*|lock(?:s|ed|ing)? out|lockout'}):
+            self.assertEqual(evidence_of([claim('for $547217d', label)], [read])[0], [DATA])
+
     def test_a_cast_state_is_a_state_read_where_the_clause_promises_haste(self):
         label = '1 behaviour_metric_delta cast_done'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
@@ -862,6 +888,10 @@ class EvidenceTablesTest(unittest.TestCase):
     def test_cross_class_guard_a_metric_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'owned_creature_distance_2d'}
         self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d']})
+
+    def test_cross_class_guard_the_sun_cleric_lockout_read_without_its_evidence_row_is_found(self):
+        seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'school_prohibited'}
+        self.assertEqual(self.unclassed_metrics(seeded), {'sun_cleric.json': ['school_prohibited']})
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):
