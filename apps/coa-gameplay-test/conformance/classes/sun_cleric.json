@@ -7571,14 +7571,14 @@
       "quote": "Dealing direct damage to an enemy affected by",
       "seed_spell": 801524,
       "aura_spell": 806697,
-      "target_rank": 800231,
+      "target_rank": 807870,
       "hit_spells": [
-        800231
+        807870
       ],
       "spares": 6,
       "radius": 10.0,
       "force_crit": "spell",
-      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Sunflare 800231 (Effect[0] SCHOOL_DAMAGE, SchoolMask 2, a direct hit, 2000 ms cast, speed 70, 10% mana, no SPELL_ATTR2_CANT_CRIT) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted as a critical strike; the earlier hit spell Glare 807870 carries AttributesEx2 0x20000000 (SPELL_ATTR2_CANT_CRIT), so no run could count a critical hit with it; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Glare 807870 (Effect[1] SCHOOL_DAMAGE, a direct hit, with a 5 s aura, but AttributesEx2 0x20000000 = SPELL_ATTR2_CANT_CRIT, so it can never be a critical strike: the cause of the 0 crits in both arms; the replacement Sunflare 800231 has DurationIndex 0 and kinds/spread_per_crit.py:58 raises Unreadable on it: tool need, see the report) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted as a critical strike; the earlier hit spell Glare 807870 carries AttributesEx2 0x20000000 (SPELL_ATTR2_CANT_CRIT), so no run could count a critical hit with it; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
     },
     {
       "spell": 704562,
