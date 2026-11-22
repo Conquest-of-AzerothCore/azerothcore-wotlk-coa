@@ -86,17 +86,42 @@
     "spell": 92137,
     "clause": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
     "labels": [
-      "92137 effect_value #0"
+      "92137 proc_rate avoided"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Avoided-swing proc rate 21.2% against 20% (band 2 points, min_detectable 4, residual 0.001 per pair); bindmysoul agrees (20%)."
   },
   {
     "spell": 92137,
     "clause": "Your next Illumination within $d is instant cast and free of cost.",
-    "labels": [
-      "92137 spell_duration 800722 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your next Illumination is instant cast",
+        "labels": [
+          "92137 behaviour_metric_delta instant"
+        ]
+      },
+      {
+        "claim": "and free of cost",
+        "labels": [
+          "92137 behaviour_metric_delta free"
+        ]
+      },
+      {
+        "claim": "the buff is spent by one Illumination (next)",
+        "labels": [
+          "92137 behaviour_metric_delta consumed"
+        ]
+      },
+      {
+        "claim": "within $d (15 s)",
+        "labels": [
+          "92137 spell_duration 800722 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Instant cast 0 ms and free 0 mana against 2000 ms and 408.9 in the control, after 40 real parried strikes (0.8^40 = 1.3e-4 residual per run); the consumed entry reads 2000 after one Illumination. The 15 s window stays a data check (aura remaining time after a random last proc cannot be stated exactly): needs a design with a known proc time."
   },
   {
     "spell": 300314,
@@ -1267,11 +1292,23 @@
   {
     "spell": 520647,
     "clause": "Place a $a1 yd holy circle at target location for $d.",
-    "labels": [
-      "520647 effect_radius e0 #0",
-      "520647 aura_duration_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "a 10 yd holy circle",
+        "labels": [
+          "520647 behaviour_metric_delta radius_in",
+          "520647 behaviour_metric_delta radius_out"
+        ]
+      },
+      {
+        "claim": "for 15 s",
+        "labels": [
+          "520647 behaviour_metric_delta circle_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Duration: aura on the caster read 9988 ms against 10000 five seconds in (13500 and 16500 ms excluded). Radius: caster at 9 yd from the circle centre holds the aura, at 13 yd does not; only a coarse bracket (the engine adds object sizes), so the 10 yd edge itself is not pinned: tight bracketing needs the dynamic object size (tool need in the report). Reference search: bindmysoul agrees (10 yd, 15 seconds)."
   },
   {
     "spell": 520647,
@@ -1307,9 +1344,11 @@
     "spell": 520647,
     "clause": "@ext:Damage which reduces the caster below 10% maximum health will break the effect.:ext@",
     "labels": [
-      "520647 effect_value #5"
+      "520647 behaviour_metric_delta break",
+      "520647 behaviour_metric_delta break_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Strike of 1100 leaving 9.4% breaks the circle (1 heal tick before, none after); the same strike leaving 48.9% leaves all 10 ticks. Reference search: nothing found."
   },
   {
     "spell": 534267,
@@ -2657,17 +2696,19 @@
     "spell": 681467,
     "clause": "Increases your armor contribution from plate items by $s1%",
     "labels": [
-      "681467 effect_value e0 #0"
+      "681467 behaviour_metric_delta plate_armor"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Plate armor gain read 80 against 80.2 (20% of the Reborn armor 401 of item 8094 from ItemAddon.dbc), within 1.5; control = before the learn with the same item. Reference search: bindmysoul has rank 1 680652 (10%) only; nothing else found."
   },
   {
     "spell": 681467,
     "clause": "and reduces Shadow damage taken by $s2%.",
     "labels": [
-      "681467 effect_value e1 #1"
+      "681467 behaviour_hit_ratio shadow_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Shadow damage ratio read -6.1% against -6.0% over 20 trials, control = passive unlearned. Reference search: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 681468,
@@ -4605,19 +4646,45 @@
   {
     "spell": 807870,
     "clause": "Flash powerful light that deals ${$m2+0+$SP*0.274099} Holy damage",
-    "labels": [
-      "807870 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deals $m2 (93..94 at level 60) Holy damage",
+        "labels": [
+          "807870 behaviour_metric_delta damage"
+        ]
+      },
+      {
+        "claim": "+ $SP*0.274099: 10000 spell power adds 2740",
+        "labels": [
+          "807870 behaviour_metric_delta damage_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Damage 93 read in [93,94] (93 + 0 at the reference spell power); +10000 spell power read 2833 (expected 2833..2835, 0.274099 x 10000 = 2740): contrast on the same pair. Reference search: coa-history 43 events, bindmysoul 805583 reads 20 + 27.41% SP (older flat base, G-9); nothing else found."
   },
   {
     "spell": 807870,
     "clause": "and stuns enemies within $a1 yds for $d.",
-    "labels": [
-      "807870 effect_radius e0 #1",
-      "807870 aura_duration_ms #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "stuns enemies within 8 yds",
+        "labels": [
+          "807870 behaviour_metric_delta radius_edge_stun",
+          "807870 behaviour_metric_delta stun_near",
+          "807870 behaviour_metric_delta stun_far",
+          "807870 behaviour_metric_delta stun_far2"
+        ]
+      },
+      {
+        "claim": "for 5 s",
+        "labels": [
+          "807870 behaviour_metric_delta stun_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 s minus 1000 after the 1500 ms cast), within 250. Radius NOT closed: radius_edge alerted in both runs (dummy stunned at 11.4 yd from the caster, edge expected 8 + 1.275 + 1.5), while one dummy at 7 yd is stunned and one at 12.5 or 16 yd is not; the effective reach lies between 11.4 and 12.5 yd, cause unknown (fix note in the report)."
   },
   {
     "spell": 805628,

@@ -207,6 +207,53 @@
       "spell_proc": {},
       "internal_cooldown_ms": 0,
       "base_mana_per_attempt": true
+    },
+    {
+      "aura": 92137,
+      "name": "Angelic Presence",
+      "tooltip": "|cFF66DDFFLevel 10 Passive|r\nAvoiding an attack now has a $h% chance to grant you |cffffffffAngelic Presence|r.@s:800722:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 50,
+        "parry": 50,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "min_parts": 10,
+      "trigger_text": "Avoiding an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 800722,
+      "events_per_proc": 1,
+      "proc_spell_source": "AscensionSunClericEvents.cpp:252 casts Angelic Presence 800722 on the caster (Cast(player,player,800722)) when the handler of 92137 succeeds.",
+      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 92137, rev_20260909_13_sun_cleric_completion.sql:59): the check at AscensionSunClericEvents.cpp:98 returns avoided && Chance(player, 92137) for a received event; Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 20) once per avoided attack with no internal cooldown (the spell_proc row of 92137 has Chance 100, so the engine always passes the event on and the handler rolls the 20). Trigger: procs avoided trigger (ADR 0900): ten aggressive stationary strikers (creature 36) melee the caster, each carrying Self Root Forever 42716, Molten 62531 and Enrage 2116852, so 500 ms attempts, whose dodge and parry are set to 50% and 50% before every swing interval, so no swing lands and every attempt is an avoided attack (the trial). Sized as the Witch Hunter Dawn Knight (damage avoided) entry: residual_target 0.001 per pair, min_detectable 4 points (20% of 20: 10% equals the 2-point band, which leaves no room for an interval, procs.py residual_sizing). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Avoiding an attack now has a 20% chance to grant you Angelic Presence ... within 15 seconds\" (agrees); coa-history spell 800722: 166 applications, 68 refreshes and 173 removals in 5 to 7 logs, no per-attack roll visible; spell 92137 itself 0 events (a passive).",
+      "dbc": {
+        "92137": {
+          "ProcChance": 20,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "92137": {
+          "ProcFlags": 1048575,
+          "Chance": 100,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [],
@@ -15432,6 +15479,553 @@
         ]
       },
       "observe_source": "804628 Suncharged Effect[0] aura 42 PROC_TRIGGER_SPELL 807080; Judgement Day 570125 (DurationIndex 9 = 30000 ms) gets a periodic dummy effect in slot 2 with Amplitude 500 (AscensionSunClericContracts.cpp:266-275) whose tick casts Suncharge 807080 on the target when 804628 is known (AscensionSunClericAuras.cpp:236-239); 807080 StackAmount 10 (DurationIndex 31), Effect[1] EffectAmplitude 500 ($807080t2 = 0.5 s). Judgement Day 806121 is cast at the dummy in both phases, 804628 learned between them (control: the first phase without the passive, 0 stacks), and the stacks of 807080 on the dummy are read. The read is taken 5500..6500 ms after the cast, when 11 to 13 ticks have elapsed: the stacks read 10, the stated cap, not 11 or more. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'Your Judgement Day now applies Suncharged to the target every 1 sec, stacking 10 times.' (an older state: 1 sec; Spell.dbc 807080 Effect[1] EffectAmplitude 500 and the contract AscensionSunClericContracts.cpp:274-275 give 0.5 s, and the tooltip token $807080t2 reads the DBC); coa-history and merged PRs give nothing else."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (damage)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Flash powerful light that deals ${$m2+0+$SP*0.274099} Holy damage",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807870,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 93.5,
+      "after_at_least": 93,
+      "after_at_most": 94,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "807870 Effect[1] SCHOOL_DAMAGE, Holy (SchoolMask 2, DmgClass 1), EffectBasePoints 57 + 1 (DieSides 1) with EffectRealPointsPerLevel 17.7 from BaseLevel 58, MaxLevel 60: at level 60 $m2 = 57 + int(17.7 x 2 = 35.4) + 1 = 93..94 (per-level term truncated, SpellInfo.cpp:497; the tooltip token resolves 93.4). The coefficient is the tooltip token $SP*0.274099. Fixtures: 984954 (Reg's Test Aura, Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000: no magic crit) and 823764 (aura 123 -10000 on schools 126: no magic resistance on the dummy), both precondition fixtures on the caster, the cast is the claim; spell hit rating 10000 in the class file. Control (before): no cast, 0. The tooltip adds $SP*0.274099 = 0 at the reference spell power 0 (class file reference_stats). Damage events of 807870 on the dummy read 2000 ms after the cast: [93, 94]. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Flash powerful light that deals ${$m2+0+$SP*0.274099} Holy damage",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807870,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 2834,
+      "after_at_least": 2833,
+      "after_at_most": 2835,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "807870 Effect[1] SCHOOL_DAMAGE, Holy (SchoolMask 2, DmgClass 1), EffectBasePoints 57 + 1 (DieSides 1) with EffectRealPointsPerLevel 17.7 from BaseLevel 58, MaxLevel 60: at level 60 $m2 = 57 + int(17.7 x 2 = 35.4) + 1 = 93..94 (per-level term truncated, SpellInfo.cpp:497; the tooltip token resolves 93.4). The coefficient is the tooltip token $SP*0.274099. Fixtures: 984954 (Reg's Test Aura, Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000: no magic crit) and 823764 (aura 123 -10000 on schools 126: no magic resistance on the dummy), both precondition fixtures on the caster, the cast is the claim; spell hit rating 10000 in the class file. Control (before): no cast, 0. As damage with 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 93..94 + int(0.274099 x 10000 = 2740.99) = [2833, 2835], against [93, 94] at spell power 0; the contrast on the same build and in the same pair is the damage entry. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun duration)",
+      "kind": "metric_delta",
+      "variant": "stun_duration",
+      "label_suffix": "stun_duration",
+      "quote": "and stuns enemies within $a1 yds for $d.",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 4000,
+      "tolerance": 250,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 28 = 5000 ms ($d, the tooltip resolves 5000). The remaining duration of the stun aura on the dummy (measure_actor dummy, not the caster) is read 2500 ms after the cast start (Glare has a 1500 ms cast, SpellCastTimes 16, so the stun starts at 1500 ms and the first probe at 1000 ms read no aura): 5000 - (2500 - 1500) = 4000 ms, within 250 ms, so a total of 4500 or 5500 ms (10% off) reads 3500 or 4500 and is excluded on both sides. Control (before): no cast, no aura, 0. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun radius)",
+      "kind": "radius_edge",
+      "label_suffix": "radius_edge_stun",
+      "quote": "and stuns enemies within $a1 yds",
+      "gate_spell": 807870,
+      "cast_spell": 807870,
+      "cast_at": "caster",
+      "hit_spell": 807870,
+      "hit_metric": "aura",
+      "power": 1360,
+      "radius": 8,
+      "dummy_reach": 1.275,
+      "primary_yd": 0.1,
+      "repeats": 1,
+      "settle_ms": 2500,
+      "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731); the judge reads each reach again and refuses a layout that does not bracket the edge; the caster is a player, whose combat reach is 1.5 yd (DEFAULT_COMBAT_REACH, an assumption the first pair 20261122 tested: with the edge at 8 + 1.275 the dummy 0.5 yd beyond it was stunned too, so the caster's own size is added: 8 + 1.275 + 1.5)",
+      "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA TARGET_SRC_CASTER, TargetB TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd ($a1, the tooltip resolves 8). The area is centred on the caster, so the primary dummy stands 0.1 yd from the caster (the judge's center) and the inside and outside dummies 0.5 yd either side of the stated 8 yd plus the dummy's combat reach (the area search adds the target's object size, WorldObject::IsWithinDist3d, Object.cpp:1354-1357). Control arm: the cast is refused before 807870 is learned (gate = cast spell, learned between the arms), no stun on any dummy; treatment: one cast after the learn (the spell has a 120 s cooldown, so one repeat), the stun read per dummy: on the primary and the inside dummy, not on the outside one. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found.",
+      "center_reach": 1.5
+    },
+    {
+      "spell": 681467,
+      "name": "Enveloped in Light (plate armor contribution)",
+      "kind": "metric_delta",
+      "variant": "plate_armor",
+      "label_suffix": "plate_armor",
+      "quote": "Increases your armor contribution from plate items by $s1%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "fields": {},
+      "metric": "armor",
+      "expected": 80.2,
+      "expected_gain": 80.2,
+      "tolerance": 1.5,
+      "shield_after_learn": {
+        "item": 8094,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "observe_source": "681467 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT, MiscValue 1 (armor), MiscValueB 16 (1<<ITEM_SUBCLASS_ARMOR_PLATE), BasePoints 19 + 1 = 20 ($s1). The caster wears Platemail Armor 8094 (chest, slot 4, item_template class 4 subclass 4, RequiredLevel 45, the item of item_armor_subclass_effects for 680652; the entry equips it in the before phase of both phases, option shield_after_learn with rejected_before false). The armor it provides to a Sun Cleric is its Reborn armor, ItemAddon.dbc of the server DBC set (/srv/coa/server-data/dbc, entry at field 1, Reborn armor at field 43 of 48, the layout of AscensionItemAddonFile.h; the same field reads 48 for the shield 2129, the value the Sun-Touched Armor 561023 entry measured): 401 for entry 8094. 20% of 401 = 80.2; StatSystem.cpp:390 adds the subclass armor x (multiplier - 1). Holy Form 805301 is the trigger cast of both phases (the Sun-Touched Armor entries' shape), the passive is learned between them; the armor read before and after is judged by its gain within 1.5 (a gain 10% off, 18% or 22%, reads 72.2 or 88.2 and is excluded). Control: the reading before the learn, the same plate item and the same cast. Reference search 2026-11-22: coa-history spell 681467: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot (fetched 2026-07-22) carries rank 1 680652 \"armor contribution from mail and plate items by 10% and reduces Shadow damage taken by -3%\" and no 681467 (the higher rank; an older, lower state of the same passive, G-9); nothing found beyond the tooltip and the DBC for the values."
+    },
+    {
+      "spell": 681467,
+      "name": "Enveloped in Light (Shadow damage taken)",
+      "kind": "taken_hit",
+      "variant": "shadow_taken",
+      "label_suffix": "shadow_taken",
+      "judge": "damage_ratio",
+      "expected": 0.94,
+      "quote": "and reduces Shadow damage taken by $s2%.",
+      "strike_spell": 47632,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            681467
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 681467,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            681467
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 681467,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "681467 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 32 (Shadow), BasePoints -7 (-6 as read, $s2 = 6, so the ratio 0.94). Grave Coil 47632 (600 Shadow, DmgClass 1 magic) strikes the caster without (control arm, passive unlearned, aura absent) and with the passive learned (aura present); the damage ratio treatment over control is judged against 0.94 within the 2-point band. Reference search 2026-11-22: coa-history spell 681467: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot (fetched 2026-07-22) carries rank 1 680652 \"armor contribution from mail and plate items by 10% and reduces Shadow damage taken by -3%\" and no 681467 (the higher rank; an older, lower state of the same passive, G-9); nothing found beyond the tooltip and the DBC for the values."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (circle duration)",
+      "kind": "metric_delta",
+      "variant": "circle_duration",
+      "label_suffix": "circle_duration",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 10000,
+      "tolerance": 700,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, DurationIndex 8 = 15000 ms ($d, the tooltip resolves 15000). One real cast at the caster's position (the caster stands inside the circle and holds its area aura 520647): the remaining duration of that aura on the caster is read 5000 ms after the cast: 15000 - 5000 = 10000 ms, within 700 ms, so a circle of 13500 or 16500 ms (10% off) reads 8500 or 11500 and is excluded on both sides. Control (before): no cast, no aura, 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (radius, caster inside)",
+      "kind": "metric_delta",
+      "variant": "radius_in",
+      "label_suffix": "radius_in",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "dummy",
+      "dummy_distance": 9,
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "aura",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, EffectRadiusIndex 13 = 10 yd ($a1, the tooltip resolves 10), TargetA 52 GAMEOBJECT_DEST_AREA, TargetB 29 DEST_DYNOBJ_ALLY: a ground circle cast at the dummy, 9 yd from the caster. The caster (an ally) holds the area aura 520647 only while it stands inside the circle: present 1700 ms after the cast at 9 yd. Control (before): no cast, 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (radius, caster outside)",
+      "kind": "metric_delta",
+      "variant": "radius_out",
+      "label_suffix": "radius_out",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "dummy",
+      "dummy_distance": 13,
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "aura",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "As radius_in with the circle cast at the dummy 13 yd from the caster: the area aura 520647 is absent on the caster, which stands beyond 10 yd plus the unit sizes (the engine adds object sizes to a dynamic-object area). Together with radius_in (9 yd, present) the edge lies between 9 and 13 yd. Control (before): no cast, 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (damage below 10% health breaks the circle)",
+      "kind": "metric_delta",
+      "variant": "break",
+      "label_suffix": "break",
+      "quote": "@ext:Damage which reduces the caster below 10% maximum health will break the effect.:ext@",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "strike": {
+        "spell": 41394,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 2000
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.5,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "observe_source": "Circle of Valor 520647: AscensionSunClericContracts.cpp:366-371 removes the caster's dynamic object 520647 when a damage hit leaves the caster's health below 10% of its maximum (health - damage < CountPctFromMaxHealth(10)); the periodic tick (AscensionSunClericAuras.cpp:243-252) heals only while the caster's health percent is 10 or more. The caster stands inside its circle (cast at its own position). Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast (strike, after_trigger_ms), the caster's health being set to the stated value of the 100000 maximum right before the strike. The heals of 520648 on the caster (spell_heal_count) are read 16500 ms after the cast. Treatment: the health is set to 10500 (10.5%, at or above the 10% line) and the 1100 strike leaves 9400 (9.4%, below it): one heal tick (1500 ms) lands before the strike and none after, 1. Control: break_control, the same strike from 50000 (leaves 48900, 48.9%): the circle goes on and the count is 10; the before phase has no cast, 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (damage that leaves 10% health keeps the circle)",
+      "kind": "metric_delta",
+      "variant": "break_control",
+      "label_suffix": "break_control",
+      "quote": "@ext:Damage which reduces the caster below 10% maximum health will break the effect.:ext@",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "strike": {
+        "spell": 41394,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 2000
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520648,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.5,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "observe_source": "Circle of Valor 520647: AscensionSunClericContracts.cpp:366-371 removes the caster's dynamic object 520647 when a damage hit leaves the caster's health below 10% of its maximum (health - damage < CountPctFromMaxHealth(10)); the periodic tick (AscensionSunClericAuras.cpp:243-252) heals only while the caster's health percent is 10 or more. The caster stands inside its circle (cast at its own position). Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast (strike, after_trigger_ms), the caster's health being set to the stated value of the 100000 maximum right before the strike. The heals of 520648 on the caster (spell_heal_count) are read 16500 ms after the cast. Control of break: the health is set to 50000 and the 1100 strike leaves 48900 (48.9%, above 10%), so the circle is not broken and every tick lands: 10 heals of 520648 (15000 ms / 1500 ms). Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 2000,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (next Illumination is instant cast)",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "metric": "spell_cast_time_ms",
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. The cast time of Illumination for the caster is read 500 ms after the strikes: 2000 ms before (control, no passive) and 0 ms after the learn. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values."
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 408.9,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (next Illumination is free of cost)",
+      "variant": "free",
+      "label_suffix": "free",
+      "metric": "spell_power_cost",
+      "expected": 0,
+      "tolerance": 2,
+      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. The mana cost of Illumination for the caster is read 500 ms after the strikes: 408.9 before (control, no passive) and 0 after the learn. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values."
+    },
+    {
+      "spell": 92137,
+      "kind": "metric_delta",
+      "quote": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "before_expected": 2000,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 40,
+        "wait_ms": 200
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "fields": {
+        "spell": 500143
+      },
+      "name": "Angelic Presence (the Illumination consumes the buff)",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "cast_power": 1360,
+      "metric": "spell_cast_time_ms",
+      "expected": 2000,
+      "tolerance": 1,
+      "observe_source": "Quote: the Description of 92137 holds only the grant sentence; the Angelic Presence clause \"Your next Illumination within $d is instant cast and free of cost.\" belongs to the ledger row of this spell (clause 7) and its words come from the tooltip of 800722, so the entry hangs under the grant sentence. 92137 Effect[0] aura 42 PROC_TRIGGER_SPELL 800722 (ProcChance 20); AscensionSunClericEvents.cpp:98 and :252: a received avoided attack rolls Chance(player, 92137) (ProcChance 20, no cooldown) and casts Angelic Presence 800722 on the caster. 800722 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -1001 and Effect[0] aura 108 MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101, class mask word 2 = 512 (AscensionSunClericContracts.cpp:146-149 sets Effects[1] mask to 512, the Illumination family flag; Illumination 500143: cast time 2000 ms, cost 30% of the base mana 1363 = 408.9, as the Resplendence 806159 entries read). The proc is rolled for real: the striker (creature 36) casts Speed Slash 2118233 (melee class, SPELL_ATTR7_NO_ATTACK_MISS, can be parried) at the caster 40 times, 200 ms apart, the caster's parry set to 100% right before each (harness set_combat_avoidance, a named precondition fixture of both phases), so each is an avoided attack and a 20% roll: the residual probability that no proc happens in 40 rolls is 0.8^40 = 1.3e-4 per run, 2.6e-4 per pair (at most 0.1%). The passive is learned between the phases; the before phase is the same strikes without the passive (control). Holy Form 805301 is the trigger cast of both phases. Here the trigger cast is Illumination 500143 itself, cast on the caster after the strikes (free and instant when 800722 was granted, a normal 2000 ms cast otherwise); the cast time of Illumination is read 500 ms after it: 2000 ms in both phases, the buff gone after one Illumination (\"next\"), against the 0 ms the instant entry reads while the buff is up. A phase without a proc would also read 2000, so the entry proves the consumption only together with the instant entry of the same pair (which alerts when no proc happened, residual 2.6e-4 per pair). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) reads \"Your next Illumination within 15 seconds is instant cast and free of cost\" (agrees); coa-history spell 800722: 166 applications and 68 refreshes in 6 and 5 logs, no cast time or cost read possible; nothing found beyond the tooltip and the DBC for the values."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun at 7 yd)",
+      "kind": "metric_delta",
+      "variant": "stun_near",
+      "label_suffix": "stun_near",
+      "quote": "and stuns enemies within $a1 yds",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807870
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "dummy_distance": 7,
+      "observe_source": "Second design of the radius claim (the radius_edge entry hit a dummy 11.4 yd from the caster). 807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 14 = SpellRadius RadiusMin = RadiusMax 8 yd, RadiusPerLevel 0 ($a1 = 8); SpellEffectInfo::CalcRadius (SpellInfo.cpp:624-639) adds only SPELLMOD_RADIUS of a learned modifier, none here. One dummy stands 7 yd from the caster; the stun aura 807870 on it is read 2500 ms after the cast start (cast time 1500 ms): present (1): 7 yd is inside 8 yd. Control (before): no cast, 0. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun at 12.5 yd)",
+      "kind": "metric_delta",
+      "variant": "stun_far",
+      "label_suffix": "stun_far",
+      "quote": "and stuns enemies within $a1 yds",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807870
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "dummy_distance": 12.5,
+      "observe_source": "Second design of the radius claim (the radius_edge entry hit a dummy 11.4 yd from the caster). 807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 14 = SpellRadius RadiusMin = RadiusMax 8 yd, RadiusPerLevel 0 ($a1 = 8); SpellEffectInfo::CalcRadius (SpellInfo.cpp:624-639) adds only SPELLMOD_RADIUS of a learned modifier, none here. One dummy stands 12.5 yd from the caster; the stun aura 807870 on it is read 2500 ms after the cast start (cast time 1500 ms): absent (0): 12.5 yd exceeds 8 yd plus the dummy combat reach 1.275 and the caster reach 1.5 (10.78 yd). Control (before): no cast, 0. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun at 16 yd)",
+      "kind": "metric_delta",
+      "variant": "stun_far2",
+      "label_suffix": "stun_far2",
+      "quote": "and stuns enemies within $a1 yds",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807870
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "dummy_distance": 16,
+      "observe_source": "Second design of the radius claim (the radius_edge entry hit a dummy 11.4 yd from the caster). 807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 14 = SpellRadius RadiusMin = RadiusMax 8 yd, RadiusPerLevel 0 ($a1 = 8); SpellEffectInfo::CalcRadius (SpellInfo.cpp:624-639) adds only SPELLMOD_RADIUS of a learned modifier, none here. One dummy stands 16 yd from the caster; the stun aura 807870 on it is read 2500 ms after the cast start (cast time 1500 ms): absent (0): 16 yd exceeds 8 yd plus the dummy combat reach 1.275 and the caster reach 1.5 (10.78 yd). Control (before): no cast, 0. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
     }
   ],
   "player_observations": [],
