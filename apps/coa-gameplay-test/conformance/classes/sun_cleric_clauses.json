@@ -530,7 +530,7 @@
           "300347 behaviour_metric_delta gavel_cd",
           "300347 cost_gate 802561 gavel_gate without",
           "300347 cost_gate 802561 gavel_gate with",
-          "300347 cost_gate 802561 gavel_gate unset"
+          "300347 cost_gate 802561 gavel_gate unfulfilled"
         ]
       },
       {
