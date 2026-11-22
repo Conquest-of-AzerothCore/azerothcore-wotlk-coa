@@ -2961,9 +2961,7 @@
       {
         "claim": "Expending Angelic Presence increases your critical strike chance by $681254s1%",
         "labels": [
-          "680648 effect_value 681254e0 #0",
-          "680648 behaviour_metric_delta expend_stack",
-          "680648 behaviour_metric_delta expend_crit"
+          "680648 effect_value 681254e0 #0"
         ]
       },
       {
