@@ -224,10 +224,13 @@
     "clause": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
     "labels": [
       "300315 effect_value e0 #0",
-      "300315 behaviour_metric_delta judgement_day_cooldown"
+      "300315 behaviour_metric_delta judgement_day_cooldown",
+      "300315 cost_gate 806121 judgement_day_gate without",
+      "300315 cost_gate 806121 judgement_day_gate with",
+      "300315 cost_gate 806121 judgement_day_gate beyond"
     ],
     "kind": "claim",
-    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 300315 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
+    "reason": "Behaviour route, cooldown gate: Judgement Day 806121 (RecoveryTime 60000 ms) attempted 45700 ms after its cast is refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again at 44300 ms (beyond), so the cut lies in [14300, 15700] ms and excludes 13500 and 16500 ms (10% off on both sides). The readback label judgement_day_cooldown is kept as data. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The data labels of this row (effect_value, aura_duration_ms, effect_radius, the readback label) are emitted by the base pair only, a behaviour-only pair does not run them; they read ok at the last base pair, and the row resolves at the next base pair on this build. Reference search 2026-11-22: coa-history spell 300315: 0 events (a passive); nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300318,
@@ -2297,9 +2300,18 @@
     "spell": 560861,
     "clause": "While Dawn is active, damage dealt by Radiant Flame now reduces the cooldown of Dawnfall and Solar Concord by $/1000;560860S1 sec.",
     "labels": [
-      "560861 effect_value 560860e0 #0"
+      "560861 effect_value 560860e0 #0",
+      "560861 cost_gate 806118 dawnfall_gate without",
+      "560861 cost_gate 806118 dawnfall_gate with",
+      "560861 cost_gate 806118 dawnfall_gate unset",
+      "560861 cost_gate 806118 dawnfall_gate beyond",
+      "560861 cost_gate 301266 concord_gate without",
+      "560861 cost_gate 301266 concord_gate with",
+      "560861 cost_gate 301266 concord_gate unset",
+      "560861 cost_gate 301266 concord_gate beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Behaviour route, cooldown gates under a real Dawn cast (Solar Power 500149 set as a precondition fixture): Radiant Flame 806060 ticks five times (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1, from the DBC), so 5 x 1000 ms (560860 BasePoints -1001) are cut from Dawnfall 806118 (120000 ms) and from Solar Concord 301266 (30000 ms): each is refused at its cooldown less 5000 ms plus 250 ms without the passive, accepted with it, refused 250 ms earlier (beyond), so the cut lies in [4750, 5250] ms, excluding 4500 and 5500 ms. Control of 'While Dawn is active': the unset arm keeps the passive and skips the Dawn cast, refused in both entries. Solar Concord arms start 40000 ms apart (arm_wait_ms) because a Dawn cast over a Dawn still up switches it off (807440 read 0 in a diagnostic, the with arm then missed the cut). Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The data labels of this row (effect_value, aura_duration_ms, effect_radius, the readback label) are emitted by the base pair only, a behaviour-only pair does not run them; they read ok at the last base pair, and the row resolves at the next base pair on this build. Reference search 2026-11-22: coa-history spell 560861: 0 events in 186 logs (a passive); nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 561023,
@@ -3612,11 +3624,31 @@
   {
     "spell": 681436,
     "clause": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
-    "labels": [
-      "681436 effect_value 504679e0 #0"
-    ],
     "kind": "claim",
-    "reason": "Observation, not a status: Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. energize_conquest reads 79 against 79 derived from the DBC (Conquest 800764 refunds 10% of the 2868 maximum mana, 286, before Devoted gives 5% of the 2868 - 1286 missing, 79.1); energize_resplendence, energize_revelation and energize_ascension read 93 (none of the three has an energize effect, so no refund precedes Devoted); cost_resplendence, cost_revelation and cost_ascension read 1093; no cost entry exists for Conquest. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found. The behaviour labels are not cited by this clause (a claim split over the cost and the energize halves is a later ledger decision)."
+    "reason": "Cost claim: the engine's own use-time function (CalcPowerCost, ADR 1024) read as a learned contrast on the four Solar Invocations, gains -258.97 Resplendence, -190.82 Revelation, -68.15 Conquest, -477.05 Ascension (ManaCostPercentage 19, 14, 5, 35 of the base mana 1363, Spell.dbc), measured -258, -190, -68, -477 (the engine truncates the cost to a whole number, band 1), and the control arm Dawnsear 554406, outside the class mask, gain 0 measured 0; the arms are all named in each entry. Energize claim: 5% of the missing mana, 93 (Resplendence, Revelation, Ascension) and 79 (Conquest: its own 10% refund of 286 comes first, 5 x (2868 - 1286) / 100), 0 under the Vow of Grace source (energize_conquest_not_vow), measured equal in both runs. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The energize claim carries the data label effect_value 504679e0 #0, emitted by the base pair only; it reads ok at the last base pair. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive), the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found.",
+    "claims": [
+      {
+        "claim": "Removes the cost of your Solar Invocation spells",
+        "labels": [
+          "681436 behaviour_metric_delta cost_use_resplendence",
+          "681436 behaviour_metric_delta cost_use_revelation",
+          "681436 behaviour_metric_delta cost_use_conquest",
+          "681436 behaviour_metric_delta cost_use_ascension",
+          "681436 behaviour_metric_delta cost_use_control"
+        ]
+      },
+      {
+        "claim": "they now generate $504679s1% of your missing mana when cast",
+        "labels": [
+          "681436 effect_value 504679e0 #0",
+          "681436 behaviour_metric_delta energize_resplendence",
+          "681436 behaviour_metric_delta energize_revelation",
+          "681436 behaviour_metric_delta energize_conquest",
+          "681436 behaviour_metric_delta energize_ascension",
+          "681436 behaviour_metric_delta energize_conquest_not_vow"
+        ]
+      }
+    ]
   },
   {
     "spell": 681448,
@@ -5039,26 +5071,64 @@
   {
     "spell": 800054,
     "clause": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
-    "labels": [
-      "800054 effect_value 800038e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base healing",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Heal 34 / 34 at the reference stats (expected 34.4..35.2 from the DBC), 1635 / 1634 at +10000 spell power and 1635 / 1635 at +20000 attack power (expected 1634.4..1635.2): the terms 0.2 SP and 0.1 AP are proven by their contrast arms against the base arm of the same pair. Every entry reads its control before the cause (no cast, 0), crit forced out by fixture 984954. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL mean 689, SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC; the DBC and the tooltip are the expectation. Same entries as the Hegemony 561204 rows, written for 800054's own labels."
   },
   {
     "spell": 800054,
     "clause": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
-    "labels": [
-      "800054 effect_value 800038e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base damage",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Damage 47 / 48 at the reference stats (expected 47.5..48.5), 4047 / 4048 at +10000 spell power (4047.5..4048.5) and 3048 / 3047 at +20000 attack power (3047.5..3048.5): the terms 0.4 SP and 0.15 AP are proven by their contrast arms against the base arm of the same pair. Every entry reads its control before the cause (no cast, 0), crit forced out by fixture 984954. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL mean 689, SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC; the DBC and the tooltip are the expectation. Same entries as the Hegemony 561204 rows, written for 800054's own labels."
   },
   {
     "spell": 800054,
     "clause": "Lasts $d.",
     "labels": [
-      "800054 aura_duration_ms #2"
+      "800054 aura_duration_ms #2",
+      "800054 behaviour_metric_delta radiance_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Presence pair on the aura of a real Radiance cast: present 9500..9950 ms and gone 10150..10550 ms of game time after the cast (DurationIndex 1 = 10000 ms), which excludes a duration 10% (1000 ms) shorter or longer; control: the before phase casts nothing and reads the aura absent. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The data labels of this row (effect_value, aura_duration_ms, effect_radius, the readback label) are emitted by the base pair only, a behaviour-only pair does not run them; they read ok at the last base pair, and the row resolves at the next base pair on this build. Reference search 2026-11-22: coa-history spell 800054 lists Radiance applied and removed events with no stated duration; nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 800600,
@@ -5477,7 +5547,11 @@
       {
         "claim": "enemies in a $804252a1 yd frontal cone",
         "labels": [
-          "503505 effect_radius 804252e0 #0"
+          "503505 effect_radius 804252e0 #0",
+          "503505 behaviour_metric_delta cone_edge_in_out",
+          "503505 behaviour_metric_delta cone_front",
+          "503505 behaviour_metric_delta cone_behind",
+          "503505 behaviour_metric_delta cone_behind_cast"
         ]
       },
       {
@@ -5488,7 +5562,7 @@
         ]
       }
     ],
-    "reason": "The tooltip gives no number for 'additional threat'. The qualitative claim is proven by threat per damage 1.1505 (cone_threat) against 1.0056 for an ordinary Holy hit (threat_control), band 0.02. The 15 percent is the server convention for effect 63 spells (PR #9382, rev_20261026_20_coa_tank_ability_threat.sql: spell_threat pctMod 1.15 for 804252, the flat 15 kept), pinned by the arm as a regression, not a ruling on the tooltip. Reference search 2026-11-22: see the entries; nothing found beyond the tooltip, the DBC and that SQL."
+    "reason": "The tooltip gives no number for 'additional threat'. The qualitative claim is proven by threat per damage 1.1505 (cone_threat) against 1.0056 for an ordinary Holy hit (threat_control), band 0.02. The 15 percent is the server convention for effect 63 spells (PR #9382, rev_20261026_20_coa_tank_ability_threat.sql: spell_threat pctMod 1.15 for 804252, the flat 15 kept), pinned by the arm as a regression, not a ruling on the tooltip. Reference search 2026-11-22: see the entries; nothing found beyond the tooltip, the DBC and that SQL. Round 11 d3, cone bracket: the area test is Nearby(ally, 10), IsWithinDist adding both combat reaches, so the effective centre distance is 10 + 1.5 (player) + 1.275 (dummy entry 36) = 12.775 yd (a first exploratory run read two hits with the second dummy at 11 yd, inside that reach). Dummies at 12.275 yd (9.5 yd from the surface, inside) and 13.275 yd (10.5 yd, outside): one hit of 404..456 summed (451 and 440), so the 10 yd radius lies in (9.5, 10.5). Front arm: a dummy 3 yd in front of the ally (ally 2 yd forward) takes one hit (428, 414); the dummy 3 yd behind the ally (ally 8 yd forward) takes none (0), and the cast itself goes through (cast_failure 0, cone_behind_cast), so the front half is the arc the code applies (HasInArc(pi)), the tooltip gives no angle. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The radius claim carries the data label effect_radius 804252e0 #0, emitted by the base pair only; it reads ok at the last base pair."
   },
   {
     "spell": 503505,
