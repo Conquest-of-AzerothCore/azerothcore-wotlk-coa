@@ -1670,6 +1670,38 @@ def striker_creature(class_file: dict, strike: 'MetricDeltaStrike') -> dict:
             'reaction': 1 if strike.reaction is None else strike.reaction, 'spell_hit_bonus': 100}
 
 
+SCRIPTED_CRIT_METRIC = 'spell_done_crit_chance_scripted'
+SPELL_DAMAGE_CLASS_MELEE = 1
+SPELL_DAMAGE_CLASS_RANGED = 3
+SPELL_ATTR2_AUTO_REPEAT = 0x00000020
+SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON = 0x01000000
+
+
+def require_scripted_crit_probe(records: Records, spec) -> None:
+    evidence_metric = spec.evidence_metric
+    if SCRIPTED_CRIT_METRIC in (spec.metric, evidence_metric) and evidence_metric not in (None, spec.metric):
+        raise NotModelled(f'{spec.spell}: {SCRIPTED_CRIT_METRIC} is read and judged under its own name only, not '
+                          f'{spec.metric} judged as {evidence_metric}')
+    if spec.metric != SCRIPTED_CRIT_METRIC:
+        return
+    spell = int(spec.fields.get('spell', 0))
+    damage_class = int(records.field('Spell', spell, 'DmgClass') or 0)
+    if damage_class == SPELL_DAMAGE_CLASS_RANGED or \
+            int(records.field('Spell', spell, 'AttributesEx2') or 0) & SPELL_ATTR2_AUTO_REPEAT:
+        raise NotModelled(f'{spec.spell}: {SCRIPTED_CRIT_METRIC} probes {spell} on the base attack, but the spell '
+                          f'rolls its crit on the ranged attack')
+    if damage_class == SPELL_DAMAGE_CLASS_MELEE and \
+            int(records.field('Spell', spell, 'AttributesEx3') or 0) & SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON:
+        raise NotModelled(f'{spec.spell}: {SCRIPTED_CRIT_METRIC} probes {spell} on the base attack, but the spell '
+                          f'rolls its crit on the off hand')
+    if spec.measure_actor != CASTER:
+        raise NotModelled(f'{spec.spell}: {SCRIPTED_CRIT_METRIC} probes the player as the caster, not '
+                          f'{spec.measure_actor}')
+    if spec.expected_gain is None:
+        raise NotModelled(f'{spec.spell}: {SCRIPTED_CRIT_METRIC} is judged on its expected_gain only, so that each '
+                          f'arm names its gain')
+
+
 def metric_delta_contrast(spec) -> str:
     from coverage import METRIC_EVIDENCE, STATE
     if not spec.setup_only_after:
@@ -1906,6 +1938,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'enemy_player_race, and the race only with it')
     checked_options(spec)
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    require_scripted_crit_probe(records, spec)
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
     class_file = armed_for(class_file, records, spec.trigger_spell)

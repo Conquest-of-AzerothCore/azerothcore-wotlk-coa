@@ -478,6 +478,7 @@ STATE_PROMISES = {
     'owned_creature_spell_crit_chance': CRIT_WORDS,
     'owned_creature_school_spell_crit_chance': CRIT_WORDS,
     'spell_done_crit_chance': CRIT_WORDS,
+    'spell_done_crit_chance_scripted': CRIT_WORDS,
     'spell_taken_crit_chance': CRIT_WORDS,
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
@@ -508,9 +509,14 @@ CONTRAST_PROOF = {
     'owned_creature_school_spell_crit_chance': LEARNED_CONTRAST,
     'enemy_player_aura_duration_ms': LEARNED_CONTRAST,
     'spell_done_crit_chance': LEARNED_CONTRAST,
+    'spell_done_crit_chance_scripted': LEARNED_CONTRAST,
     'spell_taken_crit_chance': LEARNED_CONTRAST,
     'ranged_taken_crit_chance': LEARNED_CONTRAST,
 }
+PARTNERED_CONTRASTS = frozenset({'spell_done_crit_chance_scripted'})
+PLAIN_CRIT_NAME = r"[A-Z][\w'’]*(?: [A-Z][\w'’]*)*"
+PLAIN_CRIT_SENTENCE = re.compile(rf'Increases (?:your critical strike chance|the critical strike chance of '
+                                 rf'{PLAIN_CRIT_NAME}(?:(?:, | and ){PLAIN_CRIT_NAME})*) by \$\d*s\d+%\.?')
 KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES,
                    'CONTRAST_PROOF': CONTRAST_PROOF}
 KIND_ROW_OVERRIDES = frozenset()
@@ -684,9 +690,33 @@ def promised_state(verdict: Verdict, clause: str, promise: str = '') -> bool:
     return words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None
 
 
+def conditional_text(text: str) -> bool:
+    return PLAIN_CRIT_SENTENCE.fullmatch(text.strip()) is None
+
+
+def spell_sentence(clause: dict, clauses: list[dict]) -> str:
+    return ' '.join(other.get('clause', '') for other in clauses if other.get('spell') == clause.get('spell'))
+
+
+def partners_hold(verdict: Verdict, text: str, partners: tuple[Verdict, ...]) -> bool:
+    metric = (verdict.detail or {}).get(PASSIVE_METRIC)
+    if metric not in PARTNERED_CONTRASTS:
+        return True
+    gains = [other.expected for other in partners
+             if other.status in CONFORMANT and other.status != 'closed' and other.check == verdict.check
+             and (other.detail or {}).get(PASSIVE_METRIC) == metric
+             and (other.detail or {}).get(CONTRAST) == LEARNED_CONTRAST and other.expected is not None]
+    return any(gain != 0 for gain in gains) and (not conditional_text(text) or any(gain == 0 for gain in gains))
+
+
+def judged_sentence(clause: str, sentence: str) -> str:
+    return sentence if clause.strip() in sentence else f'{clause} {sentence}'
+
+
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
-                     row: str = '', promise: str = '') -> str:
+                     row: str = '', promise: str = '', partners: tuple[Verdict, ...] = (),
+                     sentence: str | None = None) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -704,7 +734,8 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     observed = metric_class(verdict)
     detail = verdict.detail or {}
     required = contrast_proof().get(detail[PASSIVE_METRIC])
-    if required is not None and detail.get(CONTRAST) == required:
+    if required is not None and detail.get(CONTRAST) == required and \
+            partners_hold(verdict, judged_sentence(clause, row if sentence is None else sentence), partners):
         words = state_promises().get(detail[PASSIVE_METRIC])
         if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row} {promise}', re.IGNORECASE) is not None:
             return BEHAVIOUR
@@ -740,15 +771,22 @@ def bonus_terms_unproven(matched: list[Verdict]) -> bool:
     return not hits
 
 
+def row_verdicts(labels: list[str], by_label: dict[str, Verdict], statuses: dict[str, str]) -> tuple[Verdict, ...]:
+    return tuple(by_label[match] for label in labels for match in resolved_labels(label, statuses))
+
+
 def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
-                   promoted: frozenset[str] = frozenset(), row: str = '', promise: str = '') -> str:
+                   promoted: frozenset[str] = frozenset(), row: str = '', promise: str = '',
+                   row_labels: list[str] | None = None, sentence: str | None = None) -> str:
     labels = claim['labels']
     if not clause_proven(labels, statuses):
         return UNPROVEN
     matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
     if bonus_terms_unproven(matched):
         return UNPROVEN
-    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise)
+    partners = tuple(matched) if row_labels is None else row_verdicts(row_labels, by_label, statuses)
+    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise,
+                              partners=partners, sentence=sentence)
              for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
@@ -762,7 +800,7 @@ def claims_evidence(found: list[str]) -> str:
 def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
                     promoted: frozenset[str] = frozenset()) -> str:
     return claims_evidence([claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''),
-                                           promise_words(clause))
+                                           promise_words(clause), clause_labels(clause))
                             for claim in clause_claims(clause)])
 
 
@@ -808,7 +846,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     not_consumed = frozenset(label for label, result in results.items() if result == NOT_CONSUMED)
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
     per_claim = [[claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''),
-                                 promise_words(clause))
+                                 promise_words(clause), clause_labels(clause), spell_sentence(clause, clauses))
                   for claim in subject_claims(clause, clauses)]
                  for clause in claims]
     project_text = [clause for clause in claims if not independent_text(clause)]

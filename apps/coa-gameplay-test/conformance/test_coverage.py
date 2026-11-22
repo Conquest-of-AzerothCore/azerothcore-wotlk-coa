@@ -2,6 +2,7 @@ import ast
 from dataclasses import replace
 import json
 from pathlib import Path
+import re
 import shutil
 import tempfile
 from types import SimpleNamespace
@@ -17,6 +18,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, CONTRAST_PROOF, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
+                      PARTNERED_CONTRASTS, conditional_text,
                       METRIC_EVIDENCE, NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption,
                       KIND_ROW_OVERRIDES, EvidenceError, acting, kind_row_overrides,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
@@ -689,11 +691,11 @@ class EvidenceStatusTest(unittest.TestCase):
                 self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
         self.assertEqual(METRIC_EVIDENCE['spell_absorb_total'], EVENT)
 
-    def test_the_armor_script_melee_and_scripted_crit_probes_are_readbacks(self):
+    def test_the_armor_and_script_melee_probes_are_readbacks(self):
         label = '1 behaviour_metric_delta probe'
         cases = {'armor_reduced_damage': "Glorious Execution ignores 25% of the target's armor",
-                 'script_melee_damage_dealt': 'increases your melee damage done by 10%',
-                 'spell_done_crit_chance_scripted': 'increases the critical strike chance of Gift of the Sun by 50%'}
+                 'script_melee_damage_dealt': 'increases your melee damage done by 10%'}
+        self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance_scripted'], READBACK)
         for metric, text in cases.items():
             with self.subTest(metric=metric):
                 self.assertEqual(METRIC_EVIDENCE[metric], READBACK)
@@ -886,8 +888,9 @@ class EvidenceTablesTest(unittest.TestCase):
     def test_a_promise_beyond_the_state_metrics_gates_a_contrast_proof(self):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
         self.assertEqual({metric for metric in STATE_PROMISES if metric not in states},
-                         {'spell_done_crit_chance', 'spell_taken_crit_chance'})
+                         {'spell_done_crit_chance', 'spell_done_crit_chance_scripted', 'spell_taken_crit_chance'})
         self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance'], READBACK)
+        self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance_scripted'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_taken_crit_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
 
@@ -1667,6 +1670,137 @@ class BonusTermProofTest(unittest.TestCase):
             self.assertEqual(self.evidence([self.VALUE, self.HIT], [self.bonus(0.45), hit(ARGENT_BLADE)]),
                              [BEHAVIOUR])
         self.assertEqual(self.evidence([self.VALUE], [self.bonus(0.0)]), [UNPROVEN])
+
+
+class ScriptedCritPartnerTest(unittest.TestCase):
+    METRIC = 'spell_done_crit_chance_scripted'
+    GIFT = ('Increases your critical strike chance with Holy spells and abilities by $s1% on enemies above 80% '
+            'health.')
+    PLAIN = 'Increases the critical strike chance of Horusath Blast by $s1%.'
+    ABOVE = '680618 behaviour_metric_delta above'
+    BELOW = '680618 behaviour_metric_delta below'
+
+    def arm(self, label, gain, contrast=LEARNED_CONTRAST, metric=METRIC, status='ok'):
+        return replace(judged(label, BEHAVIOUR_METRIC_DELTA, metric, status=status, contrast=contrast),
+                       expected=gain)
+
+    def evidence(self, text, *verdicts):
+        return evidence_of([claim(text, *(verdict.label for verdict in verdicts))], list(verdicts))[0]
+
+    def test_the_row_proves_a_conditional_crit_clause_with_both_arms(self):
+        self.assertEqual(CONTRAST_PROOF[self.METRIC], LEARNED_CONTRAST)
+        self.assertEqual(STATE_PROMISES[self.METRIC], STATE_PROMISES['spell_done_crit_chance'])
+        self.assertIn(self.METRIC, PARTNERED_CONTRASTS)
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [BEHAVIOUR])
+
+    def test_a_conditional_clause_with_the_non_zero_arm_only_stays_data(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50)), [DATA])
+
+    def test_a_zero_gain_arm_alone_stays_data(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.BELOW, 0)), [DATA])
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.BELOW, 0)), [DATA])
+
+    def test_an_unconditional_crit_clause_needs_the_non_zero_arm_only(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.ABOVE, 10)), [BEHAVIOUR])
+
+    def test_a_condition_contrast_stays_data(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50, CONDITION_CONTRAST),
+                                       self.arm(self.BELOW, 0, CONDITION_CONTRAST)), [DATA])
+
+    def test_a_clause_that_does_not_promise_crit_stays_data(self):
+        damage = 'Increases the damage of Holy spells by $s1% on enemies above 80% health.'
+        self.assertEqual(self.evidence(damage, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [DATA])
+
+    def test_a_partner_of_another_metric_does_not_count(self):
+        other = self.arm(self.BELOW, 0, metric='spell_critical_damage')
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), other), [DATA])
+
+    def test_the_partner_arm_may_sit_in_another_claim_of_the_same_row(self):
+        clauses = [declared(self.GIFT, ('Increases your critical strike chance with Holy spells', self.ABOVE),
+                            ('on enemies above 80% health', self.BELOW))]
+        verdicts = [self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)]
+        self.assertEqual(evidence_of(clauses, verdicts)[1].claim_evidence[0][0], BEHAVIOUR)
+
+    def test_mutant_without_the_partner_gate_passes_the_one_arm_row(self):
+        with mock.patch('coverage.partners_hold', lambda verdict, text, partners: True):
+            self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50)), [BEHAVIOUR])
+
+    def test_mutant_with_every_sentence_plain_passes_the_one_arm_row(self):
+        with mock.patch('coverage.PLAIN_CRIT_SENTENCE', re.compile(r'.*', re.DOTALL)):
+            self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50)), [BEHAVIOUR])
+
+    def test_mutant_reading_its_own_row_only_misses_the_sibling_condition(self):
+        clauses = [claim('While only 1 Abomination is active,', spell=1),
+                   claim('Increases your critical strike chance by $s1%.', self.ABOVE, spell=1)]
+        with mock.patch('coverage.spell_sentence', lambda clause, clauses: clause.get('clause', '')):
+            self.assertEqual(evidence_of(clauses, [self.arm(self.ABOVE, 10)])[1].claim_evidence[1][0], BEHAVIOUR)
+
+    def test_mutant_without_the_row_keeps_the_paired_arms_at_data(self):
+        with mock.patch.dict(CONTRAST_PROOF):
+            del CONTRAST_PROOF[self.METRIC]
+            self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [DATA])
+
+    def test_every_hook_clause_of_the_sun_cleric_is_conditional(self):
+        for text in (self.GIFT, 'Increases your critical strike chance on targets below 20% health by $s1%.',
+                     'and your critical strike chance against Undead by $s2%.',
+                     'Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.'):
+            with self.subTest(text=text):
+                self.assertTrue(conditional_text(text))
+
+    def test_only_a_plain_stat_sentence_is_unconditional(self):
+        for text in (self.PLAIN, 'Increases your critical strike chance by $s1%',
+                     "Increases the critical strike chance of Valkyr's Calling by $s1%.",
+                     'Increases the critical strike chance of Gavels and Dawnbreak by $s1%.'):
+            with self.subTest(text=text):
+                self.assertFalse(conditional_text(text))
+
+    def test_trigger_duration_stack_and_next_conditions_are_conditional(self):
+        for text in ('Expending Angelic Presence increases your critical strike chance and healing by $681254s1% '
+                     'for $681254d,',
+                     'Casting Hammer of Kings now also increases your critical strike chance by $524998s1% for '
+                     '$524998d.',
+                     'Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.',
+                     'Your Oath: Condemn now provides $s1% additional critical strike chance.',
+                     'and critical strike chance of your next Argent Blade by $s1%.',
+                     'Dawn Blade now increases the critical strike chance of Noctis Blade by $680495s1% for '
+                     '$680495d.',
+                     'melee haste, movement speed, and critical strike chance for $504790d.',
+                     'the critical strike chance of your Ghouls is increased by $525388s2%',
+                     'Increases your Holy critical strike chance by $s1%',
+                     'Increases your critical strike chance with Fire spells by $s1%',
+                     'Increases the critical strike chance of you and your Shadow Hound by $s1%.'):
+            with self.subTest(text=text):
+                self.assertTrue(conditional_text(text))
+
+    def test_a_near_plain_clause_needs_the_zero_arm(self):
+        near = 'Increases your critical strike chance by $s1% for $d.'
+        self.assertEqual(self.evidence(near, self.arm(self.ABOVE, 10)), [DATA])
+        self.assertEqual(self.evidence(near, self.arm(self.ABOVE, 10), self.arm(self.BELOW, 0)), [BEHAVIOUR])
+
+    def test_a_condition_in_a_sibling_row_of_the_spell_needs_the_zero_arm(self):
+        plain = 'Increases your critical strike chance by $s1%.'
+        sibling = claim('While only 1 Abomination is active,', spell=1)
+        self.assertEqual(self.evidence(plain, self.arm(self.ABOVE, 10)), [BEHAVIOUR])
+        clauses = [sibling, claim(plain, self.ABOVE, spell=1)]
+        self.assertEqual(evidence_of(clauses, [self.arm(self.ABOVE, 10)])[1].claim_evidence[1][0], DATA)
+        both = [self.arm(self.ABOVE, 10), self.arm(self.BELOW, 0)]
+        clauses = [sibling, claim(plain, self.ABOVE, self.BELOW, spell=1)]
+        self.assertEqual(evidence_of(clauses, both)[1].claim_evidence[1][0], BEHAVIOUR)
+        other_spell = [claim('While only 1 Abomination is active,', spell=2),
+                       claim(plain, self.ABOVE, spell=1)]
+        self.assertEqual(evidence_of(other_spell, [self.arm(self.ABOVE, 10)])[1].claim_evidence[1][0], BEHAVIOUR)
+
+    def test_a_closed_zero_arm_does_not_count(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0, status='closed')),
+                         [DATA])
+
+    def test_a_zero_arm_of_another_check_does_not_count(self):
+        other = replace(self.arm(self.BELOW, 0), check=BEHAVIOUR_PARTY_STAT_RATIO)
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), other), [DATA])
+
+    def test_a_zero_arm_of_the_condition_contrast_does_not_count(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50),
+                                       self.arm(self.BELOW, 0, CONDITION_CONTRAST)), [DATA])
 
 
 if __name__ == '__main__':
