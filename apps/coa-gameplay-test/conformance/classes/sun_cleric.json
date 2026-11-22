@@ -24003,6 +24003,183 @@
       "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025, cast on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316); 806025 has DurationIndex 31 (8000 ms, $806025d). Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and an extra tick on apply, so the last tick at 4000 ms refreshes 806025 to 8000 ms: it ends at about 12000 ms after the cast. The aura 806025 on the caster is an event read (presence), not the remaining-time field: read present 11350..11900 ms of game time after the trigger cast and gone 12150..12700 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
       "gate_timing": "start",
       "trigger_only_after": true
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (cast refused after Resplendence: Ascension)",
+      "kind": "metric_delta",
+      "variant": "shared_refusal_ascension",
+      "label_suffix": "shared_refusal_ascension",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806159 and Solar Invocation: Ascension 500152 both carry Category 767 (Spell.dbc, the Ascension cooldown is read by the existing entries of this class). Without any cast of 806159 the cast of 500152 goes through (cast_failure 0, the control). Resplendence 806159 is cast for real and 1600 ms later, past the 1500 ms global cooldown, 500152 is cast: it is refused with SPELL_FAILED_NOT_READY 67, an event the server decides, not a cooldown readback. Reference search 2026-11-22: coa-history spell 806159: nothing found beyond the tooltip and the DBC for the shared category."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (cast refused after Resplendence: Conquest)",
+      "kind": "metric_delta",
+      "variant": "shared_refusal_conquest",
+      "label_suffix": "shared_refusal_conquest",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 800764,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806159 and Solar Invocation: Conquest 800764 both carry Category 767 (Spell.dbc, the Conquest cooldown is read by the existing entries of this class). Without any cast of 806159 the cast of 800764 goes through (cast_failure 0, the control). Resplendence 806159 is cast for real and 1600 ms later, past the 1500 ms global cooldown, 800764 is cast: it is refused with SPELL_FAILED_NOT_READY 67, an event the server decides, not a cooldown readback. Reference search 2026-11-22: coa-history spell 806159: nothing found beyond the tooltip and the DBC for the shared category."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (cast refused after Resplendence: Revelation)",
+      "kind": "metric_delta",
+      "variant": "shared_refusal_revelation",
+      "label_suffix": "shared_refusal_revelation",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806159 and Solar Invocation: Revelation 503651 both carry Category 767 (Spell.dbc, the Revelation cooldown is read by the existing entries of this class). Without any cast of 806159 the cast of 503651 goes through (cast_failure 0, the control). Resplendence 806159 is cast for real and 1600 ms later, past the 1500 ms global cooldown, 503651 is cast: it is refused with SPELL_FAILED_NOT_READY 67, an event the server decides, not a cooldown readback. Reference search 2026-11-22: coa-history spell 806159: nothing found beyond the tooltip and the DBC for the shared category."
+    },
+    {
+      "spell": 806159,
+      "kind": "metric_delta",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 2868,
+      "caster_health_pct": 30,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Resplendence (three Illuminations all critical)",
+      "variant": "crit_all",
+      "label_suffix": "crit_all",
+      "setup_casts": [
+        806159,
+        500143,
+        500143
+      ],
+      "expected": 3,
+      "after_at_least": 3,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart after a real cast of 806159: all 3 critical (expected 3, at least 3). Failure probability of a server that does not guarantee it: 3 critical in a row at the base chance has probability 0.0468^3 = 1.0e-4 per run, below 0.1% per pair. The phase before the cast has no cast and reads 0. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; nothing found beyond the tooltip and the DBC for the guarantee. The base crit chance of Illumination is about 4.68%."
+    },
+    {
+      "spell": 806159,
+      "kind": "metric_delta",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 2868,
+      "caster_health_pct": 30,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_wait_ms": 2100,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Resplendence (control: three Illuminations without Resplendence)",
+      "variant": "crit_control",
+      "label_suffix": "crit_control",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "gate_spell": 300321,
+      "expected": 0,
+      "after_at_most": 2,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: at most 2 of the 3 may be critical, i.e. not all 3 (probability that three casts all crit by chance 0.0468^3 = 1.0e-4 per run, below 0.1% per pair). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; nothing found beyond the tooltip and the DBC for the guarantee. The base crit chance of Illumination is about 4.68%. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast.",
+      "after_at_least": 0
+    },
+    {
+      "spell": 806159,
+      "kind": "metric_delta",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 2868,
+      "caster_health_pct": 30,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_wait_ms": 2100,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Resplendence (control: the three Illuminations landed)",
+      "variant": "crit_control_landed",
+      "label_suffix": "crit_control_landed",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "gate_spell": 300321,
+      "expected": 3,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: all 3 heals land (spell_heal_count of 500143 without the critical filter, expected 3), so the control arm of crit_control counted real heals. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast.",
+      "after_at_least": 3
     }
   ],
   "player_observations": [],

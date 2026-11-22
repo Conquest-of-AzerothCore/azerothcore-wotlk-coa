@@ -5871,7 +5871,10 @@
       {
         "claim": "and guaranteed to critically strike",
         "labels": [
-          "806159 behaviour_metric_delta guaranteed_crit"
+          "806159 behaviour_metric_delta guaranteed_crit",
+          "806159 behaviour_metric_delta crit_all",
+          "806159 behaviour_metric_delta crit_control",
+          "806159 behaviour_metric_delta crit_control_landed"
         ]
       },
       {
@@ -5887,7 +5890,10 @@
     "spell": 806159,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
     "labels": [
-      "806159 behaviour_metric_delta shared_cooldown"
+      "806159 behaviour_metric_delta shared_cooldown",
+      "806159 behaviour_metric_delta shared_refusal_ascension",
+      "806159 behaviour_metric_delta shared_refusal_conquest",
+      "806159 behaviour_metric_delta shared_refusal_revelation"
     ],
     "kind": "claim",
     "reason": "Control arm = the cooldown of Solar Invocation: Ascension 500152 read before any cast (0); 500 ms after one cast of 806159 it reads 29494 ms (Category 767, CategoryRecoveryTime 30000, within 1500). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
