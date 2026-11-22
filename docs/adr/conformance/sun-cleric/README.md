@@ -38,3 +38,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0032](0032-touch-of-light-reduces-damage-of-every-school.md) | Touch of Light 572886 reduces the damage of every school, not Physical only (owner ruling O-25) |
 | [0033](0033-solar-concord-resets-only-the-spell-of-the-active-phase.md) | Solar Concord resets Horusath Blast only in Sunrise and Rapture only in Sunset (owner ruling O-26) |
 | [0034](0034-solar-champion-threat-reaches-the-triggered-damage-spells.md) | Solar Champion's threat reduction reaches the damage spells of Radiant Flame and Sun Down (mentor D-185) |
+| [0036](0036-knight-of-dawn-trials-are-the-player-casts.md) | Knight of Dawn's extra strike never rolls again: its trials are the player casts of Glorious Execution (incorrect test, row 371) |
