@@ -39429,6 +39429,921 @@
           10000
         ]
       }
+    },
+    {
+      "spell": 803489,
+      "name": "Vow of Radiance (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Direct ability damage or healing generates 2 Solar Power and damages or heals for an additional $s2% of the amount.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803816
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        803489
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803489,
+      "name": "Vow of Radiance (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Direct ability damage or healing generates 2 Solar Power and damages or heals for an additional $s2% of the amount.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803816
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "setup_casts": [
+        803489
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803491,
+      "name": "Vow of Dawn (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Direct ability damage or healing generates 1 Solar Power and bounces to $803492s1 additional nearby targets with less value per target struck.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803816
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        803491
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803491,
+      "name": "Vow of Dawn (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Direct ability damage or healing generates 1 Solar Power and bounces to $803492s1 additional nearby targets with less value per target struck.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803816
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "setup_casts": [
+        803491
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803719,
+      "name": "Vow of Grace (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "direct ability damage or healing now regenerates $504775s1% of your missing mana plus ${$504877m1+$504877ppl1}.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        803719
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803719,
+      "name": "Vow of Grace (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "direct ability damage or healing now regenerates $504775s1% of your missing mana plus ${$504877m1+$504877ppl1}.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "setup_casts": [
+        803719
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300336,
+      "name": "Light The Way (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 300336,
+      "name": "Light The Way (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 704564
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 704564
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 707077,
+      "name": "Direct healing armor (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804405
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 707077,
+      "name": "Direct healing armor (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Direct healing done now increases the target's Armor by $804405s1% for $804405d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804405
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "trigger_spell": 503624,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1360,
+      "disable_regeneration": true,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "expected": 26900,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "force_crit": "spell",
+      "tolerance": 50,
+      "caster_health_pct": 30,
+      "gate_spell": 300349,
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1360,
+      "disable_regeneration": true,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "expected": 26900,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "force_crit": "spell",
+      "tolerance": 50,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "gate_spell": 300349,
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Healing with Illumination, Shine, and Daybreak and healing done from Holy Form now additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Healing with Illumination, Shine, and Daybreak and healing done from Holy Form now additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 704936,
+      "name": "Illumination shield (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "Your Illumination now shields you for $s1% of the amount healed.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 802598
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 704936,
+      "name": "Illumination shield (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "Your Illumination now shields you for $s1% of the amount healed.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 802598
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (D-255 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_self",
+      "label_suffix": "d255_self",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 301005
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "force_crit": "spell",
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (D-255 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d255_ally",
+      "label_suffix": "d255_ally",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 301005
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "force_crit": "spell",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 803489,
+      "name": "803489 Solar Power (D-255 self heal arm, design 2)",
+      "kind": "metric_delta",
+      "variant": "d255b_self",
+      "label_suffix": "d255b_self",
+      "quote": "Direct ability damage or healing generates 2 Solar Power",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        803489
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803489,
+      "name": "803489 Solar Power (D-255 ally heal arm, design 2)",
+      "kind": "metric_delta",
+      "variant": "d255b_ally",
+      "label_suffix": "d255b_ally",
+      "quote": "Direct ability damage or healing generates 2 Solar Power",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "setup_casts": [
+        803489
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803491,
+      "name": "803491 Solar Power (D-255 self heal arm, design 2)",
+      "kind": "metric_delta",
+      "variant": "d255b_self",
+      "label_suffix": "d255b_self",
+      "quote": "Direct ability damage or healing generates 1 Solar Power",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        803491
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 803491,
+      "name": "803491 Solar Power (D-255 ally heal arm, design 2)",
+      "kind": "metric_delta",
+      "variant": "d255b_ally",
+      "label_suffix": "d255b_ally",
+      "quote": "Direct ability damage or healing generates 1 Solar Power",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "setup_casts": [
+        803491
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 807435,
+      "name": "807435 Solar Power (D-255 self heal arm, design 2)",
+      "kind": "metric_delta",
+      "variant": "d255b_self",
+      "label_suffix": "d255b_self",
+      "quote": "Direct ability damage or effective healing now generates 1 Solar Power",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        807435
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 807435,
+      "name": "807435 Solar Power (D-255 ally heal arm, design 2)",
+      "kind": "metric_delta",
+      "variant": "d255b_ally",
+      "label_suffix": "d255b_ally",
+      "quote": "Direct ability damage or effective healing now generates 1 Solar Power",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "disable_regeneration": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, Solar Power 500149 stacks are read (design 2: the Solar Power gain, not the copy); a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "setup_casts": [
+        807435
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],
