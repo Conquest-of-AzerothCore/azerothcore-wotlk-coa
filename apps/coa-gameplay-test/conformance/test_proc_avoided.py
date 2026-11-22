@@ -265,11 +265,11 @@ class AvoidedProcMissesTest(unittest.TestCase):
     def test_a_mutant_that_never_procs_on_a_miss_alerts(self):
         from random import Random
         rng = Random(680663)
-        dodged, parried, missed = 3800, 3800, 1200
+        dodged, parried, missed = 2000, 2000, 4000
         procs = sum(rng.random() < 0.10 for _ in range(dodged + parried))
         verdict = self.verdict(dodged, parried, missed, procs)
         self.assertEqual(verdict.status, 'alert')
-        self.assertLess(verdict.measured, 0.095)
+        self.assertLess(verdict.measured, 0.06)
 
     def test_an_attack_outside_the_three_outcomes_voids_the_part(self):
         verdict = self.verdict(3800, 3800, 400, 800, extra_attacks=1)
