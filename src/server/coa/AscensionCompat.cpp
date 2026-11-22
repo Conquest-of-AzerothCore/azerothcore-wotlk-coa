@@ -5828,16 +5828,10 @@ public:
         return _vanityItems.contains(itemId) || IsBankVanityItem(itemId);
     }
 
-    void OnVanityItemUsed(Player* player, Item* item)
+    void CollectVanityCopy(Player* player, Item* item)
     {
         if (item && IsCollectibleVanityItem(item->GetEntry()))
             OnItemObtained(player, item);
-    }
-
-    void OnVanityItemWithdrawn(Player* player, uint32 itemId)
-    {
-        if (IsCollectibleVanityItem(itemId))
-            OnCarriedItemObtained(player, itemId);
     }
 
     void ForgetVanityItem(Player* player, uint32 itemId)
@@ -5846,8 +5840,10 @@ public:
         if (!state || !state->OwnedVanityItems.erase(itemId))
             return;
 
-        CharacterDatabase.Execute("DELETE FROM `account_vanity_collection` WHERE `account_id` = {} AND `item_id` = {}",
-            state->AccountId, itemId);
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_VANITY_COLLECTION);
+        stmt->SetData(0, state->AccountId);
+        stmt->SetData(1, itemId);
+        CharacterDatabase.DirectExecute(stmt);
     }
 
   void OnItemObtained(Player *player, Item *item) {
@@ -9204,7 +9200,7 @@ public:
 
     bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
     {
-        AscensionCollectionService::Instance().OnVanityItemUsed(player, item);
+        AscensionCollectionService::Instance().CollectVanityCopy(player, item);
         return true;
     }
 
@@ -9795,7 +9791,7 @@ public:
     bool CanItemUse(Player* player, Item* item, SpellCastTargets const&) override
     {
         if (player)
-            AscensionCollectionService::Instance().OnVanityItemUsed(player, item);
+            AscensionCollectionService::Instance().CollectVanityCopy(player, item);
         return false;
     }
 };
@@ -10602,9 +10598,9 @@ bool AscensionVanityOwnership::OwnsItem(Player const* player, uint32 itemId)
     return AscensionCollectionService::Instance().OwnsVanityItem(player, itemId);
 }
 
-void AscensionVanityOwnership::CollectCarriedItem(Player* player, uint32 itemId)
+void AscensionVanityOwnership::CollectItem(Player* player, Item* item)
 {
-    AscensionCollectionService::Instance().OnVanityItemWithdrawn(player, itemId);
+    AscensionCollectionService::Instance().CollectVanityCopy(player, item);
 }
 
 void AscensionVanityOwnership::ForgetItemForTest(Player* player, uint32 itemId)

@@ -5,13 +5,14 @@
 #include "Define.h"
 #include <string>
 
+class Item;
 class Player;
 
 namespace AscensionVanityOwnership
 {
 bool OwnsItem(Player const* player, uint32 itemId);
 
-void CollectCarriedItem(Player* player, uint32 itemId);
+void CollectItem(Player* player, Item* item);
 
 void ForgetItemForTest(Player* player, uint32 itemId);
 
