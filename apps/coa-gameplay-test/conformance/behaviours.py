@@ -4214,6 +4214,7 @@ class CostGateSpec:
     strike_victim_auras: tuple[tuple[int, int], ...] = ()
     caster_health_pct: int | None = None
     refused_with: bool = False
+    extra_reads: tuple[tuple[str, int | None, str | None, int | None], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -4225,6 +4226,28 @@ class CostGateArm:
     setup: bool = True
     held_ms: int = 0
     skip_setup: bool = False
+
+
+COST_GATE_EXTRA_READ_METRICS = frozenset({'cooldown_ms', 'global_cooldown_ms', 'knows_spell', 'aura', 'power'})
+EXTRA_READ_ARMS = ('without', 'with')
+
+
+EXTRA_READ_MOMENTS = ('before_cast', 'after_cast')
+
+
+def extra_read_label(label: str, metric: str, spell: int | None, moment: str | None = None,
+                     cast: int | None = None) -> str:
+    return (f'{label} extra {metric}' + ('' if spell is None else f' {spell}')
+            + ('' if moment is None else f' {moment} {cast}'))
+
+
+def extra_read_steps(spec: CostGateSpec, arm: CostGateArm, label: str, facts, moment: str | None = None,
+                     cast: int | None = None) -> list[dict]:
+    if arm.name not in EXTRA_READ_ARMS:
+        return []
+    return [measurement(extra_read_label(label, metric, spell, at, of), CASTER, metric,
+                        **({'power': facts.power_type} if metric == 'power' else {'spell': spell}))
+            for metric, spell, at, of in spec.extra_reads if (at, of) == (moment, cast)]
 
 
 def cost_gate_label(spec: CostGateSpec, arm: str) -> str:
@@ -4422,10 +4445,12 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
             steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}]
                       + cast_gate_power_step(after_facts) + required_aura_steps(after_facts)
                       + cost_gate_aura_steps(spec, spell)
+                      + extra_read_steps(spec, arm, cost_gate_label(spec, arm.name), facts, 'before_cast', spell)
                       + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target}])
             if spec.after_cast_gap_ms:
                 steps.append({'action': 'wait', 'label': f'{arm.name} gap after an after cast',
                               'ms': spec.after_cast_gap_ms})
+            steps += extra_read_steps(spec, arm, cost_gate_label(spec, arm.name), facts, 'after_cast', spell)
         return steps
 
     def cooldown_wait(arm: CostGateArm) -> int:
@@ -4499,7 +4524,7 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                       + [{'action': 'wait', 'label': f'{arm.name} cooldown wait', 'ms': cooldown_wait(arm)}]
                       + ([measurement(f'{label} after_cast', CASTER, 'cast_failure', spell=spec.spell)]
                          if spec.refused_with and arm.with_talent else [])
-                      + attempt(label, full_power))
+                      + attempt(label, full_power) + extra_read_steps(spec, arm, label, facts))
             if spec.refused_with and arm.with_talent:
                 expectations.append(Expectation(f'{label} after_cast', BEHAVIOUR_CAST_CONDITION, spec.spell,
                                                 spec.spell, None, str(NO_CAST_FAILURE), rule,
@@ -4571,6 +4596,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                     + (f' {[spell for spell, _ in spec.after_casts]} are cast {spec.after_wait_ms} ms after the '
                        f'priming cast, in every arm except {spec.spell} itself, which only the arms with it cast and '
                        f'learn.' if spec.after_casts else '')
+                    + (f' In the without and with arms, {len(spec.extra_reads)} diagnostic reads (after the attempt or around an '
+                       f'after cast) are recorded in the result and never judged.' if spec.extra_reads else '')
                     + (f' A forcing fixture raises the roll of {spec.forced_roll} by {FORCED_CHANCE_PERCENT}% (a '
                        f'SPELLMOD_CHANCE_OF_SUCCESS spell modifier mutant) for the whole scenario, so the proc lands '
                        f'on every roll; it is removed at the end and read gone.' if spec.forced_roll is not None
@@ -4613,7 +4640,26 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         else shield_after_learn.parse(entry['shield_after_learn']),
                         metric_delta_strike(entry.get('strike')),
                         tuple((int(aura), int(stacks)) for aura, stacks in entry.get('strike_victim_auras', ())),
-                        entry.get('caster_health_pct'), bool(entry.get('refused_with', False)))
+                        entry.get('caster_health_pct'), bool(entry.get('refused_with', False)),
+                        cost_gate_extra_reads(entry))
+
+
+def cost_gate_extra_reads(entry: dict) -> tuple[tuple[str, int | None, str | None, int | None], ...]:
+    found = []
+    after_spells = {int(spell) for spell, _ in entry.get('after_casts', ())}
+    for read in entry.get('extra_reads', ()):
+        metric, spell = read.get('metric'), read.get('spell')
+        at, cast = read.get('at'), read.get('cast')
+        if metric not in COST_GATE_EXTRA_READ_METRICS or (metric == 'power') != (spell is None) \
+                or (spell is not None and type(spell) is not int):
+            raise ValueError(f'{entry["spell"]} cost_gate extra_reads entries are {{metric, spell}} with a metric '
+                             f'among {sorted(COST_GATE_EXTRA_READ_METRICS)} and a spell id (none for power)')
+        if (at is None) != (cast is None) or (at is not None and (at not in EXTRA_READ_MOMENTS
+                                                                  or cast not in after_spells)):
+            raise ValueError(f'{entry["spell"]} cost_gate extra_reads "at" is one of {list(EXTRA_READ_MOMENTS)} and '
+                             f'comes with a "cast" that is one of the after_casts spells')
+        found.append((metric, spell, at, cast))
+    return tuple(found)
 
 
 def cost_gate_cast_auras(entry: dict) -> tuple[dict, ...]:
