@@ -16488,7 +16488,7 @@
       "quote": "increases the target's Holy and Fire damage taken from you by $806025s1%",
       "expected": 1.08,
       "critical": false,
-      "observe_spell": 2136,
+      "observe_spell": 500146,
       "control": {
         "auras": [
           [
@@ -16505,7 +16505,7 @@
           806060
         ],
         "learn": [
-          2136
+          500146
         ]
       },
       "treatment": {
@@ -16525,7 +16525,7 @@
         ],
         "learn": [
           806024,
-          2136
+          500146
         ]
       },
       "trials": 12,
@@ -16533,7 +16533,7 @@
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Fire Blast 2136 (SchoolMask 4 Fire, a stock spell learned by the harness for both arms) is read per arm after six Radiant Flame casts at about 1.5 s intervals (at least nine ticks, the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real six times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same six casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after six Radiant Flame casts at about 1.5 s intervals (at least nine ticks, the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real six times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same six casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the aura's class mask and family (Unit.cpp:10113-10117, :11703-11706, IsAffectedOnSpell), not by the school in MiscValue, so a family 3 spell is outside it; the claim is read on a class Fire spell."
     },
     {
       "spell": 806024,
@@ -16657,13 +16657,14 @@
           704568
         ]
       },
-      "trials": 20,
+      "trials": 14,
       "fixture": {
         "spell_power": 20000
       },
       "cast_power": 1360,
       "ally_distance": 5,
-      "expected_source": "704568 Gleaming Light Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 (SPELLMOD_DAMAGE, which healing spells read), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 1 = 536871424 = 0x20000200: Daybreak 503624 SpellFamilyFlags[1] 536870912 (0x20000000) and Illumination 500143 SpellFamilyFlags[1] 512 (0x200); Shine 800357 SpellFamilyFlags[1] 262144 matches neither. The grouped ally's heals of Daybreak are read without and with 704568 learned on the caster, the ally held at 50% health: the mean ratio is 1.2 (band 2 points, G-19: the larger of 5% of 20 and 2 points, so 18% to 22%). Daybreak ranks 500147 and 502432 carry the same SpellFamilyFlags[1] as 503624, which is tested (one effect, one class mask). Reference search 2026-11-22: coa-history spell 704568: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found."
+      "expected_source": "704568 Gleaming Light Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 (SPELLMOD_DAMAGE, which healing spells read), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 1 = 536871424 = 0x20000200: Daybreak 503624 SpellFamilyFlags[1] 536870912 (0x20000000) and Illumination 500143 SpellFamilyFlags[1] 512 (0x200); Shine 800357 SpellFamilyFlags[1] 262144 matches neither. The grouped ally's heals of Daybreak are read without and with 704568 learned on the caster, the ally held at 50% health: the mean ratio is 1.2 (band 2 points, G-19: the larger of 5% of 20 and 2 points, so 18% to 22%). Daybreak ranks 500147 and 502432 carry the same SpellFamilyFlags[1] as 503624, which is tested (one effect, one class mask). Reference search 2026-11-22: coa-history spell 704568: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Daybreak has 2 charges with a 10 s recharge (SpellChargesCategory 548, see the charge_recharge entry), so each trial waits 8500 ms after its cast (about 10 s between casts); a first design at the default spacing landed 5 of 20 casts.",
+      "cast_wait_ms": 8500
     },
     {
       "spell": 704568,
@@ -16840,6 +16841,29 @@
         "spell_power": 10000
       },
       "expected_source": "300325 Radiant Fury Effect[0] aura 303 MOD_DAMAGE_DONE_VERSUS_AURASTATE, dummied at load (AscensionSunClericContracts.cpp:167); the real effect is AscensionSunClericContracts.cpp:338-339: a hit of Radiant Flame 807058 on a target below 35% health while the caster has 300325 is multiplied by 1 + Amount(300325)/100, BasePoints 9 + 1 = 10 ($s1). The damage ticks of Radiant Flame 807058 (cast for real by 806060, four ticks) are read per arm with the dummy held at 50% health before each cast, without and with 300325 learned: the mean ratio is 1.0 (band 2 points, G-19). Control arm: the same read at 50% health, above the 35% threshold, must give 1.0. Reference search 2026-11-22: coa-history spell 300325: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot lists the name only; nothing else found."
+    },
+    {
+      "spell": 806024,
+      "name": "Purgation (Radiant Flame damage hits per cast)",
+      "kind": "metric_delta",
+      "variant": "flame_hits",
+      "label_suffix": "flame_hits",
+      "quote": "Dealing damage with Radiant Flame now increases the target's Holy and Fire damage taken from you by $806025s1% for $806025d,",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_power": 1000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807058,
+        "caster": "caster",
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "cast_in_before": false,
+      "wait_ms": 4700,
+      "expire_ms": 500,
+      "observe_source": "Radiant Flame 806060 DurationIndex 35 = 4000 ms, EffectAmplitude 1000: four damage hits of 807058 per cast are expected from the DBC. The count is read on the dummy 4700 ms after one real cast, with no 806024 involved; it explains the stack count of the stacks_one_cast entry (one stack per Radiant Flame damage hit). Reference search 2026-11-22: coa-history spell 807058 (Radiant Flame ticks): 2281 SPELL_DAMAGE events (517 crits) and 22 SPELL_MISSED in 7 of 186 logs, no per-cast count; nothing else found."
     }
   ],
   "player_observations": [],

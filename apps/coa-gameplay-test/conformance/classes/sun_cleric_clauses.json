@@ -4949,7 +4949,8 @@
     "clause": "stacking $806025U times.",
     "labels": [
       "806024 max_stacks 806025 #2",
-      "806024 behaviour_metric_delta stacks_cap"
+      "806024 behaviour_metric_delta stacks_cap",
+      "806024 behaviour_metric_delta flame_hits"
     ],
     "kind": "claim"
   },
