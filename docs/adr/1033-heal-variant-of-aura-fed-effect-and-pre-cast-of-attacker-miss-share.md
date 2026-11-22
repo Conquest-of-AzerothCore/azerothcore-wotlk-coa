@@ -33,7 +33,17 @@ Python only, opt-in, no harness change:
    before the run from earlier measurements of the heal's spread; a spell power fixture narrows the dice share. A
    second effect cast right after it must read the control mean again within the effect's dice spread: the aura is
    consumed once.
-2. `attacker_miss_share` option `pre_cast`: spells cast at the first attacker, each followed by its cast time, before
+2. `aura_fed_effect` damage option `sized` (mentor rulings D-183 and D-186, opt-in): the same judge for the
+   `damage` variant. The figure f is the value of the aura effect `figure_effect` (default 0), which must be
+   `ADD_PCT_MODIFIER` on `SPELLMOD_DAMAGE`; that modifier multiplies the whole hit, spell power part included
+   (`Unit::SpellDamageBonusDone`, Unit.cpp:9973), and the generator refuses an `expected` other than 1 + f. The 99%
+   Welch-t interval of `bonus_of` must lie wholly inside [1 + 0.9 f, 1 + 1.1 f]. The entry fixes two sized counts:
+   `min_hits`, the non-critical hits per arm at which the interval keeps a false alert within the residual (fewer is
+   unmeasured, not judged), and `trials`, the casts per arm that keep an arm below `min_hits` within the residual.
+   `consumed` is stated per entry: `true` when the tooltip says "next" or that the aura is consumed, which keeps the
+   second-cast read of the heal variant; `false` judges no second cast. Sized entries run on the accelerated
+   scenario cap, as the heal variant does. The heal variant shares the judge and keeps its floor of two heals.
+3. `attacker_miss_share` option `pre_cast`: spells cast at the first attacker, each followed by its cast time, before
    `cast_spell` in every treatment cycle. `settle_ms` and `cycle_ms` must cover the whole sequence. The aura read on
    every attacker at each cycle end is unchanged: a cycle without it makes the verdict unmeasured, never a miss sample.
 
@@ -48,5 +58,13 @@ Python only, opt-in, no harness change:
 - Sun Cleric 704920 `fed_heal_illumination` (variant `heal`) and `fed_heal_cascade`, at spell power 20000 and 12
   trials per arm. No Sun Cleric entry uses `pre_cast` yet: the Herald of Dawn entry was left out until its casts can
   wait out pushback.
-- The damage variant keeps the dice-spread band of ADR 1025: it separates a bonus from none, not from a bonus 10%
-  off. Changing it is left to a separate decision.
+- An unsized damage entry keeps the dice-spread band of ADR 1025: it separates a bonus from none, not from a bonus
+  10% off. `sized` is the opt-in that separates the figure from a bonus 10% off; no finished class has an
+  `aura_fed_effect` entry, and the generated scenarios of classes 15, 19 (with `--stack`) and 23 are byte-identical
+  before and after it.
+- Seeded `sized` tests in `kinds/test_aura_fed_effect.py`: +25% ok; 1 + 0.5 f, 1 + 0.85 f, 1 + 1.15 f and none
+  alert; an interval too wide for the band alerts; a second cast still fed alerts; an arm below `min_hits` is
+  unmeasured; a wrong `expected`, a `figure_effect` off `SPELLMOD_DAMAGE`, a `min_hits` out of range, a missing
+  `consumed` and a sized non-damage variant are refused.
+- Sun Cleric 804629 `fed_damage` turns `sized` on (Effect[1] 25%, `consumed` true for "Your next Dawnsear"), at
+  spell power 20000, 14 trials and `min_hits` 4, sized in the entry from the earlier pair's hits.
