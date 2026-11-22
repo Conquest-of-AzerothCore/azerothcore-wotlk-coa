@@ -15033,7 +15033,7 @@
     {
       "spell": 800600,
       "kind": "metric_delta",
-      "quote": "Start anew, reseting the cooldown of Paragon, Judgement Day, and Judgement Day spells.",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
       "gate_spell": 800600,
       "setup_casts": [
         806121
@@ -15061,7 +15061,7 @@
     {
       "spell": 800600,
       "kind": "metric_delta",
-      "quote": "Start anew, reseting the cooldown of Paragon, Judgement Day, and Judgement Day spells.",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
       "gate_spell": 800600,
       "setup_casts": [
         806121
