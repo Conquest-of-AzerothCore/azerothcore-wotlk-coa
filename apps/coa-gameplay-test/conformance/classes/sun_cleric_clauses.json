@@ -267,6 +267,7 @@
     "spell": 300336,
     "clause": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
     "kind": "claim",
+    "reason": "Pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, no flip. Speed: the run speed rate of the caster reads 1.2 after Illumination 500143 and after Shine 800357 heals, 1.0 before the learn (control). Duration: 300337 reads 2359 and 2369 ms (Illumination) and 2381 and 2382 ms (Shine) remaining about 600 ms after the heal, against 2400 within 250, so a total 10% off (2700 or 3300 ms) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 has 4958 SPELL_AURA_APPLIED events on players in 20 logs; nothing else found.",
     "claims": [
       {
         "claim": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1%",
@@ -1179,7 +1180,7 @@
       "504734 behaviour_metric_delta range_out"
     ],
     "kind": "claim",
-    "reason": "ON HOLD, status not counted: the range labels range_in and range_out are withdrawn from this row until a redesign is run. Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip: Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy was refused (97) at 38 yd before the learn and cast (0) after, and refused (97) at 40 yd in both phases. With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 35.225 and 37.225 yd, a bonus of +17.4% to +24.1%. The arms at 38 and 40 yd do not exclude +-10% of the +20% claim (+18% = 35.4 yd and +22% = 36.6 yd both lie inside that bracket). Redesign carried to the next batch: arms near 38.5 yd (inside, excludes +18%) and 39.0 yd (outside, excludes +22%) around the predicted edge 36 + 2.775 = 38.775 yd. Subset: range tested on Horusath Blast 500154 only, no N-of-M split of the Piety spells yet (G-23). Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
+    "reason": "Redesigned arms (b6a review I-1). Pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, no flip. Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy: refused (97) before the learn and cast (0) after at 38.5 yd (range_in), refused (97) in both phases at 39.0 yd (range_out). With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 38.5 - 2.775 = 35.725 and 39.0 - 2.775 = 36.225 yd, a bonus of +19.1% to +20.75%, which excludes -10% and +10% of the +20% claim (+18% = 35.4 yd, +22% = 36.6 yd). Control arm: the same cast before the learn is refused at 38.5 yd (32.775 yd boundary without the talent). Subset: range tested on Horusath Blast 500154 only, no N-of-M split of the Piety spells yet (G-23). Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
   },
   {
     "spell": 504734,
@@ -1404,6 +1405,7 @@
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
     "kind": "claim",
+    "reason": "Pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout: Horusath Blast is a missile (Speed 20, 5 yd minimum travel, Spell.cpp:2474-2476), so the Arcane lockout begins 250 ms after the cast; school_prohibited reads 1 at 3000 ms after the cast (duration above 2725 ms, excludes -10%) and 0 at 3475 ms (duration below 3250 ms, excludes +10%); before the learn both read 0. The first design (school_lockout kind timed from the cast, pair 20261122-054512 / 20261122-054726) alerted in both runs because it ignored the missile's 250 ms; reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
     "claims": [
       {
         "claim": "and causes Horusath Blast to interrupt the target",
@@ -2701,7 +2703,8 @@
     "labels": [
       "681436 effect_value 504679e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Observation, not a status: Pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, no flip. energize_conquest reads 79 against 79 derived from the DBC (Conquest 800764 refunds 10% of the 2868 maximum mana, 286, before Devoted gives 5% of the 2868 - 1286 missing, 79.1); energize_resplendence, energize_revelation and energize_ascension read 93 (none of the three has an energize effect, so no refund precedes Devoted); cost_resplendence, cost_revelation and cost_ascension read 1093; no cost entry exists for Conquest. The behaviour labels are not cited by this clause (a claim split over the cost and the energize halves is a later ledger decision)."
   },
   {
     "spell": 681448,
