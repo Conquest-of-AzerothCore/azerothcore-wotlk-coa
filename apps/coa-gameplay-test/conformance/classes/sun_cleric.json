@@ -86,6 +86,16 @@
         "spell": 806060
       },
       "trigger_text": "Damage dealt by Radiant Flame",
+      "trigger_spells": [
+        806060,
+        807058
+      ],
+      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy); 806060 deals no direct damage. A trial is one landed 807058 tick on the dummy: the handler rolls Chance(player, 300369) (ProcChance 10) once per 807058 damage event (AscensionSunClericEvents.cpp:115). Residual failure probability at most 0.1% per pair (residual_target). Sizing: trials_per_attempt 3 (Radiant Flame lasts 4000 ms with a 1000 ms period: 3 ticks land inside a cast window, counted in base pair 6, 38314 ticks over about 12700 casts; the judge refuses fewer trials than the sizing needs).",
+      "trigger_lands_no_hit": "AscensionSunClericEvents.cpp:115: case 300369: case 804629 return damage && info && info->Id == 807058 && Chance(player, id): the handler rolls once per landed Radiant Flame tick 807058, never per cast of 806060 or per aura application",
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "trials_per_attempt": 3,
+      "min_parts": 26,
       "event_metric": "spell_damage_count",
       "proc_spell": 807175,
       "proc_spell_source": "AscensionSunClericEvents.cpp:250: case 300369 casts Solar Flare 807175 at the target; the tooltip names Solar Flare",
@@ -100,20 +110,7 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0,
-      "base_mana_per_attempt": true,
-      "trial_readings": [
-        {
-          "name": "Radiant Flame hits",
-          "meaning": "each landed 807058 hit rolls Chance(player, 300369) once (AscensionSunClericEvents.cpp:115); Radiant Flame 806060 Effect[0] aura 227 every 1000 ms triggers 807058 and 806060 itself deals no damage",
-          "adds": [
-            {
-              "metric": "spell_damage_count",
-              "spell": 807058
-            }
-          ],
-          "minus_events": false
-        }
-      ]
+      "base_mana_per_attempt": true
     },
     {
       "aura": 704908,
@@ -176,7 +173,7 @@
     {
       "aura": 804629,
       "name": "Spears of Glory",
-      "min_parts": 10,
+      "min_parts": 36,
       "tooltip": "Damage dealt by |cffffffffRadiant Flame|r now has an $h% chance to grant you |cffffffffSpears of Glory|r.@s:807299:0@",
       "chance_token": "$h",
       "band": true,
@@ -190,7 +187,11 @@
         806060,
         807058
       ],
-      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy, DmgClass magic): the handler rolls only for a damage event of 807058 (AscensionSunClericEvents.cpp, case 804629: damage && info->Id == 807058 && Chance(player, 804629)), and the cast itself deals no direct damage. A trial is one landed 807058 tick on the dummy (806060 has no hit of its own). Residual failure probability of the pooled proof at most 0.1% per pair (the judge's residual_target). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 15% / 10 seconds / 25% for Spears of Glory, equal to the DBC (ProcChance 15, DurationIndex 1 = 10 s, $s2 25); ascension-data advancement.tsv lists it as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values.",
+      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy, DmgClass magic): the handler rolls only for a damage event of 807058 (AscensionSunClericEvents.cpp, case 804629: damage && info->Id == 807058 && Chance(player, 804629)), and the cast itself deals no direct damage. A trial is one landed 807058 tick on the dummy (806060 has no hit of its own). Residual failure probability of the pooled proof at most 0.1% per pair (the judge's residual_target). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 15% / 10 seconds / 25% for Spears of Glory, equal to the DBC (ProcChance 15, DurationIndex 1 = 10 s, $s2 25); ascension-data advancement.tsv lists it as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values. Sizing: trials_per_attempt 3 (Radiant Flame lasts 4000 ms with a 1000 ms period: 3 ticks land inside a cast window, counted in base pair 6, 38314 ticks over about 12700 casts; the judge refuses fewer trials than the sizing needs).",
+      "trigger_lands_no_hit": "AscensionSunClericEvents.cpp:115: case 300369: case 804629 return damage && info && info->Id == 807058 && Chance(player, id): the handler rolls once per landed Radiant Flame tick 807058, never per cast of 806060 or per aura application",
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "trials_per_attempt": 3,
       "event_metric": "spell_cast_count",
       "proc_spell": 807299,
       "proc_spell_source": "EffectTriggerSpell[0] of 804629; the handler casts it on the caster (Cast(player, player, 807299), AscensionSunClericEvents.cpp case 804629)",
