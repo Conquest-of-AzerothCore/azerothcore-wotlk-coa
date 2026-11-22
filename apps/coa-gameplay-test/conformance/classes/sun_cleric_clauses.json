@@ -899,7 +899,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -2731,7 +2731,14 @@
   },
   {
     "spell": 572885,
-    "clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "clause": "In addition, increases the critical strike chance of all Gavels by $s2%.",
+    "dbc_clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "text_source": {
+      "basis": "text_correction",
+      "spell": 572885,
+      "ruling": "D-162: 'srtike' read as 'strike', no figure differs (G-36); no client text change",
+      "dbc_differs": "Description: 'srtike' spelled 'strike'; no value changes"
+    },
     "kind": "claim",
     "reason": "Counts as data, status not 1: the measurement is behavioural but the tooltip typo 'srtike' is kept in the clause, so coverage.py CRIT_WORDS does not match and the verdicts fall to data; a mentor or tool decision (typo-tolerant promise or text_source correction) is needed. Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
@@ -3001,7 +3008,10 @@
     "spell": 680637,
     "clause": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage,",
     "labels": [
-      "680637 effect_value 570187e0 #0"
+      "680637 effect_value 570187e0 #0",
+      "680637 script_hit 570187 explosion",
+      "680637 script_hit 570187 explosion_sp",
+      "680637 script_hit 570187 explosion_ap"
     ],
     "kind": "claim"
   },
@@ -5716,7 +5726,10 @@
     "spell": 804628,
     "clause": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
     "labels": [
-      "804628 effect_value 807064e0 #2"
+      "804628 effect_value 807064e0 #2",
+      "804628 script_hit 807064 release",
+      "804628 script_hit 807064 release_sp",
+      "804628 script_hit 807064 release_ap"
     ],
     "kind": "claim"
   },
