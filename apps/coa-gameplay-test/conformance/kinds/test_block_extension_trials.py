@@ -58,6 +58,7 @@ class BlockExtensionTrialsTests(unittest.TestCase):
         self.assertEqual((expectation.model['base_ms'], expectation.model['extension_ms']), (12000, 4000))
         self.assertEqual(expectation.model['bands'], {'base': [10800.0, 12000 * 1.1], 'extended': [15600.0, 16400.0]})
         self.assertIn('number of extensions', scenario['contract'])
+        self.assertEqual([creature['reaction'] for creature in scenario['creatures']], [0])
 
     def test_plain_and_extended_trials_are_ok_and_the_share_is_reported(self):
         verdict = self.judged([12000, 16000, 12000, 16000, 12000, 12000])

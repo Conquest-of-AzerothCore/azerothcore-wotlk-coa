@@ -2,8 +2,8 @@
 
 Whether a block taken while an aura is on extends it by the stated time. `shield` is equipped with Block 107, `aura`
 and `spell` learned. Each of `trials` trials removes `aura`, casts it on the caster (power `cast_power`, cooldown
-reset), sets `set_combat_avoidance` with `block: 100` and dodge and parry at 0 (owner ruling O-20) and has a passive
-striker cast `strike_spell` at the caster once. One strike per application: an extension casts nothing, so on an
+reset), sets `set_combat_avoidance` with `block: 100` and dodge and parry at 0 (owner ruling O-20) and has a passive (react state 0)
+striker (react state 0) cast `strike_spell` at the caster once. One strike per application: an extension casts nothing, so on an
 application hit several times the number of extensions, and so the expected expiry, is unknown.
 
 After the strike the blocked and unblocked hit counts are read, then the aura's presence with game-time stamps

@@ -17,6 +17,7 @@ OFF_HAND_SLOT = 16
 STRIKE_HEALTH = 50000
 STRIKE_MAX_HEALTH = 100000
 STRIKE_SETTLE_MS = 300
+PASSIVE = 0
 TIME_MARGIN = 0.1
 BASE_READS = (-0.108, -0.083, 0.083, 0.108)
 EXTENDED_READS = (-0.175, -0.05, 0.025, 0.175)
@@ -122,7 +123,8 @@ def block_extension_scenario(class_file: dict, spec: BlockExtensionSpec) -> tupl
         'contract': (f'Shield {spec.shield} equipped, Block {BLOCK_SPELL} and {spec.spell} learned. Each of '
                      f'{spec.trials} trials removes {spec.aura}, casts it on the caster ({base} ms, DurationIndex), '
                      f'forces block to 100% with dodge and parry at 0 (set_combat_avoidance block, owner ruling '
-                     f'O-20) and has a passive striker cast {spec.strike_spell} at the caster once. One strike per '
+                     f'O-20) and has a passive striker (react state 0: the aura\'s own damage on it starts no blocked '
+                     f'swing) cast {spec.strike_spell} at the caster once. One strike per '
                      f'application: an extension casts nothing, so the number of extensions on an application hit '
                      f'several times is unknown and its expiry could not be judged. The aura is read with game-time '
                      f'stamps at {offsets} ms after the cast, which bracket its expiry. A trial whose strike is not '
@@ -136,7 +138,7 @@ def block_extension_scenario(class_file: dict, spec: BlockExtensionSpec) -> tupl
                         if spec.void_on_cast_failure else '')),
         'players': [player_fixture(class_file)],
         'creatures': [striker_creature(class_file, MetricDeltaStrike(spec.strike_spell, STRIKE_HEALTH,
-                                                                     STRIKE_MAX_HEALTH))],
+                                                                     STRIKE_MAX_HEALTH, reaction=PASSIVE))],
         'steps': steps}
     trials = [{'cast_time': mark(spec, f'{index} cast time'), 'cast_aura': mark(spec, f'{index} cast aura'),
                'blocked': mark(spec, f'{index} blocked'), 'unblocked': mark(spec, f'{index} unblocked'),

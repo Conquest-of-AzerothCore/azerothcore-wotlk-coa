@@ -37498,7 +37498,8 @@
         "health": 50000,
         "max_health": 100000,
         "count": 24,
-        "wait_ms": 300
+        "wait_ms": 300,
+        "reaction": 0
       },
       "caster_avoidance": {
         "block": 100
