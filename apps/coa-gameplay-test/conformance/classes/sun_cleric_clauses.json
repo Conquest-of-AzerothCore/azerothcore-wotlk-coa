@@ -21,28 +21,49 @@
   {
     "spell": 92135,
     "clause": "Increases all Holy Damage dealt by $s1% for $d.",
-    "labels": [
-      "92135 effect_value 500477e0 #0",
-      "92135 spell_duration 500477 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases all Holy Damage dealt by $s1% (20%)",
+        "labels": [
+          "92135 behaviour_hit_ratio sunrise_holy_damage"
+        ]
+      },
+      {
+        "claim": "for $d (120 s)",
+        "labels": [
+          "92135 behaviour_metric_delta sunrise_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 92135,
     "clause": "Increases your critical strike chance with Fire spells by $s1%",
     "labels": [
-      "92135 effect_value 500511e0 #2"
+      "92135 behaviour_metric_delta sunset_crit",
+      "92135 behaviour_metric_delta sunset_crit_holy_control"
     ],
     "kind": "claim"
   },
   {
     "spell": 92135,
     "clause": "and Fire Damage by $s2% for $d.",
-    "labels": [
-      "92135 effect_value 500511e1 #3",
-      "92135 spell_duration 500511 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fire Damage by $s2% (10%)",
+        "labels": [
+          "92135 behaviour_hit_ratio sunset_fire_damage"
+        ]
+      },
+      {
+        "claim": "for $d (120 s)",
+        "labels": [
+          "92135 behaviour_metric_delta sunset_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 92136,
@@ -706,23 +727,42 @@
   {
     "spell": 300626,
     "clause": "Increases your spell haste by $s1%,",
-    "labels": [
-      "300626 effect_value e0 #0",
-      "300626 behaviour_metric_delta night_haste"
-    ],
     "kind": "claim",
-    "reason": "Control arm = the cast speed read before the learn (1). Night (hour 0) 0.917431 after against 1/1.09 from Effect[0] aura 216 BasePoints 8 + 1, within 0.002. The bindmysoul snapshot's 3% + 1% belongs to the older spell 300363; our DBC and tooltip state 9% and 3%. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the cast speed read before the learn (1). Night (hour 0) 0.917431 after against 1/1.09 from Effect[0] aura 216 BasePoints 8 + 1, within 0.002. The bindmysoul snapshot's 3% + 1% belongs to the older spell 300363; our DBC and tooltip state 9% and 3%. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
+    "claims": [
+      {
+        "claim": "Increases your spell haste by $s1% (9%, read at night where no day bonus exists)",
+        "labels": [
+          "300626 behaviour_metric_delta night_haste"
+        ]
+      },
+      {
+        "claim": "the $s1% stays on during the day (the day read is 1/(1.09 x 1.03), not 1/1.03)",
+        "labels": [
+          "300626 behaviour_metric_delta day_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 300626,
     "clause": "plus an additional $s2% during the day.",
-    "labels": [
-      "300626 effect_value e1 #1",
-      "300626 behaviour_metric_delta day_haste",
-      "300626 behaviour_metric_delta night_haste"
-    ],
     "kind": "claim",
-    "reason": "Control arm = the night arm (0.917431) and the read before the learn (1). Day (hour 12) 0.890710 after against 1/(1.09 x 1.03) within 0.002, which excludes 2% and 4% (0.899442, 0.882145). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the night arm (0.917431) and the read before the learn (1). Day (hour 12) 0.890710 after against 1/(1.09 x 1.03) within 0.002, which excludes 2% and 4% (0.899442, 0.882145). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
+    "claims": [
+      {
+        "claim": "plus an additional $s2% (3%)",
+        "labels": [
+          "300626 behaviour_metric_delta day_haste"
+        ]
+      },
+      {
+        "claim": "during the day only (the night read has no 3%)",
+        "labels": [
+          "300626 behaviour_metric_delta night_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 300723,

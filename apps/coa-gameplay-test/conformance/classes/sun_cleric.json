@@ -23324,6 +23324,256 @@
       "minimum_hits": 15,
       "cast_power": 1363,
       "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 92135,
+      "name": "Sunrise and Sunset (Sunrise Holy damage)",
+      "kind": "hit_ratio",
+      "variant": "sunrise_holy_damage",
+      "label_suffix": "sunrise_holy_damage",
+      "quote": "@s:500477:0@",
+      "expected": 1.2,
+      "critical": false,
+      "observe_spell": 500154,
+      "control": {
+        "auras": [
+          [
+            807440,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          502396
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            807440,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          502396
+        ],
+        "learn": [
+          92135
+        ]
+      },
+      "trials": 20,
+      "cast_power": 1363,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "observe_source": "500477 Sunrise Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 19 + 1 = 20 ($s1). Real path (AscensionSunClericAbilities.cpp SpendDawn): Dawn 807440 (harness precondition fixture) is spent by a Holy spell cast, which grants Sunrise when 92135 is known. Both arms set Dawn and cast Sunflare 502396 (Holy) before every Horusath Blast 500154 (Holy, read); only the treatment arm has 92135 learned, so only it holds Sunrise. Control arm: the same casts without 92135, no Sunrise. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "name": "Sunrise and Sunset (Sunset Fire damage)",
+      "kind": "hit_ratio",
+      "variant": "sunset_fire_damage",
+      "label_suffix": "sunset_fire_damage",
+      "quote": "@s:500511:0@",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 500146,
+      "control": {
+        "auras": [
+          [
+            807440,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          554406
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            807440,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          554406
+        ],
+        "learn": [
+          92135
+        ]
+      },
+      "trials": 20,
+      "cast_power": 1363,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "observe_source": "500511 Sunset Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire), BasePoints 9 + 1 = 10 ($s2). Real path (AscensionSunClericAbilities.cpp SpendDawn): Dawn 807440 (harness precondition fixture) is spent by a Holy spell cast, which grants Sunset when 92135 is known. Both arms set Dawn and cast Dawnsear 554406 (Fire) before every Dawnsear 500146 (Fire, read); only the treatment arm has 92135 learned, so only it holds Sunset. Control arm: the same casts without 92135, no Sunset. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "name": "Sunrise and Sunset (Sunset Fire critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "sunset_crit",
+      "label_suffix": "sunset_crit",
+      "quote": "@s:500511:0@",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.01,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "cast_power": 1363,
+      "observe_source": "500511 Sunset Effect[0] aura 71 MOD_SPELL_CRIT_CHANCE_SCHOOL MiscValue 4 (Fire), BasePoints 19 + 1 = 20 ($s1). Dawn precondition fixture, a real Dawnsear 554406 cast grants Sunset once 92135 is learned. Dawnsear 500146 spell_done_crit_chance on the dummy is read before the learn (control, no Sunset) and after it; the gain must be 20. Reference search: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 92135,
+      "name": "Sunrise and Sunset (Sunset leaves Holy critical strike chance alone)",
+      "kind": "metric_delta",
+      "variant": "sunset_crit_holy_control",
+      "label_suffix": "sunset_crit_holy_control",
+      "quote": "@s:500511:0@",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.01,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "cast_power": 1363,
+      "observe_source": "Control of sunset_crit: the same Sunset-granting Dawnsear cast, read on Horusath Blast 500154 (Holy), which the Fire-school aura 71 must not change."
+    },
+    {
+      "spell": 92135,
+      "name": "Sunrise and Sunset (Sunrise lasts 120 s)",
+      "kind": "metric_delta",
+      "variant": "sunrise_duration",
+      "label_suffix": "sunrise_duration",
+      "quote": "@s:500477:0@",
+      "trigger_spell": 500154,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500477
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1363,
+      "wait_ms": 109000,
+      "expiry_wait_ms": 21000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          108000,
+          111500
+        ],
+        "expired": [
+          129000,
+          132000
+        ]
+      },
+      "observe_source": "500477 Sunrise DurationIndex 4 (120000 ms, $d). One real cast under Dawn (fixture) with 92135 known grants it: present when read 108000+S..111500+S ms after the cast starts (game time), gone when read 129000+S..132000+S ms after it, S = 0 for the instant Horusath Blast and 3500 ms (SpellCastTimes 22) for Dawnsear, the Sunset grant happening at the end of the cast, so the duration lies inside 10% of 120000 (108000..132000) on both sides. Control (before): no cast, absent. Reference search: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 92135,
+      "name": "Sunrise and Sunset (Sunset lasts 120 s)",
+      "kind": "metric_delta",
+      "variant": "sunset_duration",
+      "label_suffix": "sunset_duration",
+      "quote": "@s:500511:0@",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 500511
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 1363,
+      "wait_ms": 112500,
+      "expiry_wait_ms": 21000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          111500,
+          115000
+        ],
+        "expired": [
+          132500,
+          135500
+        ]
+      },
+      "observe_source": "500511 Sunset DurationIndex 4 (120000 ms, $d). One real cast under Dawn (fixture) with 92135 known grants it: present when read 108000+S..111500+S ms after the cast starts (game time), gone when read 129000+S..132000+S ms after it, S = 0 for the instant Horusath Blast and 3500 ms (SpellCastTimes 22) for Dawnsear, the Sunset grant happening at the end of the cast, so the duration lies inside 10% of 120000 (108000..132000) on both sides. Control (before): no cast, absent. Reference search: nothing found beyond the tooltip."
     }
   ],
   "player_observations": [],
