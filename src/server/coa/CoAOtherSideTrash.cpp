@@ -197,10 +197,10 @@ constexpr uint32 SpawnMaskAllDifficulties = 7;
 constexpr float TrapCommandReach = 10.0f;
 constexpr float TrapListReach = 600.0f;
 constexpr float ToxicExpulsionReach = 100.0f;
-constexpr float TrapReach = 8.0f;
+constexpr float TrapReach = 11.0f;
 constexpr float TrapHalfWidth = 3.0f;
 constexpr float TrapMaxDrop = 8.0f;
-constexpr float TrapMaxRise = 1.0f;
+constexpr float TrapMaxRise = 3.0f;
 constexpr float TrapMouthOffset = 1.5f;
 constexpr float TrapDamagePct = 15.0f;
 

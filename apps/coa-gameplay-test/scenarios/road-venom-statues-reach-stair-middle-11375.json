@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Road to De Other Side: the venom statues on the stairs breathe to the middle of the stairs for 15% of max health",
-  "contract": "Issues #11375 and #10285: the venom statues along the stairs to the Chimeric Embryo (162975, placed in pairs facing each other about 14.7 yd apart) hit nobody in the middle of the stairs, and only for about 130 per tick at level 60. On Ascension they dealt about a third of a player's health. Expected (project owner decision): the breath reaches 8 yd ahead of the mouth, which overlaps the facing statue's breath in the middle of the stairs, 3 yd to either side, and each 0.5 s tick takes 15% of the target's maximum health; the fel flame visual and the breathing cycle stay.",
+  "contract": "Issues #11375 and #10285: the venom statues along the stairs to the Chimeric Embryo (162975, placed in pairs facing each other about 17 to 21 yd apart) hit nobody in the middle of the stairs, and only for about 130 per tick at level 60. On Ascension they dealt about a third of a player's health. Expected (project owner decision, checked in game): the traps sit in the statue mouths, the breath reaches 11 yd ahead of the mouth, which covers the middle of every stair flight and overlaps the facing statue's breath there, 3 yd to either side, and each 0.5 s tick takes 15% of the target's maximum health; the fel flame visual and the breathing cycle stay.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -26,7 +26,7 @@
     },
     {
       "action": "teleport",
-      "label": "p stands in the middle of the first stair flight, 7 yd in front of statue 9370601",
+      "label": "p stands in the middle of the first stair flight, 9 yd in front of statue 9370601",
       "actor": "p",
       "map": 937,
       "x": 423.4,
