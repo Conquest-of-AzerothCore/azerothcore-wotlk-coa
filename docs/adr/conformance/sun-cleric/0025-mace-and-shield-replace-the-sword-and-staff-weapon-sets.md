@@ -17,8 +17,17 @@ two-hander, and "type not sourced, indifferent by data"):
   a shield and a wand. The tooltips at 4:50 and 4:52 are a one-hand mace (61 - 97 damage, speed 2.70) and a shield.
 - `0KkCcTyCzY0.csv` (Blessings, 12:37 and 13:04): "plate and shield", with the stat priority caption "Plate + Shield".
 
-Only one filmed set shows the mace (Piety). Seraphim's and Blessings' mace type therefore rests on that one filmed
-Piety set and on the shield footage for Blessings; no footage shows their main hand.
+- `0KkCcTyCzY0.csv` (Blessings, 10:58): floating numbers on a dummy with "weapon: one-handed mace/hammer held, teal
+  head, shield not seen" (confidence medium). It shows a one-hand mace in the Blessings video and supports the decision
+  for Blessings; it does not show a shield.
+
+Two spoken claims inside the cited videos point the other way and are weaker than the 4:50 tooltip: `1OP12-Y574g.csv`
+at 4:48, "I test using staff and mason shield" (the speaker tests with a staff and a shield), and `0KkCcTyCzY0.csv` at
+12:48, "if you do wear a two-hand weapon, it does mean that your gavel" (a two-hand weapon increases Gavel of Light
+damage, a speaker claim). Neither shows the weapon and neither is used for the decision.
+
+The mace is filmed in the Piety sheet (tooltip) and in the Blessings video (held weapon, medium confidence); no footage
+shows the main hand of Seraphim.
 
 The filmed mace, Hammer of Grace, carries stats and an equip spell. No clean one-hand mace near 61 - 97 at 2.70 exists:
 installed Hammer of Grace 11923 carries stats and PvE Power (spell 101648), its Bloodforged twin 6011923 carries stats
@@ -54,5 +63,5 @@ and spell 101712, and every one-hand mace within 55-67 / 90-104 at 2600-2800 car
 - Block (107) is known by the class, so the caster can block in Piety and Blessings. A block counts as a hit, not a
   miss, so the attacker-miss-share parts are not affected.
 - Every scenario of the three changed sets is regenerated; Valkyr scenarios are byte-identical.
-- The reference weapon type of Seraphim and Blessings is an inference from one Piety sheet; footage of their main hand
-  would reopen it.
+- The reference weapon type of Seraphim is an inference from the Piety sheet and the Blessings video; footage of its
+  main hand would reopen it.
