@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Devotion of Grace joins the mana regeneration category",
+  "contract": [
+    "Devotion of Grace rank 2 300858 (Sun Cleric, class 27; SPELL_AURA_MOD_POWER_REGEN mana, base points 9: 10",
+    "mana per 5 seconds, plus -7% spell cost) and Grove Instinct 572810 (Primalist, class 31,",
+    "SPELL_AURA_MOD_POWER_REGEN mana, base points 4: 5) are two classes' MP5 buffs. Maintainer decision",
+    "2026-11-22: Devotion of Grace belongs to the MP5 category. Its chain head 800852 joins spell_group 2113014",
+    "(rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) next to Grove Instinct. Expected: on a grouped ally each cast",
+    "replaces the other."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "sun_cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    },
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "sun_cleric",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "sun_cleric",
+      "target": "primalist"
+    },
+    {
+      "action": "learn",
+      "actor": "sun_cleric",
+      "spell": 300858
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572810
+    },
+    {
+      "action": "cast",
+      "label": "Devotion of Grace on the ally",
+      "actor": "sun_cleric",
+      "spell": 300858,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Devotion of Grace",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300858,
+      "caster": "sun_cleric",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Devotion of Grace applies its DBC amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 300858,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Grove Instinct on the ally",
+      "actor": "primalist",
+      "spell": 572810,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Grove Instinct",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572810,
+      "caster": "primalist",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grove Instinct replaced Devotion of Grace",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300858,
+      "caster": "sun_cleric",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Devotion of Grace again on the ally",
+      "actor": "sun_cleric",
+      "spell": 300858,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Devotion of Grace again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300858,
+      "caster": "sun_cleric",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the newest buff wins, so Devotion of Grace replaced Grove Instinct",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572810,
+      "caster": "primalist",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

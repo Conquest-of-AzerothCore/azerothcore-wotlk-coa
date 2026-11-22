@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Honor and Rite of Power share the Strength category",
+  "contract": [
+    "Honor 300856 (Guardian, class 18, SPELL_AURA_MOD_STAT Strength, base points 3: +4) and Rite of Power",
+    "578126 (Reaper, class 30, SPELL_AURA_MOD_STAT Strength, base points 19: +20) are two classes' Strength buffs",
+    "on one ally. Maintainer decision 2026-11-22: they form one Strength category. spell_group 2113022 (rule 1,",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both, and no lower shared group decides the pair. Expected: on a",
+    "grouped warrior ally Rite of Power replaces Honor, Strength rises by 20, not 24, and Honor cast again",
+    "replaces the stronger Rite of Power, because the rule is EXCLUSIVE, not EXCLUSIVE_HIGHEST."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "reaper"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 300856
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 578126
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "save_as": "alone",
+      "stat": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Honor on the ally",
+      "actor": "guardian",
+      "spell": 300856,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Honor",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300856,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Honor applies its DBC amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 300856,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Honor raises Strength by 4",
+      "actor": "ally",
+      "metric": "stat",
+      "relative_to": "alone",
+      "min": 3,
+      "max": 5,
+      "stat": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Rite of Power on the ally",
+      "actor": "reaper",
+      "spell": 578126,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Rite of Power",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 578126,
+      "caster": "reaper",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Rite of Power replaced Honor",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300856,
+      "caster": "guardian",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Strength rose once, by 20",
+      "actor": "ally",
+      "metric": "stat",
+      "relative_to": "alone",
+      "min": 19,
+      "max": 21,
+      "stat": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Honor again on the ally",
+      "actor": "guardian",
+      "spell": 300856,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Honor again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300856,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the newest buff wins, so Honor replaced Rite of Power",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 578126,
+      "caster": "reaper",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

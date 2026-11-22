@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "Class buffs: Hasten and Combat Symbiosis share the spell and melee haste category",
+  "contract": [
+    "Hasten 801304 (Chronomancer, class 22: SPELL_AURA_HASTE_SPELLS and SPELL_AURA_MOD_MELEE_RANGED_HASTE, base",
+    "points 19: 20% each, plus run speed) and Combat Symbiosis 805305 (Tinker, class 28: SPELL_AURA_HASTE_SPELLS",
+    "and SPELL_AURA_MOD_MELEE_RANGED_HASTE, base points 19: 20% each) are two classes' combined haste buffs on",
+    "one ally. spell_group 2113008 (rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE) holds both, and no lower shared",
+    "group decides the pair. Expected: on a grouped ally Combat Symbiosis replaces Hasten. Both have a 90",
+    "second cooldown, so neither is cast a second time."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "chronomancer",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "chronomancer",
+      "target": "tinker"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801304
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 805305
+    },
+    {
+      "action": "cast",
+      "label": "Hasten on the ally",
+      "actor": "chronomancer",
+      "spell": 801304,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Hasten",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801304,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Hasten applies its DBC amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 801304,
+      "effect": 2,
+      "equals": 20
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Combat Symbiosis on the ally",
+      "actor": "tinker",
+      "spell": 805305,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries Combat Symbiosis",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 805305,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Combat Symbiosis replaced Hasten",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801304,
+      "caster": "chronomancer",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}
