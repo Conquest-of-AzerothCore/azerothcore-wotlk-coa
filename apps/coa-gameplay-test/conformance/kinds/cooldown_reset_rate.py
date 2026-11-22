@@ -175,8 +175,8 @@ def cooldown_reset_rate_scenario(class_file: dict, spec: CooldownResetRateSpec) 
                         if spec.parts > 1 else '')
                      + (f' {RESIDUAL_TARGET} {spec.residual["target"]:g} per pair: Wilson confidence '
                         f'{spec.residual["confidence"]:g} per run instead of 99%, at least {spec.residual["trials"]} '
-                        f'trials so that a deviation of {spec.residual["min_detectable"] * 100:g} points is outside the '
-                        f'band.' if spec.residual else '')
+                        f'trials so that a deviation of {spec.residual["min_detectable"] * 100:g} points is outside '
+                        f'the band.' if spec.residual else '')
                      + (f' The dummy stands {spec.dummy_distance:g} yd from the caster.'
                         if spec.dummy_distance is not None else '')),
         'players': [player_fixture(class_file)],
