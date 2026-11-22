@@ -497,7 +497,6 @@ namespace
             auto const age = [now](uint32 then) { return secsToTimeString(now > then ? now - then : 0, true); };
             for (CoAPlayerTicket::Ticket const* ticket : tickets)
             {
-                // Same short age format as ".ticket list" so GM Genie can fill its Created/Modified columns.
                 uint32 const modified = ticket->Messages.empty() ? ticket->Created : ticket->Messages.back().Time;
                 handler->PSendSysMessage("#{} [{}] {} - {}{}, {} messages, created {} ago, modified {} ago{}",
                     ticket->Id, StatusOf(*ticket), ticket->Title, ticket->Creator,
