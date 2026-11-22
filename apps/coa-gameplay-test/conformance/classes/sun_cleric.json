@@ -23408,6 +23408,50 @@
       "wait_ms": 500,
       "expire_ms": 2000,
       "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1."
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (Glare cast time above 80% health)",
+      "variant": "glare_healthy",
+      "label_suffix": "glare_healthy",
+      "caster_health_pct": 90,
+      "before_expected": 1500,
+      "expected": 0,
+      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms."
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (control: Glare cast time at 50% health)",
+      "variant": "glare_wounded",
+      "label_suffix": "glare_wounded",
+      "caster_health_pct": 50,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500)."
     }
   ],
   "player_observations": [],

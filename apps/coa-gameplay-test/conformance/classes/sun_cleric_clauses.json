@@ -2194,8 +2194,21 @@
   {
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the cast time of Glare",
+        "labels": [
+          "561328 behaviour_metric_delta glare_healthy"
+        ]
+      },
+      {
+        "claim": "while above 80% health (control: at 50% health the cast time stays 1500 ms)",
+        "labels": [
+          "561328 behaviour_metric_delta glare_wounded"
+        ]
+      }
+    ]
   },
   {
     "spell": 561329,
