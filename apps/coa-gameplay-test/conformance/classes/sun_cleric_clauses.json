@@ -1415,7 +1415,8 @@
         "claim": "for $547217d",
         "labels": [
           "547214 spell_duration 547217 #1",
-          "547214 behaviour_expiry lockout"
+          "547214 behaviour_metric_delta lockout_held",
+          "547214 behaviour_metric_delta lockout_free"
         ]
       }
     ]
