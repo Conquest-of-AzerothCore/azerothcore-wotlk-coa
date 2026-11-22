@@ -23324,6 +23324,171 @@
       "minimum_hits": 15,
       "cast_power": 1363,
       "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "In addition, your chance to parry is increased by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 560534,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560534 Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 4 + 1 = 5 ($s2), TARGET_UNIT_CASTER. The caster's live parry chance (STATE read) before and after a real learn of 560534; the before reading is the control: gain 5 points. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "expected_gain": 5
+    },
+    {
+      "spell": 561159,
+      "name": "Holy Strength (spell power from Strength)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Increases your spell power by $s2% of your Strength.",
+      "trigger_spell": 804247,
+      "gate_spell": 561159,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 2040,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "561159 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (all magic schools), BasePoints 99 + 1 = 100 ($s2). Strength 8118 (aura 29, 2000) is a harness precondition fixture in both phases (not the subject); the reference Strength 40 (class file reference_stats) becomes 2040. Holy spell power read before the learn (control, 0) and after a real learn of 561159: 100% of 2040 = 2040, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          8118,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Holy spell power from Intellect)",
+      "kind": "metric_delta",
+      "variant": "holy_spell_power",
+      "label_suffix": "holy_spell_power",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 804247,
+      "gate_spell": 300723,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 50.1,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 6 (Holy 2 | Fire 4), MiscValueB 3 (Intellect), BasePoints 29 + 1 = 30 ($s3). Intellect 48100 (aura 29, 48) is a harness precondition fixture in both phases (not the subject): 119 + 48 = 167. Holy spell power read before the learn (control, 0) and after a real learn of 300723: 30% of 167 = 50.1, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Fire spell power from Intellect)",
+      "kind": "metric_delta",
+      "variant": "fire_spell_power",
+      "label_suffix": "fire_spell_power",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 804247,
+      "gate_spell": 300723,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 50.1,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "As the Holy entry, for school 2 (Fire, mask bit 4 of MiscValue 6). Fixture Intellect 48100 in both phases; the reading before the learn is the control (0). Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (spell hit rating from Intellect)",
+      "kind": "metric_delta",
+      "variant": "hit_rating",
+      "label_suffix": "hit_rating",
+      "quote": "and your spell hit rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 300723,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 0,
+      "expected": 10.02,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300723 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), MiscValueB 3 (Intellect), BasePoints 5 + 1 = 6 ($s1). Intellect 48100 is a harness precondition fixture in both phases (167). Combat rating 7 read before the learn (control, 0) and after a real learn of 300723: 6% of 167 = 10.02, within 0.5 for the integer rating. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 804339,
+      "name": "Valorous Champion (spell hit rating from Strength)",
+      "kind": "metric_delta",
+      "variant": "hit_rating",
+      "label_suffix": "hit_rating",
+      "quote": "and your spell hit rating by $s2% of your Strength.",
+      "trigger_spell": 804247,
+      "gate_spell": 804339,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 0,
+      "expected": 102,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804339 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), BasePoints 4 + 1 = 5 ($s2); no MiscValueB, so the stat is Strength (index 0). Strength 8118 (2000) is a harness precondition fixture in both phases: 40 + 2000 = 2040. Combat rating 7 read before the learn (control, 0) and after a real learn of 804339: 5% of 2040 = 102, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          8118,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],

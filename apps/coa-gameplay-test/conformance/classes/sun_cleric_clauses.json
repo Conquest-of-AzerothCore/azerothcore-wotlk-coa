@@ -735,7 +735,9 @@
     "spell": 300723,
     "clause": "Increases your Holy and Fire spell damage by $s3%",
     "labels": [
-      "300723 effect_value e2 #0"
+      "300723 effect_value e2 #0",
+      "300723 behaviour_metric_delta holy_spell_power",
+      "300723 behaviour_metric_delta fire_spell_power"
     ],
     "kind": "claim"
   },
@@ -743,7 +745,8 @@
     "spell": 300723,
     "clause": "and your spell hit rating by $s1% of your Intellect.",
     "labels": [
-      "300723 effect_value e0 #1"
+      "300723 effect_value e0 #1",
+      "300723 behaviour_metric_delta hit_rating"
     ],
     "kind": "claim"
   },
@@ -1904,7 +1907,8 @@
     "spell": 560534,
     "clause": "In addition, your chance to parry is increased by $s2%.",
     "labels": [
-      "560534 effect_value e1 #1"
+      "560534 effect_value e1 #1",
+      "560534 behaviour_metric_delta parry"
     ],
     "kind": "claim"
   },
@@ -2049,7 +2053,8 @@
     "spell": 561159,
     "clause": "Increases your spell power by $s2% of your Strength.",
     "labels": [
-      "561159 effect_value e1 #0"
+      "561159 effect_value e1 #0",
+      "561159 behaviour_metric_delta spell_power"
     ],
     "kind": "claim"
   },
@@ -5129,7 +5134,8 @@
     "clause": "and your spell hit rating by $s2% of your Strength.",
     "labels": [
       "804339 effect_value e1 #1",
-      "804339 e1 combat_rating 7"
+      "804339 e1 combat_rating 7",
+      "804339 behaviour_metric_delta hit_rating"
     ],
     "kind": "claim"
   },
