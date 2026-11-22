@@ -2564,6 +2564,12 @@ public:
             if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
             {
                 player->RemoveAurasDueToSpell(SpellModMutantOwnerAura);
+                if (auto const block = _blockRatingFixtures.find(player->GetGUID()); block != _blockRatingFixtures.end())
+                {
+                    if (block->second)
+                        player->ApplyRatingMod(CR_BLOCK, block->second, false);
+                    _blockRatingFixtures.erase(block);
+                }
                 if (leaveGroups)
                     ungrouped = LeaveGroups(player) && ungrouped;
                 actor.session->LogoutPlayer(false);
@@ -8963,6 +8969,35 @@ private:
             float dodge = step.get<float>("dodge", 0.0f);
             float parry = step.get<float>("parry", 0.0f);
             target->ToPlayer()->SetRealDodgeParryForTest(dodge, parry);
+            if (auto block = step.get_optional<float>("block"))
+            {
+                Player* blocker = target->ToPlayer();
+                Require(*block >= 0.0f && *block <= 100.0f, "Block fixture is a percent from 0 to 100");
+                int32& applied = _blockRatingFixtures[blocker->GetGUID()];
+                if (applied)
+                    blocker->ApplyRatingMod(CR_BLOCK, applied, false);
+                applied = 0;
+                float const multiplier = blocker->GetRatingMultiplier(CR_BLOCK);
+                Require(multiplier > 0.0f, "Block fixture needs a block rating multiplier");
+                applied = int32(std::ceil((*block - blocker->GetFloatValue(PLAYER_BLOCK_PERCENTAGE)) / multiplier));
+                if (applied)
+                    blocker->ApplyRatingMod(CR_BLOCK, applied, true);
+                bool const reached = blocker->GetUnitBlockChance() + 0.001f >= *block;
+                if (!reached && applied)
+                {
+                    blocker->ApplyRatingMod(CR_BLOCK, applied, false);
+                    applied = 0;
+                }
+                record.put("block_rating", applied);
+                record.put("block_chance", blocker->GetUnitBlockChance());
+                if (step.get<bool>("rejected", false))
+                {
+                    Require(!reached, "Block fixture was accepted");
+                    record.put("result", "rejected");
+                }
+                else
+                    Require(reached, "Block fixture needs an equipped, unbroken shield and an unclamped block chance");
+            }
         }
         else if (action == "set_health_pct")
         {
@@ -9250,6 +9285,7 @@ private:
     bool _targetsCreated = false;
     bool _stepStarted = false;
     uint32 _untilAuraAttempts = 0;
+    std::unordered_map<ObjectGuid, int32> _blockRatingFixtures;
     bool _talentRequestSent = false;
     uint32 _talentResultsBefore = 0;
     bool _characterQueueMarked = false;

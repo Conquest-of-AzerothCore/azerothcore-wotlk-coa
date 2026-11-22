@@ -251,6 +251,16 @@ class RunnerTests(unittest.TestCase):
         for field in ('spell', 'aura', 'every_ms', 'max_casts'):
             self.assert_step_rejected({key: value for key, value in step.items() if key != field})
 
+    def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
+        step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'block': 0, 'rejected': True})
+        self.assert_step_validates({'action': 'set_combat_avoidance', 'actor': 'caster', 'parry': 100})
+        for change in ({'block': -1}, {'block': 101}, {'block': '100'}, {'rejected': 1}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({'action': 'set_combat_avoidance', 'actor': 'caster', 'dodge': 10,
+                                   'rejected': True})
+
     def test_ignore_gcd_is_a_boolean_on_a_player_cast(self):
         step = {'action': 'cast', 'actor': 'caster', 'spell': 116, 'target': 'target', 'ignore_gcd': True}
         self.assert_step_validates(step)
