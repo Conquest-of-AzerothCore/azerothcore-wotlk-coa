@@ -1232,7 +1232,9 @@
       {
         "claim": "reset the cooldown of Gavels and causes the next one to not incur a cooldown",
         "labels": [
-          "503690 behaviour_metric_delta gavel_free"
+          "503690 behaviour_metric_delta gavel_reset",
+          "503690 behaviour_metric_delta gavel_free",
+          "503690 behaviour_metric_delta gavel_once"
         ]
       }
     ],
@@ -2327,7 +2329,6 @@
       {
         "claim": "and healing done by $582837s1% per stack",
         "labels": [
-          "582832 behaviour_hit_ratio healing_one",
           "582832 behaviour_hit_ratio healing_cap"
         ]
       }
@@ -5734,8 +5735,7 @@
     "spell": 807873,
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
     "labels": [
-      "807873 effect_value e0 #0",
-      "807873 behaviour_hit_ratio offhand_swing"
+      "807873 effect_value e0 #0"
     ],
     "kind": "claim"
   },
