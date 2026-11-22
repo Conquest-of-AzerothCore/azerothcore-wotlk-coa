@@ -8761,6 +8761,14 @@
         "spell": 500141,
         "target": "ally"
       },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "before_expected": 0,
       "expected": 100,
       "expected_gain": 100,
@@ -8776,7 +8784,7 @@
         ],
         "control_wait": true
       },
-      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100)."
+      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100). Fixture 984954 (spell crit chance -1001%) keeps the natural crit chance of the ally heal out of both phases: the read without it was 4.6781 before the learn, which is the engine's own chance, not the script's 100."
     },
     {
       "spell": 707517,
@@ -8796,6 +8804,14 @@
         "spell": 500141,
         "target": "ally"
       },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "before_expected": 0,
       "expected": 0,
       "expected_gain": 0,
@@ -8804,7 +8820,7 @@
         "allies": 1,
         "control_wait": true
       },
-      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target)."
+      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target). Fixture 984954 (spell crit chance -1001%) keeps the natural crit chance of the ally heal out of both phases: the read without it was 4.6781 before the learn, which is the engine's own chance, not the script's 100."
     },
     {
       "spell": 560123,
@@ -13620,9 +13636,9 @@
       "fields": {},
       "before_expected": 1.0,
       "expected": 1.2,
-      "wait_ms": 1330,
+      "wait_ms": 1840,
       "tolerance": 0.001,
-      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. Shine 800357 (the Sunwalker entries read it finished at 1230 to 1245) is cast by the caster on itself at 50% health. The run speed rate of the caster is read about 90 ms after the heal lands: 1.0 before the learn (control, no 300337) and 1.2 after, within 0.001. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found. The caster is held at 50% of the health fixture before each cast (caster_health_pct), the health Shine needs to heal, as the Illumination entries do."
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. Shine 800357 (the Sunwalker entries read it finished at 1230 to 1245) is cast by the caster on itself at 50% health. The run speed rate of the caster is read about 90 ms after the heal lands: 1.0 before the learn (control, no 300337) and 1.2 after, within 0.001. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found. The caster is held at 50% of the health fixture before each cast (caster_health_pct), the health Shine needs to heal, as the Illumination entries do. The speed is read 1840 ms after the cast like shine_duration, whose 300337 aura is present then; the 1330 ms read came before the heal's aura."
     },
     {
       "spell": 300336,
