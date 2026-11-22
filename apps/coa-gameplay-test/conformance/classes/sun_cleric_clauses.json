@@ -3849,15 +3849,27 @@
     "spell": 704579,
     "clause": "Does not work on bosses.",
     "kind": "claim",
-    "reason": "Open, no label. Dungeon-boss part: AscensionSunCleric.cpp:312 skips Blinded 505342 only when IsDungeonBoss() (flag set at load from a non-raid instance_encounters credit creature, ObjectMgr.cpp:6846-6862). The Ramstein the Gorger 10439 arms (boss_blind, boss_hit_landed) are withdrawn: in all 4 runs of pairs 2 and 4 each boss scenario logged one cast failure, SpellCastResult 12 SPELL_FAILED_BAD_TARGETS (SharedDefines.h:1062) on Sunflare 800231, which the blind_duration scenario on the training dummy never logs, and boss_hit_landed read 0 hits in pair 4 run 1 (20261122-125701) so boss_blind passed on no hit. The cause of the failed cast is not established (a hit-rating fixture cannot fix a target check: the class file sets spell_hit_rating 10000, which clamps the hit chance to 100% so the miss roll of Unit.cpp MagicSpellHitResult never fires, not measured here), so no landing proof exists; the arms are archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json. Next design: read the cast result per cast before the learn and after it. Raid and world boss part: open, server fix approved by mentor decision D-154 (bosses include raid encounter creatures and world-boss rank; 00b1aaf7b2 / #8881 removed the dungeon-boss flag from raid credit creatures for rewards, not for this spell): the code excludes only dungeon bosses, so a raid or world boss is blinded today while the tooltip says bosses; the fix and its regression on the tool group 5 boss fixture follow. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); nothing found beyond the tooltip and Spell.dbc.",
+    "reason": "Both claims proven by behaviour on one build (Twilight ADR 0030, mentor decision D-154, after 00b1aaf7b2 / #8881 took the dungeon-boss flag off raid kill-credit creatures). AscensionSunCleric.cpp:305-311, :320: Blinded 505342 is skipped on a creature without a player owner that is a dungeon boss, a raid encounter kill credit (ObjectMgr::IsRaidEncounterKillCredit) or of world-boss rank. Six Sunflare 800231 hits with Vow of the Eclipse 807435 up, 704579 learned between the phases: Blinded stacks read 0 before and 0 after on Sneed 643 (dungeon boss), Sulfuron Harbinger 12098 (Molten Core encounter 4037, raid) and Baron Rivendare 29109 (rank 3, no encounter), and 0 then 5 on Harvest Golem 36 (normal, the control). Vow of the Eclipse 505340, copied by the same Eclipse call with no boss gate, reads 1 in both phases on each of the four targets (landing controls), and every scenario's cast_failures list is empty. The data explains the SpellCastResult 12 SPELL_FAILED_BAD_TARGETS of the b10c4 Ramstein the Gorger 10439 arms (not re-run): its On Reset action list 1043900 sets unit flags 768 (immune to players and NPCs) and removes them about 6 s later, so a Sunflare cast in that window has no valid target. Lucifron 12118 was rejected as the raid fixture: its coa_boss_summon row brings Shadow of Lucifron 12268 at 5000 ms and the caster died (SpellCastResult 23 from cast 4, runs 20261122-153152 / -153355). Every attackable raid credit creature in the data is also rank 3, so the raid arm proves the outcome, not which condition gave it. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); nothing found beyond the tooltip and Spell.dbc. Pair 20261122-153655 / 20261122-153725, build deaee7002ec1, server commit 6bb059fc763b+ (the class file of the fix commit), no flip, 10/10 ok in both runs.",
     "claims": [
       {
         "claim": "Does not work on dungeon bosses",
-        "labels": []
+        "labels": [
+          "704579 behaviour_metric_delta blind_stacks_dungeon_boss",
+          "704579 behaviour_metric_delta eclipse_lands_dungeon_boss",
+          "704579 behaviour_metric_delta blind_stacks_normal",
+          "704579 behaviour_metric_delta eclipse_lands_normal"
+        ]
       },
       {
         "claim": "Does not work on raid and world bosses",
-        "labels": []
+        "labels": [
+          "704579 behaviour_metric_delta blind_stacks_raid_encounter",
+          "704579 behaviour_metric_delta eclipse_lands_raid_encounter",
+          "704579 behaviour_metric_delta blind_stacks_world_boss",
+          "704579 behaviour_metric_delta eclipse_lands_world_boss",
+          "704579 behaviour_metric_delta blind_stacks_normal",
+          "704579 behaviour_metric_delta eclipse_lands_normal"
+        ]
       }
     ]
   },
