@@ -9,9 +9,12 @@
     "replacement restarted the 3 sec tick. Expected (approach ruled by the PR author): a target in several of the",
     "caster's overlapping patches keeps the application it holds until that patch leaves or ends, so it is",
     "applied once, and its ticks keep coming. No Presence is active, so no other patch can appear. Over 8 sec,",
-    "while both 12 sec patches still overlap, the target must see no new application and at least 2 ticks. Both",
-    "patches are counted with spell_cast_count, and the older one (which dynamic_object_duration_ms reads) must",
-    "still be up when the window ends."
+    "while both 12 sec patches still overlap, the target must see no new application and at least 2 ticks. Two",
+    "live patches are established without a ground effect count metric: two casts are counted, and right after",
+    "the second the oldest live patch (which dynamic_object_duration_ms reads) has at most 11 sec of its 12 sec",
+    "left, so it is still the first patch; it must also still be up when the window ends, and the second, newer",
+    "patch outlasts it. The enemy's aura must have been applied exactly once before the window, and in the window",
+    "the tick count must be 2 or 3: both patches ticking would give 4 or more."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -57,7 +60,15 @@
       "action": "assert", "label": "SETUP: two patches were created", "actor": "cultist", "metric": "spell_cast_count",
       "spell": 805180, "equals": 2
     },
+    {
+      "action": "assert", "label": "SETUP: the oldest live patch is still the first one, cast over 1.6 sec earlier",
+      "actor": "cultist", "metric": "dynamic_object_duration_ms", "spell": 805180, "max": 11000
+    },
     {"action": "wait", "label": "Let both patches refresh their targets", "ms": 1000},
+    {
+      "action": "assert", "label": "SETUP: the enemy's aura was applied once, the second patch did not replace it",
+      "actor": "mob", "metric": "aura_apply_count", "spell": 805180, "equals": 1
+    },
     {"action": "snapshot", "actor": "mob", "metric": "aura_apply_count", "spell": 805180, "save_as": "applications"},
     {
       "action": "snapshot", "actor": "cultist", "metric": "spell_damage_count", "spell": 805180, "target": "mob",
@@ -73,9 +84,9 @@
       "metric": "aura_apply_count", "spell": 805180, "relative_to": "applications", "equals": 0
     },
     {
-      "action": "assert", "label": "#13078: the held aura keeps ticking every 3 sec", "actor": "cultist",
-      "metric": "spell_damage_count", "spell": 805180, "target": "mob", "periodic": true, "relative_to": "ticks",
-      "min": 2
+      "action": "assert", "label": "#13078: one held aura ticks every 3 sec (2 or 3 ticks, not both patches)",
+      "actor": "cultist", "metric": "spell_damage_count", "spell": 805180, "target": "mob", "periodic": true,
+      "relative_to": "ticks", "min": 2, "max": 3
     }
   ]
 }
