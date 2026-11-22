@@ -13,7 +13,7 @@ import inspect_dbc  # noqa: E402
 
 INTELLECT_GROUP = 1083
 INTELLECT_SUBGROUP_FLOOR = 2110710
-LEFT_ALONE_GROUPS = frozenset({INTELLECT_GROUP, 2112508})
+LEFT_ALONE_GROUPS = frozenset({INTELLECT_GROUP})
 FIRST_NEW_CATEGORY = 2113001
 EXCLUSIVE = 1
 RULE_OUTCOMES = {1: 'exclusive', 2: 'per_caster', 3: 'same_effect', 4: 'highest'}
@@ -50,7 +50,24 @@ ALLIED_TARGETS = frozenset({
 EXCEPTIONS = {
     523495: "Ascension live logs 2026-08-11 keep it next to Greater Beetle Pheromones and Greater Footpad's Adaptation",
 }
-MANUAL: dict = {}
+SCRIPTED_EFFECTS = frozenset({
+    300459, 460502, 500151, 500336, 500349, 500715, 500721, 500751, 501789, 501790, 501791, 501792, 501793, 501794,
+    501795, 501841, 501842, 502244, 502245, 502246, 502247, 502434, 502435, 502436, 502437, 502438, 502439, 502533,
+    502534, 502535, 502536, 505203, 521220, 527023, 560058, 562326, 570248, 570249, 570250, 570251, 570252, 573255,
+    574154, 578114, 578115, 706083, 706623, 706854, 800347, 800393, 800398, 801134, 801288, 801297, 801697, 802488,
+    803495, 803970, 804003, 804441, 804457, 805042, 805801, 806100, 806182, 806229, 806454, 806466, 806745, 807944,
+    808082,
+})
+TIMED_DAMAGE_AND_HEALING_COOLDOWNS = frozenset({
+    300679, 504157, 704476, 804859, 804990, 806197, 502442, 502443, 502444, 502445, 502446, 502447, 502448, 541493,
+    560263, 562377, 570152, 572541, 572632, 572637, 572818, 572906, 680843, 800234, 801563, 802771, 803179, 804523,
+    805417, 806123,
+})
+MANA_REGEN_ONLY = frozenset({'regen:0'})
+MANUAL: dict = {
+    **dict.fromkeys(SCRIPTED_EFFECTS | TIMED_DAMAGE_AND_HEALING_COOLDOWNS),
+    **dict.fromkeys((800852, 300858, 681160), MANA_REGEN_ONLY),
+}
 
 EXISTING_CATEGORIES = {
     2110001: frozenset({'stat:1'}),
@@ -275,11 +292,13 @@ def plan_categories(buffs, groups, first_rank, exceptions, manual):
     signatures = {}
     unclassified = []
     for buff in buffs:
-        if buff.spell_id in exceptions:
+        chain = (buff.spell_id, rank(buff.spell_id))
+        if any(spell_id in exceptions for spell_id in chain):
             continue
-        if buff.spell_id in manual:
-            if manual[buff.spell_id] is not None:
-                signatures[buff.spell_id] = frozenset(manual[buff.spell_id])
+        decided = next((spell_id for spell_id in chain if spell_id in manual), None)
+        if decided is not None:
+            if manual[decided] is not None:
+                signatures[buff.spell_id] = frozenset(manual[decided])
             continue
         keys = signature(buff)
         if keys is None:

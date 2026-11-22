@@ -183,6 +183,31 @@ class PlanTests(unittest.TestCase):
         plan = self.plan([scripted, dropped, partner], manual={60: frozenset({'resistance:4'}), 61: None})
         self.assertEqual({60, 62}, plan.members[2113001])
 
+    def test_honor_group_joins_cross_class_category(self):
+        honor = buff(1, 24, aura('SPELL_AURA_MOD_STAT', 0))
+        rite = buff(90, 36, aura('SPELL_AURA_MOD_STAT', 0))
+        plan = self.plan([honor, rite])
+        self.assertEqual(frozenset({'stat:0'}), plan.categories[2113001])
+        self.assertEqual({1, 90}, plan.members[2113001])
+
+    def test_recorded_decisions(self):
+        grace = frozenset({'regen:0'})
+        self.assertEqual({800852: grace, 300858: grace, 681160: grace},
+                         {key: value for key, value in model.MANUAL.items() if value is not None})
+        for timed in (300679, 504157, 704476, 804859, 804990, 806197, 502442, 800234, 805417, 806123):
+            self.assertIsNone(model.MANUAL[timed])
+        for passive in (300929, 300944, 560545, 300515, 504348, 804705):
+            self.assertNotIn(passive, model.MANUAL)
+        self.assertEqual(frozenset({model.INTELLECT_GROUP}), model.LEFT_ALONE_GROUPS)
+
+    def test_decision_on_first_rank_covers_every_rank(self):
+        first = buff(63, 26, aura('SPELL_AURA_MOD_RESISTANCE', 4))
+        higher = buff(64, 26, aura('SPELL_AURA_MOD_RESISTANCE', 4))
+        partner = buff(65, 24, aura('SPELL_AURA_MOD_RESISTANCE', 4))
+        other = buff(66, 22, aura('SPELL_AURA_MOD_RESISTANCE', 4))
+        plan = model.plan_categories([first, higher, partner, other], self.existing(), {64: 63}, {}, {63: None})
+        self.assertEqual({65, 66}, plan.members[2113001])
+
     def test_unclassified_without_decision_is_listed(self):
         plan = self.plan([buff(70, 19, aura('SPELL_AURA_DUMMY'))])
         self.assertEqual([70], plan.unclassified)
