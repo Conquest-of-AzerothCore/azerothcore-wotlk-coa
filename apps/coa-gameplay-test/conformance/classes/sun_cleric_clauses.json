@@ -132,7 +132,8 @@
       "300315 effect_value e0 #0",
       "300315 behaviour_metric_delta judgement_day_cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 300315 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
   },
   {
     "spell": 300318,
@@ -1458,7 +1459,8 @@
       "560113 effect_value e0 #0",
       "560113 behaviour_metric_delta radiance_cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 560113 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
   },
   {
     "spell": 560113,
@@ -4700,7 +4702,8 @@
       "807973 behaviour_metric_delta period_lo",
       "807973 behaviour_metric_delta period_hi"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Unproven on the b7b counted pairs: the data label 807973 aura_amplitude_ms #0 was not emitted by them (build d61531085dc5), so the behaviour entry does not count alone. It resolves at the next base pair, where the data scenarios run on the same build; it is not claimed here."
   },
   {
     "spell": 807973,
@@ -4718,7 +4721,8 @@
       "807973 spell_duration 807872 #2",
       "807973 behaviour_metric_delta stun_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining stun (aura_duration_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 807973 spell_duration 807872 #2 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs the aura presence and expiry shape of 807973 aura_duration, applied to the stun aura 807872. The stun length is bounded by the period reads only to (946, 1053] ms."
   },
   {
     "spell": 807973,
@@ -4727,7 +4731,8 @@
       "807973 aura_duration_ms #3",
       "807973 behaviour_metric_delta aura_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Unproven on the b7b counted pairs: the data label 807973 aura_duration_ms #3 was not emitted by them (build d61531085dc5), so the behaviour entry does not count alone. It resolves at the next base pair, where the data scenarios run on the same build; it is not claimed here."
   },
   {
     "spell": 807973,
