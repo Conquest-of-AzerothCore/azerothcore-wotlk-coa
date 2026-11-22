@@ -312,7 +312,7 @@
     "spell": 300334,
     "clause": "Increases your spell power by 3 for every 125 Armor you have.",
     "kind": "claim",
-    "reason": "Not final: two designs tried, see the b3b report. Reference search: bindmysoul snapshot carries an older state (1 per 125); nothing else found.",
+    "reason": "Resolved by design 3: the gain is 9 against 9.54 +- 1 from a real learn of 561023 with a contrast; it excludes the older 1 per 125 state (3.18) and 4 per 125 (12.7). Reference search: bindmysoul snapshot carries an older state (1 per 125); nothing else found.",
     "labels": [
       "300334 behaviour_metric_delta sp_per_armor"
     ]
@@ -377,7 +377,8 @@
       "300343 behaviour_metric_delta below_20",
       "300343 behaviour_metric_delta above_20"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Lead, unproven: the exact 20% edge. The read comes 500 ms after the Horusath Blast cast at the dummy held at 20%, so the hit can take it under 20% first, and CountPctFromMaxHealth truncates (CoAGameplayTest.cpp:8930); the 19% and 21% arms (30 / 0) are what is claimed. Reference search 2026-11-22: nothing found."
   },
   {
     "spell": 300344,
@@ -3632,16 +3633,17 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "increases your chance to parry by $707843s1%",
+        "claim": "increases your chance to parry the next attack by $707843s1% (the +30 on the live parry chance)",
         "labels": [
           "704941 behaviour_metric_delta parry_chance"
         ]
       },
       {
-        "claim": "the next attack",
+        "claim": "the next attack (the bonus is consumed by the next attack)",
         "labels": []
       }
-    ]
+    ],
+    "reason": "Open, not status 5 (no measurement yet). Lead from the data: 707843 has DurationIndex 28 (5000 ms), ProcCharges 0, ProcFlags 0 and AuraInterruptFlags 0 (Spell.dbc), its only server reference is the cast at AscensionSunClericEvents.cpp:297 and data/sql holds no spell_proc row for it, so nothing consumes the aura on the next attack: the +30 would last 5 s over several attacks. No check shows it, and a parried strike procs the aura again, so a plain second strike at 100% parry cannot tell consumption from a refresh. Reference search 2026-11-22: bindmysoul snapshot carries the same tooltip; nothing found on consumption."
   },
   {
     "spell": 704942,
@@ -4558,9 +4560,11 @@
     "spell": 503505,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "labels": [
-      "503505 behaviour_metric_delta cone_needs_bless"
+      "503505 behaviour_metric_delta cone_needs_bless",
+      "503505 behaviour_metric_delta cone_needs_bless_cast"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Review I4 applied: the cast outcome is read, not only the damage. Unblessed arm of the counted pair 20261122-081610 / -081655 (one build 7bc3655a6d3d, no flip): cast_failure 12 (SPELL_FAILED_BAD_TARGETS, SharedDefines.h:1062) in both runs, and no damage by 804252; 503505 carries TargetAuraSpell 804247 in Spell.dbc. Control: the Blessed arm of cone_damage lands the same cast and deals 30448 and 30430 at +20000 spell power (so the refusal is the missing Bless, not the setup). Reference search 2026-11-22: nothing found."
   },
   {
     "spell": 804250,
@@ -4671,7 +4675,8 @@
     "labels": [
       "804257 behaviour_metric_delta caster_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Mentor ruling D-119 (2026-11-22), status 1: the additional $s2% is a second aura 216 and the engine multiplies the two (Unit.cpp:14967-14970, ApplyPercentModFloatVar): 1/1.03^2 = 0.942596 for the caster, 1/1.03 = 0.970874 for the ally (ally_haste, same pair). The additive 1/1.06 = 0.943396 is outside the band. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive); nothing else found. ADR 0022."
   },
   {
     "spell": 804257,
@@ -4861,12 +4866,11 @@
         ]
       },
       {
-        "claim": "within $573449a1 yds of your target",
-        "labels": [
-          "804632 behaviour_metric_delta flare_radius"
-        ]
+        "claim": "within $573449a1 yds of your target (open: the edge is not bracketed, see the reason)",
+        "labels": []
       }
-    ]
+    ],
+    "reason": "Radius claim open, not status 1. Review I1 (the 2 and 3 yd inside dummies and 9 and 10 yd outside ones let any radius from 0.45 to 6.45 yd pass) is right, and the re-bracket around the predicted edge 5 + 2 x 1.275 = 7.55 yd failed: the dummies stand 7.3 and 7.8 yd from the target (geometry read in diagnostic run 20261122-081052: combat reach 1.275 on all, equal Z, 2D distances 7.2998 and 7.7998) and the pair 20261122-080756 / -080833 read 1 flare against the expected 2, so the 7.3 yd dummy is not hit. Diagnostic scans, not counted (runs 20261122-081200 and 20261122-081418; flares on the dummy at 4, 5, 5.1, 5.2, 5.3 and 5.55 yd from the target, none at 5.7, 6, 6.3, 7, 7.3, 7.5, 7.8 and 8.5 yd): the edge lies between 5.55 and 5.70 yd, which neither code path predicts (CoA handler Nearby(): 7.55 yd; core 573449 DEST_AREA_ENEMY search with the target's combat reach added for a player caster, Spell.cpp:9434-9442: 6.275 yd). Lead for the mentor: find which path picks the targets (spell_proc row 804632 triggers 573449, whose Effect 64 casts 807175, and the handler of case 804632 also casts it) and where 5.6 yd comes from. The tooltip says 5 yds, so the measured edge is close to it: an uncertain expectation of the reach term, not a defect, no server change. The entry flare_radius keeps the bounds it can prove (4.9 yd inside, 7.8 yd outside) and is not attached to the claim: it reads 2 in both runs of the counted pair 20261122-081610 / -081655. Second lead, by code reading only, not measured: Nearby() includes the target itself, the list is sorted by GUID (AscensionSunCleric.cpp:146) and the target is prepended only when absent (AscensionSunClericEvents.cpp:305-306, e36bc50aad), so with more than 5 valid enemies within the radius the target gets no flare when its GUID is not among the five lowest. The tooltip is silent on this; flare_cap (the count stays 5) is not affected."
   },
   {
     "spell": 804632,
