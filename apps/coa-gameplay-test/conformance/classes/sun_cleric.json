@@ -6241,18 +6241,361 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 80,
+      "expected": 112,
       "wait_ms": 1500,
-      "observe_source": "807343 Lights of Absolution: Effect[0] PROC_TRIGGER_SPELL 807523 (Light of Absolution, DurationIndex 1 = 10000 ms, $807523d); the Sun Cleric event hook casts 807523 on the caster when a damaging Horusath Blast hit lands (AscensionSunClericEvents.cpp:125 and :298). 807523 Effect[0] PROC_TRIGGER_SPELL 807524, whose effects trigger 807526 (energize 2%) and 807525 (HEAL_PCT 2%, $807525s1) on allies within 40 yd (EffectRadiusIndex 23, $807524a1). The code marks only Radiant Flame 806060 casts under 807523 (AscensionSunClericAbilities.cpp:42, :161, :374-375: a Radiant Flame 807058 hit casts 807524), not Solar Flare 807175, which the tooltip names. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same two sentences ('Damage dealt by Horusath Blast now grants you Light of Absolution for 10 seconds' / 'Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.'); nothing else found. Solar Flare is launched for real by Solar Concord 301266 (set up in both phases, Sunrise 500477 set as a precondition fixture) on the same Horusath Blast hit. The caster is held at 50% of the 10000 health fixture (5000 missing): 2% of the missing health is 100, x 0.8 (class tuning 887015, -20% healing done at level 60, as in the Daybreak entries) = 80, judged 79..81. Control: the phase before the learn. ",
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524 (AscensionSunClericAbilities.cpp OnSpellHitResult, gated by Chance(player, 807523, 500): 807523 ProcChance 100, a 500 ms timer per caster); 807524 Effect[0]/[1] TRIGGER_SPELL 807526 and 807525 on TargetA 22 SRC_CASTER / TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd ($807524a1); 807525 Effect[0] HEAL_PCT BasePoints 1 + DieSides 1 = 2% ($807525s1), healed on missing health by spell_ascension_sun_cleric_lights_of_absolution. No Radiant Flame route remains. The talent 807343 grants 807523 on a damaging Horusath Blast hit (AscensionSunClericEvents.cpp:126 and :300); Solar Flare is launched for real by Solar Concord 301266 (set up in both phases, Sunrise 500477 set as a precondition fixture) on the same Horusath Blast 572801 hit, and lands after the grant (missile Speed 25 yd/s). The caster is held at 30% of the 10000 health fixture (3000 of 10000, 7000 missing): 2% of 7000 missing health is 140, x 0.8 (class tuning 887015 aura 136, -20% healing done at level 60, as in the Daybreak entries) = 112. Judged 111..113, which excludes the other bases: 2% of the current 3000 x 0.8 = 48 and 2% of the maximum 10000 x 0.8 = 160. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences ('Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.') and no other value; nothing else found. Control: the phase before the learn.",
       "setup_casts": [
         301266
       ],
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "measure_actor": "caster",
-      "caster_health_pct": 50,
-      "after_at_least": 79,
-      "after_at_most": 81
+      "caster_health_pct": 30,
+      "after_at_least": 111,
+      "after_at_most": 113
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "name": "Lights of Absolution (no heal on a Radiant Flame tick)",
+      "variant": "radiant_none",
+      "label_suffix": "radiant_none",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807525,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 4700,
+      "measure_actor": "caster",
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807058,
+              "caster": "caster",
+              "target": "dummy"
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Radiant Flame 806060 DurationIndex 35 = 4000 ms, EffectAmplitude 1000 and SPELL_ATTR5_EXTRA_INITIAL_PERIOD: five 807058 hits per cast, one cast in each phase, cumulative read"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807523
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Light of Absolution 807523 is set in the after phase only (after_auras), DurationIndex 1 = 10000 ms, still held 4700 ms after the cast; no Radiant Flame cast consumes it"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524 (AscensionSunClericAbilities.cpp OnSpellHitResult, gated by Chance(player, 807523, 500): 807523 ProcChance 100, a 500 ms timer per caster); 807524 Effect[0]/[1] TRIGGER_SPELL 807526 and 807525 on TargetA 22 SRC_CASTER / TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd ($807524a1); 807525 Effect[0] HEAL_PCT BasePoints 1 + DieSides 1 = 2% ($807525s1), healed on missing health by spell_ascension_sun_cleric_lights_of_absolution. No Radiant Flame route remains. Radiant Flame 806060 is cast at the dummy in both phases with the caster at 5000 of 10000 health; the after phase holds Light of Absolution. Each 807058 tick would heal 80 on the removed route; the ruling reads 0 in both phases, while the arms show the ticks landed (5 then 10) and the buff was held (0 then 1). Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture; flare_heal grants it for real through Horusath Blast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences ('Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.') and no other value; nothing else found. Control: the before phase without the buff."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (two Solar Flares 470 ms apart heal once)",
+      "variant": "gate_once",
+      "label_suffix": "gate_once",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "setup_casts": [
+        807175
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 470,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807525,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807175,
+              "target": "dummy"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "two Solar Flare 807175 casts at the dummy per phase (one setup cast, one trigger), cumulative read"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524 (AscensionSunClericAbilities.cpp OnSpellHitResult, gated by Chance(player, 807523, 500): 807523 ProcChance 100, a 500 ms timer per caster); 807524 Effect[0]/[1] TRIGGER_SPELL 807526 and 807525 on TargetA 22 SRC_CASTER / TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd ($807524a1); 807525 Effect[0] HEAL_PCT BasePoints 1 + DieSides 1 = 2% ($807525s1), healed on missing health by spell_ascension_sun_cleric_lights_of_absolution. No Radiant Flame route remains. Two Solar Flares are cast at the dummy 3 yd away, the trigger cast follows the setup cast's 470 ms wait directly (generated steps: cast, wait 470, cast); both missiles fly the same 3 yd at Speed 25 yd/s, so the two hits land the same gap apart. The gate is a 500 ms EventMap timer per caster, updated by OnPlayerUpdate (AscensionSunCleric.cpp:433) after Unit::Update in the same player update (PlayerUpdates.cpp:81 and :324); waits advance game time in steps of at most 25 ms. The second hit falls inside the gate: 1 807525 heal. Paired with gate_after (590 ms apart), a gate below about 0.47 s or above about 0.53 s fails one of the two, so 0.45 s and 0.55 s (10% off) are excluded. The caster is held at 5000 of 10000 health before the first flare. Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture; flare_heal grants it for real through Horusath Blast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences ('Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.') and no other value; nothing else found. Control: the before phase without Light of Absolution heals 0."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (two Solar Flares 530 ms apart heal twice)",
+      "variant": "gate_after",
+      "label_suffix": "gate_after",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "setup_casts": [
+        807175
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 530,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807525,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807175,
+              "target": "dummy"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "two Solar Flare 807175 casts at the dummy per phase (one setup cast, one trigger), cumulative read"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524 (AscensionSunClericAbilities.cpp OnSpellHitResult, gated by Chance(player, 807523, 500): 807523 ProcChance 100, a 500 ms timer per caster); 807524 Effect[0]/[1] TRIGGER_SPELL 807526 and 807525 on TargetA 22 SRC_CASTER / TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd ($807524a1); 807525 Effect[0] HEAL_PCT BasePoints 1 + DieSides 1 = 2% ($807525s1), healed on missing health by spell_ascension_sun_cleric_lights_of_absolution. No Radiant Flame route remains. Two Solar Flares are cast at the dummy 3 yd away, the trigger cast follows the setup cast's 530 ms wait directly (generated steps: cast, wait 530, cast); both missiles fly the same 3 yd at Speed 25 yd/s, so the two hits land the same gap apart. The gate is a 500 ms EventMap timer per caster, updated by OnPlayerUpdate (AscensionSunCleric.cpp:433) after Unit::Update in the same player update (PlayerUpdates.cpp:81 and :324); waits advance game time in steps of at most 25 ms. The second hit falls outside the gate: 2 807525 heals. Paired with gate_once (530 ms apart), a gate below about 0.47 s or above about 0.53 s fails one of the two, so 0.45 s and 0.55 s (10% off) are excluded. The caster is held at 5000 of 10000 health before the first flare. Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture; flare_heal grants it for real through Horusath Blast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences ('Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.') and no other value; nothing else found. Control: the before phase without Light of Absolution heals 0."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (ally inside 40 yd healed, ally outside not)",
+      "variant": "ally_radius",
+      "label_suffix": "ally_radius",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807525,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 112,
+      "after_at_least": 111,
+      "after_at_most": 113,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 807525,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 stands 41 yd from the caster, outside the 40 yd edge of 807524 (TargetB 30: no leeway, no reach for a player target); it would read 112 if the edge reached it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 39,
+            "expected": 39,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally 39 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 41,
+            "expected": 41,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally2 41 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 807525,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 112,
+            "tolerance": 1,
+            "source": "the restore fired: the caster at 3000 of 10000 health heals 2% of 7000 missing x 0.8 = 112 (current base 48, maximum base 160)"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 39,
+        "ally2": 41
+      },
+      "observe_source": "Owner ruling O-13 (class ADR 0028): a damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524 (AscensionSunClericAbilities.cpp OnSpellHitResult, gated by Chance(player, 807523, 500): 807523 ProcChance 100, a 500 ms timer per caster); 807524 Effect[0]/[1] TRIGGER_SPELL 807526 and 807525 on TargetA 22 SRC_CASTER / TargetB 30 SRC_AREA_ALLY, radius index 23 = 40 yd ($807524a1); 807525 Effect[0] HEAL_PCT BasePoints 1 + DieSides 1 = 2% ($807525s1), healed on missing health by spell_ascension_sun_cleric_lights_of_absolution. No Radiant Flame route remains. Edge (ADR 1020 terms): TargetB 30 TARGET_UNIT_SRC_AREA_ALLY takes no leeway (Spell.cpp:1388-1394 adds GetLeewayBonusRadius only for TargetB 15, 20 and 56) and no combat reach for a player-controlled target (Spell.cpp:9440-9442), and the SRC check is the exact 3D distance (Spell.cpp:9444-9448), so the edge is 40.0 yd. The allies stand at the caster's spawn and are relocated along x with dz 0 (ally_offsets): ally at 39 yd (inside), ally2 at 41 yd (outside), all three at 3000 of 10000 health (7000 missing). One Solar Flare at the dummy 3 yd away. 2% of 7000 missing health is 140, x 0.8 (class tuning 887015 aura 136, -20% healing done at level 60, as in the Daybreak entries) = 112, judged 111..113 on the ally and 112 +-1 on the caster; a current-health base reads 48 and a maximum-health base 160. The distance arms and the ally2 0-heal arm are the guard that the offsets were applied (no offset: ally2 at the caster would read 112 and the distances 0). Light of Absolution 807523 applied by harness set_aura (after_auras) as a precondition fixture; flare_heal grants it for real through Horusath Blast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentences ('Damage dealt by Solar Flares now restores 2% missing health, Energy, Focus, Runic Power, and Rage to allies within 40 yds. Can only occur once every 0.5 sec.') and no other value; nothing else found. Control: the before phase without Light of Absolution heals neither."
     },
     {
       "spell": 300321,

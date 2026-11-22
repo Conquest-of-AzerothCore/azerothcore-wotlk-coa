@@ -51,7 +51,6 @@ bool Select(uint32 id, SpellInfo const* info)
         case 803238: return info && info->Id == 504764;
         case 807061: return Named(info, 806477);
         case 807077: return Named(info, 500154);
-        case 807523: return Named(info, 806060);
         default: return false;
     }
 }
@@ -73,6 +72,10 @@ constexpr uint32 SunStride = 680700;
 constexpr uint32 SunStrideVisual = 681434;
 constexpr uint32 RadiantFlame = 806060;
 constexpr uint32 RadiantFlameTick = 807058;
+constexpr uint32 SolarFlare = 807175;
+constexpr uint32 LightOfAbsolution = 807523;
+constexpr uint32 LightOfAbsolutionGateMs = 500;
+constexpr uint32 LightsOfAbsolutionRestore = 807524;
 void Finish(Player* player, Spell* spell)
 {
     for (uint32 id : SunClericFinite)
@@ -181,7 +184,7 @@ public:
                     SpendDawn(player, origin, origin->GetSpellInfo());
                 }
                 Aura* sunslam = SunslamAura(player, spell);
-                for (uint32 key : {Dawn,DawnCast,807523u})
+                for (uint32 key : {Dawn,DawnCast})
                 {
                     spell->SetScriptValue(key,origin->GetScriptValue(key));
                     if (sunslam)
@@ -192,7 +195,7 @@ public:
                 info->Id == RadiantFlameTick && Named(channel, RadiantFlame))
                 SpendDawn(player, spell, channel);
             else if (Aura* sunslam = SunslamAura(player, spell))
-                for (uint32 key : {Dawn,DawnCast,807523u})
+                for (uint32 key : {Dawn,DawnCast})
                     spell->SetScriptValue(key,sunslam->GetScriptValue(key));
             return;
         }
@@ -411,8 +414,9 @@ public:
             if (!allies.empty())
                 Copy(player, allies.front(), 803816, CalculatePct(healing, 70));
         }
-        if (info->Id == 807058 && spell->GetScriptValue(807523))
-            Cast(player, player, 807524);
+        if (info->Id == SolarFlare && damage && spell->GetCaster() == player &&
+            Chance(player, LightOfAbsolution, LightOfAbsolutionGateMs))
+            Cast(player, player, LightsOfAbsolutionRestore);
         if (!spell->IsTriggered())
         {
             if (damage && Named(info, 500146) && spell->GetScriptValue(804631))
@@ -444,6 +448,31 @@ class spell_ascension_sun_cleric_resource : public SpellScript
     void Register() override
     {
         OnEffectHitTarget += SpellEffectFn(spell_ascension_sun_cleric_resource::Effect, EFFECT_ALL, SPELL_EFFECT_ANY);
+    }
+};
+class spell_ascension_sun_cleric_lights_of_absolution : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_sun_cleric_lights_of_absolution);
+    void Launch(SpellEffIndex index)
+    {
+        PreventHitDefaultEffect(index);
+    }
+    void Heal(SpellEffIndex index)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (!caster || !target)
+            return;
+        uint32 heal = caster->SpellHealingBonusDone(target, GetSpellInfo(),
+            CalculatePct(target->GetMaxHealth() - target->GetHealth(), GetEffectValue()), HEAL, index);
+        SetHitHeal(int32(target->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, HEAL)));
+    }
+    void Register() override
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Launch, EFFECT_0,
+            SPELL_EFFECT_HEAL_PCT);
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Heal, EFFECT_0,
+            SPELL_EFFECT_HEAL_PCT);
     }
 };
 class spell_ascension_sun_cleric_ability : public SpellScript
@@ -550,4 +579,5 @@ void AddSC_AscensionSunClericAbilities()
     new sun_cleric_spells();
     RegisterSpellScript(spell_ascension_sun_cleric_ability);
     RegisterSpellScript(spell_ascension_sun_cleric_resource);
+    RegisterSpellScript(spell_ascension_sun_cleric_lights_of_absolution);
 }
