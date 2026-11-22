@@ -39456,7 +39456,6 @@
       "setup_casts": [
         803489
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39499,7 +39498,6 @@
       "setup_casts": [
         803489
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39536,7 +39534,6 @@
       "setup_casts": [
         803491
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "ally_arm": {
         "allies": 1,
@@ -39586,7 +39583,6 @@
       "setup_casts": [
         803491
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39623,7 +39619,6 @@
       "setup_casts": [
         803719
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -39666,7 +39661,6 @@
       "setup_casts": [
         803719
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40124,7 +40118,6 @@
       "setup_casts": [
         803489
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40167,7 +40160,6 @@
       "setup_casts": [
         803489
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40204,7 +40196,6 @@
       "setup_casts": [
         803491
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40254,7 +40245,6 @@
       "setup_casts": [
         803491
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40291,7 +40281,6 @@
       "setup_casts": [
         807435
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
@@ -40334,7 +40323,6 @@
       "setup_casts": [
         807435
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 1600,
       "phase_auras": [
         [
