@@ -1472,10 +1472,24 @@
   {
     "spell": 520024,
     "clause": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
-    "labels": [
-      "520024 aura_duration_ms #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d (2 s)",
+        "labels": [
+          "520024 behaviour_metric_delta immunity_duration"
+        ]
+      },
+      {
+        "claim": "becoming immune to all physical attacks and spells (no landing of a physical and a magic fixture during the window)",
+        "labels": []
+      },
+      {
+        "claim": "leap into the air (client-acknowledged knockback, not observable on the server)",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity claim needs the immunity kind with an enemy-target cast: its self_cast_attempt casts the spell on the subject, and Valkyr's Calling targets an enemy (tool need, returned to the controller). The leap is a status 4 candidate (client acknowledgement)."
   },
   {
     "spell": 520024,
@@ -1712,12 +1726,22 @@
   {
     "spell": 560095,
     "clause": "Raise your blessed shield, increasing your block value by $s1%.",
-    "labels": [
-      "560095 effect_value e0 #0",
-      "560095 aura_amount e0 #0",
-      "560095 behaviour_metric_delta block_value"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Raise your blessed shield (the aura is applied and lasts, held at 9.5 s)",
+        "labels": [
+          "560095 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "increasing your block value by $s1% (100%: the block value doubles, 45 to 90)",
+        "labels": [
+          "560095 behaviour_metric_delta block_value",
+          "560095 aura_amount e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 560095,
@@ -3070,11 +3094,21 @@
   {
     "spell": 680663,
     "clause": "Avoiding an attack now has a $h1% chance to regenerate $504876s1% of your base mana.",
-    "labels": [
-      "680663 effect_value #0",
-      "680663 effect_value 504876e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Avoiding an attack now has a $h1% (25%) chance to regenerate mana",
+        "labels": [
+          "680663 proc_rate avoided"
+        ]
+      },
+      {
+        "claim": "$504876s1% (5%) of your base mana (data read of the percent; the amount of the restore is not measured)",
+        "labels": [
+          "680663 effect_value 504876e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 680670,
@@ -3542,17 +3576,28 @@
     "spell": 704585,
     "clause": "Reduces your Physical damage taken by $s1%,",
     "labels": [
-      "704585 effect_value e0 #0"
+      "704585 behaviour_hit_ratio taken_below"
     ],
     "kind": "claim"
   },
   {
     "spell": 704585,
     "clause": "plus an additional $s2% while above 80% health.",
-    "labels": [
-      "704585 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "plus an additional $s2% (5%, ratio 0.90 at 100% health)",
+        "labels": [
+          "704585 behaviour_hit_ratio taken_above"
+        ]
+      },
+      {
+        "claim": "while above 80% health (at 70% health only the base 0.95)",
+        "labels": [
+          "704585 behaviour_hit_ratio taken_below"
+        ]
+      }
+    ]
   },
   {
     "spell": 704586,
