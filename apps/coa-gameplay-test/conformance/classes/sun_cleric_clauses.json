@@ -738,8 +738,7 @@
       "300723 effect_value e2 #0",
       "300723 behaviour_metric_delta holy_damage",
       "300723 behaviour_metric_delta holy_damage_control",
-      "300723 behaviour_metric_delta fire_damage",
-      "300723 behaviour_metric_delta fire_damage_control"
+      "300723 behaviour_metric_delta fire_damage"
     ],
     "kind": "claim"
   },
