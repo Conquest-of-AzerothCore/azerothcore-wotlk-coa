@@ -375,6 +375,18 @@ class SelectionTests(unittest.TestCase):
         records = {1: record(20), 2: record(20)}
         self.assertEqual({1, 2, 5}, model.learnable_spells(set(), {1, 5}, records, {2: 1}))
 
+    def test_selects_allied_aura_after_alternating_trigger_and_rank_links(self):
+        records = {
+            1: record(20, trigger(2)),
+            2: record(20),
+            3: record(20, trigger(4)),
+            4: record(20),
+            5: record(20, aura('SPELL_AURA_MOD_STAT', 1)),
+        }
+        first_rank = {2: 2, 3: 2, 4: 4, 5: 4}
+        learnable = model.learnable_spells({1}, set(), records, first_rank)
+        self.assertEqual([5], [buff.spell_id for buff in model.select_buffs(records, learnable)])
+
     def test_spell_dbc_row_replaces_dbc_effects(self):
         records = {10: record(25, aura('SPELL_AURA_MOD_STAT', 1))}
         row = {'ID': 10, 'Name_Lang_enUS': 'Override', 'SpellClassSet': 25, 'Attributes': 0,

@@ -487,17 +487,22 @@ def select_buffs(records, learnable, endless_durations=frozenset()):
 
 
 def learnable_spells(advancement, skill_line, records, first_rank=None):
+    ranks_by_first = {}
+    for spell_id, first in (first_rank or {}).items():
+        ranks_by_first.setdefault(first, []).append(spell_id)
+
     learnable = set(advancement) | set(skill_line)
-    learnable |= {spell_id for spell_id, first in (first_rank or {}).items() if first in learnable}
     pending = list(learnable)
     while pending:
-        spell = records.get(pending.pop())
-        if spell is None:
-            continue
-        for effect in spell.effects:
-            if effect.trigger_spell and effect.trigger_spell not in learnable:
-                learnable.add(effect.trigger_spell)
-                pending.append(effect.trigger_spell)
+        spell_id = pending.pop()
+        linked = list(ranks_by_first.get(spell_id, ()))
+        spell = records.get(spell_id)
+        if spell is not None:
+            linked.extend(effect.trigger_spell for effect in spell.effects if effect.trigger_spell)
+        for linked_id in linked:
+            if linked_id not in learnable:
+                learnable.add(linked_id)
+                pending.append(linked_id)
     return learnable
 
 

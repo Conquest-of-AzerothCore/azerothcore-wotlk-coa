@@ -90,11 +90,6 @@
     },
     {
       "action": "learn",
-      "actor": "rune_a",
-      "spell": 561250
-    },
-    {
-      "action": "learn",
       "actor": "guard_b",
       "spell": 582536
     },
@@ -181,6 +176,11 @@
     {
       "action": "wait",
       "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rune_a",
+      "spell": 561250
     },
     {
       "action": "cast",
