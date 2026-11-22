@@ -4575,6 +4575,42 @@ class JudgeDurationRatioTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertIn('cannot exclude a 10% deviation', verdict.explanation)
 
+    def test_a_margin_of_exactly_ten_percent_of_the_delta_is_refused_even_on_a_perfect_read(self):
+        expectation = self.margined(175)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('cannot exclude a 10% deviation', verdict.explanation)
+
+    def test_mutant_uneven_landing_offsets_within_the_margin_cannot_pass_a_ten_percent_deviation(self):
+        expectation = self.margined(125)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9500.0, 7550.0, (500.0, 650.0)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 0.82)
+
+    def test_an_ok_margined_verdict_always_reads_inside_its_own_band(self):
+        expectation = self.margined(50)
+        oks = 0
+        for after in range(7394, 7600, 7):
+            for offsets in ((506.0, 506.0), (506.0, 540.0), (480.0, 506.0), (520.0, 470.0)):
+                before = 10000.0 - offsets[0]
+                verdict = judge_behaviour(base_verdict(expectation),
+                                          self.timed_run(before, float(after), offsets), expectation)
+                if verdict.status == 'ok':
+                    oks += 1
+                    with self.subTest(after=after, offsets=offsets):
+                        self.assertLessEqual(verdict.low - 1e-9, verdict.measured)
+                        self.assertLessEqual(verdict.measured, verdict.high + 1e-9)
+        self.assertGreater(oks, 0)
+
+    def test_the_margined_verdict_measures_the_landing_corrected_ratio(self):
+        expectation = self.margined(50)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0, (509.0, 509.0)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 8003.0 / 10003.0)
+        self.assertIn('landing-corrected durations 10003 and 8003 ms', verdict.explanation)
+
     def test_tick_overshoot_widens_the_margin_enough_to_cover_that_same_diff(self):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 4590.0},

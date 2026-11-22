@@ -7586,7 +7586,7 @@
       "kind": "move_under_aura",
       "label_suffix": "move",
       "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities",
-      "observe_source": "760379 Sunstorm (installed DBC): ChannelInterruptFlags 0, a 6000 ms self aura. Movement is driven through the existing client_packet action (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP reach WorldSession::HandleMovementOpcodes, consumed false), no harness action (mentor D-171). Control: without the aura the same packets move the player 2 yd, which proves the packet moves the player; under the aura the player must move 2 yd and the aura must stay. t10 probe 2026-11-22 (build 0df866d2): 2389.03 -> 2391.03 without and 2391.03 -> 2393.03 under the aura, aura 1 at start, moved and stopped."
+      "observe_source": "760379 Sunstorm (installed DBC): ChannelInterruptFlags 0, a 6000 ms self aura. Movement is driven through the existing client_packet action (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP reach WorldSession::HandleMovementOpcodes, consumed false), no harness action (mentor D-171). Control: without the aura the same packets move the player 2 yd, which proves the packet moves the player; under the aura the player must move 2 yd and the aura must stay. t10 probe 2026-11-22 (build 0df866d2): 2389.03 -> 2391.03 without and 2391.03 -> 2393.03 under the aura, aura 1 at start, moved and stopped. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); 760379 appears only in the grant tables (skill_line_ability, advancement) and has 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 804629,
@@ -9997,7 +9997,7 @@
           }
         ]
       },
-      "observe_source": "Amount half of the 800612 clause. Same phases as holy_strikes (5 swing intervals with both hands at the dummy, the before phase without the aura is the control and reads 0 Holy strikes), with two ratio-only arms read after each main reading: the 807853 damage total with its resisted part at the dummy (with its count) and the caster's melee damage total (with its damaging-hit count). The main reading expects 1 or more Holy strikes after (expected 1 as a floor through the count arm). The ratio of the after-phase deltas must be 1.0 within 0.02, unmeasured unless both landed. Expected from 800612 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run.",
+      "observe_source": "Amount half of the 800612 clause. Same phases as holy_strikes (5 swing intervals with both hands at the dummy, the before phase without the aura is the control and reads 0 Holy strikes), with two ratio-only arms read after each main reading: the 807853 damage total with its resisted part at the dummy (with its count) and the caster's melee damage total (with its damaging-hit count). The main reading expects 1 or more Holy strikes after (expected 1 as a floor through the count arm). The ratio of the after-phase deltas must be 1.0 within 0.02, unmeasured unless both landed. Expected from 800612 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run. The resisted part is the CoA linear monster resistance: a creature victim and a non-physical school (Unit.cpp:120-124, CoA.MonsterResistance.Enable default true, WorldConfig.cpp:387), resistance = level x PerLevel 1.0 (Unit.cpp:2566-2587), 60 for the level-60 dummy, 60 / PerPercent 5 = 12% (WorldConfig.cpp:388-394), which 823764 cannot remove; the numerator sums damage and resisted part. 807853 is DmgClass 2 without SPELL_ATTR2_CANT_CRIT: a critical Holy copy would read above 1.02 and alert, so a crit can only give a false alert, never a false ok. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives \"an additional 50%\", an older text; the installed DBC Effect[0] BasePoints 99 + 1 = 100 wins (trust order). coa-history holds 2114 SPELL_DAMAGE events of 807853 in 11 logs, not paired with their swings, so no ratio is read from them.",
       "after_at_least": 1
     },
     {
@@ -12925,7 +12925,7 @@
       "fixture": {
         "attack_power": 20000
       },
-      "expected_source": "807507 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 30 + EffectDieSides 1 = 31 ($s1, installed DBC): off-hand auto attack damage x1.31. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn."
+      "expected_source": "807507 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 30 + EffectDieSides 1 = 31 ($s1, installed DBC): off-hand auto attack damage x1.31. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn. Residual chance: the two pair2 runs (20 trials each) read sampling half-widths of 0.42 to 0.50 points against bands of +-2 (807507) and +-3.05 (807873) points, and their excluded limits (28.55 to 33.45, 57.45 to 64.55) stay inside a 10% deviation of the expected bonus. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives \"by 20%\", an older text; the installed DBC Effect[0] BasePoints 30 + 1 = 31 wins (trust order). 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 807873,
@@ -12949,7 +12949,7 @@
       "fixture": {
         "attack_power": 20000
       },
-      "expected_source": "807873 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 60 + EffectDieSides 1 = 61 ($s1, installed DBC): off-hand auto attack damage x1.61. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn."
+      "expected_source": "807873 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 60 + EffectDieSides 1 = 61 ($s1, installed DBC): off-hand auto attack damage x1.61. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn. Residual chance: the two pair2 runs (20 trials each) read sampling half-widths of 0.42 to 0.50 points against bands of +-2 (807507) and +-3.05 (807873) points, and their excluded limits (28.55 to 33.45, 57.45 to 64.55) stay inside a 10% deviation of the expected bonus. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul and sidekick do not hold it; it appears only in the grant tables (mind_of_ascension_talent, advancement). 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 707072,
@@ -13023,7 +13023,7 @@
           "source": "Polearm: White Bone Spear 11864 (data/sql/base item_template class 2 subclass 6 InventoryType 17, RequiredLevel 0)"
         }
       ],
-      "observe_source": "707072 Effect[2] SPELL_EFFECT_DUAL_WIELD (40) and Effect[0] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC). Control: the same four off-hand equips with 707072 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items. Skill lines 55, 160 and 229 are set so proficiency is not what refuses the equip."
+      "observe_source": "707072 Effect[2] SPELL_EFFECT_DUAL_WIELD (40) and Effect[0] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC). Control: the same four off-hand equips with 707072 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items. Skill lines 55, 160 and 229 are set so proficiency is not what refuses the equip. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same text (\"Allows you to dual wield ...\"); 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 804247,
@@ -16347,7 +16347,7 @@
       "striker_entry": 36,
       "attempts": 1,
       "margin_ms": 50,
-      "observe_source": "704581 Effect[1] $s2 = 20: stun durations on the caster x0.8. Vehicle Stun 2880 (installed DBC duration 10000 ms) cast once per phase (attempts 1) so the read is a single, undiminished landing: the earlier design landed it three times 500 ms apart and read a diminished re-application (1994 ms before). Expected delta = 10000 x (0.8 - 1) = -2000 ms less the same settle in both phases; margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (200 ms), so a 10% deviation either side is excluded. The 27 s gap between the phases exceeds the 15 s diminishing-returns reset. Control: the before phase without 704581. Expected from the installed DBC and the tooltip; nothing from a run."
+      "observe_source": "704581 Effect[1] $s2 = 20: stun durations on the caster x0.8. Vehicle Stun 2880 (installed DBC duration 10000 ms) cast once per phase (attempts 1) so the read is a single, undiminished landing: the earlier design landed it three times 500 ms apart and read a diminished re-application (1994 ms before). Expected delta = 10000 x (0.8 - 1) = -2000 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (200 ms), so a 10% deviation either side is excluded. The 27 s gap between the phases exceeds the 15 s diminishing-returns reset. Control: the before phase without 704581. Expected from the installed DBC and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same -20%; 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 805581,
@@ -23408,7 +23408,7 @@
           ]
         }
       ],
-      "expected_source": "503650 Effect[0] SPELL_EFFECT_DISPEL EffectMiscValue 3 (DISPEL_DISEASE), $503650s1 = 2 (installed DBC); Mercy 504848 Effect[0] aura 23 periodic trigger of 503650, the first 503650 cast on application (period_held reads 1 cast at 2750 ms). The ally carries three diseases (Frost Fever 55095, Blood Plague 55078, Infected Wound 3427, each Dispel 3) so two removed is not all; the read is 800 ms after the cast, before the 3000 ms pulse. Control: the no_cast arm waits and reads the same way with no Mercy cast and expects 0, so a removal by anything else alerts. One trial per arm: a dispel count is not random and a recast would refresh a running aura."
+      "expected_source": "503650 Effect[0] SPELL_EFFECT_DISPEL EffectMiscValue 3 (DISPEL_DISEASE), $503650s1 = 2 (installed DBC); Mercy 504848 Effect[0] aura 23 periodic trigger of 503650, the first 503650 cast on application (period_held reads 1 cast at 2750 ms). The ally carries three diseases (Frost Fever 55095, Blood Plague 55078, Infected Wound 3427, each Dispel 3) so two removed is not all; the read is 800 ms after the cast, before the 3000 ms pulse. Control: the no_cast arm waits and reads the same way with no Mercy cast and expects 0, so a removal by anything else alerts. One trial per arm: a dispel count is not random and a recast would refresh a running aura. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same \"abolishing 2 disease effects\"; 0 logged events of 504848 and 503650; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 300341,
@@ -23430,7 +23430,16 @@
           4,
           [
             2818,
-            25810
+            25810,
+            3409
+          ]
+        ],
+        [
+          1,
+          [
+            31589,
+            15487,
+            1130
           ]
         ]
       ],
@@ -23444,6 +23453,10 @@
             ],
             [
               4,
+              1
+            ],
+            [
+              1,
               1
             ]
           ]
@@ -23461,11 +23474,15 @@
             [
               4,
               2
+            ],
+            [
+              1,
+              2
             ]
           ]
         }
       ],
-      "expected_source": "Mentor D-172. Sanctify 524968 (installed DBC) has three SPELL_EFFECT_DISPEL effects, EffectMiscValue 3 (disease), 4 (poison) and 1 (magic), EffectBasePoints 0 + EffectDieSides 1 = 1 each; Exorcism 300341 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 8 (all effects) +1 on Sanctify's class mask (family 33, flags word 1 = 16384), so each type goes 1 -> 2. The ally carries three diseases (55095, 55078, 3427) and two poisons (2818, 25810): without Exorcism one of each is removed per cast (control arm, nothing learned), with it learned two of each (both poisons, two of three diseases, one remains). Exorcism is learned, never set with set_aura. A learned arm that removes only one more in total is a finding against the data, not adapted."
+      "expected_source": "Mentor D-172. Sanctify 524968 (installed DBC) has three SPELL_EFFECT_DISPEL effects, EffectMiscValue 3 (disease), 4 (poison) and 1 (magic), EffectBasePoints 0 + EffectDieSides 1 = 1 each; Exorcism 300341 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 8 (all effects) +1 on Sanctify's class mask (family 33, flags word 1 = 16384), so each type goes 1 -> 2. The ally carries three debuffs of each type Sanctify dispels: diseases Frost Fever 55095, Blood Plague 55078, Infected Wound 3427 (Dispel 3), poisons Deadly Poison 2818, 25810, Crippling Poison 3409 (Dispel 4), magic Slow 31589, Silence 15487, Hunter's Mark 1130 (Dispel 1, installed DBC): without Exorcism one of each type is removed per cast (control arm, nothing learned), with it learned two of each type and one of each remains, so a removal of more than two of a type alerts as one of fewer does. Exorcism is learned, never set with set_aura. A learned arm that removes only one more in total is a finding against the data, not adapted. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same \"1 additional effect\"; coa-history holds 1376 SPELL_DISPEL events of Sanctify 524968 in 28 logs, not paired with a known debuff load, so no count per cast is read from them; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 804257,
@@ -24322,7 +24339,7 @@
           }
         ]
       },
-      "observe_source": "Amount half of the 301011 clause. Same scenario as allies_cap (Gavel of Light 800611 at the dummy at 5 yd, caster at 50% health, 984954 forced critical and 823764 no resist in both phases, 6 grouped allies at 5000 of 10000 health), with two ratio-only arms read after each main reading: the 301012 heal total the caster cast (with its count) and the 707522 self heal total on the caster (with its count). Control: the before phase (301011 not learned) casts Gavel of Light the same way and reads 0 of 301012. The ratio of the after-phase deltas must be 5 (5 allies x 100%) within 0.05; it is unmeasured unless both heals landed in the after phase. Expected from 301011 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run."
+      "observe_source": "Amount half of the 301011 clause. Same scenario as allies_cap (Gavel of Light 800611 at the dummy at 5 yd, caster at 50% health, 984954 forced critical and 823764 no resist in both phases, 6 grouped allies at 5000 of 10000 health), with two ratio-only arms read after each main reading: the 301012 heal total the caster cast (with its count) and the 707522 self heal total on the caster (with its count). Control: the before phase (301011 not learned) casts Gavel of Light the same way and reads 0 of 301012. The ratio of the after-phase deltas must be 5 (5 allies x 100%) within 0.05; it is unmeasured unless both heals landed in the after phase. Expected from 301011 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); 301011 appears only in the advancement grant table; coa-history holds 714 SPELL_HEAL events of 301012 in 4 logs, not paired with the Gavel of Light self heals, so no ratio is read from them; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 680643,
@@ -24495,8 +24512,8 @@
       "fields": {
         "spell": 807552
       },
-      "before_expected": 2,
-      "expected": 4,
+      "before_expected": 0,
+      "expected": 2,
       "wait_ms": 1000,
       "expire_ms": 500,
       "player_attack_power": 20000,
@@ -24552,9 +24569,11 @@
             "floor_count": 0,
             "source": "807451 Effect[0] BasePoints 4 + 1 = 5 ($807451s1): 5% of the damage of each strike, truncated to an integer per strike by CalculatePct, so the low end widens by one mana per energize event; with +20000 attack power each forced-critical strike deals thousands, so the widened band stays far inside 0.045 to 0.055 (-10% and +10%), and the verdict is unmeasured if it does not"
           }
-        ]
+        ],
+        "control_wait": true
       },
-      "observe_source": "Behaviour half of the 803913 mana clause. Glorious Execution 803913 is cast at the dummy in both phases (no gate: Amount(807451) is read from the data without a caster, Sun Cleric ADR 0018), +20000 attack power, 984954 forced critical, 823764 no resist; the class ratings (hit, expertise 10000) leave no miss, dodge or parry, so each cast lands two strikes and two 807552 energize events (main reading: 2 then 4 cumulative). Three ratio-only arms read after each main reading: the 807552 mana total (with its count) over the damage totals of 800691 and 802566 (each with its count), summed. The ratio of the second cast alone must be 5% within 0.001, the low end widened by one mana per energize event for the per-strike truncation. Expected from 807451 Effect[0] BasePoints 4 + 1 (installed DBC) and the tooltip; nothing from a run."
+      "observe_source": "Behaviour half of the 803913 mana clause. Glorious Execution 803913 is cast at the dummy in the after phase only (Amount(807451) is read from the data without a caster, Sun Cleric ADR 0018); the before phase is the control without the cause: no 803913 cast, the same timed wait (control_wait), so it reads 0 energize events of 807552 and 0 strike damage, +20000 attack power, 984954 forced critical, 823764 no resist; the class ratings (hit, expertise 10000) leave no miss, dodge or parry, so each cast lands two strikes and two 807552 energize events (main reading: 0 in the control, 2 after). Three ratio-only arms read after each main reading: the 807552 mana total (with its count) over the damage totals of 800691 and 802566 (each with its count), summed. The ratio of the after-phase deltas must be 5% within 0.001, the low end widened by one mana per energize event for the per-strike truncation. Expected from 807451 Effect[0] BasePoints 4 + 1 (installed DBC) and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); 803913 appears only in skill_line_ability; coa-history holds 6772 SPELL_ENERGIZE events of 807552 in 14 logs (1 to 195 mana), not paired with the strike damage, so no ratio is read from them; nothing found beyond the tooltip and the DBC.",
+      "cast_in_before": false
     },
     {
       "spell": 92135,

@@ -3867,8 +3867,10 @@ def margined_duration_ratio_verdict(base: Verdict, run: Run, model: dict, before
     full = float(model['full_duration_ms'])
     expected_ratio = float(model['expected'])
     expected_delta = full * (expected_ratio - 1.0)
-    delta = after - before
-    ratio = after / before
+    landed_before = before + elapsed['before']
+    landed_after = after + elapsed['after']
+    delta = landed_after - landed_before
+    ratio = landed_after / landed_before
     margin_ratio = margin / full
     text = (f'{model["vehicle_spell"]} aura_duration_ms read {before:g} ms before and {after:g} ms after '
             f'{model["target_name"]} was learned, {elapsed['before']:g} and {elapsed['after']:g} ms after each landing; '
@@ -3881,16 +3883,17 @@ def margined_duration_ratio_verdict(base: Verdict, run: Run, model: dict, before
         return replace(base, status='unmeasured', **common,
                        explanation=f'{text}; the margin is not below {DURATION_RATIO_DISCRIMINATED:.0%} of the '
                                    f'expected delta, so it cannot exclude a 10% deviation')
-    if abs(before + elapsed['before'] - full) > margin or abs(elapsed['before'] - elapsed['after']) > margin:
+    if abs(landed_before - full) > margin or abs(elapsed['before'] - elapsed['after']) > margin:
         return replace(base, status='unmeasured', **common,
                        explanation=f'{text}; void trial: the before read plus its elapsed time is '
-                                   f'{before + elapsed['before']:g} ms against the full {full:g} ms, and the landing '
+                                   f'{landed_before:g} ms against the full {full:g} ms, and the landing '
                                    f'offsets differ by {abs(elapsed['before'] - elapsed['after']):g} ms, one of them '
                                    f'beyond the margin')
     status = 'alert' if abs(delta) <= FLOAT_EPSILON < abs(expected_delta) \
         else 'ok' if abs(delta - expected_delta) <= margin + FLOAT_EPSILON else 'alert'
     return replace(base, status=status, **common,
-                   explanation=f'{text}; measured delta {delta:+g} ms, ratio of the reads {ratio:g}')
+                   explanation=f'{text}; landing-corrected durations {landed_before:g} and {landed_after:g} ms '
+                               f'(each read plus its elapsed time), measured delta {delta:+g} ms, ratio {ratio:g}')
 
 
 def behaviour_duration_refresh_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
