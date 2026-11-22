@@ -918,7 +918,9 @@ class EvidenceTablesTest(unittest.TestCase):
     def test_a_promise_beyond_the_state_metrics_gates_a_contrast_proof(self):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
         self.assertEqual({metric for metric in STATE_PROMISES if metric not in states},
-                         {'spell_done_crit_chance', 'spell_done_crit_chance_scripted', 'spell_taken_crit_chance'})
+                         {'spell_done_crit_chance', 'spell_done_crit_chance_scripted', 'spell_taken_crit_chance',
+                          'critical_block_chance'})
+        self.assertEqual(METRIC_EVIDENCE['critical_block_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance_scripted'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_taken_crit_chance'], READBACK)
@@ -1831,6 +1833,57 @@ class ScriptedCritPartnerTest(unittest.TestCase):
     def test_a_zero_arm_of_the_condition_contrast_does_not_count(self):
         self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50),
                                        self.arm(self.BELOW, 0, CONDITION_CONTRAST)), [DATA])
+
+
+class CriticalBlockChancePartnerTest(unittest.TestCase):
+    METRIC = 'critical_block_chance'
+    ROW = 'Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.'
+    CLAIM = 'and critical block chance by $524859s1%'
+    ARM = '680641 behaviour_metric_delta consume_block_crit'
+    OFF = '680641 behaviour_metric_delta consume_block_crit_nostack'
+
+    def arm(self, label, gain, contrast=LEARNED_CONTRAST, metric=METRIC, status='ok'):
+        return replace(judged(label, BEHAVIOUR_METRIC_DELTA, metric, status=status, contrast=contrast),
+                       expected=gain)
+
+    def evidence(self, text, *verdicts):
+        return evidence_of([claim(text, *(verdict.label for verdict in verdicts))], list(verdicts))[0]
+
+    def test_the_read_is_a_readback_with_the_learned_contrast_and_the_partner_gate(self):
+        self.assertEqual(METRIC_EVIDENCE[self.METRIC], READBACK)
+        self.assertEqual(CONTRAST_PROOF[self.METRIC], LEARNED_CONTRAST)
+        self.assertIn(self.METRIC, PARTNERED_CONTRASTS)
+        self.assertEqual(STATE_PROMISES[self.METRIC], r'critical block')
+
+    def test_a_consumption_clause_is_behaviour_with_the_non_zero_arm_and_the_condition_off_arm(self):
+        self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10), self.arm(self.OFF, 0)), [BEHAVIOUR])
+
+    def test_the_non_zero_arm_alone_stays_data(self):
+        self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10)), [DATA])
+
+    def test_the_zero_arm_alone_stays_data(self):
+        self.assertEqual(self.evidence(self.CLAIM, self.arm(self.OFF, 0)), [DATA])
+
+    def test_a_condition_contrast_stays_data(self):
+        self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10, CONDITION_CONTRAST),
+                                       self.arm(self.OFF, 0, CONDITION_CONTRAST)), [DATA])
+
+    def test_a_clause_that_does_not_promise_critical_block_stays_data(self):
+        speed = 'Consuming the stacks increases your movement speed by $524859s1% for $524859d.'
+        self.assertEqual(self.evidence(speed, self.arm(self.ARM, 10), self.arm(self.OFF, 0)), [DATA])
+
+    def test_a_partner_of_another_metric_does_not_count(self):
+        other = self.arm(self.OFF, 0, metric='spell_critical_damage')
+        self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10), other), [DATA])
+
+    def test_mutant_without_the_partner_gate_passes_the_one_arm_claim(self):
+        with mock.patch('coverage.partners_hold', lambda verdict, text, partners: True):
+            self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10)), [BEHAVIOUR])
+
+    def test_mutant_without_the_row_keeps_the_paired_arms_at_data(self):
+        with mock.patch.dict(CONTRAST_PROOF):
+            del CONTRAST_PROOF[self.METRIC]
+            self.assertEqual(self.evidence(self.CLAIM, self.arm(self.ARM, 10), self.arm(self.OFF, 0)), [DATA])
 
 
 if __name__ == '__main__':

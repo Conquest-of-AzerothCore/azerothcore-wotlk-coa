@@ -171,6 +171,35 @@
       "base_mana_per_attempt": true
     },
     {
+      "aura": 806021,
+      "name": "Searing Light",
+      "min_parts": 10,
+      "tooltip": "Casting |cffffffffDawnsear|r and |cffffffffSunflare|r now have a $h% chance to grant |cffffffffScorch Marks|r for $807059d.@s:807059:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 500146
+      },
+      "trigger_text": "Casting Dawnsear and Sunflare",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807059,
+      "proc_spell_source": "Cast(player, player, 807059) (AscensionSunClericAbilities.cpp:200-201, OnSpellCast for 500146/800231 with Chance(player, 806021)); Sunflare 502396 is a rank of 800231 (AscensionSpellProgressionData.h)",
+      "events_per_proc": 1,
+      "handler": "AscensionSunClericAbilities.cpp:200-201: a non-triggered cast of Dawnsear or Sunflare with Chance(player, 806021) (ProcChance 40, no internal cooldown) casts Scorch Marks 807059 on the caster. Trigger: Dawnsear 500146, the other of the two casts, the one with the longer cast time. Residual failure probability of the pooled proof at most 0.1% per pair.",
+      "dbc": {
+        "806021": {
+          "ProcChance": 40,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "base_mana_per_attempt": true
+    },
+    {
       "aura": 804629,
       "name": "Spears of Glory",
       "min_parts": 36,
@@ -1493,7 +1522,7 @@
       "before_expected": 1,
       "expected": 3,
       "wait_ms": 4500,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers the marker 804631 (DurationIndex 1, 10000 ms), cast when a Rapture 806477 cast completes with 804630 known (AscensionSunClericAbilities.cpp:213-214); a Dawnsear hit that finds the marker recasts Dawnsear 500146 and casts Solar Flare 807175 (:353-356). Each phase casts Rapture at the dummy (3000 ms cast), waits 3300 ms and casts Dawnsear 500146 (3500 ms cast), then reads the Dawnsear damage events on the dummy; 804630 is learned between the phases. The harness damage counters are cumulative over the whole scenario: the before phase (no 804630) reads 1 Dawnsear event, the after reading includes it, so the effect of the Herald phase is the gain, expected 2 (\"strike your target twice\"). The earlier reading of 3 was that 1 + 2, not three strikes. 984954 and 823764 are precondition fixtures: 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count.",
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers the marker 804631 (DurationIndex 1, 10000 ms), cast when a Rapture 806477 cast completes with 804630 known (AscensionSunClericAbilities.cpp:213-214); a Dawnsear hit that finds the marker recasts Dawnsear 500146 and casts Solar Flare 807175 (:353-356). Each phase casts Rapture at the dummy (3000 ms cast), waits 3300 ms and casts Dawnsear 500146 (3500 ms cast), then reads the Dawnsear damage events on the dummy; 804630 is learned between the phases. The harness damage counters are cumulative over the whole scenario: the before phase (no 804630) reads 1 Dawnsear event, the after reading includes it, so the effect of the Herald phase is the gain, expected 2 (\"strike your target twice\"). The earlier reading of 3 was that 1 + 2, not three strikes. 984954 and 823764 are precondition fixtures: 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count.",
       "expected_gain": 2
     },
     {
@@ -1533,7 +1562,7 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 4500,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the number of Solar Flare damage events on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the number of Solar Flare damage events on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
     },
     {
       "spell": 804630,
@@ -1573,7 +1602,7 @@
       "expected": 136.5,
       "wait_ms": 4500,
       "tolerance": 7,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the total Solar Flare damage on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the total Solar Flare damage on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
     },
     {
       "spell": 804630,
@@ -1613,7 +1642,7 @@
       "expected": 2736.5,
       "wait_ms": 4500,
       "tolerance": 137,
-      "observe_source": "Spell power arm of flare_damage in the same pair: the Solar Flare 807175 formula ${$m2+$ppl2+$SP*0.26} gives 136.5 at spell power 0 (the flare_damage entry, band 7) and 136.5 + int32(0.26 x 10000) = 2736.5 at 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict as the spell power the hit ran at). Judged in the 5% band (137), which excludes a coefficient of 0.21 or 0.31; the contrast on the same build is the flare_damage entry. Magic spell, so 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) leaves it uncrit; 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Same Herald route as flare_damage. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count.",
+      "observe_source": "Spell power arm of flare_damage in the same pair: the Solar Flare 807175 formula ${$m2+$ppl2+$SP*0.26} gives 136.5 at spell power 0 (the flare_damage entry, band 7) and 136.5 + int32(0.26 x 10000) = 2736.5 at 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict as the spell power the hit ran at). Judged in the 5% band (137), which excludes a coefficient of 0.21 or 0.31; the contrast on the same build is the flare_damage entry. Magic spell, so 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) leaves it uncrit; 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Same Herald route as flare_damage. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count.",
       "player_spell_power": {
         "amount": 10000,
         "hit_arm": true
@@ -1658,7 +1687,7 @@
       "wait_ms": 3900,
       "measure_actor": "dummy",
       "tolerance": 0.5,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the amount of effect 0 of the Solar Flare aura on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the amount of effect 0 of the Solar Flare aura on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
     },
     {
       "spell": 804630,
@@ -1802,7 +1831,7 @@
       "expected": 222.32,
       "tolerance": 11,
       "wait_ms": 1500,
-      "observe_source": "Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (DmgClass 2, melee class, Holy), BasePoints 99 (100 as read) + 70 attack power x 0.159426 = 111.16 at the reference attack power 70 (tooltip token). The fixture 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) makes the hit a crit: Unit.cpp:1731-1736 gives a melee or ranged class spell crit 100% bonus (damage x 2 before crit damage modifiers), so the crit-flagged damage is expected 2 x 111.16 = 222.32, band 5% (11). The read keeps only critical events (the crit flag of the hit is recorded), so a non-crit hit would read 0 and alert. The earlier read of 222 and 518 (at 930 more attack power) are exactly 2 x int(111.16) and 2 x int(259.4): the crit double, not a defect. Dawn 807440 is a precondition fixture (set_aura, the cast is the claim); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Control: no cast before, 0 damage. Reference search: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs, 876 crits, mean 643, no per-hit AP read possible); bindmysoul 805629 text reads \"28 + 15.94% AP\", an older state against Spell.dbc 805639 BasePoints 99 (100 as read, G-9, older reference); nothing found for the moving rule."
+      "observe_source": "Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (DmgClass 2, melee class, Holy), BasePoints 99 (100 as read) + 70 attack power x 0.159426 = 111.16 at the reference attack power 70 (tooltip token). The fixture 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) makes the hit a crit: Unit.cpp:1731-1736 gives a melee or ranged class spell crit 100% bonus (damage x 2 before crit damage modifiers), so the crit-flagged damage is expected 2 x 111.16 = 222.32, band 5% (11). The read keeps only critical events (the crit flag of the hit is recorded), so a non-crit hit would read 0 and alert. The earlier read of 222 and 518 (at 930 more attack power) are exactly 2 x int(111.16) and 2 x int(259.4): the crit double, not a defect. Dawn 807440 is a precondition fixture (set_aura, the cast is the claim); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Control: no cast before, 0 damage. Reference search: coa-history spell 807973 (257 applications in 5 logs) and 805639 (4959 damage events in 11 logs, 876 crits, mean 643, no per-hit AP read possible); bindmysoul 805629 text reads \"28 + 15.94% AP\", an older state against Spell.dbc 805639 BasePoints 99 (100 as read, G-9, older reference); nothing found for the moving rule."
     },
     {
       "spell": 807973,
@@ -2008,7 +2037,7 @@
       "before_expected": 0,
       "expected": 2,
       "wait_ms": 1500,
-      "observe_source": "Count of 506824 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Count of 506824 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
       "setup_casts": [
         807749
       ],
@@ -2070,7 +2099,7 @@
       "before_expected": 0,
       "expected": 2,
       "wait_ms": 1500,
-      "observe_source": "Count of 506823 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg’s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Count of 506823 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
       "setup_casts": [
         807749
       ],
@@ -4867,7 +4896,7 @@
       "tolerance": 0.15,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Gavel of Light 800611 hits the dummy and the server copies a share of its damage to the caster as 707522 (AscensionSunClericAbilities.cpp:283-290): the share is the effect value of the passive 707521, BasePoints 49 + 1 = 50 ($707521s1, 'heal yourself equal to $707521s1% of the damage dealt'). Solemn Priest 804269 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) BasePoints 49 + 1 = 50 ($s2) on the class mask of 707521 (SpellFamilyFlags[0] 2097152): 'an additional 50% of its damage dealt', so 100% of the damage with the passive against 50% without. Both phases cast one Gavel of Light at the dummy with the caster at 50% health and +20000 attack power (a harness fixture) so that the hit is the same to 0.4% from one cast to the next (the weapon roll of 17..29 is lost against about 3400 of attack power (20000 / 14 x 2.4)); the first run, as a hit_ratio of the heals, could not read a heal on the caster (a hit_ratio reads the heals on the target of the cast). spell_heal_total sums every matching heal event since the scenario started (the leech_ratio note), so the after reading carries the before heal: (H + 2H) / H = 3.0, tolerance 0.15 (the 5-point band on +100%). Both phases carry the class tuning aura 887015 (-20% healing done) alike. Control: the phase without the passive. Reference search 2026-11-20: bindmysoul has no Solemn Priest entry (advancement.tsv lists the name only); coa-history spell 804269: 0 events in 186 logs; nothing found beyond the tooltip and the DBC. Fixture 984954 ('Reg’s Test Aura') carries Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints 100 (+101% weapon crit), so every Gavel hit (800611, DmgClass 2, melee) is a critical strike in both phases; the heal is a share of the damage dealt, so the ratio of the two phases is unaffected."
+      "observe_source": "Gavel of Light 800611 hits the dummy and the server copies a share of its damage to the caster as 707522 (AscensionSunClericAbilities.cpp:283-290): the share is the effect value of the passive 707521, BasePoints 49 + 1 = 50 ($707521s1, 'heal yourself equal to $707521s1% of the damage dealt'). Solemn Priest 804269 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) BasePoints 49 + 1 = 50 ($s2) on the class mask of 707521 (SpellFamilyFlags[0] 2097152): 'an additional 50% of its damage dealt', so 100% of the damage with the passive against 50% without. Both phases cast one Gavel of Light at the dummy with the caster at 50% health and +20000 attack power (a harness fixture) so that the hit is the same to 0.4% from one cast to the next (the weapon roll of 17..29 is lost against about 3400 of attack power (20000 / 14 x 2.4)); the first run, as a hit_ratio of the heals, could not read a heal on the caster (a hit_ratio reads the heals on the target of the cast). spell_heal_total sums every matching heal event since the scenario started (the leech_ratio note), so the after reading carries the before heal: (H + 2H) / H = 3.0, tolerance 0.15 (the 5-point band on +100%). Both phases carry the class tuning aura 887015 (-20% healing done) alike. Control: the phase without the passive. Reference search 2026-11-20: bindmysoul has no Solemn Priest entry (advancement.tsv lists the name only); coa-history spell 804269: 0 events in 186 logs; nothing found beyond the tooltip and the DBC. Fixture 984954 ('Reg\u2019s Test Aura') carries Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints 100 (+101% weapon crit), so every Gavel hit (800611, DmgClass 2, melee) is a critical strike in both phases; the heal is a share of the damage dealt, so the ratio of the two phases is unaffected."
     },
     {
       "spell": 807964,
@@ -20103,6 +20132,1425 @@
       "settle_ms": 13000,
       "parts": 5,
       "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), applied every 3000 ms by the ground aura 572754 of Sun Down 572752 (CastingTimeIndex 5 = 2000 ms, ground 9000 ms starting 4000 ms after the cast starts). Eight aggressive stationary attackers (Harvest Golem 36, class level) melee the caster; the control arm counts their swings and misses with no cast, the treatment arm recasts Sun Down every 8000 ms (reset_cooldown and set_power are named precondition fixtures, G-21 point 6) and counts after 13000 ms, once the aura from the caster is read on every attacker; the aura is read on every attacker at each cycle end. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run); the judge takes the 99% interval of the difference of the two shares against the band of 2 points (the larger of 5% of 3 and 2), a verdict needing a half-width of at most half the band, so a correct server fails by chance with probability under 1e-6 and one 3 points off is excluded. Reference search 2026-11-22: coa-history spell 572752/572753/572754/807175: Sun Down in one log (2026-08-01, 7 casts, no combat-table data on the attackers' swings); the bindmysoul snapshot carries the same sentence; nothing else found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (at most 5 of the lowest health allies)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_cap",
+      "label_suffix": "nearby_allies_cap",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 3500,
+      "observe_source": "Heat Wave 801215 MaxAffectedTargets 5 (Spell.dbc, \"up to $801215i\" = 5) and the code AscensionSunClericEvents.cpp:344-354 (Allies sorted by health percent then GUID, the target removed, the first MaxAffectedTargets 5 copied at 75%). Illumination 500143 is cast at ally in both phases (534267 learned between them) with six grouped allies besides the cast target at 5000 of 10000 health and the caster at full health: seven candidates once the target is removed (the six others and the caster), two more than the cap. The six allies at 50% sort before the caster at 100%, so five of them are healed once each and the caster, the seventh candidate, is not: the total of 801215 heals read on the caster is 5 and the caster is not among the recipients (arm 0 reads 0). Control: the phase before 534267 is learned reads 0. The five-of-six split among equal-health allies is the GUID tie order and is not asserted per ally. Reference search 2026-11-22: coa-history spell 801215: 10475 SPELL_HEAL events in 17 logs, 2034 crits, no recipient order or count per cast can be read from them; nothing found that states the figure.",
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the caster is the seventh candidate by health percent (100 against 50), beyond the cap of 5, so it is never healed by Heat Wave (AscensionSunClericEvents.cpp:344-354)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (copy heals for 75% of the heal)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_amount",
+      "label_suffix": "nearby_allies_amount",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "observe_source": "534267 Effect[0] aura 354, BasePoints 74 + 1 = 75 ($s1), trigger 801215; the code AscensionSunClericEvents.cpp:344-354 (Allies sorted by health percent then GUID, the target removed, the first MaxAffectedTargets 5 copied at 75%) copies the source heal at 75%. Illumination 500143 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 38, DieSides 3, RealPointsPerLevel 3.264, coefficient $bh*1.05; spell power 0, class tuning 887015 -20% healing done) heals the ally 38 to 40 at level 60 with spell power 0, as in the 704936 shield_base entry (11..12 = 30% of it). Two grouped allies at 5000 of 10000 health; the heal 801215 on ally2 is arm 0 (75% of 38..40 truncated: 28 to 30, 29 within 1) and the Illumination heal on ally is arm 1 (38..40 before, 76..80 cumulative after: 39 then 78 within 2). The ratio is arm 0 over arm 1, each as its after sum less its before sum (the second cast alone): 28/38, 29/39 and 30/40 read 0.737, 0.744 and 0.750, expected 0.75 within 0.03, which excludes 0.675 and 0.825 (-10% and +10%). Control: the phase before 534267 is learned has no copy (arm 0 before 0). Reference search 2026-11-22: coa-history spell 801215: 10475 SPELL_HEAL events, mean 629, crits 2034 (a live copy could crit; ours copies the heal flat); the per-cast ratio cannot be read from the aggregate; nothing found that states the figure.",
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 801215,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 29,
+            "tolerance": 1,
+            "source": "CalculatePct(heal, 75) of an Illumination heal of 38..40 (AscensionSunClericEvents.cpp:350-353): 28 to 30"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500143,
+              "target": "ally"
+            },
+            "before_expected": 39,
+            "expected": 78,
+            "tolerance": 2,
+            "source": "Illumination 500143 heals the ally 38..40 at spell power 0 under the class tuning: 39 for the first cast, 78 cumulative for two (precondition of the ratio, not the claim)"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.75,
+            "tolerance": 0.03,
+            "source": "Heat Wave 534267 BasePoints 74 + 1 = 75 ($s1): the copy is 75% of the source heal, the ratio of the second cast alone"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Conquest grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_800764",
+      "label_suffix": "grant_800764",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 800764,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Conquest 800764 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Ascension grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_500152",
+      "label_suffix": "grant_500152",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Ascension 500152 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Revelation grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_503651",
+      "label_suffix": "grant_503651",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Revelation 503651 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Resplendence grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_806159",
+      "label_suffix": "grant_806159",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Resplendence 806159 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "kind": "metric_delta",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 803816,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "name": "Together In Conquest (a heal landing 9.1 s after the Invocation cast still copies)",
+      "variant": "window_held",
+      "label_suffix": "window_held",
+      "setup_wait_ms": 7100,
+      "expected": 1,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 803816,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "only one additional ally is healed: the caster, at full health, is the second candidate and gets no copy (AscensionSunClericAbilities.cpp:393-396, allies.front())"
+          }
+        ]
+      },
+      "observe_source": "681506 DurationIndex 1 = 10000 ms ($681506d). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). Conquest 800764 is cast at the caster; Illumination 500143 is cast at ally 7100 ms later and its 2000 ms cast lands at 9100 ms, inside the 10 s window and beyond 9000 ms (-10%): the copy 803816 heals ally2 once (1) after 681253 is learned, 0 before (control: the same casts without the passive). Reference search 2026-11-22: coa-history spell 803816: 12520 SPELL_HEAL events in 19 logs for Vow of Radiance, the 70% copy of Illumination, no timing relation to the Invocation cast can be read from them; nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "kind": "metric_delta",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 803816,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "name": "Together In Conquest (a heal landing 10.9 s after the Invocation cast no longer copies)",
+      "variant": "window_gone",
+      "label_suffix": "window_gone",
+      "setup_wait_ms": 8900,
+      "expected": 0,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 803816,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "only one additional ally is healed: the caster, at full health, is the second candidate and gets no copy (AscensionSunClericAbilities.cpp:393-396, allies.front())"
+          }
+        ]
+      },
+      "observe_source": "681506 DurationIndex 1 = 10000 ms ($681506d). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). Same as window_held with Illumination cast 8900 ms after Conquest, landing at 10900 ms, beyond the 10 s window and below 11000 ms (+10%): no copy is read (0 after, 0 before). The held entry is the contrast that shows the route works. Reference search 2026-11-22: coa-history spell 803816: 12520 SPELL_HEAL events in 19 logs for Vow of Radiance, the 70% copy of Illumination, no timing relation to the Invocation cast can be read from them; nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "kind": "metric_delta",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 803816,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "name": "Together In Conquest (the extra heal is 70% of the Illumination heal)",
+      "variant": "extra_amount",
+      "label_suffix": "extra_amount",
+      "setup_wait_ms": 1600,
+      "expected": 1,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 803816,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 27,
+            "tolerance": 1,
+            "source": "CalculatePct(heal, 70) of an Illumination heal of 38..40 (AscensionSunClericAbilities.cpp:396): 26 to 28"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500143,
+              "target": "ally"
+            },
+            "before_expected": 39,
+            "expected": 78,
+            "tolerance": 2,
+            "source": "Illumination 500143 heals the ally 38..40 at spell power 0 under the class tuning: 39 then 78 cumulative (precondition of the ratio, not the claim)"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.7,
+            "tolerance": 0.03,
+            "source": "the tooltip states 70% effectiveness: the copy is 70% of the source heal, the ratio of the second cast alone"
+          }
+        ]
+      },
+      "observe_source": "AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). Illumination heals the ally 38..40 (level 60, spell power 0, class tuning 887015; as the 704936 shield_base entry). Conquest cast, Illumination 1600 ms later (past the global cooldown) at ally, two grouped allies at 5000 of 10000: the copy 803816 on ally2 is arm 0 (70% of 38..40 truncated: 26 to 28), the Illumination heal on ally is arm 1 (39 then 78); the ratio arm 0 / arm 1 of the second cast alone reads 26/38 = 0.684, 27/39 = 0.692 or 28/40 = 0.700, expected 0.70 within 0.03 (excludes 0.63 and 0.77). Control: the phase before 681253 is learned has no copy. Reference search 2026-11-22: coa-history spell 803816: 12520 SPELL_HEAL events, mean 687, max 4006, no crits; the per-cast ratio cannot be read from the aggregate; nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Conquest by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_800764",
+      "label_suffix": "cd_cut_800764",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 24800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Conquest 800764 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 800764 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with 681253 learned, within 50 ms (a cut of 0.9 s reads 24900 and one of 1.1 s 24700, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Conquest)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_800764",
+      "label_suffix": "cd_cut_control_800764",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Conquest 800764 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 800764 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Ascension by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_500152",
+      "label_suffix": "cd_cut_500152",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500152
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25900,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Ascension 500152 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 3000 ms later, and the cooldown of 500152 is read 2600 ms after the Illumination cast started: the Ascension cast takes 2500 ms and its cooldown starts when it completes, so the elapsed cooldown time is 3000 + 2600 - 2500 = 3100 ms and the remaining cooldown is 30000 - 3100 - 1000 = 25900 with 681253 learned, within 50 ms (a cut of 0.9 s reads 26000 and one of 1.1 s 25800, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Ascension)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_500152",
+      "label_suffix": "cd_cut_control_500152",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500152
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 26900,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Ascension 500152 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 3000 ms later, and the cooldown of 500152 is read 2600 ms after the Illumination cast started: the Ascension cast takes 2500 ms and its cooldown starts when it completes, so the elapsed cooldown time is 3000 + 2600 - 2500 = 3100 ms and the remaining cooldown is 30000 - 3100 - 1000 = 25900 with Solar Conduit 300321 learned in place (control, an unrelated passive): 26900, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Revelation by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_503651",
+      "label_suffix": "cd_cut_503651",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 24800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Revelation 503651 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 503651 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with 681253 learned, within 50 ms (a cut of 0.9 s reads 24900 and one of 1.1 s 24700, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Revelation)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_503651",
+      "label_suffix": "cd_cut_control_503651",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Revelation 503651 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 503651 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Resplendence by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_806159",
+      "label_suffix": "cd_cut_806159",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 24800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Resplendence 806159 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 806159 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with 681253 learned, within 50 ms (a cut of 0.9 s reads 24900 and one of 1.1 s 24700, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Resplendence)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_806159",
+      "label_suffix": "cd_cut_control_806159",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Resplendence 806159 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 806159 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Wrath effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel",
+      "label_suffix": "effect_gavel",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.42174,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677). Weapon: the class file maps 680634 to the weapon set Seraphim (spell_weapon_sets), item 2027 in the main hand (one-handed, damage 17.25 to 28.75, normalized speed 2.4) and a shield 2129 in the off hand (no damage); with attack power 70 the weapon roll is urand(uint32(17.25 + 70 / 14 x 2.4), uint32(28.75 + 70 / 14 x 2.4)) = urand(29, 40) (Unit.cpp:3621; StatSystem.cpp:728, :767). The loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The script (.agents/plans/sun-cleric-b8a2/scratch/gavel_expect.py) reproduces the ADR 0008 table exactly with the Valkyr weapon (rolls 90..119, factor 1.2f). Correction history: the first design of this entry used the Valkyr weapon by mistake; its pair (20261122-072116 / -072234) read the three bonuses outside the wrong expectation and the weapon set explains it. The expectation here is recomputed from the class-file weapon only and is judged in a new pair. Gavel of Wrath 800617: mean non-critical hit 77.5833 without the passive and 110.303 with it, ratio 1.42174, a bonus of +42.17%: the factor compounds on the flat value and on the percent, so the bonus exceeds the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. In the first pair prove's pilot sized 1184 trials per arm and the entry's 16 parts hold 2656 at the trial limit of 166 per part; the judged half-widths were 0.55 point against a limit of about 1.9 to 2.1 points. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.4% or less and the limit lies more than 40 standard deviations above it, below 1e-9.",
+      "observe_source": "Gavel of Wrath 800617 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Light effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light",
+      "label_suffix": "effect_gavel_light",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.32233,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 22,
+      "cast_power": 1363,
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677). Weapon: the class file maps 680634 to the weapon set Seraphim (spell_weapon_sets), item 2027 in the main hand (one-handed, damage 17.25 to 28.75, normalized speed 2.4) and a shield 2129 in the off hand (no damage); with attack power 70 the weapon roll is urand(uint32(17.25 + 70 / 14 x 2.4), uint32(28.75 + 70 / 14 x 2.4)) = urand(29, 40) (Unit.cpp:3621; StatSystem.cpp:728, :767). The loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The script (.agents/plans/sun-cleric-b8a2/scratch/gavel_expect.py) reproduces the ADR 0008 table exactly with the Valkyr weapon (rolls 90..119, factor 1.2f). Correction history: the first design of this entry used the Valkyr weapon by mistake; its pair (20261122-072116 / -072234) read the three bonuses outside the wrong expectation and the weapon set explains it. The expectation here is recomputed from the class-file weapon only and is judged in a new pair. Gavel of Light 800611: mean non-critical hit 42.9167 without the passive and 56.75 with it, ratio 1.32233, a bonus of +32.23%: the factor compounds on the flat value and on the percent, so the bonus exceeds the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. In the first pair prove's pilot sized 1786 trials per arm and the entry's 22 parts hold 3652 at the trial limit of 166 per part; the judged half-widths were 0.55 point against a limit of about 1.9 to 2.1 points. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.4% or less and the limit lies more than 40 standard deviations above it, below 1e-9.",
+      "observe_source": "Gavel of Light 800611 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Grace effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace",
+      "label_suffix": "effect_gavel_grace",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.36015,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 18,
+      "cast_power": 1363,
+      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677). Weapon: the class file maps 680634 to the weapon set Seraphim (spell_weapon_sets), item 2027 in the main hand (one-handed, damage 17.25 to 28.75, normalized speed 2.4) and a shield 2129 in the off hand (no damage); with attack power 70 the weapon roll is urand(uint32(17.25 + 70 / 14 x 2.4), uint32(28.75 + 70 / 14 x 2.4)) = urand(29, 40) (Unit.cpp:3621; StatSystem.cpp:728, :767). The loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The script (.agents/plans/sun-cleric-b8a2/scratch/gavel_expect.py) reproduces the ADR 0008 table exactly with the Valkyr weapon (rolls 90..119, factor 1.2f). Correction history: the first design of this entry used the Valkyr weapon by mistake; its pair (20261122-072116 / -072234) read the three bonuses outside the wrong expectation and the weapon set explains it. The expectation here is recomputed from the class-file weapon only and is judged in a new pair. Gavel of Grace 800614: mean non-critical hit 54.375 without the passive and 73.9583 with it, ratio 1.36015, a bonus of +36.02%: the factor compounds on the flat value and on the percent, so the bonus exceeds the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. In the first pair prove's pilot sized 1277 trials per arm and the entry's 18 parts hold 2988 at the trial limit of 166 per part; the judged half-widths were 0.55 point against a limit of about 1.9 to 2.1 points. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.4% or less and the limit lies more than 40 standard deviations above it, below 1e-9.",
+      "observe_source": "Gavel of Grace 800614 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "name": "Sun Strider (Illumination heals 15% more with one stack)",
+      "kind": "hit_ratio",
+      "variant": "illumination_heal",
+      "label_suffix": "illumination_heal",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "expected": 1.15,
+      "observe_spell": 500143,
+      "metric": "spell_heal_total",
+      "critical": false,
+      "force_crit": "melee",
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "ally_distance": 5,
+      "dummy_distance": 5,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "trials": 20,
+      "control": {
+        "casts": [
+          802561
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680641
+        ],
+        "casts": [
+          802561
+        ]
+      },
+      "expected_source": "$680642s1 = 15 (680642 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 14 + 1 = +15%, SPELLMOD_DAMAGE on the class mask word 1 = 512 = Illumination 500143, set by AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster)). One stack: the heal of the next Illumination is 1.15 times the heal of an Illumination without it, both from the same procedure (a forced-crit Gavel of Wrath 802561 (rank 58) at the dummy before every Illumination at the grouped ally at 50% health, spell power 20000 so that the integer truncation of the heal is negligible); the non-critical Illumination heals are compared. Control arm: the same Gavel casts without 680641 learned (the crit gives no stack). The band is the G-19 band, the larger of 5% of 15 and 2 points; it is not widened. The Illumination heal is read as the sum of the heals of the observed spell on the ally, without the caster's modifiers dropped (the caster is the reader).",
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (StackAmount 3); AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). Forced melee crits (harness crit rating fixture) make Gavel of Wrath 802561 (rank 58) crit, so the treatment arm holds one 680642 stack before each Illumination; the stack is consumed by that Illumination. Reference search 2026-11-22: server DBC 680641, 680642 and 500143 effects; coa-history spell 680641 and 680642: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider by name only; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (stack still on at 18.3 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "wait_ms": 18300,
+      "game_time": {
+        "after": [
+          18280,
+          18370
+        ]
+      },
+      "expected": 1,
+      "observe_source": "680642 DurationIndex 18 = 20000 ms ($680642d). AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). One forced-crit Gavel of Wrath 802561 (rank 58) at the dummy with 680641 learned between the phases gives a stack; the aura on the caster is read present about 18.3 s after the Gavel: a duration 10% short (18000 ms) would be gone. Control: the same crit in the phase before 680641 is learned reads 0. No Illumination is cast, so nothing consumes the stack. Reference search 2026-11-22: server DBC 680642; coa-history spell 680642: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (stack gone by 21.9 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "wait_ms": 21850,
+      "game_time": {
+        "after": [
+          21830,
+          21920
+        ]
+      },
+      "expected": 0,
+      "observe_source": "680642 DurationIndex 18 = 20000 ms ($680642d). AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). One forced-crit Gavel of Wrath 802561 (rank 58) at the dummy with 680641 learned between the phases gives a stack; the aura on the caster is read absent about 21.9 s after the Gavel: a duration 10% long (22000 ms) would still be on. Control: the same crit in the phase before 680641 is learned reads 0. No Illumination is cast, so nothing consumes the stack. Reference search 2026-11-22: server DBC 680642; coa-history spell 680642: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800654,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "spell",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Dawnbreak)",
+      "variant": "stack_dawnbreak",
+      "label_suffix": "stack_dawnbreak",
+      "wait_ms": 1500,
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642; AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster). Dawnbreak 800654 (Holy and Fire SCHOOL_DAMAGE, cone, cooldown 6000 ms, SpellFamilyName 33) is cast at the dummy in front of the caster with forced spell crits and the spell-penetration fixture 823764, 680641 learned between the phases; the control phase (the same crit without the passive) reads 0 stacks, the after phase 1. Reference search 2026-11-22: server DBC 680641; coa-history spell 680641: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {},
+      "name": "Sun Strider (consuming the stack raises movement speed by 10%)",
+      "variant": "consume_speed",
+      "label_suffix": "consume_speed",
+      "metric": "run_speed_rate",
+      "before_expected": 1.0,
+      "expected": 1.1,
+      "tolerance": 0.001,
+      "wait_ms": 2100,
+      "observe_source": "Run speed rate of the caster 100 ms after the Illumination finishes: 1.0 in the control phase and 1.0 x 1.10 after, within 0.001 (as the Light The Way 300336 speed entry). AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster); 524859 (DurationIndex 31 = 8000 ms, $524859d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($524859s1), Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10. A forced-crit Gavel of Wrath 802561 (rank 58) at the dummy gives the stack; the Illumination 500143 cast on the caster 1600 ms later (2000 ms cast) consumes it. Control: the same two casts in the phase before 680641 is learned (no stack, no 524859). Reference search 2026-11-22: server DBC 524859; coa-history spell 524859: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 524859
+      },
+      "name": "Sun Strider (consumed buff still on at 9.3 s)",
+      "variant": "consume_held",
+      "label_suffix": "consume_held",
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9300,
+      "game_time": {
+        "after": [
+          9280,
+          9370
+        ]
+      },
+      "observe_source": "The aura 524859 on the caster is read present about 9.3 s after the Illumination cast started, 7.3 s after it finished at about 2.0 s: a duration 10% short (7200 ms) would be gone. AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster); 524859 (DurationIndex 31 = 8000 ms, $524859d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($524859s1), Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10. A forced-crit Gavel of Wrath 802561 (rank 58) at the dummy gives the stack; the Illumination 500143 cast on the caster 1600 ms later (2000 ms cast) consumes it. Control: the same two casts in the phase before 680641 is learned (no stack, no 524859). Reference search 2026-11-22: server DBC 524859; coa-history spell 524859: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 524859
+      },
+      "name": "Sun Strider (consumed buff gone by 10.7 s)",
+      "variant": "consume_gone",
+      "label_suffix": "consume_gone",
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10700,
+      "game_time": {
+        "after": [
+          10680,
+          10770
+        ]
+      },
+      "observe_source": "The aura 524859 on the caster is read absent about 10.7 s after the Illumination cast started, 8.7 s after it finished: a duration 10% long (8800 ms) would still be on. AscensionSunClericEvents.cpp:125 (a critical damaging Gavel or Dawnbreak, 800654, casts 680642 on the caster), AscensionSunClericAbilities.cpp:43, 86-87 (680642 is finished by the next Illumination 500143, which removes it and casts 524859 on the caster); 524859 (DurationIndex 31 = 8000 ms, $524859d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 9 + 1 = 10 ($524859s1), Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10. A forced-crit Gavel of Wrath 802561 (rank 58) at the dummy gives the stack; the Illumination 500143 cast on the caster 1600 ms later (2000 ms cast) consumes it. Control: the same two casts in the phase before 680641 is learned (no stack, no 524859). Reference search 2026-11-22: server DBC 524859; coa-history spell 524859: 0 events in 186 logs; ascension-data advancement.tsv lists Sun Strider as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 760379,
+      "name": "Sunstorm (disarm is not refused)",
+      "kind": "immunity",
+      "variant": "disarm",
+      "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities but you do not feel pity or remorse or fear and you cannot be stopped unless disarmed or killed.",
+      "effects": [
+        {
+          "spell": 12323,
+          "words": "stopped"
+        },
+        {
+          "spell": 676,
+          "words": "disarmed",
+          "lands": true
+        }
+      ],
+      "dummy_distance": 3,
+      "observe_source": "760379 Sunstorm Effect[1] aura 147 MECHANIC_IMMUNITY_MASK MiscValue 1733, Effect[2] aura 263 ALLOW_ONLY_ABILITY, DurationIndex 32 = 6000 ms. Piercing Howl 12323 (aura 33, Mechanic 11) is the refused control and Disarm 676 (Mechanic 3, aura 67 MOD_DISARM, range index 2, DurationIndex 32 = 6000 ms) the effect the clause leaves out: each is cast by the dummy at the caster three times, 500 ms apart, inside the 6000 ms; the slow is absent and the disarm present after them, and the slow lands again after the expiry (control that the cast route lands). Reference search 2026-11-22: server DBC 760379; coa-history spell 760379: 0 events in 186 logs; ascension-data advancement.tsv lists Sunstorm as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 800611,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Gavel of Light)",
+      "variant": "stack_light",
+      "label_suffix": "stack_light",
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); Gavel() is the script list Any(info, {800611, 800614, 800617}) (AscensionSunCleric.cpp:171-174), so each of the three Gavels is tested (G-23): Gavel of Light 800611 is cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crit without the passive, 0 stacks). One forced crit: 1 stack. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 800614,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Gavel of Grace)",
+      "variant": "stack_grace",
+      "label_suffix": "stack_grace",
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); Gavel() is the script list Any(info, {800611, 800614, 800617}) (AscensionSunCleric.cpp:171-174), so each of the three Gavels is tested (G-23): Gavel of Grace 800614 is cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crit without the passive, 0 stacks). One forced crit: 1 stack. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (a non-critical Gavel grants no stack)",
+      "variant": "stack_noncrit",
+      "label_suffix": "stack_noncrit",
+      "expected": 0,
+      "observe_source": "Gavel of Wrath 802561 (rank 58) cast at the dummy, the learned passive against a hit that cannot crit. Non-critical arm: the melee crit chance is removed by the fixture 984954 (Reg's Test Aura, Effect[0] aura 52 MOD_CRIT_PERCENT, amount set to -1000 as a phase aura on the caster; Effect[1] aura 57 -1000% spell crit), with no forced crit rating, so the passive learned in the after phase meets a hit that cannot crit; the fixture is a precondition, never the subject of the claim. Expected 0 stacks: 680641 Effect[0] aura 42 PROC_TRIGGER_SPELL fires only on a critical damaging Gavel or Dawnbreak (AscensionSunClericEvents.cpp:125, `damage && critical && (Gavel(info) || Named(info,800654))`). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC.",
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802561,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (the non-critical Gavel of Wrath landed)",
+      "variant": "stack_noncrit_landed",
+      "label_suffix": "stack_noncrit_landed",
+      "expected": 2,
+      "observe_source": "Landing read: the same fixtures, casts and waits as stack_noncrit, read as spell_damage_count of Gavel of Wrath 802561 on the dummy with critical false, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and did not crit in each phase, so the 0 read by stack_noncrit is judged on a landed non-critical hit. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ],
+      "tolerance": 0
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800654,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (a non-critical Dawnbreak grants no stack)",
+      "variant": "stack_dawnbreak_noncrit",
+      "label_suffix": "stack_dawnbreak_noncrit",
+      "wait_ms": 1500,
+      "expected": 0,
+      "observe_source": "Dawnbreak 800654 cast at the dummy in front of the caster, the learned passive against a spell that cannot crit (fixture 984954 Effect[1] aura 57, -1000% spell crit; no forced crit rating). (the same fixture) the fixture 984954 (Reg's Test Aura, Effect[0] aura 52 MOD_CRIT_PERCENT, amount set to -1000 as a phase aura on the caster; Effect[1] aura 57 -1000% spell crit), with no forced crit rating, so the passive learned in the after phase meets a hit that cannot crit; the fixture is a precondition, never the subject of the claim. Expected 0 stacks: the proc needs a critical damaging Gavel or Dawnbreak (AscensionSunClericEvents.cpp:125). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800654,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800654,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 1,
+      "expire_ms": 500,
+      "name": "Sun Strider (the non-critical Dawnbreak landed)",
+      "variant": "stack_dawnbreak_noncrit_landed",
+      "label_suffix": "stack_dawnbreak_noncrit_landed",
+      "wait_ms": 1500,
+      "expected": 2,
+      "observe_source": "Landing read: the same fixtures, casts and waits as stack_dawnbreak_noncrit, read as spell_damage_count of Dawnbreak 800654 on the dummy with critical false, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and did not crit in each phase, so the 0 read by stack_dawnbreak_noncrit is judged on a landed non-critical hit. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "tolerance": 0
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {},
+      "name": "Sun Strider (consuming the stack raises critical block chance by 10%)",
+      "variant": "consume_block_crit",
+      "label_suffix": "consume_block_crit",
+      "metric": "critical_block_chance",
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.05,
+      "wait_ms": 2100,
+      "observe_source": "Critical block chance of the caster 100 ms after the Illumination finishes: 0 in the control phase (before 680641 is learned) and 10 after, within 0.05. The read is `critical_block_chance` = player->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE) (CoAGameplayTest.cpp:5139-5140), the sum the engine rolls on in Unit::isBlockCritical (Unit.cpp:3719-3723). 524859 Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10 ($524859s1), applied by the next Illumination 500143 that consumes the stack (AscensionSunClericEvents.cpp:125, AscensionSunClericAbilities.cpp:43, 86-87). A forced-crit Gavel of Wrath 802561 at the dummy gives the stack, the Illumination cast 1600 ms later consumes it. Control: the same two casts before 680641 is learned. Condition-off arm: consume_block_crit_nostack. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {},
+      "name": "Sun Strider (no critical block chance without a consumed stack)",
+      "variant": "consume_block_crit_nostack",
+      "label_suffix": "consume_block_crit_nostack",
+      "metric": "critical_block_chance",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.05,
+      "wait_ms": 2100,
+      "observe_source": "Condition-off arm of consume_block_crit: the Gavel cannot crit (fixture 984954, Effect[0] amount -1000 as a phase aura), so no 680642 stack exists and the Illumination consumes nothing; the critical block chance stays 0 after the learn. The same read and the same 524859 Effect[1] BasePoints 9 + 1 = 10 as consume_block_crit (CoAGameplayTest.cpp:5139-5140, Unit.cpp:3719-3723). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "name": "Sun Strider (the Illumination landed)",
+      "variant": "consume_block_crit_nostack_heal_landed",
+      "label_suffix": "consume_block_crit_nostack_heal_landed",
+      "metric": "spell_heal_count",
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 2100,
+      "observe_source": "Landing read: the same fixtures, casts and waits as consume_block_crit_nostack, read as spell_heal_count of Illumination 500143 on the caster, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and landed, so the 0 read by consume_block_crit_nostack is judged on a landed landed Illumination. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {
+        "spell": 802561,
+        "target": "dummy",
+        "critical": false
+      },
+      "name": "Sun Strider (the non-critical Gavel before the Illumination landed)",
+      "variant": "consume_block_crit_nostack_gavel_landed",
+      "label_suffix": "consume_block_crit_nostack_gavel_landed",
+      "metric": "spell_damage_count",
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 2100,
+      "observe_source": "Landing read: the same fixtures, casts and waits as consume_block_crit_nostack, read as spell_damage_count of Gavel of Wrath 802561 on the dummy with critical false, before_expected 1 and expected 2 (the counter is cumulative over the scenario, the cast runs in both phases): the hit landed and did not crit in each phase, so the 0 read by consume_block_crit_nostack is judged on a landed non-critical hit. Misses, dodges and parries are removed by the class file's shared ratings (spell_hit_rating, melee_hit_rating, expertise_rating at 10000, applied to the player by profile.py), so no outcome other than a landed hit reaches the dummy; the read is exact and the 0.1% residual rule is met because a hit that did not land fails this pair instead of passing it (residual failure probability of a false pass: 0 miss paths under those ratings; the sibling arms are separate runs of one fixture, not one scenario). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
     }
   ],
   "player_observations": [],
