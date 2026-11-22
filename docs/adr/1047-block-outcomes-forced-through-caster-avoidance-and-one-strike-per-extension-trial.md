@@ -45,3 +45,18 @@ The `caster_avoidance` option set dodge and parry only, and no kind judged an au
 - The rate claim is not proven by these entries: the 28..32% band needs thousands of blocks per arm (G-20).
 - A trial costs about 17 s of game time: 24 trials hold the residual of no extended trial at 0.7^24 = 1.9e-4 per run.
 - Finished-class scenarios do not change: both additions are opt-in.
+
+## Addendum (D-228, D-230): `block: 0` and `mode: "grant"`
+
+The `metric_delta` zero arms (a whole-run guard) failed twice: about 4% of strikes are blocked at block 0 with the
+shield on, which made every run unmeasured. Both zero arms now judge per trial.
+
+- `block: 0` on the extension trials: a strike blocked anyway voids its trial, every judged trial must keep the base
+  duration, at least 24 judged.
+- `mode: "grant"`: one strike per trial on a caster whose aura was removed and read absent first; void when the strike
+  was not as forced or the aura was on before it. Block 0: no grant on any judged trial. Block 100: the share of
+  trials showing the aura is judged against `chance_pct` +- `half_width_points` (30% +- 1.6, the mentor band),
+  pooled over `parts` scenarios of at most 10000 steps, with a control arm before the talent is learned.
+- Seeded mutants: 25% and 35% rates alert, a grant on an unblocked strike alerts, a grant before the learn alerts,
+  too many void trials are unmeasured.
+- Both are opt-in: existing entries generate identical scenarios.

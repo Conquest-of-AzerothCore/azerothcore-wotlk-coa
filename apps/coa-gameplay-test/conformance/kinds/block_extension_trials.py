@@ -1,11 +1,12 @@
 from dataclasses import dataclass, replace
+import math
 from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, STRIKER, MetricDeltaStrike, behaviour_entry, prose_rule,
                         required_aura_steps, striker_creature, waited_ms)
 from compare import NO_CAST_FAILURE, Run, Verdict, describe_failures, missing_measurement
 from hits import timed
-from procs import wilson_interval
+from procs import Z_99, wilson_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
 from values import Expectation, dataset, facts_of
@@ -22,8 +23,19 @@ TIME_MARGIN = 0.1
 BASE_READS = (-0.108, -0.083, 0.083, 0.108)
 EXTENDED_READS = (-0.175, -0.05, 0.025, 0.175)
 TIME_METRIC = 'game_time_ms'
-KEYS = frozenset({'spell', 'kind', 'name', 'quote', 'aura', 'extension_spell', 'extension_effect', 'shield',
-                  'strike_spell', 'cast_power', 'trials', 'label_suffix', 'void_on_cast_failure', 'observe_source'})
+BLOCKS = (0, 100)
+MIN_UNBLOCKED_TRIALS = 24
+EXTENSION_MODE = 'extension'
+GRANT_MODE = 'grant'
+GRANT_KEYS = frozenset({'spell', 'kind', 'mode', 'name', 'quote', 'aura', 'shield', 'strike_spell', 'trials',
+                       'control_trials', 'parts', 'block', 'chance_pct', 'half_width_points', 'label_suffix',
+                       'void_on_cast_failure', 'observe_source', 'variant'})
+MAXIMUM_STEPS = 10000
+GRANT_STEPS_PER_TRIAL = 9
+CONTROL_ARM = 'control'
+TREATMENT_ARM = 'treatment'
+EXTENSION_KEYS = frozenset({'spell', 'kind', 'name', 'quote', 'aura', 'extension_spell', 'extension_effect', 'shield',
+                  'strike_spell', 'cast_power', 'trials', 'label_suffix', 'void_on_cast_failure', 'observe_source', 'block', 'mode', 'variant'})
 
 
 @dataclass(frozen=True)
@@ -40,21 +52,29 @@ class BlockExtensionSpec:
     trials: int
     label_suffix: str
     void_on_cast_failure: bool
+    block: int = 100
 
 
 def block_extension_spec(entry: dict) -> BlockExtensionSpec:
-    unknown = set(entry) - KEYS
+    unknown = set(entry) - EXTENSION_KEYS
     if unknown:
         raise ValueError(f'{entry["spell"]} {KIND} does not take {sorted(unknown)}')
+    if entry.get('mode', EXTENSION_MODE) != EXTENSION_MODE:
+        raise ValueError(f'{entry["spell"]} {KIND} mode is {EXTENSION_MODE} or {GRANT_MODE}, not {entry["mode"]!r}')
     trials = entry['trials']
     if isinstance(trials, bool) or not isinstance(trials, int) or trials < 1:
         raise ValueError(f'{entry["spell"]} {KIND} trials is a positive whole count, not {trials!r}')
     if entry.get('void_on_cast_failure', False) not in (True, False):
         raise ValueError(f'{entry["spell"]} {KIND} void_on_cast_failure is true or false')
+    block = entry.get('block', 100)
+    if isinstance(block, bool) or block not in BLOCKS:
+        raise ValueError(f'{entry["spell"]} {KIND} block is 0 or 100, not {block!r}')
+    if block == 0 and trials < MIN_UNBLOCKED_TRIALS:
+        raise ValueError(f'{entry["spell"]} {KIND} block 0 needs at least {MIN_UNBLOCKED_TRIALS} trials')
     return BlockExtensionSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['aura']),
                               int(entry['extension_spell']), int(entry.get('extension_effect', 0)),
                               int(entry['shield']), int(entry['strike_spell']), int(entry['cast_power']), trials,
-                              entry.get('label_suffix', KIND), bool(entry.get('void_on_cast_failure', False)))
+                              entry.get('label_suffix', KIND), bool(entry.get('void_on_cast_failure', False)), block)
 
 
 def mark(spec: BlockExtensionSpec, read: str) -> str:
@@ -79,6 +99,34 @@ def read_offsets(base: int, extension: int) -> list[int]:
                   + [round(base + extension + extension * shift) for shift in EXTENDED_READS])
 
 
+def contract(spec: BlockExtensionSpec, base: int, extension: int, offsets: list[int], limits: dict) -> str:
+    refused = (' A refused cast voids the run: the verdict is unmeasured, never ok or alert.'
+               if spec.void_on_cast_failure else '')
+    head = (f'Shield {spec.shield} equipped, Block {BLOCK_SPELL} and {spec.spell} learned. Each of {spec.trials} '
+            f'trials removes {spec.aura}, casts it on the caster ({base} ms, DurationIndex), forces block to '
+            f'{spec.block}% with dodge and parry at 0 (set_combat_avoidance block, owner ruling O-20) and has a '
+            f'passive striker (react state 0: the aura\'s own damage on it starts no blocked swing) cast '
+            f'{spec.strike_spell} at the caster once. One strike per application: an extension casts nothing, so the '
+            f'number of extensions on an application hit several times is unknown and its expiry could not be '
+            f'judged. The aura is read with game-time stamps at {offsets} ms after the cast, which bracket its '
+            f'expiry. ')
+    base_band = f'{limits["base"][0]:g}..{limits["base"][1]:g} ms'
+    if spec.block == 0:
+        return (head + f'A trial whose strike is not one unblocked hit (a strike blocked anyway counts as void, not as '
+                       f'a failure), or whose cast left no aura, is void. Every other trial must expire inside '
+                       f'{base_band}; an extended expiry or any other expiry alerts, a bracket straddling a band '
+                       f'edge is unmeasured, and fewer than {MIN_UNBLOCKED_TRIALS} judged trials is unmeasured '
+                       f'(a 30% extension on every unblocked strike would escape {MIN_UNBLOCKED_TRIALS} judged '
+                       f'trials with probability 0.7^{MIN_UNBLOCKED_TRIALS} = '
+                       f'{0.7 ** MIN_UNBLOCKED_TRIALS:.1e}).' + refused)
+    return (head + f'A trial whose strike is not one blocked hit, or whose cast left no aura, is void. Every other '
+                   f'trial must expire inside {base_band} (not extended) or '
+                   f'{limits["extended"][0]:g}..{limits["extended"][1]:g} ms (extended by {extension} ms, '
+                   f'{spec.extension_spell} Effect[{spec.extension_effect}], +-10%); any other expiry alerts, a '
+                   f'bracket straddling a band edge is unmeasured, and no extended trial is unmeasured. The share '
+                   f'of extended trials is reported with its 99% interval and not judged.' + refused)
+
+
 def block_extension_scenario(class_file: dict, spec: BlockExtensionSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, 1.0)
@@ -95,7 +143,7 @@ def block_extension_scenario(class_file: dict, spec: BlockExtensionSpec) -> tupl
                   measurement(mark(spec, f'{index} cast time'), CASTER, TIME_METRIC),
                   measurement(mark(spec, f'{index} cast aura'), CASTER, 'aura', spell=spec.aura),
                   {'action': 'wait', 'label': f'trial {index} before the strike', 'ms': STRIKE_SETTLE_MS},
-                  {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0, 'parry': 0, 'block': 100},
+                  {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0, 'parry': 0, 'block': spec.block},
                   {'action': 'set_health', 'actor': CASTER, 'value': STRIKE_HEALTH, 'maximum': STRIKE_MAX_HEALTH},
                   {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                   {'action': 'wait', 'label': f'trial {index} strike', 'ms': STRIKE_SETTLE_MS},
@@ -120,22 +168,7 @@ def block_extension_scenario(class_file: dict, spec: BlockExtensionSpec) -> tupl
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour block extension trials',
-        'contract': (f'Shield {spec.shield} equipped, Block {BLOCK_SPELL} and {spec.spell} learned. Each of '
-                     f'{spec.trials} trials removes {spec.aura}, casts it on the caster ({base} ms, DurationIndex), '
-                     f'forces block to 100% with dodge and parry at 0 (set_combat_avoidance block, owner ruling '
-                     f'O-20) and has a passive striker (react state 0: the aura\'s own damage on it starts no blocked '
-                     f'swing) cast {spec.strike_spell} at the caster once. One strike per '
-                     f'application: an extension casts nothing, so the number of extensions on an application hit '
-                     f'several times is unknown and its expiry could not be judged. The aura is read with game-time '
-                     f'stamps at {offsets} ms after the cast, which bracket its expiry. A trial whose strike is not '
-                     f'one blocked hit, or whose cast left no aura, is void. Every other trial must expire inside '
-                     f'{limits["base"][0]:g}..{limits["base"][1]:g} ms (not extended) or '
-                     f'{limits["extended"][0]:g}..{limits["extended"][1]:g} ms (extended by {extension} ms, '
-                     f'{spec.extension_spell} Effect[{spec.extension_effect}], +-10%); any other expiry alerts, a '
-                     f'bracket straddling a band edge is unmeasured, and no extended trial is unmeasured. The share '
-                     f'of extended trials is reported with its 99% interval and not judged.'
-                     + (' A refused cast voids the run: the verdict is unmeasured, never ok or alert.'
-                        if spec.void_on_cast_failure else '')),
+        'contract': contract(spec, base, extension, offsets, limits),
         'players': [player_fixture(class_file)],
         'creatures': [striker_creature(class_file, MetricDeltaStrike(spec.strike_spell, STRIKE_HEALTH,
                                                                      STRIKE_MAX_HEALTH, reaction=PASSIVE))],
@@ -147,7 +180,7 @@ def block_extension_scenario(class_file: dict, spec: BlockExtensionSpec) -> tupl
               for index in range(spec.trials)]
     model = {'kind': KIND, 'metric': 'aura', 'quote': entry.quote, 'base_ms': base, 'extension_ms': extension,
              'bands': {name: list(limit) for name, limit in limits.items()}, 'trials': trials,
-             'void_on_cast_failure': spec.void_on_cast_failure}
+             'void_on_cast_failure': spec.void_on_cast_failure, 'block': spec.block}
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None,
                               str(extension), prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -170,10 +203,11 @@ def classify(bracket: tuple[float, float | None], limits: dict) -> str:
     return 'alert' if outside else 'unmeasured'
 
 
-def trial_outcome(run: Run, trial: dict, previous: dict | None, limits: dict) -> tuple[str, str]:
+def trial_outcome(run: Run, trial: dict, previous: dict | None, limits: dict, block: int) -> tuple[str, str]:
     blocked, unblocked = (run.values[trial[key]] - (run.values[previous[key]] if previous else 0.0)
                           for key in ('blocked', 'unblocked'))
-    if blocked != 1 or unblocked != 0 or run.values[trial['cast_aura']] != 1:
+    wanted = (1, 0) if block else (0, 1)
+    if (blocked, unblocked) != wanted or run.values[trial['cast_aura']] != 1:
         return 'void', f'{blocked:g} blocked and {unblocked:g} unblocked hits, aura after the cast ' \
                        f'{run.values[trial["cast_aura"]]:g}'
     start = run.values[trial['cast_time']]
@@ -182,7 +216,7 @@ def trial_outcome(run: Run, trial: dict, previous: dict | None, limits: dict) ->
     if bracket is None:
         return 'alert', f'the aura came back after it was gone: {reads}'
     high = 'still on' if bracket[1] is None else f'{bracket[1]:g}'
-    return classify(bracket, limits), f'expiry in ({bracket[0]:g}, {high}] ms'
+    return classify(bracket, limits if block else {'base': limits['base']}), f'expiry in ({bracket[0]:g}, {high}] ms'
 
 
 def block_extension_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -194,7 +228,8 @@ def block_extension_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     refused = [reason for reasons in run.cast_failures.values() for reason in reasons if reason != NO_CAST_FAILURE]
     limits = {name: tuple(limit) for name, limit in model['bands'].items()}
     trials = model['trials']
-    outcomes = [trial_outcome(run, trial, trials[index - 1] if index else None, limits)
+    block = model.get('block', 100)
+    outcomes = [trial_outcome(run, trial, trials[index - 1] if index else None, limits, block)
                 for index, trial in enumerate(trials)]
     counts = {name: sum(outcome == name for outcome, _ in outcomes)
               for name in ('base', 'extended', 'alert', 'unmeasured', 'void')}
@@ -211,7 +246,7 @@ def block_extension_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                        explanation=f'{explanation}; refused casts void the run: {describe_failures(refused)}')
     if counts['alert']:
         status = 'alert'
-    elif counts['unmeasured'] or not counts['extended']:
+    elif counts['unmeasured'] or (block and not counts['extended']) or (not block and judged < MIN_UNBLOCKED_TRIALS):
         status = 'unmeasured'
     else:
         status = 'ok'
@@ -220,6 +255,8 @@ def block_extension_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    if entry.get('mode', EXTENSION_MODE) == GRANT_MODE:
+        return block_grant_scenario(class_file, block_grant_spec(entry))
     return block_extension_scenario(class_file, block_extension_spec(entry))
 
 
@@ -227,4 +264,209 @@ def label(entry: dict) -> list[str]:
     return [f"{entry['spell']} behaviour_metric_delta {entry.get('label_suffix', KIND)}"]
 
 
-JUDGES = {BEHAVIOUR_METRIC_DELTA: block_extension_verdict}
+
+
+@dataclass(frozen=True)
+class BlockGrantSpec:
+    spell: int
+    name: str
+    quote: str
+    aura: int
+    shield: int
+    strike_spell: int
+    trials: int
+    control_trials: int
+    parts: int
+    block: int
+    chance_pct: float | None
+    half_width_points: float | None
+    label_suffix: str
+    void_on_cast_failure: bool
+
+
+def block_grant_spec(entry: dict) -> BlockGrantSpec:
+    unknown = set(entry) - GRANT_KEYS
+    if unknown:
+        raise ValueError(f'{entry["spell"]} {KIND} mode grant does not take {sorted(unknown)}')
+    counts = {key: entry.get(key, default) for key, default in (('trials', None), ('control_trials', 0), ('parts', 1))}
+    if any(isinstance(count, bool) or not isinstance(count, int) or count < minimum
+           for count, minimum in ((counts['trials'], 1), (counts['control_trials'], 0), (counts['parts'], 1))):
+        raise ValueError(f'{entry["spell"]} {KIND} mode grant needs whole trials, control_trials and parts')
+    block = entry.get('block', 100)
+    if isinstance(block, bool) or block not in BLOCKS:
+        raise ValueError(f'{entry["spell"]} {KIND} block is 0 or 100, not {block!r}')
+    chance, half_width = entry.get('chance_pct'), entry.get('half_width_points')
+    if (chance is None) != (half_width is None) or (chance is not None and (
+            block != 100 or not 0 < chance < 100 or not 0 < half_width < 5)):
+        raise ValueError(f'{entry["spell"]} {KIND} chance_pct and half_width_points go together, at block 100')
+    if chance is None and counts['trials'] * counts['parts'] < MIN_UNBLOCKED_TRIALS:
+        raise ValueError(f'{entry["spell"]} {KIND} mode grant at block 0 needs {MIN_UNBLOCKED_TRIALS} trials')
+    if entry.get('void_on_cast_failure', False) not in (True, False):
+        raise ValueError(f'{entry["spell"]} {KIND} void_on_cast_failure is true or false')
+    return BlockGrantSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['aura']),
+                          int(entry['shield']), int(entry['strike_spell']), counts['trials'],
+                          counts['control_trials'], counts['parts'], block,
+                          None if chance is None else float(chance),
+                          None if half_width is None else float(half_width), entry.get('label_suffix', KIND),
+                          bool(entry.get('void_on_cast_failure', False)))
+
+
+def needed_blocks(chance_pct: float, half_width_points: float) -> int:
+    chance = chance_pct / 100
+    return math.ceil(Z_99 ** 2 * chance * (1 - chance) / (half_width_points / 100) ** 2)
+
+
+def grant_mark(spec: BlockGrantSpec, arm: str, index: int, read: str) -> str:
+    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix} {arm} {index} {read}'
+
+
+def grant_trial(spec: BlockGrantSpec, arm: str, index: int) -> list[dict]:
+    return [{'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura},
+            measurement(grant_mark(spec, arm, index, 'aura before'), CASTER, 'aura', spell=spec.aura),
+            {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0, 'parry': 0, 'block': spec.block},
+            {'action': 'set_health', 'actor': CASTER, 'value': STRIKE_HEALTH, 'maximum': STRIKE_MAX_HEALTH},
+            {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
+            {'action': 'wait', 'label': f'{arm} {index} strike', 'ms': STRIKE_SETTLE_MS},
+            measurement(grant_mark(spec, arm, index, 'blocked'), CASTER, 'spell_damage_count',
+                        spell=spec.strike_spell, caster=STRIKER, target=CASTER, blocked=True),
+            measurement(grant_mark(spec, arm, index, 'unblocked'), CASTER, 'spell_damage_count',
+                        spell=spec.strike_spell, caster=STRIKER, target=CASTER, blocked=False),
+            measurement(grant_mark(spec, arm, index, 'aura after'), CASTER, 'aura', spell=spec.aura)]
+
+
+def grant_contract(spec: BlockGrantSpec) -> str:
+    wanted = 'blocked' if spec.block else 'an unblocked hit'
+    text = (f'Shield {spec.shield} equipped and Block {BLOCK_SPELL} learned. Each trial removes {spec.aura} from the '
+            f'caster, reads that it is absent, forces block to {spec.block}% with dodge and parry at 0 '
+            f'(set_combat_avoidance block, owner ruling O-20), has a passive striker (react state 0) cast '
+            f'{spec.strike_spell} at the caster once and reads the blocked and unblocked hit counts and then the '
+            f'aura. A trial whose strike is not {wanted} (counted by the damage log, the cumulative counts '
+            f'differenced against the previous trial), or whose aura was on before the strike, is void, never a '
+            f'failure. ')
+    if spec.control_trials:
+        text += (f'Control: {spec.control_trials} trials per part before {spec.spell} is learned; none may show the '
+                 f'aura. Then {spec.spell} is learned. ')
+    if spec.chance_pct is None:
+        return text + (f'{spec.trials * spec.parts} trials: no judged trial may show the aura (an unblocked strike '
+                       f'grants nothing), and fewer than {MIN_UNBLOCKED_TRIALS} judged trials is unmeasured (a 30% '
+                       f'grant on every unblocked strike would escape {MIN_UNBLOCKED_TRIALS} judged trials with '
+                       f'probability {0.7 ** MIN_UNBLOCKED_TRIALS:.1e}).')
+    needed = needed_blocks(spec.chance_pct, spec.half_width_points)
+    return text + (f'{spec.trials} trials in each of {spec.parts} pooled parts ({spec.trials * spec.parts}, the 99% '
+                   f'half-width {spec.half_width_points:g} points needs {needed} judged): the share of trials showing '
+                   f'the aura must lie in {spec.chance_pct - spec.half_width_points:g}..'
+                   f'{spec.chance_pct + spec.half_width_points:g}%, outside it alerts as a finding and fewer than '
+                   f'{needed} judged trials is unmeasured. At a true {spec.chance_pct:g}% the share leaves that range '
+                   f'with probability {math.erfc(Z_99 / math.sqrt(2)):.1e} per run (about that squared when both runs '
+                   f'of a pair must agree).')
+
+
+def block_grant_scenario(class_file: dict, spec: BlockGrantSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, 1.0)
+    arms = [(CONTROL_ARM, spec.control_trials), (TREATMENT_ARM, spec.trials)]
+    setup = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': BLOCK_SPELL},
+                {'action': 'add_item', 'actor': CASTER, 'item': spec.shield},
+                {'action': 'equip', 'actor': CASTER, 'item': spec.shield, 'slot': OFF_HAND_SLOT}])
+    steps = list(setup)
+    for arm, count in arms:
+        if arm == TREATMENT_ARM:
+            steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
+        for index in range(count):
+            steps += grant_trial(spec, arm, index)
+    if len(steps) > MAXIMUM_STEPS:
+        raise ValueError(f'{spec.spell} {KIND} mode grant needs {len(steps)} steps, more than {MAXIMUM_STEPS}')
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour block grant trials',
+        'contract': grant_contract(spec) + (' A refused cast voids the run: the verdict is unmeasured, never ok or '
+                                            'alert.' if spec.void_on_cast_failure else ''),
+        'players': [player_fixture(class_file)],
+        'creatures': [striker_creature(class_file, MetricDeltaStrike(spec.strike_spell, STRIKE_HEALTH,
+                                                                     STRIKE_MAX_HEALTH, reaction=PASSIVE))],
+        'steps': steps}
+    reads = ('aura before', 'blocked', 'unblocked', 'aura after')
+    model = {'kind': KIND, 'mode': GRANT_MODE, 'metric': 'aura', 'quote': entry.quote, 'block': spec.block,
+             'chance_pct': spec.chance_pct, 'half_width_points': spec.half_width_points,
+             'minimum_judged': (MIN_UNBLOCKED_TRIALS if spec.chance_pct is None
+                                else needed_blocks(spec.chance_pct, spec.half_width_points)),
+             'arms': {arm: [{read: grant_mark(spec, arm, index, read) for read in reads} for index in range(count)]
+                      for arm, count in arms},
+             'void_on_cast_failure': spec.void_on_cast_failure}
+    if spec.parts > 1:
+        model['parts'] = spec.parts
+    expected = '0' if spec.chance_pct is None else f'{spec.chance_pct:g}%'
+    expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
+                              spec.spell, spec.aura, None, expected, prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def grant_tally(run: Run, model: dict) -> tuple[dict, str | None]:
+    wanted = (1, 0) if model['block'] else (0, 1)
+    tally = {arm: {'judged': 0, 'granted': 0, 'void': 0} for arm in model['arms']}
+    previous = None
+    for arm, trials in model['arms'].items():
+        for trial in trials:
+            missing = next((label for label in trial.values() if run.values.get(label) is None), None)
+            if missing is not None:
+                return tally, missing_measurement(run, missing)
+            hits = tuple(run.values[trial[key]] - (run.values[previous[key]] if previous else 0.0)
+                         for key in ('blocked', 'unblocked'))
+            previous = trial
+            if hits != wanted or run.values[trial['aura before']] != 0:
+                tally[arm]['void'] += 1
+                continue
+            tally[arm]['judged'] += 1
+            tally[arm]['granted'] += run.values[trial['aura after']] != 0
+    return tally, None
+
+
+def block_grant_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
+    total = {arm: {'judged': 0, 'granted': 0, 'void': 0} for arm in model['arms']}
+    refused = []
+    for run in runs:
+        tally, problem = grant_tally(run, model)
+        if problem is not None:
+            return replace(base, status='unmeasured', explanation=problem)
+        for arm, counts in tally.items():
+            total[arm] = {key: total[arm][key] + counts[key] for key in counts}
+        refused += [reason for reasons in run.cast_failures.values() for reason in reasons
+                    if reason != NO_CAST_FAILURE]
+    detail = {**{f'{arm}_{key}': value for arm, counts in total.items() for key, value in counts.items()},
+              **({'parts': len(runs)} if len(runs) > 1 else {})}
+    control, treatment = total[CONTROL_ARM], total[TREATMENT_ARM]
+    text = (f'control {control["granted"]} grants in {control["judged"]} judged trials ({control["void"]} void); '
+            f'treatment {treatment["granted"]} grants in {treatment["judged"]} judged trials ({treatment["void"]} void)')
+    if model.get('void_on_cast_failure') and refused:
+        return replace(base, status='unmeasured', detail=detail,
+                       explanation=f'{text}; refused casts void the run: {describe_failures(refused)}')
+    if model['arms'][CONTROL_ARM] and (not control['judged'] or control['granted']):
+        return replace(base, status='alert' if control['judged'] else 'unmeasured', detail=detail,
+                       explanation=f'{text}; no trial may show the aura before the talent is learned')
+    judged, granted = treatment['judged'], treatment['granted']
+    if judged < model['minimum_judged']:
+        return replace(base, status='unmeasured', detail=detail,
+                       explanation=f'{text}; fewer than the {model["minimum_judged"]} judged trials the claim needs')
+    if model['chance_pct'] is None:
+        status = 'alert' if granted else 'ok'
+        return replace(base, status=status, measured=float(granted), expected=0.0, detail=detail,
+                       explanation=f'{text}; an unblocked strike must grant nothing')
+    expected, half = model['chance_pct'] / 100, model['half_width_points'] / 100
+    low, high = wilson_interval(granted, judged)
+    rate = granted / judged
+    status = 'ok' if expected - half <= rate <= expected + half else 'alert'
+    return replace(base, status=status, measured=rate, expected=expected, low=low, high=high, detail=detail,
+                   explanation=f'{text}; rate {rate:.4f}, Wilson 99% interval [{low:.4f}, {high:.4f}], range '
+                               f'[{expected - half:.4f}, {expected + half:.4f}]'
+                               + ('' if status == 'ok' else ': outside the range, a finding for the mentor'))
+
+
+def single_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    if model.get('mode') == GRANT_MODE:
+        return block_grant_verdict(base, [run], model)
+    return block_extension_verdict(base, run, model)
+
+
+JUDGES = {BEHAVIOUR_METRIC_DELTA: single_verdict}
+POOLED_JUDGE = block_grant_verdict

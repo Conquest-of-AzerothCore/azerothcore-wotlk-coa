@@ -5135,6 +5135,7 @@
       {
         "claim": "has a $h% chance (30%, ProcChance)",
         "labels": [
+          "707629 behaviour_metric_delta block_grant_rate",
           "707629 effect_value #0"
         ]
       },
@@ -5145,7 +5146,7 @@
         ]
       }
     ],
-    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; 24 unblocked hits grant it never (block 0%, no shield: with the shield on, 0% still blocked about 4%), every strike checked blocked or landed (caster_avoidance block, D-176). Residual 0.7^24 = 1.9e-4 per run. The 30% chance stays data: G-20 step 1 not run (the band 28..32% needs about 5,450 to 13,900 blocks per arm; the cost goes to the mentor first); the extended share of the block_extension trials gives an interval, never judged. The 4 sec duration stays data."
+    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; unblocked hits grant it never: kind block_extension_trials mode grant (D-228), block 0% with the shield on, each trial removes the aura, reads it absent, strikes once and reads the damage log; a strike blocked anyway voids its trial (about 4%), at least 24 judged trials, 0.7^24 = 1.9e-4 per run. The 30% chance: 6 pooled parts of 950 trials at block 100% (5700, 5444 judged needed for a 99% half-width of 1.6 points), share inside 28.4..31.6% (mentor band D-228), 24 control trials per part before the learn show no aura. The 4 sec duration stays data."
   },
   {
     "spell": 707629,
@@ -5158,7 +5159,7 @@
       "707629 spell_duration 804751 #4"
     ],
     "kind": "claim",
-    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (no shield): 24 unblocked hits on one application, gone 13.8 s after the cast. The data labels of the base ledger are kept beside it."
+    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (D-228): 32 trials at block 0% on the same kind (opt-in block 0); a strike blocked anyway voids its trial, every judged trial must stay in the base band, at least 24 judged. The data labels of the base ledger are kept beside it."
   },
   {
     "spell": 707767,
