@@ -41,7 +41,8 @@
   refused.
 - `ally_strikes` (ADR 1046, provisional): `true`, on an entry with a `strike` that has `after_trigger_ms`, no
   `owned_entry` and no `dx`. After the trigger and the caster's strikes (at the start of the phase steps in an uncast
-  before phase), each ally is set to the strike's `health` of `max_health` and struck `count` times by the striker's
+  before phase), each ally is set to the strike's `health` (or to N when written `ally_strikes: {"health": N}`, which
+  changes the allies only, N at most `max_health`) of `max_health` and struck `count` times by the striker's
   spell, `wait_ms` apart. Around each ally's strikes the caster reads the striker's `spell_go_count` of the spell
   (`caster: striker`); a count that did not grow by `count`, or a missing read, makes the verdict `unmeasured` (the
   trial is void), before any other judgement. Not with `control_wait`. The harness creature cast takes any unit id as

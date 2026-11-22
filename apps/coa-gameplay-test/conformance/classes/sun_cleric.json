@@ -37817,6 +37817,336 @@
       }
     },
     {
+      "spell": 680646,
+      "name": "Scroll of Hope (Trial A (D-224, owner packet))",
+      "kind": "metric_delta",
+      "variant": "heal_each_ally_a",
+      "label_suffix": "heal_each_ally_a",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Trial A (D-224, owner packet): the caster stays above 35% the whole trial (9000 of 10000, 8580 after the hit), ally then ally2 are set to 3800 and struck below 35%. The tooltip expects one heal 681383 for each of ally and ally2; the caster none. Measurement for the owner packet on the shared once-flag (AscensionSunClericEvents.cpp:79, :297), not a claim proof; heals counted per unit on the caster. ",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 9000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 15,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 2,
+        "ally_strikes": {
+          "health": 3800
+        },
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "tooltip: any ally falling below 35% while the Scroll is active is healed once"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "tooltip: once for each ally (ally2 struck after ally)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "tooltip: the caster is healed only when it falls below 35%"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally once per phase (cumulative), so a 0 heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally2 once per phase (cumulative), so a 0 heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally holds the Scroll's area aura in the after phase only (the reach_raid entry reads the same)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally2 holds the Scroll's area aura in the after phase only (the reach_raid entry reads the same)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally: 3800 less the full 600 Grave Coil (no Scroll) = 3200 before; 3800 less 420 (30% less magic damage taken, 680646 $s1) = 3380, plus the 15% heal of 10000 = 4880 after (3380 when not healed)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally2: 3800 less the full 600 Grave Coil (no Scroll) = 3200 before; 3800 less 420 (30% less magic damage taken, 680646 $s1) = 3380, plus the 15% heal of 10000 = 4880 after (3380 when not healed)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (Trial B (D-224, owner packet))",
+      "kind": "metric_delta",
+      "variant": "heal_each_ally_b",
+      "label_suffix": "heal_each_ally_b",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Trial B (D-224, owner packet): only the caster falls below 35% (3800, 3380 after the hit); ally and ally2 are set to 9000 and struck but stay above 35% (8580). The tooltip expects one heal for the caster and none for the allies. Measurement for the owner packet on the shared once-flag (AscensionSunClericEvents.cpp:79, :297), not a claim proof; heals counted per unit on the caster. ",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 3800,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 15,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 2,
+        "ally_strikes": {
+          "health": 9000
+        },
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "tooltip: an ally that stays above 35% is not healed"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "tooltip: an ally that stays above 35% is not healed"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "tooltip: the caster is healed only when it falls below 35%"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally once per phase (cumulative), so a 0 heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally2 once per phase (cumulative), so a 0 heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally holds the Scroll's area aura in the after phase only (the reach_raid entry reads the same)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally2 holds the Scroll's area aura in the after phase only (the reach_raid entry reads the same)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally: 3800 less the full 600 Grave Coil (no Scroll) = 3200 before; 3800 less 420 (30% less magic damage taken, 680646 $s1) = 3380, plus the 15% heal of 10000 = 4880 after (3380 when not healed)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally2: 3800 less the full 600 Grave Coil (no Scroll) = 3200 before; 3800 less 420 (30% less magic damage taken, 680646 $s1) = 3380, plus the 15% heal of 10000 = 4880 after (3380 when not healed)"
+          }
+        ]
+      }
+    },
+    {
       "spell": 805301,
       "name": "Holy Form (additional mana spent with the extra heal: below-30% arm 850 pays nothing, above-30% arm 872 pays)",
       "kind": "metric_delta",
@@ -38071,6 +38401,546 @@
       ],
       "expected": 1,
       "force_crit": "spell"
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (critical extra heal on the Bless ally procs The Redeemer: 30% healed when struck)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer",
+      "label_suffix": "extra_heal_redeemer",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1749,
+        1771
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative: one Daybreak heal on ally2 per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Daybreak at ally2 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Holy Form extra heal on the Bless ally (ally 1): none below the gate, one above it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the extra heal on ally 1 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker hit this ally once in the phase, so a 301005 it held was consumed (proof that a missing Redeemer heal is not a missing strike)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally 1 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 301004,
+              "target": "ally"
+            },
+            "source": "the Redeemer heal 301004 lands on the Bless ally when struck (AscensionSunClericEvents.cpp:380-387)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "source": "the Holy Form extra heal 807994 on ally 1, critical (the amount the Redeemer part is read against)"
+          }
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_strikes": true,
+        "ratios": [
+          {
+            "numerator": 7,
+            "denominator": 8,
+            "expected": 0.3,
+            "tolerance": 0.003,
+            "floor_count": 7,
+            "source": "tooltip: healed for 30% of the amount originally healed the next time they take damage (The Redeemer 300339 Effect[0] BasePoints 29 + 1, Spell.dbc); CalculatePct truncates the heal to an integer"
+          }
+        ]
+      },
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Main reading: heal events 301004 on ally 1, 0 below the gate and 1 above it; ratio of the 301004 total to the critical 807994 total expected 0.30.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 1,
+      "force_crit": "spell",
+      "strike": {
+        "spell": 47632,
+        "health": 5000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      }
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (control: non-critical extra heal, no Redeemer, no heal when struck)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer_noncrit",
+      "label_suffix": "extra_heal_redeemer_noncrit",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1749,
+        1771
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative: one Daybreak heal on ally2 per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Daybreak at ally2 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Holy Form extra heal on the Bless ally (ally 1): none below the gate, one above it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the extra heal on ally 1 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker hit this ally once in the phase, so a 301005 it held was consumed (proof that a missing Redeemer heal is not a missing strike)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally 1 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          }
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_strikes": true
+      },
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without the forced crit: 807994 reads non-critical (its critical arm 0), no 301004 on strike. A baseline crit would turn an arm off, never pass the control.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "strike": {
+        "spell": 47632,
+        "health": 5000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      }
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (control without the form: no extra heal 807994, no Redeemer)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer_no_form",
+      "label_suffix": "extra_heal_redeemer_no_form",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1749,
+        1771
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative: one Daybreak heal on ally2 per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Daybreak at ally2 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Holy Form extra heal on the Bless ally (ally 1): none without Holy Form"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the extra heal on ally 1 reads critical exactly when the crit is forced"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker hit this ally once in the phase, so a 301005 it held was consumed (proof that a missing Redeemer heal is not a missing strike)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally 1 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301005
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 holds no 301005 after the phase strikes (a leftover turns this arm off: no state metric exists to void the trial on an aura)"
+          }
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_strikes": true
+      },
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without Holy Form (setup cast dropped): no 807994, Daybreak critical at ally2 only, no 301004 on ally 1.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "force_crit": "spell",
+      "strike": {
+        "spell": 47632,
+        "health": 5000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      }
     }
   ],
   "player_observations": [],

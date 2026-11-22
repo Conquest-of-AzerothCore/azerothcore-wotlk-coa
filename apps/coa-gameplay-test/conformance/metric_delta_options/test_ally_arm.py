@@ -684,6 +684,24 @@ class AllyAttackAndStrikeTests(unittest.TestCase):
                              ('caster', 'spell_go_count', 'striker', 47632))
             self.assertLess(labels.index(start), labels.index(end))
 
+    def test_ally_strike_health_sets_the_allies_only(self):
+        scenario, _ = self.steps(strike_entry(ally_strikes={'health': 9000}))
+        steps = scenario['steps']
+        values = {unit: [step['value'] for step in steps if step['action'] == 'set_health' and step['actor'] == unit]
+                  for unit in ('caster', 'ally', 'ally2')}
+        self.assertEqual(values['ally'], [9000, 9000])
+        self.assertEqual(values['ally2'], [9000, 9000])
+        self.assertEqual(set(values['caster']), {3800})
+        default, _ = self.steps(strike_entry())
+        self.assertEqual({step['value'] for step in default['steps'] if step['action'] == 'set_health'
+                          and step['actor'] == 'ally'} & {3800}, {3800})
+
+    def test_malformed_ally_strike_health_is_refused(self):
+        for bad in ({'health': 0}, {'health': 9.5}, {'health': 20000}, {'hp': 5}, {}):
+            with self.subTest(option=bad):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(templar(), strike_entry(ally_strikes=bad))
+
     def judged(self, entry: dict, grow=2):
         _, [expectation] = behaviour_scenario(templar(), entry)
         values = {expectation.model['before_label']: 1.0, expectation.model['after_label']: 2.0}

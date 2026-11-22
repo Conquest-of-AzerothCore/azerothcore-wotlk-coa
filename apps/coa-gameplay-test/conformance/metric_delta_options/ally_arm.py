@@ -71,6 +71,7 @@ class AllyArm:
     reach_source: str = ''
     ally_attacks: tuple[tuple[int, int, str], ...] = ()
     ally_strikes: bool = False
+    ally_strike_health: int | None = None
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
@@ -193,8 +194,14 @@ def parse(raw) -> AllyArm:
     attacks = raw.get('ally_attacks', [])
     if not isinstance(attacks, list) or ('ally_attacks' in raw and not attacks):
         raise ValueError(f'ally_arm ally_attacks is a non-empty list, not {attacks!r}')
-    if raw.get('ally_strikes', True) is not True:
-        raise ValueError(f'ally_arm ally_strikes is true, not {raw["ally_strikes"]!r}')
+    strikes = raw.get('ally_strikes', True)
+    strike_health = None
+    if isinstance(strikes, dict):
+        strike_health = strikes.get('health')
+        if set(strikes) != {'health'} or type(strike_health) is not int or strike_health <= 0:
+            raise ValueError(f'ally_arm ally_strikes is true or {{health: a positive integer}}, not {strikes!r}')
+    elif strikes is not True:
+        raise ValueError(f'ally_arm ally_strikes is true or {{health: N}}, not {strikes!r}')
     if allies == 0 and (attacks or 'ally_strikes' in raw):
         raise ValueError('ally_arm allies 0 has no ally to attack or to strike')
     if (attacks or 'ally_strikes' in raw) and 'control_wait' in raw:
@@ -248,7 +255,7 @@ def parse(raw) -> AllyArm:
                    'control_wait' in raw, parsed_arms,
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
                    parsed_ratios, raw.get('reach_source', ''),
-                   tuple(parse_ally_attack(attack) for attack in attacks), 'ally_strikes' in raw)
+                   tuple(parse_ally_attack(attack) for attack in attacks), 'ally_strikes' in raw, strike_health)
 
 
 def check(spec, ally):
@@ -301,6 +308,10 @@ def check(spec, ally):
                               or spec.strike.owned_entry is not None or spec.strike.dx):
         raise ValueError(f'{spec.spell} ally_arm ally_strikes repeats the entry\'s strike at each ally after the '
                          f'trigger: a strike with after_trigger_ms, no owned_entry and no dx')
+    if ally.ally_strike_health is not None and spec.strike is not None \
+            and ally.ally_strike_health > spec.strike.max_health:
+        raise ValueError(f'{spec.spell} ally_arm ally_strikes health {ally.ally_strike_health} exceeds the strike\'s '
+                         f'max_health {spec.strike.max_health}')
     if ally.ally_casts and spec.attack_swings:
         raise ValueError(f'{spec.spell} ally_arm casts at the ally in cast phases only, not between attack swings')
     for spell in ally.ally_casts:
@@ -386,7 +397,8 @@ def ally_strike_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
     for unit in ally.ally_ids:
         steps.append(measurement(strike_label(spec, moment, unit, 'start'), CASTER, ALLY_CAST_PROOF_METRIC,
                                  spell=strike.spell, caster=STRIKER))
-        steps.append({'action': 'set_health', 'actor': unit, 'value': strike.health, 'maximum': strike.max_health})
+        steps.append({'action': 'set_health', 'actor': unit, 'maximum': strike.max_health,
+                      'value': strike.health if ally.ally_strike_health is None else ally.ally_strike_health})
         for _ in range(strike.count):
             steps += [{'action': 'cast', 'actor': STRIKER, 'spell': strike.spell, 'target': unit},
                       {'action': 'wait', 'label': 'strike', 'ms': strike.wait_ms}]
@@ -511,7 +523,8 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
         contract += f' Each phase sets the allies\' health to {ally.ally_health[0]} of {ally.ally_health[1]}.'
     if ally.ally_strikes:
         contract += (f' After the trigger and the caster\'s strikes (at the start of an uncast before phase), each '
-                     f'ally is set to {spec.strike.health} of {spec.strike.max_health} health and struck '
+                     f'ally is set to {spec.strike.health if ally.ally_strike_health is None else ally.ally_strike_health}'
+                     f' of {spec.strike.max_health} health and struck '
                      f'{spec.strike.count} time(s) by the striker\'s '
                      f'{spec.strike.spell}; the caster\'s count of the striker\'s {ALLY_CAST_PROOF_METRIC} of it is '
                      f'read around each ally\'s strikes, and a count that did not grow by {spec.strike.count} voids '

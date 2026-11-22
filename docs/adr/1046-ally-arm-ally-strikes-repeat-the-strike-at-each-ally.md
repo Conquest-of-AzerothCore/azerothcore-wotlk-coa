@@ -28,3 +28,7 @@ that did not grow by `count` voids the trial (`unmeasured`).
 - Seeded tests: the strike order and reads, a malformed option refused, landed strikes keep the verdict, and the mutant
   of a strike that did not land voids it.
 - Not verified before the pair: that the striker's SPELL_GO reaches the caster's observer for a strike at an ally.
+
+- Amendment (mentor D-224, same provisional number): `ally_strikes` may be `{"health": N}`, which sets the allies'
+  health to N (at most the strike's `max_health`) instead of the strike health; the caster keeps the strike health. `true`
+  generates as before.
