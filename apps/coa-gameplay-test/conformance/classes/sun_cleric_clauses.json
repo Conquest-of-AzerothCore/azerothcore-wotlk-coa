@@ -3406,7 +3406,10 @@
     "spell": 707078,
     "clause": "and take $707768s2% reduced periodic damage.",
     "labels": [
-      "707078 effect_value 707768e1 #1"
+      "707078 effect_value 707768e1 #1",
+      "707078 behaviour_metric_delta taken_dot",
+      "707078 behaviour_metric_delta taken_dot_night",
+      "707078 behaviour_metric_delta taken_direct"
     ],
     "kind": "claim"
   },

@@ -14,3 +14,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0008](0008-fanaticism-expectation-is-the-reproduced-engine-arithmetic.md) | Fanaticism expectation is the reproduced engine arithmetic (supersedes the figures of 0007) |
 | [0009](0009-sunwalker-doubles-vow-of-light-once.md) | Sunwalker doubles the value of Vow of Light once |
 | [0010](0010-valkyrs-calling-landing-follows-the-flight-aura.md) | Valkyr's Calling lands when its flight aura ends |
+| [0012](0012-stand-against-darkness-reduces-periodic-damage-taken.md) | Stand Against Darkness reduces periodic damage taken from any caster |
