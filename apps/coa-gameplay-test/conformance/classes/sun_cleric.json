@@ -20050,6 +20050,316 @@
         "control_wait": true
       },
       "observe_source": "Control of cone_damage: the identical cast of 503505 at an ally that does not hold the caster's Bless: the script returns before the damage (AscensionSunClericAbilities.cpp:497-499, !ally->HasAura(Bless, player->GetGUID())), so 0 damage in both phases (tooltip: Only usable on your ally with Bless active). Without the player_spell_power fixture the amount would be 404..456 + 1.5 x base spell power. ntrol (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. "
+    },
+    {
+      "spell": 300360,
+      "name": "Learning Light (spell haste on entering Sunrise)",
+      "kind": "metric_delta",
+      "variant": "sunrise_haste",
+      "label_suffix": "sunrise_haste",
+      "quote": "Entering Sunset or Sunrise increases your spell haste by $301265s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 300360,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.833333,
+      "tolerance": 0.0001,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Sunflare 800231 (Holy, SchoolMask 2) is cast at the dummy after Dawn: Sunrise is entered. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 300360,
+      "name": "Learning Light (spell haste on entering Sunset)",
+      "kind": "metric_delta",
+      "variant": "sunset_haste",
+      "label_suffix": "sunset_haste",
+      "quote": "Entering Sunset or Sunrise increases your spell haste by $301265s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 300360,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.833333,
+      "tolerance": 0.0001,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Dawnsear 554406 (Fire, SchoolMask 4, cast time 3500 ms) is cast at the dummy after Dawn and read at 4500 ms: Sunset is entered when the cast completes. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 680624,
+      "name": "Divine Retribution (unleashes 25% of the damage dealt)",
+      "kind": "metric_delta",
+      "variant": "unleash_quarter",
+      "label_suffix": "unleash_quarter",
+      "quote": "Accumulates 25% of your damage dealt to on the target",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "setup_casts": [
+        680624
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 570147,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 34,
+      "tolerance": 1,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "observe_source": "680624 Divine Retribution Effect[0] aura 4 DUMMY, EffectTriggerSpell 570147, DurationIndex 31 (8000 ms, $d); the accumulator adds every own direct damage event on the target (AscensionSunClericEvents.cpp:90 and :387-389, not a copy spell) and on expiry casts 570147 at each enemy within its radius with a quarter of the sum (AscensionSunClericAuras.cpp:170-178, amount / 4). The damage source is Solar Flare 807175 (not a copy spell, so it counts), a fixed hit: Effect[1] SCHOOL_DAMAGE BasePoints 50 + 1, DieSides 1, RealPointsPerLevel 1.9, the streamed tooltip ${$m2+$ppl2+$SP*0.26} = 136.5 at level 60 and the reference spell power 0 (packet value $m2 51 + 1.9 x 45). Crit and resist fixtures 984954 and 823764 in both phases make the hit constant. Divine Retribution 680624 is cast at the dummy before the hit in the after phase only (setup_only_after); the control phase deals the same hit with no Divine Retribution. One hit of 136 or 137 accumulates and the unleash on the dummy reads 136 / 4 = 34 (137 / 4 = 34), within 1 (excludes 20% = 27 and 30% = 41, and the band of 2 points, 23% = 31 and 27% = 36.7 lie outside 33 to 35). The control reading of the unleash spell on the dummy is 0. Reference search 2026-11-22: coa-history spell 680624 Divine Retribution: 46 casts, 46 applications and 46 removals, 2273 refreshes (one per accumulated hit) in 4 logs; 570147: 76 SPELL_DAMAGE events (min 122, max 50441) in 4 logs, so the accumulate-then-unleash shape exists in real play but a 25% share cannot be read from aggregates; bindmysoul snapshot (fetched 2026-07-22) carries \"Accumulates 25% of your damage dealt to on the target and unleashes it after 8 seconds, damaging enemies within 10 yds as Holy damage.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (at most 5 Solar Flares among 7 enemies)",
+      "kind": "metric_delta",
+      "variant": "flare_cap",
+      "label_suffix": "flare_cap",
+      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
+      "trigger_spell": 500154,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        11,
+        12,
+        13
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 5,
+      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5 = $573449i, radius index 8 = 5 yd = $573449a1); the handler (AscensionSunClericEvents.cpp:126 and :303-312) fires on damage by Horusath Blast 500154, lists the living units within 5 yd of the target sorted by GUID (the target added if absent) and casts Solar Flare 807175 at each valid enemy until the count of 5 is spent. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, 0 Solar Flare damage events). Crit and resist fixtures 984954 and 823764 in both phases. The Solar Flare damage events of 807175 are counted over every dummy (area_sum). Seven enemies stand 1 to 3 yd from the target (the target at 10 yd and six dummies at 7, 8, 9, 11, 12 and 13 yd from the caster, all in line), well inside 5 yd by centre distance, so the cap decides: exactly 5 events (excludes 4 and 6 and 7). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no cap can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (only the enemies within 5 yds are hit)",
+      "kind": "metric_delta",
+      "variant": "flare_radius",
+      "label_suffix": "flare_radius",
+      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
+      "trigger_spell": 500154,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "area_dummies": [
+        12,
+        13,
+        19,
+        20
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 3,
+      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5 = $573449i, radius index 8 = 5 yd = $573449a1); the handler (AscensionSunClericEvents.cpp:126 and :303-312) fires on damage by Horusath Blast 500154, lists the living units within 5 yd of the target sorted by GUID (the target added if absent) and casts Solar Flare 807175 at each valid enemy until the count of 5 is spent. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, 0 Solar Flare damage events). Crit and resist fixtures 984954 and 823764 in both phases. The Solar Flare damage events of 807175 are counted over every dummy (area_sum). Layout: the target at 10 yd, two dummies 2 and 3 yd from it (12 and 13 yd from the caster) and two 9 and 10 yd from it (19 and 20 yd): the engine range check adds at most the two combat reaches (2 x 1.275 yd) to the 5 yd, so 9 yd is outside under every reading and 3 yd is inside. Expected exactly 3 events (the target and the two inside dummies; excludes 5 for a radius of 10 yd or more, and 2 for a radius under 3 yd). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no cap can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 704941,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "quote": "and increases your chance to parry the next attack by $707843s1%.",
+      "metric": "parry_chance",
+      "fields": {},
+      "expected": 30,
+      "name": "Light of the Sun (live parry chance +30 points after a parry)",
+      "variant": "parry_chance",
+      "label_suffix": "parry_chance",
+      "expected_gain": 30,
+      "tolerance": 0.01,
+      "observe_source": "704941 Light of the Sun Effect[0] aura 42 PROC_TRIGGER_SPELL 707843; 707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), no charges. The scenario is the one of the aura_amount entry (a parried Speed Slash 2118233 in each phase, caster parry chance forced to 100% by harness set_combat_avoidance as a named precondition fixture of both phases, 704941 learned between the phases), but the read is the live unit value: PLAYER_PARRY_PERCENTAGE (CoAGameplayTest.cpp:5133), read 500 ms after the Holy Form 805301 cast and the strike: the gain of the learned phase over the phase without it (the control) is 30 points, within 0.01. Reference search 2026-11-22: coa-history spell 707843 Light of the Sun: 2 SPELL_AURA_APPLIED, 2 SPELL_AURA_REMOVED and 2 SPELL_HEAL (90 to 101) in 2 logs (the aura exists in real play, no parry chance in the events), 704941 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Parrying an attack now restores 3% of your maximum health and increases your chance to parry the next attack by 30%.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 300343,
+      "name": "Savior (critical strike chance below 20% health)",
+      "kind": "metric_delta",
+      "variant": "below_20",
+      "label_suffix": "below_20",
+      "quote": "Increases your critical strike chance on targets below 20% health by $s1%.",
+      "trigger_spell": 500154,
+      "gate_spell": 300343,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "tolerance": 0.05,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        99,
+        19
+      ],
+      "expected_gain": 30,
+      "observe_source": "300343 Savior Effect[0] and Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, BasePoints 29 + 1 = 30 ($s1), TARGET_UNIT_CASTER; the scripted crit hook (AscensionSunClericAbilities.cpp:206-207) adds Amount(300343) to the crit chance of a family 33 spell when the target's health percentage is below 20. Horusath Blast 500154 is read with the engine's own SpellDoneCritChance plus the script hook (spell_done_crit_chance_scripted) against the dummy, before and after a real learn of 300343 (the reading before, with the dummy at 99% health, is the control and fixes the base chance); the gain of the learned phase is judged. The dummy is held at 19% in the treatment phase: the gain is 30, within 0.05 (excludes 0). Reference search 2026-11-22: coa-history spell 300343: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot (fetched 2026-07-22) carries \"Increases your healing on targets below 20% health by 30%.\" (an older wording: our Spell.dbc 300343 and the code say critical strike chance, and the tooltip comes first); nothing else found."
+    },
+    {
+      "spell": 300343,
+      "name": "Savior (no bonus above 20% health)",
+      "kind": "metric_delta",
+      "variant": "above_20",
+      "label_suffix": "above_20",
+      "quote": "Increases your critical strike chance on targets below 20% health by $s1%.",
+      "trigger_spell": 500154,
+      "gate_spell": 300343,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.05,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        99,
+        21
+      ],
+      "expected_gain": 0,
+      "observe_source": "300343 Savior Effect[0] and Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, BasePoints 29 + 1 = 30 ($s1), TARGET_UNIT_CASTER; the scripted crit hook (AscensionSunClericAbilities.cpp:206-207) adds Amount(300343) to the crit chance of a family 33 spell when the target's health percentage is below 20. Horusath Blast 500154 is read with the engine's own SpellDoneCritChance plus the script hook (spell_done_crit_chance_scripted) against the dummy, before and after a real learn of 300343 (the reading before, with the dummy at 99% health, is the control and fixes the base chance); the gain of the learned phase is judged. The dummy is held at 21% in the treatment phase: the gain is 0 (the other side of the stated 20%, bracketed with the 19% entry in the same pair; an exact 20% hold read the bonus in the first pair, so the edge itself is not claimed). Reference search 2026-11-22: coa-history spell 300343: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot (fetched 2026-07-22) carries \"Increases your healing on targets below 20% health by 30%.\" (an older wording: our Spell.dbc 300343 and the code say critical strike chance, and the tooltip comes first); nothing else found."
     }
   ],
   "player_observations": [],

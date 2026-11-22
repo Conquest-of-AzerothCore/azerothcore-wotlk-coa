@@ -374,7 +374,8 @@
     "spell": 300343,
     "clause": "Increases your critical strike chance on targets below 20% health by $s1%.",
     "labels": [
-      "300343 effect_value e0 #0"
+      "300343 behaviour_metric_delta below_20",
+      "300343 behaviour_metric_delta above_20"
     ],
     "kind": "claim"
   },
@@ -542,7 +543,8 @@
     "spell": 300360,
     "clause": "Entering Sunset or Sunrise increases your spell haste by $301265s1%.",
     "labels": [
-      "300360 effect_value 301265e0 #0"
+      "300360 behaviour_metric_delta sunrise_haste",
+      "300360 behaviour_metric_delta sunset_haste"
     ],
     "kind": "claim"
   },
@@ -2426,7 +2428,9 @@
   {
     "spell": 680624,
     "clause": "Accumulates 25% of your damage dealt to on the target",
-    "labels": [],
+    "labels": [
+      "680624 behaviour_metric_delta unleash_quarter"
+    ],
     "kind": "claim"
   },
   {
@@ -3625,11 +3629,19 @@
   {
     "spell": 704941,
     "clause": "and increases your chance to parry the next attack by $707843s1%.",
-    "labels": [
-      "704941 effect_value 707843e0 #1",
-      "704941 behaviour_metric_delta parry"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your chance to parry by $707843s1%",
+        "labels": [
+          "704941 behaviour_metric_delta parry_chance"
+        ]
+      },
+      {
+        "claim": "the next attack",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 704942,
@@ -4840,11 +4852,21 @@
   {
     "spell": 804632,
     "clause": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
-    "labels": [
-      "804632 effect_value #0",
-      "804632 effect_radius 573449e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "launches a Solar Flare at up to $573449i enemies",
+        "labels": [
+          "804632 behaviour_metric_delta flare_cap"
+        ]
+      },
+      {
+        "claim": "within $573449a1 yds of your target",
+        "labels": [
+          "804632 behaviour_metric_delta flare_radius"
+        ]
+      }
+    ]
   },
   {
     "spell": 804632,
