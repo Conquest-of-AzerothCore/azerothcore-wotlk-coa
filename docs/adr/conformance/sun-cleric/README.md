@@ -41,3 +41,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0035](0035-fervor-of-the-sun-raises-sunslam-damage-by-a-percent.md) | Fervor of the Sun raises Sunslam's damage by a percent per stack (mentor D-219) |
 | [0036](0036-knight-of-dawn-trials-are-the-player-casts.md) | Knight of Dawn's extra strike never rolls again: its trials are the player casts of Glorious Execution (incorrect test, row 371) |
 | [0037](0037-blessing-of-kings-cuts-once-per-critical-strike.md) | Blessing of Kings cuts Hammer of Kings and Solar Prayer once per critical strike, a self-heal included (mentor D-220) |
+| [0038](0038-heal-procs-fire-once-on-a-self-heal.md) | Eight heal and critical-strike procs fire once on a self-heal, from the actor-side event (mentor D-255/D-258) |

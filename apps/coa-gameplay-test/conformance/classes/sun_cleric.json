@@ -39338,7 +39338,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the caster (actor == target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "caster_health_pct": 50
     },
     {
@@ -39363,7 +39363,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the grouped ally (actor != target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "allies": 1,
         "ally_health": [
@@ -39394,7 +39394,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the caster (actor == target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "tolerance": 1,
       "caster_health_pct": 50
     },
@@ -39420,7 +39420,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the grouped ally (actor != target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "tolerance": 1,
       "ally_arm": {
         "allies": 1,
@@ -39698,7 +39698,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "caster_health_pct": 50
     },
     {
@@ -39722,7 +39722,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "allies": 1,
         "ally_health": [
@@ -39752,7 +39752,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "caster_health_pct": 50
     },
     {
@@ -39776,7 +39776,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "allies": 1,
         "ally_health": [
@@ -39806,7 +39806,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "caster_health_pct": 50
     },
     {
@@ -39830,7 +39830,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "allies": 1,
         "ally_health": [
@@ -39948,7 +39948,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "caster_health_pct": 50,
       "ally_arm": {
         "allies": 2,
@@ -39979,7 +39979,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "allies": 2,
         "ally_health": [
@@ -40009,7 +40009,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "caster_health_pct": 50
     },
     {
@@ -40033,7 +40033,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "allies": 1,
         "ally_health": [
@@ -40063,7 +40063,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the caster itself (actor == target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "force_crit": "spell",
       "caster_health_pct": 50
     },
@@ -40088,7 +40088,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "D-255 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a heal by the caster lands on the grouped ally (actor != target): a heal by the caster whose tooltip names the done side is read once in each arm, a doubled proc reads twice the tooltip value. Reference search: nothing found beyond the tooltip and the DBC.",
+      "observe_source": "Sun Cleric ADR 0038 (mentor D-255/D-258): AscensionSunClericEvents.cpp accepts this proc on the actor-side event only (DONE_HIT_PROC_FLAG_MASK); a heal by the caster lands on the caster itself (actor == target) and is read once in each arm, as a heal on an ally. Reference search: nothing found beyond the tooltip and the DBC.",
       "force_crit": "spell",
       "ally_arm": {
         "allies": 1,
