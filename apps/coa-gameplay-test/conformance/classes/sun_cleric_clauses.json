@@ -5468,14 +5468,7 @@
         ]
       },
       {
-        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%)",
-        "labels": [
-          "800602 behaviour_metric_delta holy_form_threat_doubled",
-          "800602 behaviour_metric_delta holy_form_threat_control"
-        ]
-      },
-      {
-        "claim": "Doubles the effectiveness of your Holy Form: the mana sacrifice of the Blessed ally (Effect[1])",
+        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%) and the mana sacrifice of the Blessed ally (Effect[1])",
         "labels": []
       },
       {
@@ -5490,7 +5483,7 @@
         ]
       }
     ],
-    "reason": "Open: the healing part (Effect[0]) and the Ancient Rites tick-rate part have their labels. Pair 20261122-212700 / 20261122-212745, build ff87ef5384bf, server commit b794d53f1bc5, no flip, 40 of 40 entries ok in both runs of the round B4 prove (807507, 807873, 800602, 504734). Threat part (Effect[2], -50% doubled to -100%): Dawnsear 554406 at spell power 10000 with Holy Form cast for real after 800602 is learned reads threat per damage 0.00716 and 0.00715 against 0.00718 expected (0 + 60 / 8360.7, the flat 60 is the SpellLevel, unmodified), control arm holy_form_threat_control (Holy Form alone) 0.5072 and 0.5072 against 0.50718, both within 0.01 (a -90% or -50% threat reads 0.107 or 0.507); cast_failures empty in both runs (void_on_cast_failure on). Not proven: the Bless mana sacrifice (Effect[1]): extra = healing x mana fraction x Effect[1] amount / 100 (AscensionSunClericAbilities.cpp:396-401), paid (extra + 3) / 4, depends on the random heal and needs an arm-to-arm ratio, the same tool need as claim 377 (ally heal ratio of 807994 with and without 800602). Proposed status for the threat part: 1; the clause stays open for the Bless part."
+    "reason": "Open: the Holy Form doubling is measured on its healing effect only (Effect[0]; Holy Form is cast for real in both arms); no label covers the threat (Effect[2]) and the Bless mana sacrifice (Effect[1]) parts, so the clause is not status 1. The Ancient Rites tick-rate part has its own labels."
   },
   {
     "spell": 800612,
