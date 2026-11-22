@@ -450,6 +450,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_ROOT;
         info->Effects[EFFECT_1].Effect = info->Effects[EFFECT_2].Effect = 0;
+        info->DurationEntry = sSpellDurationStore.LookupEntry(31);
     }
     if (id == MarionetteStacks)
     {

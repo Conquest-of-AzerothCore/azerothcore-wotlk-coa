@@ -36,3 +36,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0027](0027-spirit-shock-locks-a-creatures-school.md) | Spirit Shock locks a creature's school | accepted |
 | [0028](0028-voodoo-cauldron-heals-allies-within-fifteen-yards.md) | Voodoo Cauldron heals allies within 15 yd | accepted |
 | [0029](0029-graven-effigy-lengthens-crowd-control.md) | Graven Effigy lengthens crowd control | accepted (contributor decision 2026-11-22); engine file `Unit.cpp`, gated on Witch Doctor ids |
+| [0030](0030-soul-marionette-roots-for-eight-seconds.md) | Soul Marionette roots for 8 sec | accepted (contributor decision 2026-11-22) |
