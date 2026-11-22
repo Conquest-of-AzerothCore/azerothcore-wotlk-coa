@@ -542,16 +542,23 @@ namespace
             return true;
         }
 
-        static bool HandleAssign(ChatHandler* handler, std::string target, Optional<std::string> name)
+        static bool HandleAssign(ChatHandler* handler, std::string target, Optional<QuotedString> name)
         {
+            std::string assignee = name ? std::string(*name) : std::string();
+            if (!assignee.empty() &&
+                (!normalizePlayerName(assignee) || ObjectMgr::CheckPlayerName(assignee, true) != CHAR_NAME_SUCCESS))
+            {
+                handler->SendErrorMessage("{} is not a valid character name.", assignee);
+                return false;
+            }
             std::lock_guard<std::mutex> lock(DeskLock);
             CoAPlayerTicket::Ticket* ticket = Target(target);
             if (!ticket)
                 return Missing(handler, target);
-            TicketDesk.Assign(ticket->Id, name.value_or(""));
+            TicketDesk.Assign(ticket->Id, assignee);
             Publish(*ticket);
             handler->PSendSysMessage("Player ticket #{} is {}.", ticket->Id,
-                name ? "assigned to " + *name : "unassigned");
+                assignee.empty() ? std::string("unassigned") : "assigned to " + assignee);
             return true;
         }
 
