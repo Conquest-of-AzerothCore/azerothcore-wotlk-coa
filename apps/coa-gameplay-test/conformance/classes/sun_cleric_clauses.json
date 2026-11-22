@@ -920,16 +920,8 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Resets the cooldown of Horusath Blast while in Sunrise",
-        "labels": [
-          "301266 behaviour_metric_delta reset_sunrise"
-        ]
-      },
-      {
-        "claim": "and Rapture while in Sunset",
-        "labels": [
-          "301266 behaviour_metric_delta reset_sunset"
-        ]
+        "claim": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset",
+        "labels": []
       },
       {
         "claim": "and causes their damage dealt to launch a Solar Flare",
