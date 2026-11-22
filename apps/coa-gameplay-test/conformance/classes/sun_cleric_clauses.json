@@ -538,14 +538,18 @@
   {
     "spell": 300371,
     "clause": "Dealing direct damage to an enemy affected by Chains of Light will now cause it to chain to a nearby enemy.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300371 behaviour_metric_delta chain"
+    ]
   },
   {
     "spell": 300371,
     "clause": "Can only occur once per sec.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300371 behaviour_metric_delta chain"
+    ]
   },
   {
     "spell": 300621,
@@ -796,18 +800,29 @@
   {
     "spell": 301343,
     "clause": "Increases the critical strike chance of Sunflare and Dawnsear by $s1%",
-    "labels": [
-      "301343 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of Sunflare by $s1%",
+        "labels": [
+          "301343 behaviour_metric_delta crit_sunflare"
+        ]
+      },
+      {
+        "claim": "Increases the critical strike chance of Dawnsear by $s1%",
+        "labels": [
+          "301343 behaviour_metric_delta crit_dawnsear"
+        ]
+      }
+    ]
   },
   {
     "spell": 301343,
     "clause": "and reduces spell pushback suffered from damaging attacks by $s2%.",
+    "kind": "claim",
     "labels": [
-      "301343 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "301343 behaviour_metric_delta pushback_game_time"
+    ]
   },
   {
     "spell": 301345,
@@ -1652,59 +1667,117 @@
   {
     "spell": 572752,
     "clause": "Bring the wrath of the sun down upon an enemy after $d,",
+    "kind": "claim",
     "labels": [
-      "572752 effect_value #7"
-    ],
-    "kind": "claim"
+      "572752 behaviour_metric_delta delay_window"
+    ]
   },
   {
     "spell": 572752,
     "clause": "dealing ${$572753m1+$572753ppl1+$SP*1.3} Holyflame Damage",
-    "labels": [
-      "572752 effect_value 572753e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$572753m1+$572753ppl1} Holyflame Damage",
+        "labels": [
+          "572752 script_hit 572753 damage"
+        ]
+      },
+      {
+        "claim": "$SP*1.3 spell power term",
+        "labels": [
+          "572752 script_hit 572753 damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "and scorching the earth beneath them for $572754d.",
-    "labels": [
-      "572752 spell_duration 572754 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "lasts more than 8.2 s",
+        "labels": [
+          "572752 behaviour_metric_delta ground_held"
+        ]
+      },
+      {
+        "claim": "lasts less than 9.9 s",
+        "labels": [
+          "572752 behaviour_metric_delta ground_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "While inside, enemies are struck by a Solar Flare every $572754t1 sec",
+    "kind": "claim",
     "labels": [
-      "572752 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
+      "572752 behaviour_metric_delta period"
+    ]
   },
   {
     "spell": 572752,
     "clause": "and take $572754s2% increased damage from Rapture and Horusath Blast.",
-    "labels": [
-      "572752 effect_value 572754e1 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Horusath Blast",
+        "labels": [
+          "572752 behaviour_hit_ratio taken_horusath"
+        ]
+      },
+      {
+        "claim": "Rapture",
+        "labels": [
+          "572752 behaviour_hit_ratio taken_rapture"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
-    "labels": [
-      "572752 effect_value 807175e1 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m2+$ppl2} Holyflame Damage",
+        "labels": [
+          "572752 script_hit 807175 flare_damage"
+        ]
+      },
+      {
+        "claim": "$SP*0.26 spell power term",
+        "labels": [
+          "572752 script_hit 807175 flare_damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 572752,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
-    "labels": [
-      "572752 effect_value 807175e0 #5",
-      "572752 spell_duration 807175 #6"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the target's chance to hit by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $d: lasts more than 9.15 s after the last tick",
+        "labels": [
+          "572752 behaviour_metric_delta flare_aura_held"
+        ]
+      },
+      {
+        "claim": "for $d: lasts less than 10.85 s after the last tick",
+        "labels": [
+          "572752 behaviour_metric_delta flare_aura_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 572885,
@@ -2325,19 +2398,54 @@
   {
     "spell": 704562,
     "clause": "Fulfilling a Vow now increases your block chance by $680672s1% for $680672d,",
-    "labels": [
-      "704562 effect_value 680672e0 #0",
-      "704562 spell_duration 680672 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fulfilling a Vow now increases your block chance by $680672s1%",
+        "labels": [
+          "704562 behaviour_metric_delta block_one"
+        ]
+      },
+      {
+        "claim": "for $680672d: lasts more than 14.6 s",
+        "labels": [
+          "704562 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "for $680672d: lasts less than 16.4 s",
+        "labels": [
+          "704562 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704562,
     "clause": "stacking $680672u times.",
-    "labels": [
-      "704562 max_stacks 680672 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "stacking",
+        "labels": [
+          "704562 behaviour_metric_delta stack_one",
+          "704562 behaviour_metric_delta block_cap"
+        ]
+      },
+      {
+        "claim": "$680672u times: the cap of 5",
+        "labels": [
+          "704562 behaviour_metric_delta stack_cap"
+        ]
+      },
+      {
+        "claim": "control: a fulfilled Vow without 704562 gives no stack",
+        "labels": [
+          "704562 behaviour_metric_delta control_stacks",
+          "704562 behaviour_metric_delta control_fulfilled"
+        ]
+      }
+    ]
   },
   {
     "spell": 704563,
@@ -2548,10 +2656,21 @@
   {
     "spell": 704916,
     "clause": "Increases your Strength and Intellect by $s1%.",
-    "labels": [
-      "704916 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength",
+        "labels": [
+          "704916 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and Intellect by $s1%",
+        "labels": [
+          "704916 behaviour_metric_delta intellect"
+        ]
+      }
+    ]
   },
   {
     "spell": 704920,
@@ -2574,19 +2693,78 @@
   {
     "spell": 704928,
     "clause": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
-    "labels": [
-      "704928 effect_value 704926e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2} mana",
+        "labels": [
+          "704928 behaviour_metric_delta mana_flat"
+        ]
+      },
+      {
+        "claim": "$SP*.15 spell power term",
+        "labels": [
+          "704928 behaviour_metric_delta mana_sp"
+        ]
+      },
+      {
+        "claim": "Critical strikes now bless you: a non-critical hit does not",
+        "labels": [
+          "704928 behaviour_metric_delta no_crit_mana",
+          "704928 behaviour_metric_delta no_crit_aura",
+          "704928 behaviour_metric_delta no_crit_hit"
+        ]
+      }
+    ]
   },
   {
     "spell": 704928,
     "clause": "and increasing all of your primary stats by $704926s1% for $704926d.",
-    "labels": [
-      "704928 effect_value 704926e0 #1",
-      "704928 spell_duration 704926 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Strength by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Agility by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta agility"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Stamina by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Intellect by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta intellect"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Spirit by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta spirit"
+        ]
+      },
+      {
+        "claim": "for $704926d: lasts more than 4.6 s",
+        "labels": [
+          "704928 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "for $704926d: lasts less than 5.3 s",
+        "labels": [
+          "704928 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704929,
@@ -2723,18 +2901,29 @@
   {
     "spell": 704942,
     "clause": "Increases your Strength and maximum mana by $s1%",
-    "labels": [
-      "704942 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength",
+        "labels": [
+          "704942 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and maximum mana by $s1%",
+        "labels": [
+          "704942 behaviour_metric_delta max_mana"
+        ]
+      }
+    ]
   },
   {
     "spell": 704942,
     "clause": "and your expertise by $s2.",
+    "kind": "claim",
     "labels": [
-      "704942 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "704942 behaviour_metric_delta expertise"
+    ]
   },
   {
     "spell": 704945,
@@ -3747,10 +3936,46 @@
   {
     "spell": 805628,
     "clause": "Increases the effectiveness of Gavels and Horusath Blast and reduces their mana cost by $s2%.",
-    "labels": [
-      "805628 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of Gavels (Gavel of Light)",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel_light"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Gavels (Gavel of Grace)",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel_grace"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Gavels (Gavel of Wrath)",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Horusath Blast",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_horusath"
+        ]
+      },
+      {
+        "claim": "reduces the mana cost of Gavels by $s2% (Gavel of Light and Gavel of Wrath; Gavel of Grace has no mana cost)",
+        "labels": [
+          "805628 behaviour_metric_delta cost_gavel_light",
+          "805628 behaviour_metric_delta cost_gavel"
+        ]
+      },
+      {
+        "claim": "reduces the mana cost of Horusath Blast by $s2%",
+        "labels": [
+          "805628 behaviour_metric_delta cost_horusath"
+        ]
+      }
+    ]
   },
   {
     "spell": 807973,
