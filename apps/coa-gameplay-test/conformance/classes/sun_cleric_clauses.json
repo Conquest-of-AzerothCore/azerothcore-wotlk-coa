@@ -1232,7 +1232,7 @@
         ]
       }
     ],
-    "reason": "Base roll 669..748 measured 676 and 691 at 0 spell power (ok). The spell power term is an alert: 1.0 x 20000 measured against 0.765222 x 20000, so the coefficient part is not conformant; fix note fix-note-554406.md (row { 554406, 0, 1.0 } in AscensionSunClericData.h:81). Control = the 0 spell power arm of the same pair. Reference search 2026-11-22: coa-history spell 554406: 74 SPELL_DAMAGE events in 1 log (Dawnsear 1385..7550, mean 3551 on crits, a different spell power); git log origin/main --grep 554406: #13027 (Dawn charge), #5345, #4516, none about the coefficient; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: rank 1 (500146) \"88 + 100% fire SP\" and rank 2 (502366) \"114+0+FireP*1\" against the installed DBC $spfi*0.765222 (500146 to 554406); the snapshot matches the server's 1.0, the installed DBC tooltip governs, and the case is with the mentor (G-37 criterion 1 in doubt); no server change. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Base roll 669..748 measured 676 and 691 at 0 spell power (ok). Before the fix the spell power term read 1.0 x 20000 (20672 and 20745 against [15973, 16053]; fix note fix-note-554406.md, row { 554406, 0, 1.0 } in AscensionSunClericData.h:81). Owner ruling O-15 (2026-11-22, Sun Cleric ADR 0026) set the eight Dawnsear rows to 0.765222: damage_sp 15976 and 15986, damage_base 683 and 718 (Pair 20261122-122552 / 20261122-122627, build 52430b34db93, server commit dcab16a08d7a, no flip). Control = the 0 spell power arm of the same pair. Reference search 2026-11-22: coa-history spell 554406: 74 SPELL_DAMAGE events in 1 log (Dawnsear 1385..7550, mean 3551 on crits, a different spell power); git log origin/main --grep 554406: #13027 (Dawn charge), #5345, #4516, none about the coefficient; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: rank 1 (500146) \"88 + 100% fire SP\" and rank 2 (502366) \"114+0+FireP*1\" against the installed DBC $spfi*0.765222 (500146 to 554406); the snapshot matches the server's 1.0, the installed DBC tooltip governs, and O-15 settled it for the tooltip. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 503624,
@@ -1391,9 +1391,10 @@
     "spell": 504070,
     "clause": "Increases the spell damage bonus of Dawnsear by $s1%",
     "kind": "claim",
-    "reason": "Counted pair 20261120-203153 / 20261120-203227, build 8f46b717, no flip; control arm = Grace not learned. Reference search: server DBC (Dawnsear 554406 Description coefficient 0.765222; measured level matches either 0.765222 or the server table's 1.0 inside the band); nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
+    "reason": "Counted pair 20261120-203153 / 20261120-203227, build 8f46b717, no flip; control arm = Grace not learned. Reference search: server DBC (Dawnsear 554406 Description coefficient 0.765222; measured level matches either 0.765222 or the server table's 1.0 inside the band); nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip. dawnsear_damage_sp: Dawnsear at 20000 spell power with Grace reads 19070 and 19099 against [19034, 19114] (20% of the 0.765222 term, O-15, Sun Cleric ADR 0026); control = 554406 damage_sp at the same spell power without Grace; hit_ratio dawnsear 1.1829 and 1.1827 against 1.1831 (Pair 20261122-122552 / 20261122-122627, build 52430b34db93, server commit dcab16a08d7a, no flip).",
     "labels": [
-      "504070 behaviour_hit_ratio dawnsear"
+      "504070 behaviour_hit_ratio dawnsear",
+      "504070 behaviour_metric_delta dawnsear_damage_sp"
     ]
   },
   {
