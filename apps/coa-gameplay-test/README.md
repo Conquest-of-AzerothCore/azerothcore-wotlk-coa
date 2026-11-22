@@ -810,6 +810,8 @@ They exclude zero damage, melee swing packets, and healing, and do not test netw
 `spell_log_count`, `spell_absorb_total` and `spell_resist_total` read the same native direct spell damage logs,
 including a hit that an absorb took whole: they count the logs of `spell`, or sum the absorbed or the resisted amount
 each log reports. They take the `caster`, `target` and `critical` filters; periodic logs are not read.
+`spell_damage_with_resist_total` reads the same logs with the same filters and sums each log's landed damage plus its
+resisted amount, so a partial resist does not lower it; absorbed damage stays excluded.
 `spell_resist_chance` reads back, in percentage points, the average resist the player's spells of `school` (1..6) meet
 on `target`: `Unit::GetEffectiveResistChance` with the player as owner, after its target resistance and spell
 penetration modifiers. It applies no damage.
