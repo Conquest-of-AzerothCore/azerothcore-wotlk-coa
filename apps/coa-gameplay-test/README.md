@@ -1231,6 +1231,8 @@ selection holds it, otherwise 0.
 `lfg_need_allowed` takes a player `actor` and an `item` entry and returns 1 when the native Dungeon Finder
 loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
 group or its dungeon every item returns 1.
+`item_usable` takes a player `actor` and an `item` entry and returns 1 when the native `Player::CanUseItem` check
+on the item template (class, race, level, skill, spell and reputation requirements) accepts the actor, otherwise 0.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
 `arena_points` takes a player `actor` and returns the arena points the player holds.
 `battleground_status` takes a player `actor` and returns the native status of the player's battleground
