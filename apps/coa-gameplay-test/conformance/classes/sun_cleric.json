@@ -30160,7 +30160,7 @@
       "spell": 704920,
       "name": "Cultivate Divinity (the next Radiant Cascade after an effective Illumination heal)",
       "kind": "aura_fed_effect",
-      "variant": "heal",
+      "variant": "heal_cascade",
       "label_suffix": "fed_heal_cascade",
       "quote": "to increase the healing of your next Radiant Cascade by $300354s1%.",
       "feed_spell": 500143,

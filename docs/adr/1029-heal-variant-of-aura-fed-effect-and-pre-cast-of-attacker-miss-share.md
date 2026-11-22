@@ -37,5 +37,5 @@ Python only, opt-in, no harness change:
   after).
 - Seeded tests in `kinds/test_aura_fed_effect.py` (ratio, consumed twice, missing aura, step shape) and
   `kinds/test_attacker_miss_share.py` (sequence order, short settle and cycle refused).
-- Sun Cleric 704920 `fed_heal_illumination` and `fed_heal_cascade`; 804630 `herald_miss`.
+- Sun Cleric 704920 `fed_heal_illumination` (variant `heal`) and `fed_heal_cascade`; 804630 `herald_miss`.
 - The heal band is the dice spread, as for the damage variant: it separates a 20% bonus from none, not from 10%.

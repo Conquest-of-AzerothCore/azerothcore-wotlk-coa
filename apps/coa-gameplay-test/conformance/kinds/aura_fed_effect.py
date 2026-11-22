@@ -40,6 +40,10 @@ class AuraFedSpec:
     label_suffix: str
     chance_spell: int = 0
 
+    @property
+    def family(self) -> str:
+        return 'heal' if self.variant.startswith('heal') else self.variant
+
 
 def aura_fed_spec(entry: dict) -> AuraFedSpec:
     spec = AuraFedSpec(int(entry['spell']), entry['name'], entry['quote'], entry['variant'],
@@ -49,7 +53,7 @@ def aura_fed_spec(entry: dict) -> AuraFedSpec:
                        tuple(int(spell) for spell in entry.get('caster_auras', ())),
                        tuple(sorted((name, int(value)) for name, value in entry.get('fixture', {}).items())),
                        entry.get('label_suffix', KIND), int(entry.get('chance_spell', 0)))
-    if spec.variant not in VARIANTS or not 0 < spec.residual_target < 1 or spec.trials < 1:
+    if spec.family not in VARIANTS or not 0 < spec.residual_target < 1 or spec.trials < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a variant of {VARIANTS}, a residual_target in (0, 1) and at '
                          f'least one trial')
     if spec.variant == 'instant' and (spec.trials != 1 or spec.expected != 0):
@@ -76,7 +80,7 @@ def feed_casts(records: Records, spec: AuraFedSpec) -> tuple[int, float]:
     chance = records.field('Spell', spec.chance_spell or spec.spell, 'ProcChance') / 100
     if not 0 < chance < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a proc chance between 0 and 100%')
-    miss = (1 - chance) ** feed_ticks(records, spec.feed_spell, spec.variant)
+    miss = (1 - chance) ** feed_ticks(records, spec.feed_spell, spec.family)
     per_feed = spec.residual_target / (PAIR_RUNS * spec.trials)
     return math.ceil(math.log(per_feed) / math.log(miss)), miss
 
@@ -85,7 +89,7 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.expected)
     max_casts, miss = feed_casts(records, spec)
-    channel_ms = (facts_of(records, spec.feed_spell).cast_time_ms if spec.variant == 'heal'
+    channel_ms = (facts_of(records, spec.feed_spell).cast_time_ms if spec.family == 'heal'
                   else int(records.duration_ms(spec.feed_spell)))
     if spec.every_ms <= max(channel_ms, GCD_WAIT_MS):
         raise ValueError(f'{spec.spell} {KIND} every_ms {spec.every_ms} must exceed the feed duration {channel_ms} ms '
@@ -94,7 +98,7 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
     effect = facts_of(records, spec.effect_spell)
     speed = records.field('Spell', spec.effect_spell, 'Speed')
     travel_ms = math.ceil(distance / speed * 1000) if speed else 0
-    heal = spec.variant == 'heal'
+    heal = spec.family == 'heal'
     target = ALLY if heal else dummy_id(0)
 
     def effect_cast() -> list[dict]:
@@ -185,7 +189,7 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
         'contract': (f'{spec.spell} is learned. Control trials cancel {spec.aura} and cast {spec.effect_spell}; '
                      f'treatment trials cast {spec.feed_spell} every {spec.every_ms} ms (cast_until_aura, at most '
                      f'{max_casts} casts: miss chance per cast {miss:.4f} from ProcChance and '
-                     f'{feed_ticks(records, spec.feed_spell, spec.variant)} ticks, residual target {spec.residual_target:g} per '
+                     f'{feed_ticks(records, spec.feed_spell, spec.family)} ticks, residual target {spec.residual_target:g} per '
                      f'pair) until {spec.aura} is on the caster, then cast {spec.effect_spell}; the aura is never '
                      f'set by the harness. Each trial reads {spec.aura} right before the judged cast; a trial whose '
                      f'read disagrees with its arm makes the run unmeasured. {expected_text}.'),
@@ -193,10 +197,10 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
         + (ally_players(class_file, {ALLY}) if heal else []),
         'creatures': [dummy_fixture(0, class_file, distance)],
         'steps': steps}
-    model = {'kind': KIND, 'variant': spec.variant, 'metric': 'casting' if spec.variant == 'instant' else
+    model = {'kind': KIND, 'variant': spec.family, 'metric': 'casting' if spec.variant == 'instant' else
              'spell_heal_total' if heal else 'spell_damage_total', 'quote': entry.quote, 'expected': spec.expected,
              'reads': reads}
-    if spec.variant in ('damage', 'heal'):
+    if spec.family in ('damage', 'heal'):
         model['dice'] = float(records.field('Spell', spec.effect_spell, 'EffectDieSides[0]'))
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.effect_spell, None,
                               f'{spec.expected:g}', prose_rule(entry.quote, spec.spell), model)
