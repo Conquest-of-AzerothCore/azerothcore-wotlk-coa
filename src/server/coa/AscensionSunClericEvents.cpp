@@ -317,7 +317,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 806058: ResetJusticeAfterCast(player); break;
             case 804629: Cast(player,player,807299); break;
             case 707077: Cast(player,target,804405); break;
-            case 802935: Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),Amount(504619))); break;
+            case 802935: Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),Amount(504619)),504619); break;
             case 680643: Cast(player,target,506824); break;
             case 547214: Cast(player,target,547217); break;
             case 561327:

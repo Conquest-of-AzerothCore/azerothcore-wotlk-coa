@@ -4091,7 +4091,8 @@
       "802935 effect_value #1",
       "802935 effect_value 504619e0 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount not entered: the procs kind divides both hands' events by the main-hand trials (batch 6 chunk a3, tool need 1)."
   },
   {
     "spell": 804032,
