@@ -2028,19 +2028,38 @@
   {
     "spell": 572885,
     "clause": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage for $572886d.",
-    "labels": [
-      "572885 effect_value 572886e0 #0",
-      "572885 spell_duration 572886 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage",
+        "labels": [
+          "572885 effect_value 572886e0 #0",
+          "572885 behaviour_metric_delta debuff_amount"
+        ]
+      },
+      {
+        "claim": "for $572886d.",
+        "labels": [
+          "572885 spell_duration 572886 #1",
+          "572885 behaviour_metric_delta debuff_duration",
+          "572885 behaviour_metric_delta debuff_no_touch"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration claim: Touch of Light 572886 on the dummy is present when read 4650..4950 ms of game time after Blessing of Absolution 804249 (above 4500, -10% excluded) and gone when read 5150..5500 ms after it (below 5500, +10% excluded), both runs; control = the same cast with 300341 learned instead of 572885, no aura (entry debuff_no_touch). The reduced-damage claim stays data only: the aura amount reads -20 (BasePoints -21 + 1), but no existing kind makes an enemy carrying a real 572886 strike and compares its damage (tool need in the report). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Enemies struck by Blessing of Absolution now deal -20% reduced damage for 5 seconds.\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs."
   },
   {
     "spell": 572885,
     "clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "kind": "claim",
+    "reason": "Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "572885 effect_value e1 #2"
-    ],
-    "kind": "claim"
+      "572885 effect_value e1 #2",
+      "572885 behaviour_metric_delta crit_gavel_light",
+      "572885 behaviour_metric_delta crit_gavel_wrath",
+      "572885 behaviour_metric_delta crit_gavel_grace",
+      "572885 behaviour_metric_delta crit_control"
+    ]
   },
   {
     "spell": 582832,
@@ -2973,18 +2992,34 @@
   {
     "spell": 704909,
     "clause": "Increases your damage and healing done by $s1%",
-    "labels": [
-      "704909 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your damage done by $s1%",
+        "labels": [
+          "704909 effect_value e0 #0",
+          "704909 behaviour_hit_ratio holy_damage"
+        ]
+      },
+      {
+        "claim": "Increases your healing done by $s1%",
+        "labels": [
+          "704909 behaviour_hit_ratio healing"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = the same Horusath Blast hits (Holy, 180 trials per arm) and the same grouped-ally Sunlight heals (20 trials per arm) without 704909 learned. Damage +2.993% and +2.992% (99% intervals +2.983 to +3.003 and +2.983 to +3.002), healing +2.985% and +3.005% (+2.93 to +3.04 and +2.947 to +3.064), inside the 2-point band around +3 (1 to 5); the band edge lies far from the readings, residual failure probability far below 0.1% per pair. Reference search 2026-11-22: coa-history spell 704909: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Increases your damage and healing done by 3% and your critical strike chance against Undead by 2%.\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs."
   },
   {
     "spell": 704909,
     "clause": "and your critical strike chance against Undead by $s2%.",
+    "kind": "claim",
+    "reason": "Control arm = the same read before the learn and the same read against a Humanoid (Kobold Vermin 6, gain 0.0, entry crit_humanoid). Horusath Blast 500154 against the Undead Brittlebones Skeleton 201 gains 2.0 critical strike chance (expected 2 = BasePoints 1 + 1, within 0.05, so the interval 1.95 to 2.05 excludes the control gain 0 and the 2-point band holds 0 only through that control), both runs; a deterministic read, no trials. Reference search 2026-11-22: coa-history spell 704909: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Increases your damage and healing done by 3% and your critical strike chance against Undead by 2%.\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "704909 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "704909 effect_value e1 #1",
+      "704909 behaviour_metric_delta crit_undead",
+      "704909 behaviour_metric_delta crit_humanoid"
+    ]
   },
   {
     "spell": 704910,
@@ -3985,10 +4020,12 @@
   {
     "spell": 802935,
     "clause": "Increases your Physical damage dealt by $s1%",
+    "kind": "claim",
+    "reason": "Control arm = the same Glorious Execution main-hand strikes 800691 (Physical) without 802935 learned. +5.520% and +5.464% (99% intervals +4.695 to +6.345 and +4.615 to +6.313, 498 trials per arm, pilot-sized) inside the 2-point band around +6 (4 to 8); the band edge lies about 3 standard errors beyond each interval end, residual failure probability below 0.1% per pair. Reference search 2026-11-22: coa-history spell 802935: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Increases your Physical damage dealt by 6% and auto attacks now have a 10% chance to restore 3% of your maximum mana.\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "802935 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "802935 effect_value e0 #0",
+      "802935 behaviour_hit_ratio physical_damage"
+    ]
   },
   {
     "spell": 802935,
@@ -4175,18 +4212,24 @@
   {
     "spell": 804250,
     "clause": "Redeem a Blessed ally for $680911d,",
+    "kind": "claim",
+    "reason": "680911 on the Blessed ally is present when read 19250..19750 ms of game time after the cast (above 18000, -10% excluded) and gone when read 20250..20750 ms after it (below 22000, +10% excluded), both runs; the same cast at an ally without Bless leaves no aura (control, entry no_bless). The ally is another unit because 680911 cannot be self-cast (AttributesEx 524288, SPELL_ATTR1_EXCLUDE_CASTER). Reference search 2026-11-22: coa-history spell 804250: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Redeem a Blessed ally for 20 seconds, granting 25% increased...\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "804250 spell_duration 680911 #0"
-    ],
-    "kind": "claim"
+      "804250 spell_duration 680911 #0",
+      "804250 behaviour_metric_delta duration",
+      "804250 behaviour_metric_delta no_bless"
+    ]
   },
   {
     "spell": 804250,
     "clause": "granting $680911s1% increased haste",
+    "kind": "claim",
+    "reason": "Control arm = the ally's reading before the cast. Spell cast speed multiplier 1 to 0.8000 (1 / 1.25, within 0.0001) and main-hand swing time ratio 0.8 (after / before, within 0.001, the ally's own weapon speed is not a stated value), both runs. Reference search 2026-11-22: coa-history spell 804250: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Redeem a Blessed ally for 20 seconds, granting 25% increased...\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "804250 effect_value 680911e0 #1"
-    ],
-    "kind": "claim"
+      "804250 effect_value 680911e0 #1",
+      "804250 behaviour_metric_delta spell_haste",
+      "804250 behaviour_metric_delta melee_haste"
+    ]
   },
   {
     "spell": 804250,
@@ -4207,10 +4250,12 @@
   {
     "spell": 804250,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
+    "kind": "claim",
+    "reason": "Control and claim: the cast at an ally without Bless leaves no 680911 (0 in both runs), against 1 with Bless in the duration entry. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "804250 effect_value #4"
-    ],
-    "kind": "claim"
+      "804250 effect_value #4",
+      "804250 behaviour_metric_delta no_bless"
+    ]
   },
   {
     "spell": 804253,
