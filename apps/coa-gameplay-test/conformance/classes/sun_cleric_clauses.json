@@ -917,8 +917,27 @@
   {
     "spell": 301266,
     "clause": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Resets the cooldown of Horusath Blast while in Sunrise",
+        "labels": [
+          "301266 behaviour_metric_delta reset_sunrise"
+        ]
+      },
+      {
+        "claim": "and Rapture while in Sunset",
+        "labels": [
+          "301266 behaviour_metric_delta reset_sunset"
+        ]
+      },
+      {
+        "claim": "and causes their damage dealt to launch a Solar Flare",
+        "labels": [
+          "301266 behaviour_metric_delta flare_damage"
+        ]
+      }
+    ]
   },
   {
     "spell": 301266,
@@ -3261,8 +3280,19 @@
   {
     "spell": 681337,
     "clause": "Doubles the effectiveness of Vow of the Valkyr and Vow of Light.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doubles the effectiveness of Vow of the Valkyr",
+        "labels": [
+          "681337 behaviour_hit_ratio valkyr_damage"
+        ]
+      },
+      {
+        "claim": "Doubles the effectiveness of Vow of Light",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 681436,
