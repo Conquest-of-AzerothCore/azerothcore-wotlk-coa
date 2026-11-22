@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "CoAZoneScaling.h"
 #include "CoADungeonRescale.h"
+#include "CoAProfessionRescale.h"
 #include "CoAZoneScalingPolicy.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -165,11 +166,13 @@ float ZoneScaling::SpellMultiplier(Unit const* attacker)
 
 bool ZoneScaling::OwnsItem(std::uint32_t entry)
 {
-    return Items.count(entry) != 0 || DungeonRescale::OwnsItem(entry);
+    return Items.count(entry) != 0 || DungeonRescale::OwnsItem(entry) || ProfessionRescale::OwnsItem(entry);
 }
 
 std::optional<std::uint32_t> ZoneScaling::ItemPower(std::uint32_t entry, bool pvp)
 {
+    if (auto const power = ProfessionRescale::ItemPower(entry, pvp))
+        return power;
     if (auto const power = DungeonRescale::ItemPower(entry, pvp))
         return power;
     auto const item = Items.find(entry);
@@ -179,6 +182,9 @@ std::optional<std::uint32_t> ZoneScaling::ItemPower(std::uint32_t entry, bool pv
 
 void ZoneScaling::NormalizeProperty(Item* item)
 {
+    ProfessionRescale::NormalizeProperty(item);
+    if (item && ProfessionRescale::OwnsItem(item->GetEntry()))
+        return;
     DungeonRescale::NormalizeProperty(item);
     if (item && DungeonRescale::OwnsItem(item->GetEntry()))
         return;

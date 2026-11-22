@@ -28,6 +28,7 @@ the reference that holds this repository's procedure. Creating or editing this s
 |---|---|
 | Feature, behavior change, refactor | brainstorming → `writing-plans` (plan in `.agents/plans/<task>/`), then the relevant `.agents/docs/` guide |
 | Raid conversion or rescaling | [coa-raid-rescaling](../coa-raid-rescaling/SKILL.md) |
+| Profession conversion or crafted-equipment rescaling | [coa-profession-rescale](../coa-profession-rescale/SKILL.md) |
 | Outdoor zone conversion or rescaling | [coa-zone-rescaling](../coa-zone-rescaling/SKILL.md) |
 | Five-player dungeon conversion by zone | [coa-dungeon-rescale](../coa-dungeon-rescale/SKILL.md) |
 | One reported bug or issue | `.agents/rules/defects.md`, systematic-debugging, then [gameplay-test](references/gameplay-test.md) for its regression |

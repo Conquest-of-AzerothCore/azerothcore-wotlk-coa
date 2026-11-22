@@ -71,6 +71,8 @@ void AddSC_CoADungeonSpellDamage();
 void AddSC_CoAGameObjectScale();
 void AddSC_CoABossLeash();
 void AddSC_CoACreatureScaling();
+void AddSC_CoATbcGemRequirements();
+void AddSC_CoAProfessionRescale();
 void AddSC_CoADungeonBossKit();
 void AddSC_CoAFierceBlow();
 void AddSC_CoADungeonNormal();
@@ -892,6 +894,8 @@ void AddCoAScripts()
     AddSC_CoAGameObjectScale();
     AddSC_CoABossLeash();
     AddSC_CoACreatureScaling();
+    AddSC_CoATbcGemRequirements();
+    AddSC_CoAProfessionRescale();
     AddSC_CoADungeonBossKit();
     AddSC_CoAFierceBlow();
     AddSC_CoADungeonNormal();

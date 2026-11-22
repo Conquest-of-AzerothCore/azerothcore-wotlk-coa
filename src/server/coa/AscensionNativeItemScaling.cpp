@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "CoAProfessionRescale.h"
 #include "AscensionNativeItemScaling.h"
 #include "CoAZoneScaling.h"
 #include "AscensionCompatOpcodes.h"
@@ -261,7 +262,8 @@ ItemTemplate const* InstanceTemplate(Item const* item)
 
 uint32 WornArmor(Player const* player, ItemTemplate const* proto, uint32 armor)
 {
-    if (!armor || !rebornArmor.load(std::memory_order_relaxed) || !ItemLadder::WearsRebornArmor(player->getClass()))
+    if (ProfessionRescale::OwnsItem(proto->ItemId) || !armor ||
+        !rebornArmor.load(std::memory_order_relaxed) || !ItemLadder::WearsRebornArmor(player->getClass()))
         return armor;
 
     {
@@ -446,8 +448,11 @@ void MailListed(Player* player)
 
     for (Mail const* mail : player->GetMails())
         for (MailItemInfo const& info : mail->items)
-            if (Item const* item = player->GetMItem(info.item_guid))
+            if (Item* item = player->GetMItem(info.item_guid))
+            {
+                ProfessionRescale::NormalizeProperty(item);
                 SendLevel(player, item);
+            }
 }
 
 uint32 AuctionLevel(uint32 itemGuidLow, ItemTemplate const* proto)

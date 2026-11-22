@@ -4,6 +4,7 @@
 #include "CoACreatureScalingPolicy.h"
 #include "CoAZoneScaling.h"
 #include "CoADungeonRescale.h"
+#include "CoAProfessionRescale.h"
 #include "CoADungeonNormal.h"
 #include "AllCreatureScript.h"
 #include "AscensionRaidReleasePolicy.h"
@@ -224,6 +225,7 @@ public:
     void OnStartup() override
     {
         OnAfterConfigLoad(false);
+        ProfessionRescale::Load();
         ZoneScaling::Load();
         DungeonRescale::Load();
         FlexHealthEntries.clear();
