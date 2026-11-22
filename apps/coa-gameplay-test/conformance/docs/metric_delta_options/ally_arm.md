@@ -10,8 +10,8 @@
   reading only), where a party-scoped spell (`TARGET_CHECK_PARTY`, `IsInPartyWith`, `GetPartyMembers`) reads 0.
   Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
   that adds another player, such as an enemy player, is refused at validation.
-- `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target` is
-  `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that makes the spell reach raid
+- `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target`, or the
+  trigger's cast `target`, is `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that makes the spell reach raid
   subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked by `TARGET_CHECK_ALLY`),
   never a run's reading. The contract states it. On each use, the reviewer opens the cited lines and checks that the
   spell's whole target selection (DBC implicit targets and every script filter) reaches the raid, not only the party
