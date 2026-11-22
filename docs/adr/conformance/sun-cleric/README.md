@@ -4,7 +4,7 @@ Class 27. Numbered inside this folder (ADR 0583).
 
 | ADR | Title |
 |---|---|
-| [0001](0001-reference-weapon-sets-per-specialization.md) | Reference weapon sets per specialization |
+| [0001](0001-reference-weapon-sets-per-specialization.md) | Reference weapon sets per specialization (superseded by 0025 for the sets) |
 | [0002](0002-bless-restores-five-percent-of-maximum-mana.md) | Bless restores 5% of maximum mana per tick |
 | [0003](0003-rapture-spell-power-coefficient-from-tooltip.md) | Rapture adds 1.03734 times Fire spell power |
 | [0004](0004-solemn-priest-adds-its-own-share-to-the-gavel-heal.md) | Solemn Priest adds its own share to the Gavel of Light heal |
@@ -28,3 +28,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0022](0022-glaring-rays-haste-stacks-as-two-multipliers.md) | Glaring Rays haste stacks as two multipliers |
 | [0023](0023-a-triggered-strike-takes-its-cast-spells-weapon-set.md) | A triggered strike takes its cast spell's weapon set |
 | [0024](0024-valiance-first-auto-attack-is-the-dbc-extra-swing.md) | Valiance's first auto attack on a target is the DBC extra attack, gated by its debuff |
+| [0025](0025-mace-and-shield-replace-the-sword-and-staff-weapon-sets.md) | Mace and shield replace the sword and staff reference weapon sets (supersedes 0001 for the sets) |

@@ -35,6 +35,15 @@ def dual_wielder(off_hand=None):
     return {**class_file, 'weapon_sets': {'Pair': hands}, 'default_weapon_set': 'Pair'}
 
 
+def two_sets(mapped: bool):
+    class_file = dual_wielder()
+    slow = {'main_hand': {**VALKYR_HAND, 'slot': 15}, 'off_hand': {**VALKYR_HAND, 'slot': 16}, 'ranged': None}
+    fast = {'main_hand': {**VALKYR_HAND, 'item': 2524, 'speed_ms': 2500, 'slot': 15}, 'off_hand': SHIELD,
+            'ranged': None}
+    return {**class_file, 'weapon_sets': {'Fast': fast, 'Slow': slow}, 'default_weapon_set': 'Fast',
+            'spell_weapon_sets': {'806699': 'Slow'} if mapped else {}}
+
+
 def phase_of(label: str) -> str:
     return 'control' if ' control ' in label else 'treatment'
 
@@ -128,6 +137,17 @@ class SwingResetRateTests(unittest.TestCase):
         self.assertEqual(expectation.model['swing_bound'], 5 * 2 * (3400000 // 2800))
         _, [single] = self.built()
         self.assertEqual(single.model['swing_bound'], PARTS * (3400000 // 2500))
+
+    def test_an_entry_is_sized_and_armed_on_the_weapon_set_of_its_spell(self):
+        scenario, [mapped] = self.built({**ENTRY, 'parts': 5}, two_sets(True))
+        self.assertEqual(mapped.model['swing_bound'], 5 * 2 * (3400000 // 2800))
+        self.assertIn('speeds [2800, 2800]', scenario['contract'])
+        equips = [step['item'] for step in scenario['steps'] if step['action'] == 'equip']
+        self.assertEqual(equips, [2529, 2529])
+        scenario, [default] = self.built(class_file=two_sets(False))
+        self.assertEqual(default.model['swing_bound'], PARTS * (3400000 // 2500))
+        self.assertIn('speeds [2500]', scenario['contract'])
+        self.assertEqual([step['item'] for step in scenario['steps'] if step['action'] == 'equip'], [2524, 2129])
 
     def test_a_chance_of_a_hundred_percent_or_no_attack_time_is_refused(self):
         for change in ({'chance_pct': 100}, {'chance_pct': 0}, {'attack_ms': 0}, {'control_ms': 0}, {'parts': 0}):

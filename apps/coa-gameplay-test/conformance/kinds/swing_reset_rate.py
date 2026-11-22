@@ -7,7 +7,7 @@ from kinds.cooldown_reset_rate import (CLEAR_COOLDOWN_OPCODE, cooldown_reset_rat
                                        minimum_trials)
 from procs import RESIDUAL_TARGET
 from profile import (CASTER, DBC_DIR, EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND, base_steps, equipped_weapons,
-                     measurement, player_fixture, with_weapon_set)
+                     for_entry, measurement, player_fixture)
 from tooltip import Records
 from values import Expectation, TARGET, dataset
 
@@ -46,9 +46,9 @@ def swing_reset_rate_spec(entry: dict) -> SwingResetRateSpec:
     return spec
 
 
-def melee_speeds(class_file: dict) -> list[int]:
+def melee_speeds(class_file: dict, spell_id: int | None = None) -> list[int]:
     if 'weapon_sets' in class_file and 'weapon_set' not in class_file:
-        class_file = with_weapon_set(class_file, class_file['default_weapon_set'], {})
+        class_file = for_entry(class_file, spell_id)
     return [int(weapon['speed_ms']) for weapon, slot in equipped_weapons(class_file)
             if slot in MELEE_SLOTS and weapon.get('speed_ms', 0) > 0]
 
@@ -62,9 +62,11 @@ def reset_mark(spec: SwingResetRateSpec, mark: str) -> str:
 
 
 def swing_reset_rate_scenario(class_file: dict, spec: SwingResetRateSpec) -> tuple[dict, list[Expectation]]:
+    if 'weapon_sets' in class_file and 'weapon_set' not in class_file:
+        class_file = for_entry(class_file, spec.spell)
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.chance_pct)
-    speeds = melee_speeds(class_file)
+    speeds = melee_speeds(class_file, spec.spell)
     if not speeds:
         raise ValueError(f'{spec.spell} {KIND} needs a melee weapon with a swing speed')
     needed = minimum_trials(spec.chance_pct, spec.residual)

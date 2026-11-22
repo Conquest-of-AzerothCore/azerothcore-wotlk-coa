@@ -1,6 +1,6 @@
 # 0001. Reference weapon sets per specialization
 
-- Status: accepted
+- Status: superseded by [0025](0025-mace-and-shield-replace-the-sword-and-staff-weapon-sets.md) for the weapon table, the default-set rule and the shield consequence
 - Date: 2026-11-20
 
 ## Context
