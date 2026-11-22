@@ -1790,7 +1790,7 @@ def with_game_time(steps: list[dict], spec: MetricDeltaSpec, after_label: str, e
     return stamped
 
 
-PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
+PHASE_AURA_UNITS = frozenset({CASTER, TARGET, STRIKER})
 
 
 def phase_aura(raw) -> tuple[int, int, str, str]:
@@ -1862,6 +1862,11 @@ def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
 
 
 def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict, list[Expectation]]:
+    striker_auras = [aura[0] for aura in (*spec.phase_auras, *spec.after_auras,
+                                          *(dict(spec.options).get('before_auras') or ())) if STRIKER in aura[2:]]
+    if striker_auras and spec.strike is None:
+        raise ValueError(f'{spec.spell} sets auras {striker_auras} on or by the striker without a strike, so there '
+                         f'is no striker in its scenario')
     if spec.setup_only_after and not spec.setup_casts:
         raise ValueError(f'{spec.spell} sets setup_only_after without a setup_casts to withhold then apply')
     if (spec.expiry_wait_ms is None) != (spec.after_expiry_expected is None):
