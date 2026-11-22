@@ -130,7 +130,8 @@
       {
         "claim": "within $704911a1 yds",
         "labels": [
-          "92136 effect_radius 704911e0 #1"
+          "92136 effect_radius 704911e0 #1",
+          "92136 behaviour_metric_delta radius_edge"
         ]
       },
       {
@@ -140,7 +141,8 @@
           "92136 behaviour_metric_delta cap_caster_low"
         ]
       }
-    ]
+    ],
+    "reason": "Radius part: allies at 42.5 yd healed and at 43.5 yd not, the engine edge 40 + 1.5 + 1.5 (combat reach terms cited from Player.h:1110, not read; first run with 39/41 yd healed the 41 yd ally, the lead that showed the reach term). Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. Reference search 2026-11-22: coa-history spell 92136 (a passive, no events) and merged PRs give nothing beyond the tooltip and the DBC; nothing found. Open: the radius claim is not proven. 92136 effect_radius 704911e0 #1 has no verdict on build bb13592025dc (it resolves at the next pair holding it), and the engine edge rests on the unread combat reach terms (guide section 5 asks for a read of both reaches or a stock area control; the combat_reach metric is not accepted by ally_arm: design note to the controller)."
   },
   {
     "spell": 92137,
@@ -295,7 +297,7 @@
       "300324 behaviour_metric_delta dawn_casts"
     ],
     "kind": "claim",
-    "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 13 against 10 + 3 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 2 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 13 against 10 + 3 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 2 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Open: the exact count 13 = 10 + 3 is not proven. In pair 20261122-155900 / 20261122-155954 (build bb13592025dc) a 13-cast read still found Dawn 807440 present after the 13th cast (expected 0, alert in both runs), so the entries consume_12 and consume_13 are removed (archived in .agents/plans/sun-cleric-b11d1-fix/removed-entries.json) and unlinked; dawn_casts (13 charges read after the cast) is a charge-count readback. The three attempts (Illumination route; Gavels with a Gavel trigger; all Gavels as setup casts with a Holy Form trigger) are one design (aura read after N real casts), so no status 3. Lead: Gavel of Wrath 800617 has ManaCost 3 and ManaCostPercentage 10 (Spell.dbc; SpellInfo.cpp:3185-3194 adds 10% of base mana), so 13 Gavels plus Holy Form 805301 (ManaCostPercentage 40) may exceed what the setup refill covers; Dawn charge refresh paths that add casts: ActivateDawn sets charges to max (AscensionSunCleric.cpp:263-268), a reapply resets them to CalcMaxCharges (AscensionSunClericAuras.cpp:97-98), 680630 resets charges and duration (AscensionSunClericAbilities.cpp:526-531). A per-cast count (charges read after each Gavel) would separate 14 charges from an uncounted cast."
   },
   {
     "spell": 300325,
@@ -3497,9 +3499,13 @@
     "spell": 681252,
     "clause": "Direct Physical damage dealt now reduces the cooldown of Champion of the Sun by $/1000;681263s1 sec.",
     "labels": [
-      "681252 effect_value 681263e0 #0"
+      "681252 effect_value 681263e0 #0",
+      "681252 cost_gate 800612 cooldown_cut without",
+      "681252 cost_gate 800612 cooldown_cut with",
+      "681252 cost_gate 800612 cooldown_cut beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cost-gate arms: without 681252 the cooldown of Champion of the Sun runs on (attempt at 119080 ms refused), with it the attempt goes through, the 118920 ms attempt is refused: cut 1000 ms, excludes 900 and 1100. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. Reference search 2026-11-22: coa-history and merged PRs give nothing beyond the tooltip and the DBC for the cut; nothing found. Open: the data label 681252 effect_value 681263e0 #0 has no verdict on build bb13592025dc, so the row closes at the next pair that holds all its labels on one build. The qualifier Direct Physical has no contrast arm (a non-Physical or periodic hit is not run); one direct Physical Gavel is proven to cut 1000 ms. Hit landing is by construction (class ratings melee hit 10000, expertise 10000: no miss, dodge or parry)."
   },
   {
     "spell": 681252,
@@ -5063,22 +5069,29 @@
         "claim": "Start anew, reseting the cooldown of Paragon",
         "labels": [
           "800600 behaviour_metric_delta reset_680639",
-          "800600 behaviour_metric_delta reset_680639_control"
+          "800600 behaviour_metric_delta reset_680639_control",
+          "800600 cost_gate 680639 reset_680639_cast without",
+          "800600 cost_gate 680639 reset_680639_cast with"
         ]
       },
       {
         "claim": "Chosen of the Light",
         "labels": [
           "800600 behaviour_metric_delta reset_800622",
-          "800600 behaviour_metric_delta reset_800622_control"
+          "800600 behaviour_metric_delta reset_800622_control",
+          "800600 cost_gate 800622 reset_800622_cast without",
+          "800600 cost_gate 800622 reset_800622_cast with"
         ]
       },
       {
         "claim": "and Judgement Day spells",
-        "labels": []
+        "labels": [
+          "800600 cost_gate 806121 reset_806121 without",
+          "800600 cost_gate 806121 reset_806121 with"
+        ]
       }
     ],
-    "reason": "Open for Judgement Day: the reset_806121 arms and their control are withdrawn (archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json): the control read cooldown 0 against 58400 in all 4 runs of pairs 2 and 4, so the setup cast of 806121 leaves no cooldown (RecoveryTime 60000, Spell.dbc) and the reset arm's 0 proves nothing. One design so far (cast at the caster, then at the dummy are two targets of the same design), so no status 3. Lead: establish that 806121 is cast and on cooldown right after the setup cast (cast-count or cooldown read) before New Day. Paragon and Chosen of the Light are proven by their own labels."
+    "reason": "Second design for Judgement Day: a cost_gate resets arm (primer cast of 806121 with a dummy in its area, New Day cast after it, 806121 attempted again inside its 60000 ms cooldown: refused 67 without, accepted with), replacing the withdrawn cooldown read (b10c4: the primer found no enemy and left no cooldown). Paragon and Chosen of the Light get the same cast-attempt arms beside their cooldown readbacks. Judgement Day: refused without, accepted with, on the cost_gate resets arm. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 800602,
@@ -6615,7 +6628,7 @@
     "spell": 807343,
     "clause": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
     "kind": "claim",
-    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip.",
+    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip. light_held: present at 9500..9800 ms, gone at 10700..11000 ms after the cast. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. The hit delay after the cast (about 250 ms, Speed 20 at 5 yd) is computed, not read; the windows leave about 150 to 200 ms per side.",
     "claims": [
       {
         "claim": "grants you Light of Absolution on Horusath Blast damage",
@@ -6626,7 +6639,8 @@
       {
         "claim": "for $807523d (10 s, remaining duration read)",
         "labels": [
-          "807343 behaviour_metric_delta light_remaining"
+          "807343 behaviour_metric_delta light_remaining",
+          "807343 behaviour_metric_delta light_held"
         ]
       }
     ]
