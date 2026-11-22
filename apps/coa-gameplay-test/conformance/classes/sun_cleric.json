@@ -23572,6 +23572,94 @@
       "cast_power": 1360,
       "ally_distance": 5,
       "expected_source": "Control of the no_stack entry: Tree of Life 34123 alone (aura 118, EffectBasePoints 5 + 1 = +6%) raises the same Sunlight 704911 heal on the grouped ally by 6%, so a no_stack reading of 1.0 shows a cap, not a partner that does not reach the ally."
+    },
+    {
+      "spell": 680648,
+      "kind": "metric_delta",
+      "quote": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d, stacking up to $681254u times.",
+      "gate_spell": 680648,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          800722,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Sacred Vessel (one expended Angelic Presence grants one stack)",
+      "variant": "expend_stack",
+      "label_suffix": "expend_stack",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 681254
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "Angelic Presence 800722 is set on the caster in each phase (precondition fixture, the grant is a proc of 92137, not the subject); Illumination 500143 is cast at the caster and consumes it (AscensionSunClericAbilities.cpp:43 and :88: Finish() calls StackWithoutRefresh(player, 681254) when 680648 is known). Control: the same cast in the phase before 680648 is learned leaves no 681254. 681254 Effect[0] aura 290 MOD_CRIT_PCT and Effect[1] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 0 + 1 = 1 ($681254s1) per stack, StackAmount 10, DurationIndex 18 = 20000 ms."
+    },
+    {
+      "spell": 680648,
+      "kind": "metric_delta",
+      "quote": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d, stacking up to $681254u times.",
+      "gate_spell": 680648,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          800722,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Sacred Vessel (critical strike chance after one expended Angelic Presence)",
+      "variant": "expend_crit",
+      "label_suffix": "expend_crit",
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0.0001,
+      "observe_source": "Angelic Presence 800722 is set on the caster in each phase (precondition fixture, the grant is a proc of 92137, not the subject); Illumination 500143 is cast at the caster and consumes it (AscensionSunClericAbilities.cpp:43 and :88: Finish() calls StackWithoutRefresh(player, 681254) when 680648 is known). Control: the same cast in the phase before 680648 is learned leaves no 681254. 681254 Effect[0] aura 290 MOD_CRIT_PCT and Effect[1] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 0 + 1 = 1 ($681254s1) per stack, StackAmount 10, DurationIndex 18 = 20000 ms. The reading is the caster's spell critical chance (school 1) after the cast: +1 point against the before phase."
     }
   ],
   "player_observations": [],
