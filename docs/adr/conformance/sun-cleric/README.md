@@ -34,3 +34,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0028](0028-lights-of-absolution-restores-on-solar-flare-damage.md) | Lights of Absolution restores on Solar Flare damage, from missing health, once every 0.5 sec (owner ruling O-13) |
 | [0029](0029-gavel-effectiveness-talents-apply-to-the-whole-hit.md) | Gavel effectiveness talents apply their figure to the whole hit (supersedes 0007 and the Gavel figures of 0008) |
 | [0033](0033-solar-concord-resets-only-the-spell-of-the-active-phase.md) | Solar Concord resets Horusath Blast only in Sunrise and Rapture only in Sunset (owner ruling O-26) |
+| [0034](0034-solar-champion-threat-reaches-the-triggered-damage-spells.md) | Solar Champion's threat reduction reaches the damage spells of Radiant Flame and Sun Down (mentor D-185) |

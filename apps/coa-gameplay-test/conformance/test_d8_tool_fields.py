@@ -135,10 +135,10 @@ class ThreatSlopeFieldTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
-    def test_the_sun_down_flat_is_the_two_spell_levels(self):
+    def test_the_sun_down_flat_is_the_three_spell_levels(self):
         for variant, expected in (('threat_slope_sundown', 0.8), ('threat_slope_sundown_control', 1.0)):
             _, (expectation,) = behaviour_scenario(CLASS_FILE, entry_of(504734, variant))
-            self.assertEqual((expectation.model['flat'], expectation.model['expected']), (119.0, expected))
+            self.assertEqual((expectation.model['flat'], expectation.model['expected']), (178.0, expected))
 
 
 if __name__ == '__main__':

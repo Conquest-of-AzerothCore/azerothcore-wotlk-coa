@@ -282,6 +282,8 @@ void ApplyContracts(SpellInfo* info)
                 info->DurationEntry = sSpellDurationStore.LookupEntry(SunDownDuration);
             }
         }
+    if (id == 504734)
+        info->Effects[EFFECT_1].SpellClassMask |= flag96(0, 0, 0x8 | 0x40);
     info->_InitializeExplicitTargetMask();
 }
 }

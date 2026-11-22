@@ -831,7 +831,7 @@ Opt-in fields (ADR 1034): `flat` adds a stated flat part (the SpellLevel initial
 `learn` learns spells after `hit_spell` (the talent), `label_suffix` keeps a talent entry and its control apart,
 `settle_ms` lengthens the read wait for a delayed hit, and `unlanded` (needs `settle_ms`) reads
 `spell_damage_count` of each named spell on the dummy after the threat read; a count above 0 makes the trial
-`unmeasured`. Sun Down 572752 (flat 119, `settle_ms` 2500, `unlanded` [807175]) reads after its 572753 hit and
+`unmeasured`. Sun Down 572752 (flat 178, `settle_ms` 2500, `unlanded` [807175]) reads after its 572753 hit and
 before the first Solar Flare tick; its control without the talent must read 1.0.
 
 ### Event-delay scenarios (`behaviour_event_delay`, `kind: "event_delay"`)
