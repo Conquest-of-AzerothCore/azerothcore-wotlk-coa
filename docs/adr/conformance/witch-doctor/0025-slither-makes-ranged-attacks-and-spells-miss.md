@@ -1,6 +1,6 @@
 # 0025. Slither makes ranged attacks and spells miss
 
-- Status: proposed (owner question); engine file `Unit.cpp`
+- Status: accepted (contributor decision 2026-11-22); engine file `Unit.cpp`, gated on Witch Doctor ids
 - Date: 2026-11-21
 
 ## Context

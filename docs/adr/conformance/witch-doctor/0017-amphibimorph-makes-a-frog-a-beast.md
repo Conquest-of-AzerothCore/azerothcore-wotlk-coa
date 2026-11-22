@@ -1,13 +1,13 @@
 # 0017. Amphibimorph makes a frogged unit a Beast
 
-- Status: proposed (owner question)
+- Status: accepted (contributor decision 2026-11-22); engine file `Unit.cpp`, gated on Witch Doctor ids
 - Date: 2026-11-20
 
 ## Context
 
 Written 2026-11-21, after the fix, as a catch-up for guide section 7.
 
-This change was made without the owner's approval and is put to the owner. Guide section 7 criteria 3 and 4 do not
+The contributor decided this change on 2026-11-22. Guide section 7 criteria 3 and 4 do not
 hold: the cause is the shared `Unit::GetCreatureType`, and the change is in `src/server/game/Entities/Unit/Unit.cpp`,
 an `ENGINE_FILES` entry, not in the class's own code.
 
@@ -19,9 +19,8 @@ a frogged Kobold Vermin 6 (Humanoid) in the cycle 9 sweep.
 
 ## Decision
 
-- Proposed: `Unit::GetCreatureType` returns CREATURE_TYPE_BEAST while the unit carries 500952, next to the CoA class
+- `Unit::GetCreatureType` returns CREATURE_TYPE_BEAST while the unit carries 500952, next to the CoA class
   checks already in that function.
-- The owner decides whether this stays there or moves into CoA code.
 
 ## Consequences
 

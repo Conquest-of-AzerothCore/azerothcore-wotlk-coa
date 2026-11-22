@@ -1,6 +1,6 @@
 # 0026. Hir'eek's Jinx lasts eight seconds against players
 
-- Status: proposed (owner question); engine file `SpellMgr.cpp`
+- Status: accepted (contributor decision 2026-11-22); engine file `SpellMgr.cpp`, gated on Witch Doctor ids
 - Date: 2026-11-21
 
 ## Context

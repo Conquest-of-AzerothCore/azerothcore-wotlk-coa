@@ -1,13 +1,13 @@
 # 0009. Tiki Splash joins the target A ally list of dynamic object auras
 
-- Status: proposed (owner question)
+- Status: accepted (contributor decision 2026-11-22); engine file `SpellAuras.cpp`, gated on Witch Doctor ids
 - Date: 2026-11-20
 
 ## Context
 
 Written 2026-11-21, after the fix, as a catch-up for guide section 7.
 
-This change was made without the owner's approval and is put to the owner. Guide section 7 criteria 3 and 4 do not
+The contributor decided this change on 2026-11-22. Guide section 7 criteria 3 and 4 do not
 hold: the cause is in a shared core function, and the change is in `src/server/game/Spells/Auras/SpellAuras.cpp`
 (`DynObjAura::FillTargetMap`), an `ENGINE_FILES` entry, not in the class's own code.
 
@@ -19,9 +19,8 @@ R4-1).
 
 ## Decision
 
-- Proposed: add 500478 to the existing `coaTargetAAlly` list in `DynObjAura::FillTargetMap`, next to the entries
+- Add 500478 to the existing `coaTargetAAlly` list in `DynObjAura::FillTargetMap`, next to the entries
   that already encode the ally selector in TargetA, still scoped to TARGET_UNIT_DEST_AREA_ALLY.
-- The owner decides whether this stays, moves to the spell's data, or is dropped.
 
 ## Consequences
 
