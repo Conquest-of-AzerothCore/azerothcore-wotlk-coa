@@ -4,6 +4,7 @@ from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, SPELL_FAILED_NOT_READY, ally_group_steps, ally_players,
                         behaviour_entry, dummy_fixture, dummy_id, prose_rule, waited_ms)
+from aura_fed_rate import HEAL_RATE, is_rate, rate_scenario, rate_verdict
 from bonus import bonus_of, per_event_sample
 from compare import FLOAT_EPSILON, NO_CAST_FAILURE, Run, Verdict, describe_failures, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
@@ -562,6 +563,8 @@ def cooldown_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    if model['variant'] == HEAL_RATE:
+        return rate_verdict(base, run, model)
     labels = [label for arm in ARMS for trial in model['reads'][arm] for label in trial.values()]
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
@@ -653,6 +656,8 @@ def figure_verdict(base: Verdict, model: dict, hits: dict, next_hits: list[float
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    if is_rate(entry):
+        return rate_scenario(class_file, entry)
     return aura_fed_scenario(class_file, aura_fed_spec(entry))
 
 

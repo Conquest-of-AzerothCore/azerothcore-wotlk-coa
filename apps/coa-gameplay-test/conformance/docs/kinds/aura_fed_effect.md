@@ -53,9 +53,20 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   selection on the aura timing, never on R). A refused feed cast or a primer read not natural within 10% voids the
   run (unmeasured); the control's refusal of R is the judged read. The verdict is stamped `cast_failure`. `trials`
   must keep a run without a selected trial at most `residual_target` per pair (15 at ProcChance 40 and 0.001).
+- `variant: "heal_rate"` or `"heal_rate_<suffix>"` (ADR 1065, opt-in): a proc rate per feed heal, no control arm.
+  `feed_target` is `ally` or `self`; each of `rolls` rolls sets the feed target to 1 health of a 2000000000 maximum,
+  cancels `aura` on the caster, casts `feed_spell` once at the target and, after the cast time + 500 ms, reads `aura`
+  on the caster and `spell_heal_count` of the feed on the target. A heal count not exactly +1 per roll, a last feed
+  cast failure other than 0, or (ally) an effective feed heal on the full-health caster voids the run. The Wilson
+  interval at `residual_z(residual_target)` must lie inside the G-20 band (`procs.rate_band`) around ProcChance of
+  `chance_spell`; wholly outside alerts, straddling is unmeasured with the needed roll count (`residual_sizing`,
+  `min_detectable`). `haste_aura` (opt-in) sets a casting-speed-only aura (`SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK`,
+  no proc, family or class mask, else refused) before the rolls, reads the feed's cast time and casts with
+  `ignore_gcd`; the roll step shrinks to the hasted cast time + 500 ms.
 
 Sun Cleric: Dawn's Arrival 503690 (`cooldown` with `evidence_metric`, label `fed_cooldown`;
 `cooldown_reset_recast`, label `fed_reset`); Spears of Glory 804629 (Radiant Flame 806060 feeding 807299,
 Dawnsear 554406 instant and +25%, the
 +25% sized with `figure_effect` 1, `min_hits` 4, 14 trials and `consumed`); Cultivate
-Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%).
+Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%;
+`heal_rate_*` self and ally rate arms of both tiers, with and without Fast Cast 50336).
