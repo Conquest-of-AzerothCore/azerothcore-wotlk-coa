@@ -9,8 +9,9 @@
     "#13077 reports that it procs off itself. Expected (ruled by the PR author from Ascension experience):",
     "Despoiled Ground's own ticks never create another patch. One patch is cast directly over twelve stationary",
     "enemies with Presence of Y'Shaarj active and no other damage source, so in 11 sec its ticks give about 36",
-    "rolls at 20%, and before the fix a second patch was near certain (0.8^36 is about 0.03%). Exactly one patch",
-    "must remain."
+    "rolls at 20%, and before the fix a second patch was near certain (0.8^36 is about 0.03%). Exactly one",
+    "Despoiled Ground may have been cast (spell_cast_count counts triggered casts too; the dynamic_object metric",
+    "only reports whether one exists)."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -99,8 +100,8 @@
       "metric": "spell_damage_count", "spell": 805180, "periodic": true, "min": 12
     },
     {
-      "action": "assert", "label": "#13077: Despoiled Ground's own ticks never curse more ground", "actor": "cultist",
-      "metric": "dynamic_object", "spell": 805180, "equals": 1
+      "action": "assert", "label": "#13077: Despoiled Ground's own ticks never curse more ground (only the one cast)",
+      "actor": "cultist", "metric": "spell_cast_count", "spell": 805180, "equals": 1
     }
   ]
 }

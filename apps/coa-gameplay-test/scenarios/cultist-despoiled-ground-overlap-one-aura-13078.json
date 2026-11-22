@@ -9,7 +9,9 @@
     "replacement restarted the 3 sec tick. Expected (approach ruled by the PR author): a target in several of the",
     "caster's overlapping patches keeps the application it holds until that patch leaves or ends, so it is",
     "applied once, and its ticks keep coming. No Presence is active, so no other patch can appear. Over 8 sec,",
-    "while both 12 sec patches still overlap, the target must see no new application and at least 2 ticks."
+    "while both 12 sec patches still overlap, the target must see no new application and at least 2 ticks. Both",
+    "patches are counted with spell_cast_count, and the older one (which dynamic_object_duration_ms reads) must",
+    "still be up when the window ends."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -52,8 +54,8 @@
       "spell": 805180, "equals": 0
     },
     {
-      "action": "assert", "label": "SETUP: two overlapping patches", "actor": "cultist", "metric": "dynamic_object",
-      "spell": 805180, "equals": 2, "within_ms": 2000
+      "action": "assert", "label": "SETUP: two patches were created", "actor": "cultist", "metric": "spell_cast_count",
+      "spell": 805180, "equals": 2
     },
     {"action": "wait", "label": "Let both patches refresh their targets", "ms": 1000},
     {"action": "snapshot", "actor": "mob", "metric": "aura_apply_count", "spell": 805180, "save_as": "applications"},
@@ -63,8 +65,8 @@
     },
     {"action": "wait", "label": "Stand in both patches", "ms": 8000},
     {
-      "action": "assert", "label": "SETUP: both patches still overlap", "actor": "cultist", "metric": "dynamic_object",
-      "spell": 805180, "equals": 2
+      "action": "assert", "label": "SETUP: the older patch is still up, so both still overlap", "actor": "cultist",
+      "metric": "dynamic_object_duration_ms", "spell": 805180, "min": 1
     },
     {
       "action": "assert", "label": "#13078: the overlapping patches do not swap the enemy's aura", "actor": "mob",
