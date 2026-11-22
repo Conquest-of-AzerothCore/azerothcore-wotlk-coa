@@ -1,6 +1,8 @@
 # 0008. Fanaticism expectation is the reproduced engine arithmetic
 
 - Status: accepted (mentor D-61, 2026-11-22, on two conditions; both met, accepted for counting by D-68)
+- Superseded by: [0029](0029-gavel-effectiveness-talents-apply-to-the-whole-hit.md) (owner ruling O-18) for the three Gavel figures.
+  This ADR stays as the record of the old behaviour; its Horusath Blast row and its method stand.
 - Date: 2026-11-22
 - Supersedes: the expected figures and the Horusath Blast sentence of [0007](0007-fanaticism-compounds-on-the-gavel-flat-damage.md).
   Its decision (a), accept the stock engine order, stands.

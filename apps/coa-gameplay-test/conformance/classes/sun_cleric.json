@@ -12151,34 +12151,6 @@
       "observe_source": "562316 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -101 (-100%) on the Gavels' class mask (SpellFamilyFlags[1] 32); the script adds it while Paragon and 300347 are both on the caster. Gavel of Wrath 802561 has CategoryRecoveryTime 5000 (category 1207, 'Shares a cooldown with other Gavels'). Paragon is cast in both phases; one Gavel is then cast and its remaining cooldown read 500 ms later: 5000 - 500 = 4500 with Paragon alone (control phase, no passive), 0 with the passive; tolerance 250 ms (5%) excludes a cooldown 10% (500 ms) off on both sides. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
     },
     {
-      "spell": 300347,
-      "name": "Battle Cleric (Gavel effectiveness under Paragon)",
-      "kind": "hit_ratio",
-      "variant": "effectiveness",
-      "label_suffix": "effectiveness",
-      "quote": "causing them to have no cooldown and have $562316s1% increased effectiveness.",
-      "expected": 1.5,
-      "observe_spell": 802561,
-      "control": {
-        "casts": [
-          680639
-        ]
-      },
-      "treatment": {
-        "learn": [
-          300347
-        ],
-        "casts": [
-          680639
-        ]
-      },
-      "critical": false,
-      "trials": 40,
-      "cast_power": 1000,
-      "expected_source": "$562316s1 = 50 (562316 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8, SPELLMOD_ALL_EFFECTS, BasePoints 49, +1 = +50%) on the Gavels' mask: the ratio of Gavel of Wrath damage with the passive to the same cast without it, both arms under a real Paragon cast, is 1.5. The tolerance band is 5% of 50, 2.5 points.",
-      "observe_source": "Gavel of Wrath 802561 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 300347 first so the script's helper 562316 is applied. Control arm: Paragon without the passive. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
-    },
-    {
       "spell": 707081,
       "kind": "metric_delta",
       "gate_spell": 707081,
@@ -12729,156 +12701,6 @@
       "parts": 35,
       "cast_power": 1363,
       "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Horusath Blast 500154: mean non-critical hit 73.8708 without the passive and 88.1542 with it, ratio 1.19336, a bonus of +19.34%. Horusath arithmetic (Holy SCHOOL_DAMAGE): value 72 + int32(5 x 1.06) + irand(1, 12) from the DBC, scaled by the passive as int32(float(value) x 1.2f); no spell power term (the reference character has none) and no attack power term; the dummy resists Holy through the monster linear resistance (CoA.MonsterResistance.Enable 1, PerLevel 1.0, PerPercent 5.0: 12% average, partial resist i/10 with probabilities 20%, 45%, 30%, 5% for i = 0..3, Unit.cpp:2563-2720). Control: passive not learned. Out-of-sample arm: entry effect_horusath_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +19.34%, read +19.53 / +19.18); the Horusath arm is a replication of the same engine path, not an out-of-sample test (no attack power term, no armor, and the resist is the same). Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 3500 trials per arm at 0.76 and 0.76 of the limit and sized 3136 and 3136 trials per arm; the entry now runs 35 parts, 3500 trials per arm, at least 1.1 times the larger sized count (3136). At 3500 trials the half-width is at most 0.760 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.20%, and the limit lies 32% above it, 26 standard deviations, below 1e-9."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Wrath effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel",
-      "label_suffix": "effect_gavel",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.27137,
-      "observe_spell": 800617,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 14,
-      "cast_power": 1363,
-      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Gavel of Wrath 800617: mean non-critical hit 141.4576 without the passive and 179.8455 with it, ratio 1.27137, a bonus of +27.14%. Gavel arithmetic (Physical, Spell::EffectWeaponDmg, SpellEffects.cpp:4668-4756): weapon roll urand(uint32(min), uint32(max)) with item 2529 (two-handed, multiplier 3.3) and attack power 70, rolls 90..119; flat value BasePoints + irand(1, DieSides) from the DBC, scaled by the passive as int32(float(value) x 1.2f); the weapon percent 100 becomes 120 the same way; the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating; dummy armor 528 (dummy_armor entry), tmp = x / (1 + x) with x = 528 / (85 x 60 + 400) and the hit uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). Control: passive not learned. Out-of-sample arm: entry effect_gavel_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +25.37%, read +25.57 / +25.08); Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 800 trials per arm at 0.972 and 0.943 of the limit and sized 1182 and 1113 trials per arm; the entry now runs 14 parts, 1400 trials per arm, at least 1.1 times the larger sized count (1182). At 1400 trials the half-width is at most 0.735 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.89%, and the limit lies 36% above it, 19 standard deviations, below 1e-9."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Light effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_light",
-      "label_suffix": "effect_gavel_light",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.21667,
-      "observe_spell": 800611,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 19,
-      "cast_power": 1363,
-      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Gavel of Light 800611: mean non-critical hit 106.7667 without the passive and 129.9000 with it, ratio 1.21667, a bonus of +21.67%. Gavel arithmetic (Physical, Spell::EffectWeaponDmg, SpellEffects.cpp:4668-4756): weapon roll urand(uint32(min), uint32(max)) with item 2529 (two-handed, multiplier 3.3) and attack power 70, rolls 90..119; flat value BasePoints + irand(1, DieSides) from the DBC, scaled by the passive as int32(float(value) x 1.2f); the weapon percent 100 becomes 120 the same way; the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating; dummy armor 528 (dummy_armor entry), tmp = x / (1 + x) with x = 528 / (85 x 60 + 400) and the hit uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). Control: passive not learned. Out-of-sample arm: entry effect_gavel_light_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +21.11%, read +21.22 / +21.02); Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1200 trials per arm at 0.939 and 0.939 of the limit and sized 1654 and 1655 trials per arm; the entry now runs 19 parts, 1900 trials per arm, at least 1.1 times the larger sized count (1655). At 1900 trials the half-width is at most 0.746 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.62%, and the limit lies 34% above it, 21 standard deviations, below 1e-9."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Grace effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_grace",
-      "label_suffix": "effect_gavel_grace",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.23845,
-      "observe_spell": 800614,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 16,
-      "cast_power": 1363,
-      "expected_source": "Accepted model of ADR sun-cleric 0008 (mentor D-61 and D-68): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% and Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, applied to integer values. Gavel of Grace 800614: mean non-critical hit 118.1583 without the passive and 146.3333 with it, ratio 1.23845, a bonus of +23.85%. Gavel arithmetic (Physical, Spell::EffectWeaponDmg, SpellEffects.cpp:4668-4756): weapon roll urand(uint32(min), uint32(max)) with item 2529 (two-handed, multiplier 3.3) and attack power 70, rolls 90..119; flat value BasePoints + irand(1, DieSides) from the DBC, scaled by the passive as int32(float(value) x 1.2f); the weapon percent 100 becomes 120 the same way; the loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating; dummy armor 528 (dummy_armor entry), tmp = x / (1 + x) with x = 528 / (85 x 60 + 400) and the hit uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). Control: passive not learned. Out-of-sample arm: entry effect_gavel_grace_oos (attack power 280, target creature 603 armor 3750; prediction commit 95f8ff6c99 written before any arm, pair 20261122-024352 / -024635, predicted +22.70%, read +22.71 / +22.85); Not tested: another weapon, another level, spell power. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1000 trials per arm at 0.933 and 0.955 of the limit and sized 1361 and 1426 trials per arm; the entry now runs 16 parts, 1600 trials per arm, at least 1.1 times the larger sized count (1426). At 1600 trials the half-width is at most 0.755 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.77%, and the limit lies 32% above it, 18 standard deviations, below 1e-9."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Wrath effectiveness, out-of-sample: attack power 280, armor 3750)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_oos",
-      "label_suffix": "effect_gavel_oos",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.2537,
-      "observe_spell": 800617,
-      "fixture": {
-        "attack_power": 210
-      },
-      "target_entry": 603,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 14,
-      "cast_power": 1363,
-      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Grace effectiveness, out-of-sample: attack power 280, armor 3750)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_grace_oos",
-      "label_suffix": "effect_gavel_grace_oos",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.227,
-      "observe_spell": 800614,
-      "fixture": {
-        "attack_power": 210
-      },
-      "target_entry": 603,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 16,
-      "cast_power": 1363,
-      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
-    },
-    {
-      "spell": 805628,
-      "name": "Fanaticism (Gavel of Light effectiveness, out-of-sample: attack power 280, armor 3750)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_light_oos",
-      "label_suffix": "effect_gavel_light_oos",
-      "quote": "Increases the effectiveness of",
-      "expected": 1.2111,
-      "observe_spell": 800611,
-      "fixture": {
-        "attack_power": 210
-      },
-      "target_entry": 603,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          805628
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 19,
-      "cast_power": 1363,
-      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
     },
     {
       "spell": 805628,
@@ -21428,78 +21250,6 @@
       "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Resplendence 806159 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 806159 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
     },
     {
-      "spell": 680634,
-      "name": "Glorious Defender (Gavel of Wrath effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel",
-      "label_suffix": "effect_gavel",
-      "quote": "Increases the effectiveness of Gavels by $s1%.",
-      "expected": 1.38626,
-      "observe_spell": 800617,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          680634
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 16,
-      "cast_power": 1363,
-      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677). Weapon: the class file maps 680634 to the weapon set Seraphim (spell_weapon_sets), item 2524 in the main hand (one-handed, damage 34.61 to 55.4, normalized speed 2.4) and a shield 2129 in the off hand (no damage); with attack power 70 the weapon roll is urand(uint32(34.61 + 70 / 14 x 2.4), uint32(55.4 + 70 / 14 x 2.4)) = urand(46, 67) (Unit.cpp:3621; StatSystem.cpp:728, :767). The loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The same enumeration (the b8a script, rewritten as .agents/plans/weapon-sets-fix/scratch/gavel_expect_entry.py with the Wrath flat value 44 + irand(1, 11), the Light flat value 11 + 1 and the Grace flat value 22 + irand(1, 4), each scaled by 1.25f, and the weapon percent 99 + 1) reproduces exactly the means this entry recorded for the previous Seraphim weapon, item 2027 (77.5833 and 110.303, 42.9167 and 56.75, 54.375 and 73.9583). Correction history: the first design of this entry used the Valkyr weapon by mistake; its pair (20261122-072116 / -072234) read the three bonuses outside the wrong expectation and the weapon set explains it. The expectation here is recomputed from the class-file weapon only and is judged in a new pair. Correction (owner ruling O-10): the Seraphim main hand became the Truncheon 2524, so the expectation was recomputed with the same method from its damage range; the earlier 2027 values were the figures of a weapon no scenario equips any more. Gavel of Wrath 800617: mean non-critical hit 97.6736 without the passive and 135.4008 with it, ratio 1.38626, a bonus of +38.63%: the factor compounds on the flat value and on the percent, so the bonus exceeds the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. In the first pair prove's pilot sized 1184 trials per arm and the entry's 16 parts hold 2656 at the trial limit of 166 per part; the judged half-widths were 0.55 point against a limit of about 1.9 to 2.1 points. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.4% or less and the limit lies more than 40 standard deviations above it, below 1e-9.",
-      "observe_source": "Gavel of Wrath 800617 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
-    },
-    {
-      "spell": 680634,
-      "name": "Glorious Defender (Gavel of Light effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_light",
-      "label_suffix": "effect_gavel_light",
-      "quote": "Increases the effectiveness of Gavels by $s1%.",
-      "expected": 1.29726,
-      "observe_spell": 800611,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          680634
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 22,
-      "cast_power": 1363,
-      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677). Weapon: the class file maps 680634 to the weapon set Seraphim (spell_weapon_sets), item 2524 in the main hand (one-handed, damage 34.61 to 55.4, normalized speed 2.4) and a shield 2129 in the off hand (no damage); with attack power 70 the weapon roll is urand(uint32(34.61 + 70 / 14 x 2.4), uint32(55.4 + 70 / 14 x 2.4)) = urand(46, 67) (Unit.cpp:3621; StatSystem.cpp:728, :767). The loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The same enumeration (the b8a script, rewritten as .agents/plans/weapon-sets-fix/scratch/gavel_expect_entry.py with the Wrath flat value 44 + irand(1, 11), the Light flat value 11 + 1 and the Grace flat value 22 + irand(1, 4), each scaled by 1.25f, and the weapon percent 99 + 1) reproduces exactly the means this entry recorded for the previous Seraphim weapon, item 2027 (77.5833 and 110.303, 42.9167 and 56.75, 54.375 and 73.9583). Correction history: the first design of this entry used the Valkyr weapon by mistake; its pair (20261122-072116 / -072234) read the three bonuses outside the wrong expectation and the weapon set explains it. The expectation here is recomputed from the class-file weapon only and is judged in a new pair. Correction (owner ruling O-10): the Seraphim main hand became the Truncheon 2524, so the expectation was recomputed with the same method from its damage range; the earlier 2027 values were the figures of a weapon no scenario equips any more. Gavel of Light 800611: mean non-critical hit 63 without the passive and 81.7273 with it, ratio 1.29726, a bonus of +29.73%: the factor compounds on the flat value and on the percent, so the bonus exceeds the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. In the first pair prove's pilot sized 1786 trials per arm and the entry's 22 parts hold 3652 at the trial limit of 166 per part; the judged half-widths were 0.55 point against a limit of about 1.9 to 2.1 points. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.4% or less and the limit lies more than 40 standard deviations above it, below 1e-9.",
-      "observe_source": "Gavel of Light 800611 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
-    },
-    {
-      "spell": 680634,
-      "name": "Glorious Defender (Gavel of Grace effectiveness)",
-      "kind": "hit_ratio",
-      "variant": "effect_gavel_grace",
-      "label_suffix": "effect_gavel_grace",
-      "quote": "Increases the effectiveness of Gavels by $s1%.",
-      "expected": 1.33176,
-      "observe_spell": 800614,
-      "control": {
-        "auras": []
-      },
-      "treatment": {
-        "learn": [
-          680634
-        ]
-      },
-      "critical": false,
-      "trials": 100,
-      "parts": 18,
-      "cast_power": 1363,
-      "expected_source": "Accepted model of ADR sun-cleric 0008 (stock engine order accepted by ADR 0007 decision (a)): the expectation is the engine arithmetic enumerated over every random roll, float32 where the code uses float, from data and stat reads only, never from a measured bonus. 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1) on EffectSpellClassMask word index 1 = 32, the SpellFamilyFlags[1] of the three Gavels (800611, 800614, 800617). The factor 1.25 is applied to integer values, as for Fanaticism: the flat value BasePoints + irand(1, DieSides) becomes int32(float(value) x 1.25f) and the weapon percent 100 becomes int32(100 x 1.25f) = 125 (SpellInfo.cpp:531, :592; Player.cpp:10622, :10677). Weapon: the class file maps 680634 to the weapon set Seraphim (spell_weapon_sets), item 2524 in the main hand (one-handed, damage 34.61 to 55.4, normalized speed 2.4) and a shield 2129 in the off hand (no damage); with attack power 70 the weapon roll is urand(uint32(34.61 + 70 / 14 x 2.4), uint32(55.4 + 70 / 14 x 2.4)) = urand(46, 67) (Unit.cpp:3621; StatSystem.cpp:728, :767). The loop adds the flat value to the roll before the percent, in DBC order, with ApplyPct truncating (SpellEffects.cpp:4731-4743); dummy armor 528, tmp = x / (1 + x) with x = 528 / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560). The same enumeration (the b8a script, rewritten as .agents/plans/weapon-sets-fix/scratch/gavel_expect_entry.py with the Wrath flat value 44 + irand(1, 11), the Light flat value 11 + 1 and the Grace flat value 22 + irand(1, 4), each scaled by 1.25f, and the weapon percent 99 + 1) reproduces exactly the means this entry recorded for the previous Seraphim weapon, item 2027 (77.5833 and 110.303, 42.9167 and 56.75, 54.375 and 73.9583). Correction history: the first design of this entry used the Valkyr weapon by mistake; its pair (20261122-072116 / -072234) read the three bonuses outside the wrong expectation and the weapon set explains it. The expectation here is recomputed from the class-file weapon only and is judged in a new pair. Correction (owner ruling O-10): the Seraphim main hand became the Truncheon 2524, so the expectation was recomputed with the same method from its damage range; the earlier 2027 values were the figures of a weapon no scenario equips any more. Gavel of Grace 800614: mean non-critical hit 74.3977 without the passive and 99.0795 with it, ratio 1.33176, a bonus of +33.18%: the factor compounds on the flat value and on the percent, so the bonus exceeds the +25% of the tooltip, as ADR 0007 states for Fanaticism. Control: passive not learned. The judged band is the G-19 band, the larger of 5% of the bonus and 2 points; it is not widened. Not tested: another weapon, another level, spell power, another attack power or armor. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. In the first pair prove's pilot sized 1277 trials per arm and the entry's 18 parts hold 2988 at the trial limit of 166 per part; the judged half-widths were 0.55 point against a limit of about 1.9 to 2.1 points. Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.4% or less and the limit lies more than 40 standard deviations above it, below 1e-9.",
-      "observe_source": "Gavel of Grace 800614 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
-    },
-    {
       "spell": 680641,
       "name": "Sun Strider (Illumination heals 15% more with one stack)",
       "kind": "hit_ratio",
@@ -28682,13 +28432,433 @@
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "disable_regeneration": true
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel effectiveness under Paragon)",
+      "kind": "hit_ratio",
+      "variant": "effectiveness",
+      "label_suffix": "effectiveness",
+      "quote": "causing them to have no cooldown and have $562316s1% increased effectiveness.",
+      "expected": 1.4975,
+      "observe_spell": 802561,
+      "control": {
+        "casts": [
+          680639
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300347
+        ],
+        "casts": [
+          680639
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "parts": 13,
+      "cast_power": 1000,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 300347 to the weapon set Blessings, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 300347 Battle Cleric applies its helper 562316 under Paragon: Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 49 + 1 = +50% ($562316s1) on the Gavels' mask, m = 1.5. Both arms cast Paragon 680639 before every observed cast (cooldown reset by the harness), so both run at attack power 86 (Paragon's Strength 48, q-sc-8 analysis), weapon rolls 49..70, dummy armor 528. Gavel of Wrath rank 5 802561, flat 222 + irand(1, 50): mean non-critical hit 280.6082 without the passive and 420.2109 with it, ratio 1.49750 (+49.75%). Before the fix (stock compounding): predicted 2.10060, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +111.96 / +111.20, alert against the stated 1.5. Sizing: the model's per-hit variances give 793 trials per arm at 0.8 of the power limit; the entry pools 13 parts of 80 trials (1040 per arm). ",
+      "observe_source": "Gavel of Wrath 802561 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 300347 first so the script's helper 562316 is applied. Control arm: Paragon without the passive. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Wrath effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel",
+      "label_suffix": "effect_gavel",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.19451,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 14,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 805628 to the weapon set Valkyr, Zweihander 2529 (73.62 to 103.34, normalized speed 3.3). 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% on EffectSpellClassMask word 1 = 96 (Gavels, Horusath Blast); the tooltip prints no effectiveness figure, so +20% is Effect[0] of the DBC, the consistency O-18 states, m = 1.2. Gavel of Wrath 800617, attack power 70, weapon rolls 90..119, flat 44 + irand(1, 11), the dummy (armor 528): mean non-critical hit 141.4576 without the passive and 168.9727 with it, ratio 1.19451 (+19.45%). Before the fix (ADR 0008 engine arithmetic): predicted 1.27137, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +27.37 / +27.17. Sizing: the model's per-hit variances give 1049 trials per arm at 0.8 of the power limit; the entry pools 14 parts of 100 trials (1400 per arm). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4)."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Light effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light",
+      "label_suffix": "effect_gavel_light",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.19263,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 19,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 805628 to the weapon set Valkyr, Zweihander 2529 (73.62 to 103.34, normalized speed 3.3). 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% on EffectSpellClassMask word 1 = 96 (Gavels, Horusath Blast); the tooltip prints no effectiveness figure, so +20% is Effect[0] of the DBC, the consistency O-18 states, m = 1.2. Gavel of Light 800611, attack power 70, weapon rolls 90..119, flat 11 + 1, the dummy (armor 528): mean non-critical hit 106.7667 without the passive and 127.3333 with it, ratio 1.19263 (+19.26%). Before the fix (ADR 0008 engine arithmetic): predicted 1.21667, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +22.17 / +21.91. Sizing: the model's per-hit variances give 1614 trials per arm at 0.8 of the power limit; the entry pools 19 parts of 100 trials (1900 per arm). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4)."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Grace effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace",
+      "label_suffix": "effect_gavel_grace",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.19331,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 805628 to the weapon set Valkyr, Zweihander 2529 (73.62 to 103.34, normalized speed 3.3). 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% on EffectSpellClassMask word 1 = 96 (Gavels, Horusath Blast); the tooltip prints no effectiveness figure, so +20% is Effect[0] of the DBC, the consistency O-18 states, m = 1.2. Gavel of Grace 800614, attack power 70, weapon rolls 90..119, flat 22 + irand(1, 4), the dummy (armor 528): mean non-critical hit 118.1583 without the passive and 141.0000 with it, ratio 1.19331 (+19.33%). Before the fix (ADR 0008 engine arithmetic): predicted 1.23845, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +23.88 / +23.90. Sizing: the model's per-hit variances give 1353 trials per arm at 0.8 of the power limit; the entry pools 16 parts of 100 trials (1600 per arm). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4)."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Wrath effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_oos",
+      "label_suffix": "effect_gavel_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.19532,
+      "observe_spell": 800617,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 14,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 805628 to the weapon set Valkyr, Zweihander 2529 (73.62 to 103.34, normalized speed 3.3). 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% on EffectSpellClassMask word 1 = 96 (Gavels, Horusath Blast); the tooltip prints no effectiveness figure, so +20% is Effect[0] of the DBC, the consistency O-18 states, m = 1.2. Gavel of Wrath 800617, attack power 280, weapon rolls 139..169, flat 44 + irand(1, 11), creature 603 (armor 3750: creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1), attack power 70 + the fixture's 210: mean non-critical hit 121.7918 without the passive and 145.5806 with it, ratio 1.19532 (+19.53%). Before the fix (ADR 0008 engine arithmetic): predicted 1.2537, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +25.27 / +24.93. Sizing: the model's per-hit variances give 643 trials per arm at 0.8 of the power limit; the entry pools 14 parts of 100 trials (1400 per arm). "
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Grace effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace_oos",
+      "label_suffix": "effect_gavel_grace_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.19452,
+      "observe_spell": 800614,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 805628 to the weapon set Valkyr, Zweihander 2529 (73.62 to 103.34, normalized speed 3.3). 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% on EffectSpellClassMask word 1 = 96 (Gavels, Horusath Blast); the tooltip prints no effectiveness figure, so +20% is Effect[0] of the DBC, the consistency O-18 states, m = 1.2. Gavel of Grace 800614, attack power 280, weapon rolls 139..169, flat 22 + irand(1, 4), creature 603 (armor 3750: creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1), attack power 70 + the fixture's 210: mean non-critical hit 106.6290 without the passive and 127.3710 with it, ratio 1.19452 (+19.45%). Before the fix (ADR 0008 engine arithmetic): predicted 1.227, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +22.48 / +22.70. Sizing: the model's per-hit variances give 747 trials per arm at 0.8 of the power limit; the entry pools 16 parts of 100 trials (1600 per arm). "
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Light effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light_oos",
+      "label_suffix": "effect_gavel_light_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.19415,
+      "observe_spell": 800611,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 19,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 805628 to the weapon set Valkyr, Zweihander 2529 (73.62 to 103.34, normalized speed 3.3). 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% on EffectSpellClassMask word 1 = 96 (Gavels, Horusath Blast); the tooltip prints no effectiveness figure, so +20% is Effect[0] of the DBC, the consistency O-18 states, m = 1.2. Gavel of Light 800611, attack power 280, weapon rolls 139..169, flat 11 + 1, creature 603 (armor 3750: creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1), attack power 70 + the fixture's 210: mean non-critical hit 99.1935 without the passive and 118.4516 with it, ratio 1.19415 (+19.42%). Before the fix (ADR 0008 engine arithmetic): predicted 1.2111, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +20.78 / +21.27. Sizing: the model's per-hit variances give 868 trials per arm at 0.8 of the power limit; the entry pools 19 parts of 100 trials (1900 per arm). "
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Wrath effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel",
+      "label_suffix": "effect_gavel",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.24094,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 680634 to the weapon set Seraphim, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1), m = 1.25. Gavel of Wrath 800617, attack power 70, weapon rolls 46..67, flat 44 + irand(1, 11), dummy armor 528: mean non-critical hit 97.6736 without the passive and 121.2066 with it, ratio 1.24094 (+24.09%). Before the fix (stock order, ADR 0007 decision (a), ADR 0008 method): predicted 1.38626, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +38.22 / +38.50. Sizing: the model's per-hit variances give 1411 trials per arm at 0.8 of the power limit; the entry pools 16 parts of 100 trials (1600 per arm). ",
+      "observe_source": "Gavel of Wrath 800617 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Light effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light",
+      "label_suffix": "effect_gavel_light",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.2417,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 22,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 680634 to the weapon set Seraphim, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1), m = 1.25. Gavel of Light 800611, attack power 70, weapon rolls 46..67, flat 11 + 1, dummy armor 528: mean non-critical hit 63.0000 without the passive and 78.2273 with it, ratio 1.24170 (+24.17%). Before the fix (stock order, ADR 0007 decision (a), ADR 0008 method): predicted 1.29726, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +29.48 / +30.21. Sizing: the model's per-hit variances give 2780 trials per arm at 0.8 of the power limit; the entry pools 22 parts of 100 trials (2200 per arm). ",
+      "observe_source": "Gavel of Light 800611 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender (Gavel of Grace effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace",
+      "label_suffix": "effect_gavel_grace",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.23935,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 18,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 680634 to the weapon set Seraphim, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 680634 Glorious Defender Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 24 + 1 = +25% ($s1), m = 1.25. Gavel of Grace 800614, attack power 70, weapon rolls 46..67, flat 22 + irand(1, 4), dummy armor 528: mean non-critical hit 74.3977 without the passive and 92.2045 with it, ratio 1.23935 (+23.93%). Before the fix (stock order, ADR 0007 decision (a), ADR 0008 method): predicted 1.33176, base pair 10 (20261122-113024 / -115522, build fd0671597bc3) read +33.31 / +32.91. Sizing: the model's per-hit variances give 2044 trials per arm at 0.8 of the power limit; the entry pools 18 parts of 100 trials (1800 per arm). ",
+      "observe_source": "Gavel of Grace 800614 damage read in two arms of one scenario; the treatment arm learns 680634 first. Control arm: no passive. Reference search 2026-11-22: server DBC 680634; coa-history spell 680634: 0 events in 186 logs; ascension-data advancement.tsv lists Glorious Defender as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel of Wrath effectiveness under Paragon)",
+      "kind": "hit_ratio",
+      "variant": "effectiveness_wrath",
+      "label_suffix": "effectiveness_wrath",
+      "quote": "causing them to have no cooldown and have $562316s1% increased effectiveness.",
+      "expected": 1.49255,
+      "observe_spell": 800617,
+      "control": {
+        "casts": [
+          680639
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300347
+        ],
+        "casts": [
+          680639
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "parts": 21,
+      "cast_power": 1000,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 300347 to the weapon set Blessings, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 300347 Battle Cleric applies its helper 562316 under Paragon: Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 49 + 1 = +50% ($562316s1) on the Gavels' mask, m = 1.5. Both arms cast Paragon 680639 before every observed cast (cooldown reset by the harness), so both run at attack power 86 (Paragon's Strength 48, q-sc-8 analysis), weapon rolls 49..70, dummy armor 528. Gavel of Wrath 800617, flat 44 + irand(1, 11): mean non-critical hit 100.4132 without the passive and 149.8719 with it, ratio 1.49255 (+49.26%). New arm of the O-18 regression (D-146 condition: each talent alone on the three Gavels). Sizing: the model's per-hit variances give 1277 trials per arm at 0.8 of the power limit; the entry pools 21 parts of 80 trials (1680 per arm). ",
+      "observe_source": "Gavel of Wrath 800617 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 300347 first so the script's helper 562316 is applied. Control arm: Paragon without the passive. Reference search 2026-11-22: owner ruling O-18 and mentor D-146; server DBC 300347, 562316, 680639 and the Gavel ranks; no Ascension source states the hit beyond the tooltip (live servers closed)."
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel of Light effectiveness under Paragon)",
+      "kind": "hit_ratio",
+      "variant": "effectiveness_light",
+      "label_suffix": "effectiveness_light",
+      "quote": "causing them to have no cooldown and have $562316s1% increased effectiveness.",
+      "expected": 1.49308,
+      "observe_spell": 800611,
+      "control": {
+        "casts": [
+          680639
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300347
+        ],
+        "casts": [
+          680639
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "parts": 39,
+      "cast_power": 1000,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 300347 to the weapon set Blessings, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 300347 Battle Cleric applies its helper 562316 under Paragon: Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 49 + 1 = +50% ($562316s1) on the Gavels' mask, m = 1.5. Both arms cast Paragon 680639 before every observed cast (cooldown reset by the harness), so both run at attack power 86 (Paragon's Strength 48, q-sc-8 analysis), weapon rolls 49..70, dummy armor 528. Gavel of Light 800611, flat 11 + 1: mean non-critical hit 65.7273 without the passive and 98.1364 with it, ratio 1.49308 (+49.31%). New arm of the O-18 regression (D-146 condition: each talent alone on the three Gavels). Sizing: the model's per-hit variances give 2365 trials per arm at 0.8 of the power limit; the entry pools 39 parts of 80 trials (3120 per arm). ",
+      "observe_source": "Gavel of Light 800611 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 300347 first so the script's helper 562316 is applied. Control arm: Paragon without the passive. Reference search 2026-11-22: owner ruling O-18 and mentor D-146; server DBC 300347, 562316, 680639 and the Gavel ranks; no Ascension source states the hit beyond the tooltip (live servers closed)."
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel of Grace effectiveness under Paragon)",
+      "kind": "hit_ratio",
+      "variant": "effectiveness_grace",
+      "label_suffix": "effectiveness_grace",
+      "quote": "causing them to have no cooldown and have $562316s1% increased effectiveness.",
+      "expected": 1.49087,
+      "observe_spell": 800614,
+      "control": {
+        "casts": [
+          680639
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300347
+        ],
+        "casts": [
+          680639
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "parts": 29,
+      "cast_power": 1000,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 300347 to the weapon set Blessings, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). 300347 Battle Cleric applies its helper 562316 under Paragon: Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 49 + 1 = +50% ($562316s1) on the Gavels' mask, m = 1.5. Both arms cast Paragon 680639 before every observed cast (cooldown reset by the harness), so both run at attack power 86 (Paragon's Strength 48, q-sc-8 analysis), weapon rolls 49..70, dummy armor 528. Gavel of Grace 800614, flat 22 + irand(1, 4): mean non-critical hit 77.1364 without the passive and 115.0000 with it, ratio 1.49087 (+49.09%). New arm of the O-18 regression (D-146 condition: each talent alone on the three Gavels). Sizing: the model's per-hit variances give 1782 trials per arm at 0.8 of the power limit; the entry pools 29 parts of 80 trials (2320 per arm). ",
+      "observe_source": "Gavel of Grace 800614 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 300347 first so the script's helper 562316 is applied. Control arm: Paragon without the passive. Reference search 2026-11-22: owner ruling O-18 and mentor D-146; server DBC 300347, 562316, 680639 and the Gavel ranks; no Ascension source states the hit beyond the tooltip (live servers closed)."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender with Fanaticism (Gavel of Wrath, talents add)",
+      "kind": "hit_ratio",
+      "variant": "pair_gd_fan",
+      "label_suffix": "pair_gd_fan",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.43838,
+      "observe_spell": 800617,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          680634,
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 21,
+      "cast_power": 1363,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 680634 to the weapon set Seraphim, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). Combination rule (mentor D-146): two talents add, the stock engine's rule for percent modifiers on one operation (Player.cpp:10622), and the flag keeps it. The ratio separates the additive whole-hit reading from the old compounding and from a multiplicative reading. Glorious Defender 680634 +25% and Fanaticism 805628 +20%, m = 1.45. Gavel of Wrath 800617, attack power 70, weapon rolls 46..67, flat 44 + irand(1, 11), dummy armor 528: mean non-critical hit 97.6736 without the passives and 140.4917 with both, ratio 1.43838 (+43.84%); the stock compounding predicts 1.74146 and a multiplicative reading 1.50000, both outside the band (2.19 points). Sizing: the model's per-hit variances give 1582 trials per arm at 0.8 of the power limit; the entry pools 21 parts of 100 trials (2100 per arm). ",
+      "observe_source": "Gavel of Wrath 800617 damage read in two arms of one scenario; the treatment arm learns 680634 and 805628 first. Control arm: no passive. Reference search 2026-11-22: owner ruling O-18 and mentor D-146; server DBC 300347, 562316, 680639 and the Gavel ranks; no Ascension source states the hit beyond the tooltip (live servers closed)."
+    },
+    {
+      "spell": 680634,
+      "name": "Glorious Defender with Battle Cleric (Gavel of Wrath rank 5 under Paragon, talents add)",
+      "kind": "hit_ratio",
+      "variant": "pair_gd_bc",
+      "label_suffix": "pair_gd_bc",
+      "quote": "Increases the effectiveness of Gavels by $s1%.",
+      "expected": 1.74617,
+      "observe_spell": 802561,
+      "control": {
+        "casts": [
+          680639
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680634,
+          300347
+        ],
+        "casts": [
+          680639
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "parts": 8,
+      "cast_power": 1000,
+      "expected_source": "Owner ruling O-18 (Q-sc-8, option b) with mentor decision D-146, Sun Cleric ADR 0029: the Gavel effectiveness talents apply their figure to the whole hit. The expectation is the model's prediction, committed before any arm of the fix ran (out-of-sample, never fitted to a measurement): the server sets SpellInfo::AscensionFlatAfterWeaponPercent on every Gavel rank (AscensionSunClericContracts.cpp, ApplyContracts), so Spell::EffectWeaponDmg applies the weapon percent to the weapon roll alone and then adds the flat value (SpellEffects.cpp:4724-4742). With the talents' percents summed to m (SPELLMOD_ALL_EFFECTS percent modifiers add, Player.cpp:10622), the hit is int(W x int(100 x m) / 100) + int(F x m), enumerated over every weapon roll W (urand(uint32(min), uint32(max)) with min and max = weapon damage + attack power / 14 x normalized speed, Unit.cpp:3621, StatSystem.cpp:728) and every flat roll F (BasePoints + irand(1, DieSides) from the DBC), float32 where the code uses float, then target armor: tmp = x / (1 + x) with x = armor / (85 x 60 + 400), hit = uint32(ceil(damage x (1 - tmp))) (Unit.cpp:2550-2560); non-critical hits. The gap to the displayed figure is integer truncation, under one point. Control arm: the talent not learned; its hit is the same before and after the fix (W x 100% + F = (W + F) x 100%). Band: G-19, the larger of 5% of the bonus and 2 points, not widened. Model: .agents/plans/o18/scratch/size.py (from the approved design's o18_expect.py, whose stock side reproduces the committed ADR 0008 and Glorious Defender ratios exactly). Weapon: the class file maps 680634 to the weapon set Seraphim, Truncheon 2524 in the main hand (34.61 to 55.4, normalized speed 2.4). Combination rule (mentor D-146): two talents add, the stock engine's rule for percent modifiers on one operation (Player.cpp:10622), and the flag keeps it. The ratio separates the additive whole-hit reading from the old compounding and from a multiplicative reading. Glorious Defender 680634 +25% and Battle Cleric's helper 562316 +50% under Paragon, m = 1.75. Both arms cast Paragon 680639 before every observed cast, attack power 86, weapon rolls 49..70. Gavel of Wrath rank 5 802561, flat 222 + irand(1, 50), dummy armor 528: mean non-critical hit 280.6082 without the passives and 489.9891 with both, ratio 1.74617 (+74.62%); the stock compounding predicts 2.80161 and a multiplicative reading 1.87500, both outside the band (3.73 points). Sizing: the model's per-hit variances give 480 trials per arm at 0.8 of the power limit; the entry pools 8 parts of 80 trials (640 per arm). ",
+      "observe_source": "Gavel of Wrath 802561 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 680634 and 300347 first. Control arm: Paragon without the passives. Reference search 2026-11-22: owner ruling O-18 and mentor D-146; server DBC 300347, 562316, 680639 and the Gavel ranks; no Ascension source states the hit beyond the tooltip (live servers closed)."
     }
   ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],
   "conditional_spells": [],
-  "weapon_percent_before_flat": [],
+  "weapon_percent_before_flat": [
+    800611,
+    502467,
+    502468,
+    502469,
+    502470,
+    502471,
+    502472,
+    502473,
+    502474,
+    502475,
+    502476,
+    502477,
+    502478,
+    800614,
+    807981,
+    807982,
+    807983,
+    807984,
+    807985,
+    807986,
+    807987,
+    800617,
+    802558,
+    802559,
+    802560,
+    802561
+  ],
   "self_stack_bonus": [],
   "dual_target_effects": [],
   "target_aura_gates": [],
