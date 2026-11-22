@@ -606,20 +606,46 @@
   {
     "spell": 300361,
     "clause": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
-    "labels": [
-      "300361 effect_value 301176e1 #0",
-      "300361 aura_amplitude_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the remaining cooldown of Horusath Blast is reduced by $301176s2% (10%, 25000 ms Horusath read 5500 ms after its cast: 10536 within 300 ms against 12056 at 8% and 9230 at 12%)",
+        "labels": [
+          "300361 effect_value 301176e1 #0",
+          "300361 behaviour_metric_delta sunrise_horusath",
+          "300361 behaviour_metric_delta sunset_horusath_control"
+        ]
+      },
+      {
+        "claim": "every $t1 sec (1000 ms: the five ticks that fit in the read are the ones the expected value counts)",
+        "labels": [
+          "300361 aura_amplitude_ms #1",
+          "300361 behaviour_metric_delta sunrise_horusath"
+        ]
+      }
+    ]
   },
   {
     "spell": 300361,
     "clause": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
-    "labels": [
-      "300361 effect_value 301176e1 #2",
-      "300361 aura_amplitude_ms #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the remaining cooldown of Rapture is reduced by $301176s2% (10%, 20000 ms Rapture read 8500 ms after its cast: 7583 within 300 ms against 8761 at 8% and 6591 at 12%)",
+        "labels": [
+          "300361 effect_value 301176e1 #2",
+          "300361 behaviour_metric_delta sunset_rapture",
+          "300361 behaviour_metric_delta sunrise_rapture_control"
+        ]
+      },
+      {
+        "claim": "every $t1 sec (1000 ms: the five ticks that fit in the read are the ones the expected value counts)",
+        "labels": [
+          "300361 aura_amplitude_ms #3",
+          "300361 behaviour_metric_delta sunset_rapture"
+        ]
+      }
+    ]
   },
   {
     "spell": 300363,
@@ -3070,7 +3096,8 @@
       {
         "claim": "Expending Angelic Presence increases your critical strike chance by $681254s1%",
         "labels": [
-          "680648 effect_value 681254e0 #0"
+          "680648 effect_value 681254e0 #0",
+          "680648 behaviour_metric_delta crit_gain"
         ]
       },
       {
@@ -3096,7 +3123,11 @@
   {
     "spell": 680648,
     "clause": "Additional applications do not refresh the duration.",
-    "labels": [],
+    "labels": [
+      "680648 behaviour_metric_delta stack_two",
+      "680648 behaviour_metric_delta alive_19s",
+      "680648 behaviour_metric_delta gone_22s"
+    ],
     "kind": "claim"
   },
   {
@@ -3699,8 +3730,11 @@
         ]
       },
       {
-        "claim": "while above 80% health (open: the server holds the helper through a 75% to 80% hysteresis band, so the 80% literal needs an arm that enters from below at 79% and 81%; the arms here are 74% and 82%)",
-        "labels": []
+        "claim": "while above 80% health (the helper stays absent at 79% and appears at 81%, both after a rise from 70%, past the 75% to 80% hysteresis band)",
+        "labels": [
+          "704585 behaviour_metric_delta threshold_79",
+          "704585 behaviour_metric_delta threshold_81"
+        ]
       }
     ],
     "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Tool need returned to the controller: a taken_hit pre-step that sets the health below 75% and lets the helper clear before the health is raised to 79% and 81%."
@@ -4856,7 +4890,9 @@
     "claims": [
       {
         "claim": "Doubles the effectiveness of your Holy Form",
-        "labels": []
+        "labels": [
+          "800602 behaviour_hit_ratio holy_form_doubled"
+        ]
       },
       {
         "claim": "and reduces the tick rate of Ancient Rites by $/1000;s2 sec",
@@ -5975,9 +6011,10 @@
     "spell": 806058,
     "clause": "Damage dealt by Justice now has an $h% chance to reset its own cooldown.",
     "labels": [
-      "806058 effect_value #0"
+      "806058 behaviour_metric_delta justice_reset_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged by cooldown_reset_rate with reset_between_attempts, trial_casts and residual_target 0.001 / min_detectable 4: the Justice strike 572850 is cast directly, one roll of the 8% chance per damaging cast (a miss rolls nothing); the clear-cooldown packets of 572848 per completed cast must hold 8% in the 2-point band."
   },
   {
     "spell": 560867,
