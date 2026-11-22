@@ -1267,6 +1267,25 @@ class CalcAmountAndBuildTest(unittest.TestCase):
                       f'- `{self.LABEL}`', report)
         self.assertIn(f'- Build judged: commit {WORKSPACE_COMMIT}, worldserver sha256 {WORKSPACE_BUILD}', report)
 
+    def test_a_rule_only_verdict_is_selected_without_a_run_and_an_unrun_measurement_is_not(self):
+        self.value('568')
+        for key, label, rule in (('conformance-templar-value-1002', '1002 effect_value #0', 'closed: no value'),
+                                 ('conformance-templar-value-1003', '1003 effect_value #0', 'read flat')):
+            self.workspace.scenario(key, 'value', [expectation(label, 'effect_value', self.TOKEN.text, rule, 0)],
+                                    [self.TOKEN.text], None)
+            self.workspace.scenarios[-1]['file'] = None
+        manifest, results = self.workspace.manifest()
+
+        def selection():
+            comparison = evaluate(manifest, results, tooltips=constant_reader(self.TOKEN), hit_model=reference_hit)
+            return {verdict.label: (verdict.status, verdict.runs, verdict.selected) for verdict in comparison.verdicts}
+
+        self.assertEqual(selection(), {self.LABEL: ('ok', [f'run-{VALUE_KEY}'], True),
+                                       '1002 effect_value #0': ('closed', [], True),
+                                       '1003 effect_value #0': ('alert', [], False)})
+        with mock.patch('compare.rule_only_labels', return_value=set()):
+            self.assertFalse(selection()['1002 effect_value #0'][2])
+
     def test_every_verdict_carries_the_build_and_the_run_that_produced_it(self):
         self.value('305')
         self.workspace.scenario('conformance-templar-value-1002', 'value',
@@ -2113,6 +2132,14 @@ class ResolveLinkedStatusesTest(unittest.TestCase):
         resolved = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok')])
         self.assertEqual(resolved[0].status, 'unmodelled')
         self.assertIn('(status unmodelled)', resolved[0].explanation)
+
+    def test_a_resolved_link_records_its_own_status_and_resolves_again_from_it(self):
+        first = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok'), verdict('2 proc_rate', 'ok')])
+        self.assertEqual((first[0].status, first[0].detail['linked_from']), ('closed', 'unmodelled'))
+        again = resolve_linked_statuses([first[0], verdict('2 proc_rate', 'alert')], {'1 e0'})
+        self.assertEqual((again[0].status, again[0].detail['linked_from']), ('unmodelled', 'unmodelled'))
+        self.assertIn('(status alert)', again[0].explanation)
+        self.assertEqual(resolve_linked_statuses([first[0], verdict('2 proc_rate', 'alert')], set())[0], first[0])
 
     def test_an_unrelated_verdict_passes_through_unchanged(self):
         plain = verdict('1 e0', 'ok')

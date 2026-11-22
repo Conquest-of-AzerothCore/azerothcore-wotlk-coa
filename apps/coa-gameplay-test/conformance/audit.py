@@ -2,7 +2,8 @@ from dataclasses import replace
 import json
 from pathlib import Path
 
-from compare import CONFORMANT, DATA_ONLY, NOT_MEASURED, Verdict, observed, read_verdicts
+from compare import (CLOSED, CONFORMANT, DATA_ONLY, LINKED_FROM, NOT_MEASURED, Verdict, linked_references, observed,
+                     read_verdicts, resolve_linked_statuses)
 from coverage import (BY_METRIC, EVIDENCE, ClauseCoverage, clause_coverage, clause_labels, load_clauses,
                       load_consumption, resolved_labels)
 from values import Expectation
@@ -41,20 +42,42 @@ def hooked_labels(document) -> set[str]:
 
 
 def selected(verdict: Verdict) -> bool:
+    if verdict.selected is not None:
+        return verdict.selected
     return verdict.runs is None or bool(verdict.runs)
 
 
-def merged_verdicts(runs: list[list[Verdict]]) -> list[Verdict]:
+def merged_layers(runs: list[list[Verdict]]) -> list[tuple[int, Verdict]]:
     order, latest = [], {}
-    for run in runs:
+    for index, run in enumerate(runs):
         earlier = set(latest)
         for verdict in run:
             if verdict.label in earlier and not selected(verdict):
                 continue
             if verdict.label not in latest:
                 order.append(verdict.label)
-            latest[verdict.label] = verdict
+            latest[verdict.label] = (index, verdict)
     return [latest[label] for label in order]
+
+
+def merged_verdicts(runs: list[list[Verdict]]) -> list[Verdict]:
+    return [verdict for _, verdict in merged_layers(runs)]
+
+
+def recorded_link_status(verdict: Verdict) -> Verdict:
+    if LINKED_FROM in (verdict.detail or {}) or verdict.status != 'closed' or verdict.explanation.startswith(CLOSED):
+        return verdict
+    return replace(verdict, detail={**(verdict.detail or {}), LINKED_FROM: 'unmodelled'})
+
+
+def relinked(merged: list[tuple[int, Verdict]]) -> list[Verdict]:
+    origin = {verdict.label: index for index, verdict in merged}
+    verdicts = [verdict for _, verdict in merged]
+    crossing = {verdict.label for verdict in verdicts
+                if any(origin.get(label, origin[verdict.label]) != origin[verdict.label]
+                       for label in linked_references(verdict))}
+    return resolve_linked_statuses([recorded_link_status(verdict) if verdict.label in crossing else verdict
+                                    for verdict in verdicts], crossing)
 
 
 def layered_labels(layers: list[list[Verdict]]) -> tuple[set[str], set[str]]:
@@ -72,7 +95,8 @@ def disagreements(runs: list[tuple[str, list[Verdict]]]) -> list[dict]:
     seen = {}
     for name, verdicts in runs:
         for verdict in verdicts:
-            seen.setdefault(verdict.label, []).append((name, verdict))
+            if selected(verdict):
+                seen.setdefault(verdict.label, []).append((name, verdict))
     rows = []
     for label, found in sorted(seen.items()):
         classes = {status_class(verdict) for _, verdict in found}
@@ -117,15 +141,16 @@ def audit_document(class_id: int, ledger: Path, results: list[Path], base_result
     stamps = manifest_stamps(json.loads(Path(manifest).read_text(encoding='utf-8'))) if manifest else {}
     forced = hooked_labels(json.loads(Path(hooked).read_text(encoding='utf-8'))) if hooked else set()
 
+    def hooked_forced(verdicts: list[Verdict]) -> list[Verdict]:
+        return [replace(verdict, status=NOT_MEASURED) if verdict.label in forced else verdict for verdict in verdicts]
+
     def prepared(directory: Path) -> list[Verdict]:
-        verdicts = [stamped(verdict, stamps) for verdict in read_verdicts(directory)[1]]
-        verdicts = [replace(verdict, status=NOT_MEASURED) if verdict.label in forced else verdict
-                    for verdict in verdicts]
+        verdicts = hooked_forced([stamped(verdict, stamps) for verdict in read_verdicts(directory)[1]])
         return [replace(verdict, build=build) for verdict in verdicts] if build else verdicts
 
     base = prepared(base_results) if base_results else []
     runs = [(str(directory), prepared(directory)) for directory in results]
-    verdicts = merged_verdicts([base] + [run for _, run in runs])
+    verdicts = hooked_forced(relinked(merged_layers([base] + [run for _, run in runs])))
     clauses = load_clauses(ledger)
     rows = load_consumption(consumption) if consumption else ()
     result = clause_coverage(clauses, verdicts, build or single_build(verdicts), rows)

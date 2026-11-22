@@ -19,39 +19,56 @@ them by verdicts with no run, and 13 behaviour claims and 1 data claim fell from
 had judged them (`recount-diff-s1.md`, figures 288/74/57).
 
 Mentor D-179 ruled that a label a run did not select or measure never replaces a base result; only a measured verdict
-replaces.
+replaces. Mentor D-180 added that a verdict judged by rule alone (`closed`, `unmodelled`: a ledger or class-file state,
+which has no run by nature) must still replace in a later layer, and that only a label its run did not select is kept
+out. An empty `runs` list cannot tell the two apart: a full compare already holds 193 rule-only verdicts with no run.
+
+The review of the first fix also found that a link-derived status is frozen per layer: `compare.resolve_linked_statuses`
+closes an `unmodelled` linking verdict when every referenced label is conformant in that compare, so a base `closed`
+kept over a later layer that turns a referenced label into an alert would count as data proof.
 
 ## Options
 
 1. Keep the merge and drop the narrow sets from counting audits: the controller has to know which labels each set
    ran, and a layered count stays wrong when one is forgotten.
-2. Skip, over an earlier layer, a verdict whose `runs` list is empty. A verdict with runs (whatever its status) and a
-   verdict without a provenance field (`runs` absent, written before provenance) replace as before.
+2. Skip, over an earlier layer, a verdict whose `runs` list is empty (the first fix, commit 10848d8480). A rule-only
+   verdict can then never update a label.
 3. Skip by status (`unmeasured`, `unmodelled`): an `unmeasured` verdict from a trial that ran but saw no event is a
    real outcome and would be hidden.
+4. `compare` writes an explicit `selected` marker per verdict, and `audit` skips only `selected: false`; link statuses
+   are resolved again after the merge.
 
 ## Decision
 
-Option 2, in `audit.py`:
+Option 4.
 
-- `selected(verdict)` is true when `runs` is absent or holds at least one run id.
-- `merged_verdicts` skips an unselected verdict whose label an earlier layer already holds; a label first seen in a
-  layer is taken whatever its provenance, so `results_added` is unchanged.
-- The audit document lists the skipped labels in a new key `results_not_selected`; `results_replaced` and
-  `results_added` hold only the labels a layer actually set.
+- `compare.with_provenance` writes `selected = bool(runs) or rule_only`, where a label is rule-only when every manifest
+  expectation of it is judged from its rule before any run is read (`closed`, `unmodelled`, `unmeasurable`,
+  `generic`, `unreadable`, `ambiguous_tooltip` rule prefixes or the `unmodelled` check, pooled checks excluded:
+  `compare.rule_only_labels`). `runs` stays provenance only.
+- `audit.merged_layers` skips a `selected: false` verdict whose label an earlier layer holds; a label first seen in a
+  layer is taken whatever its marker. A verdict written before the marker (`selected` absent) falls back to the first
+  fix: it counts as selected when `runs` is absent or not empty. That fallback never lets an unselected verdict hide a
+  measured one; its cost is that an older rule-only verdict with no run still cannot update a label, which a rerun of
+  `compare` on the same results removes.
+- `compare.resolve_linked_statuses` records each linking verdict's own status in `detail.linked_from` and resolves
+  from it, and the referenced labels' own statuses, so resolving twice gives the same result. `audit.relinked`
+  resolves again, on the merged statuses, every linking verdict with a referenced label from another layer. A
+  link-closed verdict written before `linked_from` (status `closed`, rule not a `closed:` rule) is resolved from
+  `unmodelled`, the status `compare` gives such an entry before its links resolve; an older value-link verdict an
+  alert closed to `alert` stays `alert`. Links within one layer keep the status `compare` gave them.
+- `results_disagree` compares only selected verdicts. `results_not_selected` lists the skipped labels; a label one
+  directory added can also be listed there for a later directory.
 
 ## Consequences
 
-- The s1 layered audit (same inputs, b11s1 ledger) gives 301/75/43 instead of 288/74/57: the 14 lost claims come
-  back, and against the base set alone (300/75/44 on that ledger) the one change is 680637 claim 179 gaining
-  behaviour from its new 570187 explosion labels. `results_replaced` falls from 244 to 18 labels,
-  `results_not_selected` holds 226.
-- Single-directory audits are unchanged except for the new empty key: the Necromancer final16 runs (393/3/13), the
-  Templar ledger-only and c3 restore audits, the Witch Hunter pr-focus pair and the Sun Cleric base 11 set give the
-  same figures, rows and statuses. Layered audits change only where an unselected verdict had replaced a different
-  status (Witch Hunter leech-focus layering: 804068 claim 351 becomes behaviour; Necromancer final16 layered: no
-  status change).
-- A ledger or class-file verdict with no run (`closed` or `unmodelled` from a rule) no longer replaces an earlier
-  layer's verdict for the same label. A rule change of that kind is counted on a full compare used as the base, as a
-  merged pair already is.
-- `results_disagree` still compares every verdict of the `--results` directories, unselected ones included.
+- The s1 layered audit (same inputs, b11s1 ledger, sets written before the marker) gives 301/75/43 for run 1 and run 2,
+  as with the first fix: the 14 claims lost at 288/74/57 stay restored. Against the base set alone (300/75/44) the one
+  change is 680637 claim 179 gaining behaviour from its new 570187 explosion labels.
+- On the s1 sets the rule-only update is not visible: they carry no marker, so 804628 e0 keeps the base11 explanation
+  until `compare` is rerun on those results (the b11s1 manifest and results are no longer on disk).
+- Single-directory audits (Necromancer final16 runs, Templar ledger-only and c3 restore, Witch Hunter pr-focus, Sun
+  Cleric base 11) and the Necromancer layered audit are identical to the first fix. The Witch Hunter leech-focus
+  layering keeps its figures and statuses; its `results_disagree` drops from 6 rows to none, all of them unselected
+  verdicts. Generated scenarios of classes 15, 19 (with and without `--stack`) and 23 are byte-identical.
+- `resolve_base_roll_links` statuses are still frozen per layer; they are not re-resolved by this decision.
