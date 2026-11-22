@@ -532,13 +532,22 @@
     "kind": "claim",
     "labels": [
       "300349 behaviour_metric_delta cd_cut",
-      "300349 behaviour_metric_delta cd_cut_control",
-      "300349 behaviour_metric_delta cd_cut_806159",
-      "300349 behaviour_metric_delta cd_cut_control_806159",
       "300349 behaviour_metric_delta cd_cut_503651",
-      "300349 behaviour_metric_delta cd_cut_control_503651"
+      "300349 behaviour_metric_delta cd_cut_806159",
+      "300349 behaviour_metric_delta cd_cut_control",
+      "300349 behaviour_metric_delta cd_cut_control_503651",
+      "300349 behaviour_metric_delta cd_cut_control_806159",
+      "300349 cost_gate 503651 cd_gate_503651 beyond",
+      "300349 cost_gate 503651 cd_gate_503651 with",
+      "300349 cost_gate 503651 cd_gate_503651 without",
+      "300349 cost_gate 800764 cd_gate beyond",
+      "300349 cost_gate 800764 cd_gate with",
+      "300349 cost_gate 800764 cd_gate without",
+      "300349 cost_gate 806159 cd_gate_806159 beyond",
+      "300349 cost_gate 806159 cd_gate_806159 with",
+      "300349 cost_gate 806159 cd_gate_806159 without"
     ],
-    "reason": "Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip. Hope's three Solar Invocation targets (Conquest 800764, Resplendence 806159, Revelation 503651) are each read after a forced critical Daybreak with a control arm (Solar Conduit in place of Hope): cooldown 30000 - 1000 - 2100 elapsed = 26900 within 50 ms, so a 0.9 s or 1.1 s cut fails. Solar Invocation: Ascension 500152 (the fourth spell of category 767) is not a target of 804512 and is not read. The once-per-second clause 31 stays open."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Cost gates: each Solar Invocation (Conquest 800764, Resplendence 806159, Revelation 503651) attempted 1000 ms early after a critical Daybreak 503624 on the caster held at 30% health (cost_gate caster_health_pct, ADR 1027; crit fixture 10043): refused without Hope, accepted with it, refused one step beyond. The cooldown_ms readbacks cd_cut / cd_cut_control stay as the term read. Earlier gates failed at full health (no effective heal, Events.cpp:51). Reference search 2026-11-22: bindmysoul snapshot \"Your critical heals now reduce the cooldown of Solar Invocation spells by -1 sec.Can occur only once per sec.\" (same figure); coa-history spell 300349: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 300349,
@@ -678,45 +687,49 @@
     "spell": 300361,
     "clause": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
     "kind": "claim",
+    "reason": "Pair 20261122-142319 / 20261122-142349 (prove, build 241ecaa2, server 5e3c344130), no flip, no alert. The remaining cooldown of Horusath Blast 500154 read every 100 ms (109 ms measured) over 6540 ms after a cast in Sunrise: 6 ticks (allowed 6 to 7), each cut bracketed with no tick epoch (9.84 to 10.05% over both runs) inside 10 +- 2, and the period bracketed from the tick intervals at 959.2 to 1002.8 ms inside 950 to 1050, so a period 10% off on either side fails (cooldown_tick_cut, ADR 1027; t9 review I-1: the earlier 3108 ms count alone could not exclude 900 or 1100 ms). The control in the other phase shows no tick. 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2), amplitude 1000 ms ($t1). Reference search 2026-11-22: bindmysoul snapshot \"the remaining cooldown of Horusath Blast is reduced by 10% every 1 sec\" (same figures); coa-history spells 300361 and 301176: 0 events in 186 logs; nothing else found.",
     "claims": [
       {
-        "claim": "the remaining cooldown of Horusath Blast is reduced by $301176s2% (10%, 25000 ms Horusath read 5500 ms after its cast: 10536 within 300 ms against 12056 at 8% and 9230 at 12%)",
+        "claim": "the remaining cooldown of Horusath Blast is reduced by $301176s2%",
         "labels": [
-          "300361 effect_value 301176e1 #0",
-          "300361 behaviour_metric_delta sunrise_horusath",
-          "300361 behaviour_metric_delta sunset_horusath_control"
+          "300361 behaviour_metric_delta tick_cut_sunrise",
+          "300361 behaviour_metric_delta tick_cut_sunrise_control",
+          "300361 effect_value 301176e1 #0"
         ]
       },
       {
-        "claim": "every $t1 sec (the aura amplitude is read as data; the cooldown read does not exclude a period 10% off)",
+        "claim": "every $t1 sec",
         "labels": [
+          "300361 behaviour_metric_delta tick_cut_sunrise",
+          "300361 behaviour_metric_delta tick_cut_sunrise_control",
           "300361 aura_amplitude_ms #1"
         ]
       }
-    ],
-    "reason": "Data only, not behaviour and not a final status (review c5 I-1): both claims are read on cooldown_ms, a READBACK metric (coverage.METRIC_EVIDENCE). The tick-grid read does not measure the period either: with the entry's model a period of 1100 ms reads 10421, inside 10536 +- 300 (900 ms reads 9016, excluded), so only the lower side is excluded. A tick-aligned cooldown read is tool group 5 item 5 (tool need, returned); the clause stays open. The entries keep emitting the labels as evidence."
+    ]
   },
   {
     "spell": 300361,
     "clause": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
     "kind": "claim",
+    "reason": "Pair 20261122-142319 / 20261122-142349 (prove, build 241ecaa2, server 5e3c344130), no flip, no alert. The remaining cooldown of Rapture 806477 read every 100 ms (109 ms measured) over 6540 ms after a cast in Sunset: 6 ticks (allowed 6 to 7), each cut bracketed with no tick epoch (9.74 to 10.07% over both runs) inside 10 +- 2, and the period bracketed from the tick intervals at 959.2 to 1002.8 ms inside 950 to 1050, so a period 10% off on either side fails (cooldown_tick_cut, ADR 1027; t9 review I-1: the earlier 3108 ms count alone could not exclude 900 or 1100 ms). The control in the other phase shows no tick. 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2), amplitude 1000 ms ($t1). Reference search 2026-11-22: bindmysoul snapshot \"the remaining cooldown of Rapture is reduced by 10% every 1 sec\" (same figures); coa-history spells 300361 and 301176: 0 events in 186 logs; nothing else found.",
     "claims": [
       {
-        "claim": "the remaining cooldown of Rapture is reduced by $301176s2% (10%, 20000 ms Rapture read 5000 ms after its cooldown starts: about 7838 within 300 ms against about 9000 at 8% and 6760 at 12%)",
+        "claim": "the remaining cooldown of Rapture is reduced by $301176s2%",
         "labels": [
-          "300361 effect_value 301176e1 #2",
-          "300361 behaviour_metric_delta sunset_rapture",
-          "300361 behaviour_metric_delta sunrise_rapture_control"
+          "300361 behaviour_metric_delta tick_cut_sunset",
+          "300361 behaviour_metric_delta tick_cut_sunset_control",
+          "300361 effect_value 301176e1 #2"
         ]
       },
       {
-        "claim": "every $t1 sec (the aura amplitude is read as data; the cooldown read does not exclude a period 10% off)",
+        "claim": "every $t1 sec",
         "labels": [
+          "300361 behaviour_metric_delta tick_cut_sunset",
+          "300361 behaviour_metric_delta tick_cut_sunset_control",
           "300361 aura_amplitude_ms #3"
         ]
       }
-    ],
-    "reason": "Data only, not behaviour and not a final status (review c5 I-1): both claims are read on cooldown_ms, a READBACK metric (coverage.METRIC_EVIDENCE). The tick-grid read does not measure the period either: with the entry's model a period of 900 ms reads 7993 and 1100 ms reads 7887, both inside 7838 +- 300, so neither side is excluded. A tick-aligned cooldown read is tool group 5 item 5 (tool need, returned); the clause stays open. The entries keep emitting the labels as evidence."
+    ]
   },
   {
     "spell": 300363,
@@ -886,7 +899,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -1657,9 +1670,21 @@
         "claim": "becoming immune to all physical attacks and spells (no landing of a physical and a magic fixture during the window)",
         "labels": [
           "520024 behaviour_metric_delta immune_magic",
-          "520024 behaviour_metric_delta immune_physical",
           "520024 behaviour_metric_delta immune_magic_after",
-          "520024 behaviour_metric_delta immune_physical_after"
+          "520024 behaviour_metric_delta immune_physical",
+          "520024 behaviour_metric_delta immune_physical_after",
+          "520024 immunity enemy_physical 1715 control",
+          "520024 immunity enemy_physical 1715 with",
+          "520024 immunity enemy_physical 1715 without",
+          "520024 immunity enemy_physical 520024 applied",
+          "520024 immunity enemy_physical 520024 cast",
+          "520024 immunity enemy_physical 520024 expired",
+          "520024 immunity enemy_spells 520024 applied",
+          "520024 immunity enemy_spells 520024 cast",
+          "520024 immunity enemy_spells 520024 expired",
+          "520024 immunity enemy_spells 5782 control",
+          "520024 immunity enemy_spells 5782 with",
+          "520024 immunity enemy_spells 5782 without"
         ]
       },
       {
@@ -1667,7 +1692,7 @@
         "labels": []
       }
     ],
-    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity is measured by a real cast of 520024 at the dummy and a creature striker's hit 800 ms later: a Shadow hit (47632, magic) and a Physical hit (32247), each landing without the cast (count 1) and not landing under it (count still 1), and landing again 2600 ms after the cast (count 2, the route control): the same shape as Blessing of Purity 804253 immune_strike. The leap is status 4: 520025 Effect[0] is 138 SPELL_EFFECT_LEAP_BACK on the caster, a knockback packet the client acknowledges, as Norgannon's Wrath 524739 (guide section 2). A client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 (520025 Effect[0] BasePoints 200, MiscValueB 200). Reference search 2026-11-22: see the entries; nothing found beyond the tooltip and the server DBC."
+    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity is measured by a real cast of 520024 at the dummy and a creature striker's hit 800 ms later: a Shadow hit (47632, magic) and a Physical hit (32247), each landing without the cast (count 1) and not landing under it (count still 1), and landing again 2600 ms after the cast (count 2, the route control): the same shape as Blessing of Purity 804253 immune_strike. The leap is status 4: 520025 Effect[0] is 138 SPELL_EFFECT_LEAP_BACK on the caster, a knockback packet the client acknowledges, as Norgannon's Wrath 524739 (guide section 2). A client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 (520025 Effect[0] BasePoints 200, MiscValueB 200). Reference search 2026-11-22: see the entries; nothing found beyond the tooltip and the server DBC. Added: Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. 520024 cast at the dummy (cast_target, ADR 1027) puts 520025 on the caster; Hamstring 1715 (Physical, melee) and Fear 5782 (Shadow) applied by the dummy land before, do not land in the 2 s window and land again after it."
   },
   {
     "spell": 520024,
@@ -1746,7 +1771,12 @@
     "claims": [
       {
         "claim": "a 10 yd holy circle",
-        "labels": []
+        "labels": [
+          "520647 behaviour_metric_delta reach_in",
+          "520647 behaviour_metric_delta reach_out",
+          "520647 behaviour_metric_delta dynobj_radius",
+          "520647 behaviour_metric_delta dynobj_size"
+        ]
       },
       {
         "claim": "for 15 s",
@@ -1755,7 +1785,7 @@
         ]
       }
     ],
-    "reason": "OPEN: the radius claim has no status. Radius: caster at 9 yd from the circle centre holds the aura, at 13 yd does not (labels radius_in, radius_out ran, not cited): that brackets 9 to 13 yd only and a 9 yd or 11 yd circle passes both, and the area test adds object sizes (AnyFriendlyUnitInObjectRangeCheck, IsWithinDistInMap) with no stock control. Duration: aura on the caster read 9988 ms against 10000 five seconds in (13500 and 16500 ms excluded), a readback. Reference search: bindmysoul agrees (10 yd, 15 seconds)."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Reach written term by term: radius 10 (dynamic_object_radius read 10; EffectRadiusIndex 13) + dynamic object size 0.389 (dynamic_object_size read 0.389) + caster combat reach 1.5 = 11.889 yd from the circle centre (_IsWithinDist adds both sizes, Object.cpp:1257-1264). The caster at 11.4 yd holds the aura, at 12.4 yd does not. Duration: circle_duration (unchanged). Reference search: bindmysoul agrees (10 yd, 15 seconds)."
   },
   {
     "spell": 520647,
@@ -2459,7 +2489,7 @@
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
     "kind": "claim",
-    "reason": "Open for 'while above 80% health': the helper turns off only at or below 75% (AscensionSunCleric.cpp:366-371, hysteresis b2ad6f76d6, #5963, Fixes #5763), so after a drop from above 80% to 76-80% Glare stays instant while the tooltip says above 80%. Measured on the rising edge only (entries glare_81, glare_80, glare_79: 81% reads 0 ms, 80% and 79% 1500 ms after a pre-step to 70%), which does not exercise the falling edge, so the claim is not counted as behaviour. Needs a ruling: 'above 80%' against the hysteresis of #5963 (falling-edge arm 100% to 78%, tooltip expects 1500 ms). Cast time of Glare 807870 is SpellCastTimes 16 = 1500 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L found #5963; nothing else found.",
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Glare 807870 cast time after the learn: 0 ms at 81% entered from 50%, 1500 ms at 79% entered from 90% or from 50% and at 75% entered from 90% (the four edges D-153 named, judged by the tooltip literal). The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, no status 2, no server change. Data conformant, not status 1: the arms read spell_cast_time_ms, a readback in coverage.METRIC_EVIDENCE, so coverage counts both claims as data; status 1 waits for a behaviour route (an observed cast duration). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
     "claims": [
       {
         "claim": "Removes the cast time of Glare",
@@ -2469,8 +2499,13 @@
         ]
       },
       {
-        "claim": "while above 80% health",
-        "labels": []
+        "claim": "while above 80% health (on at 81% from 50%; off at 79% from 90% and from 50%; off at 75% from 90%)",
+        "labels": [
+          "561328 behaviour_metric_delta glare_edge_on_above_80",
+          "561328 behaviour_metric_delta glare_edge_off_band_from_above",
+          "561328 behaviour_metric_delta glare_edge_off_band_from_below",
+          "561328 behaviour_metric_delta glare_edge_off_at_75"
+        ]
       }
     ]
   },
@@ -3873,14 +3908,15 @@
         ]
       },
       {
-        "claim": "while above 80% health (the helper stays absent at 79% and appears at 81%, both after a rise from 70%, past the 75% to 80% hysteresis band)",
+        "claim": "while above 80% health (on at 81% entered from 50%; off at 79% entered from 50% and from 90%)",
         "labels": [
-          "704585 behaviour_metric_delta threshold_79",
-          "704585 behaviour_metric_delta threshold_81"
+          "704585 behaviour_hit_ratio taken_above_from_below",
+          "704585 behaviour_hit_ratio taken_band_from_below",
+          "704585 behaviour_hit_ratio taken_off_band_from_above"
         ]
       }
     ],
-    "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Resolved by claim 2: each arm first sets 70% (below 75%), waits 1600 ms for the helper to clear, then raises the health to 79% (helper absent) or 81% (helper present), read 1500 ms later; the helper aura 707769 is read, and the damage effect of the helper is linked through the taken_above labels at 82%."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Strikes of Void Zone 92559 against a control arm: 81% entered from 50% reads ratio 0.9028 (5% plus 5%), 79% entered from 50% reads 0.9499 and 79% entered from 90% reads 0.9499 with the helper 707769 present. The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, status 1, no status 2, no server change. Reference search 2026-11-22: bindmysoul snapshot \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (same figures); coa-history spell 704585: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 704586,
@@ -5224,16 +5260,19 @@
     "spell": 802935,
     "clause": "and auto attacks now have a $h% chance to restore $504619s1% of your maximum mana.",
     "kind": "claim",
-    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount stay open: a proc entry for 802935 was tried (pair 20261122-124700 / -125240) and removed: the character dual-wields 2529 in both hands (Titan's Grip), the procs kind divides both hands' events by the main-hand trials, proc_rate read 0.195 and 0.194 against 0.10 (alert in both runs, about twice the chance), and the energize amount (86 = floor(3% of max mana) in both runs, 3% from 504619 Effect[0] BasePoints 2 + 1) had no control arm in the pair (an attack trigger takes no baseline). Tool needs: per-hand trials for the procs kind (batch 6 group 5 item 4) and a baseline arm for an attack trigger. Reference search 2026-11-22: bindmysoul snapshot \"10% chance to restore 3% of your maximum mana\" (same figures); nothing else found.",
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Trials are both hands' damaging auto attacks (trial_hand both, ADR 1027): the handler rolls on every automatic damage event of either hand (AscensionSunClericEvents.cpp:124, Chance ProcChance 10). Rate 0.1035 over 8989 trials in run 1 and 0.1032 over 8983 in run 2, inside the band 0.08-0.12 (pilot 0.0947 over 8952 trials), baseline arm without the passive; each energize restores 3% of maximum mana (504619). The earlier entry divided both hands' events by main-hand trials (0.195, pair 20261122-124700 / -125240). Energize source: Sun Cleric ADR 0019, mentor D-93. Reference search 2026-11-22: bindmysoul snapshot \"10% chance to restore 3% of your maximum mana\" (same figures); nothing else found.",
     "claims": [
       {
         "claim": "auto attacks now have a $h% chance",
-        "labels": []
+        "labels": [
+          "802935 proc_rate"
+        ]
       },
       {
         "claim": "to restore $504619s1% of your maximum mana",
         "labels": [
-          "802935 effect_value 504619e0 #2"
+          "802935 effect_value 504619e0 #2",
+          "802935 proc_energize_amount 0"
         ]
       }
     ]
@@ -6062,9 +6101,11 @@
   {
     "spell": 805647,
     "clause": "Your Glorious Execution now has a $h% chance to strike 1 additional time.",
-    "labels": [],
+    "labels": [
+      "805647 effect_value #0"
+    ],
     "kind": "claim",
-    "reason": "Open, no label (tool need, design note sent to the controller). The proc_rate entry is withdrawn (archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json): it alerted in all 4 runs of pairs 2 and 4 (0.163-0.169 against 0.2). Cause by code reading, not measured: the proc cast of 800626 is cast triggered (Cast is CastSpell(target, id, true), AscensionSunCleric.cpp:83-86; TRIGGERED_DISALLOW_PROC_EVENTS in SpellDefines.h:152-154; Spell.cpp:2373), so its own 800691 hit never rolls, yet the entry counted it as a trial: 0.2 / 1.2 = 0.1667 matches all four reads. A rerun with trial_readings minus_events read 'no usable trial' in 66 of 66 parts in both runs (20261122-131508 / -131632): that reading only works where the trigger spell deals damage itself, and 800626 deals none (trigger_lands_no_hit mode sums the added labels and cannot take minus_events). Proc rate of Knight of Dawn 805647 is ProcChance 20 (Spell.dbc). Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc."
+    "reason": "Open, server lead: a proc entry (trigger Glorious Execution 803913, events = its casts beyond the trigger casts, trials = landed 800691 strikes) ran in the group 5 pilot (verify-all 20261122-133519, worldserver e496bda1, server b7e79aca553d+; raw results archived in .agents/plans/t9-fix/evidence/805647-pilot-20261122-133519, 66 parts). Over all 66 parts: 5820 casts of 803913, 5820 landed 800691 strikes and 5820 cast events, aura 805647 present in all 66, so 0 additional strikes in 5820 trials (20% expected, ProcChance 20). The judged pilot verdict alerted for another reason: \"21 events in 0 baseline trials without the passive\", because the entry's trials label read spell_damage_count 803913 (0 in every part) instead of the 800691 strikes, so the entry was mis-wired; it was removed (nothing merges alerting). Handler AscensionSunClericEvents.cpp:128 (damage of 800691 and Chance), reaction :303 Cast(player, target, Highest(player, 800626)); whether that rank is 803913, the spell the events counted, is not checked. Cause not traced."
   },
   {
     "spell": 805816,

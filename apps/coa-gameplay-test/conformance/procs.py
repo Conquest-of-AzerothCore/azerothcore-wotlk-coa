@@ -477,17 +477,23 @@ def tick_spacing(class_file: dict, facts: RankFacts, spell: int) -> int:
 
 
 OFF_HAND = 1
+BOTH_HANDS = 'both'
 TRIAL_HAND = 'trial_hand'
 
 
-def trial_hand(entry: dict) -> int:
+def trial_hand(entry: dict) -> int | str:
     hand = entry.get(TRIAL_HAND, MAIN_HAND)
-    if hand not in (MAIN_HAND, OFF_HAND) or isinstance(hand, bool):
-        raise ValueError(f'Proc {entry["aura"]} trial_hand is {MAIN_HAND} or {OFF_HAND}, not {hand!r}')
-    if hand == OFF_HAND and (entry['trigger']['action'] != ATTACK or entry.get(PER_TRIGGER) is not None):
-        raise ValueError(f'Proc {entry["aura"]} counts off-hand trials only for an attack trigger without '
-                         f'{PER_TRIGGER}')
+    if hand not in (MAIN_HAND, OFF_HAND, BOTH_HANDS) or isinstance(hand, bool):
+        raise ValueError(f'Proc {entry["aura"]} trial_hand is {MAIN_HAND}, {OFF_HAND} or {BOTH_HANDS!r}, not {hand!r}')
+    if hand != MAIN_HAND and (entry['trigger']['action'] != ATTACK or entry.get(PER_TRIGGER) is not None):
+        raise ValueError(f'Proc {entry["aura"]} counts off-hand or both-hand trials only for an attack trigger '
+                         f'without {PER_TRIGGER}')
     return hand
+
+
+def hand_fields(entry: dict) -> dict:
+    hand = trial_hand(entry)
+    return {} if hand == BOTH_HANDS else {'hand': hand}
 
 
 def off_hand_weapon_of(class_file: dict) -> dict:
@@ -501,6 +507,9 @@ def off_hand_weapon_of(class_file: dict) -> dict:
 def hand_swing_interval(class_file: dict, entry: dict) -> int:
     if trial_hand(entry) == OFF_HAND:
         return off_hand_weapon_of(class_file)['speed_ms']
+    if trial_hand(entry) == BOTH_HANDS:
+        main, off = swing_interval(class_file), off_hand_weapon_of(class_file)['speed_ms']
+        return main * off // (main + off)
     return swing_interval(class_file)
 
 
@@ -542,7 +551,7 @@ def boundary_reads(entry: dict) -> int:
 def attempt_interval(class_file: dict, entry: dict) -> int:
     trigger = entry['trigger']
     cooldown = entry.get('internal_cooldown_ms', 0)
-    off_hand = trial_hand(entry) == OFF_HAND
+    off_hand = trial_hand(entry) in (OFF_HAND, BOTH_HANDS)
     if trigger['action'] == ATTACK:
         swing = swing_interval(class_file, cooldown)
         if off_hand:
@@ -682,6 +691,9 @@ def trial_rule(entry: dict) -> str:
         return (f'trials: {entry["trial_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
                 f'attacking the dummy with the caster, {trigger["swing_ms"]} ms swings ({trigger["swing_source"]})'
                 f'{fixtures}')
+    if entry['trigger']['action'] == ATTACK and trial_hand(entry) == BOTH_HANDS:
+        return ('trials: melee hits dealing damage in either hand (melee_damage_count with no hand, the sum of both), '
+                'the caster dual wielding')
     if entry['trigger']['action'] == ATTACK and trial_hand(entry) == OFF_HAND:
         return (f'trials: off-hand melee hits dealing damage (melee_damage_count hand {OFF_HAND}), the caster '
                 f'dual wielding; main-hand swings are not trials')
@@ -820,8 +832,8 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
                 {'action': 'wait', 'label': 'swings', 'ms': plan.per_part * plan.attempt_ms},
                 {'action': 'stop_attack', 'actor': CASTER},
                 {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS},
-                measurement(labels['trials'], CASTER, 'melee_damage_count', hand=trial_hand(entry)),
-                measurement(labels['attempts'], CASTER, 'melee_attack_count', hand=trial_hand(entry))]
+                measurement(labels['trials'], CASTER, 'melee_damage_count', **hand_fields(entry)),
+                measurement(labels['attempts'], CASTER, 'melee_attack_count', **hand_fields(entry))]
     from proc_avoided import attempt_steps as avoided_attempts, guard_steps, is_avoided, trial_steps
     if is_avoided(entry):
         return (avoided_attempts(entry, plan.per_part, plan.attempt_ms)
