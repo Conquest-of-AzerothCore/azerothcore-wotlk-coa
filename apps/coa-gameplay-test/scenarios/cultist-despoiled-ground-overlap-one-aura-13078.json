@@ -9,12 +9,10 @@
     "replacement restarted the 3 sec tick. Expected (approach ruled by the PR author): a target in several of the",
     "caster's overlapping patches keeps the application it holds until that patch leaves or ends, so it is",
     "applied once, and its ticks keep coming. No Presence is active, so no other patch can appear. Over 8 sec,",
-    "while both 12 sec patches still overlap, the target must see no new application and at least 2 ticks. Two",
-    "live patches are established without a ground effect count metric: two casts are counted, and right after",
-    "the second the oldest live patch (which dynamic_object_duration_ms reads) has at most 11 sec of its 12 sec",
-    "left, so it is still the first patch; it must also still be up when the window ends, and the second, newer",
-    "patch outlasts it. The enemy's aura must have been applied exactly once before the window, and in the window",
-    "the tick count must be 2 or 3: both patches ticking would give 4 or more."
+    "while both 12 sec patches still overlap, the target must see no new application and at least 2 ticks.",
+    "dynamic_object_count must read two live patches before and at the end of the window. The enemy's aura must",
+    "have been applied exactly once before the window, and in the window the tick count must be 2 or 3: both",
+    "patches ticking would give 4 or more."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -57,12 +55,8 @@
       "spell": 805180, "equals": 0
     },
     {
-      "action": "assert", "label": "SETUP: two patches were created", "actor": "cultist", "metric": "spell_cast_count",
-      "spell": 805180, "equals": 2
-    },
-    {
-      "action": "assert", "label": "SETUP: the oldest live patch is still the first one, cast over 1.6 sec earlier",
-      "actor": "cultist", "metric": "dynamic_object_duration_ms", "spell": 805180, "max": 11000
+      "action": "assert", "label": "SETUP: two live, overlapping patches", "actor": "cultist",
+      "metric": "dynamic_object_count", "spell": 805180, "equals": 2, "within_ms": 2000
     },
     {"action": "wait", "label": "Let both patches refresh their targets", "ms": 1000},
     {
@@ -76,8 +70,8 @@
     },
     {"action": "wait", "label": "Stand in both patches", "ms": 8000},
     {
-      "action": "assert", "label": "SETUP: the older patch is still up, so both still overlap", "actor": "cultist",
-      "metric": "dynamic_object_duration_ms", "spell": 805180, "min": 1
+      "action": "assert", "label": "SETUP: both patches are still live when the window ends", "actor": "cultist",
+      "metric": "dynamic_object_count", "spell": 805180, "equals": 2
     },
     {
       "action": "assert", "label": "#13078: the overlapping patches do not swap the enemy's aura", "actor": "mob",
