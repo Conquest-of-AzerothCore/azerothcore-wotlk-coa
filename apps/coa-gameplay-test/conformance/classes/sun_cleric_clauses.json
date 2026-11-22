@@ -856,7 +856,7 @@
         ]
       }
     ],
-    "reason": "Alert (lead): Arbiter adds no mana: ratio 1.9985 / 1.9970 against the 5.0 of base 5% plus 15%, and the control without Vow reads 2.0 / 2.0. Fix note: .agents/plans/sun-cleric-b6b/fix-note-301313.md. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Fixed (Sun Cleric ADR 0018, mentor D-84): Glorious Execution adds 807446 effect 2 to its mana share while the caster has 301313 and Vow of Grace 803719. Before, on the counted pair of batch 6b (build f50fb5fce072, server commit 68e7af248b64+): ge_mana_vow 1.9985 / 2.0015 against 5.0, ge_mana_no_vow 2.0045 / 2.0015 against 2.0. After, pair 20261122-043143 / 20261122-043214 (build 81dc59a6e458, server commit 5a6c7944a09c+, no flip): ge_mana_vow 5.0015 / 4.9955 within 0.4 of 5.0, ge_mana_no_vow 2.0015 / 2.0 within 0.4 of 2.0. Regression sun-cleric-arbiter-of-grace-vow-gate (three arms)."
   },
   {
     "spell": 301343,

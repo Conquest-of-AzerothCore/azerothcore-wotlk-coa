@@ -22,6 +22,9 @@ constexpr uint32 SolemnPriest = 804269;
 constexpr uint32 ArbiterOfLight = 302914;
 constexpr uint32 VowOfLight = 807547;
 constexpr uint32 VowOfLightArbiterShare = 807549;
+constexpr uint32 ArbiterOfGrace = 301313;
+constexpr uint32 VowOfGrace = 803719;
+constexpr uint32 VowOfGraceArbiterShare = 807446;
 constexpr uint32 Calm = 804057;
 bool SilenceImmune(Unit const* target)
 {
@@ -350,7 +353,11 @@ public:
         }
         if (info->Id == 800691 || info->Id == 802566)
             if (uint32 const dealt = spell->GetScriptHealthLeechDamage())
-                Mana(player, CalculatePct(dealt, Amount(807451)), 807552);
+            {
+                bool const arbiter = player->HasAura(ArbiterOfGrace) && player->HasAura(VowOfGrace);
+                int32 const share = Amount(807451) + (arbiter ? Amount(VowOfGraceArbiterShare, 2) : 0);
+                Mana(player, CalculatePct(dealt, share), 807552);
+            }
         if (healing && player->HasAura(300344) && target->HasAura(Bless, player->GetGUID()) &&
             !spell->IsTriggered() && !spell->GetScriptValue(300344))
         {
