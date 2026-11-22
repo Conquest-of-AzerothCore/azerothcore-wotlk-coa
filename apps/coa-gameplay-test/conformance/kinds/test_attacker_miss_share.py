@@ -13,6 +13,11 @@ ENTRY = {'spell': 572752, 'name': 'Sun Down (attackers swing inside the scorched
          'quote': "reduces the target's chance to hit by", 'quote_spell': 807175, 'cast_spell': 572752,
          'aura': 807175, 'expected': 3,
          'arm_ms': 64000, 'cycle_ms': 8000, 'settle_ms': 7500}
+HERALD = {'spell': 804630, 'name': 'Herald of Dawn (attacker swings under the Solar Flare)',
+          'kind': 'attacker_miss_share', 'quote': "reduces the target's chance to hit by", 'quote_spell': 807175,
+          'cast_spell': 500146,
+          'pre_cast': [806477], 'learn': [804630, 806477], 'aura': 807175, 'expected': 3, 'attackers': 1,
+          'arm_ms': 64000, 'cycle_ms': 8000, 'settle_ms': 7500, 'label_suffix': 'herald_miss'}
 BASE_MANA = {'power': 0, 'value': 1363, 'source': 'seeded test value'}
 
 
@@ -27,6 +32,19 @@ class AttackerMissShareTests(unittest.TestCase):
         if parts > 1:
             expectation.model['parts'] = parts
         return scenario, expectation
+
+    def test_pre_cast_casts_the_sequence_before_the_cast_spell_in_every_treatment_cycle(self):
+        scenario, expectation = self.built(HERALD)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        casts = [step['spell'] for step in scenario['steps'] if step['action'] == 'cast']
+        self.assertEqual(casts, [806477, 500146] * 9)
+        self.assertEqual(expectation.model['auras']['treatment'][0].count('herald_miss'), 1)
+
+    def test_pre_cast_needs_a_settle_and_a_cycle_over_the_whole_sequence(self):
+        with self.assertRaises(ValueError):
+            self.built({**HERALD, 'settle_ms': 4000})
+        with self.assertRaises(ValueError):
+            self.built({**HERALD, 'cycle_ms': 5000, 'arm_ms': 60000})
 
     def values(self, expectation, control: tuple[int, int], treated: tuple[int, int], held: dict | None = None):
         model = expectation.model

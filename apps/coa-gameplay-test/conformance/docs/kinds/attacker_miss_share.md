@@ -12,6 +12,9 @@ melee the caster after one engaging swing each. Two arms of `arm_ms`, in whole c
   of `cast_spell` is reset (a named precondition fixture, G-21 point 6, stated in the verdict) and `cast_spell` is
   cast at the first attacker. Counting starts `settle_ms` after the first cast, once `aura` from the caster is read on
   every attacker; the aura is read on every attacker again at each cycle end, where it must be held.
+  `pre_cast` (ADR 1033, opt-in) lists spells cast at the first attacker before `cast_spell` in every treatment cycle,
+  each with its power set, its cooldown reset (the same named fixture) and its cast time waited out; `settle_ms` and
+  `cycle_ms` must cover the whole sequence.
 
 The aura is never set by the harness. Expected: the miss share rises by minus the amount of `aura` effect
 `aura_effect`, which must be `SPELL_AURA_MOD_HIT_CHANCE` (54); `expected` must equal it. The judge sums swings and
