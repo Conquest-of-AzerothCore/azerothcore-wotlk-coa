@@ -1048,7 +1048,7 @@
     "spell": 504848,
     "clause": "Grant mercy to an ally and up to 5 nearby allies,",
     "kind": "claim",
-    "reason": "Open, no entry: metric_delta has no ally unit to read an effect on allies (shared tool, outside this author's files); the count of 5 nearby allies needs it too. Not given a final status.",
+    "reason": "Open: the ally half is read by targets_ally (the target and the four other grouped allies hold the aura, none in the uncast control). The cap of 5 needs a sixth candidate (allies above 5 in the ally option, tool need returned). Not given a final status.",
     "claims": [
       {
         "claim": "Grant mercy to an ally",
@@ -1202,16 +1202,38 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "now additionally heals nearby allies",
+        "claim": "now additionally heals nearby allies after Daybreak",
         "labels": [
           "534267 behaviour_metric_delta nearby_allies"
         ]
       },
       {
-        "claim": "up to 5 of the target's lowest health nearby allies",
+        "claim": "now additionally heals nearby allies after Illumination",
+        "labels": [
+          "534267 behaviour_metric_delta nearby_allies_illumination"
+        ]
+      },
+      {
+        "claim": "now additionally heals nearby allies after Shine",
+        "labels": [
+          "534267 behaviour_metric_delta nearby_allies_shine"
+        ]
+      },
+      {
+        "claim": "now additionally heals nearby allies after the healing done from Holy Form",
+        "labels": [
+          "534267 behaviour_metric_delta nearby_allies_holy_form"
+        ]
+      },
+      {
+        "claim": "up to 5 nearby allies (the number)",
         "labels": [
           "534267 effect_value #0"
         ]
+      },
+      {
+        "claim": "the target's lowest health nearby allies (the priority order and the cap of 5 need a sixth candidate)",
+        "labels": []
       },
       {
         "claim": "for 75% of the value",
@@ -1219,7 +1241,8 @@
           "534267 effect_value e0 #1"
         ]
       }
-    ]
+    ],
+    "reason": "One claim per source named at AscensionSunClericEvents.cpp:136 (the trigger is a script list, so G-23 does not cover a subset): Daybreak, Illumination, Shine and the Holy Form heal 807994 each have an entry. Open, tool need returned: the order and cap need allies above 5 in the ally option; the 75% amount needs an arm-to-arm ratio. Not given a final status."
   },
   {
     "spell": 547214,
@@ -3972,7 +3995,7 @@
     "spell": 805301,
     "clause": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
     "kind": "claim",
-    "reason": "Open, no entry: Bless sets the blessed ally only for a target other than the caster (AscensionSunClericAuras.cpp:67) and metric_delta has no ally unit (shared tool). Not given a final status.",
+    "reason": "The gate and the ally heal are read by ally_bless_heal: the ally is below full health, the caster's mana is 850 then 872 at the Daybreak hook against a gate at 860.4, and the Daybreak arm proves the same heal landed in both phases. Open, tool need returned: \"sacrifice additional mana\" is the paid (extra + 3) / 4 of AscensionSunClericAbilities.cpp:365, which depends on the random heal amount and needs an arm-to-arm ratio. Not given a final status.",
     "claims": [
       {
         "claim": "you sacrifice additional mana with each heal",
@@ -4069,7 +4092,7 @@
         ]
       }
     ],
-    "reason": "Mentor D-54, ruling (a): the stock engine order is accepted. Expectation as engine arithmetic 1.2 x (W + 1.2 x B) against W + B (Spell::EffectWeaponDmg, SpellEffects.cpp:4676, :4681 and the loop at :4729-4741), expected values from W, B and the armor read, never from the measured bonus: Horusath Blast +20% (no flat term, band 18..22), Gavel of Wrath +27.77%, Gavel of Grace +24.54%, Gavel of Light +22.46% (ADR sun-cleric 0007)."
+    "reason": "Mentor D-54, ruling (a): the stock engine order is accepted; the expectation is the reproduced engine arithmetic, every term from data or code (ADR sun-cleric 0007 decision, 0008 figures): Horusath Blast +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%, each judged in the G-19 band of 2 points. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (coa-history, the snapshots, merged PRs #4516, #8988, #9558; the full text is in each entry's expected_source)."
   },
   {
     "spell": 807973,
