@@ -6,8 +6,9 @@ import re
 from bonus import bonus_band
 import control_excluded
 import hit_ratio_versus
-from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS,
-                  TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
+from hits import (ARMOR_LABEL, DAMAGE_TAKEN, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS,
+                  MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps,
+                  creature_fixture,
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
 from kinds import kind_module, kind_names
 from metric_delta_options import shield_after_learn
@@ -7814,6 +7815,7 @@ class ScriptHitSpec:
     normalized_percent: bool = False
     value_rolls: bool = False
     strikes_per_cast: int | None = None
+    level_points: bool = False
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -7916,7 +7918,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         model = reference_script_hit_model(class_file, spec.spell, spec.hit_spell, spec.value_spell, spec.value_effect,
                                            (*spec.model_auras, *spec.minion_model_auras), spec.unresisted,
                                            spec.hit_effect, spec.weapon_only, spec.normalized_value,
-                                           spec.effective_school, spec.normalized_percent, spec.value_rolls)
+                                           spec.effective_school, spec.normalized_percent, spec.value_rolls,
+                                           spec.level_points, () if spec.caster_entry else spec.model_auras)
     except Unmodelled as error:
         raise NotModelled(f'{spec.spell} script_hit {spec.hit_spell}: {error.reason}') from error
     label = script_hit_label(spec)
@@ -8007,7 +8010,9 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     rule = f'{model.kind} hit of script-cast spell {spec.hit_spell} read from the {spec.spell} tooltip, ' \
            f'integer steps modelled; control arm {control_rule}; {prose_rule(entry.quote, spec.spell)}' + \
-           (f'; the tooltip value times {spec.multiplier:g}' if spec.multiplier != 1.0 else '')
+           (f'; the tooltip value times {spec.multiplier:g}' if spec.multiplier != 1.0 else '') + \
+           ('; the points carry their per-level term at the caster level (SpellEffectInfo::CalcValue)'
+            if spec.level_points else '')
     record = {**model_record(model, school_mask, None, labels, spec.minimum_hits), 'hit_spell': spec.hit_spell,
               'tooltip_spell': spec.spell, 'control_label': control_label, 'gate_multiplier': spec.multiplier,
               'part': 0,
@@ -8018,6 +8023,9 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         record.update({'value_spell': spec.value_spell, 'value_effect': spec.value_effect})
     if spec.model_auras or spec.minion_model_auras:
         record['model_auras'] = [*spec.model_auras, *spec.minion_model_auras]
+    taken = sorted({modifier.spell_id for modifier in model.modifiers if modifier.applies_to == DAMAGE_TAKEN})
+    if taken:
+        record['taken_auras'] = taken
     if spec.unresisted:
         record['unresisted'] = True
     if spec.hit_effect is not None:
@@ -8032,6 +8040,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         record['normalized_percent'] = True
     if spec.value_rolls:
         record['value_rolls'] = True
+    if spec.level_points:
+        record['level_points'] = True
     if spec.strikes_per_cast is not None:
         record['strikes'] = script_hit_strikes_record(spec, label)
     return scenario, [Expectation(label, 'hit_mean', spec.spell, spec.hit_spell, 0, ' | '.join(model.displayed), rule,
@@ -8039,7 +8049,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
 
 
 def script_hit_spec(entry: dict) -> ScriptHitSpec:
-    for flag in ('weapon_only', 'normalized_value', 'effective_school', 'normalized_percent', 'value_rolls'):
+    for flag in ('weapon_only', 'normalized_value', 'effective_school', 'normalized_percent', 'value_rolls',
+                 'level_points'):
         if type(entry.get(flag, False)) is not bool:
             raise ValueError(f'{entry["spell"]} script_hit {flag} is a boolean, not {entry[flag]!r}')
     return ScriptHitSpec(entry['spell'], entry['name'], entry['quote'], entry['hit_spell'], entry['trials'],
@@ -8065,7 +8076,8 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          entry.get('normalized_value', False) is True,
                          entry.get('effective_school', False) is True,
                          entry.get('normalized_percent', False) is True,
-                         entry.get('value_rolls', False) is True, entry.get('strikes_per_cast'))
+                         entry.get('value_rolls', False) is True, entry.get('strikes_per_cast'),
+                         entry.get('level_points', False) is True)
 
 
 TAKEN_OUTCOME_ATTACKERS = 8

@@ -1505,6 +1505,11 @@ of that effect, to the school part (ADR 0208, the Scourgebane strike 801832 from
 527269 from `$527270m3`). `value_rolls: true` (ADR 0996, only with `value_spell`) rolls the die of `value_spell`'s
 `value_effect` instead of the hit spell's, one modelled value per roll (Shadow Rage 680275 `$m3`, 57..58, struck by
 567570); without it the hit spell's die is rolled, as before.
+`level_points: true` (ADR 1150) reads the hit effect's points with the `SpellEffectInfo::CalcValue` per-level term at
+the caster level (clamped to BaseLevel and MaxLevel), not at the client level of a helper `$m1` (ADR 0014): each roll
+is forced to base + roll + that term and read again through the tooltip, and the engine model truncates the term
+(Spirit Volley 503712 `volley_hit`: 389.0 with the 18 points of 504582 at level 60, 371.0 without; mentor ruling
+M-46). Weapon, normalized and value-spell hits refuse it.
 `strikes_per_cast` (ADR 1007, with a minion `caster_entry` and casts) reads that minion's casts of the hit spell before
 each treatment call and after its settle; the verdict alerts unless every call cast that many, and lists per run the
 casts, landed (any outcome), usable, critical and not-landed strikes (Houndmaster's Call 802273: two per call).
@@ -1931,7 +1936,10 @@ the one 3 yd behind never.
   `model_auras` names auras the treatment casts put on the caster, which the hit model then counts among its modifiers
   (they must be cast by the entry), and `unresisted: true` drops the resistance mitigation for a hit that ignores it.
   The hit model now reads SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) and SPELL_AURA_MOD_HEALING_PCT (118) modifiers of
-  those auras (ADR 0219, ADR 0220). Libram of Grace 801463's Grace 804150 on the Templar under its own +20% healing
+  those auras (ADR 0219, ADR 0220), and, for the caster's own hit, their SPELL_AURA_MOD_DAMAGE_FROM_CASTER (271) on
+  the target as a taken modifier after the done truncation, kept to the school mask and to the family and class mask
+  `SpellInfo::IsAffected` checks (ADR 1151; the record names them in `taken_auras`: Veil of Darkness 802100
+  `veil_tick`, the pulse under the Veil's own +15%, 235). Libram of Grace 801463's Grace 804150 on the Templar under its own +20% healing
   received, Eternal Blessing 705300's 707111 under its own +15% Holy damage, Norgannon's Wrath's 524740 unresisted.
 
 ### fixed_count cap arms (ADR 0221)
