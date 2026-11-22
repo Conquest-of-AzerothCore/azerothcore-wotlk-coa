@@ -75,6 +75,8 @@ heal, which one arm's absolute band cannot state.
   after-less-before deltas. A denominator that did not move is off. The arms keep their absolute expectations, and
   without `ratios` the model and the verdict are unchanged.
 - Not built: a per-ally health for the lowest-health order of Heat Wave (`ally_health` sets one value on every ally).
+- The amendment leaves the finished classes byte-identical: `generate --class 19`, `19 --stack`, `23` and `15`
+  at base 80dc5ff714 and at head, compared by `diff -r`.
 
 ## Consequences
 
