@@ -39729,5 +39729,58 @@
       "text": "Avoiding an attack now also deals ${$560493m1*$<scalingbp>+$spfi*0.12+$AP*0.03} Fire damage to the attacker.\r\n\r\nCan only occur once per sec.",
       "ruling": "D-166 (mentor, 2026-11-22): the token is read as '+$spfi*0.12'; the client text lacks the operator, every sibling formula of the class adds its spell power term; ledger-only text_correction, no client text change"
     }
-  }
+  },
+  "value_ally_casts": [
+    {
+      "spell": 503498
+    },
+    {
+      "spell": 503499
+    },
+    {
+      "spell": 503500
+    },
+    {
+      "spell": 503501
+    },
+    {
+      "spell": 503502
+    },
+    {
+      "spell": 503503
+    },
+    {
+      "spell": 503504
+    },
+    {
+      "spell": 503505
+    },
+    {
+      "spell": 503506
+    },
+    {
+      "spell": 503507
+    },
+    {
+      "spell": 503508
+    },
+    {
+      "spell": 804249
+    },
+    {
+      "spell": 804253
+    },
+    {
+      "spell": 804250,
+      "setup_casts": [
+        804247
+      ]
+    },
+    {
+      "spell": 804254,
+      "setup_casts": [
+        804247
+      ]
+    }
+  ]
 }

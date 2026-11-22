@@ -23,6 +23,8 @@ SELF_TARGETS = frozenset({0, 1})
 FRIEND_TARGETS = frozenset({21})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
+ALLY_CASTS_KEY = 'value_ally_casts'
+ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
 SPELL_RANGE_RANGED = 2
@@ -274,6 +276,31 @@ def required_aura_steps(facts: RankFacts) -> list[dict]:
 def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
     return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1}
             for entry in class_file.get('cast_auras', []) if entry['spell'] == spell for aura in entry['auras']]
+
+
+def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
+    entries = [entry for entry in class_file.get(ALLY_CASTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return None
+    if len(entries) > 1:
+        raise ValueError(f'{ALLY_CASTS_KEY} lists {rank_id} more than once')
+    extra = set(entries[0]) - {'spell', 'setup_casts'}
+    setup = entries[0].get('setup_casts', [])
+    if extra or not isinstance(setup, list) or not all(isinstance(spell, int) and spell > 0 for spell in setup):
+        raise ValueError(f'{ALLY_CASTS_KEY} entry for {rank_id} takes spell and a list of setup_casts spell ids, '
+                         f'not {entries[0]!r}')
+    return tuple(setup)
+
+
+def ally_setup_steps(records: Records, setup: tuple[int, ...]) -> list[dict]:
+    from behaviours import cast_gate_power_step
+    steps = []
+    for spell in setup:
+        facts = facts_of(records, spell)
+        steps += (cast_gate_power_step(facts) + required_aura_steps(facts)
+                  + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': ALLY},
+                     {'action': 'wait', 'label': f'{spell} ally setup settle', 'ms': ALLY_SETUP_SETTLE_MS}])
+    return steps
 
 
 def required_target_health_steps(facts: RankFacts, target: str = TARGET) -> list[dict]:
@@ -721,6 +748,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         expect(label, 'effect_value', None, '',
                GENERIC + 'tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")')
 
+    ally_cast = value_ally_cast(class_file, rank_id)
     cast_steps: list[dict] = []
     if not facts.passive:
         label = f'{rank_id} power_cost'
@@ -742,6 +770,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         elif targets_resurrect(facts):
             cast_steps.append({'action': 'die', 'actor': ALLY})
             cast['target'] = ALLY
+        elif ally_cast is not None:
+            cast_steps += ally_setup_steps(records, ally_cast)
+            cast['target'] = ALLY
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
         if summon_reads:
             cast_steps += summon_aura_setup_steps(records, summon_carrier)
@@ -762,7 +793,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         expectations.append(Expectation(
             known_aura_label(aura), 'known_aura', aura, aura, None, str(aura), 'reference profile aura'))
     learn = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
-            + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)])
+            + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)]
+            + [{'action': 'learn', 'actor': CASTER, 'spell': setup} for setup in ally_cast or ()])
     budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast)
                  - len(ally_grant_proofs), READ_BUDGET_MS // READ_STEP_MS)
     sampled, samples = sampled_reads(measured, rolled, budget)
@@ -779,6 +811,6 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         placed = rank_id if is_hostile(facts) else summon_carrier['summon']
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
                                   'health': DUMMY_HEALTH, 'distance': cast_distance(records, placed)}]
-    if (targets_resurrect(facts) or needs_ally_target) and cast_wanted:
+    if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals
