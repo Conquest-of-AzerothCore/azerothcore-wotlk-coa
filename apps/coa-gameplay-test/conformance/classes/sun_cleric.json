@@ -13238,6 +13238,297 @@
       "cast_power": 1360,
       "ally_distance": 5,
       "expected_source": "560547 Sun Disc Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 118 MOD_HEALING_PCT misc 127, BasePoints 5 + 1 = 6 ($s1), radius index 12 = 100 yd; Effect[1] aura 108 ADD_PCT_MODIFIER BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 512 = SpellFamilyFlags[1] of Illumination 500143. The grouped ally's Illumination 500143 heals are read without and with 560547 learned on the caster, the ally 5 yd away and held at 50% health: the mean ratio is 1.20 x 1.06 = 1.272 (the 6% healing received applies to Illumination as to any heal; the Sunlight arm ally_healing reads 1.06 alone), band 2 points around the 20% part. Reference search 2026-11-22: coa-history spell 560547: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"You now emit an aura that causes all nearby allies to receive 6% increased healing. Does not stack with similar effects. In addition, the healing done by Illumination is increased by 20%.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 300336,
+      "name": "Light The Way (Illumination heal raises the target run speed)",
+      "kind": "metric_delta",
+      "variant": "illumination_speed",
+      "label_suffix": "illumination_speed",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "trigger_spell": 500143,
+      "gate_spell": 300336,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.2,
+      "wait_ms": 2100,
+      "expire_ms": 4500,
+      "tolerance": 0.001,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. Illumination 500143 (2000 ms cast, the Angelic entries read it finished at 1760 to 1775 with 250 ms less) is cast by the caster on itself at 50% health. The run speed rate of the caster is read about 90 ms after the heal lands: 1.0 before the learn (control, no 300337) and 1.2 after, within 0.001. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 300336,
+      "name": "Light The Way (Illumination heal, 3 sec)",
+      "kind": "metric_delta",
+      "variant": "illumination_duration",
+      "label_suffix": "illumination_duration",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "trigger_spell": 500143,
+      "gate_spell": 300336,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 2400,
+      "wait_ms": 2610,
+      "expire_ms": 4500,
+      "tolerance": 250,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. The remaining duration of 300337 on the caster is read about 600 ms after the heal lands: 0 before the learn (control) and 2400 after, within 250, so a total 10% off (2700 or 3300 ms, reading 2100 or 2700) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 300336,
+      "kind": "metric_delta",
+      "gate_spell": 300336,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 4500,
+      "name": "Light The Way (Shine heal raises the target run speed)",
+      "variant": "shine_speed",
+      "label_suffix": "shine_speed",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.2,
+      "wait_ms": 1330,
+      "tolerance": 0.001,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. Shine 800357 (the Sunwalker entries read it finished at 1230 to 1245) is cast by the caster on itself at 50% health. The run speed rate of the caster is read about 90 ms after the heal lands: 1.0 before the learn (control, no 300337) and 1.2 after, within 0.001. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 300336,
+      "kind": "metric_delta",
+      "gate_spell": 300336,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 4500,
+      "name": "Light The Way (Shine heal, 3 sec)",
+      "variant": "shine_duration",
+      "label_suffix": "shine_duration",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 2400,
+      "wait_ms": 1840,
+      "tolerance": 250,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. The remaining duration of 300337 on the caster is read about 600 ms after the heal lands: 0 before the learn (control) and 2400 after, within 250, so a total 10% off (2700 or 3300 ms, reading 2100 or 2700) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681337,
+      "name": "Holy Giant (Vow of the Valkyr auto attack damage)",
+      "kind": "hit_ratio",
+      "variant": "valkyr_damage",
+      "label_suffix": "valkyr_damage",
+      "quote": "Doubles the effectiveness of Vow of the Valkyr and Vow of Light.",
+      "expected": 1.0909,
+      "metric": "melee_damage_total",
+      "swing_hand": 0,
+      "control": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            807749,
+            1
+          ]
+        ],
+        "learn": [
+          681337
+        ]
+      },
+      "critical": false,
+      "trials": 60,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "681337 Holy Giant Effect[0] aura 108 ADD_PCT_MODIFIER misc 8 (SPELLMOD_ALL_EFFECTS) BasePoints 99 + 1 = +100%, EffectSpellClassMask word 0 = 2 = a bit of SpellFamilyFlags[0] of Vow of the Valkyr 807749 (3); Vow of Light 807547 has SpellFamilyFlags[0] 1, outside that mask (the Spell.dbc scan of family 33 with that bit finds 807749 only); Effect[2] carries a class mask but no effect. 807749 Effect[1] aura 112 OVERRIDE_CLASS_SCRIPTS BasePoints 9 + 1 = 10 ($s2), the auto attack damage bonus the script applies (AscensionSunClericContracts.cpp:354-355). Main-hand auto attack hits (plain, not critical, not glancing) are read with Vow of the Valkyr on the caster (set_aura, a precondition fixture: the subject is Holy Giant, the contrast is the learn) without and with 681337 learned. The Vow adds 10% and, doubled, 20%: the mean ratio is 1.20 / 1.10 = 1.0909 (band 2 points, G-19; an undoubled Vow reads 1.0). Reference search 2026-11-22: coa-history spell 681337: 0 events in 186 logs (a passive); 807749 Vow of the Valkyr 138 casts in 11 logs; bindmysoul carries Holy Giant without Vow of Light (an older state, noted by the first author); bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Resplendence generates 5% of the missing mana)",
+      "variant": "energize_resplendence",
+      "label_suffix": "energize_resplendence",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 93,
+      "tolerance": 1.5,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Resplendence 806159 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Revelation generates 5% of the missing mana)",
+      "variant": "energize_revelation",
+      "label_suffix": "energize_revelation",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 93,
+      "tolerance": 1.5,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 800764,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Conquest generates 5% of the missing mana)",
+      "variant": "energize_conquest",
+      "label_suffix": "energize_conquest",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 93,
+      "tolerance": 1.5,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Conquest 800764 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Ascension generates 5% of the missing mana)",
+      "variant": "energize_ascension",
+      "label_suffix": "energize_ascension",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 0,
+      "expected": 93,
+      "tolerance": 1.5,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Resplendence costs no mana)",
+      "variant": "cost_resplendence",
+      "label_suffix": "cost_resplendence",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 741.03,
+      "expected": 1093,
+      "tolerance": 2,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Resplendence 806159 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 258.97 = 741.03 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Revelation costs no mana)",
+      "variant": "cost_revelation",
+      "label_suffix": "cost_revelation",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 809.18,
+      "expected": 1093,
+      "tolerance": 2,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 190.82 = 809.18 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 681436,
+      "kind": "metric_delta",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Devoted to the Light (Ascension costs no mana)",
+      "variant": "cost_ascension",
+      "label_suffix": "cost_ascension",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 522.95,
+      "expected": 1093,
+      "tolerance": 2,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "gate_spell": 681436,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 477.05 = 522.95 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
     }
   ],
   "player_observations": [],
