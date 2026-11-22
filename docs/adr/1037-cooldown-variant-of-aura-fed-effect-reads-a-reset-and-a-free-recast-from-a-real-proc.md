@@ -42,3 +42,33 @@ Python only, opt-in (`variant: "cooldown"`), no harness change, no change for an
 - Dawn's Arrival's free-cast and reset claims ride a real Dawnbreak; the 40% chance stays an owner question.
 - The finished class digests (15, 19, 19 `--stack`, 23) are unchanged: no entry of them uses the variant.
 - The judge reads only metrics the other kinds already read (`cooldown_ms`, `spell_go_count`, `cast_failure`, `aura`).
+
+## Addendum (2026-11-22, mentor D-210)
+
+The first measured pair (Sun Cleric d203) left two gaps: the free-cast verdict was stamped with the readback
+`cooldown_ms`, so coverage could not count the recast reads it judges as behaviour; and the reset was read only as
+`cooldown_ms`, data, with no recast of its own. Both changes are opt-in and Python only, with no harness change.
+
+1. `evidence_metric: "cast_failure"` on the `cooldown` variant puts `evidence_metric` in the model, which the verdict
+   stamp (`compare.observed`) prefers over `metric`. The scenario and the judged reads are unchanged; only the
+   evidence class of the verdict moves from readback to event. Any other value, or the field on another variant, is
+   refused.
+2. A `cooldown_reset_recast` variant gives the reset its own recast read, as a second entry of the same spell (the
+   scenario key is built from kind and variant, so the read is a variant, not a field). Every trial resets the effect
+   cooldown as a fixture, casts the effect (primer) and reads `cooldown_ms` and `spell_go_count` 1600 ms later;
+   treatment trials feed with `cast_until_aura` until the aura is on the caster, control trials cast no feed. 1600 ms
+   later (Gavel of Light and Dawnbreak share start-recovery category 133, StartRecoveryTime 1500 in Spell.dbc) the
+   effect is cast again (R), 3200 ms after the primer, with 1800 ms of its 5000 ms natural cooldown left: R must go
+   off (`cast_failure` 0 and one more `spell_go_count`) in the treatment and be refused with
+   `SPELL_FAILED_NOT_READY` 67 in the control.
+3. Selection: only treatment trials whose aura came at the first feed cast are judged. A grant at the second cast puts
+   R at 4900 ms, inside the band of the natural end, so it could not tell a reset from the expiry. The selection uses
+   the feed's `spell_go_count`, never the outcome of R.
+4. Void, inside the kind: a refused feed cast (the feed spell in the run's cast failures) or a primer whose cooldown
+   read is not natural within 10% makes the run unmeasured. The shared `void_on_cast_failure` option is not used:
+   it voids every refusal, and the control's refusal of R is the judged read.
+5. Sizing: a trial is selected with probability p (the ProcChance), and the generator refuses fewer trials than keep
+   a run without a selected trial at most `residual_target` per pair: 15 trials at p = 0.4 and 0.001
+   (0.6^15 = 4.7e-4). The verdict is stamped `cast_failure`.
+
+The finished class digests (15, 19, 19 `--stack`, 23) are unchanged: generated before and after, `diff -r` empty.
