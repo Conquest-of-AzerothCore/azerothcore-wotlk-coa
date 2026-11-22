@@ -15042,7 +15042,7 @@
       "setup_wait_ms": 1600,
       "setup_only_after": true,
       "cast_power": 1363,
-      "target": "caster",
+      "target": "dummy",
       "metric": "cooldown_ms",
       "fields": {
         "spell": 806121
@@ -15070,7 +15070,7 @@
       "setup_wait_ms": 1600,
       "setup_only_after": true,
       "cast_power": 1363,
-      "target": "caster",
+      "target": "dummy",
       "metric": "cooldown_ms",
       "fields": {
         "spell": 806121
