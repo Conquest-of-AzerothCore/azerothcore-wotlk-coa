@@ -1154,7 +1154,7 @@
       {
         "claim": "reduces the target's chance to hit by $s1%",
         "labels": [
-          "301266 behaviour_metric_delta flare_hit_chance"
+          "572752 behaviour_metric_delta attacker_miss"
         ]
       },
       {
@@ -1163,7 +1163,8 @@
           "301266 behaviour_metric_delta flare_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Round 11 d8: the miss share of Solar Flare 807175 effect 0 (SPELL_AURA_MOD_HIT_CHANCE, $s1 = 3) is read on the swings of 8 attackers by the attacker_miss_share entry of Sun Down 572752 (aura 807175 never set by the harness, 5 parts, control arm without the cast): the same spell and effect that Solar Concord's proc casts at the target (AscensionSunClericEvents.cpp:250 casts 807175), so the engine path that lowers the swings is the one of the aura, whoever launched it. This clause cites that label as the Solar Flare claims of 560276 cite flare_damage of 301266. Solar Concord has no attacker_miss_share entry of its own: that kind casts one spell at the attackers and has no pre-cast of Solar Concord with the phase aura (tool need). The readback flare_hit_chance (aura_amount -3 on the dummy after a Concord proc) stays in the class file as evidence of the application by Solar Concord and is not a claim label. Reference search 2026-11-22: coa-history 807175 Solar Flare: 15499 damage events in 29 logs; bindmysoul (fetched 2026-07-22) reads 'reduces the target's chance to hit by -3% for 10 seconds' on Adjudication 804630; nothing else found."
   },
   {
     "spell": 301267,
@@ -1592,7 +1593,7 @@
         "labels": []
       }
     ],
-    "reason": "HELD, no final status: the threat label 504734 behaviour_metric_delta threat is measured on Dawnsear 554406 only and is moved out of the claim because G-23 is unmet (the scripted spells Sun Down 572752, Sunflare 800231 and Rapture 806477 and other shapes are untested), so the audit does not count it as behaviour; the entry keeps emitting it as evidence. Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off."
+    "reason": "HELD, no final status: the threat label 504734 behaviour_metric_delta threat is measured on Dawnsear 554406 only and is moved out of the claim because G-23 is unmet (the scripted spells Sun Down 572752, Sunflare 800231 and Rapture 806477 and other shapes are untested), so the audit does not count it as behaviour; the entry keeps emitting it as evidence. Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off. Round 11 d8: evidence arms added for Horusath Blast 500154 (direct), Rapture 807372 (direct) and Radiant Flame 560867 (periodic), each with a control arm without the talent (labels 504734 behaviour_metric_delta threat_hb, threat_base_hb, threat_rapture, threat_base_rapture, threat_radiant, threat_base_radiant). Sun Down 572752 and Sunflare 800231 stay untested, so G-23 stays unmet and the claim stays held: Sunflare 800231 carries no spell power coefficient in its Description and Sun Down damages through a delayed trigger and a ground aura, so no expected threat per damage can be derived from the DBC without a measured value; that needs a threat slope read with a stated flat part (tool need)."
   },
   {
     "spell": 504848,
@@ -4398,9 +4399,11 @@
     "clause": "Your Illumination now shields you for $s1% of the amount healed.",
     "kind": "claim",
     "labels": [
-      "704936 behaviour_metric_delta shield_base",
-      "704936 behaviour_metric_delta shield_sp"
-    ]
+      "704936 behaviour_metric_delta shield_absorb",
+      "704936 behaviour_metric_delta shield_absorb_sp",
+      "704936 behaviour_metric_delta shield_absorb_control"
+    ],
+    "reason": "Round 11 d8: the shield is read by the damage it stops (spell_absorb_total of Light of the Naaru 41394 on the caster, an event), at 0 and +1000 spell power with a control arm without 704936. The aura_amount readbacks shield_base and shield_sp measured the same amounts (11..12 and 262..265) and stay in the class file as evidence; they are not claim labels because the absorbed total reads the same claim as a behaviour. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 704938,
@@ -5937,10 +5940,13 @@
     "labels": [
       "805581 effect_value 807445e0 #0",
       "805581 behaviour_metric_delta cd",
-      "805581 behaviour_metric_delta cd_control"
+      "805581 behaviour_metric_delta cd_control",
+      "805581 cost_gate 500154 cd_gate without",
+      "805581 cost_gate 500154 cd_gate with",
+      "805581 cost_gate 500154 cd_gate beyond"
     ],
     "kind": "claim",
-    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Round 11 d8: cost_gate arms on the same fulfilment, cast_failure events of Horusath Blast attempted 23200 ms (with: accepted), 23200 ms without 805581 (refused) and 22800 ms (beyond: refused) after the priming cast that fulfils the Vow, which bracket the cut inside 1800..2200 ms."
   },
   {
     "spell": 807870,
