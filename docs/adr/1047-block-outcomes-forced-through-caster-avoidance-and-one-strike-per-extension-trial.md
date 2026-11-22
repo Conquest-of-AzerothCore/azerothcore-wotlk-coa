@@ -33,7 +33,7 @@ The `caster_avoidance` option set dodge and parry only, and no kind judged an au
   unblocked hit, else the run is unmeasured; a match keeps the reading's verdict. Without `block` the steps,
   contract and model are byte-identical.
 - `kinds/block_extension_trials.py`: `trials` trials of {remove the aura, cast it, block 100, one strike, blocked and
-  unblocked counts, seven stamped presence reads}. A trial whose strike is not one blocked hit is void. Each other
+  unblocked counts, eight stamped presence reads}. A trial whose strike is not one blocked hit is void. Each other
   trial's expiry bracket must lie inside the base band (DurationIndex +-10%) or the extended band (base + extension
   effect, +-10%); outside both alerts, straddling an edge is unmeasured, no extended trial is unmeasured. The extended
   share and its 99% interval are reported, never judged (the 30% rate is a G-20 question).

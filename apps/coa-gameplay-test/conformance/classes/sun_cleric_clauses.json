@@ -5150,19 +5150,14 @@
   {
     "spell": 707629,
     "clause": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
-    "kind": "claim",
-    "claims": [
-      {
-        "claim": "If Hammer of Kings is already active, you increase the duration by 4 sec (one blocked strike per fresh application: expiry 12 s +-10% or 16 s +-10%, never other; unblocked hits never extend)",
-        "labels": [
-          "707629 behaviour_metric_delta block_extension",
-          "707629 behaviour_metric_delta block_extension_unblocked",
-          "707629 effect_value 804752e0 #2",
-          "707629 aura_amplitude_ms #3",
-          "707629 spell_duration 804751 #4"
-        ]
-      }
+    "labels": [
+      "707629 behaviour_metric_delta block_extension",
+      "707629 behaviour_metric_delta block_extension_unblocked",
+      "707629 effect_value 804752e0 #2",
+      "707629 aura_amplitude_ms #3",
+      "707629 spell_duration 804751 #4"
     ],
+    "kind": "claim",
     "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (no shield): 24 unblocked hits on one application, gone 13.8 s after the cast. The data labels of the base ledger are kept beside it."
   },
   {

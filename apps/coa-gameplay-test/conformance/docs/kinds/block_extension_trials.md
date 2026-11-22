@@ -7,7 +7,7 @@ striker cast `strike_spell` at the caster once. One strike per application: an e
 application hit several times the number of extensions, and so the expected expiry, is unknown.
 
 After the strike the blocked and unblocked hit counts are read, then the aura's presence with game-time stamps
-(`game_time_ms`) at seven offsets from the cast: inside and past the base band (`DurationIndex` of `aura`, +-10%)
+(`game_time_ms`) at eight offsets from the cast: on both sides of the base band (`DurationIndex` of `aura`, +-10%)
 and on both sides of the extended band (base + `extension_spell` Effect[`extension_effect`], +-10%). The stamps
 bracket the expiry.
 
