@@ -1,0 +1,7 @@
+source   PASSED           50.6 s  52 passed, 0 failed
+build    SKIPPED           0.0 s
+unit     SKIPPED           0.0 s
+harness  SKIPPED           0.0 s
+gameplay SKIPPED           0.0 s
+VERIFY ALL: PASSED /home/fab/Projects/coa-wt-sun-cleric-oos/.cache/verify-all/20261122-024812/report.json
+exit 0
