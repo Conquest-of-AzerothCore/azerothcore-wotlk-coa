@@ -1598,7 +1598,7 @@
     "spell": 504848,
     "clause": "Grant mercy to an ally and up to 5 nearby allies,",
     "kind": "claim",
-    "reason": "The ally half is read by targets_ally (the target and the four other grouped allies hold the aura, none in the uncast control); the reach is the stock chain targeting of a target-21 spell with EffectChainTarget 6 (Spell::SelectImplicitChainTargets, Spell.cpp:1919-1939, SearchChainTargets :2200-2300; the arm cites it as its reach_source, ally5 stands in raid subgroup 2 and TARGET_CHECK_ALLY has no group test). The cap of 5 needs a sixth candidate (allies above 5 in the ally option, tool need returned). The \"up to 5 nearby allies (the cap)\" claim has no label and keeps the clause open. Not given a final status.",
+    "reason": "The ally half is read by targets_ally (the target and the four other grouped allies hold the aura, none in the uncast control); the reach is the stock chain targeting of a target-21 spell with EffectChainTarget 6 (Spell::SelectImplicitChainTargets, Spell.cpp:1919-1939, SearchChainTargets :2200-2300; the arm cites it as its reach_source, ally5 stands in raid subgroup 2 and TARGET_CHECK_ALLY has no group test). The cap of 5 is read by targets_cap (six candidate allies, five hold the aura), ok in both runs of base pair 11 (20261122-143800 / 20261122-150434), so the clause resolves at that pair.",
     "claims": [
       {
         "claim": "Grant mercy to an ally",
