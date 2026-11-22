@@ -3696,7 +3696,7 @@
       "704579 behaviour_metric_delta blind_duration"
     ],
     "kind": "claim",
-    "reason": "Dungeon boss arm: Ramstein the Gorger 10439, a non-raid encounter credit creature flagged DUNGEON_BOSS at load (ObjectMgr.cpp:6846-6862), reads no Blinded after a landed Sunflare, against the training dummy's 5500 ms (blind_duration). Lead (observation, no change): AscensionSunCleric.cpp:312 tests only IsDungeonBoss(), and raid encounter creatures never get the flag, so a raid or world boss is not excluded. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc."
+    "reason": "Dungeon boss arm: Ramstein the Gorger 10439, a non-raid encounter credit creature flagged DUNGEON_BOSS at load (ObjectMgr.cpp:6846-6862), reads no Blinded after a landed Sunflare, against the training dummy's 5500 ms (blind_duration). Lead (observation, no change): AscensionSunCleric.cpp:312 tests only IsDungeonBoss(), and raid encounter creatures never get the flag, so a raid or world boss is not excluded. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc. Pair 2 passed twice, pair 4 flipped boss_hit_landed (alert, then ok): no counted pair, row open."
   },
   {
     "spell": 704579,
@@ -4890,13 +4890,10 @@
       },
       {
         "claim": "and Judgement Day spells",
-        "labels": [
-          "800600 behaviour_metric_delta reset_806121",
-          "800600 behaviour_metric_delta reset_806121_control"
-        ]
+        "labels": []
       }
     ],
-    "reason": "Judgement Day 806121 (RecoveryTime 60000 ms) cast, then New Day: cooldown reads 0; control with Holy Form 805301 keeps it. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc."
+    "reason": "Open: the Judgement Day 806121 arms read cooldown 0 in the control (cast of 806121 leaves no cooldown on the caster in two designs: caster target, dummy target); the reset itself cannot be told from a failed setup cast. Paragon and Chosen of the Light are proven by their own labels."
   },
   {
     "spell": 800602,
