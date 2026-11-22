@@ -8813,7 +8813,7 @@
       "variant": "dawn_ap",
       "label_suffix": "dawn_ap",
       "quote": "Increases the effectiveness of your Devotions by $s2%.",
-      "trigger_spell": 300859,
+      "trigger_spell": 572384,
       "gate_spell": 707767,
       "target": "ally",
       "metric": "attack_power",
@@ -8823,7 +8823,7 @@
       "tolerance": 0.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Dawn 300859 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, BasePoints 34 + 1 = 35. The grouped ally's attack power is 70 (reference_stats) before any cast (the control); after a real learn of 707767 and a real cast of 300859 at the ally it is 70 + 35 x 1.20 = 112, a gain of 42 within 0.5, which excludes the 35 of an unchanged Devotion. One of three tested shapes of the 24 Devotions (G-23): attack power here, spell power and cost reduction in their own entries, every one a distinct aura type under the one mask.",
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Dawn 572384 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, BasePoints 34 + 1 = 35. The grouped ally's attack power is 70 (reference_stats) before any cast (the control); after a real learn of 707767 and a real cast of 572384 at the ally it is 70 + 35 x 1.20 = 112, a gain of 42 within 0.5, which excludes the 35 of an unchanged Devotion. One of three tested shapes of the 24 Devotions (G-23): attack power here, spell power and cost reduction in their own entries, every one a distinct aura type under the one mask.",
       "measure_actor": "ally",
       "disable_regeneration": true,
       "ally_arm": {
@@ -8839,7 +8839,7 @@
       "variant": "radiance_sp",
       "label_suffix": "radiance_sp",
       "quote": "Increases the effectiveness of your Devotions by $s2%.",
-      "trigger_spell": 300862,
+      "trigger_spell": 575040,
       "gate_spell": 707767,
       "target": "ally",
       "metric": "spell_power",
@@ -8851,7 +8851,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Radiance 300862 Effect[0] aura 345, BasePoints 27 + 1 = 28 (spell power). The grouped ally's Holy spell power is 0 before any cast (the control) and 28 x 1.20 = 33.6 after a real learn of 707767 and a real cast of 300862 at the ally, within 1 (excludes the 28 of an unchanged Devotion).",
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Radiance 575040 Effect[0] aura 345, BasePoints 27 + 1 = 28 (spell power). The grouped ally's Holy spell power is 0 before any cast (the control) and 28 x 1.20 = 33.6 after a real learn of 707767 and a real cast of 575040 at the ally, within 1 (excludes the 28 of an unchanged Devotion).",
       "measure_actor": "ally",
       "disable_regeneration": true,
       "ally_arm": {
@@ -8978,7 +8978,13 @@
         ],
         "control_wait": true
       },
-      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100)."
+      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100).",
+      "phase_power": [
+        0,
+        1363,
+        1363
+      ],
+      "phase_power_in_uncast_before": true
     },
     {
       "spell": 707517,
@@ -9119,8 +9125,99 @@
       },
       "before_expected": 0,
       "expected": 10,
-      "expected_gain": 10,
-      "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons, spell_weapon_sets): each phase attacks for 5 swing intervals with both hands, 10 damaging auto attacks (as in the swings entry of 807749), so the count of 807853 damage events is 0 in the phase without the aura (control) and 10 in the phase with it. The 100% amount part is not proven by this entry."
+      "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons, spell_weapon_sets): each phase attacks for 5 swing intervals with both hands, 10 damaging auto attacks (as in the swings entry of 807749), so the count of 807853 damage events is 0 in the phase without the aura (control) and 10 in the phase with it; a swing landing at the edge of the window makes 11 (the first pair read 10 then 11, a flip of an exact read), so the count is judged in 10..12. The 100% amount part is not proven by this entry.",
+      "after_at_least": 10,
+      "after_at_most": 12
+    },
+    {
+      "spell": 706735,
+      "name": "Divine Vision (Holy damage)",
+      "kind": "hit_ratio",
+      "variant": "holy_damage",
+      "label_suffix": "holy_damage",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.04,
+      "critical": false,
+      "observe_spell": 500154,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          706735
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). Horusath Blast 500154 (Holy, SchoolMask 2) is read in a control arm and an arm with 706735 learned: the mean hit ratio is 1.04 (band 2 points, G-19: the larger of 5% of 4 and 2 points)."
+    },
+    {
+      "spell": 706735,
+      "name": "Divine Vision (Physical damage)",
+      "kind": "hit_ratio",
+      "variant": "physical_damage",
+      "label_suffix": "physical_damage",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.04,
+      "critical": false,
+      "observe_spell": 800691,
+      "cast_spell": 803913,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          706735
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). Glorious Execution 803913 is cast and its main-hand strike 800691 (Physical, SchoolMask 1) is read in a control arm and an arm with 706735 learned: the mean hit ratio is 1.04 (band 2 points)."
+    },
+    {
+      "spell": 706735,
+      "name": "Divine Vision (healing)",
+      "kind": "hit_ratio",
+      "variant": "healing",
+      "label_suffix": "healing",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.04,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          706735
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). The grouped ally's Sunlight 704911 heals (Holy) are read without and with 706735 learned on the caster, the ally held at 50% health: the mean ratio is 1.04 (band 2 points)."
     }
   ],
   "player_observations": [],
