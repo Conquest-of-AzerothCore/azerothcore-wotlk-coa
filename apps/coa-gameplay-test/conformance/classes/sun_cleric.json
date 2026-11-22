@@ -16026,6 +16026,712 @@
       "expire_ms": 500,
       "dummy_distance": 16,
       "observe_source": "Second design of the radius claim (the radius_edge entry hit a dummy 11.4 yd from the caster). 807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 14 = SpellRadius RadiusMin = RadiusMax 8 yd, RadiusPerLevel 0 ($a1 = 8); SpellEffectInfo::CalcRadius (SpellInfo.cpp:624-639) adds only SPELLMOD_RADIUS of a learned modifier, none here. One dummy stands 16 yd from the caster; the stun aura 807870 on it is read 2500 ms after the cast start (cast time 1500 ms): absent (0): 16 yd exceeds 8 yd plus the dummy combat reach 1.275 and the caster reach 1.5 (10.78 yd). Control (before): no cast, 0. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 802161,
+      "name": "Sun Gate (shift 25 yd forward)",
+      "variant": "shift",
+      "quote": "Shift $802145a1 yds forward at light speed, removing all root effects.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 25,
+      "tolerance": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "802145 Effect[0] SPELL_EFFECT_LEAP, EffectRadiusIndex 20 = 25 yd ($802145a1 = 25, the tooltip), target DEST_CASTER_FRONT. Sun Gate 802161 (RecoveryTime 90000) summons creature 50331 (SummonProperties 61) and AscensionSunClericSummons.cpp:22-43 casts 802145 on the caster. The judged reading is the caster 2D displacement from right before the cast to 1500 ms after it, judged within 1 yd of 25 on open ground. Control (before): no cast, displacement 0. Reference search 2026-11-22: coa-history (802161 23 casts and 23 summons in 2 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "shift"
+    },
+    {
+      "spell": 802161,
+      "name": "Sun Gate (frees the caster from a root)",
+      "variant": "frees_root",
+      "quote": "Shift $802145a1 yds forward at light speed, removing all root effects.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 25000,
+      "metric": "aura",
+      "fields": {
+        "spell": 339
+      },
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "strike": {
+        "spell": 339,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 1800,
+        "in_before": true
+      },
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 339
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Entangling Roots cast per phase: its application on the caster is counted, 1 after the before phase and 2 after the after phase, so the root landed in the after phase before Sun Gate"
+          }
+        ]
+      },
+      "observe_source": "Sun Gate: SunGate() calls RemoveMovementImpairingAuras(true) (AscensionSunClericSummons.cpp:41) and 802145 Effect[1] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root). A real Entangling Roots 339 (Mechanic 7) from a striker lands on the caster in both phases; the before phase (no Sun Gate cast, control) still shows the root (read 1), the after phase casts Sun Gate 1800 ms after the strike and reads the root gone (0), with the application count showing the root landed first. Reference search 2026-11-22: coa-history (802161 casts only) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "frees_root"
+    },
+    {
+      "spell": 802161,
+      "name": "Sun Gate (gate still present at 13.6 s)",
+      "variant": "gate_held",
+      "quote": "This leaves behind a Sun Gate for $d that allies can interact with to blink themselves the same distance forward.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50331
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 13600,
+      "game_time": {
+        "after": [
+          13580,
+          13680
+        ]
+      },
+      "observe_source": "Sun Gate 802161 DurationIndex 8 = 15000 ms ($d), the summon time passed to SummonCreature (AscensionSunClericSummons.cpp:27-28, TEMPSUMMON_TIMED_DESPAWN). The creature 50331 owned by the caster is present at 13.6 s of game time (window 13580..13680 ms): the duration is above 13.5 s, excluding 10% short. Control (before): no cast, 0. Reference search 2026-11-22: coa-history (802161 summon events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "gate_held"
+    },
+    {
+      "spell": 802161,
+      "name": "Sun Gate (gate gone by 16.4 s)",
+      "variant": "gate_gone",
+      "quote": "This leaves behind a Sun Gate for $d that allies can interact with to blink themselves the same distance forward.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50331
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 16400,
+      "game_time": {
+        "after": [
+          16380,
+          16470
+        ]
+      },
+      "observe_source": "Sun Gate 802161 DurationIndex 8 = 15000 ms ($d). The creature 50331 owned by the caster is gone at 16.4 s of game time (window 16380..16470 ms): the duration is below 16.5 s, excluding 10% long. With gate_held it brackets 15 s. Control (before): no cast, 0. Reference search 2026-11-22: coa-history (802161 summon events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "gate_gone"
+    },
+    {
+      "spell": 300349,
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gate_spell": 300349,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Hope (a critical heal cuts Solar Invocation by 1 s)",
+      "variant": "cd_cut",
+      "expected": 26900,
+      "tolerance": 100,
+      "observe_source": "Hope 300349 Effect[0] PROC_TRIGGER_SPELL 804512 (Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -1001, on 806159, 503651 and 800764; $/1000;804512s1 = 1 s). The script (AscensionSunClericEvents.cpp:129, :301) reduces the Solar Invocation cooldowns after a critical heal (Chance(player, id, 1000)). Solar Invocation: Conquest 800764 has RecoveryTime 30000 ms. Conquest 800764 is cast, 1600 ms later Daybreak 503624 (instant) heals the caster at 30% health with a forced spell crit rating, and the cooldown of 800764 is read 500 ms after: 30000 - 1000 - 2100 ms elapsed = 26900, within 100 ms (the 10% band is 100 ms: excludes 0 and 2 s). Control: cd_cut_control. Reference search 2026-11-22: coa-history (804512 0 events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "cd_cut"
+    },
+    {
+      "spell": 300349,
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Hope (control: a critical heal without Hope)",
+      "variant": "cd_cut_control",
+      "expected": 27900,
+      "tolerance": 100,
+      "observe_source": "Same as cd_cut with an unrelated passive (Solar Conduit 300321, which only changes the Dawn cast time) learned in place of Hope: the cooldown of 800764 reads 30000 - 2100 = 27900 within 100 ms. Reference search 2026-11-22: coa-history (804512 0 events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "cd_cut_control"
+    },
+    {
+      "spell": 520639,
+      "name": "Nysoni's Blessing (Seraphim's Light, specialization 92137)",
+      "variant": "helper_92137",
+      "quote": "Dawn will now provide an additional effect based on your specialization.",
+      "gate_spell": 520639,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92137,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520641
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 92137, helper 520641 Seraphim's Light. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "helper_92137"
+    },
+    {
+      "spell": 520639,
+      "name": "Nysoni's Blessing (Pious Flames, specialization 500207)",
+      "variant": "helper_500207",
+      "quote": "Dawn will now provide an additional effect based on your specialization.",
+      "gate_spell": 520639,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          500207,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520644
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500207, helper 520644 Pious Flames. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "helper_500207"
+    },
+    {
+      "spell": 520639,
+      "name": "Nysoni's Blessing (Holy Blessing, specialization 500209)",
+      "variant": "helper_500209",
+      "quote": "Dawn will now provide an additional effect based on your specialization.",
+      "gate_spell": 520639,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          500209,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520645
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500209, helper 520645 Holy Blessing. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "helper_500209"
+    },
+    {
+      "spell": 520639,
+      "name": "Nysoni's Blessing (Power of the Val'kyr, specialization 680627)",
+      "variant": "helper_680627",
+      "quote": "Dawn will now provide an additional effect based on your specialization.",
+      "gate_spell": 520639,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680627,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520646
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 680627, helper 520646 Power of the Val'kyr. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "helper_680627"
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Radiance lasts 6 s longer)",
+      "variant": "radiance_duration",
+      "quote": "Increases the duration of Radiance by $/1000;s1 sec.",
+      "gate_spell": 561204,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": true,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 9950,
+      "expected": 15950,
+      "tolerance": 100,
+      "wait_ms": 50,
+      "expire_ms": 10500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. A real Radiance cast on the caster reads 9950 ms 50 ms later without the passive (control, 10000 base) and 15950 with it (10000 + 6000), within 100 ms (the 10% band is 1000 ms). Reference search 2026-11-22: coa-history (800054 474 applications, 123 refreshes) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "radiance_duration"
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Dawn grants Radiance for 6 s)",
+      "variant": "dawn_gain",
+      "quote": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
+      "gate_spell": 561204,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 5950,
+      "tolerance": 100,
+      "wait_ms": 50,
+      "expire_ms": 61000,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture): without the passive no Radiance (0, control); with it Radiance 800054 reads 6001 - 50 = 5950 ms within 100 ms (the 10% band is 600 ms). Lead of batch 1b: Radiance was not applied after a Dawn cast. Reference search 2026-11-22: coa-history (800054 cast and refresh events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "dawn_gain"
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Dawn extends an active Radiance by 6 s)",
+      "variant": "dawn_extend",
+      "quote": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
+      "gate_spell": 561204,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        800054
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 8300,
+      "expected": 20300,
+      "tolerance": 300,
+      "wait_ms": 50,
+      "expire_ms": 61000,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. Radiance is cast first, 1600 ms later Dawn is cast and the Radiance duration is read 50 ms after. Control (before, no passive): 10000 - 1650 = 8350 within 300 ms, no extension. With the passive: the base is 16000 and the extension adds 6001: 16000 + 6001 - 1650 = 20351, within 300 ms (excludes the 14350 of no extension, 6 s apart). Reference search 2026-11-22: coa-history (800054 refresh events 123) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "dawn_extend"
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (first burst by 2.15 s)",
+      "variant": "burst_upper",
+      "quote": "@s:800038:0@",
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2150,
+      "game_time": {
+        "after": [
+          2140,
+          2190
+        ]
+      },
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. Radiance cast on the caster with the dummy 5 yd away inside the 8 yd radius of 800038; damage events of 800038 on the dummy are counted from the cast. One burst by 2.15 s of game time (window 2140..2190): the period is at most 2.2 s (excludes +10%). Control (before): no cast, 0. Reference search 2026-11-22: coa-history (800038 4255 damage events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_upper"
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (no burst before 1.85 s)",
+      "variant": "burst_lower",
+      "quote": "@s:800038:0@",
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1850,
+      "game_time": {
+        "after": [
+          1840,
+          1890
+        ]
+      },
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. Radiance cast on the caster with the dummy 5 yd away inside the 8 yd radius of 800038; damage events of 800038 on the dummy are counted from the cast. No burst at 1.85 s of game time (window 1840..1890): the period is above 1.8 s (excludes -10%). With burst_upper it brackets 2 s. Reference search 2026-11-22: coa-history (800038 4255 damage events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_lower"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Hegemony (burst damage at the reference stats)",
+      "variant": "burst_damage",
+      "quote": "@s:800038:0@",
+      "expected": 48,
+      "after_at_least": 47,
+      "after_at_most": 49,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Damage at AP 70: 37..38 + 0.15 x 70 = 47.5..48.5, read within 47..49. Control: no cast, 0. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Hegemony (burst damage at +10000 spell power)",
+      "variant": "burst_damage_sp",
+      "quote": "@s:800038:0@",
+      "expected": 4048,
+      "after_at_least": 4047,
+      "after_at_most": 4049,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the spell power term: +10000 spell power (harness rating, hit_arm): 37..38 + 0.4 x 10000 + 0.15 x 70 = 4047.5..4048.5 against 47.5..48.5 at 0. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage_sp"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Hegemony (burst damage at +20000 attack power)",
+      "variant": "burst_damage_ap",
+      "quote": "@s:800038:0@",
+      "expected": 3048,
+      "after_at_least": 3047,
+      "after_at_most": 3049,
+      "player_attack_power": 20000,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: +20000 attack power (harness fixture): 37..38 + 0.15 x 20070 = 3047.5..3048.5 against 47.5..48.5 at 70. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage_ap"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800038,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "name": "Hegemony (burst heal at the reference stats)",
+      "variant": "burst_heal",
+      "quote": "@s:800038:0@",
+      "expected": 35,
+      "after_at_least": 34,
+      "after_at_most": 36,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Heal at AP 70: 0.8 x (36..37 + 0.1 x 70) = 34.4..35.2, read within 34..36 on the caster held at 30% health. Control: no cast, 0. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL mean 689) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_heal"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800038,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "name": "Hegemony (burst heal at +10000 spell power)",
+      "variant": "burst_heal_sp",
+      "quote": "@s:800038:0@",
+      "expected": 1635,
+      "after_at_least": 1634,
+      "after_at_most": 1636,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the spell power term: 0.8 x (36..37 + 0.2 x 10000 + 7) = 1634.4..1635.2 against 34.4..35.2 at 0. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_heal_sp"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800038,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "name": "Hegemony (burst heal at +20000 attack power)",
+      "variant": "burst_heal_ap",
+      "quote": "@s:800038:0@",
+      "expected": 1635,
+      "after_at_least": 1634,
+      "after_at_most": 1636,
+      "player_attack_power": 20000,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: 0.8 x (36..37 + 0.1 x 20070) = 1634.4..1635.2 against 34.4..35.2 at 70. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_heal_ap"
     }
   ],
   "player_observations": [],

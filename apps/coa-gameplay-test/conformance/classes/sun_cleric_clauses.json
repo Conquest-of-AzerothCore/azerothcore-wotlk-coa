@@ -391,10 +391,12 @@
   {
     "spell": 300349,
     "clause": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+    "kind": "claim",
     "labels": [
-      "300349 effect_value 804512e0 #0"
+      "300349 behaviour_metric_delta cd_cut",
+      "300349 behaviour_metric_delta cd_cut_control"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Solar Invocation: Conquest cooldown read 26885 ms against 26900 expected (30000 - 1000 - 2100) after a forced critical Daybreak, 27885 against 27900 with an unrelated passive in place of Hope (control); the 1 s cut lies within the 100 ms band. The once-per-second clause 31 stays open: two critical heal events within 1 s need a second heal target or a heal faster than the 1500 ms global cooldown."
   },
   {
     "spell": 300349,
@@ -1280,14 +1282,46 @@
   {
     "spell": 520639,
     "clause": "Dawn will now provide an additional effect based on your specialization.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "520639 behaviour_metric_delta helper_92137",
+      "520639 behaviour_metric_delta helper_500207",
+      "520639 behaviour_metric_delta helper_500209",
+      "520639 behaviour_metric_delta helper_680627"
+    ],
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Helper aura read on the caster 500 ms after Dawn: absent without Nysoni's Blessing, present with it for the four specializations (92137, 500207, 500209, 680627; the tooltip's first id 800586 is granted nowhere in the server or the references, and with 800586 as the specialization no helper is cast, prove1 of this chunk, so 92137 is the subject). Specialization auras are precondition fixtures (set_aura), not the subject. Reference search: coa-history 520641 57 applications in 4 logs, nothing beyond the tooltip."
   },
   {
     "spell": 520639,
     "clause": "$?s800586[][]$?s500207[][]$?s500209[][]$?s680627[][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Seraphim's Light with the obtainable specialization 92137 (the tooltip's 800586 is granted nowhere)",
+        "labels": [
+          "520639 behaviour_metric_delta helper_92137"
+        ]
+      },
+      {
+        "claim": "Pious Flames with specialization 500207",
+        "labels": [
+          "520639 behaviour_metric_delta helper_500207"
+        ]
+      },
+      {
+        "claim": "Holy Blessing with specialization 500209",
+        "labels": [
+          "520639 behaviour_metric_delta helper_500209"
+        ]
+      },
+      {
+        "claim": "Power of the Val'kyr with specialization 680627",
+        "labels": [
+          "520639 behaviour_metric_delta helper_680627"
+        ]
+      }
+    ],
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Same entries, one per branch of the specialization conditional."
   },
   {
     "spell": 520647,
@@ -1814,50 +1848,91 @@
   {
     "spell": 561204,
     "clause": "Increases the duration of Radiance by $/1000;s1 sec.",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value e0 #0"
+      "561204 behaviour_metric_delta radiance_duration"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance duration 9944 ms without the passive and 15944 with it (10000 + 6000), band 100 ms."
   },
   {
     "spell": 561204,
     "clause": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value 302907e0 #1"
+      "561204 behaviour_metric_delta dawn_gain"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance applied by Dawn reads 5945 ms (6001 - 50) with the passive and is absent without it; the batch 1b lead (Radiance not applied after a Dawn cast) does not reproduce."
   },
   {
     "spell": 561204,
     "clause": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value 302907e0 #2"
+      "561204 behaviour_metric_delta dawn_extend"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance cast, Dawn 1600 ms later: duration 8338 without the passive (control, no extension) and 20339 with it (16000 + 6001 - 1650), band 300 ms, no extension would read 14350."
   },
   {
     "spell": 561204,
     "clause": "Every $/1000;800054t1 sec you burst with light,",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value #5"
+      "561204 behaviour_metric_delta burst_upper",
+      "561204 behaviour_metric_delta burst_lower"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Damage events of the burst: none by 1.85 s, one by 2.15 s (game time), so the period lies in (1.8, 2.2) s around 2 s."
   },
   {
     "spell": 561204,
     "clause": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
-    "labels": [
-      "561204 effect_value 800038e0 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base healing",
+        "labels": [
+          "561204 behaviour_metric_delta burst_heal"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_heal_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_heal_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Burst heal 35 at the reference stats (expected 34.4..35.2), 1634-1635 at +10000 spell power and 1634 at +20000 attack power (expected 1634.4..1635.2): the heal terms 0.2 SP and 0.1 AP are proven by their contrast arms against the base."
   },
   {
     "spell": 561204,
     "clause": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
-    "labels": [
-      "561204 effect_value 800038e1 #4"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base damage",
+        "labels": [
+          "561204 behaviour_metric_delta burst_damage"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_damage_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_damage_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Burst damage 48 at the reference stats (expected 47.5..48.5), 4047 at +10000 spell power (4047.5..4048.5) and 3048 at +20000 attack power (3047.5..3048.5): the damage terms 0.4 SP and 0.15 AP are proven by their contrast arms against the base."
   },
   {
     "spell": 561327,
@@ -4021,10 +4096,22 @@
   {
     "spell": 802161,
     "clause": "Shift $802145a1 yds forward at light speed, removing all root effects.",
-    "labels": [
-      "802161 effect_radius 802145e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "shift 25 yds forward",
+        "labels": [
+          "802161 behaviour_metric_delta shift"
+        ]
+      },
+      {
+        "claim": "removing all root effects",
+        "labels": [
+          "802161 behaviour_metric_delta frees_root"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Caster displacement 25 yd after the cast (0 without it), and the Entangling Roots 339 root on the caster gone after Sun Gate (present in the control phase, application counted)."
   },
   {
     "spell": 802161,
