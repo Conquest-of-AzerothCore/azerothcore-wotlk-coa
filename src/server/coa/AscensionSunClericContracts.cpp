@@ -25,6 +25,10 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
     if (id == 803493)
         info->Effects[EFFECT_0].ChainTarget = 0;
+    if (id == ValianceExtraAttack)
+        info->ExcludeTargetAuraSpell = 0;
+    if (id == ValianceMarker)
+        info->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
     if (id == Rejuvenating)
         for (auto& effect : info->Effects)
             if (effect.IsAura())
