@@ -5765,7 +5765,8 @@ private:
                 return object && object->IsInWorld();
             if (metric == "dynamic_object_radius" || metric == "dynamic_object_size")
             {
-                Require(object != nullptr, "Ground-effect radius or size needs an existing ground effect");
+                if (!object)
+                    return 0.0;
                 return metric == "dynamic_object_radius" ? object->GetRadius() : object->GetObjectSize();
             }
             if (metric == "dynamic_object_height")

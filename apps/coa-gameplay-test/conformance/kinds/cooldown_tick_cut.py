@@ -13,9 +13,10 @@ ORDER = 48
 
 TICK_CUT_METRIC = 'cooldown_tick_cut_pct'
 PHASE_SETTLE_MS = 500
-CAST_SETTLE_MS = 100
 MIN_READS = 3
-MAX_READS = 20
+MAX_READS = 40
+MIN_READ_STEP_MS = 100
+TICK_EXCESS_MS = 50
 
 
 @dataclass(frozen=True)
@@ -26,7 +27,8 @@ class CooldownTickCutSpec:
     cooled_spell: int
     phase_aura: int
     expected_pct: float
-    reads: int = 4
+    reads: int = 13
+    read_step_ms: int = 250
     amplitude_effect: int = 0
     cast_power: int | None = None
     label_suffix: str = 'tick_cut'
@@ -34,12 +36,13 @@ class CooldownTickCutSpec:
 
 def cooldown_tick_cut_spec(entry: dict) -> CooldownTickCutSpec:
     spec = CooldownTickCutSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['cooled_spell']),
-                               int(entry['phase_aura']), float(entry['expected_pct']), int(entry.get('reads', 4)),
-                               int(entry.get('amplitude_effect', 0)), entry.get('cast_power'),
-                               entry.get('label_suffix', 'tick_cut'))
-    if not MIN_READS <= spec.reads <= MAX_READS or spec.amplitude_effect not in (0, 1, 2):
-        raise ValueError(f'{spec.spell} cooldown_tick_cut reads {MIN_READS} to {MAX_READS} times the cooldown of '
-                         f'one aura effect 0-2')
+                               int(entry['phase_aura']), float(entry['expected_pct']), int(entry.get('reads', 13)),
+                               int(entry.get('read_step_ms', 250)), int(entry.get('amplitude_effect', 0)),
+                               entry.get('cast_power'), entry.get('label_suffix', 'tick_cut'))
+    if (not MIN_READS <= spec.reads <= MAX_READS or spec.amplitude_effect not in (0, 1, 2)
+            or spec.read_step_ms < MIN_READ_STEP_MS):
+        raise ValueError(f'{spec.spell} cooldown_tick_cut reads {MIN_READS} to {MAX_READS} times, at least '
+                         f'{MIN_READ_STEP_MS} ms apart, the cooldown of one aura effect 0-2')
     if not 0 <= spec.expected_pct < 100:
         raise ValueError(f'{spec.spell} cooldown_tick_cut expects a cut per tick of 0 to 100%, not '
                          f'{spec.expected_pct:g}')
@@ -61,29 +64,33 @@ def cooldown_tick_cut_scenario(class_file: dict, spec: CooldownTickCutSpec) -> t
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.expected_pct)
     amplitude = amplitude_ms(records, spec)
+    if spec.read_step_ms >= amplitude or (spec.reads - 1) * spec.read_step_ms < 2 * amplitude:
+        raise ValueError(f'{spec.spell} cooldown_tick_cut reads more often than the {amplitude} ms amplitude and over '
+                         f'at least two amplitudes')
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in (spec.cooled_spell, spec.spell)]
              + [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.phase_aura, 'stacks': 1},
                 {'action': 'wait', 'label': 'phase settle', 'ms': PHASE_SETTLE_MS}])
-    steps += hit_ratio_cast(records, spec.cooled_spell, CASTER, TARGET, spec.cast_power)[:-1]
-    steps.append({'action': 'wait', 'label': 'cast settle', 'ms': CAST_SETTLE_MS})
+    steps += hit_ratio_cast(records, spec.cooled_spell, CASTER, TARGET, spec.cast_power)
     reads = []
     for index in range(spec.reads):
         labels = [tick_label(spec, f'read {index} {name}') for name in ('time', 'cooldown')]
         steps += [measurement(labels[0], CASTER, 'game_time_ms'),
                   measurement(labels[1], CASTER, 'cooldown_ms', spell=spec.cooled_spell)]
         if index + 1 < spec.reads:
-            steps.append({'action': 'wait', 'label': f'tick interval {index}', 'ms': amplitude})
+            steps.append({'action': 'wait', 'label': f'read interval {index}', 'ms': spec.read_step_ms})
         reads.append(labels)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cooldown tick cut',
         'contract': (f'{spec.spell} is learned with {spec.phase_aura} on the caster, then {spec.cooled_spell} is '
-                     f'cast at the dummy and its remaining cooldown is read {spec.reads} times, {amplitude} ms apart '
-                     f'(the amplitude of {spec.spell} effect {spec.amplitude_effect}), each read with the game time. '
-                     f'Each interval of exactly one amplitude holds exactly one tick wherever it falls, so the cut '
-                     f'per tick is bracketed by r2 / (r1 - D) and (r2 + D) / r1 with no tick epoch; every bracket '
-                     f'must lie inside the G-19 band of {spec.expected_pct:g}%.'),
+                     f'cast at the dummy and its remaining cooldown is read {spec.reads} times, {spec.read_step_ms} ms '
+                     f'apart, each read with the game time. An interval shorter than the {amplitude} ms amplitude of '
+                     f'{spec.spell} effect {spec.amplitude_effect} holds at most one tick, seen as a drop more than '
+                     f'{TICK_EXCESS_MS} ms beyond the time elapsed; its cut is bracketed by 1 - (r2 + D) / r1 and '
+                     f'1 - r2 / (r1 - D) with no tick epoch. Every tick bracket must lie inside the G-19 band of '
+                     f'{spec.expected_pct:g}%, and the ticks found must number the elapsed time over the amplitude, '
+                     f'rounded down or up (none when 0% is expected).'),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -111,23 +118,29 @@ def cooldown_tick_cut_verdict(base, run, model: dict):
     brackets = []
     for (time1, first), (time2, second) in zip(rows, rows[1:]):
         elapsed = time2 - time1
-        if elapsed != amplitude:
+        if not 0 < elapsed < amplitude:
             return replace(base, status='unmeasured',
-                           explanation=f'an interval lasted {elapsed:g} ms, not one amplitude of {amplitude:g} ms')
+                           explanation=f'an interval lasted {elapsed:g} ms, not between 0 and the {amplitude:g} ms '
+                                       f'amplitude')
         if first <= elapsed or second <= 0:
             return replace(base, status='unmeasured',
                            explanation=f'the cooldown ran out during the reads ({first:g} then {second:g} ms)')
-        brackets.append(interval_bracket(first, second, elapsed))
+        if first - elapsed - second > TICK_EXCESS_MS:
+            brackets.append(interval_bracket(first, second, elapsed))
     expected = float(model['expected'])
     band = bonus_band(expected)
-    inside = all(expected - band <= low and high <= expected + band for low, high in brackets)
-    outside = any(high < expected - band or low > expected + band for low, high in brackets)
+    span = rows[-1][0] - rows[0][0]
+    allowed = (0, 0) if expected == 0 else (int(span // amplitude), int(-(-span // amplitude)))
+    counted = allowed[0] <= len(brackets) <= allowed[1]
+    inside = counted and all(expected - band <= low and high <= expected + band for low, high in brackets)
+    outside = not counted or any(high < expected - band or low > expected + band for low, high in brackets)
     status = 'ok' if inside else 'alert' if outside else 'unmeasured'
-    measured = sum((low + high) / 2 for low, high in brackets) / len(brackets)
-    text = ', '.join(f'{low:.2f} to {high:.2f}' for low, high in brackets)
+    measured = sum((low + high) / 2 for low, high in brackets) / len(brackets) if brackets else 0.0
+    text = ', '.join(f'{low:.2f} to {high:.2f}' for low, high in brackets) or 'none'
     return replace(base, status=status, measured=measured, expected=expected, low=expected - band,
                    high=expected + band,
-                   explanation=f'cut per tick {text}% over {len(brackets)} intervals against {expected:g} +- {band:g}')
+                   explanation=f'{len(brackets)} ticks in {span:g} ms (allowed {allowed[0]} to {allowed[1]}), cut per '
+                               f'tick {text}% against {expected:g} +- {band:g}')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

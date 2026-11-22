@@ -385,6 +385,50 @@
           "source": "680663 names 504876 Effect[0] SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT (166) BasePoints 4 + 1 = 5 ($504876s1%) of the base mana; the base mana of class 27 at level 60 is 1363 (player_class_stats row; the effective table may be ascension_class_stats when CoA.ClassLevelSixtyStats.Enable is 1, rev_20261105_95_coa_class_level_sixty_stats.sql:19, not read here), 5% of 1363 = 68.15, whole mana 68 per energize. Reference search 2026-11-22: coa-history spell 504876: 0 events"
         }
       ]
+    },
+    {
+      "aura": 802935,
+      "name": "Sunsworn",
+      "tooltip": "Increases your Physical damage dealt by $s1% and auto attacks now have a $h% chance to restore $504619s1% of your maximum mana.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "attack"
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "trigger_text": "auto attacks",
+      "event_metric": "spell_energize_count",
+      "proc_spell": 504619,
+      "events_per_proc": 1,
+      "proc_spell_source": "AscensionSunClericEvents.cpp:323: case 802935 calls Mana(player, CalculatePct(player->GetMaxPower(POWER_MANA), Amount(504619)), 504619): the proc is the Energize events of 504619 on the caster (Sun Cleric ADR 0019).",
+      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 802935): AscensionSunClericEvents.cpp:124 returns damage && automatic && Chance(player, 802935); Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 10) once per automatic damage event of either hand with no internal cooldown (spell_proc row of 802935: Chance 100). Both hands roll, so the trials are both hands' damaging auto attacks (trial_hand both, the harness sum); the earlier main-hand trials divided both hands' events by one hand (pair 20261122-124700 / -125240, 0.195 and 0.194).",
+      "dbc": {
+        "802935": {
+          "ProcChance": 10,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "802935": {
+          "ProcFlags": 1048575,
+          "Chance": 100,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0,
+      "energize_amounts": [
+        {
+          "power": 0,
+          "percent_of_max": 3,
+          "source": "504619 Effect[0] SPELL_EFFECT_ENERGIZE_PCT BasePoints 2 + 1 = 3 ($504619s1), the percent of the caster's maximum mana"
+        }
+      ],
+      "trial_hand": "both"
     }
   ],
   "triggers": [],
@@ -27411,6 +27455,704 @@
         }
       ],
       "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. The without arm drops both the Solar Concord cast and the phase aura, so it proves the reset by the cast and not the words \"while in Sunset\": that phase condition stays open (tool need: a cost_gate arm with the cast in the other phase, expected refused)."
+    },
+    {
+      "spell": 704585,
+      "name": "Gleaming Vigil (Physical damage taken at 79% entered from 50%, the base 5% only)",
+      "kind": "taken_hit",
+      "variant": "taken_band_from_below",
+      "label_suffix": "taken_band_from_below",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "plus an additional $s2% while above 80% health.",
+      "strike_spell": 92559,
+      "caster_health_pct": 79,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704585
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704585,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 707769,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704585
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704585,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 707769,
+              "equals": 0
+            }
+          ]
+        }
+      ],
+      "observe_source": "704585 Gleaming Vigil: Effect[0] aura 87 Physical -5% always; the helper 707769 (aura 87 -5%) is kept only while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: helper absent, ratio 0.95 against the control arm (704585 unlearned).",
+      "caster_health_from_pct": 50
+    },
+    {
+      "spell": 704585,
+      "name": "Gleaming Vigil (Physical damage taken at 81% entered from 50%, 5% plus 5%)",
+      "kind": "taken_hit",
+      "variant": "taken_above_from_below",
+      "label_suffix": "taken_above_from_below",
+      "judge": "damage_ratio",
+      "expected": 0.9025,
+      "quote": "plus an additional $s2% while above 80% health.",
+      "strike_spell": 92559,
+      "caster_health_pct": 81,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704585
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704585,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 707769,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704585
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704585,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 707769,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "704585 Gleaming Vigil: Effect[0] aura 87 Physical -5% always; the helper 707769 (aura 87 -5%) is kept only while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: helper present, ratio 0.9025 against the control arm (704585 unlearned).",
+      "caster_health_from_pct": 50
+    },
+    {
+      "spell": 704585,
+      "name": "Gleaming Vigil (Physical damage taken at 79% entered from 90%: off inside the band from above (aura state 28))",
+      "kind": "taken_hit",
+      "variant": "taken_off_band_from_above",
+      "label_suffix": "taken_off_band_from_above",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "plus an additional $s2% while above 80% health.",
+      "strike_spell": 92559,
+      "caster_health_pct": 79,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704585
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704585,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 707769,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704585
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704585,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 707769,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "704585 Gleaming Vigil: Effect[0] aura 87 Physical -5% always; the helper 707769 (aura 87 -5%) is kept only while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: helper present, its effect off, ratio 0.95. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side.",
+      "caster_health_from_pct": 90
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (on above 80%: Glare cast time at 81% entered from 50%)",
+      "variant": "glare_edge_on_above_80",
+      "label_suffix": "glare_edge_on_above_80",
+      "caster_health_pct": 81,
+      "before_expected": 1500,
+      "expected": 0,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
+      "caster_health_from": 50,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (off inside the band from above (aura state 28): Glare cast time at 79% entered from 90%)",
+      "variant": "glare_edge_off_band_from_above",
+      "label_suffix": "glare_edge_off_band_from_above",
+      "caster_health_pct": 79,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side.",
+      "caster_health_from": 90,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (off at or below 75%: Glare cast time at 75% entered from 90%)",
+      "variant": "glare_edge_off_at_75",
+      "label_suffix": "glare_edge_off_at_75",
+      "caster_health_pct": 75,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
+      "caster_health_from": 90,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (off inside the band from below: Glare cast time at 79% entered from 50%)",
+      "variant": "glare_edge_off_band_from_below",
+      "label_suffix": "glare_edge_off_band_from_below",
+      "caster_health_pct": 79,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
+      "caster_health_from": 50,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 520024,
+      "name": "Valkyr's Calling (immune to physical attacks, cast at an enemy)",
+      "kind": "immunity",
+      "variant": "enemy_physical",
+      "target": "caster",
+      "cast_target": "dummy",
+      "aura": 520025,
+      "quote": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
+      "effects": [
+        {
+          "spell": 1715,
+          "words": "physical attacks"
+        }
+      ],
+      "dummy_distance": 3,
+      "observe_source": "520024 is cast at the dummy (TARGET_UNIT_TARGET_ENEMY); its effects are dummies at load (AscensionSunClericContracts.cpp:238-241) and the cast hook calls Valkyr() (AscensionSunClericAbilities.cpp:276-277, AscensionSunClericSummons.cpp:44-52), which casts 520025 on the caster: SCHOOL_IMMUNITY MiscValue 127 (all schools), LEAP_BACK and feather fall, DurationIndex 39 (2000 ms). The leap is a client-acknowledged knockback, so the caster stays in range of the dummy. 1715 (Hamstring, Physical, melee class) is applied by the dummy before (present), cast 3 times during the 2 s window (absent) and after expiry (present)."
+    },
+    {
+      "spell": 520024,
+      "name": "Valkyr's Calling (immune to spells, cast at an enemy)",
+      "kind": "immunity",
+      "variant": "enemy_spells",
+      "target": "caster",
+      "cast_target": "dummy",
+      "aura": 520025,
+      "quote": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
+      "effects": [
+        {
+          "spell": 5782,
+          "words": "spells"
+        }
+      ],
+      "observe_source": "520024 is cast at the dummy (TARGET_UNIT_TARGET_ENEMY); its effects are dummies at load (AscensionSunClericContracts.cpp:238-241) and the cast hook calls Valkyr() (AscensionSunClericAbilities.cpp:276-277, AscensionSunClericSummons.cpp:44-52), which casts 520025 on the caster: SCHOOL_IMMUNITY MiscValue 127 (all schools), LEAP_BACK and feather fall, DurationIndex 39 (2000 ms). The leap is a client-acknowledged knockback, so the caster stays in range of the dummy. 5782 (Fear, Shadow, magic class) is applied by the dummy before (present), cast 3 times during the 2 s window (absent) and after expiry (present)."
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (Horusath Blast 500154 (RecoveryTime 25000) in Sunrise 500477: 10% per tick)",
+      "kind": "cooldown_tick_cut",
+      "label_suffix": "tick_cut_sunrise",
+      "quote": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
+      "cooled_spell": 500154,
+      "phase_aura": 500477,
+      "expected_pct": 10,
+      "cast_power": 1363,
+      "observe_source": "300361 Day Cycles: Effect[0] PERIODIC_TRIGGER_SPELL 301176 every 1000 ms, made a periodic dummy (AscensionSunClericContracts.cpp:266-272); each tick (AscensionSunClericAuras.cpp:229-235) calls ReducePercent(player, 500154 in Sunrise or 806477 in Sunset, |301176 s2|), cutting that percent of the remaining cooldown (AscensionSunCleric.cpp:206-212). 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2). Horusath Blast 500154 (RecoveryTime 25000) in Sunrise 500477: 10% per tick.",
+      "variant": "tick_cut_sunrise"
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (control: Horusath Blast in Sunset 500511, no cut)",
+      "kind": "cooldown_tick_cut",
+      "label_suffix": "tick_cut_sunrise_control",
+      "quote": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
+      "cooled_spell": 500154,
+      "phase_aura": 500511,
+      "expected_pct": 0,
+      "cast_power": 1363,
+      "observe_source": "300361 Day Cycles: Effect[0] PERIODIC_TRIGGER_SPELL 301176 every 1000 ms, made a periodic dummy (AscensionSunClericContracts.cpp:266-272); each tick (AscensionSunClericAuras.cpp:229-235) calls ReducePercent(player, 500154 in Sunrise or 806477 in Sunset, |301176 s2|), cutting that percent of the remaining cooldown (AscensionSunCleric.cpp:206-212). 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2). control: Horusath Blast in Sunset 500511, no cut.",
+      "variant": "tick_cut_sunrise_control"
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (Rapture 806477 (RecoveryTime 20000) in Sunset 500511: 10% per tick)",
+      "kind": "cooldown_tick_cut",
+      "label_suffix": "tick_cut_sunset",
+      "quote": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
+      "cooled_spell": 806477,
+      "phase_aura": 500511,
+      "expected_pct": 10,
+      "cast_power": 1363,
+      "observe_source": "300361 Day Cycles: Effect[0] PERIODIC_TRIGGER_SPELL 301176 every 1000 ms, made a periodic dummy (AscensionSunClericContracts.cpp:266-272); each tick (AscensionSunClericAuras.cpp:229-235) calls ReducePercent(player, 500154 in Sunrise or 806477 in Sunset, |301176 s2|), cutting that percent of the remaining cooldown (AscensionSunCleric.cpp:206-212). 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2). Rapture 806477 (RecoveryTime 20000) in Sunset 500511: 10% per tick.",
+      "variant": "tick_cut_sunset"
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (control: Rapture in Sunrise 500477, no cut)",
+      "kind": "cooldown_tick_cut",
+      "label_suffix": "tick_cut_sunset_control",
+      "quote": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
+      "cooled_spell": 806477,
+      "phase_aura": 500477,
+      "expected_pct": 0,
+      "cast_power": 1363,
+      "observe_source": "300361 Day Cycles: Effect[0] PERIODIC_TRIGGER_SPELL 301176 every 1000 ms, made a periodic dummy (AscensionSunClericContracts.cpp:266-272); each tick (AscensionSunClericAuras.cpp:229-235) calls ReducePercent(player, 500154 in Sunrise or 806477 in Sunset, |301176 s2|), cutting that percent of the remaining cooldown (AscensionSunCleric.cpp:206-212). 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2). control: Rapture in Sunrise 500477, no cut.",
+      "variant": "tick_cut_sunset_control"
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (a critical heal lets Solar Invocation: Conquest go 1 s early)",
+      "kind": "cost_gate",
+      "variant": "cd_gate",
+      "label_suffix": "cd_gate",
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "after_casts": [
+        [
+          503624,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "cast_auras": [
+        {
+          "spell": 503624,
+          "auras": [
+            10043
+          ],
+          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture; the claim measured is the cooldown cut a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
+        }
+      ],
+      "observe_source": "Hope 300349 procs on an effective critical heal (AscensionSunClericEvents.cpp:51, :129) and calls ReduceInvocations(player, |804512 s1| = 1000 ms) (Events.cpp:304). The caster is set to 30% health before every arm's Daybreak 503624 so the heal is effective; the gated Solar Invocation is attempted 1000 ms early: refused without Hope, accepted with it, refused one step beyond."
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (a critical heal lets Solar Invocation: Resplendence go 1 s early)",
+      "kind": "cost_gate",
+      "variant": "cd_gate_806159",
+      "label_suffix": "cd_gate_806159",
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gated_spell": 806159,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "after_casts": [
+        [
+          503624,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "cast_auras": [
+        {
+          "spell": 503624,
+          "auras": [
+            10043
+          ],
+          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture; the claim measured is the cooldown cut a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
+        }
+      ],
+      "observe_source": "Hope 300349 procs on an effective critical heal (AscensionSunClericEvents.cpp:51, :129) and calls ReduceInvocations(player, |804512 s1| = 1000 ms) (Events.cpp:304). The caster is set to 30% health before every arm's Daybreak 503624 so the heal is effective; the gated Solar Invocation is attempted 1000 ms early: refused without Hope, accepted with it, refused one step beyond."
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (a critical heal lets Solar Invocation: Revelation go 1 s early)",
+      "kind": "cost_gate",
+      "variant": "cd_gate_503651",
+      "label_suffix": "cd_gate_503651",
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gated_spell": 503651,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "caster",
+      "after_casts": [
+        [
+          503624,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "cast_auras": [
+        {
+          "spell": 503624,
+          "auras": [
+            10043
+          ],
+          "reason": "10043 (QA Test +100% School Crit chance, aura 71 MiscValue 127) is set before the Daybreak cast so the heal is critical: a precondition fixture; the claim measured is the cooldown cut a critical heal applies. 984954 is not used: its Effect[1] aura 57 -1000 spell crit stops a heal crit."
+        }
+      ],
+      "observe_source": "Hope 300349 procs on an effective critical heal (AscensionSunClericEvents.cpp:51, :129) and calls ReduceInvocations(player, |804512 s1| = 1000 ms) (Events.cpp:304). The caster is set to 30% health before every arm's Daybreak 503624 so the heal is effective; the gated Solar Invocation is attempted 1000 ms early: refused without Hope, accepted with it, refused one step beyond."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (reach, caster at 11.4 yd holds the aura)",
+      "kind": "metric_delta",
+      "variant": "reach_in",
+      "label_suffix": "reach_in",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "dummy",
+      "dummy_distance": 11.4,
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "aura",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "DynObjAura::FillTargetMap (SpellAuras.cpp:3019, :3041) -> AnyFriendlyUnitInObjectRangeCheck (GridNotifiers.h:998-1014) -> IsWithinDistInMap -> _IsWithinDist (Object.cpp:1257-1264) adds both object sizes to the radius: reach = radius 10 (EffectRadiusIndex 13) + dynamic object size 0.389 (DEFAULT_WORLD_OBJECT_SIZE x scale 1, Object.cpp:2898-2901, DynamicObject.cpp:112) + caster combat reach 1.5 (race 1, the Templar combat_reach read) = 11.889 yd from the circle centre (the dummy). The caster stands 11.4 yd from the centre: aura present; the pair brackets 11.889 within 1 yd."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (reach, caster at 12.4 yd does not)",
+      "kind": "metric_delta",
+      "variant": "reach_out",
+      "label_suffix": "reach_out",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "dummy",
+      "dummy_distance": 12.4,
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "aura",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "DynObjAura::FillTargetMap (SpellAuras.cpp:3019, :3041) -> AnyFriendlyUnitInObjectRangeCheck (GridNotifiers.h:998-1014) -> IsWithinDistInMap -> _IsWithinDist (Object.cpp:1257-1264) adds both object sizes to the radius: reach = radius 10 (EffectRadiusIndex 13) + dynamic object size 0.389 (DEFAULT_WORLD_OBJECT_SIZE x scale 1, Object.cpp:2898-2901, DynamicObject.cpp:112) + caster combat reach 1.5 (race 1, the Templar combat_reach read) = 11.889 yd from the circle centre (the dummy). The caster stands 12.4 yd from the centre: aura absent; the pair brackets 11.889 within 1 yd."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (circle radius read)",
+      "kind": "metric_delta",
+      "variant": "dynobj_radius",
+      "label_suffix": "dynobj_radius",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "dummy",
+      "dummy_distance": 9,
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "dynamic_object_radius",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.001,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "DynObjAura::FillTargetMap (SpellAuras.cpp:3019, :3041) -> AnyFriendlyUnitInObjectRangeCheck (GridNotifiers.h:998-1014) -> IsWithinDistInMap -> _IsWithinDist (Object.cpp:1257-1264) adds both object sizes to the radius: reach = radius 10 (EffectRadiusIndex 13) + dynamic object size 0.389 (DEFAULT_WORLD_OBJECT_SIZE x scale 1, Object.cpp:2898-2901, DynamicObject.cpp:112) + caster combat reach 1.5 (race 1, the Templar combat_reach read) = 11.889 yd from the circle centre (the dummy). This entry reads the dynamic_object_radius term (read-only harness metric, 0 without the circle in the before phase)."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (circle object size read)",
+      "kind": "metric_delta",
+      "variant": "dynobj_size",
+      "label_suffix": "dynobj_size",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "dummy",
+      "dummy_distance": 9,
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "dynamic_object_size",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 0.389,
+      "tolerance": 0.001,
+      "wait_ms": 1700,
+      "expire_ms": 500,
+      "observe_source": "DynObjAura::FillTargetMap (SpellAuras.cpp:3019, :3041) -> AnyFriendlyUnitInObjectRangeCheck (GridNotifiers.h:998-1014) -> IsWithinDistInMap -> _IsWithinDist (Object.cpp:1257-1264) adds both object sizes to the radius: reach = radius 10 (EffectRadiusIndex 13) + dynamic object size 0.389 (DEFAULT_WORLD_OBJECT_SIZE x scale 1, Object.cpp:2898-2901, DynamicObject.cpp:112) + caster combat reach 1.5 (race 1, the Templar combat_reach read) = 11.889 yd from the circle centre (the dummy). This entry reads the dynamic_object_size term (read-only harness metric, 0 without the circle in the before phase)."
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Blinded stacks on Sneed 643)",
+      "kind": "metric_delta",
+      "variant": "blind_stacks_dungeon_boss",
+      "label_suffix": "blind_stacks_dungeon_boss",
+      "quote": "stacking $505342u times.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Sneed 643, the Deadmines encounter 162 kill credit (rank 3; the Templar 705306 precedent). Expected 0 stacks after the learn.",
+      "target_entry": 643
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (landing control: Vow of the Eclipse on Sneed 643)",
+      "kind": "metric_delta",
+      "variant": "eclipse_lands_dungeon_boss",
+      "label_suffix": "eclipse_lands_dungeon_boss",
+      "quote": "stacking $505342u times.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505340,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Sneed 643, the Deadmines encounter 162 kill credit (rank 3; the Templar 705306 precedent). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
+      "target_entry": 643
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Blinded stacks on Harvest Golem 36)",
+      "kind": "metric_delta",
+      "variant": "blind_stacks_normal",
+      "label_suffix": "blind_stacks_normal",
+      "quote": "stacking $505342u times.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). Expected 5 stacks after the learn.",
+      "target_entry": 36
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (landing control: Vow of the Eclipse on Harvest Golem 36)",
+      "kind": "metric_delta",
+      "variant": "eclipse_lands_normal",
+      "label_suffix": "eclipse_lands_normal",
+      "quote": "stacking $505342u times.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505340,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
+      "target_entry": 36
     }
   ],
   "player_observations": [],

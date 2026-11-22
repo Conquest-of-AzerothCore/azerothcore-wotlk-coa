@@ -1069,8 +1069,8 @@ charmer holds the player (`Unit::IsCharmed`), else 0.
 `dynamic_object_height` reads how far, in yards, the player's oldest ground effect with that `spell` sits above
 the map's top terrain/collision height at its X/Y; it fails when no such ground effect exists.
 `dynamic_object_radius` reads that ground effect's radius field in yards (the area its aura fills), and
-`dynamic_object_size` its object size (the term the distance check adds to the unit's combat reach); both fail
-when no such ground effect exists and change nothing.
+`dynamic_object_size` its object size (the term the distance check adds to the unit's combat reach); both read
+zero when no such ground effect exists and change nothing.
 `display_id` reads the unit's selected server display ID; it does not verify client rendering or animations.
 `target_entry` reads the entry of the unit's current target, or zero without one.
 `global_cooldown_ms` requires `spell` and reads the remaining native global cooldown for its recovery category.
