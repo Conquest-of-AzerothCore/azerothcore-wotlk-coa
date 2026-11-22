@@ -12899,6 +12899,345 @@
         ]
       },
       "observe_source": "681448 Last Call Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 999 (+1000 ms, $/1000;s1 = 1 s), EffectSpellClassMask word 2 = 2097152 = SpellFamilyFlags[2] of Valkyr's Calling 520024 and of its flight aura 520025 (DurationIndex 39, 2000 ms), so 3000 ms with the passive. A real Valkyr's Calling cast at the dummy, the aura 520025 on the caster read in game time (window 3305..3350 ms after the cast): gone 10 ms after a total 10% above 3000 (3300) would have ended. The before phase (no passive, control) reads 0 at both times (2000 ms). Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the duration of Valkyr's Calling by 1 sec.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 300314,
+      "name": "Pure Light (damage while above 80% health)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "While above 80% health you now deal $301341s1% increased damage and healing.",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 500154,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300314
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "300314 Pure Light Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 301341; the script keeps the helper 301341 on the caster while it is above 80% health (on above 80, off at 75 or below: AscensionSunCleric.cpp:361-373); 301341 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE misc 127 and Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 127, BasePoints 9 + 1 = 10 ($301341s1). Horusath Blast 500154 (Holy) is read in a control arm and an arm with 300314 learned, the caster at full health: the mean hit ratio is 1.10 (band 2 points, G-19: the larger of 5% of 10 and 2 points). Reference search 2026-11-22: coa-history spell 300314: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"While above 80% health you now deal 10% increased damage and healing.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 300314,
+      "name": "Pure Light (healing while above 80% health)",
+      "kind": "hit_ratio",
+      "variant": "healing",
+      "label_suffix": "healing",
+      "quote": "While above 80% health you now deal $301341s1% increased damage and healing.",
+      "expected": 1.1,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          300314
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "300314 Pure Light Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 301341; the script keeps the helper 301341 on the caster while it is above 80% health (on above 80, off at 75 or below: AscensionSunCleric.cpp:361-373); 301341 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE misc 127 and Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 127, BasePoints 9 + 1 = 10 ($301341s1). The grouped ally's Sunlight 704911 heals are read without and with 300314 learned on the caster, the caster at full health and the ally held at 50% health: the mean ratio is 1.10 (band 2 points). Reference search 2026-11-22: coa-history spell 300314: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"While above 80% health you now deal 10% increased damage and healing.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 300314,
+      "name": "Pure Light (helper present at 100% health)",
+      "kind": "metric_delta",
+      "variant": "gate_above",
+      "label_suffix": "gate_above",
+      "quote": "While above 80% health you now deal $301341s1% increased damage and healing.",
+      "trigger_spell": 805301,
+      "gate_spell": 300314,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 301341
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "300314 Pure Light Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 301341; the script keeps the helper 301341 on the caster while it is above 80% health (on above 80, off at 75 or below: AscensionSunCleric.cpp:361-373); 301341 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE misc 127 and Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 127, BasePoints 9 + 1 = 10 ($301341s1). The caster is at full health before the Holy Form 805301 cast; the aura 301341 on the caster is read 1500 ms later with the passive learned between the phases: 0 before (control), 1 after, above 80% (100%): the helper is on the caster. Reference search 2026-11-22: coa-history spell 300314: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"While above 80% health you now deal 10% increased damage and healing.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 300314,
+      "name": "Pure Light (helper absent at 70% health)",
+      "kind": "metric_delta",
+      "variant": "gate_below",
+      "label_suffix": "gate_below",
+      "quote": "While above 80% health you now deal $301341s1% increased damage and healing.",
+      "trigger_spell": 805301,
+      "gate_spell": 300314,
+      "target": "caster",
+      "caster_health_pct": 70,
+      "metric": "aura",
+      "fields": {
+        "spell": 301341
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "300314 Pure Light Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 301341; the script keeps the helper 301341 on the caster while it is above 80% health (on above 80, off at 75 or below: AscensionSunCleric.cpp:361-373); 301341 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE misc 127 and Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 127, BasePoints 9 + 1 = 10 ($301341s1). The caster is held at 70% of the 10000 health fixture before the Holy Form 805301 cast; the aura 301341 on the caster is read 1500 ms later with the passive learned between the phases: 0 before (control), 0 after, at 70% (below 75): the helper is not on the caster. Reference search 2026-11-22: coa-history spell 300314: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"While above 80% health you now deal 10% increased damage and healing.\" (same figure); nothing else found."
+    },
+    {
+      "spell": 805267,
+      "name": "Gleaming Armor (spell damage taken at 70% health)",
+      "kind": "taken_hit",
+      "variant": "taken_below",
+      "label_suffix": "taken_below",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "Reduces your spell damage taken by $s1%,",
+      "strike_spell": 47632,
+      "caster_health_pct": 70,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805267
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805267,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 807876,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805267
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805267,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 807876,
+              "equals": 0
+            }
+          ]
+        }
+      ],
+      "observe_source": "805267 Gleaming Armor Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN misc 126 (all magic schools), BasePoints -6 + 1 = -5 ($s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 807876; the script keeps 807876 (aura 87 misc 126, -5 as $807876s1) on the caster while it is above 80% health (AscensionSunCleric.cpp:361-373). Grave Coil 47632 (600 Shadow, DmgClass 1 magic) strikes the caster in a control arm and an arm with 805267 learned; the damage ratio is judged against 0.95 at 70% health (only the base 5%; 807876 absent, read in the arm). Ledger clause \"Reduces your spell damage taken by $s1%,\" (the second clause 355 of 805267 is the streamed text; the quote field names the Spell.dbc sentence the entry hangs under). Reference search 2026-11-22: coa-history spell 805267: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your spell damage taken by -5%, plus an additional -5% while above 80% health.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 805267,
+      "name": "Gleaming Armor (spell damage taken at 100% health)",
+      "kind": "taken_hit",
+      "variant": "taken_above",
+      "label_suffix": "taken_above",
+      "judge": "damage_ratio",
+      "expected": 0.9025,
+      "quote": "Reduces your spell damage taken by $s1%,",
+      "strike_spell": 47632,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            805267
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805267,
+              "equals": 0
+            },
+            {
+              "metric": "aura",
+              "spell": 807876,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            805267
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805267,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 807876,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805267 Gleaming Armor Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN misc 126 (all magic schools), BasePoints -6 + 1 = -5 ($s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 807876; the script keeps 807876 (aura 87 misc 126, -5 as $807876s1) on the caster while it is above 80% health (AscensionSunCleric.cpp:361-373). Grave Coil 47632 (600 Shadow, DmgClass 1 magic) strikes the caster in a control arm and an arm with 805267 learned; the damage ratio is judged against 0.95 x 0.95 = 0.9025 at 100% health (the damage taken auras multiply; 807876 present, read in the arm). Ledger clause \"plus an additional $807876s1% while above 80% health.\" (the second clause 355 of 805267 is the streamed text; the quote field names the Spell.dbc sentence the entry hangs under). Reference search 2026-11-22: coa-history spell 805267: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your spell damage taken by -5%, plus an additional -5% while above 80% health.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 704586,
+      "name": "Shining Shield (aura duration after Dawn)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Activating Dawn now grants Shining Shield for $805265d.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 805265
+      },
+      "before_expected": 0,
+      "expected": 59500,
+      "tolerance": 1000,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture) and the Dawn aura left by the first phase is set to 0 stacks before the second cast. The remaining duration of 805265 on the caster 500 ms after the cast is read: 0 before the learn (control) and 59500 after, within 1000 (a total 10% off reads 53500 or 65500). Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found."
+    },
+    {
+      "spell": 704586,
+      "name": "Shining Shield (shield armor contribution)",
+      "kind": "metric_delta",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "Activating Dawn now grants Shining Shield for $805265d.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20.5,
+      "expected_gain": 20.5,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). The reference character wields the Seraphim set with the Large Round Shield 2129 (spell_weapon_sets 704586 = Seraphim), armor 41 (item_template read 2026-11-22 in the Sun-Touched Armor 561023 entry); StatSystem.cpp:390 adds the shield armor x (multiplier - 1) for a MiscValueB mask, so 41 x 0.5 = 20.5. The armor is read 500 ms after a real Dawn cast, before the learn (control) and after, judged by its gain, within 1 (a gain 10% off reads 18.45 or 22.55). Ledger clause 235 of 704586 (the streamed Shining Shield text); the quote field names the Spell.dbc sentence the entry hangs under. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found."
+    },
+    {
+      "spell": 560547,
+      "name": "Sun Disc (healing received by a nearby ally)",
+      "kind": "hit_ratio",
+      "variant": "ally_healing",
+      "label_suffix": "ally_healing",
+      "quote": "You now emit an aura that causes all nearby allies to receive $s1% increased healing. Does not stack with similar effects.",
+      "expected": 1.06,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560547
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "560547 Sun Disc Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 118 MOD_HEALING_PCT misc 127, BasePoints 5 + 1 = 6 ($s1), radius index 12 = 100 yd; Effect[1] aura 108 ADD_PCT_MODIFIER BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 512 = SpellFamilyFlags[1] of Illumination 500143. The grouped ally's Sunlight 704911 heals (not Illumination) are read without and with 560547 learned on the caster, the ally 5 yd away and held at 50% health: the mean ratio is 1.06 (band 2 points, G-19: the larger of 5% of 6 and 2 points). Reference search 2026-11-22: coa-history spell 560547: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"You now emit an aura that causes all nearby allies to receive 6% increased healing. Does not stack with similar effects. In addition, the healing done by Illumination is increased by 20%.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 560547,
+      "name": "Sun Disc (Illumination healing)",
+      "kind": "hit_ratio",
+      "variant": "illumination",
+      "label_suffix": "illumination",
+      "quote": "In addition, the healing done by Illumination is increased by $s2%.",
+      "expected": 1.272,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 500143,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560547
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "560547 Sun Disc Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 118 MOD_HEALING_PCT misc 127, BasePoints 5 + 1 = 6 ($s1), radius index 12 = 100 yd; Effect[1] aura 108 ADD_PCT_MODIFIER BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 512 = SpellFamilyFlags[1] of Illumination 500143. The grouped ally's Illumination 500143 heals are read without and with 560547 learned on the caster, the ally 5 yd away and held at 50% health: the mean ratio is 1.20 x 1.06 = 1.272 (the 6% healing received applies to Illumination as to any heal; the Sunlight arm ally_healing reads 1.06 alone), band 2 points around the 20% part. Reference search 2026-11-22: coa-history spell 560547: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"You now emit an aura that causes all nearby allies to receive 6% increased healing. Does not stack with similar effects. In addition, the healing done by Illumination is increased by 20%.\" (same figures); nothing else found."
     }
   ],
   "player_observations": [],
