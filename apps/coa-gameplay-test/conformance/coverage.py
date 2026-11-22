@@ -24,6 +24,7 @@ from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from kinds import kind_modules, kind_rows
 from metric_delta_options import option_rows
+from metric_delta_options.use_time_contrast import METRICS as USE_TIME_METRICS, NAME as USE_TIME_CONTRAST
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK, PROC_ENERGIZE_CHECK
 from profile import DbcSetMismatch, require_server_sha
@@ -521,6 +522,8 @@ PARTNERED_CONTRASTS = frozenset({'spell_done_crit_chance_scripted', 'critical_bl
 PLAIN_CRIT_NAME = r"[A-Z][\w'’]*(?: [A-Z][\w'’]*)*"
 PLAIN_CRIT_SENTENCE = re.compile(rf'Increases (?:your critical strike chance|the critical strike chance of '
                                  rf'{PLAIN_CRIT_NAME}(?:(?:, | and ){PLAIN_CRIT_NAME})*) by \$\d*s\d+%\.?')
+PLAIN_USE_TIME_SENTENCE = re.compile(rf'Reduces the cast time of {PLAIN_CRIT_NAME}(?:(?:, | and ){PLAIN_CRIT_NAME})* by '
+                                     rf'\$\d*s\d+%\.?')
 KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES,
                    'CONTRAST_PROOF': CONTRAST_PROOF}
 KIND_ROW_OVERRIDES = frozenset()
@@ -713,6 +716,35 @@ def partners_hold(verdict: Verdict, text: str, partners: tuple[Verdict, ...]) ->
     return any(gain != 0 for gain in gains) and (not conditional_text(text) or any(gain == 0 for gain in gains))
 
 
+def opted_use_time(verdict: Verdict) -> bool:
+    detail = verdict.detail or {}
+    return detail.get(PASSIVE_METRIC) in USE_TIME_METRICS and isinstance(detail.get(USE_TIME_CONTRAST), dict)
+
+
+def required_contrast(verdict: Verdict) -> str | None:
+    return LEARNED_CONTRAST if opted_use_time(verdict) else contrast_proof().get(verdict.detail[PASSIVE_METRIC])
+
+
+def use_time_partners_hold(verdict: Verdict, text: str, partners: tuple[Verdict, ...]) -> bool:
+    metric = verdict.detail[PASSIVE_METRIC]
+    arms = verdict.detail[USE_TIME_CONTRAST].get('arms') or []
+    held = {other.label: other for other in partners
+            if other.label in arms and other.status in CONFORMANT and other.status != 'closed'
+            and other.check == verdict.check and opted_use_time(other)
+            and other.detail[PASSIVE_METRIC] == metric and other.detail.get(CONTRAST) == LEARNED_CONTRAST
+            and None not in (other.measured, other.expected, other.low, other.high)
+            and other.detail[USE_TIME_CONTRAST].get('gain') == other.expected}
+    if set(held) != set(arms):
+        return False
+    gains = [other.expected for other in held.values()]
+    moved = [abs(gain) for gain in gains if gain != 0]
+    if not moved or any(abs(other.measured - other.expected) > (other.high - other.low) / 2
+                        or (other.high - other.low) / 2 >= min(moved) / 2 for other in held.values()):
+        return False
+    conditional = PLAIN_USE_TIME_SENTENCE.fullmatch(text.strip()) is None
+    return not conditional or any(gain == 0 for gain in gains)
+
+
 def judged_sentence(clause: str, sentence: str) -> str:
     return sentence if clause.strip() in sentence else f'{clause} {sentence}'
 
@@ -737,9 +769,10 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
         return BEHAVIOUR
     observed = metric_class(verdict)
     detail = verdict.detail or {}
-    required = contrast_proof().get(detail[PASSIVE_METRIC])
-    if required is not None and detail.get(CONTRAST) == required and \
-            partners_hold(verdict, judged_sentence(clause, row if sentence is None else sentence), partners):
+    required = required_contrast(verdict)
+    judged = judged_sentence(clause, row if sentence is None else sentence)
+    gate = use_time_partners_hold if opted_use_time(verdict) else partners_hold
+    if required is not None and detail.get(CONTRAST) == required and gate(verdict, judged, partners):
         words = state_promises().get(detail[PASSIVE_METRIC])
         if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row} {promise}', re.IGNORECASE) is not None:
             return BEHAVIOUR

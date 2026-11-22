@@ -6375,7 +6375,7 @@
       "807874 behaviour_metric_delta cast_time"
     ],
     "kind": "claim",
-    "reason": "Control arm = the cast time before the learn: Radiant Cascade 2500 ms (SpellCastTimes 19), 2125 ms after (-15% from Spell.dbc 807874 effect 0, BasePoints -16 + 1). Reference search: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm = the cast time before the learn: Radiant Cascade 2500 ms (SpellCastTimes 19), 2125 ms after (-15% from Spell.dbc 807874 effect 0, BasePoints -16 + 1). Reference search: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Behaviour pair (use-time contrast, ADR 1024, measured gain -375 against expected_gain -375, tolerance 1) 20261122-103905 / 20261122-103942, build 99f1aff0, server commit 0d2fedc1b66f, no flip; earlier readback pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+."
   },
   {
     "spell": 807963,

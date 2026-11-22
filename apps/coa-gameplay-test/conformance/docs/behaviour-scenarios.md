@@ -2210,3 +2210,5 @@ Options with a module:
   time after an auto-repeat shot, its hits read so no shot fires after the move (ADR 1005)
 - [`ally_arm`](metric_delta_options/ally_arm.md): grouped ally players to read or target, their health and casts at
   the ally in both phases, a timed no-cast control, and stated extra reads judged beside the main one (ADR 1016)
+- [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
+  power cost read, judged with the partner arms the entry names (ADR 1024)
