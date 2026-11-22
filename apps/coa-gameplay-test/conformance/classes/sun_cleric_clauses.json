@@ -207,7 +207,9 @@
     "spell": 300325,
     "clause": "Damage dealt by Radiant Flame is now increased by $s1% on enemies below 35% health.",
     "labels": [
-      "300325 effect_value e0 #0"
+      "300325 effect_value e0 #0",
+      "300325 behaviour_hit_ratio below35",
+      "300325 behaviour_hit_ratio above35"
     ],
     "kind": "claim"
   },
@@ -313,7 +315,9 @@
     "spell": 300344,
     "clause": "Healing a target affected by Bless refunds $s2% of the mana cost of the spell.",
     "labels": [
-      "300344 effect_value e1 #0"
+      "300344 effect_value e1 #0",
+      "300344 behaviour_metric_delta refund_bless",
+      "300344 behaviour_metric_delta refund_no_bless"
     ],
     "kind": "claim"
   },
@@ -2861,10 +2865,23 @@
   {
     "spell": 704568,
     "clause": "Increases healing of Illumination and Daybreak by $s1%.",
-    "labels": [
-      "704568 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases healing of Illumination by $s1%",
+        "labels": [
+          "704568 effect_value e0 #0",
+          "704568 behaviour_hit_ratio illumination_heal",
+          "704568 behaviour_hit_ratio shine_control"
+        ]
+      },
+      {
+        "claim": "Increases healing of Daybreak by $s1%",
+        "labels": [
+          "704568 behaviour_hit_ratio daybreak_heal"
+        ]
+      }
+    ]
   },
   {
     "spell": 704579,
@@ -4902,17 +4919,37 @@
   {
     "spell": 806024,
     "clause": "Dealing damage with Radiant Flame now increases the target's Holy and Fire damage taken from you by $806025s1% for $806025d,",
-    "labels": [
-      "806024 effect_value 806025e0 #0",
-      "806024 spell_duration 806025 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Dealing damage with Radiant Flame now increases the target's Holy damage taken from you by $806025s1%",
+        "labels": [
+          "806024 effect_value 806025e0 #0",
+          "806024 behaviour_hit_ratio holy_taken",
+          "806024 behaviour_metric_delta stacks_one_cast"
+        ]
+      },
+      {
+        "claim": "increases the target's Fire damage taken from you by $806025s1%",
+        "labels": [
+          "806024 behaviour_hit_ratio fire_taken"
+        ]
+      },
+      {
+        "claim": "for $806025d,",
+        "labels": [
+          "806024 spell_duration 806025 #1",
+          "806024 behaviour_metric_delta debuff_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 806024,
     "clause": "stacking $806025U times.",
     "labels": [
-      "806024 max_stacks 806025 #2"
+      "806024 max_stacks 806025 #2",
+      "806024 behaviour_metric_delta stacks_cap"
     ],
     "kind": "claim"
   },
