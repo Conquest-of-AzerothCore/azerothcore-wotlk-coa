@@ -27535,6 +27535,387 @@
       "wait_ms": 4500,
       "expire_ms": 500,
       "observe_source": "300339 The Redeemer: same forced-critical Illumination 500143 on the caster at 30% health as crit_heal_return, 300339 learned in the treatment phase, but no striker: the caster takes no damage, so the 301005 proc never fires and the heal 301004 on the caster must stay at 0 over the same 4500 ms in which crit_heal_return reads 1 after its strike at 3200 ms (AscensionSunClericEvents.cpp:76, :374-381: 301005 heals on received direct damage). Contrast arm of the 'next time they take damage' part. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (Horusath Blast cooldown cut in Sunrise)",
+      "kind": "metric_delta",
+      "variant": "sunrise_horusath",
+      "label_suffix": "sunrise_horusath",
+      "quote": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
+      "trigger_spell": 500154,
+      "gate_spell": 300361,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500154
+      },
+      "before_expected": 19500,
+      "expected": 10536,
+      "tolerance": 300,
+      "wait_ms": 5500,
+      "expire_ms": 26000,
+      "game_time": {
+        "after": [
+          5400,
+          5700
+        ]
+      },
+      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: 10577 at eps 0, 10536 at eps 100, 10495 at eps 200 ms. A tick of 8% reads 12056 and 12% reads 9230 (eps 0), more than 1000 ms away; tolerance 300 ms is below 10% of the reading (1053 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50). Limit (review c5 I-1): the read does not measure the tick period. A period of 1100 ms reads 10421 with the same model, inside 10536 +- 300, so the 10% per tick is measured and \"every $t1 sec\" is not; cooldown_ms is a READBACK metric, so the entry is data and not behaviour. A tick-aligned cooldown read is tool group 5 item 5 (tool need, returned)."
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (control: Horusath Blast keeps its cooldown in Sunset)",
+      "kind": "metric_delta",
+      "variant": "sunset_horusath_control",
+      "label_suffix": "sunset_horusath_control",
+      "quote": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
+      "trigger_spell": 500154,
+      "gate_spell": 300361,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          500511,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500154
+      },
+      "before_expected": 19500,
+      "expected": 19500,
+      "tolerance": 300,
+      "wait_ms": 5500,
+      "expire_ms": 26000,
+      "game_time": {
+        "after": [
+          5400,
+          5700
+        ]
+      },
+      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: no tick reduces it: 25000 - 5500 = 19500. A tick of 8% reads 12056 and 12% reads 9230 (eps 0), more than 1000 ms away; tolerance 300 ms is below 10% of the reading (1950 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50)."
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (Rapture cooldown cut in Sunset)",
+      "kind": "metric_delta",
+      "variant": "sunset_rapture",
+      "label_suffix": "sunset_rapture",
+      "quote": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
+      "trigger_spell": 806477,
+      "gate_spell": 300361,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          500511,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806477
+      },
+      "before_expected": 15000,
+      "expected": 7838,
+      "tolerance": 300,
+      "wait_ms": 8000,
+      "expire_ms": 26000,
+      "game_time": {
+        "after": [
+          7900,
+          8200
+        ]
+      },
+      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read: see Design 2 below (the setup cast shifts the tick grid). The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50). Design 2 (the first design read 6436: the tick grid fell on the end of the 3000 ms cast, a sixth tick landed at the cooldown start). A setup cast of Holy Form 805301 and its 1600 ms wait before the Rapture cast shift the grid by 600 ms, so after the cooldown starts (read 5000 ms later, 8000 ms after the cast) the ticks fall at about 400, 1400, 2400, 3400 and 4400 ms minus eps (0 to 200): 7797, 7838 and 7879 at eps 200, 100 and 0; 8% reads about 9000 and 12% about 6760, more than 1000 ms away; the read before the learn is 20000 - 5000 = 15000. Limit (review c5 I-1): the read does not measure the tick period. With the same model a period of 900 ms reads 7993 and 1100 ms reads 7887, both inside 7838 +- 300, so the 10% per tick is measured and \"every $t1 sec\" is not; cooldown_ms is a READBACK metric, so the entry is data and not behaviour. A tick-aligned cooldown read is tool group 5 item 5 (tool need, returned).",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 300361,
+      "name": "Day Cycles (control: Rapture keeps its cooldown in Sunrise)",
+      "kind": "metric_delta",
+      "variant": "sunrise_rapture_control",
+      "label_suffix": "sunrise_rapture_control",
+      "quote": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
+      "trigger_spell": 806477,
+      "gate_spell": 300361,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          500477,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806477
+      },
+      "before_expected": 15000,
+      "expected": 15000,
+      "tolerance": 300,
+      "wait_ms": 8000,
+      "expire_ms": 26000,
+      "game_time": {
+        "after": [
+          7900,
+          8200
+        ]
+      },
+      "observe_source": "300361 Day Cycles Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1000 ms), triggers 301176 whose Effect[1] EffectBasePoints 9 + 1 = 10 ($301176s2). AscensionSunClericAuras.cpp:229-235: each tick with the Sunrise aura 500477 calls ReducePercent on Horusath Blast 500154 and with the Sunset aura 500511 on Rapture 806477, cutting 10% of the remaining cooldown of every known spell of that name. The Sunrise or Sunset aura is a named precondition fixture (phase_auras of both phases): it is the state the clause names, not its subject. Horusath Blast: RecoveryTime 25000 ms; Rapture: RecoveryTime 20000 ms, cast time 3000 ms (CastingTimeIndex 14). The gate learn starts the aura; the cast follows within a few steps, so the ticks fall at about 1000, 2000 ... ms after the cooldown starts, minus the small step delay eps (0 to 200 ms). Model of the remaining cooldown at the read, ticking 10% of the remaining after each elapsed second: no tick reduces it: 20000 - 5000 = 15000 (read 5000 ms after the cooldown starts, the same read as the Sunset entry). Tolerance 300 ms is below 10% of the reading (1500 ms) on both sides. The read is stamped (game_time after window) so the elapsed time is judged. The control phase reads the same cast without the passive, and the control entry reads the other day-cycle aura with the passive: no reduction.  Reference search 2026-11-22: coa-history spell 300361: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries the same words (agrees; the entry Day Cycles is Piety, level 50).",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 704585,
+      "name": "Gleaming Vigil (helper absent at 79% health after rising from 70%)",
+      "kind": "metric_delta",
+      "variant": "threshold_79",
+      "label_suffix": "threshold_79",
+      "quote": "plus an additional $s2% while above 80% health.",
+      "trigger_spell": 805301,
+      "gate_spell": 704585,
+      "target": "caster",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "caster_health": [
+        7000,
+        10000
+      ],
+      "caster_health_pct": 79,
+      "metric": "aura",
+      "fields": {
+        "spell": 707769
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 79% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% stops at 79%, which is not above 80%: the helper stays absent (the arm at 81% is the contrast, same pre-step). Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees)."
+    },
+    {
+      "spell": 704585,
+      "name": "Gleaming Vigil (helper present at 81% health after rising from 70%)",
+      "kind": "metric_delta",
+      "variant": "threshold_81",
+      "label_suffix": "threshold_81",
+      "quote": "plus an additional $s2% while above 80% health.",
+      "trigger_spell": 805301,
+      "gate_spell": 704585,
+      "target": "caster",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "caster_health": [
+        7000,
+        10000
+      ],
+      "caster_health_pct": 81,
+      "metric": "aura",
+      "fields": {
+        "spell": 707769
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 81% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% reaches 81%, above 80%: the helper appears, where the same sequence at 79% leaves it absent. Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees)."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Holy Form healing done doubled)",
+      "kind": "hit_ratio",
+      "variant": "holy_form_doubled",
+      "label_suffix": "holy_form_doubled",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "expected": 1.090909,
+      "observe_spell": 503624,
+      "metric": "spell_heal_total",
+      "target": "ally",
+      "control": {
+        "casts": [
+          805301
+        ]
+      },
+      "treatment": {
+        "learn": [
+          800602
+        ],
+        "casts": [
+          805301
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 3500,
+      "expected_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[0] aura 136 MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1 = +10% healing, so with 800602 the effect is +20%: a Daybreak 503624 heal (non-critical, bonus healing fixture 5000) is x1.20 with the passive and x1.10 without, ratio 1.20 / 1.10 = 1.090909. Holy Form is cast for real before every heal in both arms (review c5 I-3: 805301 has an infinite duration and the harness resets its cooldown before each cast, so a real cast costs the same as a fixture aura and its amount is computed by the real cast path with the spell modifiers in force). Only the healing effect (Effect[0]) is measured; the threat (Effect[2], -50%) and the Bless mana sacrifice (Effect[1], 49) are not (review c5 I-2). Control arm: 800602 not known; treatment: 800602 learned. The 10-trial pair of the Holy Form healing entry holds the same shape (805301 healing, expected 1.1). Reference search 2026-11-22: coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only \"Doubles the effectiveness of your Holy Form.\" (agrees; the Ancient Rites sentence is a later state)."
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (critical strike chance after Illumination consumes Angelic Presence)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d,",
+      "trigger_spell": 500143,
+      "gate_spell": 680648,
+      "target": "caster",
+      "setup_casts": [
+        800722
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 22000,
+      "observe_source": "680648 Sacred Vessel Effect[0] aura 4 DUMMY; AscensionSunClericAbilities.cpp:78-90 (Finish): when an Illumination cast consumes Angelic Presence 800722 (the aura the spell remembers as its generation, set when the aura applies) and the caster holds 680648, StackWithoutRefresh adds one stack of 681254 and restores the duration (AscensionSunCleric.cpp:236-243). 681254 Sacred Vessel: DurationIndex 18 = 20000 ms, StackAmount 10, Effect[0] aura 290 MOD_CRIT_PCT, Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 126, EffectBasePoints 0 + 1 = 1. Precondition: Angelic Presence 800722 is cast for real by the caster (setup cast, learned with the setup casts; the earlier set_aura attempt left no consumption generation, b9b report) and Illumination 500143 is the trigger cast that consumes it, instant and free of cost; the same sequence runs in the before phase without 680648 (control). The caster live Holy (school index 1) spell crit percentage 500 ms after the Illumination, before the passive is learned (control) and after: gain 1 point ($681254s1). Reference search 2026-11-22: coa-history spell 680648 and 681254: 0 events in 186 logs, 800722: 166 applications in 6 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times. Additional applications do not refresh the duration.\" (agrees).",
+      "expected_gain": 1,
+      "tolerance": 0.0001
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (two stacks after two consumptions)",
+      "kind": "metric_delta",
+      "variant": "stack_two",
+      "label_suffix": "stack_two",
+      "quote": "Additional applications do not refresh the duration.",
+      "trigger_spell": 500143,
+      "gate_spell": 680648,
+      "target": "caster",
+      "setup_casts": [
+        800722,
+        500143,
+        800722
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 681254
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 22000,
+      "observe_source": "680648 Sacred Vessel Effect[0] aura 4 DUMMY; AscensionSunClericAbilities.cpp:78-90 (Finish): when an Illumination cast consumes Angelic Presence 800722 (the aura the spell remembers as its generation, set when the aura applies) and the caster holds 680648, StackWithoutRefresh adds one stack of 681254 and restores the duration (AscensionSunCleric.cpp:236-243). 681254 Sacred Vessel: DurationIndex 18 = 20000 ms, StackAmount 10, Effect[0] aura 290 MOD_CRIT_PCT, Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 126, EffectBasePoints 0 + 1 = 1. Precondition: Angelic Presence 800722 is cast for real by the caster (setup cast, learned with the setup casts; the earlier set_aura attempt left no consumption generation, b9b report) and Illumination 500143 is the trigger cast that consumes it, instant and free of cost; the same sequence runs in the before phase without 680648 (control). Sequence: Angelic Presence, Illumination (stack 1, about 1.6 s), Angelic Presence, Illumination (stack 2, about 4.8 s), each 1600 ms apart; 2 stacks read 500 ms after the last. Reference search 2026-11-22: coa-history spell 680648 and 681254: 0 events in 186 logs, 800722: 166 applications in 6 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times. Additional applications do not refresh the duration.\" (agrees).",
+      "tolerance": 0
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (aura still present 19.8 s after the first application)",
+      "kind": "metric_delta",
+      "variant": "alive_19s",
+      "label_suffix": "alive_19s",
+      "quote": "Additional applications do not refresh the duration.",
+      "trigger_spell": 500143,
+      "gate_spell": 680648,
+      "target": "caster",
+      "setup_casts": [
+        800722,
+        500143,
+        800722
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 681254
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15000,
+      "expire_ms": 22000,
+      "observe_source": "680648 Sacred Vessel Effect[0] aura 4 DUMMY; AscensionSunClericAbilities.cpp:78-90 (Finish): when an Illumination cast consumes Angelic Presence 800722 (the aura the spell remembers as its generation, set when the aura applies) and the caster holds 680648, StackWithoutRefresh adds one stack of 681254 and restores the duration (AscensionSunCleric.cpp:236-243). 681254 Sacred Vessel: DurationIndex 18 = 20000 ms, StackAmount 10, Effect[0] aura 290 MOD_CRIT_PCT, Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 126, EffectBasePoints 0 + 1 = 1. Precondition: Angelic Presence 800722 is cast for real by the caster (setup cast, learned with the setup casts; the earlier set_aura attempt left no consumption generation, b9b report) and Illumination 500143 is the trigger cast that consumes it, instant and free of cost; the same sequence runs in the before phase without 680648 (control). Applications at about 1.6 s and 4.8 s; read 15000 ms after the last, about 19.8 s after the first: still present (20000 ms duration from the first application, DurationIndex 18). Reference search 2026-11-22: coa-history spell 680648 and 681254: 0 events in 186 logs, 800722: 166 applications in 6 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times. Additional applications do not refresh the duration.\" (agrees)."
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (aura gone 22.3 s after the first application)",
+      "kind": "metric_delta",
+      "variant": "gone_22s",
+      "label_suffix": "gone_22s",
+      "quote": "Additional applications do not refresh the duration.",
+      "trigger_spell": 500143,
+      "gate_spell": 680648,
+      "target": "caster",
+      "setup_casts": [
+        800722,
+        500143,
+        800722
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 681254
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 17500,
+      "expire_ms": 22000,
+      "observe_source": "680648 Sacred Vessel Effect[0] aura 4 DUMMY; AscensionSunClericAbilities.cpp:78-90 (Finish): when an Illumination cast consumes Angelic Presence 800722 (the aura the spell remembers as its generation, set when the aura applies) and the caster holds 680648, StackWithoutRefresh adds one stack of 681254 and restores the duration (AscensionSunCleric.cpp:236-243). 681254 Sacred Vessel: DurationIndex 18 = 20000 ms, StackAmount 10, Effect[0] aura 290 MOD_CRIT_PCT, Effect[1] aura 136 MOD_HEALING_DONE_PERCENT misc 126, EffectBasePoints 0 + 1 = 1. Precondition: Angelic Presence 800722 is cast for real by the caster (setup cast, learned with the setup casts; the earlier set_aura attempt left no consumption generation, b9b report) and Illumination 500143 is the trigger cast that consumes it, instant and free of cost; the same sequence runs in the before phase without 680648 (control). Read 17500 ms after the second application, about 22.3 s after the first: without a refresh the aura ends at about 21.6 s (20000 ms after the first application); a refresh by the second application would keep it until about 24.8 s, so a present aura is the failing reading. Reference search 2026-11-22: coa-history spell 680648 and 681254: 0 events in 186 logs, 800722: 166 applications in 6 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times. Additional applications do not refresh the duration.\" (agrees)."
+    },
+    {
+      "spell": 806058,
+      "name": "Herald of Purity (Justice cooldown reset rate)",
+      "kind": "cooldown_reset_rate",
+      "variant": "justice",
+      "label_suffix": "justice_reset_rate",
+      "quote": "Damage dealt by Justice now has an $h% chance to reset its own cooldown.",
+      "talent": 806058,
+      "chance_pct": 8,
+      "reset_between_attempts": true,
+      "trial_casts": true,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "trigger_spell": 572850,
+      "reset_spell": 572848,
+      "casts": 1900,
+      "control_casts": 100,
+      "cast_wait_ms": 1700,
+      "parts": 8,
+      "observe_source": "AscensionSunClericEvents.cpp:130 (damage && Justice spell && Chance(player, 806058), ProcChance 8) and :320 (ResetJusticeAfterCast: Reduce(player, 520359, INT32_MAX) one tick later, one SMSG_CLEAR_COOLDOWN per known spell named Justice). Justice 572848 triggers the strikes 572850 and 572045 (idIsJustice); the trial is a completed cast of the strike 572850 cast directly at the dummy, the packet is the clear-cooldown of 572848, learned by the kind as the reset spell, so the fixture reset of 572850 before each cast is not counted in it (the control must read zero packets). Valkyr weapon set (2529 pair, ADR 1017). Reference search 2026-11-22: coa-history spell 806058: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Damage dealt by Justice now has an 8% chance to reset its own cooldown.\" (agrees)."
     }
   ],
   "player_observations": [],
