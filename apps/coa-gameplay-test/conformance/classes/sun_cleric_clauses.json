@@ -3533,7 +3533,9 @@
     "spell": 704586,
     "clause": "Activating Dawn now grants Shining Shield for $805265d.",
     "labels": [
-      "704586 behaviour_metric_delta duration"
+      "704586 behaviour_metric_delta duration",
+      "704586 behaviour_metric_delta shield_expiry",
+      "704586 behaviour_metric_delta shield_expiry_control"
     ],
     "kind": "claim",
     "reason": "Control arm = aura 805265 absent after Dawn without the passive; remaining 59494 ms with it. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
@@ -5172,7 +5174,9 @@
     "spell": 804625,
     "clause": "and its duration is reduced by $s1%.",
     "labels": [
-      "804625 behaviour_metric_delta scorch_duration"
+      "804625 behaviour_metric_delta scorch_duration",
+      "804625 behaviour_metric_delta scorch_expiry",
+      "804625 behaviour_metric_delta scorch_expiry_control"
     ],
     "kind": "claim",
     "reason": "Control arm = remaining duration 3700 without the passive (read 300 ms after the cast), 1694 with it (expected 1700, tolerance 80). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
@@ -5460,7 +5464,8 @@
       {
         "claim": "for 5 s",
         "labels": [
-          "807870 behaviour_metric_delta stun_duration"
+          "807870 behaviour_metric_delta stun_duration",
+          "807870 behaviour_metric_delta stun_expiry"
         ]
       }
     ],
@@ -5618,7 +5623,8 @@
       {
         "claim": "Scorch Marks lasts 10 s",
         "labels": [
-          "806021 behaviour_metric_delta scorch_duration"
+          "806021 behaviour_metric_delta scorch_duration",
+          "806021 behaviour_metric_delta scorch_marks_expiry"
         ]
       }
     ],
@@ -5677,7 +5683,9 @@
         "claim": "for $806025d,",
         "labels": [
           "806024 spell_duration 806025 #1",
-          "806024 behaviour_metric_delta debuff_duration"
+          "806024 behaviour_metric_delta debuff_duration",
+          "806024 behaviour_metric_delta debuff_expiry",
+          "806024 behaviour_metric_delta debuff_expiry_control"
         ]
       }
     ],

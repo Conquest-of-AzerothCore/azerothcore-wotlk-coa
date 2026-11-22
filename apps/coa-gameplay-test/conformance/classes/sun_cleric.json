@@ -23689,6 +23689,320 @@
       "label_suffix": "dawn_extend_expiry_control",
       "gate_timing": "start",
       "trigger_only_after": true
+    },
+    {
+      "spell": 704586,
+      "name": "Shining Shield (aura present then gone around 60 sec)",
+      "kind": "metric_delta",
+      "variant": "shield_expiry",
+      "label_suffix": "shield_expiry",
+      "quote": "Activating Dawn now grants Shining Shield for $805265d.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 805265
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 58600,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 has DurationIndex 3 (60000 ms, $805265d). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture). The aura 805265 on the caster is an event read (presence), not the remaining-time field: read present 57300..59900 ms of game time after the trigger cast and gone 60200..62500 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "expiry_wait_ms": 2750,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          57300,
+          59900
+        ],
+        "expired": [
+          60200,
+          62500
+        ]
+      }
+    },
+    {
+      "spell": 704586,
+      "name": "Shining Shield (aura present then gone around 60 sec) (control: without the passive)",
+      "kind": "metric_delta",
+      "variant": "shield_expiry_control",
+      "label_suffix": "shield_expiry_control",
+      "quote": "Activating Dawn now grants Shining Shield for $805265d.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 805265
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 58600,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 has DurationIndex 3 (60000 ms, $805265d). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture). The aura 805265 on the caster is an event read (presence), not the remaining-time field: read present 57300..59900 ms of game time after the trigger cast and gone 60200..62500 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 300321
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame ends at 2 s after Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_expiry",
+      "label_suffix": "scorch_expiry",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 500,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1900,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "804625 Harsh Lessons: Dawn grants Scorch Marks 807059 (Effect[0] SPELLMOD_DURATION -51 = -50%), so Radiant Flame 806060 (DurationIndex 35, 4000 ms) lasts 2000 ms; the gate 804625 is learned from the start, Dawn 804584 is cast at the dummy-less caster as the setup cast of the treatment phase (Solar Power 500149 at 20 stacks, precondition fixture). The aura 806060 on the caster is an event read (presence), not the remaining-time field: read present 1850..1950 ms of game time after the trigger cast and gone 2050..2150 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, read at 2000 ms: aura present.",
+      "expiry_wait_ms": 200,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          1850,
+          1950
+        ],
+        "expired": [
+          2050,
+          2150
+        ]
+      }
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame ends at 2 s after Dawn) (control: without the passive)",
+      "kind": "metric_delta",
+      "variant": "scorch_expiry_control",
+      "label_suffix": "scorch_expiry_control",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 500,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2000,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "804625 Harsh Lessons: Dawn grants Scorch Marks 807059 (Effect[0] SPELLMOD_DURATION -51 = -50%), so Radiant Flame 806060 (DurationIndex 35, 4000 ms) lasts 2000 ms; the gate 804625 is learned from the start, Dawn 804584 is cast at the dummy-less caster as the setup cast of the treatment phase (Solar Power 500149 at 20 stacks, precondition fixture). The aura 806060 on the caster is an event read (presence), not the remaining-time field: read present 1850..1950 ms of game time after the trigger cast and gone 2050..2150 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, read at 2000 ms: aura present.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 300321
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun present then gone around 5 sec)",
+      "kind": "metric_delta",
+      "variant": "stun_expiry",
+      "label_suffix": "stun_expiry",
+      "quote": "and stuns enemies within $a1 yds for $d.",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807870
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 6275,
+      "expire_ms": 500,
+      "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 28 (5000 ms, $d); Glare has a 1500 ms cast (SpellCastTimes 16), so the stun starts between 1500 and 1550 ms after the cast start. The aura 807870 on the caster is an event read (presence), not the remaining-time field: read present 6100..6450 ms of game time after the trigger cast and gone 6600..6950 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the phase before the cast reads no aura (0).",
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          6100,
+          6450
+        ],
+        "expired": [
+          6600,
+          6950
+        ]
+      }
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "name": "Searing Light (Scorch Marks present then gone around 10 sec)",
+      "variant": "scorch_marks_expiry",
+      "label_suffix": "scorch_marks_expiry",
+      "trigger_spell": 504764,
+      "target": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 807059
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9600,
+      "expire_ms": 500,
+      "observe_source": "$807059d = 10000 ms. Sun Ray 504764 grants Scorch Marks 807059 on the caster by script (AscensionSunClericAbilities.cpp:215-216), at the cast. The aura 807059 on the caster is an event read (presence), not the remaining-time field: read present 9300..9900 ms of game time after the trigger cast and gone 10150..10900 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the phase before the cast reads no aura (0).",
+      "expiry_wait_ms": 925,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          9300,
+          9900
+        ],
+        "expired": [
+          10150,
+          10900
+        ]
+      },
+      "measure_actor": "caster"
+    },
+    {
+      "spell": 806024,
+      "name": "Purgation (debuff present then gone around 8 sec after the last tick)",
+      "kind": "metric_delta",
+      "variant": "debuff_expiry",
+      "label_suffix": "debuff_expiry",
+      "quote": "for $806025d,",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 806025
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "gate_spell": 806024,
+      "wait_ms": 11625,
+      "expire_ms": 500,
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025, cast on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316); 806025 has DurationIndex 31 (8000 ms, $806025d). Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and an extra tick on apply, so the last tick at 4000 ms refreshes 806025 to 8000 ms: it ends at about 12000 ms after the cast. The aura 806025 on the caster is an event read (presence), not the remaining-time field: read present 11350..11900 ms of game time after the trigger cast and gone 12150..12700 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          11350,
+          11900
+        ],
+        "expired": [
+          12150,
+          12700
+        ]
+      }
+    },
+    {
+      "spell": 806024,
+      "name": "Purgation (debuff present then gone around 8 sec after the last tick) (control: without the passive)",
+      "kind": "metric_delta",
+      "variant": "debuff_expiry_control",
+      "label_suffix": "debuff_expiry_control",
+      "quote": "for $806025d,",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 806025
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "gate_spell": 300321,
+      "wait_ms": 11625,
+      "expire_ms": 500,
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025, cast on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316); 806025 has DurationIndex 31 (8000 ms, $806025d). Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and an extra tick on apply, so the last tick at 4000 ms refreshes 806025 to 8000 ms: it ends at about 12000 ms after the cast. The aura 806025 on the caster is an event read (presence), not the remaining-time field: read present 11350..11900 ms of game time after the trigger cast and gone 12150..12700 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "gate_timing": "start",
+      "trigger_only_after": true
     }
   ],
   "player_observations": [],
