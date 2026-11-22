@@ -920,10 +920,23 @@
   {
     "spell": 302914,
     "clause": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
-    "labels": [
-      "302914 effect_value 807549e2 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health",
+        "labels": [
+          "302914 behaviour_metric_delta gavel_heal_vow",
+          "302914 behaviour_metric_delta gavel_heal_no_vow",
+          "302914 behaviour_metric_delta vow_aura_active"
+        ]
+      },
+      {
+        "claim": "$807549s3% health equal to the damage dealt",
+        "labels": [
+          "302914 effect_value 807549e2 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 554406,
@@ -994,11 +1007,23 @@
   {
     "spell": 572801,
     "clause": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
-    "labels": [
-      "572801 effect_value 572050e0 #1",
-      "572801 spell_duration 572050 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reducing their attack power by ${-($572050m1+$572050ppl1)}",
+        "labels": [
+          "572801 behaviour_metric_delta ap_reduction",
+          "572801 effect_value 572050e0 #1"
+        ]
+      },
+      {
+        "claim": "for $572050d",
+        "labels": [
+          "572801 behaviour_metric_delta ap_duration",
+          "572801 spell_duration 572050 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 503651,
@@ -1289,10 +1314,21 @@
   {
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
-    "labels": [
-      "547214 spell_duration 547217 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and causes Horusath Blast to interrupt the target",
+        "labels": [
+          "547214 behaviour_metric_delta interrupt"
+        ]
+      },
+      {
+        "claim": "for $547217d",
+        "labels": [
+          "547214 spell_duration 547217 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 560094,
@@ -3388,18 +3424,40 @@
   {
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
-    "labels": [
-      "707433 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the tick rate of Mercy",
+        "labels": [
+          "707433 behaviour_metric_delta mercy_period"
+        ]
+      },
+      {
+        "claim": "by $s1%",
+        "labels": [
+          "707433 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707433,
     "clause": "but increases its mana cost by $s2%.",
-    "labels": [
-      "707433 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "but increases its mana cost",
+        "labels": [
+          "707433 behaviour_metric_delta mercy_cost"
+        ]
+      },
+      {
+        "claim": "by $s2%",
+        "labels": [
+          "707433 effect_value e1 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 707517,
@@ -3609,10 +3667,30 @@
   {
     "spell": 800039,
     "clause": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
-    "labels": [
-      "800039 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of Gavels",
+        "labels": [
+          "800039 behaviour_metric_delta crit_gavel_light",
+          "800039 behaviour_metric_delta crit_gavel_wrath",
+          "800039 behaviour_metric_delta crit_gavel_grace",
+          "800039 behaviour_metric_delta crit_dawnsear_control"
+        ]
+      },
+      {
+        "claim": "and Dawnbreak",
+        "labels": [
+          "800039 behaviour_metric_delta crit_dawnbreak"
+        ]
+      },
+      {
+        "claim": "by $s1%",
+        "labels": [
+          "800039 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 800054,

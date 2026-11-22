@@ -12320,6 +12320,386 @@
         ]
       },
       "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 302914,
+      "name": "Arbiter of Light (Gavel of Light heal while Vow of Light is active)",
+      "kind": "metric_delta",
+      "variant": "gavel_heal_vow",
+      "label_suffix": "gavel_heal_vow",
+      "quote": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 302914,
+      "target": "dummy",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 100,
+      "expected": 400,
+      "expected_ratio": 4.0,
+      "tolerance": 0.15,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Gavel of Light 800611 copies a share of its damage to the caster as 707522; the share is the 50 of 707521 ($707521s1) plus the spell modifiers that reach it. Arbiter of Light 302914 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) on 707521's class mask (SpellFamilyFlags[0] 2097152), BasePoints -1 (read 0 in Spell.dbc), and Vow of Light 807549 Effect[2] aura 107 MiscValue 3 BasePoints 99 + 1 = 100 ($807549s3) on Arbiter's own class mask (4194304) supply the 100 while Vow of Light is active. Vow of Light 807547 is cast on the caster before both phases (setup_casts, the same real cast as Soul of Light's vow_value entry). Expected: 100% of the damage with Arbiter's tooltip share against 50% without, so after = H + 3H with the 4H of 150% (50 + 100) against H: ratio 4.0, tolerance 0.15. Fixture 984954 makes every Gavel hit a critical strike in both phases and +20000 attack power makes the hit the same to 0.4%; the heal is a share of the damage, so the ratio is unaffected. Control: the first phase without the passive; the arm without Vow of Light is the entry gavel_heal_no_vow. Reference search 2026-11-22: ADR Sun Cleric 0004 and the four-arm scenario sun-cleric-solemn-priest-gavel-heal.json measured Arbiter alone at ratio 1 without Vow; nothing found beyond the tooltip, the DBC and that ADR."
+    },
+    {
+      "spell": 302914,
+      "name": "Arbiter of Light (no extra Gavel of Light heal without Vow of Light)",
+      "kind": "metric_delta",
+      "variant": "gavel_heal_no_vow",
+      "label_suffix": "gavel_heal_no_vow",
+      "quote": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 302914,
+      "target": "dummy",
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 100,
+      "expected": 200,
+      "expected_ratio": 2.0,
+      "tolerance": 0.15,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of gavel_heal_vow: the same two phases with no Vow of Light cast. The tooltip adds the 100% only while Vow of Light is active, so learning Arbiter changes nothing: after = H + H, ratio 2.0, tolerance 0.15 (excludes 4.0)."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Gavel of Light critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gavel_light",
+      "label_suffix": "crit_gavel_light",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800611,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Light 800611 SpellFamilyFlags[1] 32 is in the mask; its done crit chance reads 0 without the passive and 5 with it after a real learn (spell_done_crit_chance, a learned contrast, ADR 0691). Shape 1 of 4 covered spells (G-23): a weapon-percent Gavel."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Gavel of Wrath critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gavel_wrath",
+      "label_suffix": "crit_gavel_wrath",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802561,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Wrath 802561 SpellFamilyFlags[1] 32 is in the mask. Shape 2: the Gavel whose class flags also carry word 2 (4) and whose third effect is a dispel (38)."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Gavel of Grace critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gavel_grace",
+      "label_suffix": "crit_gavel_grace",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 807987,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Grace 807987 SpellFamilyFlags[1] 32 is in the mask. Shape 3: the Gavel whose third effect is a trigger-spell effect (142)."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Dawnbreak critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_dawnbreak",
+      "label_suffix": "crit_dawnbreak",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Dawnbreak 504580 SpellFamilyFlags[1] 1073741824 is in the mask. Shape 4: the area Dawnbreak."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Dawnsear is not raised (control))",
+      "kind": "metric_delta",
+      "variant": "crit_dawnsear_control",
+      "label_suffix": "crit_dawnsear_control",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Control arm: Dawnsear 500146 carries none of the three mask bits in its SpellFamilyFlags[1]; the tooltip names Gavels and Dawnbreak only, so its done crit chance must stay 0 after the learn (zero expected gain)."
+    },
+    {
+      "spell": 572801,
+      "name": "Horusath Blast (attack power reduction)",
+      "kind": "metric_delta",
+      "variant": "ap_reduction",
+      "label_suffix": "ap_reduction",
+      "quote": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "attack_power",
+      "fields": {},
+      "phase_auras": [
+        [
+          56412,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 801,
+      "expected": 566,
+      "expected_gain": -235,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Horusath Blast 572801 applies 572050 to the target (AscensionSunClericAbilities.cpp:304): Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT, BasePoints -25 DieSides 1, RealPointsPerLevel -4.4 from SpellLevel 12 (Spell.dbc): at caster level 60, -25 + 1 - 4.4 x 48 = -235.2 (${-($572050m1+$572050ppl1)} = 235.2), so the dummy loses 235 or 236 (tolerance 1). The dummy (Harvest Golem 36 at level 60) carries AP Test 56412 (aura 99, +801 attack power, a precondition fixture by harness set_aura in both phases, so the floor of the metric cannot hide the reduction); the caster carries 823764 (spell penetration fixture). The reading before the learn-and-cast is the control (801, no Horusath Blast landed); after one real cast it reads 801 - 235. Same shape as Necromancer Bone Ward's attack_power entry. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572801,
+      "name": "Horusath Blast (attack power reduction duration)",
+      "kind": "metric_delta",
+      "variant": "ap_duration",
+      "label_suffix": "ap_duration",
+      "quote": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
+      "gate_spell": 572801,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 572050
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 14500,
+      "tolerance": 500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "572050 DurationIndex 8 (15000 ms, $572050d). The remaining duration of 572050 on the dummy is read 500 ms after one real Horusath Blast: 15000 - 500 = 14500, tolerance 500, an interval [14000, 15000] that excludes the 13500 and 16500 of a 10% error. Control: the reading before the cast is 0 (no aura). gate_spell 572801 is the spell itself, learned for the cast; the claim's subject is the duration of the aura it applies."
+    },
+    {
+      "spell": 302914,
+      "name": "Arbiter of Light (Vow of Light aura is up in the Vow arm)",
+      "kind": "metric_delta",
+      "variant": "vow_aura_active",
+      "label_suffix": "vow_aura_active",
+      "quote": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 302914,
+      "target": "dummy",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807547,
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Precondition read of gavel_heal_vow: the caster carries Vow of Light 807547 (DurationIndex 21) after the real cast, in the phase before and after Arbiter of Light is learned, so the 4.0 of gavel_heal_vow is measured with Vow of Light active."
+    },
+    {
+      "spell": 547214,
+      "kind": "metric_delta",
+      "quote": "and causes Horusath Blast to interrupt the target for $547217d.",
+      "gate_spell": 547214,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Luminary Mendicant (Horusath Blast interrupts the channel)",
+      "variant": "interrupt",
+      "label_suffix": "interrupt",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 600,
+      "observe_source": "Luminary Mendicant 547214 Effect[1] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 547217; the handler casts 547217 at the target on a Horusath Blast 500154 damage event (AscensionSunClericEvents.cpp:126, :323). 547217 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms, $547217d). The dummy channels Evocation 12051 (Arcane, silence-prevented, interruptible, 8 s) right before the cast (target_casts_before). Control: the reading before the learn and the cast (channel running, 1); after one Horusath Blast with Luminary Mendicant learned the dummy no longer channels (0). Horusath Blast alone does not interrupt (the control phase carries no cast)."
+    },
+    {
+      "spell": 707433,
+      "name": "Blightbreaker (Mercy period)",
+      "kind": "metric_delta",
+      "variant": "mercy_period",
+      "label_suffix": "mercy_period",
+      "quote": "Increases the tick rate of Mercy by $s1%,",
+      "gate_spell": 707433,
+      "trigger_spell": 504848,
+      "target": "caster",
+      "metric": "aura_amplitude_ms",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 3000,
+      "expected": 1500,
+      "tolerance": 10,
+      "wait_ms": 300,
+      "expire_ms": 20000,
+      "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The period of the Mercy aura on the caster is read after a real cast before the learn (3000, the control) and after a real cast with Blightbreaker learned: the SPELLMOD period of -50% gives 1500 ms. Expectation note: the tooltip says the tick rate rises by $s1 = 50%, which is a period of 2000 ms read literally and 1500 ms (a rate of +100%) read as the stated modifier on the period; the DBC value is the period modifier, so 1500 is judged and the wording is returned as an owner question if the reading is 1500."
+    },
+    {
+      "spell": 707433,
+      "name": "Blightbreaker (Mercy mana cost)",
+      "kind": "metric_delta",
+      "variant": "mercy_cost",
+      "label_suffix": "mercy_cost",
+      "quote": "but increases its mana cost by $s2%.",
+      "gate_spell": 707433,
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 286.23,
+      "expected": 572.46,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The use-time cost function of Mercy is read before the learn (21% x 1363 = 286.23, the control) and after it (+100%: 572.46), the same shape as Resplendence's cost entry (spell 806159)."
     }
   ],
   "player_observations": [],
