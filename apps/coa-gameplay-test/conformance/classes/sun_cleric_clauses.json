@@ -2474,11 +2474,23 @@
   {
     "spell": 704563,
     "clause": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
-    "labels": [
-      "704563 effect_value 704564e0 #0",
-      "704563 spell_duration 704564 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1}",
+        "labels": [
+          "704563 behaviour_metric_delta max_health",
+          "704563 behaviour_metric_delta control"
+        ]
+      },
+      {
+        "claim": "for $704564d",
+        "labels": [
+          "704563 behaviour_metric_delta held",
+          "704563 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704565,
@@ -2893,10 +2905,11 @@
   {
     "spell": 704936,
     "clause": "Your Illumination now shields you for $s1% of the amount healed.",
+    "kind": "claim",
     "labels": [
-      "704936 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "704936 behaviour_metric_delta shield_base",
+      "704936 behaviour_metric_delta shield_sp"
+    ]
   },
   {
     "spell": 704938,
@@ -3044,10 +3057,23 @@
   {
     "spell": 707078,
     "clause": "During the day you now deal $707768s2% more Holy damage",
-    "labels": [
-      "707078 effect_value 707768e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "you now deal $707768s2% more Holy damage",
+        "labels": [
+          "707078 behaviour_metric_delta day_damage",
+          "707078 behaviour_metric_delta day_aura"
+        ]
+      },
+      {
+        "claim": "During the day",
+        "labels": [
+          "707078 behaviour_metric_delta night_damage",
+          "707078 behaviour_metric_delta night_aura"
+        ]
+      }
+    ]
   },
   {
     "spell": 707078,
@@ -3139,8 +3165,11 @@
   {
     "spell": 707528,
     "clause": "Fulfilling your Vow of Grace now also reduces the cooldown of the triggered ability by 10%.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "707528 behaviour_metric_delta cd",
+      "707528 behaviour_metric_delta cd_control"
+    ]
   },
   {
     "spell": 707613,
@@ -4409,17 +4438,31 @@
   {
     "spell": 806479,
     "clause": "Recite a solar prayer, instantly healing you for $s1% of your maximum health plus an additional ${$m2+0+$SP*1}, scaling with spell power.",
-    "labels": [
-      "806479 effect_value e0 #0",
-      "806479 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "instantly healing you for $s1% of your maximum health",
+        "labels": [
+          "806479 behaviour_metric_delta heal_base",
+          "806479 behaviour_metric_delta heal_half_health"
+        ]
+      },
+      {
+        "claim": "plus an additional ${$m2+0+$SP*1}, scaling with spell power",
+        "labels": [
+          "806479 behaviour_metric_delta heal_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 806479,
     "clause": "Usable while stunned.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "806479 behaviour_metric_delta stunned",
+      "806479 behaviour_metric_delta stunned_control"
+    ]
   },
   {
     "spell": 806699,
@@ -4441,19 +4484,45 @@
   {
     "spell": 806980,
     "clause": "Bring holy wrath down upon an enemy, dealing ${$m1+0+$SP*.55+$AP*.25} High Threat Holy damage",
-    "labels": [
-      "806980 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*.55+$AP*.25} Holy damage",
+        "labels": [
+          "806980 behaviour_metric_delta damage",
+          "806980 behaviour_metric_delta damage_sp",
+          "806980 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "High Threat",
+        "labels": [
+          "806980 behaviour_threat_slope 806980",
+          "806980 behaviour_metric_delta threat_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 806980,
     "clause": "and increasing the target's spell damage taken by $572067s1% for $572067d.",
-    "labels": [
-      "806980 effect_value 572067e0 #1",
-      "806980 spell_duration 572067 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing the target's spell damage taken by $572067s1%",
+        "labels": [
+          "806980 behaviour_hit_ratio taken_fire",
+          "806980 behaviour_hit_ratio taken_holy"
+        ]
+      },
+      {
+        "claim": "for $572067d",
+        "labels": [
+          "806980 behaviour_metric_delta held",
+          "806980 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 807343,

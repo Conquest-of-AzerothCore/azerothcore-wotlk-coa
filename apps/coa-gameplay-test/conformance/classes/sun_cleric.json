@@ -8997,6 +8997,919 @@
       "cast_power": 1000,
       "critical": false,
       "expected_source": "$s1 = 10 (806458 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, EffectBasePoints 9 + 1); AscensionSunClericContracts.cpp:328-336 multiplies a family 33 Fire-school hit by 1 + 10% when the target carries an applied Fire-school periodic damage aura. Dawnsear 554406 (Fire school 4, family 33) is cast at the dummy; the non-critical hit with 806458 learned (treatment) against without it (control). Control of the condition: no Burning aura on the dummy in either arm, so the passive must add nothing: expected 1.00. 823764 removes the dummy's magic resistance. Reference search 2026-11-22: coa-history spell 806458: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806458 and no value; git log --grep and gh pr list --search 806458: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 806479,
+      "name": "Solar Prayer (healing at 20000 maximum health, 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "Recite a solar prayer, instantly healing you for $s1% of your maximum health plus an additional ${$m2+0+$SP*1}, scaling with spell power.",
+      "trigger_spell": 806479,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        6000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806479,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 4120,
+      "tolerance": 2,
+      "observe_source": "806479 Solar Prayer: Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + 1 = 25 ($s1, percent of the caster's maximum health); Effect[1] SPELL_EFFECT_HEAL, BasePoints 99 + 1 = 100 plus RealPointsPerLevel 1.0 x (level 60 - BaseLevel 10) = 150 ($m2, the tooltip's value at level 60) plus spell power x 1 ($SP*1). The class file's known aura 887015 (-20% healing done at 60) multiplies the healing, so the expected heal is 0.8 x (25% of the maximum health + 150 + spell power). Maximum health held at 20000 (caster_health 6000 of 20000), spell power 0: 0.8 x (5000 + 150) = 4120, deterministic (no dice, DieSides 1), judged to rounding (tolerance 2). Reference search 2026-11-22: coa-history spell 806479: 41 SPELL_HEAL events in 17 logs, min 293 max 4915 mean 1837 (the players' maximum health and spell power differ, so no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806479 and no value; merged-PR and git log search --grep 806479: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806479,
+      "name": "Solar Prayer (healing at 10000 maximum health, contrast of the maximum health term)",
+      "kind": "metric_delta",
+      "variant": "heal_half_health",
+      "label_suffix": "heal_half_health",
+      "quote": "Recite a solar prayer, instantly healing you for $s1% of your maximum health plus an additional ${$m2+0+$SP*1}, scaling with spell power.",
+      "trigger_spell": 806479,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806479,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 2120,
+      "tolerance": 2,
+      "observe_source": "806479 Solar Prayer: Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + 1 = 25 ($s1, percent of the caster's maximum health); Effect[1] SPELL_EFFECT_HEAL, BasePoints 99 + 1 = 100 plus RealPointsPerLevel 1.0 x (level 60 - BaseLevel 10) = 150 ($m2, the tooltip's value at level 60) plus spell power x 1 ($SP*1). The class file's known aura 887015 (-20% healing done at 60) multiplies the healing, so the expected heal is 0.8 x (25% of the maximum health + 150 + spell power). Contrast arm of the percent-of-maximum-health term: maximum health 10000: 0.8 x (2500 + 150) = 2120 against 4120 at 20000, so the 25% term is the one that moves. Reference search 2026-11-22: coa-history spell 806479: 41 SPELL_HEAL events in 17 logs, min 293 max 4915 mean 1837 (the players' maximum health and spell power differ, so no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806479 and no value; merged-PR and git log search --grep 806479: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806479,
+      "name": "Solar Prayer (healing at +2000 spell power, contrast of the spell power term)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Recite a solar prayer, instantly healing you for $s1% of your maximum health plus an additional ${$m2+0+$SP*1}, scaling with spell power.",
+      "trigger_spell": 806479,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        6000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806479,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 5720,
+      "tolerance": 2,
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "observe_source": "806479 Solar Prayer: Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + 1 = 25 ($s1, percent of the caster's maximum health); Effect[1] SPELL_EFFECT_HEAL, BasePoints 99 + 1 = 100 plus RealPointsPerLevel 1.0 x (level 60 - BaseLevel 10) = 150 ($m2, the tooltip's value at level 60) plus spell power x 1 ($SP*1). The class file's known aura 887015 (-20% healing done at 60) multiplies the healing, so the expected heal is 0.8 x (25% of the maximum health + 150 + spell power). Contrast arm of the spell power term: +2000 spell power (a harness rating on the caster, hit_arm) at the same 20000 maximum health: 0.8 x (5000 + 150 + 2000 x 1) = 5720 against 4120 at 0 spell power. Reference search 2026-11-22: coa-history spell 806479: 41 SPELL_HEAL events in 17 logs, min 293 max 4915 mean 1837 (the players' maximum health and spell power differ, so no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806479 and no value; merged-PR and git log search --grep 806479: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806479,
+      "name": "Solar Prayer (cast while stunned)",
+      "kind": "metric_delta",
+      "variant": "stunned",
+      "label_suffix": "stunned",
+      "quote": "Usable while stunned.",
+      "trigger_spell": 806479,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        6000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          56,
+          1,
+          "caster",
+          "dummy"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806479,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 4120,
+      "tolerance": 2,
+      "observe_source": "806479 Solar Prayer: Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + 1 = 25 ($s1, percent of the caster's maximum health); Effect[1] SPELL_EFFECT_HEAL, BasePoints 99 + 1 = 100 plus RealPointsPerLevel 1.0 x (level 60 - BaseLevel 10) = 150 ($m2, the tooltip's value at level 60) plus spell power x 1 ($SP*1). The class file's known aura 887015 (-20% healing done at 60) multiplies the healing, so the expected heal is 0.8 x (25% of the maximum health + 150 + spell power). Stun 56 (aura 12 MOD_STUN, set on the caster by the dummy in both phases) is a precondition fixture: the subject is the cast, observed as the heal. Spell.dbc AttributesEx5 8 = SPELL_ATTR5_ALLOW_WHILE_STUNNED. The cast is expected to go through and heal 4120 as unstunned. Reference search 2026-11-22: coa-history spell 806479: 41 SPELL_HEAL events in 17 logs, min 293 max 4915 mean 1837 (the players' maximum health and spell power differ, so no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806479 and no value; merged-PR and git log search --grep 806479: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806479,
+      "name": "Solar Prayer (control: Daybreak 503624 while stunned heals nothing)",
+      "kind": "metric_delta",
+      "variant": "stunned_control",
+      "label_suffix": "stunned_control",
+      "quote": "Usable while stunned.",
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        6000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          56,
+          1,
+          "caster",
+          "dummy"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 503624,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 0,
+      "tolerance": 2,
+      "observe_source": "806479 Solar Prayer: Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + 1 = 25 ($s1, percent of the caster's maximum health); Effect[1] SPELL_EFFECT_HEAL, BasePoints 99 + 1 = 100 plus RealPointsPerLevel 1.0 x (level 60 - BaseLevel 10) = 150 ($m2, the tooltip's value at level 60) plus spell power x 1 ($SP*1). The class file's known aura 887015 (-20% healing done at 60) multiplies the healing, so the expected heal is 0.8 x (25% of the maximum health + 150 + spell power). Control arm of 'Usable while stunned': Daybreak 503624 (no ALLOW_WHILE_STUNNED attribute: Attributes 65536, AttributesEx2 524288 only) is cast with the same stun 56 on the caster and must heal nothing: the stun, not the fixture, is what refuses an ordinary spell. Reference search 2026-11-22: coa-history spell 806479: 41 SPELL_HEAL events in 17 logs, min 293 max 4915 mean 1837 (the players' maximum health and spell power differ, so no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806479 and no value; merged-PR and git log search --grep 806479: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (a direct heal raises the ally's maximum health by 300)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 2090,
+      "tolerance": 1,
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural maximum health is read from the live unit with metric max_health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. Read 1500 ms after the heal: 1790 before (no heal) and 2090 = 1790 + 300 after, within 1 (judged to rounding). The control arm is the identical heal without 704563 (variant control). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (control: the same direct heal without the passive)",
+      "kind": "metric_delta",
+      "variant": "control",
+      "label_suffix": "control",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 1790,
+      "tolerance": 1,
+      "gate_spell": 704582,
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural maximum health is read from the live unit with metric max_health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. Control: 704563 is never learned (the learned gate is Angelic 704582, a passive that only changes Illumination's cast time); the same Daybreak heal leaves the maximum health at 1790. Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (the bonus is still there at 14.4 s)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 14400,
+      "expire_ms": 500,
+      "expected": 2090,
+      "tolerance": 1,
+      "game_time": {
+        "after": [
+          14350,
+          14500
+        ]
+      },
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural maximum health is read from the live unit with metric max_health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. The read is taken 14400 ms after the heal (game time 14350..14500 ms): the 2090 (1790 + 300) is still held, which excludes a duration 10% short (13500 ms). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (the bonus is gone at 15.6 s)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 15600,
+      "expire_ms": 500,
+      "expected": 1790,
+      "tolerance": 1,
+      "game_time": {
+        "after": [
+          15550,
+          15700
+        ]
+      },
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural maximum health is read from the live unit with metric max_health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. The read is taken 15600 ms after the heal (game time 15550..15700 ms): the maximum health is back at 1790, which excludes a duration 10% long (16500 ms). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 707528,
+      "name": "Final Vows (Horusath Blast cooldown after a fulfilment)",
+      "kind": "metric_delta",
+      "variant": "cd",
+      "label_suffix": "cd",
+      "quote": "Fulfilling your Vow of Grace now also reduces the cooldown of the triggered ability by 10%.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500154
+      },
+      "before_expected": 24000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          980,
+          1020
+        ]
+      },
+      "expected": 21500,
+      "tolerance": 150,
+      "observe_source": "707528 Final Vows Effect[0] aura 107 and Effect[2] aura 107 carry no cooldown percent; the 10% is read by the class code (AscensionSunClericAbilities.cpp:264-265: after a cast carrying the Dawn script value, with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|) with Amount from Effect[0] BasePoints 9 + 1 = 10). Fulfilment is set up as the Dawnguard control does: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast (it 'allows you to fulfill your Vows'), then Horusath Blast 500154 (Holy damage, RecoveryTime 25000, instant, its own cooldown, not a Gavel category) is cast at the dummy. Setup runs in the after phase only, so the before phase is a plain cast without any fulfilment: its read (24000 = 25000 - 1000) is a third control. The remaining cooldown of 500154 is read 1000 ms after the cast (game time 980..1020 ms): 25000 x 0.9 - 1000 = 21500 with the passive, 24000 without (control). A cut of 9% reads 21750 and 11% reads 21250, 250 ms away, so tolerance 150 excludes both. With 707528 learned: 21500. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707528 and no value; merged-PR and git log search --grep 707528: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 707528,
+      "name": "Final Vows (control: the same fulfilment without 707528)",
+      "kind": "metric_delta",
+      "variant": "cd_control",
+      "label_suffix": "cd_control",
+      "quote": "Fulfilling your Vow of Grace now also reduces the cooldown of the triggered ability by 10%.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500154
+      },
+      "before_expected": 24000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          980,
+          1020
+        ]
+      },
+      "expected": 24000,
+      "tolerance": 150,
+      "gate_spell": 704582,
+      "observe_source": "707528 Final Vows Effect[0] aura 107 and Effect[2] aura 107 carry no cooldown percent; the 10% is read by the class code (AscensionSunClericAbilities.cpp:264-265: after a cast carrying the Dawn script value, with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|) with Amount from Effect[0] BasePoints 9 + 1 = 10). Fulfilment is set up as the Dawnguard control does: Vow of Grace 803719 cast, 20 Solar Power 500149 set on the caster (precondition fixture) and Dawn 804584 cast (it 'allows you to fulfill your Vows'), then Horusath Blast 500154 (Holy damage, RecoveryTime 25000, instant, its own cooldown, not a Gavel category) is cast at the dummy. Setup runs in the after phase only, so the before phase is a plain cast without any fulfilment: its read (24000 = 25000 - 1000) is a third control. The remaining cooldown of 500154 is read 1000 ms after the cast (game time 980..1020 ms): 25000 x 0.9 - 1000 = 21500 with the passive, 24000 without (control). A cut of 9% reads 21750 and 11% reads 21250, 250 ms away, so tolerance 150 excludes both. Control: 707528 is never learned (the learned gate is Angelic 704582): 24000, so the Vow alone cuts nothing. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707528 and no value; merged-PR and git log search --grep 707528: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704936,
+      "name": "The Chosen (shield at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "shield_base",
+      "label_suffix": "shield_base",
+      "quote": "Your Illumination now shields you for $s1% of the amount healed.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 1363,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 802598,
+        "effect": 0
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 11.5,
+      "after_at_least": 11,
+      "after_at_most": 12,
+      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370: Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 38, DieSides 3, RealPointsPerLevel 3.264 x (min(60, MaxLevel 4) - BaseLevel 1) = 9.79 -> 9, coefficient $bh*1.05) is cast at the caster, held at 30% of its health so the heal is not capped, with the class's -20% healing done (887015). The shield is the live aura 802598 on the caster, read with metric aura_amount after the cast; the before phase is the same cast without 704936 learned (control: no shield, 0). Spell power 0: heal int((47 + 1..3) x 0.8) = 38..40, shield 30% = 11..12, read within 11..12. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704936 and no value; merged-PR and git log search --grep 704936: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704936,
+      "name": "The Chosen (shield at +1000 spell power)",
+      "kind": "metric_delta",
+      "variant": "shield_sp",
+      "label_suffix": "shield_sp",
+      "quote": "Your Illumination now shields you for $s1% of the amount healed.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 1363,
+      "caster_health_pct": 30,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 802598,
+        "effect": 0
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 263.5,
+      "after_at_least": 262,
+      "after_at_most": 265,
+      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370: Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 38, DieSides 3, RealPointsPerLevel 3.264 x (min(60, MaxLevel 4) - BaseLevel 1) = 9.79 -> 9, coefficient $bh*1.05) is cast at the caster, held at 30% of its health so the heal is not capped, with the class's -20% healing done (887015). The shield is the live aura 802598 on the caster, read with metric aura_amount after the cast; the before phase is the same cast without 704936 learned (control: no shield, 0). Contrast arm: +1000 spell power: heal (47 + 1..3 + 1.05 x 1000) x 0.8 = 878..880, shield 30% = 263..264, read within 262..265 (the order of the rounding is not known), against 11..12 at 0, so the shield follows the amount healed. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704936 and no value; merged-PR and git log search --grep 704936: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report).",
+      "player_spell_power": 1000
+    },
+    {
+      "spell": 707078,
+      "name": "Stand Against Darkness (Holy damage at day)",
+      "kind": "metric_delta",
+      "variant": "day_damage",
+      "label_suffix": "day_damage",
+      "quote": "During the day you now deal $707768s2% more Holy damage",
+      "hour": 12,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 589.5,
+      "after_at_least": 584,
+      "after_at_most": 595,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (15000 ms) 707768; the class code keeps helper 707768 on the player only in daytime (Daytime(): local hour 6 to 17, AscensionSunCleric.cpp:361-377) with 707078; 707768 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 9 + 1 = 10 ($707768s2 as the tooltip reads it). Justicar's Wrath 806980 is cast once at the dummy (deterministic: 515..523 + int(0.25 x 70) = 532..540 at the reference stats, measured in the 806980 damage entry; Holy resistance removed by 823764); the scenario runs at realm-local hour 12 (day) or 0 (night, the control), 707078 learned between the phases. Day: 1.10 x 532..540 = 585..594, read within 584..595. Reference search 2026-11-22: coa-history spell 707078: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707078 and no value; merged-PR and git log search --grep 707078: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 707078,
+      "name": "Stand Against Darkness (control: the same hit at night)",
+      "kind": "metric_delta",
+      "variant": "night_damage",
+      "label_suffix": "night_damage",
+      "quote": "During the day you now deal $707768s2% more Holy damage",
+      "hour": 0,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 536,
+      "after_at_least": 531,
+      "after_at_most": 541,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (15000 ms) 707768; the class code keeps helper 707768 on the player only in daytime (Daytime(): local hour 6 to 17, AscensionSunCleric.cpp:361-377) with 707078; 707768 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 9 + 1 = 10 ($707768s2 as the tooltip reads it). Justicar's Wrath 806980 is cast once at the dummy (deterministic: 515..523 + int(0.25 x 70) = 532..540 at the reference stats, measured in the 806980 damage entry; Holy resistance removed by 823764); the scenario runs at realm-local hour 12 (day) or 0 (night, the control), 707078 learned between the phases. Night (control): 532..540, read within 531..541, so the 10% is the daytime part. Reference search 2026-11-22: coa-history spell 707078: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707078 and no value; merged-PR and git log search --grep 707078: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 707078,
+      "name": "Stand Against Darkness (helper aura at day)",
+      "kind": "metric_delta",
+      "variant": "day_aura",
+      "label_suffix": "day_aura",
+      "quote": "During the day you now deal $707768s2% more Holy damage",
+      "hour": 12,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 707768
+      },
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (15000 ms) 707768; the class code keeps helper 707768 on the player only in daytime (Daytime(): local hour 6 to 17, AscensionSunCleric.cpp:361-377) with 707078; 707768 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 9 + 1 = 10 ($707768s2 as the tooltip reads it). Justicar's Wrath 806980 is cast once at the dummy (deterministic: 515..523 + int(0.25 x 70) = 532..540 at the reference stats, measured in the 806980 damage entry; Holy resistance removed by 823764); the scenario runs at realm-local hour 12 (day) or 0 (night, the control), 707078 learned between the phases. Day: the helper 707768 is on the caster. Reference search 2026-11-22: coa-history spell 707078: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707078 and no value; merged-PR and git log search --grep 707078: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 707078,
+      "name": "Stand Against Darkness (control: no helper aura at night)",
+      "kind": "metric_delta",
+      "variant": "night_aura",
+      "label_suffix": "night_aura",
+      "quote": "During the day you now deal $707768s2% more Holy damage",
+      "hour": 0,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 707768
+      },
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 0,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (15000 ms) 707768; the class code keeps helper 707768 on the player only in daytime (Daytime(): local hour 6 to 17, AscensionSunCleric.cpp:361-377) with 707078; 707768 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 9 + 1 = 10 ($707768s2 as the tooltip reads it). Justicar's Wrath 806980 is cast once at the dummy (deterministic: 515..523 + int(0.25 x 70) = 532..540 at the reference stats, measured in the 806980 damage entry; Holy resistance removed by 823764); the scenario runs at realm-local hour 12 (day) or 0 (night, the control), 707078 learned between the phases. Night (control): the helper is absent. Reference search 2026-11-22: coa-history spell 707078: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 707078 and no value; merged-PR and git log search --grep 707078: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (damage at the reference stats)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m1+0+$SP*.55+$AP*.25} High Threat Holy damage",
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 536.0,
+      "after_at_least": 531,
+      "after_at_most": 541,
+      "observe_source": "806980 Justicar's Wrath Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Holy, BasePoints 507, DieSides 9 (the roll adds 1..9 to 507), RealPointsPerLevel 2.4375 x (60 - BaseLevel 57) = 7.3125 -> 7, so m1 is 515..523 at level 60; the tooltip adds spell power x 0.55 and attack power x 0.25 ($SP*.55+$AP*.25). The dummy has its Holy resistance removed (823764 on the caster) and the read keeps non-critical hits (fields critical false). Effect[1] SPELL_EFFECT_THREAT 99 + 1 = 100 (flat). Reference attack power 70 (class file reference_stats), spell power 0: 515..523 + int(0.25 x 70 = 17.5) = 532..540, read within 531..541 (one for the float truncation). Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$m1+0+$SP*.55+$AP*.25} High Threat Holy damage",
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 6036.0,
+      "after_at_least": 6031,
+      "after_at_most": 6041,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "806980 Justicar's Wrath Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Holy, BasePoints 507, DieSides 9 (the roll adds 1..9 to 507), RealPointsPerLevel 2.4375 x (60 - BaseLevel 57) = 7.3125 -> 7, so m1 is 515..523 at level 60; the tooltip adds spell power x 0.55 and attack power x 0.25 ($SP*.55+$AP*.25). The dummy has its Holy resistance removed (823764 on the caster) and the read keeps non-critical hits (fields critical false). Effect[1] SPELL_EFFECT_THREAT 99 + 1 = 100 (flat). Contrast arm of the spell power term: +10000 spell power (player_spell_power hit_arm, harness rating): 515..523 + int(0.55 x 10000 = 5500) + 17 = 6032..6040, read within 6031..6041, against 532..540 at 0. Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (damage at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "dealing ${$m1+0+$SP*.55+$AP*.25} High Threat Holy damage",
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 5536.0,
+      "after_at_least": 5531,
+      "after_at_most": 5541,
+      "player_attack_power": 20000,
+      "observe_source": "806980 Justicar's Wrath Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Holy, BasePoints 507, DieSides 9 (the roll adds 1..9 to 507), RealPointsPerLevel 2.4375 x (60 - BaseLevel 57) = 7.3125 -> 7, so m1 is 515..523 at level 60; the tooltip adds spell power x 0.55 and attack power x 0.25 ($SP*.55+$AP*.25). The dummy has its Holy resistance removed (823764 on the caster) and the read keeps non-critical hits (fields critical false). Effect[1] SPELL_EFFECT_THREAT 99 + 1 = 100 (flat). Contrast arm of the attack power term: +20000 attack power (player_attack_power, harness rating): 515..523 + int(0.25 x (70 + 20000) = 5017.5) = 5532..5540, read within 5531..5541, against 532..540 at 70. Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (High Threat)",
+      "kind": "threat_slope",
+      "variant": "threat",
+      "label_suffix": "threat",
+      "quote": "High Threat Holy damage",
+      "hit_spell": 806980,
+      "expected_slope": 2,
+      "observe_source": "No number in the tooltip. Owner ruling 2026-11-12 (class-conformance-rulings.md:394, 'High Threat': threat x2 on damage, flat threat kept; scoped by the owner to Templar tooltips and applied as precedent, as for Witch Hunter Shadow Brand 680516): the cast at a fresh dummy must give (threat - flat 100) / damage = 2. 806980 Effect[1] SPELL_EFFECT_THREAT 99 + 1 = 100 is the flat part the judge reads from the DBC. Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (High Threat, control: an ordinary Holy/Fire hit has threat equal to its damage plus the flat initial threat)",
+      "kind": "metric_delta",
+      "variant": "threat_control",
+      "label_suffix": "threat_control",
+      "quote": "High Threat Holy damage",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.00718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": 10000,
+      "observe_source": "Control of the High Threat factor: Dawnsear 554406 (no threat effect, no High Threat) at spell power 10000 gives threat = damage x 1 + the flat initial threat 60 of a level 60 cast (Spell::HandleThreatSpells, Spell.cpp:5737, ignoreModifiers; derivation of the Holy Form threat_base control, 805301): 1 + 60 / 8360.7 = 1.00718, so the x2 of Justicar's Wrath is not the class's baseline. Not a threat_slope control: at the reference stats that judge reads 1 + 60 / 617 = 1.097 for Dawnsear (measured in the first pairs, the flat 60 over a small hit), an incorrect control expectation, not a defect. Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (debuff: +10% spell damage taken, Dawnsear 554406)",
+      "kind": "hit_ratio",
+      "variant": "taken_fire",
+      "label_suffix": "taken_fire",
+      "quote": "increasing the target's spell damage taken by $572067s1% for $572067d.",
+      "expected": 1.1,
+      "observe_spell": 554406,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          806980
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1363,
+      "critical": false,
+      "expected_source": "572067 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 126 (the magic schools), BasePoints 9 + 1 = 10 ($572067s1), DurationIndex 8 (15000 ms). Dawnsear 554406 (Fire school) is the observed hit: a non-critical hit after a Justicar's Wrath cast on the dummy (treatment) against the same hit without it (control), expected 1.10 (band 2 points). The first version observed Gavel of Wrath 800617, a weapon-damage (Physical) hit that the magic-school mask 126 rightly leaves out (measured +0.29%), an incorrect test. Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (debuff: +10% spell damage taken, Horusath Blast 572801)",
+      "kind": "hit_ratio",
+      "variant": "taken_holy",
+      "label_suffix": "taken_holy",
+      "quote": "increasing the target's spell damage taken by $572067s1% for $572067d.",
+      "expected": 1.1,
+      "observe_spell": 572801,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          806980
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1363,
+      "critical": false,
+      "expected_source": "572067 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 126 (the magic schools), BasePoints 9 + 1 = 10 ($572067s1), DurationIndex 8 (15000 ms). Horusath Blast 572801 (Holy school) is the observed hit: a non-critical hit after a Justicar's Wrath cast on the dummy (treatment) against the same hit without it (control), expected 1.10 (band 2 points). The first version observed Gavel of Wrath 800617, a weapon-damage (Physical) hit that the magic-school mask 126 rightly leaves out (measured +0.29%), an incorrect test. Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (debuff held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "increasing the target's spell damage taken by $572067s1% for $572067d.",
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 572067,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 14400,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          14350,
+          14500
+        ]
+      },
+      "observe_source": "572067 DurationIndex 8 = 15000 ms ($572067d): the aura is still on the dummy 14400 ms after the cast (excludes a duration 10% short, 13500 ms). Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath (debuff gone)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "increasing the target's spell damage taken by $572067s1% for $572067d.",
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 572067,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 15600,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          15550,
+          15700
+        ]
+      },
+      "observe_source": "572067 DurationIndex 8 = 15000 ms ($572067d): the aura is gone from the dummy 15600 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
     }
   ],
   "player_observations": [],
