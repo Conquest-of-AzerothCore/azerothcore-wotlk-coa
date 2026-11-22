@@ -6262,7 +6262,12 @@
       "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
-    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.2004 / 0.2013 over 33992 landed auto-attack hits (14 parts, Valkyr set, false alert 1.92e-08 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-082433 / 20261122-082531, build b9a881db0cfb, server commit 5fb28e465107, no flip."
+    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.2004 / 0.2013 over 33992 landed auto-attack hits (14 parts, Valkyr set, false alert 1.92e-08 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-082433 / 20261122-082531, build b9a881db0cfb, server commit 5fb28e465107, no flip. Owner ruling O-14 (Q-sc-4, option a, 2026-11-22): \"Melee attacks\" means auto attacks only, as the server does (AscensionSunClericEvents.cpp:124 `damage && automatic && Chance`); no change, counted on the measured rate. Base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3) reads swing_reset_rate ok in both runs.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 806699,
+      "ruling": "O-14 (Q-sc-4, option a, 2026-11-22): Odyn's Vanguard rolls on auto attacks only, as the server does"
+    }
   },
   {
     "spell": 806980,
