@@ -23699,6 +23699,56 @@
       "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the caster's own marker (owner ruling O-21, Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE (one marker per caster), and the 680643 proc condition refuses a target holding the caster's own 681531. Each phase attacks the dummy for 3 reference swing intervals (7500 ms of the Seraphim main hand 2524, 2500 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 506824 (Vow of the Valkyr (Mainhand), the strike the code cast before ADR 0024) read 0 without the passive (control) and 0 with it over 3 swing intervals. Positive control: coa-history 506824 SPELL_DAMAGE 1388 events in 11 logs, none from the Valiance player. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
     },
     {
+      "spell": 680643,
+      "name": "Valiance (a second target gets its own extra attack)",
+      "kind": "metric_delta",
+      "variant": "second_target",
+      "label_suffix": "second_target",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 681472
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expire_ms": 500,
+      "area_dummies": [
+        3.0
+      ],
+      "second_swing_target": "area1",
+      "void_on_cast_failure": true,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms); 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. The per-target 'first' is the caster's own marker (owner ruling O-21, Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE (one marker per caster), and the 680643 proc condition refuses a target holding the caster's own 681531. Each phase attacks the dummy for 3 reference swing intervals (7500 ms of the main hand 2524, 2500 ms), stops, then attacks area1, a copy of the dummy at the same 3 yd melee placement (area_dummies, second_swing_target, tool ADR 1050), for the same 7500 ms, with no spell cast; the gate is learned between the phases (control: the before phase without 680643). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 681472 read 0 without the passive and exactly 2 with it: one extra attack on the dummy and one on area1 (the tooltip's 'on a target': each target's first auto attack), so a single extra attack per caster (1) or one per swing (6 or more) alerts. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): 681531 DEBUFF applied on 35 distinct target GUIDs after 36 SPELL_EXTRA_ATTACKS 681472 events, one per target, consistent with the tooltip; nothing else found."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (the second target is marked too)",
+      "kind": "metric_delta",
+      "variant": "second_marker",
+      "label_suffix": "second_marker",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "aura",
+      "fields": {
+        "spell": 681531,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "area_dummies": [
+        3.0
+      ],
+      "second_swing_target": "area1",
+      "void_on_cast_failure": true,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms); 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. The per-target 'first' is the caster's own marker (owner ruling O-21, Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE (one marker per caster), and the 680643 proc condition refuses a target holding the caster's own 681531. Each phase attacks the dummy for 3 reference swing intervals (7500 ms of the main hand 2524, 2500 ms), stops, then attacks area1, a copy of the dummy at the same 3 yd melee placement (area_dummies, second_swing_target, tool ADR 1050), for the same 7500 ms, with no spell cast; the gate is learned between the phases (control: the before phase without 680643). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's 681531 marker on area1 reads 0 without the passive and 1 with it: the second target's first auto attack marks it as the first target's does (first_marker entry). Reference search 2026-11-22: coa-history log 161: 681531 applied once on each of 35 distinct targets; nothing else found.",
+      "measure_actor": "area1"
+    },
+    {
       "spell": 803913,
       "name": "Glorious Execution (main-hand strike)",
       "kind": "script_hit",
