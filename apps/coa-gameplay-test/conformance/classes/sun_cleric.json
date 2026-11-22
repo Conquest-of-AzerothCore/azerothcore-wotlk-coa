@@ -16472,7 +16472,7 @@
           806024
         ]
       },
-      "trials": 12,
+      "trials": 10,
       "cast_power": 1000,
       "fixture": {
         "spell_power": 10000
@@ -16528,7 +16528,7 @@
           500146
         ]
       },
-      "trials": 12,
+      "trials": 10,
       "cast_power": 1000,
       "fixture": {
         "spell_power": 10000
