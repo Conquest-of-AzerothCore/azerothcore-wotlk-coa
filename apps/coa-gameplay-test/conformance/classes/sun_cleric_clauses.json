@@ -658,9 +658,13 @@
     "spell": 300353,
     "clause": "Gavel of Grace: Restores $504722s1% of your maximum mana.",
     "labels": [
-      "300353 effect_value 504722e0 #0"
+      "300353 effect_value 504722e0 #0",
+      "300353 behaviour_metric_delta grace_mana",
+      "300353 behaviour_metric_delta grace_mana_control",
+      "300353 behaviour_metric_delta grace_mana_nolearn"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Control arms: grace_mana_control (the same Gavel of Grace 800614 without Holy Form 805301) and grace_mana_nolearn (Holy Form, 300353 never learned) both read 25 mana, the Energize 681317 of the Gavel's own Effect[2] ($m3 = 25); with Holy Form and 300353 learned the read is 311 in both runs: 25 + 286, 10% (504722 Effect[0] aura 137, BasePoints 9 + 1) of the 2868 maximum mana (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20)), truncated to 286, judged within 1 mana. Holy Form is applied by harness set_aura as a precondition fixture, the subject being the 300353 effect. Reference search 2026-11-22: coa-history spells 300353 and 800614: Gavels and the passive leave no logged energize event; nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300353,
@@ -677,9 +681,12 @@
     "spell": 300355,
     "clause": "Melee critical strikes against you prevent you from being critically struck again for $301342d.",
     "labels": [
-      "300355 spell_duration 301342 #0"
+      "300355 spell_duration 301342 #0",
+      "300355 behaviour_metric_delta immunity_held",
+      "300355 behaviour_metric_delta immunity_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Stalwart 300355 grants 301342 (DurationIndex 35 = 4000 ms) on a received melee critical hit with damage. A real Strike 11976 (melee) made critical by the Vulnerable 213 fixture (harness set_aura, not the subject) hits the caster; 300355 is learned between the phases, so the before phase is the control (aura absent). The aura is held at about 3.74 s after the critical hit and gone at about 4.24 s, so 4 s is neither 10% shorter (3.6 s) nor 10% longer (4.4 s). The reads are placed from a calibration run (aura_duration_ms, run 20261122-200519, readback used for placement only: 112 ms between the strike and the clock of the trigger cast). A first pair read the held entry once ok and once alert (a missed strike); the entries then cast four Strikes 20 ms apart with dodge and parry 0, residual about 2 p^4 per pair (1.3e-5 at the 5% base miss chance, at most 0.1% for p up to 0.149; p not measured). The second half of the tooltip ('prevent you from being critically struck again') is the aura's own effect 301342 Effect[0] aura 197 -1001%, read as data, not exercised by a second strike. Reference search 2026-11-22: coa-history spells 300355 and 301342: no logged event (passive); nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300357,
@@ -4135,9 +4142,11 @@
     "spell": 704579,
     "clause": "In addition, increases the effectiveness of the Fulfillment effect of Vow of the Eclipse by $s2%.",
     "labels": [
-      "704579 effect_value e1 #3"
+      "704579 effect_value e1 #3",
+      "704579 behaviour_metric_delta fulfillment_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Ratio entry fulfillment_ratio: the Fulfillment copy of Vow of the Eclipse 807435 on a marked enemy (Sun Power 807215 damage events on the dummy) reads c without 704579 learned (10%, Dawn 807444 Effect[1] BasePoints 9 + 1) and the cumulative reading after the learn is 3c, so the learned copy is 2c, +100% = 704579 Effect[1] BasePoints 99 + 1; judged on the ratio 3.0 within 0.1 (the band of +100% is 5 points). Control = the before phase of the same entry. Vow of the Eclipse, Dawn (one charge) and the Eclipse mark 505340 are harness set_aura precondition fixtures; the subject is the Fulfillment copy. Crit and resist removed (984954, 823764), spell power 20000. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip; nothing found that states another figure."
   },
   {
     "spell": 704581,

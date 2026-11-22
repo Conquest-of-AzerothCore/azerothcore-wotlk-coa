@@ -36084,8 +36084,8 @@
         "spell": 11976,
         "health": 100000,
         "max_health": 100000,
-        "count": 1,
-        "wait_ms": 100
+        "count": 4,
+        "wait_ms": 20
       },
       "metric": "aura",
       "fields": {
@@ -36105,7 +36105,11 @@
           3750
         ]
       },
-      "observe_source": "300355 Stalwart Effect[0] aura 42 (proc trigger of 301342); 301342 Stalwart has DurationIndex 35 = 4000 ms ($301342d, SpellDuration.dbc) and Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001 + 1 = -1000%, the immunity. The server grants it on a received melee critical hit with damage (AscensionSunClericEvents.cpp:102-103, :276). The critical melee hit is real: the striker's Strike 11976 (DmgClass 2, melee, Effect 58 weapon damage) hits the caster, and Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 + 1 = +10000% to be critically struck, the fixture of Witch Hunter Alertness 681152) set by harness set_aura makes it critical; Vulnerable is a precondition fixture, not the subject. 300355 is learned between the phases, so the before phase is the control (the same crit, no talent, aura 301342 absent). The aura is read on the caster at a game time measured from the trigger cast Angelic Presence 800722 (an instant self cast, only the clock): a calibration run (aura_duration_ms, run 20261122-200519, readback used to place the reads, not as proof) put the strike's landing 112 ms before that clock, so the read at about 3.74 s after the critical hit finds the immunity still held, so 4 s is not 10% shorter (3.6 s). Reference search 2026-11-22: coa-history spell 300355 and 301342: see the Stalwart passive, no logged event; nothing found beyond the tooltip and the server DBC."
+      "observe_source": "300355 Stalwart Effect[0] aura 42 (proc trigger of 301342); 301342 Stalwart has DurationIndex 35 = 4000 ms ($301342d, SpellDuration.dbc) and Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001 + 1 = -1000%, the immunity. The server grants it on a received melee critical hit with damage (AscensionSunClericEvents.cpp:102-103, :276). The critical melee hit is real: the striker's Strike 11976 (DmgClass 2, melee, Effect 58 weapon damage) hits the caster, and Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 + 1 = +10000% to be critically struck, the fixture of Witch Hunter Alertness 681152) set by harness set_aura makes it critical; Vulnerable is a precondition fixture, not the subject. 300355 is learned between the phases, so the before phase is the control (the same crit, no talent, aura 301342 absent). The aura is read on the caster at a game time measured from the trigger cast Angelic Presence 800722 (an instant self cast, only the clock): a calibration run (aura_duration_ms, run 20261122-200519, readback used to place the reads, not as proof) put the strike's landing 112 ms before that clock, so the read at about 3.74 s after the critical hit finds the immunity still held, so 4 s is not 10% shorter (3.6 s). Reference search 2026-11-22: coa-history spell 300355 and 301342: see the Stalwart passive, no logged event; nothing found beyond the tooltip and the server DBC. Four Strikes are cast 20 ms apart (strike count 4) with the caster's dodge and parry set to 0 (caster_avoidance): a first pair run read this entry once ok and once alert (aura absent), a strike that missed. What remains is the melee spell miss chance, 5.00% base (Unit::GetUnitMissChance, Unit.cpp:4350) plus the defence term of Unit::MeleeSpellMissChance (Unit.cpp:16928-16929), not measured here. Vulnerable makes every landing critical, so the aura starts at the first landing within 60 ms of the first Strike, and a run fails only if all four miss: with a miss chance p the pair fails with probability about 2 p^4, which is at most 0.1% for p up to 0.149 (at the 5% base, 1.3e-5).",
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
+      }
     },
     {
       "spell": 300355,
@@ -36126,8 +36130,8 @@
         "spell": 11976,
         "health": 100000,
         "max_health": 100000,
-        "count": 1,
-        "wait_ms": 100
+        "count": 4,
+        "wait_ms": 20
       },
       "metric": "aura",
       "fields": {
@@ -36147,7 +36151,11 @@
           4250
         ]
       },
-      "observe_source": "300355 Stalwart Effect[0] aura 42 (proc trigger of 301342); 301342 Stalwart has DurationIndex 35 = 4000 ms ($301342d, SpellDuration.dbc) and Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001 + 1 = -1000%, the immunity. The server grants it on a received melee critical hit with damage (AscensionSunClericEvents.cpp:102-103, :276). The critical melee hit is real: the striker's Strike 11976 (DmgClass 2, melee, Effect 58 weapon damage) hits the caster, and Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 + 1 = +10000% to be critically struck, the fixture of Witch Hunter Alertness 681152) set by harness set_aura makes it critical; Vulnerable is a precondition fixture, not the subject. 300355 is learned between the phases, so the before phase is the control (the same crit, no talent, aura 301342 absent). The aura is read on the caster at a game time measured from the trigger cast Angelic Presence 800722 (an instant self cast, only the clock): a calibration run (aura_duration_ms, run 20261122-200519, readback used to place the reads, not as proof) put the strike's landing 112 ms before that clock, so the read at about 4.24 s after the critical hit finds it gone, so 4 s is not 10% longer (4.4 s). Reference search 2026-11-22: coa-history spell 300355 and 301342: see the Stalwart passive, no logged event; nothing found beyond the tooltip and the server DBC."
+      "observe_source": "300355 Stalwart Effect[0] aura 42 (proc trigger of 301342); 301342 Stalwart has DurationIndex 35 = 4000 ms ($301342d, SpellDuration.dbc) and Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001 + 1 = -1000%, the immunity. The server grants it on a received melee critical hit with damage (AscensionSunClericEvents.cpp:102-103, :276). The critical melee hit is real: the striker's Strike 11976 (DmgClass 2, melee, Effect 58 weapon damage) hits the caster, and Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 + 1 = +10000% to be critically struck, the fixture of Witch Hunter Alertness 681152) set by harness set_aura makes it critical; Vulnerable is a precondition fixture, not the subject. 300355 is learned between the phases, so the before phase is the control (the same crit, no talent, aura 301342 absent). The aura is read on the caster at a game time measured from the trigger cast Angelic Presence 800722 (an instant self cast, only the clock): a calibration run (aura_duration_ms, run 20261122-200519, readback used to place the reads, not as proof) put the strike's landing 112 ms before that clock, so the read at about 4.24 s after the critical hit finds it gone, so 4 s is not 10% longer (4.4 s). Reference search 2026-11-22: coa-history spell 300355 and 301342: see the Stalwart passive, no logged event; nothing found beyond the tooltip and the server DBC. Four Strikes are cast 20 ms apart (strike count 4) with the caster's dodge and parry set to 0 (caster_avoidance): a first pair run read this entry once ok and once alert (aura absent), a strike that missed. What remains is the melee spell miss chance, 5.00% base (Unit::GetUnitMissChance, Unit.cpp:4350) plus the defence term of Unit::MeleeSpellMissChance (Unit.cpp:16928-16929), not measured here. Vulnerable makes every landing critical, so the aura starts at the first landing within 60 ms of the first Strike, and a run fails only if all four miss: with a miss chance p the pair fails with probability about 2 p^4, which is at most 0.1% for p up to 0.149 (at the 5% base, 1.3e-5).",
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
+      }
     }
   ],
   "player_observations": [],
