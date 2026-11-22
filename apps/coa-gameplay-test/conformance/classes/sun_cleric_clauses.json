@@ -5542,7 +5542,7 @@
       "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
-    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.1991 / 0.1967 over 21762 / 21771 landed auto-attack hits (9 parts, Valkyr set, false alert 1.96e-04 / 1.95e-04 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
+    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.2004 / 0.2013 over 33992 landed auto-attack hits (14 parts, Valkyr set, false alert 1.92e-08 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-082433 / 20261122-082531, build b9a881db0cfb, server commit 5fb28e465107, no flip."
   },
   {
     "spell": 806980,
