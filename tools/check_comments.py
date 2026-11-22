@@ -24,7 +24,8 @@ def owned_files(root=ROOT):
 
 
 def added_lines(base, root=ROOT):
-    diff = git(root, 'diff', '--no-ext-diff', '--no-textconv', '--no-renames', '--unified=0', base, '--')
+    diff = git(root, 'diff', '--no-ext-diff', '--no-textconv', '--no-renames', '--src-prefix=a/',
+               '--dst-prefix=b/', '--unified=0', base, '--')
     result = {}
     current = None
     for line in diff.splitlines():
