@@ -1,6 +1,7 @@
 NAME = 'specialization'
 ORDER = 26
 MAX_SPECIALIZATION = 0xFFFF
+SWITCH_COPPER = 1000000
 
 
 def parse(raw) -> int:
@@ -13,10 +14,12 @@ def phase_steps(spec, specialization: int, after: bool) -> list[dict]:
     from profile import CASTER
     if after:
         return []
-    return [{'action': 'specialization', 'actor': CASTER, 'id': specialization}]
+    return [{'action': 'money', 'actor': CASTER, 'copper': SWITCH_COPPER},
+            {'action': 'specialization', 'actor': CASTER, 'id': specialization}]
 
 
 def fixtures(class_file: dict, spec, specialization: int, scenario: dict):
-    scenario['contract'] += (f' The caster switches to specialization {specialization} at the start of the before '
-                             f'phase, a precondition fixture: an ability a talent teaches only in that '
-                             f'specialization is then taught by the learn between the phases.')
+    scenario['contract'] += (f' The caster is given {SWITCH_COPPER} copper for the switch cost and switches to '
+                             f'specialization {specialization} at the start of the before phase, a precondition '
+                             f'fixture: an ability a talent teaches only in that specialization is then taught by the '
+                             f'learn between the phases.')

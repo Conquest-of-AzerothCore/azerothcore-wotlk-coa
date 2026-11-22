@@ -21,6 +21,7 @@ class SpecializationTests(unittest.TestCase):
         switched = [index for index, step in enumerate(steps) if step['action'] == 'specialization']
         self.assertEqual(len(switched), 1)
         self.assertEqual(steps[switched[0]]['id'], 6)
+        self.assertEqual(steps[switched[0] - 1], {'action': 'money', 'actor': 'caster', 'copper': 1000000})
         labels = [step.get('label') for step in steps]
         self.assertLess(switched[0], labels.index(expectation.model['before_label']))
 
