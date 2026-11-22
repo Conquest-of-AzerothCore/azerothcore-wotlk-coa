@@ -20,6 +20,7 @@
 #include "StringFormat.h"
 #include "TicketMgr.h"
 #include "Timer.h"
+#include "Util.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <algorithm>
@@ -492,10 +493,17 @@ namespace
                 handler->SendSysMessage("No player tickets.");
                 return true;
             }
+            uint32 const now = uint32(GameTime::GetGameTime().count());
+            auto const age = [now](uint32 then) { return secsToTimeString(now > then ? now - then : 0, true); };
             for (CoAPlayerTicket::Ticket const* ticket : tickets)
-                handler->PSendSysMessage("#{} [{}] {} - {}{}, {} messages{}", ticket->Id, StatusOf(*ticket),
-                    ticket->Title, ticket->Creator, OnlineCreator(*ticket) ? " (online)" : "",
-                    ticket->Messages.size(), AssignmentOf(*ticket));
+            {
+                // Same short age format as ".ticket list" so GM Genie can fill its Created/Modified columns.
+                uint32 const modified = ticket->Messages.empty() ? ticket->Created : ticket->Messages.back().Time;
+                handler->PSendSysMessage("#{} [{}] {} - {}{}, {} messages, created {} ago, modified {} ago{}",
+                    ticket->Id, StatusOf(*ticket), ticket->Title, ticket->Creator,
+                    OnlineCreator(*ticket) ? " (online)" : "", ticket->Messages.size(),
+                    age(ticket->Created), age(modified), AssignmentOf(*ticket));
+            }
             return true;
         }
 
