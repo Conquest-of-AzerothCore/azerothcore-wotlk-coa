@@ -110,6 +110,25 @@ class ExtraReadsTests(unittest.TestCase):
         self.assertEqual([(e.label, e.expected) for e in plain], [(e.label, e.expected) for e in extended])
         self.assertFalse([e for e in extended if ' extra ' in e.label])
 
+    def test_a_read_placed_around_an_after_cast_brackets_that_cast_in_the_without_and_with_arms(self):
+        reads = [{'metric': 'cooldown_ms', 'spell': 500154, 'at': 'before_cast', 'cast': 500143},
+                 {'metric': 'cooldown_ms', 'spell': 500154, 'at': 'after_cast', 'cast': 500143}]
+        scenario, _ = self.scenario(extra_reads=reads, after_casts=[[500143, 'caster']], after_wait_ms=1600,
+                                    after_cast_gap_ms=2200)
+        steps = scenario['steps']
+        for arm in ('without', 'with'):
+            before = next(i for i, step in enumerate(steps) if step.get('label', '').endswith(f'{arm} extra cooldown_ms 500154 before_cast 500143'))
+            after = next(i for i, step in enumerate(steps) if step.get('label', '').endswith(f'{arm} extra cooldown_ms 500154 after_cast 500143'))
+            casts = [i for i in range(before, after) if steps[i]['action'] == 'cast']
+            self.assertEqual([steps[i]['spell'] for i in casts], [500143])
+            self.assertEqual(steps[after - 1]['ms'], 2200)
+        self.assertFalse([step for step in steps if step.get('label', '').startswith('301266 cost_gate 500154 reset_horusath beyond extra')])
+
+    def test_a_placed_read_needs_a_cast_among_the_after_casts(self):
+        read = {'metric': 'cooldown_ms', 'spell': 500154, 'at': 'after_cast', 'cast': 1}
+        with self.assertRaisesRegex(ValueError, 'extra_reads'):
+            self.scenario(extra_reads=[read])
+
     def test_an_unknown_metric_or_a_power_with_a_spell_is_refused(self):
         for read in ({'metric': 'cast_failure', 'spell': 500154}, {'metric': 'power', 'spell': 1},
                      {'metric': 'cooldown_ms'}):

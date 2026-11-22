@@ -5955,9 +5955,9 @@
       "805581 behaviour_metric_delta cd_control",
       "805581 behaviour_metric_delta cd_late",
       "805581 behaviour_metric_delta cd_late_control",
-      "805581 cost_gate 500154 cd_gate without",
-      "805581 cost_gate 500154 cd_gate with",
-      "805581 cost_gate 500154 cd_gate beyond"
+      "805581 cost_gate 500154 cd_gate_order without",
+      "805581 cost_gate 500154 cd_gate_order with",
+      "805581 cost_gate 500154 cd_gate_order beyond"
     ],
     "kind": "claim",
     "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Round 11 d8, open: the cooldown cut is not yet read as a behaviour. Design 1: cost_gate cooldown arms with the Vow and Dawn casts as setup_casts before the priming Horusath Blast, attempt at 23200 ms: the with arm was refused (cast_failure 67) in both runs while the without and beyond arms were refused as expected (pair 20261122 x3, build 80cb6ee11a34, no flip). Design 2: the same with fixtures 823764 and 984954 before every Horusath Blast cast (a landed hit): the with arm was still refused (67), so the cut that the cd entry reads (22000 ms 1000 ms after the cast) does not show as an early accepted recast in that sequence; the cause is not established (no cause guessed), both entries withdrawn from the class file, the cd readback labels stay. Design 3 (d8 third): the cause of the refused recast is not the category cooldown. Spell::CheckCast reads only the spell's own entry (HasSpellCooldown(500154), Spell.cpp:5828); Category 559 only writes entries for other spells of the family (Player.cpp:11867-11909); Reduce cuts the Blast entry (Player.cpp:11969). Pair d1 reads cooldown_ms of Blast 23200 ms after the cast: 0 with 805581 and 1791 without (cd_late, cd_late_control, ok in both runs, no flip), so the entry that CheckCast reads had ended while the cd_gate attempt was refused; the refusal comes from something else, not established. Status unchanged: open, the cut is a cooldown readback."
