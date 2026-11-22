@@ -16,3 +16,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0010](0010-valkyrs-calling-landing-follows-the-flight-aura.md) | Valkyr's Calling lands when its flight aura ends |
 | [0011](0011-holy-giant-doubles-vow-of-the-valkyr-damage.md) | Holy Giant doubles Vow of the Valkyr's auto attack damage bonus |
 | [0012](0012-battle-cleric-cuts-paragon-cooldown-on-the-cast.md) | Battle Cleric cuts Paragon's cooldown on the cast |
+| [0013](0013-stand-against-darkness-reduces-periodic-damage-taken.md) | Stand Against Darkness reduces periodic damage taken |

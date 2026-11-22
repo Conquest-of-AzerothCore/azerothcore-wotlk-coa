@@ -10656,7 +10656,7 @@
       "metric": "spell_damage_total",
       "expire_ms": 3000,
       "gate_spell": 707078,
-      "name": "Stand Against Darkness (periodic damage taken: an enemy DoT, lead L-1)",
+      "name": "Stand Against Darkness (periodic damage taken: an enemy DoT at day)",
       "variant": "taken_dot",
       "label_suffix": "taken_dot",
       "quote": "and take $707768s2% reduced periodic damage.",
@@ -10677,7 +10677,7 @@
       "expected": 7600,
       "tolerance": 40,
       "wait_ms": 500,
-      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). Unit::SpellDamageBonusTaken applies aura 214 to a DOT only when the effect's MiscValueB is 1 and its caster is the DoT's caster (Unit.cpp:10095-10099), so the lead (b4b report L-1, mentor D-65) is that an enemy's DoT is never reduced; this entry measures it. The scenario runs at realm-local hour 12 (day) in both phases; the passive is learned between them (before phase: no helper, the control; after phase: helper 707768 present). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount with the aura. The enemy DoT is Shadow Flame 22682 (Effect[0] aura 3 PERIODIC_DAMAGE, DmgClass none so it cannot miss, Shadow, BasePoints 499 + 1 die side = 500, amplitude 1000 ms, DurationIndex 31 = 8000 ms): 8 ticks of 500 = 4000 per phase, read 9500 ms after the strike. Tooltip expectation: periodic damage taken -10%, so the after phase deals 0.9 x 4000 = 3600 and the cumulative reading is 4000 + 3600 = 7600; tolerance 40 (1%) excludes a DoT not reduced (8000) and a reduction of 5% or 15%. Control arms: the before phase (no aura) reads the full 4000; the taken_direct entry reads a direct hit of the same school with the same aura, which the periodic claim must leave unchanged. Reference search 2026-11-22: coa-history spell 707078 and 707768: passives and helpers leave no event (a positive control is Paragon 680639 in the same index); nothing found beyond the tooltip and the DBC. A reading of 8000 leaves the clause with the owner (report only, no server change).",
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). The engine reads aura 214 on a DOT only for MiscValueB 1 from the DoT's own caster (Unit.cpp:10095-10099), so the class's periodic hook applies the effect: sun_cleric_scaling::ModifyPeriodicDamageAurasTick multiplies a periodic damage, damage percent or leech tick taken by a target carrying 707768 Effect[1] by 1 + amount / 100 when the effect's MiscValue matches the school, from any caster (Sun Cleric ADR 0013, mentor D-77). Before the fix the enemy DoT read 4000 in both phases (b5t pair B, runs 20261122-031110 / 20261122-031311). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount of the after phase; the passive is learned between the phases (before phase: no helper, the control). The scenario runs at realm-local hour 12 (day). The enemy DoT is Shadow Flame 22682 (Effect[0] aura 3 PERIODIC_DAMAGE, DmgClass none so it cannot miss, Shadow, BasePoints 499 + 1 die side = 500, amplitude 1000 ms, DurationIndex 31 = 8000 ms): 8 ticks of 500 = 4000 per phase, read 9500 ms after the strike. Tooltip expectation: periodic damage taken -10%, so the after phase deals 8 x 450 = 3600 and the cumulative reading is 4000 + 3600 = 7600; tolerance 40 (1%) excludes a DoT not reduced (8000) and a reduction of 5% or 15%. Control arms: the before phase (no aura) reads the full 4000; taken_dot_night reads the same DoT at night, where the helper is absent; taken_direct reads a direct hit of the same school with the same aura, which the periodic claim must leave unchanged. Reference search 2026-11-22: coa-history spell 707078 and 707768: passives and helpers leave no event; nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "arms": [
           {
@@ -10692,6 +10692,65 @@
             "expected": 1,
             "tolerance": 0,
             "source": "Positive control of the aura arm: helper 707768 is kept on the player in daytime with 707078 learned (AscensionSunCleric.cpp:376), so the reading at the end of the phase is 0 in the before phase (707078 not learned) and 1 after the learn at realm hour 12; without it the unchanged damage of this entry would show no reduction because the aura was absent, not because the aura does not reduce"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 707078,
+      "kind": "metric_delta",
+      "hour": 0,
+      "trigger_spell": 806980,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "expire_ms": 3000,
+      "gate_spell": 707078,
+      "name": "Stand Against Darkness (control: the enemy DoT at night)",
+      "variant": "taken_dot_night",
+      "label_suffix": "taken_dot_night",
+      "quote": "and take $707768s2% reduced periodic damage.",
+      "strike": {
+        "spell": 22682,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 9500,
+        "in_before": true
+      },
+      "fields": {
+        "spell": 22682,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 4000,
+      "expected": 8000,
+      "tolerance": 40,
+      "wait_ms": 500,
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). The engine reads aura 214 on a DOT only for MiscValueB 1 from the DoT's own caster (Unit.cpp:10095-10099), so the class's periodic hook applies the effect: sun_cleric_scaling::ModifyPeriodicDamageAurasTick multiplies a periodic damage, damage percent or leech tick taken by a target carrying 707768 Effect[1] by 1 + amount / 100 when the effect's MiscValue matches the school, from any caster (Sun Cleric ADR 0013, mentor D-77). Before the fix the enemy DoT read 4000 in both phases (b5t pair B, runs 20261122-031110 / 20261122-031311). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount of the after phase; the passive is learned between the phases (before phase: no helper, the control). The scenario runs at realm-local hour 0 (night): Daytime() is false, so the class code keeps no helper (AscensionSunCleric.cpp:315, :376) and the DoT is not reduced. The enemy DoT is Shadow Flame 22682 (Effect[0] aura 3 PERIODIC_DAMAGE, DmgClass none, Shadow, BasePoints 499 + 1 die side = 500, amplitude 1000 ms, DurationIndex 31 = 8000 ms): 8 ticks of 500 = 4000 per phase in both phases, cumulative reading 8000; tolerance 40 excludes the day reading 7600. Control of the day gate for the taken_dot entry (mentor D-77).",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 707768
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control of the day gate: at realm hour 0 the class code keeps no helper 707768 on the player even with 707078 learned (AscensionSunCleric.cpp:315, :376), so the reading is 0 in both phases; a reading of 1 would mean the helper is present at night"
           }
         ]
       }
@@ -10715,7 +10774,7 @@
       "metric": "spell_damage_total",
       "expire_ms": 3000,
       "gate_spell": 707078,
-      "name": "Stand Against Darkness (control: direct damage taken from the same school, lead L-1)",
+      "name": "Stand Against Darkness (control: direct damage taken from the same school)",
       "variant": "taken_direct",
       "label_suffix": "taken_direct",
       "quote": "and take $707768s2% reduced periodic damage.",
@@ -10736,7 +10795,7 @@
       "expected": 1200,
       "tolerance": 12,
       "wait_ms": 500,
-      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). Unit::SpellDamageBonusTaken applies aura 214 to a DOT only when the effect's MiscValueB is 1 and its caster is the DoT's caster (Unit.cpp:10095-10099), so the lead (b4b report L-1, mentor D-65) is that an enemy's DoT is never reduced; this entry measures it. The scenario runs at realm-local hour 12 (day) in both phases; the passive is learned between them (before phase: no helper, the control; after phase: helper 707768 present). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount with the aura. The direct-damage control is Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick): 600 per phase. The tooltip's reduction names periodic damage only, so the same aura leaves the direct hit alone: the after phase deals 600 and the cumulative reading is 1200; tolerance 12 (1%) excludes a direct hit reduced by 10% (1140). Reference search 2026-11-22: as the taken_dot entry; nothing found beyond the tooltip and the DBC.",
+      "observe_source": "707078 Stand Against Darkness Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 707768; the class code keeps helper 707768 on the player in daytime with 707078 (AscensionSunCleric.cpp:376, KeepHelper(player, 707768, day && player->HasAura(707078))); 707768 Effect[1] aura 214 SPELL_AURA_214 MiscValue 127 (all schools), MiscValueB 0, BasePoints -11 + 1 = -10 ($707768s2). The engine reads aura 214 on a DOT only for MiscValueB 1 from the DoT's own caster (Unit.cpp:10095-10099), so the class's periodic hook applies the effect: sun_cleric_scaling::ModifyPeriodicDamageAurasTick multiplies a periodic damage, damage percent or leech tick taken by a target carrying 707768 Effect[1] by 1 + amount / 100 when the effect's MiscValue matches the school, from any caster (Sun Cleric ADR 0013, mentor D-77). Before the fix the enemy DoT read 4000 in both phases (b5t pair B, runs 20261122-031110 / 20261122-031311). The striker (creature 36, spell hit bonus 100) casts the spell at the caster in each phase and the amount it deals to the caster is read as the cumulative spell_damage_total, so the after reading is the control amount plus the amount of the after phase; the passive is learned between the phases (before phase: no helper, the control). The scenario runs at realm-local hour 12 (day). The direct-damage control is Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick): 600 per phase. The tooltip's reduction names periodic damage only, so the same aura leaves the direct hit alone: the after phase deals 600 and the cumulative reading is 1200; tolerance 12 (1%) excludes a direct hit reduced by 10% (1140). Reference search 2026-11-22: as the taken_dot entry; nothing found beyond the tooltip and the DBC.",
       "ally_arm": {
         "arms": [
           {

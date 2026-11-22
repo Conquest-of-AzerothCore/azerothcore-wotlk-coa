@@ -347,6 +347,13 @@ public:
     {
         if (!info || !info->HasAura(SPELL_AURA_PERIODIC_HEAL))
             damage = uint32(damage * Factor(target, caster, info));
+        if (!target || !info || info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
+            return;
+        if (AuraEffect const* stand = target->GetAuraEffect(707768, EFFECT_1))
+            if ((stand->GetMiscValue() & info->SchoolMask) &&
+                (info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+                 info->HasAura(SPELL_AURA_PERIODIC_LEECH)))
+                damage = uint32(damage * std::max(0.0f, 1.0f + float(stand->GetAmount()) / 100.0f));
     }
     void ModifyMeleeDamage(Unit*, Unit* caster, uint32& damage) override
     {
