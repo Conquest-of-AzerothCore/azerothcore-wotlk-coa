@@ -70,8 +70,8 @@ finished-class snapshots regenerate unchanged).
   806477), 806699 (`swing_reset_rate`) and 680656 (`power_term_direction`, attack power aura 35785). Each rate entry
   has `residual_target` 0.001 and `min_detectable` 4: at least 19386 trials at 20% and 29078 at 40%, where the
   false alert at the chance is at most 0.1% per pair (normal approximation). 300367 runs 11 parts of 1900 Horusath
-  Blast casts and 19 parts of 1050 Rapture casts, 806699 9 parts, 704920 188 and 230 parts (the 1.5x outcome margin
-  of the proc plan).
+  Blast casts and 19 parts of 1050 Rapture casts, 806699 14 parts (the cross-class guard sizes it at the default
+  2300 ms weapon) and 704920 188 and 230 parts (the 1.5x outcome margin of the proc plan).
 - The rate proves the chance of 704920, not the healing increase of the next Illumination or Radiant Cascade: the
   ledger splits each clause into the chance claim and the increase claim, which stays open.
 - The control check of `power_term_direction` exceeds the 0.1% per-pair false-alert bound of D-197 (0.4% per pair
