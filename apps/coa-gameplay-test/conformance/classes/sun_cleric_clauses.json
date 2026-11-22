@@ -1455,17 +1455,29 @@
     "spell": 560113,
     "clause": "Reduces the cooldown of Radiance by $/1000;s1 sec.",
     "labels": [
-      "560113 effect_value e0 #0"
+      "560113 effect_value e0 #0",
+      "560113 behaviour_metric_delta radiance_cooldown"
     ],
     "kind": "claim"
   },
   {
     "spell": 560113,
     "clause": "Increases the healing and damage of Radiance by $s2%.",
-    "labels": [
-      "560113 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the damage of Radiance by 125%",
+        "labels": [
+          "560113 behaviour_metric_delta radiance_damage"
+        ]
+      },
+      {
+        "claim": "increases the healing of Radiance by 125%",
+        "labels": [
+          "560113 behaviour_metric_delta radiance_heal"
+        ]
+      }
+    ]
   },
   {
     "spell": 560123,
@@ -2209,16 +2221,27 @@
   {
     "spell": 680631,
     "clause": "Increases your chance to critically strike and to parry attacks by $s1%",
-    "labels": [
-      "680631 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your chance to critically strike by 2%",
+        "labels": [
+          "680631 behaviour_metric_delta melee_crit"
+        ]
+      },
+      {
+        "claim": "and to parry attacks by 2%",
+        "labels": [
+          "680631 behaviour_metric_delta parry"
+        ]
+      }
+    ]
   },
   {
     "spell": 680631,
     "clause": "and your spell hit chance by $s3%.",
     "labels": [
-      "680631 effect_value e2 #1"
+      "680631 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
@@ -4840,20 +4863,41 @@
   {
     "spell": 560867,
     "clause": "Launch radiant spheres at an enemy each dealing ${$m1+0+$SP*0.206923} Holyflame Damage,",
-    "labels": [
-      "560867 effect_value e0 #0",
-      "560867 aura_amount e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "each dealing the flat amount of Holyflame damage",
+        "labels": [
+          "560867 behaviour_metric_delta tick_damage"
+        ]
+      },
+      {
+        "claim": "plus 0.206923 of spell power",
+        "labels": [
+          "560867 behaviour_metric_delta tick_damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 560867,
     "clause": "repeating every $t1 sec for $d.",
-    "labels": [
-      "560867 aura_duration_ms #1",
-      "560867 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "repeating every $t1 sec",
+        "labels": [
+          "560867 behaviour_metric_delta period_lo",
+          "560867 behaviour_metric_delta period_hi"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "560867 behaviour_metric_delta aura_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 806116,
