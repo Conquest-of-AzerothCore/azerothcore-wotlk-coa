@@ -5,7 +5,7 @@ from pathlib import Path
 from behaviours import (BEHAVIOUR_METRIC_DELTA, ally_group_steps, ally_players, behaviour_entry, dummy_fixture, dummy_id,
                         prose_rule, waited_ms)
 from compare import FLOAT_EPSILON, Run, Verdict, missing_measurement
-from hits import timed
+from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
 from procs import HEAL_POOL
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -200,7 +200,8 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
         model['dice'] = float(records.field('Spell', spec.effect_spell, 'EffectDieSides[0]'))
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.effect_spell, None,
                               f'{spec.expected:g}', prose_rule(entry.quote, spec.spell), model)
-    return timed(scenario, waited_ms(steps) + windows), [expectation]
+    return (timed(scenario, waited_ms(steps) + windows, MAX_ACCELERATED_SCENARIO_MS if heal else MAX_SCENARIO_MS),
+            [expectation])
 
 
 def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
