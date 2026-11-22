@@ -26969,6 +26969,58 @@
     },
     {
       "spell": 520024,
+      "name": "Valkyr's Calling (charge-back bracket around the 2 s duration)",
+      "kind": "metric_delta",
+      "variant": "charge_bracket",
+      "label_suffix": "charge_bracket",
+      "quote": "At the end of the duration, you charge back down, dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage to all enemies within $570034a1 yds.",
+      "trigger_spell": 520024,
+      "target": "dummy",
+      "cast_in_before": false,
+      "select_dummy": true,
+      "trigger_only_after": true,
+      "before_expected": 0,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 570034,
+        "target": "dummy"
+      },
+      "expected": 0,
+      "tolerance": 25,
+      "after_expiry_expected": 497.6,
+      "gate_timing": "start",
+      "wait_ms": 1900,
+      "expiry_wait_ms": 250,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1800,
+          1950
+        ],
+        "expired": [
+          2050,
+          2200
+        ]
+      },
+      "observe_source": "Charge-back time bracket: Spell.dbc 520025 duration 2000 ms (the aura of 520024), the landing cast 570034 comes with its end. One cast of 520024 at the dummy with the dummy selected (without a selection the landing fails, cast_failure 27); 570034 damage to the dummy read at 1800 to 1950 ms of game time after the cast (before the end of $d, expected 0, the 10% margin 200 ms excluded) and at 2050 to 2200 ms (after it, expected 497.6, the DBC figure of the counted charge_hit entry, 570034 at the reference stats). The windows exclude a value 10% off the 2000 ms on both sides. Control: the no-cast first phase reads 0. Reference search 2026-11-22: coa-history spell 570034 and 520024 give no timing of the landing; nothing found."
+    },
+    {
+      "spell": 520024,
       "name": "Valkyr's Calling (immune to spell damage: Shadow strike)",
       "kind": "metric_delta",
       "variant": "immune_magic",
@@ -33194,6 +33246,74 @@
       "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). One real Illumination cast (2000 ms cast time, the aura is granted when it completes) with no later cast: the aura is present when read 11100..11700 ms after the cast started (game time), at least 9100 ms after it was granted, and gone when read 12400..12900 ms after it, at most 10900 ms after, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip."
     },
     {
+      "spell": 300360,
+      "kind": "metric_delta",
+      "gate_spell": 300360,
+      "target": "caster",
+      "trigger_spell": 500143,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "quote": "Lasts for $301265d or 3 casts.",
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 301265
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "wait_ms": 1600,
+      "name": "Learning Light (the aura is still held after the second cast)",
+      "variant": "charges_two_held",
+      "label_suffix": "charges_two_held",
+      "setup_casts": [
+        804584,
+        500143,
+        500143
+      ],
+      "expected": 1,
+      "observe_source": "301265 Learning Light carries no ProcCharges in Spell.dbc; the count 3 is the tooltip's ('Lasts for $301265d or 3 casts') and the server counts it: the SpellInfo correction ProcCharges 3 (AscensionSunClericContracts.cpp:162-163), the reapply reset to 3 charges (AscensionSunClericAuras.cpp:101-103) and the decrement after every finished Family 33 magic spell cast while the aura is present, removal at the last charge (Finish and Select, AscensionSunClericAbilities.cpp:49 and :85-88). The count is level independent. The aura is granted only when a Dawn-spending Holy or Fire cast enters Sunrise or Sunset (AscensionSunClericAbilities.cpp:94-128); Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject), any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Shine 500143 (Holy) enters Sunrise in the setup and each further Shine is one cast; the aura is read on the caster 1600 ms after the second Shine after the entering one cast, about 8 s into the 10 s duration, so a time expiry (9 to 11 s) cannot explain the reading. Control: the same casts without 300360 learned read no aura. Reference search 2026-11-22: coa-history spell 301265: aura applied and removed events in 3 logs, no charge count; bindmysoul snapshot (2026-07-22) carries 'Lasts for 10 seconds or 3 casts.'; nothing else found."
+    },
+    {
+      "spell": 503690,
+      "name": "Dawn's Arrival (free Gavel earned from Dawnbreak)",
+      "kind": "aura_fed_effect",
+      "variant": "cooldown",
+      "label_suffix": "fed_cooldown",
+      "quote": "causes the next one to not incur a cooldown.",
+      "feed_spell": 800654,
+      "aura": 503691,
+      "effect_spell": 800611,
+      "every_ms": 1700,
+      "residual_target": 0.001,
+      "feed_power": 1363,
+      "effect_power": 1363,
+      "expected": 0,
+      "trials": 8,
+      "observe_source": "Route: real Dawnbreak 800654 casts every 1700 ms (cast_until_aura, owner ruling O-17) until the free-Gavel aura 503691 is on the caster; the harness never sets it (D-145). Code: the grant and the reset sit in one block, one roll: AscensionSunClericAbilities.cpp:282-287 (if Chance(player, 503690): Reduce INT32_MAX on Gavel roots 800611, 800614, 800617, then Cast 503691); Chance() rolls the raw ProcChance 40 of 503690 (AscensionSunCleric.cpp:196-205), so the trials that read the aura also read the reset. The free cast: :291-292 (a Gavel carrying script value 503691 is reduced to no cooldown). Reads: cooldown_ms is readback data (the server cooldown map), so the behaviour is the recast: a second real Gavel 1600 ms after the first goes off (spell_go_count, cast_failure 0) in the treatment and is refused with SPELL_FAILED_NOT_READY 67 in the control (no aura), and a third in the treatment is refused (only the next cast is free). Reset: a Gavel of Light 800611 is cast first (CategoryRecoveryTime 5000 in Spell.dbc), 1600 ms later the feed starts; a feed that reaches the aura at its first or second cast finds the Gavel still cooling naturally (3400 or 1700 ms left), so a read of 0 right after the aura appeared is the reset; later casts find it over and are not judged (spell_go_count of 800654 gives the casts per trial). Control: the same Gavel without the feed reads 3400 and 1700 ms left (natural cooldown, within 10%). The free read starts from a Gavel reset as a precondition fixture so it does not depend on the reset claim. Sizing: ProcChance 40, so a trial is judged for the reset with probability 1 - 0.6^2 = 0.64; 8 trials leave a run with no judged trial at 0.36^8 = 2.8e-4 (5.7e-4 per pair, unmeasured, never a false verdict); max_casts 19 keeps an unfed trial at most 0.001 per pair. A correct server has no random outcome in a judged trial. Reference search 2026-11-22: coa-history spell 503690: 0 events in 186 logs (a passive); 503691: 280 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED in 5 logs, no cooldown or cast event, so a free Gavel is not told apart there; Dawnbreak 800654: 284 SPELL_CAST_SUCCESS in 4 logs; nothing found beyond the tooltip and the DBC. Tool: aura_fed_effect cooldown variant (Sun Cleric tool ADR 1037)."
+    },
+    {
       "spell": 300323,
       "name": "Holy Fervor (Sunrise effectiveness)",
       "kind": "hit_ratio",
@@ -36109,6 +36229,31 @@
       ],
       "observe_source": "301266 Solar Concord resets the cooldowns through Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; handler SpellEffects.cpp:1103-1112). Neither has a CasterAuraSpell, and a triggered cast would ignore one (TRIGGERED_IGNORE_CASTER_AURASTATE, Spell.cpp:5929-5938). Owner ruling O-26: the class script prevents the 301268 reset outside Sunrise 500477 and the 302899 reset outside Sunset 500511 (spell_ascension_sun_cleric_ability, AscensionSunClericAbilities.cpp:509-510, ADR conformance/sun-cleric 0033); the aura-apply reset that repeated it in phase is removed. Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1034 provisional): Solar Concord is cast with Sunrise 500477 on the caster, so the tooltip words 'while in Sunset' expect the recast of 806477 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). Before O-26 the DBC effects reset both cooldowns in either phase (pairs x3, x4 and y1: cast_failure 0 against 67); the class script now prevents the out-of-phase reset (ADR conformance/sun-cleric 0033). Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
       "refused_with": true
+    },
+    {
+      "spell": 504734,
+      "name": "Solar Champion (threat slope, Dawnsear)",
+      "kind": "threat_slope",
+      "variant": "threat_slope_dawnsear",
+      "label_suffix": "talent",
+      "quote": "and reduces the threat generated by them by $s2%.",
+      "hit_spell": 554406,
+      "expected_slope": 0.8,
+      "flat": 60,
+      "learn": [
+        504734
+      ]
+    },
+    {
+      "spell": 504734,
+      "name": "Solar Champion (threat slope control, Dawnsear without the talent)",
+      "kind": "threat_slope",
+      "variant": "threat_slope_dawnsear_control",
+      "label_suffix": "control",
+      "quote": "and reduces the threat generated by them by $s2%.",
+      "hit_spell": 554406,
+      "expected_slope": 1.0,
+      "flat": 60
     },
     {
       "spell": 504734,

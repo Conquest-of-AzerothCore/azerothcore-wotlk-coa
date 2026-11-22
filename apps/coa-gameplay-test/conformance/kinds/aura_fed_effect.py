@@ -2,8 +2,8 @@ from dataclasses import dataclass, replace
 import math
 from pathlib import Path
 
-from behaviours import (BEHAVIOUR_METRIC_DELTA, ally_group_steps, ally_players, behaviour_entry, dummy_fixture,
-                        dummy_id, prose_rule, waited_ms)
+from behaviours import (BEHAVIOUR_METRIC_DELTA, SPELL_FAILED_NOT_READY, ally_group_steps, ally_players,
+                        behaviour_entry, dummy_fixture, dummy_id, prose_rule, waited_ms)
 from bonus import bonus_of, per_event_sample
 from compare import FLOAT_EPSILON, Run, Verdict, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
@@ -14,7 +14,7 @@ from values import ALLY, CAST_MARGIN_MS, GCD_WAIT_MS, Expectation, cast_distance
 
 KIND = 'aura_fed_effect'
 ORDER = 32
-VARIANTS = ('instant', 'damage', 'heal')
+VARIANTS = ('instant', 'damage', 'heal', 'cooldown')
 ARMS = ('control', 'treatment')
 EXTRA_INITIAL_PERIOD = 0x200
 CASTING_READ_MS = 300
@@ -25,6 +25,10 @@ FIGURE_BAND = 0.1
 HEAL_MULTIPLIED_AT = 'Unit::SpellHealingBonusDone, Unit.cpp:10932'
 DAMAGE_MULTIPLIED_AT = 'Unit::SpellDamageBonusDone, Unit.cpp:9973'
 HEAL_MIN_HITS = 2
+COOLDOWN_READ_MS = 500
+RESET_TOLERANCE_MS = 100
+RESET_ATTEMPTS = 2
+COOLDOWN_BAND = 0.1
 
 
 @dataclass(frozen=True)
@@ -77,6 +81,8 @@ def aura_fed_spec(entry: dict) -> AuraFedSpec:
     if spec.family not in VARIANTS or not 0 < spec.residual_target < 1 or spec.trials < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a variant of {VARIANTS}, a residual_target in (0, 1) and at '
                          f'least one trial')
+    if spec.family == 'cooldown' and (spec.expected != 0 or spec.variant != 'cooldown'):
+        raise ValueError(f'{spec.spell} {KIND} cooldown reads the remaining cooldown, expected 0 (no cooldown)')
     if spec.variant == 'instant' and (spec.trials != 1 or spec.expected != 0):
         raise ValueError(f'{spec.spell} {KIND} instant reads casting 0 after one fed cast')
     if spec.sized and (spec.family != 'damage' or not 2 <= spec.min_hits <= spec.trials
@@ -91,7 +97,7 @@ def mark(spec: AuraFedSpec, read: str) -> str:
 
 
 def feed_ticks(records: Records, spell: int, variant: str = 'damage') -> int:
-    if variant == 'heal':
+    if variant in ('heal', 'cooldown'):
         return 1
     duration = records.duration_ms(spell)
     amplitude = records.amplitude_ms(spell, 0)
@@ -106,6 +112,13 @@ def feed_casts(records: Records, spec: AuraFedSpec) -> tuple[int, float]:
     if not 0 < chance < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a proc chance between 0 and 100%')
     miss = (1 - chance) ** feed_ticks(records, spec.feed_spell, spec.family)
+    if spec.family == 'cooldown':
+        usable = 1 - miss ** RESET_ATTEMPTS
+        need = math.ceil(math.log(spec.residual_target / PAIR_RUNS) / math.log(1 - usable))
+        if spec.trials < need:
+            raise ValueError(f'{spec.spell} {KIND} cooldown needs {need} trials: a trial reads the reset only when '
+                             f'the aura came within {RESET_ATTEMPTS} casts (chance {usable:.4f}), and a run with none '
+                             f'is unmeasured, at most {spec.residual_target:g} per pair')
     per_feed = spec.residual_target / (PAIR_RUNS * spec.trials)
     return math.ceil(math.log(per_feed) / math.log(miss)), miss
 
@@ -129,13 +142,15 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
     figure = aura_figure(records, spec) if spec.judged_figure else None
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.expected)
     max_casts, miss = feed_casts(records, spec)
-    channel_ms = (facts_of(records, spec.feed_spell).cast_time_ms if spec.family == 'heal'
+    channel_ms = (facts_of(records, spec.feed_spell).cast_time_ms if spec.family in ('heal', 'cooldown')
                   else int(records.duration_ms(spec.feed_spell)))
     if spec.every_ms <= max(channel_ms, GCD_WAIT_MS):
         raise ValueError(f'{spec.spell} {KIND} every_ms {spec.every_ms} must exceed the feed duration {channel_ms} ms '
                          f'and the global cooldown')
     distance = cast_distance(records, spec.effect_spell)
     effect = facts_of(records, spec.effect_spell)
+    if spec.family == 'cooldown':
+        return cooldown_scenario(class_file, spec, records, entry, effect, distance, max_casts, miss)
     speed = records.field('Spell', spec.effect_spell, 'Speed')
     travel_ms = math.ceil(distance / speed * 1000) if speed else 0
     heal = spec.family == 'heal'
@@ -275,11 +290,149 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
             [expectation])
 
 
+def cooldown_scenario(class_file: dict, spec: AuraFedSpec, records: Records, entry, effect, distance: float,
+                      max_casts: int, miss: float) -> tuple[dict, list[Expectation]]:
+    recovery = int(max(records.field('Spell', spec.effect_spell, field) for field in
+                       ('RecoveryTime', 'CategoryRecoveryTime')))
+    if recovery <= RESET_ATTEMPTS * spec.every_ms + int(COOLDOWN_BAND * recovery):
+        raise ValueError(f'{spec.spell} {KIND} cooldown: {spec.effect_spell} cooldown {recovery} ms must outlast '
+                         f'{RESET_ATTEMPTS} feed casts {spec.every_ms} ms apart')
+    target = dummy_id(0)
+
+    def gavel(reset: bool) -> list[dict]:
+        return ([{'action': 'set_power', 'actor': CASTER, 'power': effect.power_type, 'value': spec.effect_power}]
+                + ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.effect_spell}] if reset else [])
+                + [{'action': 'cast', 'actor': CASTER, 'spell': spec.effect_spell, 'target': target}])
+
+    def read(arm: str, index: int, part: str, metric: str, spell: int) -> dict:
+        return measurement(mark(spec, f'{arm} {index} {part}'), CASTER, metric, spell=spell)
+
+    def wait(arm: str, index: int, part: str, ms: int) -> dict:
+        return {'action': 'wait', 'label': f'{arm} {index} {part}', 'ms': ms}
+
+    def trial(arm: str, index: int) -> list[dict]:
+        steps = [{'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura}] + gavel(True)
+        steps += [wait(arm, index, 'primed', GCD_WAIT_MS), read(arm, index, 'pre', 'cooldown_ms', spec.effect_spell)]
+        if arm == ARMS[1]:
+            steps += [{'action': 'cast_until_aura', 'label': mark(spec, f'{arm} {index} feed'), 'actor': CASTER,
+                       'spell': spec.feed_spell, 'target': target, 'aura': spec.aura, 'every_ms': spec.every_ms,
+                       'max_casts': max_casts, 'cast_power': spec.feed_power, 'reset_cooldown': True},
+                      read(arm, index, 'reset', 'cooldown_ms', spec.effect_spell),
+                      read(arm, index, 'fed', 'spell_go_count', spec.feed_spell)]
+        else:
+            steps += [wait(arm, index, 'late', spec.every_ms),
+                      read(arm, index, 'reset', 'cooldown_ms', spec.effect_spell)]
+        steps += [read(arm, index, 'aura', 'aura', spec.aura), wait(arm, index, 'settled', GCD_WAIT_MS)]
+        steps += gavel(True)
+        steps += [wait(arm, index, 'free', COOLDOWN_READ_MS),
+                  read(arm, index, 'free', 'cooldown_ms', spec.effect_spell),
+                  wait(arm, index, 'second', GCD_WAIT_MS - COOLDOWN_READ_MS)] + gavel(False)
+        steps += [wait(arm, index, 'second lands', CAST_MARGIN_MS),
+                  read(arm, index, 'second go', 'spell_go_count', spec.effect_spell),
+                  read(arm, index, 'second failure', 'cast_failure', spec.effect_spell)]
+        if arm == ARMS[1]:
+            steps += [wait(arm, index, 'third', GCD_WAIT_MS)] + gavel(False)
+            steps += [wait(arm, index, 'third lands', CAST_MARGIN_MS),
+                      read(arm, index, 'third go', 'spell_go_count', spec.effect_spell),
+                      read(arm, index, 'third failure', 'cast_failure', spec.effect_spell)]
+        return steps + [wait(arm, index, 'trial ends', GCD_WAIT_MS)]
+
+    steps = (base_steps(class_file)
+             + [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+                for spell in dict.fromkeys((spec.feed_spell, spec.effect_spell, spec.spell))])
+    for arm in ARMS:
+        for index in range(spec.trials):
+            steps += trial(arm, index)
+    parts = ('pre', 'reset', 'aura', 'free', 'second go', 'second failure')
+    reads = {arm: [{**{part.replace(' ', '_'): mark(spec, f'{arm} {index} {part}')
+                       for part in parts + (('fed', 'third go', 'third failure') if arm == ARMS[1] else ())}}
+                   for index in range(spec.trials)] for arm in ARMS}
+    chance = records.field('Spell', spec.chance_spell or spec.spell, 'ProcChance')
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura fed effect',
+        'contract': (f'{spec.spell} is learned. Every trial casts {spec.effect_spell} for real and reads its remaining '
+                     f'cooldown {GCD_WAIT_MS} ms later. Control trials then wait {spec.every_ms} ms and read it again '
+                     f'(the natural cooldown, {recovery} ms: CategoryRecoveryTime of Spell.dbc); '
+                     f'treatment trials cast {spec.feed_spell} '
+                     f'every {spec.every_ms} ms (cast_until_aura, at most {max_casts} casts: ProcChance {chance}%, '
+                     f'residual target {spec.residual_target:g} per pair) until {spec.aura} is on the caster and read '
+                     f'the cooldown right after: 0 when the roll that granted the aura also reset it, judged only '
+                     f'when {RESET_ATTEMPTS} or fewer feed casts went off (spell_go_count of {spec.feed_spell}), '
+                     f'because a later cast finds the natural cooldown over. The aura is never set by the harness and '
+                     f'is read before the next cast (0 in the control, 1 in the treatment). The cooldown of '
+                     f'{spec.effect_spell} is then reset as a precondition fixture and it is cast (A), read '
+                     f'{COOLDOWN_READ_MS} ms later (cooldown_ms is readback data), and cast again {GCD_WAIT_MS} ms '
+                     f'after A (B): the behaviour is B going off without the refusal {SPELL_FAILED_NOT_READY} in the '
+                     f'treatment (spell_go_count, cast_failure) and refused in the control; treatment trials cast it '
+                     f'a third time (C), which must be refused, so only the next cast is free. Every cast '
+                     f'follows the previous one by more than the global cooldown.'),
+        'players': [{**player_fixture(class_file), **dict(spec.fixture)}],
+        'creatures': [dummy_fixture(0, class_file, distance)],
+        'steps': steps}
+    model = {'kind': KIND, 'variant': 'cooldown', 'metric': 'cooldown_ms', 'quote': entry.quote,
+             'expected': spec.expected, 'recovery': recovery, 'every_ms': spec.every_ms,
+             'refused': SPELL_FAILED_NOT_READY, 'read_ms': COOLDOWN_READ_MS, 'reads': reads}
+    expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.effect_spell, None,
+                              f'{spec.expected:g}', prose_rule(entry.quote, spec.spell), model)
+    return (timed(scenario, waited_ms(steps) + spec.trials * max_casts * spec.every_ms, MAX_ACCELERATED_SCENARIO_MS),
+            [expectation])
+
+
+def cooldown_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    recovery, every, band = model['recovery'], model['every_ms'], COOLDOWN_BAND * model['recovery']
+    trials = {arm: [{key: run.values[label] for key, label in trial.items()} for trial in model['reads'][arm]]
+              for arm in ARMS}
+    for arm, wanted in zip(ARMS, (0.0, 1.0)):
+        held = [trial['aura'] for trial in trials[arm]]
+        if any(value != wanted for value in held):
+            return replace(base, status='unmeasured',
+                           explanation=f'precondition: the aura read {held} in the {arm} trials, {wanted:g} needed')
+    primed = [trial['pre'] for arm in ARMS for trial in trials[arm]]
+    natural = [(trial['pre'], recovery - 1600) for trial in trials[ARMS[0]]] + \
+              [(trial['reset'], recovery - 1600 - every) for trial in trials[ARMS[0]]]
+    if any(abs(value - wanted) > band for value, wanted in natural) or min(primed) <= RESET_TOLERANCE_MS:
+        return replace(base, status='unmeasured',
+                       explanation=f'precondition: the control cooldown reads {natural} are not the natural '
+                                   f'{recovery} ms cooldown within {band:g} ms')
+    fed = [trial['fed'] for trial in trials[ARMS[1]]]
+    attempts = [int(value - (fed[index - 1] if index else 0)) for index, value in enumerate(fed)]
+    usable = [trial for trial, count in zip(trials[ARMS[1]], attempts) if 1 <= count <= RESET_ATTEMPTS]
+    if not usable:
+        return replace(base, status='unmeasured',
+                       explanation=f'no feed reached the aura in {RESET_ATTEMPTS} casts: {attempts}')
+    reset = [trial['reset'] for trial in usable]
+    free = [trial['free'] for trial in trials[ARMS[1]]]
+    control_free = [trial['free'] for trial in trials[ARMS[0]]]
+    free_wanted = recovery - COOLDOWN_READ_MS
+    control_ok = all(abs(value - free_wanted) <= band for value in control_free)
+    refused = float(model['refused'])
+    control_second = all(trial['second_failure'] == refused for trial in trials[ARMS[0]])
+    second = all(trial['second_failure'] == 0 for trial in trials[ARMS[1]])
+    go = [trial['second_go'] for arm in ARMS for trial in trials[arm]]
+    third = all(trial['third_failure'] == refused and trial['third_go'] == trial['second_go']
+                for trial in trials[ARMS[1]])
+    reset_ok = all(value <= RESET_TOLERANCE_MS for value in reset)
+    free_ok = all(value <= RESET_TOLERANCE_MS for value in free)
+    ok = reset_ok and free_ok and control_ok and control_second and second and third
+    return replace(base, status='ok' if ok else 'alert', measured=max(free + reset), expected=model['expected'],
+                   low=0.0, high=float(RESET_TOLERANCE_MS),
+                   explanation=f'treatment: reset reads {reset} on {len(usable)} of {len(attempts)} trials '
+                               f'(feed casts {attempts}), free cooldown reads {free}, second cast failures '
+                               f'{[trial["second_failure"] for trial in trials[ARMS[1]]]}, third '
+                               f'{[trial["third_failure"] for trial in trials[ARMS[1]]]}; control: free cooldown reads '
+                               f'{control_free} (natural {free_wanted}), second cast failures '
+                               f'{[trial["second_failure"] for trial in trials[ARMS[0]]]}, go counts {go}')
+
+
 def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     labels = [label for arm in ARMS for trial in model['reads'][arm] for label in trial.values()]
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
+    if model['variant'] == 'cooldown':
+        return cooldown_verdict(base, run, model)
     for arm, wanted in zip(ARMS, (0.0, 1.0)):
         held = [run.values[trial['aura']] for trial in model['reads'][arm]]
         if any(value != wanted for value in held):
