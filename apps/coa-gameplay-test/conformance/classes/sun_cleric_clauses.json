@@ -211,7 +211,8 @@
       "300325 behaviour_hit_ratio below35",
       "300325 behaviour_hit_ratio above35"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Control arm = the same Radiant Flame ticks (807058) without 300325 learned and the same read at 50% health. At 32% health the ratio is +10.00% and +10.01% (intervals +9.97 to +10.04 and +9.98 to +10.05, 20 trials per arm, expected +10 within 8 to 12); at 50% it is +0.016% and +0.005% (expected 0)."
   },
   {
     "spell": 300327,
@@ -319,7 +320,8 @@
       "300344 behaviour_metric_delta refund_bless",
       "300344 behaviour_metric_delta refund_no_bless"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Daybreak 503624 on the Blessed caster (Bless 804247 cast for real) refunds 88 mana in both runs (expected 25% of 26% of base mana 1363 = 88.6, judged within 1), 0 before 300344 is learned; control: the same heal with 300344 learned and no Bless refunds 0. Observed only: the live logs carry the energize as spell 300345 where this server's Mana() uses source 504877, no amount difference. Reference search 2026-11-22: coa-history 300345 has 13,775 energize events in 20 logs (no figure decides)."
   },
   {
     "spell": 300347,
@@ -2881,7 +2883,8 @@
           "704568 behaviour_hit_ratio daybreak_heal"
         ]
       }
-    ]
+    ],
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Control arm = the same grouped-ally heals without 704568 learned, and Shine 800357 outside the class mask (bonus -0.001% and -0.010%, interval within +-0.03). Illumination 500143 +20.002% and +20.003% (interval +20 to +20.01), Daybreak 503624 +20.016% and +20.018% (+19.93 to +20.1; 14 trials per arm spaced 10 s for its 2 charges), expected +20 within the 2-point band. Daybreak ranks 500147 and 502432 share SpellFamilyFlags[1] with 503624 (one effect, one class mask, G-23). Reference search 2026-11-22: nothing found beyond the name."
   },
   {
     "spell": 704579,
@@ -4942,7 +4945,8 @@
           "806024 behaviour_metric_delta debuff_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Control arm = the same scenario without 806024 learned (the before phase, or the control arm with the same five or six Radiant Flame casts): Holy damage (Horusath Blast 500154) +7.84% and +7.85% at the real cap of 8 stacks (99% intervals +7.38 to +8.30 and +7.42 to +8.28, 20 trials per arm; expected +8, band 6 to 10); Fire damage (Dawnsear 500146, a class Fire spell) +7.93% and +7.94% (intervals +7.76 to +8.09 and +7.79 to +8.09); 806025 is real Purgation stacks from real Radiant Flame casts, never set_aura. One cast gives 5 stacks (5 damage hits per cast, Radiant Flame carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD) and the debuff reads 7628 ms 1500 ms after the cast (read bounds 7000 to 7900 exclude 10% off on both sides; 0 before the learn). Fire reading: the engine applies SPELL_AURA_MOD_DAMAGE_FROM_CASTER by class mask and family, not by the MiscValue school (Unit.cpp:10113-10117), so a stock Fire spell of another family is not affected (Fire Blast 2136 read +0.05% and +0.28%, a discarded design); every Sun Cleric spell of any school gets the bonus, which includes Holy and Fire. Reference search 2026-11-22: coa-history 806025 has 221 applied, 825 dose and 352 refresh events in 5 logs and no figure; nothing else found."
   },
   {
     "spell": 806024,
@@ -4952,7 +4956,8 @@
       "806024 behaviour_metric_delta stacks_cap",
       "806024 behaviour_metric_delta flame_hits"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Four real Radiant Flame casts 3300 ms apart read 8 stacks on the dummy in both runs (expected 8 = StackAmount, at least twelve damage hits landed so the cap, not the tick count, sets it), 0 before the learn (control). One cast reads 5 stacks, equal to the 5 damage hits of one cast (entry flame_hits)."
   },
   {
     "spell": 806058,
