@@ -67,8 +67,9 @@ class RefusedWithTests(unittest.TestCase):
         self.assertEqual(judged(by_arm['after_cast'], {after_label: float(NO_CAST_FAILURE)}), 'ok')
 
     def test_refused_with_needs_a_reset(self):
-        entry = {**entry_of(805581, 'cd_gate'), 'refused_with': True}
-        with self.assertRaises(ValueError):
+        entry = {**entry_of(301266, 'reset_horusath'), 'refused_with': True, 'resets': False, 'after_casts': [],
+                 'reduction': 2000}
+        with self.assertRaisesRegex(ValueError, 'needs resets'):
             behaviour_scenario(CLASS_FILE, entry)
 
 
