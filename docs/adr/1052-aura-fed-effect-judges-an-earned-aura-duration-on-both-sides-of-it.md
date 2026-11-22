@@ -41,6 +41,7 @@ classed `fed_window` as data. The window model now stamps `evidence_metric` `aur
 `aura_window` (the aura held against the aura gone, the talent known on both sides). The kind declares its own rows,
 with no edit to `coverage.py`: `METRIC_EVIDENCE` state, `CONTRAST_PROOF` `aura_window` and `STATE_PROMISES` `within`.
 An ok verdict is behaviour only when the stamp is present and the clause, its ledger row or its promise says "within";
-without the stamp, with another contrast or on another clause it stays data. The judged reads, the tolerances and what
-counts as ok are unchanged, and the other variants carry no stamp, so the finished classes regenerate byte-identical.
+without the stamp, with a condition contrast or on another clause it stays data (a learned or own-cast contrast
+would follow the general state rule of `promised_state`; the variant never stamps one). The judged reads, the
+tolerances and what counts as ok are unchanged, and the other variants carry no stamp, so the finished classes regenerate byte-identical.
 Seeded test: `WindowTests.test_the_window_is_classed_behaviour_only_on_a_within_clause_with_its_contrast_stamped`.

@@ -420,8 +420,8 @@ class WindowTests(unittest.TestCase):
         self.assertEqual(verdict_evidence(verdict, 'Your next Dawnsear is instant cast', {}), DATA)
         unstamped = replace(verdict, detail={'metric': 'aura_fed_window_casting'})
         self.assertEqual(verdict_evidence(unstamped, 'within $d', {}), DATA)
-        learned = replace(verdict, detail={'metric': 'aura_fed_window_casting', 'contrast': 'learned'})
-        self.assertEqual(verdict_evidence(learned, 'within $d', {}), DATA)
+        condition = replace(verdict, detail={'metric': 'aura_fed_window_casting', 'contrast': 'condition'})
+        self.assertEqual(verdict_evidence(condition, 'within $d', {}), DATA)
         self.assertEqual(verdict_evidence(self.judged(expectation, held=1.0), 'within $d', {}), UNPROVEN)
 
     def test_a_window_entry_needs_its_minimum_and_a_feed_past_the_global_cooldown(self):
