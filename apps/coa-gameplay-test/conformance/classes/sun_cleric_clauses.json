@@ -2940,12 +2940,11 @@
       {
         "claim": "and all charges of Dawn",
         "labels": [
-          "680630 behaviour_metric_delta pendant_consumption",
-          "680630 behaviour_metric_delta pendant_consumption_control"
+          "680630 behaviour_metric_delta pendant_charges"
         ]
       }
     ],
-    "reason": "The Pendant duration is read by two presence windows on the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject): present 55.0 to 56.0 s and gone 65 to 66 s after the Pendant cast started, which excludes 54 s and 66 s. No arm without Pendant is read at the same offset (review I-4), so the duration part is not control-armed and the row stays data through the charges claim (aura_charges: 8 charges before, 10 after). Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; nothing else found. Pair numbers in the fix report. Round 11 d8: the duration part has its control (the same timeline with an Illumination in place of Pendant, Dawn gone when read 55 s later, label pendant_duration_control) and the charges part is read by consumption (post_trigger_casts: 2 heals, Pendant, 9 heals leave Dawn present against the control of 11 heals without the refresh, which ends at the 10th; ProcCharges 10 from the DBC). The aura_charges readback pendant_charges stays in the class file as evidence and is not a claim label."
+    "reason": "The Pendant duration is read by two presence windows on the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject): present 55.0 to 56.0 s and gone 65 to 66 s after the Pendant cast started, which excludes 54 s and 66 s. No arm without Pendant is read at the same offset (review I-4), so the duration part is not control-armed and the row stays data through the charges claim (aura_charges: 8 charges before, 10 after). Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; nothing else found. Pair numbers in the fix report. Round 11 d8: the duration part now has its control (pendant_duration_control: an Illumination in place of Pendant, Dawn gone when read 55 s later, ok in both runs of pair x3, build 80cb6ee11a34, no flip). The charges part stays data (aura_charges readback 8 to 10). Consumption was tried with post_trigger_casts: 2 heals, Pendant, 9 heals read Dawn present (ProcCharges 10 from the DBC), but the control of 11 heals without the refresh also read Dawn present in both runs where the DBC count says it should be gone, so the presence read does not tell the refresh from none (a state aura may stay with 0 charges; cause not established). Design 2 (read aura_charges after the post casts) is a readback and cannot count as behaviour. Both consumption entries withdrawn."
   },
   {
     "spell": 680631,
@@ -5948,13 +5947,10 @@
     "labels": [
       "805581 effect_value 807445e0 #0",
       "805581 behaviour_metric_delta cd",
-      "805581 behaviour_metric_delta cd_control",
-      "805581 cost_gate 500154 cd_gate without",
-      "805581 cost_gate 500154 cd_gate with",
-      "805581 cost_gate 500154 cd_gate beyond"
+      "805581 behaviour_metric_delta cd_control"
     ],
     "kind": "claim",
-    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Round 11 d8: cost_gate arms on the same fulfilment, cast_failure events of Horusath Blast attempted 23200 ms (with: accepted), 23200 ms without 805581 (refused) and 22800 ms (beyond: refused) after the priming cast that fulfils the Vow, which bracket the cut inside 1800..2200 ms."
+    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Round 11 d8, open: the cooldown cut is not yet read as a behaviour. Design 1: cost_gate cooldown arms with the Vow and Dawn casts as setup_casts before the priming Horusath Blast, attempt at 23200 ms: the with arm was refused (cast_failure 67) in both runs while the without and beyond arms were refused as expected (pair 20261122 x3, build 80cb6ee11a34, no flip). Design 2: the same with fixtures 823764 and 984954 before every Horusath Blast cast (a landed hit): the with arm was still refused (67), so the cut that the cd entry reads (22000 ms 1000 ms after the cast) does not show as an early accepted recast in that sequence; the cause is not established (no cause guessed), both entries withdrawn from the class file, the cd readback labels stay."
   },
   {
     "spell": 807870,
