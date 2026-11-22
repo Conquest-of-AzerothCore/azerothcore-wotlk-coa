@@ -701,8 +701,7 @@
         "claim": "every $t1 sec",
         "labels": [
           "300361 behaviour_metric_delta tick_cut_sunrise",
-          "300361 behaviour_metric_delta tick_cut_sunrise_control",
-          "300361 aura_amplitude_ms #1"
+          "300361 behaviour_metric_delta tick_cut_sunrise_control"
         ]
       }
     ]
@@ -725,8 +724,7 @@
         "claim": "every $t1 sec",
         "labels": [
           "300361 behaviour_metric_delta tick_cut_sunset",
-          "300361 behaviour_metric_delta tick_cut_sunset_control",
-          "300361 aura_amplitude_ms #3"
+          "300361 behaviour_metric_delta tick_cut_sunset_control"
         ]
       }
     ]
@@ -1408,7 +1406,9 @@
     "spell": 572801,
     "clause": "Blast an enemy with the power of the sun, dealing ${$m1+0+$sph*1} Holy damage",
     "labels": [
-      "572801 effect_value e0 #0"
+      "572801 effect_value e0 #0",
+      "572801 behaviour_metric_delta damage_base",
+      "572801 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
@@ -4373,7 +4373,9 @@
     "spell": 704934,
     "clause": "stacking $u times.",
     "labels": [
-      "704934 max_stacks 800601 #2"
+      "704934 max_stacks 800601 #2",
+      "704934 behaviour_metric_delta melee_stack",
+      "704934 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },

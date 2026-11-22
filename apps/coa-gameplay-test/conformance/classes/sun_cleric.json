@@ -12417,6 +12417,121 @@
       "observe_source": "Sunwalker 800601 ($d = 30000 ms). Same scenario as duration_held, read later: the stack is gone at 32.9 s of game time after the cast (window 32880..32970 ms): the duration is below 33.0 s, excluding 10% long. With duration_held it brackets 30 s; the stack itself is proven by melee_stack and duration_held in the same pair, control (before phase) 0. Reference search 2026-11-22: coa-history spell 800601: 1601 SPELL_AURA_REFRESH and 101 SPELL_AURA_APPLIED_DOSE events in 5 logs, no duration figure in the index; the sidekick, bindmysoul and ascension-data snapshots carry the tooltip with its numbers blanked ('for , stacking times'): nothing found beyond the DBC and the tooltip, which are the expectation."
     },
     {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "name": "Sunwalker (stacks after nine Gavel hits)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800601
+      },
+      "setup_casts": [
+        802561,
+        802561,
+        802561,
+        802561,
+        802561,
+        802561,
+        802561,
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 5200,
+      "setup_only_after": true,
+      "before_expected": 1,
+      "expected": 5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Sunwalker 800601 StackAmount 5 (Spell.dbc), $u = 5 in the tooltip of 800601 that clause 259 quotes (stacking $u times). The handler (AscensionSunClericEvents.cpp:123, 704934: damage && melee) gives one stack per melee hit. Gavel of Wrath 802561 (melee, CategoryRecoveryTime 5000 ms, StartRecoveryTime 1500 ms) is cast nine times at the dummy, 5200 ms apart (eight setup casts and the trigger), 704934 learned between the phases; the stack of 800601 is read 1500 ms after the ninth cast. The cast count is chosen so that five hits in nine suffice. The scenario players carry melee hit rating 10000 and expertise 10000 (every generated scenario), so a swing is not avoided; the count of stacks read is the count of hits capped by the aura, and a read of exactly 5 after nine hits excludes a cap of 4 or of 6 or more. The stack lasts 30000 ms and every hit refreshes it, so the first stacks survive the 41600 ms of casts. Control arm (contract: 704934 known in both phases, setup casts only in the after phase): the before phase casts the trigger once and reads 1 stack, so the cap is not reached by a single hit and the aura grows with the hits (melee_stack proves the first stack against the phase without 704934 in the same pair). Mana: nine casts of 10% of base mana 1363 are 1227 of 1363 before regeneration. Ledger clause 259 is the text of 800601, which the tooltip of 704934 carries only as a link; the quote field names the 800601 sentence the entry hangs under. Reference search 2026-11-22: coa-history spell 800601: 1601 SPELL_AURA_REFRESH and 101 SPELL_AURA_APPLIED_DOSE events in 5 logs, no cap figure in the index; sidekick, bindmysoul and ascension-data snapshots carry the tooltip with its numbers blanked ('for , stacking times'): nothing found beyond the DBC and the tooltip, which are the expectation."
+    },
+    {
+      "spell": 572801,
+      "kind": "metric_delta",
+      "quote": "Blast an enemy with the power of the sun, dealing ${$m1+0+$sph*1} Holy damage",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572801,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Horusath Blast (damage at 0 spell power)",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "expected": 835.5,
+      "after_at_least": 782,
+      "after_at_most": 889,
+      "player_spell_power": 0,
+      "observe_source": "Horusath Blast 572801 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 769, EffectDieSides 107, EffectRealPointsPerLevel 6.32 from BaseLevel 58, SchoolMask 2 (Holy), CastingTimeIndex 1 (instant), ManaCostPercentage 33, RecoveryTime 25000 ms (Spell.dbc, server set). $m1 at level 60 = 769 + int32(2 x 6.32) + 1..107 = 782..888 (the tooltip reads 782.64 at the reference stats, the low end); the coefficient is the stated $sph*1, i.e. 1.0 x Holy spell power. One real cast on the dummy with 984954 (no spell crit) and 823764 (no magic resistance) as harness precondition fixtures. The hit at 0 spell power lies in [782, 889]. This is the contrast arm of damage_sp in the same pair. Reference search 2026-11-22: coa-history map spell 500154 (the same-name Horusath Blast) has 1073 cast events in the index, no damage figure that fixes a coefficient (players' gear differs); bindmysoul snapshot carries the same sentence; nothing else found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572801,
+      "kind": "metric_delta",
+      "quote": "Blast an enemy with the power of the sun, dealing ${$m1+0+$sph*1} Holy damage",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572801,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Horusath Blast (damage at 10000 spell power)",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "expected": 10835.5,
+      "after_at_least": 10782,
+      "after_at_most": 10889,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Horusath Blast 572801 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 769, EffectDieSides 107, EffectRealPointsPerLevel 6.32 from BaseLevel 58, SchoolMask 2 (Holy), CastingTimeIndex 1 (instant), ManaCostPercentage 33, RecoveryTime 25000 ms (Spell.dbc, server set). $m1 at level 60 = 769 + int32(2 x 6.32) + 1..107 = 782..888 (the tooltip reads 782.64 at the reference stats, the low end); the coefficient is the stated $sph*1, i.e. 1.0 x Holy spell power. One real cast on the dummy with 984954 (no spell crit) and 823764 (no magic resistance) as harness precondition fixtures. With 10000 spell power (player_spell_power hit_arm, harness fixture, the Holy spell power read before the hit is recorded on the verdict) the hit is 782..888 + int32(1.0 x 10000) = [10782, 10889]; a coefficient 10% off (0.9 or 1.1) reads about 1000 away and is excluded. Contrast arm: damage_base in the same pair. Reference search 2026-11-22: coa-history map spell 500154 (the same-name Horusath Blast) has 1073 cast events in the index, no damage figure that fixes a coefficient (players' gear differs); bindmysoul snapshot carries the same sentence; nothing else found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 300347,
       "kind": "metric_delta",
       "gate_spell": 300347,
