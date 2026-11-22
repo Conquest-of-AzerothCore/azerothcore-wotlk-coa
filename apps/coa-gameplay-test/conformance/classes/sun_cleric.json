@@ -14190,6 +14190,10 @@
       "target_casts_before": [
         12051
       ],
+      "target_casts": [
+        12051
+      ],
+      "enemy_cast_wait_ms": 300,
       "measure_actor": "dummy",
       "expire_ms": 500,
       "phase_auras": [
@@ -14201,18 +14205,16 @@
         ]
       ],
       "dummy_distance": 3,
-      "name": "Luminary Mendicant (Arcane lockout still held 3000 ms after the cast)",
+      "name": "Luminary Mendicant (Arcane lockout still refuses a cast 3000 ms after the cast)",
       "variant": "lockout_held",
       "label_suffix": "lockout_held",
       "quote": "and causes Horusath Blast to interrupt the target for $547217d.",
-      "metric": "school_prohibited",
-      "fields": {
-        "school_mask": 64
-      },
-      "before_expected": 0,
-      "expected": 1,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
       "wait_ms": 3000,
-      "observe_source": "Luminary Mendicant 547214 Effect[1] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 547217; the handler casts 547217 at the target on a Horusath Blast 500154 damage event (AscensionSunClericEvents.cpp:126, :322). 547217 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms, $547217d); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, and locks that channel's school for the duration (ProhibitSpellSchool, SpellEffects.cpp:4844). The dummy channels Evocation 12051 (Arcane, SchoolMask 64, PreventionType 1, 8 s) on itself right before the cast (target_casts_before); its Arcane lockout is read with school_prohibited. Horusath Blast 572801 is a missile (Spell.dbc Speed 20) and Spell.cpp:2474-2476 clamps the distance to at least 5 yd, so the hit, and the lockout with it, comes floor(5 / 20 x 1000) = 250 ms after the cast with the dummy inside 5 yd (placed 3 yd away); the first design read the lockout from the cast with the school_lockout kind and alerted in both runs (school_prohibited still 1 between 3026 and 3126 ms), which is that 250 ms. The lockout therefore ends 250 + 3000 = 3250 ms after the cast. lockout_held reads 3000 ms after the cast: locked means a duration above 3000 - 250 - 25 = 2725 ms, which excludes -10% (2700 ms). lockout_free reads 3475 ms after the cast: free means a duration below 3475 - 250 + 25 = 3250 ms, which excludes +10% (3300 ms). Control arm: before the learn the same Horusath Blast 572801 is cast at the channelling dummy without 547214, no interrupt and no lockout, and the school reads 0. Reference search 2026-11-22: coa-history spell 547214: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "Luminary Mendicant 547214 Effect[1] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 547217; the handler casts 547217 at the target on a Horusath Blast 500154 damage event (AscensionSunClericEvents.cpp:126, :322). 547217 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms, $547217d); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, and locks that channel's school for the duration (ProhibitSpellSchool, SpellEffects.cpp:4844). The dummy channels Evocation 12051 (Arcane, PreventionType 1, 8 s) on itself right before the cast (target_casts_before). Horusath Blast 572801 is a missile (Spell.dbc Speed 20) and Spell.cpp:2474-2476 clamps the distance to at least 5 yd, so the hit, and the lockout with it, comes floor(5 / 20 x 1000) = 250 ms after the cast with the dummy inside 5 yd (placed 3 yd away); the first design read the lockout from the cast with the school_lockout kind and alerted in both runs (school_prohibited still 1 between 3026 and 3126 ms), which is that 250 ms. The lockout therefore ends 250 + 3000 = 3250 ms after the cast. The lockout is read by a real attempt: the dummy casts Evocation again at the stated time after the cast (target_casts) and 'casting' is read 300 ms later, 1 when the cast was accepted and 0 when the Arcane lockout refused it. lockout_held: the attempt comes 3000 ms after the cast and is refused (casting 0), so the lockout still holds then, a duration above 3000 - 250 - 25 = 2725 ms, which excludes -10% (2700 ms). Control arm: before the learn the same Horusath Blast 572801 is cast at the channelling dummy without 547214, no interrupt and no lockout, and the dummy keeps casting (1). Reference search 2026-11-22: coa-history spell 547214: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 547214,
@@ -14223,6 +14225,10 @@
       "target_casts_before": [
         12051
       ],
+      "target_casts": [
+        12051
+      ],
+      "enemy_cast_wait_ms": 300,
       "measure_actor": "dummy",
       "expire_ms": 500,
       "phase_auras": [
@@ -14234,18 +14240,16 @@
         ]
       ],
       "dummy_distance": 3,
-      "name": "Luminary Mendicant (Arcane lockout over 3475 ms after the cast)",
+      "name": "Luminary Mendicant (Arcane lockout accepts a cast 3475 ms after the cast)",
       "variant": "lockout_free",
       "label_suffix": "lockout_free",
       "quote": "and causes Horusath Blast to interrupt the target for $547217d.",
-      "metric": "school_prohibited",
-      "fields": {
-        "school_mask": 64
-      },
-      "before_expected": 0,
-      "expected": 0,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
       "wait_ms": 3475,
-      "observe_source": "Luminary Mendicant 547214 Effect[1] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 547217; the handler casts 547217 at the target on a Horusath Blast 500154 damage event (AscensionSunClericEvents.cpp:126, :322). 547217 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms, $547217d); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, and locks that channel's school for the duration (ProhibitSpellSchool, SpellEffects.cpp:4844). The dummy channels Evocation 12051 (Arcane, SchoolMask 64, PreventionType 1, 8 s) on itself right before the cast (target_casts_before); its Arcane lockout is read with school_prohibited. Horusath Blast 572801 is a missile (Spell.dbc Speed 20) and Spell.cpp:2474-2476 clamps the distance to at least 5 yd, so the hit, and the lockout with it, comes floor(5 / 20 x 1000) = 250 ms after the cast with the dummy inside 5 yd (placed 3 yd away); the first design read the lockout from the cast with the school_lockout kind and alerted in both runs (school_prohibited still 1 between 3026 and 3126 ms), which is that 250 ms. The lockout therefore ends 250 + 3000 = 3250 ms after the cast. lockout_held reads 3000 ms after the cast: locked means a duration above 3000 - 250 - 25 = 2725 ms, which excludes -10% (2700 ms). lockout_free reads 3475 ms after the cast: free means a duration below 3475 - 250 + 25 = 3250 ms, which excludes +10% (3300 ms). Control arm: before the learn the same Horusath Blast 572801 is cast at the channelling dummy without 547214, no interrupt and no lockout, and the school reads 0. Reference search 2026-11-22: coa-history spell 547214: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "Luminary Mendicant 547214 Effect[1] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 547217; the handler casts 547217 at the target on a Horusath Blast 500154 damage event (AscensionSunClericEvents.cpp:126, :322). 547217 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms, $547217d); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, and locks that channel's school for the duration (ProhibitSpellSchool, SpellEffects.cpp:4844). The dummy channels Evocation 12051 (Arcane, PreventionType 1, 8 s) on itself right before the cast (target_casts_before). Horusath Blast 572801 is a missile (Spell.dbc Speed 20) and Spell.cpp:2474-2476 clamps the distance to at least 5 yd, so the hit, and the lockout with it, comes floor(5 / 20 x 1000) = 250 ms after the cast with the dummy inside 5 yd (placed 3 yd away); the first design read the lockout from the cast with the school_lockout kind and alerted in both runs (school_prohibited still 1 between 3026 and 3126 ms), which is that 250 ms. The lockout therefore ends 250 + 3000 = 3250 ms after the cast. The lockout is read by a real attempt: the dummy casts Evocation again at the stated time after the cast (target_casts) and 'casting' is read 300 ms later, 1 when the cast was accepted and 0 when the Arcane lockout refused it. lockout_free: the attempt comes 3475 ms after the cast and is accepted (casting 1), so the lockout is over, a duration below 3475 - 250 + 25 = 3250 ms, which excludes +10% (3300 ms); the reading equals the control's, the bound is the proof. Control arm: before the learn the same Horusath Blast 572801 is cast at the channelling dummy without 547214, no interrupt and no lockout, and the dummy keeps casting (1). Reference search 2026-11-22: coa-history spell 547214: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 707433,
