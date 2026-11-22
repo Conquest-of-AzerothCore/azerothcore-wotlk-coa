@@ -7,14 +7,15 @@
     "solve the same report (#7457) by keeping the minions summoned and immune to NPCs while the owner is mounted",
     "or in flight. Expected: before mounting a hostile NPC can attack a worm; while mounted it cannot, both worms",
     "stay summoned, no worm engages the NPC and the owner stays out of combat; after dismounting the worm is",
-    "attackable again. The unmounted baseline reads 1, so the mounted 0 distinguishes the fix."
+    "attackable again. The aggressive NPC starts out of range and moves in after mounting. Invisibility on the",
+    "owner isolates aggro on the worms from direct aggro on the rider."
   ],
   "timeout_ms": 90000,
   "players": [
     { "id": "bm", "race": 1, "class": 20, "level": 60 }
   ],
   "creatures": [
-    { "id": "enemy", "owner": "bm", "entry": 36, "level": 60, "health": 1000000, "distance": 6 }
+    { "id": "enemy", "owner": "bm", "entry": 36, "level": 60, "health": 1000000, "distance": 60, "reaction": 2 }
   ],
   "steps": [
     { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
@@ -59,7 +60,21 @@
       "entry": 325301,
       "equals": 2
     },
-    { "action": "wait", "label": "Ride beside the hostile NPC", "ms": 3000 },
+    { "action": "set_aura", "label": "Hide the rider from direct aggro", "actor": "bm", "spell": 32612, "stacks": 1 },
+    { "action": "move_point", "label": "Bring the aggressive NPC into range", "actor": "enemy", "dx": -57 },
+    {
+      "action": "assert",
+      "label": "The NPC has reached the mounted owner's worms",
+      "actor": "bm",
+      "metric": "owned_creature_distance_2d",
+      "entry": 325301,
+      "target": "enemy",
+      "max": 10,
+      "within_ms": 12000
+    },
+    { "action": "wait", "label": "Give the hostile NPC time to engage", "ms": 3000 },
+    { "action": "assert", "label": "Still mounted", "actor": "bm", "metric": "mount_display_id", "min": 1 },
+    { "action": "assert", "label": "Still invisible", "actor": "bm", "metric": "aura", "spell": 32612, "equals": 1 },
     {
       "action": "assert",
       "label": "Mounted: no worm has engaged the NPC",

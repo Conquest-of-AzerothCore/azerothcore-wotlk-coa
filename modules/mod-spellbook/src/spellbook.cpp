@@ -141,7 +141,7 @@ namespace
 
     void RememberLearned(Player *player, uint32 spellId)
     {
-        if (!player->HasSpell(spellId) || PreviouslyLearned(player, spellId))
+        if (PreviouslyLearned(player, spellId))
             return;
         PlayerSettingVector const *values = player->FindPlayerSettings(PURCHASED_RANKS_KEY);
         uint32 const count = values && !values->empty()
@@ -571,7 +571,8 @@ namespace
         if (!player || !IsAscensionClass(player->getClass()))
             return;
         for (Row const &row : BuildRows(player, false))
-            RememberLearned(player, row.SpellId);
+            if (player->HasSpell(row.SpellId))
+                RememberLearned(player, row.SpellId);
     }
 
     void RestoreBookRanks(Player *player, Creature *book)
@@ -942,7 +943,7 @@ public:
     void OnPlayerLearnTrainerSpell(Player *player, Creature *trainer, uint32 spellId) override
     {
         if (player && IsAscensionClass(player->getClass()) && IsBook(trainer) &&
-            Spellbook::OffersSpell(player, spellId))
+            player->HasSpell(spellId) && Spellbook::OffersSpell(player, spellId))
             RememberLearned(player, spellId);
     }
 
@@ -953,13 +954,27 @@ public:
     {
         if (!player || !IsAscensionClass(player->getClass()))
             return;
+        PlayerSpellMap const &spells = player->GetSpellMap();
+        auto const prerequisite = spells.find(spellId);
+        uint8 const retainedSpecs = prerequisite != spells.end() && prerequisite->second->State != PLAYERSPELL_REMOVED
+            ? prerequisite->second->specMask : 0;
+
         for (SpellbookRankData::Rank const &rank : SpellbookRankData::Ranks)
-            if (rank.ClassId == player->getClass() && rank.RequiredSpellId == spellId &&
-                player->HasSpell(rank.SpellId))
-            {
-                RememberLearned(player, rank.SpellId);
-                player->removeSpell(rank.SpellId, SPEC_MASK_ALL, false);
-            }
+        {
+            if (rank.ClassId != player->getClass() || rank.RequiredSpellId != spellId)
+                continue;
+
+            auto const dependent = spells.find(rank.SpellId);
+            if (dependent == spells.end() || dependent->second->State == PLAYERSPELL_REMOVED)
+                continue;
+
+            uint8 const affectedSpecs = dependent->second->specMask & ~retainedSpecs;
+            if (!affectedSpecs)
+                continue;
+
+            RememberLearned(player, rank.SpellId);
+            player->removeSpell(rank.SpellId, affectedSpecs, false);
+        }
     }
 
     void OnPlayerBeforeTempSummonInitStats(Player *player, TempSummon *summon, uint32 & /*duration*/) override
