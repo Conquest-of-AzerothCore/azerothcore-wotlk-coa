@@ -12,6 +12,9 @@ learned; each of two arms makes two real `hit_spell` casts, the second with the 
   read and above by that sum plus `max_step_ms` per step; a window holding more than one whole count is unmeasured.
 - `variant: "chain_copy"`: each arm seeds `seed_spell` on the primary dummy and hits it twice; the effect is the count
   of new `aura_spell` copies of the caster on `spares` spare dummies within `radius` yd.
+- `variant: "chain_control"` (ADR 1044, provisional): `chain_copy` with a control arm before `spell` is learned:
+  the same seed and two hits `gaps[1]` ms apart must give no new copy (else `alert`); its spacing must lie in the
+  allowed band and its opening cast count 1 (else `unmeasured`); the later arms then count 2 and 3 opening casts.
 
 Judge: every read present, each arm's measured spacing (`event_interval_min_ms` of the hits since the arm's opening
 cast; critical heals only for `cooldown_cut`) inside its band, and two critical heals per `cooldown_cut` arm, else

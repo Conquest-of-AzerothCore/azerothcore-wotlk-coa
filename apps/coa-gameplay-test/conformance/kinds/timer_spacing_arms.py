@@ -13,7 +13,9 @@ from values import (CAST_MARGIN_MS, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, GCD_
 KIND = 'timer_spacing_arms'
 ORDER = 31
 ARMS = ('blocked', 'allowed')
-VARIANTS = ('cooldown_cut', 'chain_copy')
+CONTROL = 'control'
+VARIANTS = ('cooldown_cut', 'chain_copy', 'chain_control')
+CHAIN_VARIANTS = ('chain_copy', 'chain_control')
 BAND_PCT = 10
 SPARE_EDGE_YD = 0.5
 READ_WAIT_MS = 500
@@ -39,6 +41,10 @@ class TimerSpacingSpec:
     spares: int = 0
     radius: float = 0.0
     cast_power: int = 0
+
+    @property
+    def control_arm(self) -> bool:
+        return self.variant == 'chain_control'
 
 
 def band(spec: TimerSpacingSpec) -> tuple[tuple[float, float], tuple[float, float]]:
@@ -66,7 +72,7 @@ def timer_spacing_spec(entry: dict) -> TimerSpacingSpec:
                                            or spec.force_crit not in FORCE_CRIT_RATINGS):
         raise ValueError(f'{spec.spell} {KIND} cooldown_cut needs a cooldown_spell, a cut_spell and a force_crit of '
                          f'{sorted(FORCE_CRIT_RATINGS)}')
-    if spec.variant == 'chain_copy' and (not spec.seed_spell or not spec.aura_spell or spec.spares < 3
+    if spec.variant in CHAIN_VARIANTS and (not spec.seed_spell or not spec.aura_spell or spec.spares < 3
                                          or spec.radius <= SPARE_EDGE_YD):
         raise ValueError(f'{spec.spell} {KIND} chain_copy needs a seed_spell, an aura_spell, at least three spare '
                          f'dummies and a radius')
@@ -92,7 +98,7 @@ def expected_effects(spec: TimerSpacingSpec) -> dict[str, int]:
 def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, 1.0)
-    chain = spec.variant == 'chain_copy'
+    chain = spec.variant in CHAIN_VARIANTS
     target = dummy_id(0) if chain else CASTER
     stream, since = ('spell_damage', spec.seed_spell) if chain else ('spell_heal', spec.cooldown_spell)
     hit = facts_of(records, spec.hit_spell)
@@ -149,6 +155,7 @@ def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[di
     learned = (spec.seed_spell, spec.hit_spell) if chain else (spec.cooldown_spell, spec.hit_spell)
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)]
+             + (arm(CONTROL, spec.gaps[1]) if spec.control_arm else [])
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
              + arm(ARMS[0], spec.gaps[0]) + arm(ARMS[1], spec.gaps[1]))
     player = player_fixture(class_file)
@@ -165,7 +172,8 @@ def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[di
                      f'the first. The {spec.timer_ms} ms timer of the tooltip allows one effect in the blocked arm and '
                      f'two in the allowed arm, counted as {effect}. An arm counts only when its measured spacing of '
                      f'the hits lies in [{blocked_low:g}, {blocked_high:g}) or ({allowed_low:g}, {allowed_high:g}] '
-                     f'ms.'),
+                     f'ms.' + (f' A control arm before {spec.spell} is learned makes the same two hits '
+                               f'{spec.gaps[1]} ms apart and must give no new copy.' if spec.control_arm else '')),
         'players': [player],
         'steps': steps}
     if creatures:
@@ -176,6 +184,10 @@ def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[di
              'reads': {name: {'spacing': mark(spec, f'{name} spacing'), 'opened': mark(spec, f'{name} opened'),
                               'start': [read['label'] for read in effect_reads(name, 'start')],
                               'end': [read['label'] for read in effect_reads(name, 'end')]} for name in ARMS}}
+    if spec.control_arm:
+        model[CONTROL] = {'spacing': mark(spec, f'{CONTROL} spacing'), 'opened': mark(spec, f'{CONTROL} opened'),
+                          'start': [read['label'] for read in effect_reads(CONTROL, 'start')],
+                          'end': [read['label'] for read in effect_reads(CONTROL, 'end')], 'expected': 0}
     if not chain:
         model['cooldown'] = {'recovery_ms': float(records.field('Spell', spec.cooldown_spell, 'RecoveryTime')),
                              'cut_ms': abs(records.single_value(spec.cut_spell, spec.cut_effect))}
@@ -221,7 +233,28 @@ def timer_spacing_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if missing is not None:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
     notes, effects = [], {}
-    for count, name in enumerate(ARMS, 1):
+    control = model.get(CONTROL)
+    if control:
+        missing = next((label for label in [control['spacing'], control['opened'], *control['start'],
+                                            *control['end']] if run.values.get(label) is None), None)
+        if missing is not None:
+            return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
+        if run.values[control['opened']] != 1:
+            return replace(base, status='unmeasured',
+                           explanation=f'{CONTROL}: {run.values[control["opened"]]:g} opening casts by its end, 1 '
+                                       f'needed, so its reads are not its own')
+        low, high = model['bands'][ARMS[1]]
+        spacing = run.values[control['spacing']]
+        if not low < spacing <= high:
+            return replace(base, status='unmeasured',
+                           explanation=f'{CONTROL} spacing {spacing:g} ms outside its band {low:g}-{high:g}')
+        copies = sum(run.values[label] for label in control['end']) - sum(run.values[label]
+                                                                         for label in control['start'])
+        notes.append(f'{CONTROL}: spacing {spacing:g} ms, {copies:g} new copies before the learn')
+        if copies != control['expected']:
+            return replace(base, measured=copies, expected=float(control['expected']), low=0.0, high=0.0,
+                           explanation=f'{CONTROL} arm without {base.spell_id}: {"; ".join(notes)}')
+    for count, name in enumerate(ARMS, 2 if control else 1):
         reads = model['reads'][name]
         if run.values[reads['opened']] != count:
             return replace(base, status='unmeasured',

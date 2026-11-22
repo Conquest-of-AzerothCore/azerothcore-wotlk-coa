@@ -10,6 +10,11 @@
   reading only), where a party-scoped spell (`TARGET_CHECK_PARTY`, `IsInPartyWith`, `GetPartyMembers`) reads 0.
   Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
   that adds another player, such as an enemy player, is refused at validation.
+- `ally_class` (ADR 1040): a CoA class, 12 to 32, needing at least one ally. The allies are created with that class
+  instead of the class under test (the scenario schema's per-player `class`, created by the existing character
+  creation), for a spell that lands only on a power type the class under test lacks. The entry states the power type it
+  needs with a precondition arm on the state metric `active_power` (`fields.power`), read on the ally, so a wrong class
+  voids the trial.
 - `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target`, or the
   trigger's cast `target`, is `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that
   makes the spell reach raid subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked

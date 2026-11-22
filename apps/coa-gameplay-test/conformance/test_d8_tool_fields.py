@@ -18,6 +18,12 @@ def entry_of(spell: int, variant: str) -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry.get('variant') == variant)
 
 
+def cd_gate_all_arms() -> dict:
+    entry = entry_of(707528, 'cd_gate_without')
+    return {**{key: value for key, value in entry.items() if key not in ('only_arm', 'priming_reads')},
+            'variant': 'cd_gate', 'label_suffix': 'cd_gate'}
+
+
 def results(expectations) -> dict:
     return {expectation.label.rsplit(' ', 1)[1]: expectation.displayed for expectation in expectations}
 
@@ -107,7 +113,7 @@ class ExtraReadsTests(unittest.TestCase):
     def test_the_reads_are_never_an_expectation_and_leave_the_judged_labels_unchanged(self):
         _, plain = self.scenario()
         _, extended = self.scenario(extra_reads=self.READS)
-        self.assertEqual([(e.label, e.expected) for e in plain], [(e.label, e.expected) for e in extended])
+        self.assertEqual([(e.label, e.displayed) for e in plain], [(e.label, e.displayed) for e in extended])
         self.assertFalse([e for e in extended if ' extra ' in e.label])
 
     def test_a_read_placed_around_an_after_cast_brackets_that_cast_in_the_without_and_with_arms(self):
@@ -139,7 +145,7 @@ class ExtraReadsTests(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class OnlyArmTests(unittest.TestCase):
     def scenario(self, **changes):
-        return behaviour_scenario(CLASS_FILE, {**entry_of(707528, 'cd_gate'), **changes})
+        return behaviour_scenario(CLASS_FILE, {**cd_gate_all_arms(), **changes})
 
     def test_off_by_default_every_arm_shares_one_scenario(self):
         _, expectations = self.scenario()

@@ -1188,6 +1188,10 @@ plain (not critical unless `critical` says so, not glancing) hits of that hand. 
 swing from landing between the total and the count. An off-hand `swing_hand` needs `off_hand_item`; a swing entry
 takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
 
+`void_on_cast_failure: true` (ADR 1054, provisional) voids the trial when the run's `cast_failures` lists a refused
+cast: the verdict is `unmeasured`, never ok or alert, and the contract says so. Absent by default; it changes no
+step, so a run without a refusal is judged as without the option.
+
 `versus_creature_type` (ADR 0782; main-hand swings, pooled `parts` allowed) judges attack power that a creature-type aura adds to
 swings: `aura`/`effect` name an aura 102 effect (SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS) whose creature type mask is
 read from the DBC; `treatment_entry`/`treatment_type` must lie in the mask and `control_entry`/`control_type` outside
@@ -1501,6 +1505,8 @@ it, the ally gains none and the caster some: the whole of the ally's threat goes
 
 ### Script-cast hits (`hit_mean`, `kind: "script_hit"`)
 
+The class file key `tooltip_corrections` (`{"<spell>": {"text": ..., "ruling": ...}}`, ADR 1042, provisional) replaces the Description that a script hit reads its amount from, only for a spell with a recorded ruling and only when the text is the DBC Description with `+` operators inserted; anything else is refused. Sun Cleric: Protector of the Flame 560492 (D-166). No finished class uses it.
+
 A tooltip may state the amount of a hit that a class script casts on an event, such as a pulse on a heal or a
 strike when a shield breaks (ADR 0160). `hit_spell` is the spell the script casts and `spell` the passive whose
 tooltip shows its amount. Every trial sets `caster_auras` on the caster, holds the caster at `caster_health_pct`
@@ -1509,7 +1515,7 @@ and, with `strike_spell`, has a passive, stationary striker (creature `striker_e
 caster; with `caster_avoidance` (`{"dodge": percent, "parry": percent}`, ADR 1028) it instead sets the caster's
 avoidance with `set_combat_avoidance` at the start of every trial while a hostile, stationary melee striker (creature
 `striker_entry`, `reaction` 2) swings at it, so an avoided swing can set off the script, and the striker can be the
-`receiver` (refused with `strike_spell`); it then waits `settle_ms` (default 500). `trials` trials run without
+`receiver` (refused with `strike_spell`). The caster engages that striker once with its auto attack for 2800 ms before the control trials (ADR 1042, provisional, round B design 2: without it the striker never swings), and its own melee swings after the engage must be 0 at the end, or the run fails before its reads; it then waits `settle_ms` (default 500). `trials` trials run without
 `spell` known (the control arm,
 whose `hit_spell` hits on the `receiver` must count 0) and `trials` with it. The `receiver` is the dummy or the
 striker; its armor, view level and resistances are read for the mitigation model. `weapon_only: true` (ADR 0742,
@@ -1902,6 +1908,18 @@ players are flagged for PvP after the base steps. The entry's `target` and `meas
 only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an orc in the circle (read 9800 ms and
 10200 ms after the cast, its first tick at about 2000 ms) and 40000 ms on the dummy.
 
+### Two read-only harness reads (ADR 1040, provisional)
+
+- `school_mask` (1 to 127) in the `fields` of a `spell_damage_count` or `spell_damage_total` read keeps the damage events
+  whose packet school mask equals it (`SMSG_SPELLNONMELEEDAMAGELOG` carries `log->schoolMask`; Physical 1, Holy 2, Fire 4,
+  Nature 8, Frost 16, Shadow 32, Arcane 64). Absent, the read is unchanged. Periodic damage events carry no mask and
+  never match. Justice 572848: the main-hand strike 572850 reads 1 event at mask 1 and 0 at mask 4, the off-hand strike
+  572045 the reverse, each beside an unfiltered count of 1 so that the 0 is not a missed hit.
+- the state metric `unit_flag_set` (`fields.target` a unit, `field` 1 for `UNIT_FIELD_FLAGS` or 2 for
+  `UNIT_FIELD_FLAGS_2`, `mask`) reads 1 when every bit of the mask is set on the unit, else 0. Calm 804057: on an Imp
+  `UNIT_FLAG_DISARMED` 0x00200000 and `UNIT_FLAG2_DISARM_OFFHAND` 0x80 read 1 after the cast and 0 before, the ranged
+  flag `UNIT_FLAG2_DISARM_RANGED` 0x400 is read beside them.
+
 ### A fixed-count dummy behind the caster (ADR 0223)
 
 A `fixed_count` entry may set `behind_yd` (inside `radius`) for a cone: every dummy spawns `2 x behind_yd` further
@@ -2139,6 +2157,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   windows (ADR 0551)
 - [`block_charge_strikes`](kinds/block_charge_strikes.md): how many real blocks a block-charge aura lasts without and
   with a talent, block forced by `set_combat_avoidance` (ADR 1025, provisional)
+- [`block_extension_trials`](kinds/block_extension_trials.md): whether one blocked strike on a fresh aura extends
+  it by the stated time, every trial judged on game-time stamps (ADR 1047, provisional)
 - [`bounce_amounts`](kinds/bounce_amounts.md): the per-hit amount of each enemy a bouncing spell strikes, against
   its jump multiplier (ADR 0587)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
@@ -2207,6 +2227,8 @@ Options with a module:
 
 - [`after_start_reads`](metric_delta_options/after_start_reads.md): a caster aura read at the start of the after phase,
   a mismatch is `unmeasured` (ADR 1039)
+- [`after_setup_reads`](metric_delta_options/after_setup_reads.md): a caster aura read after the last setup cast of
+  each phase, a mismatch is `unmeasured` (ADR 1058)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
@@ -2247,6 +2269,10 @@ Options with a module:
   reading and at or above its floor, for a decay without a stated rate (ADR 0738)
 - [`refill_power_after_setup_casts`](metric_delta_options/refill_power_after_setup_casts.md): the caster's power set to
   `cast_power` after every setup cast, refused for a claim about a resource (ADR 1038)
+- [`second_strike`](metric_delta_options/second_strike.md): a second strike no table avoids after the treatment
+  cast, the state it meets read first, a missing state or strike is unmeasured (ADR 1053, provisional)
+- [`without_item`](metric_delta_options/without_item.md): destroys the equipped item (and resets the trigger's
+  cooldown) before the second cast of a `cast_failure` entry (ADR 1056).
 - [`void_on_cast_failure`](metric_delta_options/void_on_cast_failure.md): the verdict `unmeasured` when a setup, step
   or trigger cast was refused (ADR 1038)
 - [`displacement`](metric_delta_options/displacement.md): the judged readings replaced by the caster's 2D
@@ -2266,5 +2292,7 @@ Options with a module:
 - [`ally_arm`](metric_delta_options/ally_arm.md): grouped ally players to read or target, their health and casts at
   the ally in both phases, a timed no-cast control, and stated extra reads judged beside the main one (ADR 1016),
   or held as preconditions that void the trial when off (ADR 1029)
+- [`enemy_shooter`](metric_delta_options/enemy_shooter.md): the enemy player casts a shot or an ability at the caster in
+  an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1040)
 - [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
   power cost read, judged with the partner arms the entry names (ADR 1024)

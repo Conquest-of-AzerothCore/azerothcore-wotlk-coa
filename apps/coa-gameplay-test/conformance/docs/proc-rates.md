@@ -457,3 +457,5 @@ blocked (state 5) swings since the engage must be 0: these asserts come before t
 source fails the part instead of being judged. Trials per attempt are the striker count; `trials_per_attempt`,
 `trial_readings` and an internal cooldown are refused. The label is `<aura> proc_rate avoided` and the key ends in
 `avoided`; an avoided entry does not rename a sibling entry of the same aura.
+
+`count_misses: true` in the trigger (ADR 1041, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.

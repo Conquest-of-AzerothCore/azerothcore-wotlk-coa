@@ -834,11 +834,11 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
                 {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS},
                 measurement(labels['trials'], CASTER, 'melee_damage_count', **hand_fields(entry)),
                 measurement(labels['attempts'], CASTER, 'melee_attack_count', **hand_fields(entry))]
-    from proc_avoided import attempt_steps as avoided_attempts, guard_steps, is_avoided, trial_steps
+    from proc_avoided import attempt_steps as avoided_attempts, counts_misses, guard_steps, is_avoided, trial_steps
     if is_avoided(entry):
         return (avoided_attempts(entry, plan.per_part, plan.attempt_ms)
                 + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}] + guard_steps(entry)
-                + trial_steps(labels['trials'], labels['attempts']))
+                + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry)))
     if entry['trigger']['action'] == TAKEN_HIT:
         return (taken_hit_attempts(entry, plan, plan.per_part)
                 + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}, taken_hit_trials(entry, labels['trials']),
@@ -1078,9 +1078,11 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                 added_trials_label(aura, term): baseline_trigger_label(aura, term['spell'])
                 for term in trigger_spell_terms(entry)}
     if avoided:
-        from proc_avoided import avoided_baseline_model, reading
-        model['readings'] = [reading(labels['trials'])]
+        from proc_avoided import ATTACK_BALANCE, attack_balance, avoided_baseline_model, counts_misses, reading
+        model['readings'] = [reading(labels['trials'], counts_misses(entry))]
         model['baseline'] = avoided_baseline_model(entry, plan, part)
+        if counts_misses(entry):
+            model[ATTACK_BALANCE] = attack_balance(labels['trials'], labels['attempts'])
     if control:
         model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct),
                              CONTROL_WEAPON: entry[CONTROL_WEAPON], 'control_item': control['item'],

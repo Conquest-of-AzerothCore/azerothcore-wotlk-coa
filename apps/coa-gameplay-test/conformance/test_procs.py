@@ -1365,7 +1365,8 @@ class SpearsOfGloryScenarioTest(unittest.TestCase):
                          {added: f'{SPEARS_OF_GLORY} proc baseline trials {RADIANT_FLAME_TICK}'})
         self.assertIs(expectation.model['trigger_lands_no_hit'], True)
 
-from test_proc_avoided import AvoidedProcJudgeTest, AvoidedProcLabelTest, AvoidedProcScenarioTest  # noqa: E402,F401
+from test_proc_avoided import (AvoidedProcJudgeTest, AvoidedProcLabelTest, AvoidedProcMissesTest,  # noqa: E402,F401
+                               AvoidedProcScenarioTest)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')

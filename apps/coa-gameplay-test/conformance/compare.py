@@ -40,6 +40,7 @@ from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_
                    per_event_sample, sized_trials)
 import control_excluded
 import hit_ratio_versus
+import hit_ratio_void
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings, fixture_note
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
@@ -49,6 +50,7 @@ from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, family_spells, literal_token
+from proc_avoided import attack_imbalance
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
                    PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, residual_note, wilson_interval)
 from profile import (DBC_DIR, WEAPON_REQUIREMENT_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
@@ -1384,6 +1386,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     event_labels = model.get('event_labels') or [labels['events']]
     refunds = [model['charge_pool'], labels['attempts']] if model.get('charge_pool') else []
     heal_guards = model.get('heal_guards', {})
+    balance = model.get('attack_balance')
     wanted = [labels['aura']] + list(dict.fromkeys(
         event_labels + [labels['trials']] + [label for reading in readings for label in reading['labels']]
         + refunds + list(heal_guards.values())))
@@ -1391,6 +1394,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     totals = dict.fromkeys(wanted[1:], 0.0)
     events = 0.0
     counted, without_aura, unmeasured, reasons, ungranted, spoiled = [], [], [], [], [], []
+    imbalanced = []
     granted = 0
     per_part: list[tuple[dict[str, float], float]] = []
     baseline_trials = baseline_events = None
@@ -1417,6 +1421,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             ungranted.append(f'{run.key} ({ungranted_text(grant_reads)})')
         elif heal_guards and heal_spoiled(heal_guards, run):
             spoiled.append(f'{run.key} ({heal_spoiled(heal_guards, run)})')
+        elif balance and attack_imbalance(balance, run.values):
+            imbalanced.append(f'{run.key} ({attack_imbalance(balance, run.values)})')
         elif values[0] <= 0:
             without_aura.append(run.key)
         else:
@@ -1444,6 +1450,10 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             offset = refund_offset(model, run) - player_casts(model, run, trigger)
             events += offset
             per_part.append((part_totals, offset))
+    if imbalanced:
+        return replace(base, status='unmeasured', expected=0.0,
+                       explanation=f'void: the attacks taken are not the hits, misses and avoided swings in '
+                                   f'{", ".join(imbalanced)}, so the proc rate is not judged')
     if spoiled:
         return replace(base, status='unmeasured', expected=0.0,
                        explanation=f'not every heal of the trigger was an effective heal on the ally in '
@@ -4652,6 +4662,11 @@ def engine_amount_band_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
+    if model.get(hit_ratio_void.NAME):
+        refused = hit_ratio_void.refused(runs, NO_CAST_FAILURE)
+        if refused:
+            return replace(base, status='unmeasured',
+                           explanation=hit_ratio_void.explanation(refused, describe_failures))
     scale = 100.0 if model.get('rate') else 1.0
     between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))
     series = {}
