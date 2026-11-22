@@ -435,16 +435,21 @@
       },
       {
         "claim": "When you critically heal your target",
-        "labels": []
+        "labels": [
+          "300339 behaviour_metric_delta noncrit_heal_return",
+          "300339 behaviour_metric_delta noncrit_heal_landed",
+          "300339 behaviour_metric_delta noncrit_strike_landed"
+        ]
       }
     ],
-    "reason": "Held open by review I-1: no arm shows that a non-critical heal returns nothing. A critical-only gate (AscensionSunClericEvents.cpp:140) cannot be separated from a server that returns 30% of every heal without a heal that is certainly not critical, and the harness has none: a negative spell_crit_rating clamps at 0 in Player::UpdateRating (PlayerUpdates.cpp:671-672), so the intellect crit stays. Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage); the 'critically' part has no label. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    "reason": "Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage). The \"critically\" part: noncrit_heal_return reads 0 returns for a heal that is certainly not critical (fixture 984954, Effect[1] aura 57 spell crit -1000), against 1 in crit_heal_return, with noncrit_heal_landed (the Illumination heal landed) and noncrit_strike_landed (the 47632 strike landed in the same scenario) so a missed heal or strike cannot pass it. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300339,
     "clause": "Lasts $301005d.",
     "labels": [
-      "300339 spell_duration 301005 #0"
+      "300339 spell_duration 301005 #0",
+      "300339 behaviour_metric_delta return_window"
     ],
     "kind": "claim"
   },
@@ -807,7 +812,9 @@
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
       "804630 behaviour_metric_delta flare_hit",
-      "804630 behaviour_metric_delta flare_duration"
+      "804630 behaviour_metric_delta flare_duration",
+      "300369 behaviour_metric_delta flare_expiry",
+      "572752 behaviour_metric_delta attacker_miss"
     ],
     "kind": "claim"
   },
@@ -2560,14 +2567,16 @@
         "labels": [
           "561329 effect_value e0 #0",
           "561329 behaviour_metric_delta dawnsear_cast_time",
-          "561329 behaviour_metric_delta sunflare_cast_time"
+          "561329 behaviour_metric_delta sunflare_cast_time",
+          "561329 behaviour_metric_delta cascade_cast_time"
         ]
       },
       {
         "claim": "and mana cost by $s1%",
         "labels": [
           "561329 behaviour_metric_delta dawnsear_cost",
-          "561329 behaviour_metric_delta sunflare_cost"
+          "561329 behaviour_metric_delta sunflare_cost",
+          "561329 behaviour_metric_delta cascade_cost"
         ]
       }
     ],
@@ -2993,7 +3002,8 @@
     "spell": 680624,
     "clause": "and unleashes it after $d,",
     "labels": [
-      "680624 aura_duration_ms #0"
+      "680624 aura_duration_ms #0",
+      "680624 behaviour_metric_delta unleash_timing"
     ],
     "kind": "claim"
   },
@@ -3001,7 +3011,9 @@
     "spell": 680624,
     "clause": "damaging enemies within $570147a1 yds as Holy damage.",
     "labels": [
-      "680624 effect_radius 570147e0 #1"
+      "680624 effect_radius 570147e0 #1",
+      "680624 behaviour_metric_delta radius_in",
+      "680624 behaviour_metric_delta radius_out"
     ],
     "kind": "claim"
   },
@@ -4242,7 +4254,9 @@
     "spell": 704910,
     "clause": "Increases your healing power by $s1% of your Intellect",
     "labels": [
-      "704910 effect_value e0 #0"
+      "704910 effect_value e0 #0",
+      "704910 behaviour_metric_delta heal_power",
+      "704910 behaviour_metric_delta heal_power_control"
     ],
     "kind": "claim"
   },
@@ -5904,7 +5918,10 @@
     "labels": [
       "804625 behaviour_metric_delta scorch_cost",
       "804625 behaviour_metric_delta scorch_period",
-      "804625 behaviour_metric_delta scorch_next"
+      "804625 behaviour_metric_delta scorch_next",
+      "804625 behaviour_metric_delta scorch_cost_next",
+      "804625 behaviour_metric_delta scorch_ticks",
+      "804625 behaviour_metric_delta scorch_ticks_control"
     ],
     "kind": "claim",
     "reason": "Control arm = Radiant Flame cost 340 and amplitude 1000 without the passive; 0 and 500 with it after Dawn; the next cast after consumption reads 1000 again. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
