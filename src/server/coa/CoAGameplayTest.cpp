@@ -1170,6 +1170,7 @@ struct Actor
     std::array<uint32, 2> meleeAttacksByHand{};
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
     std::map<std::pair<ObjectGuid, uint8>, uint32> meleeVictimStatesTakenFrom;
+    std::map<ObjectGuid, uint32> meleeMissesTakenFrom;
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
@@ -1791,6 +1792,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         {
             ++actor.meleeAttacksTakenFrom[attacker];
             ++actor.meleeVictimStatesTakenFrom[{ attacker, victimState }];
+            if (hitInfo & HITINFO_MISS)
+                ++actor.meleeMissesTakenFrom[attacker];
         }
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
         outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
@@ -5147,6 +5150,19 @@ private:
             return player->GetShieldBlockValue();
         if (metric == "critical_block_chance")
             return player->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE);
+        if (metric == "melee_missed_taken")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            if (auto attacker = step.get_optional<std::string>("target"))
+            {
+                auto const found = actor.meleeMissesTakenFrom.find(GetUnit(*attacker)->GetGUID());
+                return found == actor.meleeMissesTakenFrom.end() ? 0 : found->second;
+            }
+            uint32 total = 0;
+            for (auto const& [attacker, count] : actor.meleeMissesTakenFrom)
+                total += count;
+            return total;
+        }
         if (metric == "melee_attacks_taken")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
