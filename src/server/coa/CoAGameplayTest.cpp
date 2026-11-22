@@ -6351,6 +6351,8 @@ private:
             Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, uint8(slot));
             return item ? item->GetEntry() : 0;
         }
+        if (metric == "vanity_owned")
+            return AscensionVanityOwnership::OwnsItem(player, step.get<uint32>("item")) ? 1.0 : 0.0;
         if (metric == "visible_item")
         {
             uint32 slot = step.get<uint32>("slot");
@@ -8376,6 +8378,8 @@ private:
                 .SendMailTo(trans, MailReceiver(player, player->GetGUID().GetCounter()), sender);
             CharacterDatabase.CommitTransaction(trans);
         }
+        else if (action == "forget_vanity")
+            AscensionVanityOwnership::ForgetItemForTest(player, step.get<uint32>("item"));
         else if (action == "destroy_item")
         {
             Item* item = player->GetItemByEntry(step.get<uint32>("item"));

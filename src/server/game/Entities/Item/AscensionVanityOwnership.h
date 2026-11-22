@@ -11,6 +11,10 @@ namespace AscensionVanityOwnership
 {
 bool OwnsItem(Player const* player, uint32 itemId);
 
+void CollectCarriedItem(Player* player, uint32 itemId);
+
+void ForgetItemForTest(Player* player, uint32 itemId);
+
 class TestOverride
 {
 public:

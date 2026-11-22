@@ -3,6 +3,7 @@
 
 #include "AscensionItemLadder.h"
 #include "AscensionNativeItemScaling.h"
+#include "AscensionVanityOwnership.h"
 #include "Bag.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
@@ -455,8 +456,10 @@ void RemoveFromInventory(CharacterDatabaseTransaction trans, Player* player, uin
 
 void MoveIntoInventory(CharacterDatabaseTransaction trans, Player* player, ItemPosCountVec const& dest, Item* item)
 {
+    uint32 const entry = item->GetEntry();
     player->MoveItemToInventory(dest, item, true);
     player->SaveInventoryAndGoldToDB(trans);
+    AscensionVanityOwnership::CollectCarriedItem(player, entry);
 }
 
 void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 tab, uint8 bankSlot,
@@ -1050,6 +1053,25 @@ bool CanAccess(Player* player, uint8 kind)
         if (!guard(player, kind))
             return false;
     return true;
+}
+
+std::vector<StoredItem> StoredItems(Player const* player)
+{
+    std::vector<StoredItem> stored;
+    QueryResult result = CharacterDatabase.Query(
+        "SELECT ii.itemEntry, ii.flags FROM mod_ascension_bank_item bi INNER JOIN item_instance ii "
+        "ON bi.item_guid = ii.guid WHERE (bi.owner_kind = {} AND bi.owner_id = {}) OR "
+        "(bi.owner_kind = {} AND bi.owner_id = {})",
+        OWNER_CHARACTER, BankOwnerId(player, PERSONAL), OWNER_REALM, BankOwnerId(player, REALM));
+    if (!result)
+        return stored;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        stored.push_back({fields[0].Get<uint32>(), (fields[1].Get<uint32>() & ITEM_FIELD_FLAG_SOULBOUND) != 0});
+    } while (result->NextRow());
+    return stored;
 }
 
 void SendKindHint(Player* player, uint8 kind)

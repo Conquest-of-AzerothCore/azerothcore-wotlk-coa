@@ -5814,13 +5814,40 @@ public:
         }
     }
 
-    void OnMailItemObtained(Player* player, uint32 itemId)
+    void OnCarriedItemObtained(Player* player, uint32 itemId)
     {
         if (auto state = GetState(player))
         {
             Item const* stored = player->GetItemByEntry(itemId);
             CollectItem(player, *state, itemId, true, stored && stored->IsSoulBound());
         }
+    }
+
+    [[nodiscard]] bool IsCollectibleVanityItem(uint32 itemId) const
+    {
+        return _vanityItems.contains(itemId) || IsBankVanityItem(itemId);
+    }
+
+    void OnVanityItemUsed(Player* player, Item* item)
+    {
+        if (item && IsCollectibleVanityItem(item->GetEntry()))
+            OnItemObtained(player, item);
+    }
+
+    void OnVanityItemWithdrawn(Player* player, uint32 itemId)
+    {
+        if (IsCollectibleVanityItem(itemId))
+            OnCarriedItemObtained(player, itemId);
+    }
+
+    void ForgetVanityItem(Player* player, uint32 itemId)
+    {
+        auto state = GetState(player);
+        if (!state || !state->OwnedVanityItems.erase(itemId))
+            return;
+
+        CharacterDatabase.Execute("DELETE FROM `account_vanity_collection` WHERE `account_id` = {} AND `item_id` = {}",
+            state->AccountId, itemId);
     }
 
   void OnItemObtained(Player *player, Item *item) {
@@ -6882,23 +6909,42 @@ private:
   }
 
   void ScanPlayerInventory(Player *player, PlayerCollectionState &state) {
-    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END;
-         ++slot) {
-      if (Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+      if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
-    }
 
-    for (uint8 bagSlot = INVENTORY_SLOT_BAG_START;
-         bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot) {
-      Bag *bag = player->GetBagByPos(bagSlot);
-      if (!bag)
-        continue;
+    ForEachItemInBags(player, INVENTORY_SLOT_BAG_START, INVENTORY_SLOT_BAG_END, [&](Item* item)
+    {
+      CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
+    });
 
-      for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot) {
-        if (Item *item = bag->GetItemByPos(slot))
-          CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
-      }
-    }
+    auto const collectBanked = [&](uint32 itemId, bool bound)
+    {
+      if (IsCollectibleVanityItem(itemId))
+        CollectItem(player, state, itemId, false, bound);
+    };
+
+    for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; ++slot)
+      if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+        collectBanked(item->GetEntry(), item->IsSoulBound());
+
+    ForEachItemInBags(player, BANK_SLOT_BAG_START, BANK_SLOT_BAG_END, [&](Item* item)
+    {
+      collectBanked(item->GetEntry(), item->IsSoulBound());
+    });
+
+    for (AscensionPersonalBank::StoredItem const& stored : AscensionPersonalBank::StoredItems(player))
+      collectBanked(stored.Entry, stored.SoulBound);
+  }
+
+  template <typename Visit>
+  static void ForEachItemInBags(Player* player, uint8 firstBagSlot, uint8 endBagSlot, Visit&& visit)
+  {
+    for (uint8 bagSlot = firstBagSlot; bagSlot < endBagSlot; ++bagSlot)
+      if (Bag* bag = player->GetBagByPos(bagSlot))
+        for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot)
+          if (Item* item = bag->GetItemByPos(slot))
+            visit(item);
   }
 
   static bool IsEquipmentAppearance(AppearanceInfo const& appearance)
@@ -8787,8 +8833,8 @@ public:
             "AscensionCompatPlayerScript",
             {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SAVE,
              PLAYERHOOK_ON_AFTER_SET_VISIBLE_ITEM_SLOT, PLAYERHOOK_ON_EQUIP, PLAYERHOOK_ON_DELETE,
-             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL, PLAYERHOOK_CAN_EQUIP_ITEM,
-             PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
+             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_ON_BEFORE_OPEN_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL,
+             PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
              PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
              PLAYERHOOK_ON_PLAYER_IS_CLASS, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED,
              PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_LEARN_TRAINER_SPELL, PLAYERHOOK_ON_FORGOT_SPELL,
@@ -9153,7 +9199,13 @@ public:
 
     void OnPlayerTakeMailItem(Player* player, Mail const*, uint32 itemEntry) override
     {
-        AscensionCollectionService::Instance().OnMailItemObtained(player, itemEntry);
+        AscensionCollectionService::Instance().OnCarriedItemObtained(player, itemEntry);
+    }
+
+    bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
+    {
+        AscensionCollectionService::Instance().OnVanityItemUsed(player, item);
+        return true;
     }
 
   void OnPlayerStoreNewItem(Player *player, Item *item,
@@ -9733,6 +9785,19 @@ enum StoreTitleContract : uint32
     ITEM_FOUNDERS_CHARTER_ACCOUNT = 977020,
     TITLE_THE_BLOODY = 230,
     TITLE_FOUNDER = 210
+};
+
+class AscensionVanityItemUseScript : public AllItemScript
+{
+public:
+    AscensionVanityItemUseScript() : AllItemScript("AscensionVanityItemUseScript") { }
+
+    bool CanItemUse(Player* player, Item* item, SpellCastTargets const&) override
+    {
+        if (player)
+            AscensionCollectionService::Instance().OnVanityItemUsed(player, item);
+        return false;
+    }
 };
 
 class item_coa_title_contract : public AllItemScript
@@ -10537,6 +10602,16 @@ bool AscensionVanityOwnership::OwnsItem(Player const* player, uint32 itemId)
     return AscensionCollectionService::Instance().OwnsVanityItem(player, itemId);
 }
 
+void AscensionVanityOwnership::CollectCarriedItem(Player* player, uint32 itemId)
+{
+    AscensionCollectionService::Instance().OnVanityItemWithdrawn(player, itemId);
+}
+
+void AscensionVanityOwnership::ForgetItemForTest(Player* player, uint32 itemId)
+{
+    AscensionCollectionService::Instance().ForgetVanityItem(player, itemId);
+}
+
 bool AscensionCosmeticPetTokens::AvailableOnRealm(uint32 itemId)
 {
     return AscensionCollectionService::Instance().CosmeticPetTokenAvailableHere(itemId);
@@ -10861,6 +10936,7 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_reaper_redshade);
   RegisterSpellScript(spell_ascension_wildcard_mount);
   RegisterSpellScript(spell_ascension_legacy_quest_reward);
+  new AscensionVanityItemUseScript();
   new AscensionTradesmanScroll();
   new item_coa_title_contract();
   new AscensionCompatServerScript();
