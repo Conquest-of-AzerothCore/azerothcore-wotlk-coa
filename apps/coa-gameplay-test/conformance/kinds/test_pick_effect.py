@@ -64,6 +64,16 @@ class PickEffectTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['metric'], 'pick_effect')
         self.assertEqual(expectations[0].model['contrast'], 'learned')
 
+    def test_the_skill_fixture_refreshes_the_stats_before_the_first_read(self):
+        scenario, _ = built()
+        skills = [step for step in scenario['steps'] if step['action'] == 'set_skill']
+        self.assertTrue(skills)
+        self.assertTrue(all(step['refresh_stats'] is True for step in skills))
+        first_read = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('metric') == 'melee_crit_chance')
+        last_skill = max(index for index, step in enumerate(scenario['steps']) if step['action'] == 'set_skill')
+        self.assertLess(last_skill, first_read)
+
     def test_a_pick_holds_its_change_and_no_other(self):
         _, expectations = built()
         model = expectations[0].model

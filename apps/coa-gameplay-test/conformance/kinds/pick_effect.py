@@ -132,7 +132,9 @@ def read_model(read: PickRead) -> dict:
 
 def pick_effect_scenario(class_file: dict, spec: PickEffectSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
-    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
+    steps = [{**step, 'refresh_stats': True} if step['action'] == 'set_skill' else step
+             for step in base_steps(class_file)]
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell})
     rows = []
     for phase, trials in ((CONTROL, spec.control_trials), (TREATMENT, spec.trials)):
         if phase == TREATMENT:

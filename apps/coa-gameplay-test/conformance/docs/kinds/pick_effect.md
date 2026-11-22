@@ -4,7 +4,10 @@ A real cast applies one aura of a set at random ("applies a random empowerment")
 effect. Every trial removes all `picks` auras from the caster (`set_aura` with 0 stacks), reads the judged states,
 makes a real cast of `cast_spell` at the caster (mana `cast_power`, cooldown reset, its CasterAuraSpell set, waiting
 its cast time plus 1600 ms, or `wait_ms` when longer), then reads which pick auras are on the caster and the same
-states again. `control_trials` trials run before `spell` is learned, `trials` (at least 20) after it.
+states again. `control_trials` trials run before `spell` is learned, `trials` (at least 20) after it. The
+fixture's weapon skills are set with `refresh_stats` (ADR 1180, provisional), so the stat fields the first trial
+reads are current: `Player::SetSkill` alone leaves the melee and ranged critical strike chance at the value of the
+skill before the fixture, and the first aura that recomputes them would move them by more than its own amount.
 
 Each pick is `{aura, label_suffix, quote, reads}`, one verdict `<spell> behaviour_metric_delta <label_suffix>` each.
 A read is `{metric, fields, ratio | gain, tolerance}` with `metric` one of `cast_speed_multiplier`,
