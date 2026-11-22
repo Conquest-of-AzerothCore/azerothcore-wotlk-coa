@@ -222,7 +222,10 @@
     "clause": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
     "labels": [
       "300315 effect_value e0 #0",
-      "300315 behaviour_metric_delta judgement_day_cooldown"
+      "300315 behaviour_metric_delta judgement_day_cooldown",
+      "300315 cost_gate 806121 judgement_day_gate without",
+      "300315 cost_gate 806121 judgement_day_gate with",
+      "300315 cost_gate 806121 judgement_day_gate beyond"
     ],
     "kind": "claim",
     "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 300315 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
@@ -2295,7 +2298,15 @@
     "spell": 560861,
     "clause": "While Dawn is active, damage dealt by Radiant Flame now reduces the cooldown of Dawnfall and Solar Concord by $/1000;560860S1 sec.",
     "labels": [
-      "560861 effect_value 560860e0 #0"
+      "560861 effect_value 560860e0 #0",
+      "560861 cost_gate 806118 dawnfall_gate without",
+      "560861 cost_gate 806118 dawnfall_gate with",
+      "560861 cost_gate 806118 dawnfall_gate unset",
+      "560861 cost_gate 806118 dawnfall_gate beyond",
+      "560861 cost_gate 301266 concord_gate without",
+      "560861 cost_gate 301266 concord_gate with",
+      "560861 cost_gate 301266 concord_gate unset",
+      "560861 cost_gate 301266 concord_gate beyond"
     ],
     "kind": "claim"
   },
@@ -3606,11 +3617,31 @@
   {
     "spell": 681436,
     "clause": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
-    "labels": [
-      "681436 effect_value 504679e0 #0"
-    ],
     "kind": "claim",
-    "reason": "Observation, not a status: Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. energize_conquest reads 79 against 79 derived from the DBC (Conquest 800764 refunds 10% of the 2868 maximum mana, 286, before Devoted gives 5% of the 2868 - 1286 missing, 79.1); energize_resplendence, energize_revelation and energize_ascension read 93 (none of the three has an energize effect, so no refund precedes Devoted); cost_resplendence, cost_revelation and cost_ascension read 1093; no cost entry exists for Conquest. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found. The behaviour labels are not cited by this clause (a claim split over the cost and the energize halves is a later ledger decision)."
+    "reason": "Observation, not a status: Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. energize_conquest reads 79 against 79 derived from the DBC (Conquest 800764 refunds 10% of the 2868 maximum mana, 286, before Devoted gives 5% of the 2868 - 1286 missing, 79.1); energize_resplendence, energize_revelation and energize_ascension read 93 (none of the three has an energize effect, so no refund precedes Devoted); cost_resplendence, cost_revelation and cost_ascension read 1093; no cost entry exists for Conquest. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found. The behaviour labels are not cited by this clause (a claim split over the cost and the energize halves is a later ledger decision).",
+    "claims": [
+      {
+        "claim": "Removes the cost of your Solar Invocation spells",
+        "labels": [
+          "681436 behaviour_metric_delta cost_use_resplendence",
+          "681436 behaviour_metric_delta cost_use_revelation",
+          "681436 behaviour_metric_delta cost_use_conquest",
+          "681436 behaviour_metric_delta cost_use_ascension",
+          "681436 behaviour_metric_delta cost_use_control"
+        ]
+      },
+      {
+        "claim": "they now generate $504679s1% of your missing mana when cast",
+        "labels": [
+          "681436 effect_value 504679e0 #0",
+          "681436 behaviour_metric_delta energize_resplendence",
+          "681436 behaviour_metric_delta energize_revelation",
+          "681436 behaviour_metric_delta energize_conquest",
+          "681436 behaviour_metric_delta energize_ascension",
+          "681436 behaviour_metric_delta energize_conquest_not_vow"
+        ]
+      }
+    ]
   },
   {
     "spell": 681448,
@@ -5021,24 +5052,59 @@
   {
     "spell": 800054,
     "clause": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
-    "labels": [
-      "800054 effect_value 800038e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base healing",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 800054,
     "clause": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
-    "labels": [
-      "800054 effect_value 800038e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base damage",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 800054,
     "clause": "Lasts $d.",
     "labels": [
-      "800054 aura_duration_ms #2"
+      "800054 aura_duration_ms #2",
+      "800054 behaviour_metric_delta radiance_expiry"
     ],
     "kind": "claim"
   },
@@ -5452,7 +5518,11 @@
       {
         "claim": "enemies in a $804252a1 yd frontal cone",
         "labels": [
-          "503505 effect_radius 804252e0 #0"
+          "503505 effect_radius 804252e0 #0",
+          "503505 behaviour_metric_delta cone_edge_in_out",
+          "503505 behaviour_metric_delta cone_front",
+          "503505 behaviour_metric_delta cone_behind",
+          "503505 behaviour_metric_delta cone_behind_cast"
         ]
       },
       {

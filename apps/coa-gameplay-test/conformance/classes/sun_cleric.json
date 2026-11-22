@@ -30021,6 +30021,728 @@
       "expire_ms": 500,
       "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 36
+    },
+    {
+      "spell": 300315,
+      "name": "Judgement of the Valkyrie (Judgement Day cooldown gate)",
+      "kind": "cost_gate",
+      "variant": "judgement_day_gate",
+      "label_suffix": "judgement_day_gate",
+      "quote": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
+      "gated_spell": 806121,
+      "resource": "cooldown",
+      "reduction": 15000,
+      "target": "dummy",
+      "margin_ms": 700,
+      "observe_source": "300315 Judgement of the Valkyrie Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 11 (cooldown), BasePoints -15001 (-15000 ms, $/1000;s1 = 15 sec), class mask word 0 = 8 = Judgement Day 806121 SpellFamilyFlags[0] (RecoveryTime 60000 ms, Spell.dbc). Route: Judgement Day is cast and attempted again 45700 ms after the cast (15000 ms less than its cooldown plus 700 ms): refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 44300 ms after the cast (beyond), so the cut lies in [14300, 15700] ms, which excludes 13500 and 16500 ms (10% off on both sides). The readback entry judgement_day_cooldown stays as data; this route is the behaviour proof that a cast is refused then accepted around the reduced cooldown. Reference search 2026-11-22: coa-history spell 300315: 0 events (a passive); nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 560861,
+      "name": "The Coming Dawn (Dawnfall cooldown cut by Radiant Flame under Dawn)",
+      "kind": "cost_gate",
+      "variant": "dawnfall_gate",
+      "label_suffix": "dawnfall_gate",
+      "quote": "While Dawn is active, damage dealt by Radiant Flame now reduces the cooldown of Dawnfall and Solar Concord by $/1000;560860S1 sec.",
+      "gated_spell": 806118,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "dummy",
+      "setup_casts": [
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "after_casts": [
+        [
+          806060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "unset_arm": true,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut Radiant Flame damage applies while Dawn is active."
+        }
+      ],
+      "observe_source": "560861 The Coming Dawn Effect[0] aura 42 PROC_TRIGGER_SPELL 560860 (Effect[0] and Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN 165, BasePoints -1001, so 1000 ms each, $/1000;560860S1 = 1 sec, MiscValue 806118 Dawnfall and 301266 Solar Concord). The class code (AscensionSunClericEvents.cpp:116, :263-272) reduces both cooldowns by 1000 ms on every own damage hit of Radiant Flame's tick 807058 while Dawn 807440 is on the caster. Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200), so one cast ticks 807058 five times (4000 / 1000 + 1, as the flame_hits entry of 806024 derives and measures), 5 x 1000 = 5000 ms in all. Route: Dawnfall 806118 (120000 ms cooldown, Spell.dbc RecoveryTime) is cast, Radiant Flame is cast at the dummy 1600 ms later with Dawn up (Dawn 804584 cast for real as the setup cast, Solar Power fixture 500149), and Dawnfall 806118 is attempted again 115250 ms after its cast (115000 ms plus 250 ms): refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, refused again at 114750 ms (beyond), so the five-tick cut lies in [4750, 5250] ms, which excludes 4500 and 5500 ms (10% off on both sides). The unset arm keeps the passive learned and skips the Dawn setup cast (Dawn from the earlier arms is long gone, 60000 ms, 807440 DurationIndex 3): Radiant Flame ticks without Dawn and the attempt is refused, the control of the clause 'While Dawn is active'. Reference search 2026-11-22: coa-history spell 560861: 0 events in 186 logs (a passive); nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 560861,
+      "name": "The Coming Dawn (Solar Concord cooldown cut by Radiant Flame under Dawn)",
+      "kind": "cost_gate",
+      "variant": "concord_gate",
+      "label_suffix": "concord_gate",
+      "quote": "While Dawn is active, damage dealt by Radiant Flame now reduces the cooldown of Dawnfall and Solar Concord by $/1000;560860S1 sec.",
+      "gated_spell": 301266,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "setup_casts": [
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "after_casts": [
+        [
+          806060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "margin_ms": 250,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 activates only with 20 Solar Power (AscensionSunClericAbilities.cpp:86, AscensionSunCleric.cpp:265); 500149 is set at 20 stacks on the caster before each Dawn cast, a precondition fixture, the claim is the cooldown cut Radiant Flame damage applies while Dawn is active."
+        },
+        {
+          "spell": 301266,
+          "auras": [
+            500477
+          ],
+          "reason": "Sunrise 500477 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before each Solar Concord cast: named precondition fixtures; the claim measured is the cooldown cut Radiant Flame damage applies, not the phase condition."
+        }
+      ],
+      "observe_source": "560861 The Coming Dawn Effect[0] aura 42 PROC_TRIGGER_SPELL 560860 (Effect[0] and Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN 165, BasePoints -1001, so 1000 ms each, $/1000;560860S1 = 1 sec, MiscValue 806118 Dawnfall and 301266 Solar Concord). The class code (AscensionSunClericEvents.cpp:116, :263-272) reduces both cooldowns by 1000 ms on every own damage hit of Radiant Flame's tick 807058 while Dawn 807440 is on the caster. Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200), so one cast ticks 807058 five times (4000 / 1000 + 1, as the flame_hits entry of 806024 derives and measures), 5 x 1000 = 5000 ms in all. Route: Solar Concord 301266 (30000 ms cooldown, Spell.dbc RecoveryTime) is cast, Radiant Flame is cast at the dummy 1600 ms later with Dawn up (Dawn 804584 cast for real as the setup cast, Solar Power fixture 500149), and Solar Concord 301266 is attempted again 25250 ms after its cast (25000 ms plus 250 ms): refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, refused again at 24750 ms (beyond), so the five-tick cut lies in [4750, 5250] ms, which excludes 4500 and 5500 ms (10% off on both sides). The unset arm keeps the passive learned and skips the Dawn setup cast: Radiant Flame ticks without Dawn and the attempt is refused, the control of the clause 'While Dawn is active'. Each arm waits 40000 ms more before it starts (arm_wait_ms): the arms of this 30000 ms cooldown would otherwise be about 27000 ms apart, and a Dawn cast over a Dawn still up (807440 lasts 60000 ms) switches it off, which a first exploratory run measured (807440 read 0 after the second Dawn cast, the cut missing in the with arm); at 67000 ms between arms the Dawn of the earlier arm is gone before the next one. Reference search 2026-11-22: coa-history spell 560861: 0 events in 186 logs (a passive); nothing found beyond the tooltip and the DBC.",
+      "unset_arm": true,
+      "arm_wait_ms": 40000
+    },
+    {
+      "spell": 681436,
+      "name": "Devoted to the Light (Resplendence cost read at use time)",
+      "kind": "metric_delta",
+      "variant": "cost_use_resplendence",
+      "label_suffix": "cost_use_resplendence",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "use_time_contrast": [
+        "cost_use_resplendence",
+        "cost_use_revelation",
+        "cost_use_conquest",
+        "cost_use_ascension",
+        "cost_use_control"
+      ],
+      "gate_spell": 681436,
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 258.97,
+      "expected": 0,
+      "expected_gain": -258.97,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Resplendence 806159 costs 19% of 1363 = 258.97; the read is 258.97 before and 0 after, gain -258.97, band 1 (the engine truncates the cost to a whole number)."
+    },
+    {
+      "spell": 681436,
+      "name": "Devoted to the Light (Revelation cost read at use time)",
+      "kind": "metric_delta",
+      "variant": "cost_use_revelation",
+      "label_suffix": "cost_use_revelation",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "use_time_contrast": [
+        "cost_use_resplendence",
+        "cost_use_revelation",
+        "cost_use_conquest",
+        "cost_use_ascension",
+        "cost_use_control"
+      ],
+      "gate_spell": 681436,
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 190.82,
+      "expected": 0,
+      "expected_gain": -190.82,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Revelation 503651 costs 14% of 1363 = 190.82; the read is 190.82 before and 0 after, gain -190.82, band 1 (the engine truncates the cost to a whole number)."
+    },
+    {
+      "spell": 681436,
+      "name": "Devoted to the Light (Conquest cost read at use time)",
+      "kind": "metric_delta",
+      "variant": "cost_use_conquest",
+      "label_suffix": "cost_use_conquest",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "use_time_contrast": [
+        "cost_use_resplendence",
+        "cost_use_revelation",
+        "cost_use_conquest",
+        "cost_use_ascension",
+        "cost_use_control"
+      ],
+      "gate_spell": 681436,
+      "trigger_spell": 800764,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 68.15,
+      "expected": 0,
+      "expected_gain": -68.15,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Conquest 800764 costs 5% of 1363 = 68.15; the read is 68.15 before and 0 after, gain -68.15, band 1 (the engine truncates the cost to a whole number)."
+    },
+    {
+      "spell": 681436,
+      "name": "Devoted to the Light (Ascension cost read at use time)",
+      "kind": "metric_delta",
+      "variant": "cost_use_ascension",
+      "label_suffix": "cost_use_ascension",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "use_time_contrast": [
+        "cost_use_resplendence",
+        "cost_use_revelation",
+        "cost_use_conquest",
+        "cost_use_ascension",
+        "cost_use_control"
+      ],
+      "gate_spell": 681436,
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 477.05,
+      "expected": 0,
+      "expected_gain": -477.05,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Ascension 500152 costs 35% of 1363 = 477.05; the read is 477.05 before and 0 after, gain -477.05, band 1 (the engine truncates the cost to a whole number)."
+    },
+    {
+      "spell": 681436,
+      "name": "Devoted to the Light (control, Dawnsear cost read at use time)",
+      "kind": "metric_delta",
+      "variant": "cost_use_control",
+      "label_suffix": "cost_use_control",
+      "quote": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
+      "use_time_contrast": [
+        "cost_use_resplendence",
+        "cost_use_revelation",
+        "cost_use_conquest",
+        "cost_use_ascension",
+        "cost_use_control"
+      ],
+      "gate_spell": 681436,
+      "trigger_spell": 554406,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 554406
+      },
+      "before_expected": 204.45,
+      "expected": 204.45,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Dawnsear 554406 costs 15% of 1363 = 204.45 (read as a whole number) before and after, gain 0, band 1: the passive does not touch a spell outside its mask."
+    },
+    {
+      "spell": 800054,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800038,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "name": "Radiance (burst heal at the reference stats)",
+      "variant": "burst_heal",
+      "quote": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
+      "expected": 35,
+      "after_at_least": 34,
+      "after_at_most": 36,
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Heal at AP 70: 0.8 x (36..37 + 0.1 x 70) = 34.4..35.2, read within 34..36 on the caster held at 30% health. Control: no cast, 0. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL mean 689) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_heal"
+    },
+    {
+      "spell": 800054,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800038,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "name": "Radiance (burst heal at +10000 spell power)",
+      "variant": "burst_heal_sp",
+      "quote": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
+      "expected": 1635,
+      "after_at_least": 1634,
+      "after_at_most": 1636,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the spell power term: 0.8 x (36..37 + 0.2 x 10000 + 7) = 1634.4..1635.2 against 34.4..35.2 at 0. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_heal_sp"
+    },
+    {
+      "spell": 800054,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800038,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "name": "Radiance (burst heal at +20000 attack power)",
+      "variant": "burst_heal_ap",
+      "quote": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
+      "expected": 1635,
+      "after_at_least": 1634,
+      "after_at_most": 1636,
+      "player_attack_power": 20000,
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: 0.8 x (36..37 + 0.1 x 20070) = 1634.4..1635.2 against 34.4..35.2 at 70. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_heal_ap"
+    },
+    {
+      "spell": 800054,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Radiance (burst damage at the reference stats)",
+      "variant": "burst_damage",
+      "quote": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
+      "expected": 48,
+      "after_at_least": 47,
+      "after_at_most": 49,
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Damage at AP 70: 37..38 + 0.15 x 70 = 47.5..48.5, read within 47..49. Control: no cast, 0. Crit forced out by fixture 984954 (aura 57 -1000 spell crit, harness precondition) so the non-critical read cannot read 0 from a critical tick; residual failure probability from crit: none beyond the fixture, whose -1000 exceeds the base Holy crit. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage"
+    },
+    {
+      "spell": 800054,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Radiance (burst damage at +10000 spell power)",
+      "variant": "burst_damage_sp",
+      "quote": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
+      "expected": 4048,
+      "after_at_least": 4047,
+      "after_at_most": 4049,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the spell power term: +10000 spell power (harness rating, hit_arm): 37..38 + 0.4 x 10000 + 0.15 x 70 = 4047.5..4048.5 against 47.5..48.5 at 0. Crit forced out by fixture 984954 (aura 57 -1000 spell crit, harness precondition) so the non-critical read cannot read 0 from a critical tick; residual failure probability from crit: none beyond the fixture, whose -1000 exceeds the base Holy crit. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage_sp"
+    },
+    {
+      "spell": 800054,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Radiance (burst damage at +20000 attack power)",
+      "variant": "burst_damage_ap",
+      "quote": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
+      "expected": 3048,
+      "after_at_least": 3047,
+      "after_at_most": 3049,
+      "player_attack_power": 20000,
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: +20000 attack power (harness fixture): 37..38 + 0.15 x 20070 = 3047.5..3048.5 against 47.5..48.5 at 70. Crit forced out by fixture 984954 (aura 57 -1000 spell crit, harness precondition) so the non-critical read cannot read 0 from a critical tick; residual failure probability from crit: none beyond the fixture, whose -1000 exceeds the base Holy crit. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage_ap"
+    },
+    {
+      "spell": 800054,
+      "name": "Radiance (the aura ends 10 s after a real cast)",
+      "variant": "radiance_expiry",
+      "label_suffix": "radiance_expiry",
+      "quote": "Lasts $d.",
+      "trigger_spell": 800054,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9725,
+      "expire_ms": 500,
+      "expiry_wait_ms": 625,
+      "after_expiry_expected": 0,
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          9500,
+          9950
+        ],
+        "expired": [
+          10150,
+          10550
+        ]
+      },
+      "observe_source": "Radiance 800054 DurationIndex 1 = 10000 ms ($d). A real Radiance cast on the caster: the aura 800054 on the caster is an event read (presence), not the remaining-time field, read present 9500..9950 ms of game time after the cast and gone 10150..10550 ms after it, so the end lies between the two reads, which excludes a duration 10% (1000 ms) shorter or longer than the stated 10000 ms (9000 and 11000 ms). Control: the before phase casts nothing and reads the aura absent. Reference search 2026-11-22: coa-history spell 800054 lists Radiance applied and removed events with no stated duration; nothing found beyond the tooltip and the DBC for the end of the aura.",
+      "kind": "metric_delta",
+      "gate_timing": "start"
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (10 yd cone: a dummy at 9.5 yd from the ally's edge is hit, one at 10.5 yd is not)",
+      "kind": "metric_delta",
+      "variant": "cone_edge_in_out",
+      "label_suffix": "cone_edge_in_out",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 12.275,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252); 804252 Effect[0] TARGET_UNIT_CONE_ENEMY_104 with EffectRadiusIndex 13 = 10 yd ($804252a1); script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, 804252 Holy damage 404..456 (m1 at level 60, spell power read 0 at the reference character) to every attackable enemy within the radius of the ally and HasInArc(pi) of the ally, the front half. Bless is cast at the ally in both phases (ally_casts), the 503505 cast at the ally is the trigger, crit forced out by fixture 984954, the read adds the resisted amount back. The ally stands at the caster's spawn, facing as the caster; dummies stand in front of the caster at the stated distance. The script's area test is Nearby(ally, 10) = Acore::AnyUnitInObjectRangeCheck, WorldObject::IsWithinDist, which adds the object sizes (combat reaches) of both units, as the engine's area test does (owner ruling O-47 of Witch Hunter 804051 states the same reach for Nearby, AscensionWitchHunterSummons.cpp:374-380): the effective centre distance is 10 + 1.5 (player combat reach, race 1, the Templar combat_reach read) + 1.275 (dummy entry 36 combat reach, creature_model_info display 367, read in the Templar and Witch Hunter radius_edge runs) = 12.775 yd. Two dummies, one at 12.275 yd (9.5 yd of the surface distance, inside) and one at 13.275 yd (10.5 yd, outside), their damage summed: exactly one hit of 404..456 means the first was hit and the second was not (two hits would read 808..912, as the first exploratory run read 908 with the second dummy at 11 yd, inside 12.775). The band 9.5 .. 10.5 yd excludes 5% either side of the stated 10 yd. Control (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found.",
+      "expected": 430,
+      "area_dummies": [
+        13.275
+      ],
+      "area_sum": true,
+      "after_at_least": 404,
+      "after_at_most": 456
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (cone: a dummy 3 yd in front of the ally is hit)",
+      "kind": "metric_delta",
+      "variant": "cone_front",
+      "label_suffix": "cone_front",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252); 804252 Effect[0] TARGET_UNIT_CONE_ENEMY_104 with EffectRadiusIndex 13 = 10 yd ($804252a1); script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, 804252 Holy damage 404..456 (m1 at level 60, spell power read 0 at the reference character) to every attackable enemy within the radius of the ally and HasInArc(pi) of the ally, the front half. Bless is cast at the ally in both phases (ally_casts), the 503505 cast at the ally is the trigger, crit forced out by fixture 984954, the read adds the resisted amount back. The ally stands at the caster's spawn, facing as the caster; dummies stand in front of the caster at the stated distance. The ally is moved 2 yd forward (ally_offsets), the dummy at 5 yd is then 3 yd in front of the ally: one hit of 404..456. Control (before): no cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found.",
+      "expected": 430,
+      "ally_offsets": {
+        "ally": 2
+      },
+      "after_at_least": 404,
+      "after_at_most": 456
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (cone: a dummy 3 yd behind the ally is not hit)",
+      "kind": "metric_delta",
+      "variant": "cone_behind",
+      "label_suffix": "cone_behind",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252); 804252 Effect[0] TARGET_UNIT_CONE_ENEMY_104 with EffectRadiusIndex 13 = 10 yd ($804252a1); script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, 804252 Holy damage 404..456 (m1 at level 60, spell power read 0 at the reference character) to every attackable enemy within the radius of the ally and HasInArc(pi) of the ally, the front half. Bless is cast at the ally in both phases (ally_casts), the 503505 cast at the ally is the trigger, crit forced out by fixture 984954, the read adds the resisted amount back. The ally stands at the caster's spawn, facing as the caster; dummies stand in front of the caster at the stated distance. The ally is moved 8 yd forward (ally_offsets), the dummy at 5 yd is then 3 yd behind the ally, well inside the 10 yd radius: no damage (the front arm of the same pair reads one hit). The companion cone_behind_cast reads that the cast itself went through (cast_failure 0), so the zero is the cone and not a refusal. Control (before): no cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found.",
+      "expected": 0,
+      "ally_offsets": {
+        "ally": 8
+      },
+      "tolerance": 0
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (cone: the cast with the dummy behind the ally goes through)",
+      "kind": "metric_delta",
+      "variant": "cone_behind_cast",
+      "label_suffix": "cone_behind_cast",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 503505
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252); 804252 Effect[0] TARGET_UNIT_CONE_ENEMY_104 with EffectRadiusIndex 13 = 10 yd ($804252a1); script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, 804252 Holy damage 404..456 (m1 at level 60, spell power read 0 at the reference character) to every attackable enemy within the radius of the ally and HasInArc(pi) of the ally, the front half. Bless is cast at the ally in both phases (ally_casts), the 503505 cast at the ally is the trigger, crit forced out by fixture 984954, the read adds the resisted amount back. The ally stands at the caster's spawn, facing as the caster; dummies stand in front of the caster at the stated distance. Companion of cone_behind (same setup, ally 8 yd forward): the cast_failure of 503505 reads 0, the cast was not refused, so the missing damage of cone_behind is the arc of the cone. Control (before): no cast, 0. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found.",
+      "expected": 0,
+      "ally_offsets": {
+        "ally": 8
+      },
+      "tolerance": 0,
+      "select_dummy": true
     }
   ],
   "player_observations": [],
