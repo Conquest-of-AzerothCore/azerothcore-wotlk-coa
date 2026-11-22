@@ -14,7 +14,7 @@ apply it only to the schools in MiscValue.
 
 The tooltip names no school. Owner ruling O-25: the debuff reduces ALL damage the enemy deals by 20%, not Physical
 only. Measured before the fix (pair 20261122-164341 / 20261122-164658, build 6cd75cfa82e6): an enemy's Physical Void
-Zone 92559 read a treatment / control ratio of 0.80041 in both runs, its Holy Light of the Naaru 41394 read 1.0
+Zone 92559 read a treatment / control ratio of 0.80041 in both runs, its Light of the Naaru 41394 read 1.0
 (1100 against 1100 per hit) in both runs.
 
 ## Options
@@ -37,4 +37,4 @@ school mask of the effect changes.
   the code; no SQL, no other class file and no other class's code reads it. The contract function returns for any
   spell outside family 33, and no engine file changes.
 - Regression: the 572885 class-file entries `struck_damage` (Physical Void Zone, expected 0.8) and
-  `struck_damage_magic` (Holy Light of the Naaru, expected 0.8), each with a control arm that unlearns 572885.
+  `struck_damage_magic` (Light of the Naaru, expected 0.8), each with a control arm that unlearns 572885.
