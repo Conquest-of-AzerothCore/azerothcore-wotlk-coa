@@ -4758,7 +4758,10 @@
     "kind": "claim",
     "labels": [
       "707528 behaviour_metric_delta cd",
-      "707528 behaviour_metric_delta cd_control"
+      "707528 behaviour_metric_delta cd_control",
+      "707528 cost_gate 500154 cd_gate without",
+      "707528 cost_gate 500154 cd_gate with",
+      "707528 cost_gate 500154 cd_gate beyond"
     ]
   },
   {

@@ -30021,6 +30021,49 @@
       "expire_ms": 500,
       "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 36
+    },
+    {
+      "spell": 707528,
+      "name": "Final Vows (Horusath Blast can be cast again 10% sooner after a fulfilment)",
+      "kind": "cost_gate",
+      "variant": "cd_gate",
+      "label_suffix": "cd_gate",
+      "quote": "Fulfilling your Vow of Grace now also reduces the cooldown of the triggered ability by 10%.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 2500,
+      "target": "dummy",
+      "margin_ms": 150,
+      "setup_casts": [
+        [
+          803719,
+          "caster"
+        ],
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 804584,
+          "auras": [
+            500149
+          ],
+          "stacks": 20,
+          "reason": "Dawn 804584 fulfils the Vows only with 20 Solar Power (AscensionSunClericAbilities.cpp:86); 500149 is set at 20 stacks on the caster before the Dawn cast, a named precondition fixture; the claim measured is the cooldown cut."
+        },
+        {
+          "spell": 500154,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "823764 removes the dummy's resists and 984954 removes the caster's natural spell crit chance, set before every Horusath Blast cast as in the cd entry: precondition fixtures, the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "707528 Final Vows Effect[0] aura 107 BasePoints 9 (+1 = 10) and Effect[2] aura 107 carry no cooldown percent; the 10% is applied by the class code (AscensionSunClericAbilities.cpp:264-265: after a Horusath Blast cast made after a Dawn fulfilment with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|)). Horusath Blast 500154 has RecoveryTime 25000 ms, so 10% is 2500 ms. Route: the cooldown cost_gate (guide section 2, Lorescribe), a cast the server accepts or refuses, not a cooldown readback. Vow of Grace 803719 and Dawn 804584 (20 Solar Power) are cast in every arm before the priming Horusath Blast, 707528 is learned in the arms with it. The gated cast is attempted 22500 + 150 ms after the priming cast (accepted with it, refused without it) and 22500 - 150 ms after it (refused): a cut of 9% (2250 ms) or 11% (2750 ms) would make the beyond arm accepted or the with arm refused. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows carry the acquisition and no value; nothing found beyond the tooltip and the DBC for the 10%."
     }
   ],
   "player_observations": [],
