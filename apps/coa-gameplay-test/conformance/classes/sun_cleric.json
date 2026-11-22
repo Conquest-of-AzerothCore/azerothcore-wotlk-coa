@@ -39315,6 +39315,120 @@
           }
         ]
       }
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (D-245 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d245_self",
+      "label_suffix": "d245_self",
+      "quote": "your critical strikes grant allies Replenishment.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 1257670
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the caster (actor == target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (D-245 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d245_ally",
+      "label_suffix": "d245_ally",
+      "quote": "your critical strikes grant allies Replenishment.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 1257670
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the grouped ally (actor != target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
+    },
+    {
+      "spell": 704928,
+      "name": "Bastion of Hope (D-245 self heal arm)",
+      "kind": "metric_delta",
+      "variant": "d245_self",
+      "label_suffix": "d245_self",
+      "quote": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 704926
+      },
+      "before_expected": 0,
+      "expected": 40.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the caster (actor == target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "tolerance": 1,
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 704928,
+      "name": "Bastion of Hope (D-245 ally heal arm)",
+      "kind": "metric_delta",
+      "variant": "d245_ally",
+      "label_suffix": "d245_ally",
+      "quote": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 704926
+      },
+      "before_expected": 0,
+      "expected": 40.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "D-245 measure only: AscensionSunClericEvents.cpp:117 accepts the actor and the target proc event with no side filter; a forced-critical Illumination 500143 heals the grouped ally (actor != target); the same read in both arms, a doubled proc reads twice the single-proc value. Reference search: nothing found (an internal implementation question, no tooltip value).",
+      "tolerance": 1,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      }
     }
   ],
   "player_observations": [],
